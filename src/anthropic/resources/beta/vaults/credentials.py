@@ -118,6 +118,10 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.create",
+                span_route="/v1/vaults/{vault_id}/credentials",
+                span_attributes={"anthropic.vault.id": vault_id},
+                span_created_id="anthropic.vault.credential.id",
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -188,6 +192,9 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.retrieve",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -274,6 +281,9 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.update",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -350,6 +360,9 @@ class Credentials(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.vaults.credentials.list",
+                span_route="/v1/vaults/{vault_id}/credentials",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             model=BetaManagedAgentsCredential,
         )
@@ -420,6 +433,9 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.delete",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsDeletedCredential,
         )
@@ -490,6 +506,9 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.archive",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -560,6 +579,9 @@ class Credentials(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.mcp_oauth_validate",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredentialValidation,
         )
@@ -657,6 +679,10 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.create",
+                span_route="/v1/vaults/{vault_id}/credentials",
+                span_attributes={"anthropic.vault.id": vault_id},
+                span_created_id="anthropic.vault.credential.id",
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -727,6 +753,9 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.retrieve",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -813,6 +842,9 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.update",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -889,6 +921,9 @@ class AsyncCredentials(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.vaults.credentials.list",
+                span_route="/v1/vaults/{vault_id}/credentials",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             model=BetaManagedAgentsCredential,
         )
@@ -959,6 +994,9 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.delete",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsDeletedCredential,
         )
@@ -1029,6 +1067,9 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.archive",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredential,
         )
@@ -1099,6 +1140,9 @@ class AsyncCredentials(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.credentials.mcp_oauth_validate",
+                span_route="/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate",
+                span_attributes={"anthropic.vault.id": vault_id, "anthropic.vault.credential.id": credential_id},
             ),
             cast_to=BetaManagedAgentsCredentialValidation,
         )

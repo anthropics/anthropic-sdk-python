@@ -11,6 +11,7 @@ from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolP
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
 from .beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
+from .beta_managed_agents_execution_identity_params import BetaManagedAgentsExecutionIdentityParams
 from .beta_managed_agents_agent_toolset20260401_params import BetaManagedAgentsAgentToolset20260401Params
 
 __all__ = ["AgentUpdateParams", "Model", "Tool"]
@@ -19,6 +20,13 @@ __all__ = ["AgentUpdateParams", "Model", "Tool"]
 class AgentUpdateParams(TypedDict, total=False):
     description: Optional[str]
     """Description. Omit to preserve; send empty string or null to clear."""
+
+    execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams]
+    """Execution principal for runs of this agent.
+
+    Full replacement. Omit to preserve; send null or `{"type": "service_account"}`
+    to restore the default.
+    """
 
     mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]]
     """MCP servers.

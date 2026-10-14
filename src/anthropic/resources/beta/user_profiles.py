@@ -152,6 +152,9 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -213,6 +216,9 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -320,6 +326,9 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -410,6 +419,8 @@ class UserProfiles(SyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -473,6 +484,9 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )
@@ -600,6 +614,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -661,6 +678,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -768,6 +788,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -858,6 +881,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -921,6 +946,9 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )

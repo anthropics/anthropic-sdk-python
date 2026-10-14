@@ -15,6 +15,7 @@ from ._utils import is_dict, extract_type_var_from_base
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
     from ._models import FinalRequestOptions
+    from ._tracing import StreamObserver
 
 
 _T = TypeVar("_T")
@@ -42,11 +43,21 @@ class Stream(Generic[_T]):
         self._decoder = client._make_sse_decoder()
         self._iterator = self.__stream__()
 
+    @property
+    def _observer(self) -> Optional[StreamObserver]:
+        # A stand-in for the response, such as a mock with a `spec`, may have no `stream`.
+        return getattr(getattr(self.response, "stream", None), "stream_observer", None)
+
     def __next__(self) -> _T:
-        return self._iterator.__next__()
+        item = self._iterator.__next__()
+        if (observer := self._observer) is not None:
+            observer.item(item)
+        return item
 
     def __iter__(self) -> Iterator[_T]:
         for item in self._iterator:
+            if (observer := self._observer) is not None:
+                observer.item(item)
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
@@ -66,6 +77,9 @@ class Stream(Generic[_T]):
         response = self.response
         process_data = self._client._process_response_data
         iterator = self._iter_events()
+
+        if (observer := self._observer) is not None:
+            observer.begin()
 
         try:
             for sse in iterator:
@@ -150,6 +164,12 @@ class Stream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+            if (observer := self._observer) is not None:
+                observer.end("read")
+        except Exception as err:
+            if (observer := self._observer) is not None:
+                observer.end("failed", err)
+            raise
         finally:
             if sys.is_finalizing():
                 # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
@@ -175,6 +195,8 @@ class Stream(Generic[_T]):
 
         Automatically called if the response body is read to completion.
         """
+        if (observer := self._observer) is not None:
+            observer.end("closed")
         self.response.close()
 
 
@@ -200,11 +222,21 @@ class AsyncStream(Generic[_T]):
         self._decoder = client._make_sse_decoder()
         self._iterator = self.__stream__()
 
+    @property
+    def _observer(self) -> Optional[StreamObserver]:
+        # A stand-in for the response, such as a mock with a `spec`, may have no `stream`.
+        return getattr(getattr(self.response, "stream", None), "stream_observer", None)
+
     async def __anext__(self) -> _T:
-        return await self._iterator.__anext__()
+        item = await self._iterator.__anext__()
+        if (observer := self._observer) is not None:
+            observer.item(item)
+        return item
 
     async def __aiter__(self) -> AsyncIterator[_T]:
         async for item in self._iterator:
+            if (observer := self._observer) is not None:
+                observer.item(item)
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
@@ -225,6 +257,9 @@ class AsyncStream(Generic[_T]):
         response = self.response
         process_data = self._client._process_response_data
         iterator = self._iter_events()
+
+        if (observer := self._observer) is not None:
+            observer.begin()
 
         try:
             async for sse in iterator:
@@ -309,6 +344,12 @@ class AsyncStream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+            if (observer := self._observer) is not None:
+                observer.end("read")
+        except Exception as err:
+            if (observer := self._observer) is not None:
+                observer.end("failed", err)
+            raise
         finally:
             if sys.is_finalizing():
                 # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
@@ -334,6 +375,8 @@ class AsyncStream(Generic[_T]):
 
         Automatically called if the response body is read to completion.
         """
+        if (observer := self._observer) is not None:
+            observer.end("closed")
         await self.response.aclose()
 
 

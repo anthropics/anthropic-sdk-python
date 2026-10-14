@@ -76,6 +76,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -124,6 +127,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -190,6 +196,8 @@ class Users(SyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=OrganizationUser,
         )
@@ -228,6 +236,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )
@@ -287,6 +298,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -335,6 +349,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -401,6 +418,8 @@ class AsyncUsers(AsyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=OrganizationUser,
         )
@@ -439,6 +458,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )

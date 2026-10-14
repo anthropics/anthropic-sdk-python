@@ -160,6 +160,9 @@ class Users(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.users.list",
+                span_route="/v1/organizations/analytics/users",
+                span_content_query_params=("page",),
             ),
             model=BetaAnalyticsUserActivity,
         )
@@ -303,6 +306,9 @@ class AsyncUsers(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.users.list",
+                span_route="/v1/organizations/analytics/users",
+                span_content_query_params=("page",),
             ),
             model=BetaAnalyticsUserActivity,
         )

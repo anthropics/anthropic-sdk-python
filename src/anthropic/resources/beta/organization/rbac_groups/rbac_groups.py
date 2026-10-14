@@ -91,6 +91,9 @@ class RBACGroups(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.create",
+                span_route="/v1/organizations/rbac_groups",
+                span_created_id="anthropic.organization.rbac_group.id",
             ),
             cast_to=BetaRBACGroup,
         )
@@ -131,6 +134,9 @@ class RBACGroups(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.retrieve",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=BetaRBACGroup,
         )
@@ -178,6 +184,9 @@ class RBACGroups(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.update",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=BetaRBACGroup,
         )
@@ -226,6 +235,8 @@ class RBACGroups(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_groups.list",
+                span_route="/v1/organizations/rbac_groups",
             ),
             model=BetaRBACGroup,
         )
@@ -269,6 +280,9 @@ class RBACGroups(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.delete",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=RBACGroupDeleteResponse,
         )
@@ -335,6 +349,9 @@ class AsyncRBACGroups(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.create",
+                span_route="/v1/organizations/rbac_groups",
+                span_created_id="anthropic.organization.rbac_group.id",
             ),
             cast_to=BetaRBACGroup,
         )
@@ -375,6 +392,9 @@ class AsyncRBACGroups(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.retrieve",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=BetaRBACGroup,
         )
@@ -422,6 +442,9 @@ class AsyncRBACGroups(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.update",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=BetaRBACGroup,
         )
@@ -470,6 +493,8 @@ class AsyncRBACGroups(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_groups.list",
+                span_route="/v1/organizations/rbac_groups",
             ),
             model=BetaRBACGroup,
         )
@@ -513,6 +538,9 @@ class AsyncRBACGroups(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.delete",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             cast_to=RBACGroupDeleteResponse,
         )

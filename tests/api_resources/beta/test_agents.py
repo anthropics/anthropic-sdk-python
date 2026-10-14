@@ -33,6 +33,10 @@ class TestAgents:
             model="claude-opus-5-5",
             name="My First Agent",
             description="A general-purpose starter agent.",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -161,6 +165,10 @@ class TestAgents:
         agent = client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -347,6 +355,10 @@ class TestAsyncAgents:
             model="claude-opus-5-5",
             name="My First Agent",
             description="A general-purpose starter agent.",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -475,6 +487,10 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",

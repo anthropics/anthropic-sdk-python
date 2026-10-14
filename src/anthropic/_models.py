@@ -10,8 +10,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Type,
+    Tuple,
     Union,
     Generic,
+    Mapping,
     TypeVar,
     Callable,
     Iterable,
@@ -84,6 +86,7 @@ from ._constants import RAW_RESPONSE_HEADER
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler, ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema, core_schema
+    from opentelemetry.util.types import AttributeValue
     from pydantic_core.core_schema import ModelField, ModelSchema, LiteralSchema, ModelFieldsSchema
 else:
     try:
@@ -91,6 +94,9 @@ else:
     except ImportError:
         CoreSchema = None
         core_schema = None
+
+    # pydantic can't resolve the forward reference that this alias can hold, and request options are never validated.
+    AttributeValue = Any
 
 __all__ = ["BaseModel", "GenericModel"]
 
@@ -983,6 +989,14 @@ class FinalRequestOptions(pydantic.BaseModel):
     idempotency_key: Union[str, None] = None
     post_parser: Union[Callable[[Any], Any], NotGiven] = NotGiven()
     follow_redirects: Union[bool, None] = None
+    # Set by the SDK method that makes the API call, for the call's span. Not public options.
+    span_name: Optional[str] = None
+    span_route: Optional[str] = None
+    span_query_params: Tuple[str, ...] = ()
+    # The query parameters that are content on this endpoint only.
+    span_content_query_params: Tuple[str, ...] = ()
+    span_attributes: Union[Mapping[str, AttributeValue], Callable[[object], Mapping[str, AttributeValue]], None] = None
+    span_created_id: Union[str, Tuple[str, str], None] = None
 
     content: Union[bytes, bytearray, IO[bytes], Iterable[bytes], AsyncIterable[bytes], None] = None
     # It should be noted that we cannot use `json` here as that would override

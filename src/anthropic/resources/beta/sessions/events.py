@@ -151,6 +151,9 @@ class Events(SyncAPIResource):
                     "page": page,
                     "types": types,
                 },
+                span_name="anthropic.sessions.events.list",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -216,6 +219,9 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.events.send",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSendSessionEvents,
         )
@@ -288,6 +294,9 @@ class Events(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.events.stream",
+                span_route="/v1/sessions/{session_id}/events/stream",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents
@@ -411,6 +420,9 @@ class AsyncEvents(AsyncAPIResource):
                     "page": page,
                     "types": types,
                 },
+                span_name="anthropic.sessions.events.list",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -476,6 +488,9 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.events.send",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSendSessionEvents,
         )
@@ -548,6 +563,9 @@ class AsyncEvents(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.events.stream",
+                span_route="/v1/sessions/{session_id}/events/stream",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents

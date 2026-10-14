@@ -105,6 +105,9 @@ class SpendLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.retrieve",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=BetaSpendLimit,
         )
@@ -176,6 +179,8 @@ class SpendLimits(SyncAPIResource):
                     "page": page,
                     "scope_type": scope_type,
                 },
+                span_name="anthropic.organization.spend_limits.list",
+                span_route="/v1/organizations/spend_limits",
             ),
             model=BetaSpendLimit,
         )
@@ -220,6 +225,9 @@ class SpendLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.delete",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=SpendLimitDeleteResponse,
         )
@@ -286,6 +294,9 @@ class SpendLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.set",
+                span_route="/v1/organizations/spend_limits",
+                span_created_id="anthropic.organization.spend_limit.id",
             ),
             cast_to=BetaSpendLimit,
         )
@@ -353,6 +364,9 @@ class AsyncSpendLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.retrieve",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=BetaSpendLimit,
         )
@@ -424,6 +438,8 @@ class AsyncSpendLimits(AsyncAPIResource):
                     "page": page,
                     "scope_type": scope_type,
                 },
+                span_name="anthropic.organization.spend_limits.list",
+                span_route="/v1/organizations/spend_limits",
             ),
             model=BetaSpendLimit,
         )
@@ -468,6 +484,9 @@ class AsyncSpendLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.delete",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=SpendLimitDeleteResponse,
         )
@@ -534,6 +553,9 @@ class AsyncSpendLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.set",
+                span_route="/v1/organizations/spend_limits",
+                span_created_id="anthropic.organization.spend_limit.id",
             ),
             cast_to=BetaSpendLimit,
         )

@@ -180,6 +180,9 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.create",
+                span_route="/v1/sessions",
+                span_created_id="anthropic.session.id",
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -239,6 +242,9 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.retrieve",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -332,6 +338,9 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.update",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -446,6 +455,8 @@ class Sessions(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.sessions.list",
+                span_route="/v1/sessions",
             ),
             model=BetaManagedAgentsSession,
         )
@@ -505,6 +516,9 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.delete",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsDeletedSession,
         )
@@ -564,6 +578,9 @@ class Sessions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.archive",
+                span_route="/v1/sessions/{session_id}/archive",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -694,6 +711,9 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.create",
+                span_route="/v1/sessions",
+                span_created_id="anthropic.session.id",
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -753,6 +773,9 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.retrieve",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -846,6 +869,9 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.update",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )
@@ -960,6 +986,8 @@ class AsyncSessions(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.sessions.list",
+                span_route="/v1/sessions",
             ),
             model=BetaManagedAgentsSession,
         )
@@ -1019,6 +1047,9 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.delete",
+                span_route="/v1/sessions/{session_id}",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsDeletedSession,
         )
@@ -1078,6 +1109,9 @@ class AsyncSessions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.archive",
+                span_route="/v1/sessions/{session_id}/archive",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSession,
         )

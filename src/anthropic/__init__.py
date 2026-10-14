@@ -1,7 +1,19 @@
 import typing as _t
 
 from . import types
-from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, omit, not_given
+from ._types import (
+    NOT_GIVEN,
+    Omit,
+    NoneType,
+    NotGiven,
+    OpenTelemetryTraces,
+    OpenTelemetryOptions,
+    OpenTelemetryClientOption,
+    ResolvedOpenTelemetryTraces,
+    ResolvedOpenTelemetryOptions,
+    omit,
+    not_given,
+)
 from ._utils import file_from_path
 from ._client import Client, Stream, Timeout, Anthropic, AsyncClient, AsyncStream, AsyncAnthropic, RequestOptions
 from ._models import BaseModel
@@ -80,6 +92,11 @@ __all__ = [
     "IdentityTokenFileError",
     "Timeout",
     "RequestOptions",
+    "OpenTelemetryClientOption",
+    "OpenTelemetryOptions",
+    "OpenTelemetryTraces",
+    "ResolvedOpenTelemetryOptions",
+    "ResolvedOpenTelemetryTraces",
     "Client",
     "AsyncClient",
     "Stream",

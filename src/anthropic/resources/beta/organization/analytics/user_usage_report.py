@@ -206,6 +206,8 @@ class UserUsageReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.analytics.user_usage_report.list",
+                span_route="/v1/organizations/analytics/user_usage_report",
             ),
             model=BetaAnalyticsUsageUsersItem,
         )
@@ -391,6 +393,8 @@ class AsyncUserUsageReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.analytics.user_usage_report.list",
+                span_route="/v1/organizations/analytics/user_usage_report",
             ),
             model=BetaAnalyticsUsageUsersItem,
         )

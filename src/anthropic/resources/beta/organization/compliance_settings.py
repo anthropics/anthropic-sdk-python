@@ -64,6 +64,8 @@ class ComplianceSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -114,6 +116,8 @@ class ComplianceSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -164,6 +168,8 @@ class AsyncComplianceSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -214,6 +220,8 @@ class AsyncComplianceSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )

@@ -27,6 +27,7 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import (
     BetaManagedAgentsMultiagentParams,
+    BetaManagedAgentsExecutionIdentityParams,
     agent_create_params,
     agent_update_params,
 )
@@ -36,6 +37,7 @@ from ....types.beta.beta_managed_agents_agent import BetaManagedAgentsAgent
 from ....types.beta.beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
 from ....types.beta.beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from ....types.beta.beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
+from ....types.beta.beta_managed_agents_execution_identity_params import BetaManagedAgentsExecutionIdentityParams
 
 __all__ = ["Agents", "AsyncAgents"]
 
@@ -70,6 +72,7 @@ class Agents(SyncAPIResource):
         model: agent_create_params.Model,
         name: str,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
@@ -98,6 +101,9 @@ class Agents(SyncAPIResource):
           name: Human-readable name for the agent.
 
           description: Description of what the agent does.
+
+          execution_identity: Execution principal for runs of this agent. Omitting it, sending null, or
+              sending `{"type": "service_account"}` stores the default.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array. Every server must be referenced by an `mcp_toolset` in `tools`;
@@ -151,6 +157,7 @@ class Agents(SyncAPIResource):
                 "model": model,
                 "name": name,
                 "description": description,
+                "execution_identity": execution_identity,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "multiagent": multiagent,
@@ -163,6 +170,9 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.create",
+                span_route="/v1/agents",
+                span_created_id="gen_ai.agent.id",
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -229,6 +239,9 @@ class Agents(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"version": version},
+                span_name="anthropic.agents.retrieve",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -238,6 +251,7 @@ class Agents(SyncAPIResource):
         agent_id: str,
         *,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
@@ -263,6 +277,9 @@ class Agents(SyncAPIResource):
           agent_id: Unique identifier of the agent to update.
 
           description: Description. Omit to preserve; send empty string or null to clear.
+
+          execution_identity: Execution principal for runs of this agent. Full replacement. Omit to preserve;
+              send null or `{"type": "service_account"}` to restore the default.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -332,6 +349,7 @@ class Agents(SyncAPIResource):
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
             body={
                 "description": description,
+                "execution_identity": execution_identity,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "model": model,
@@ -347,6 +365,9 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.update",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -426,6 +447,8 @@ class Agents(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.agents.list",
+                span_route="/v1/agents",
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -487,6 +510,9 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.archive",
+                span_route="/v1/agents/{agent_id}/archive",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -522,6 +548,7 @@ class AsyncAgents(AsyncAPIResource):
         model: agent_create_params.Model,
         name: str,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
@@ -550,6 +577,9 @@ class AsyncAgents(AsyncAPIResource):
           name: Human-readable name for the agent.
 
           description: Description of what the agent does.
+
+          execution_identity: Execution principal for runs of this agent. Omitting it, sending null, or
+              sending `{"type": "service_account"}` stores the default.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array. Every server must be referenced by an `mcp_toolset` in `tools`;
@@ -603,6 +633,7 @@ class AsyncAgents(AsyncAPIResource):
                 "model": model,
                 "name": name,
                 "description": description,
+                "execution_identity": execution_identity,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "multiagent": multiagent,
@@ -615,6 +646,9 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.create",
+                span_route="/v1/agents",
+                span_created_id="gen_ai.agent.id",
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -681,6 +715,9 @@ class AsyncAgents(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"version": version},
+                span_name="anthropic.agents.retrieve",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -690,6 +727,7 @@ class AsyncAgents(AsyncAPIResource):
         agent_id: str,
         *,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
@@ -715,6 +753,9 @@ class AsyncAgents(AsyncAPIResource):
           agent_id: Unique identifier of the agent to update.
 
           description: Description. Omit to preserve; send empty string or null to clear.
+
+          execution_identity: Execution principal for runs of this agent. Full replacement. Omit to preserve;
+              send null or `{"type": "service_account"}` to restore the default.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -784,6 +825,7 @@ class AsyncAgents(AsyncAPIResource):
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
             body={
                 "description": description,
+                "execution_identity": execution_identity,
                 "mcp_servers": mcp_servers,
                 "metadata": metadata,
                 "model": model,
@@ -799,6 +841,9 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.update",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -878,6 +923,8 @@ class AsyncAgents(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.agents.list",
+                span_route="/v1/agents",
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -939,6 +986,9 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.agents.archive",
+                span_route="/v1/agents/{agent_id}/archive",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )

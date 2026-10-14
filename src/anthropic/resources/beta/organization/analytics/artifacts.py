@@ -123,6 +123,8 @@ class Artifacts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.analytics.artifacts.list",
+                span_route="/v1/organizations/analytics/artifacts",
             ),
             model=BetaAnalyticsArtifactActivity,
         )
@@ -229,6 +231,8 @@ class AsyncArtifacts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.analytics.artifacts.list",
+                span_route="/v1/organizations/analytics/artifacts",
             ),
             model=BetaAnalyticsArtifactActivity,
         )

@@ -99,6 +99,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=OrganizationInvite,
         )
@@ -137,6 +140,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=OrganizationInvite,
         )
@@ -209,6 +215,8 @@ class Invites(SyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=OrganizationInvite,
         )
@@ -247,6 +255,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )
@@ -328,6 +339,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=OrganizationInvite,
         )
@@ -366,6 +380,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=OrganizationInvite,
         )
@@ -438,6 +455,8 @@ class AsyncInvites(AsyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=OrganizationInvite,
         )
@@ -476,6 +495,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )

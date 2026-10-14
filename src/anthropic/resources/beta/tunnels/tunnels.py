@@ -120,6 +120,9 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.create",
+                span_route="/v1/tunnels",
+                span_created_id="anthropic.tunnel.id",
             ),
             cast_to=BetaTunnel,
         )
@@ -187,6 +190,9 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -265,6 +271,8 @@ class Tunnels(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.tunnels.list",
+                span_route="/v1/tunnels",
             ),
             model=BetaTunnel,
         )
@@ -335,6 +343,9 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.archive",
+                span_route="/v1/tunnels/{tunnel_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -405,6 +416,9 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.reveal_token",
+                span_route="/v1/tunnels/{tunnel_id}/reveal_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -478,6 +492,9 @@ class Tunnels(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.rotate_token",
+                span_route="/v1/tunnels/{tunnel_id}/rotate_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -571,6 +588,9 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.create",
+                span_route="/v1/tunnels",
+                span_created_id="anthropic.tunnel.id",
             ),
             cast_to=BetaTunnel,
         )
@@ -638,6 +658,9 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -716,6 +739,8 @@ class AsyncTunnels(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.tunnels.list",
+                span_route="/v1/tunnels",
             ),
             model=BetaTunnel,
         )
@@ -786,6 +811,9 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.archive",
+                span_route="/v1/tunnels/{tunnel_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -856,6 +884,9 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.reveal_token",
+                span_route="/v1/tunnels/{tunnel_id}/reveal_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -929,6 +960,9 @@ class AsyncTunnels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.rotate_token",
+                span_route="/v1/tunnels/{tunnel_id}/rotate_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )

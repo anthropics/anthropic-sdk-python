@@ -89,6 +89,11 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -142,6 +147,8 @@ class IncreaseRequests(SyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                span_name="anthropic.organization.spend_limits.increase_requests.list",
+                span_route="/v1/organizations/spend_limit_increase_requests",
             ),
             model=BetaSpendLimitIncreaseRequest,
         )
@@ -199,6 +206,11 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.approve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=IncreaseRequestApproveResponse,
         )
@@ -247,6 +259,11 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.deny",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -314,6 +331,11 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -367,6 +389,8 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                span_name="anthropic.organization.spend_limits.increase_requests.list",
+                span_route="/v1/organizations/spend_limit_increase_requests",
             ),
             model=BetaSpendLimitIncreaseRequest,
         )
@@ -424,6 +448,11 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.approve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=IncreaseRequestApproveResponse,
         )
@@ -472,6 +501,11 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.spend_limits.increase_requests.deny",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )

@@ -139,6 +139,9 @@ class Shares(SyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                span_name="anthropic.organization.plugins.shares.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/shares",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginShare,
         )
@@ -259,6 +262,9 @@ class AsyncShares(AsyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                span_name="anthropic.organization.plugins.shares.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/shares",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginShare,
         )

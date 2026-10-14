@@ -140,6 +140,9 @@ class InstallationSettings(SyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                span_name="anthropic.organization.plugins.installation_settings.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginInstallationSetting,
         )
@@ -231,6 +234,12 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.installation_settings.remove",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -323,6 +332,12 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.installation_settings.set",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaPluginInstallationSetting,
         )
@@ -441,6 +456,9 @@ class AsyncInstallationSettings(AsyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                span_name="anthropic.organization.plugins.installation_settings.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginInstallationSetting,
         )
@@ -532,6 +550,12 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.installation_settings.remove",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -624,6 +648,12 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.installation_settings.set",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaPluginInstallationSetting,
         )

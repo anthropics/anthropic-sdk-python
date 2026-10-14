@@ -143,6 +143,9 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=Workspace,
         )
@@ -181,6 +184,9 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )
@@ -250,6 +256,9 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )
@@ -310,6 +319,8 @@ class Workspaces(SyncAPIResource):
                     "include_default": include_default,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=Workspace,
         )
@@ -346,6 +357,9 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )
@@ -447,6 +461,9 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=Workspace,
         )
@@ -485,6 +502,9 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )
@@ -554,6 +574,9 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )
@@ -614,6 +637,8 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "include_default": include_default,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=Workspace,
         )
@@ -650,6 +675,9 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=Workspace,
         )

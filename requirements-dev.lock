@@ -76,6 +76,8 @@ mdurl==0.1.2
     # via markdown-it-py
 nodeenv==1.10.0
     # via pyright
+opentelemetry-api==1.44.0
+    # via anthropic
 packaging==26.0
     # via pytest
 pluggy==1.6.0
@@ -125,6 +127,7 @@ typing-extensions==4.15.0
     #   exceptiongroup
     #   httpx2
     #   inline-snapshot
+    #   opentelemetry-api
     #   pydantic
     #   pydantic-core
     #   pyright

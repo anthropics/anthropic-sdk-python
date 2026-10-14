@@ -117,6 +117,9 @@ class Events(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.sessions.threads.events.list",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/events",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -198,6 +201,9 @@ class Events(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.threads.events.stream",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/stream",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents
@@ -296,6 +302,9 @@ class AsyncEvents(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.sessions.threads.events.list",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/events",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -377,6 +386,9 @@ class AsyncEvents(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.threads.events.stream",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/stream",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents

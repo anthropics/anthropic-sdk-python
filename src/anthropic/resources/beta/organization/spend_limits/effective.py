@@ -97,6 +97,8 @@ class Effective(SyncAPIResource):
                     "period": period,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.spend_limits.effective.list",
+                span_route="/v1/organizations/spend_limits/effective",
             ),
             model=BetaSpendSummary,
         )
@@ -178,6 +180,8 @@ class AsyncEffective(AsyncAPIResource):
                     "period": period,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.spend_limits.effective.list",
+                span_route="/v1/organizations/spend_limits/effective",
             ),
             model=BetaSpendSummary,
         )

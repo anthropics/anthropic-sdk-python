@@ -615,6 +615,9 @@ from .beta_managed_agents_custom_tool_params import (
 from .beta_managed_agents_effort_xhigh_param import (
     BetaManagedAgentsEffortXhighParam as BetaManagedAgentsEffortXhighParam,
 )
+from .beta_managed_agents_execution_identity import (
+    BetaManagedAgentsExecutionIdentity as BetaManagedAgentsExecutionIdentity,
+)
 from .beta_managed_agents_mcp_toolset_params import (
     BetaManagedAgentsMCPToolsetParams as BetaManagedAgentsMCPToolsetParams,
 )
@@ -1159,6 +1162,9 @@ from .beta_count_tokens_context_management_response import (
 from .beta_managed_agents_always_allow_policy_param import (
     BetaManagedAgentsAlwaysAllowPolicyParam as BetaManagedAgentsAlwaysAllowPolicyParam,
 )
+from .beta_managed_agents_execution_identity_params import (
+    BetaManagedAgentsExecutionIdentityParams as BetaManagedAgentsExecutionIdentityParams,
+)
 from .beta_managed_agents_mcp_server_url_definition import (
     BetaManagedAgentsMCPServerURLDefinition as BetaManagedAgentsMCPServerURLDefinition,
 )
@@ -1248,6 +1254,9 @@ from .beta_browser_state_change_download_failed_param import (
 )
 from .beta_managed_agents_agent_with_overrides_params import (
     BetaManagedAgentsAgentWithOverridesParams as BetaManagedAgentsAgentWithOverridesParams,
+)
+from .beta_managed_agents_aws_role_execution_identity import (
+    BetaManagedAgentsAWSRoleExecutionIdentity as BetaManagedAgentsAWSRoleExecutionIdentity,
 )
 from .beta_managed_agents_memory_store_resource_param import (
     BetaManagedAgentsMemoryStoreResourceParam as BetaManagedAgentsMemoryStoreResourceParam,
@@ -1567,11 +1576,17 @@ from .beta_response_computer_left_mouse_down_tool_use_block import (
 from .beta_web_search_tool_result_block_param_content_param import (
     BetaWebSearchToolResultBlockParamContentParam as BetaWebSearchToolResultBlockParamContentParam,
 )
+from .beta_managed_agents_aws_role_execution_identity_params import (
+    BetaManagedAgentsAWSRoleExecutionIdentityParams as BetaManagedAgentsAWSRoleExecutionIdentityParams,
+)
 from .beta_managed_agents_multiagent_advisor_disabled_params import (
     BetaManagedAgentsMultiagentAdvisorDisabledParams as BetaManagedAgentsMultiagentAdvisorDisabledParams,
 )
 from .beta_managed_agents_multiagent_predefined_agent_params import (
     BetaManagedAgentsMultiagentPredefinedAgentParams as BetaManagedAgentsMultiagentPredefinedAgentParams,
+)
+from .beta_managed_agents_service_account_execution_identity import (
+    BetaManagedAgentsServiceAccountExecutionIdentity as BetaManagedAgentsServiceAccountExecutionIdentity,
 )
 from .beta_managed_agents_agent_toolset_default_config_params import (
     BetaManagedAgentsAgentToolsetDefaultConfigParams as BetaManagedAgentsAgentToolsetDefaultConfigParams,
@@ -1650,6 +1665,9 @@ from .beta_managed_agents_web_fetch_url_source_tool_filter_params import (
 )
 from .beta_managed_agents_multiagent_inline_agents_disabled_params import (
     BetaManagedAgentsMultiagentInlineAgentsDisabledParams as BetaManagedAgentsMultiagentInlineAgentsDisabledParams,
+)
+from .beta_managed_agents_service_account_execution_identity_params import (
+    BetaManagedAgentsServiceAccountExecutionIdentityParams as BetaManagedAgentsServiceAccountExecutionIdentityParams,
 )
 from .beta_managed_agents_web_fetch_url_source_tool_reference_param import (
     BetaManagedAgentsWebFetchURLSourceToolReferenceParam as BetaManagedAgentsWebFetchURLSourceToolReferenceParam,
