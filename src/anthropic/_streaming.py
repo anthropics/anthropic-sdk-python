@@ -4,6 +4,7 @@ from __future__ import annotations
 import sys
 import json
 import inspect
+from copy import copy
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Iterator, Optional, AsyncIterator, cast
 from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, runtime_checkable
@@ -11,6 +12,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._compat import cached_property
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -41,7 +43,12 @@ class Stream(Generic[_T]):
         self._client = client
         self._options = options
         self._decoder = client._make_sse_decoder()
-        self._iterator = self.__stream__()
+
+    @cached_property
+    def _iterator(self) -> Iterator[_T]:
+        # On a copy, as a generator that referred to this stream would form a cycle with it, which would leave it to
+        # the garbage collector to close a dropped stream. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__stream__()
 
     @property
     def _observer(self) -> Optional[StreamObserver]:
@@ -220,7 +227,12 @@ class AsyncStream(Generic[_T]):
         self._client = client
         self._options = options
         self._decoder = client._make_sse_decoder()
-        self._iterator = self.__stream__()
+
+    @cached_property
+    def _iterator(self) -> AsyncIterator[_T]:
+        # On a copy, as a generator that referred to this stream would form a cycle with it, which would leave it to
+        # the garbage collector to close a dropped stream. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__stream__()
 
     @property
     def _observer(self) -> Optional[StreamObserver]:

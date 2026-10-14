@@ -14,6 +14,7 @@
 ### Bug Fixes
 
 * **api:** rename telemetry destination test response model
+* **client:** close dropped streams without waiting for the collector
 * **streaming:** pass unknown event types through the message stream helpers
 * **streaming:** stop raising "Unexpected event order" for an event before message_start
 
