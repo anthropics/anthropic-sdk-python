@@ -121,21 +121,20 @@ class OpenTelemetryTraces(TypedDict, total=False):
     enabled: bool
     """Whether the client emits spans. `False` disables them, and then the other fields are not used.
 
-    Defaults to `True`, or to `False` when the environment variable `ANTHROPIC_OPEN_TELEMETRY` is `false`.
+    Defaults to `True`.
     """
 
     content_mode: Literal["metadata_only", "content"]
     """Whether the client's spans have the content of its requests and responses, with `content`.
 
-    Defaults to the environment variable `ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE`, or else to `metadata_only`.
+    Defaults to `metadata_only`.
     """
 
     max_content_bytes: int
     """The size in bytes that the content of one span is kept within, in content mode.
 
     A span with more content has only what fits, and `anthropic.content.truncated`. The SDK measures content by the
-    bytes of its JSON in UTF-8. At least 1, and a smaller value is 750,000. Defaults to the environment variable
-    `ANTHROPIC_OPEN_TELEMETRY_TRACES_MAX_CONTENT_BYTES`, or else to 750,000.
+    bytes of its JSON in UTF-8. At least 1, and a smaller value is 750,000. Defaults to 750,000.
     """
 
 
@@ -153,7 +152,11 @@ class ResolvedOpenTelemetryTraces(TypedDict):
 
 
 class OpenTelemetryOptions(TypedDict, total=False):
-    """The `open_telemetry` client option."""
+    """The `open_telemetry` client option.
+
+    A client that is given it, even empty, reads none of the `ANTHROPIC_OPEN_TELEMETRY*` environment variables: a field
+    that it leaves out has its default.
+    """
 
     tracer_provider: TracerProvider
     """The tracer provider that creates the client's spans, in place of the one registered with the OpenTelemetry API."""
@@ -162,8 +165,7 @@ class OpenTelemetryOptions(TypedDict, total=False):
     """Whether the client's requests carry the trace context of their span, in the headers of the registered propagator.
 
     Set `False` for an application whose HTTP client instrumentation already propagates the trace context, so that a
-    request does not carry it twice. The client's spans are not affected. Defaults to `True`, or to `False` when the
-    environment variable `ANTHROPIC_OPEN_TELEMETRY_PROPAGATION` is `false`.
+    request does not carry it twice. The client's spans are not affected. Defaults to `True`.
     """
 
     traces: OpenTelemetryTraces | ResolvedOpenTelemetryTraces | bool
@@ -184,9 +186,9 @@ class OpenTelemetryOptions(TypedDict, total=False):
 class ResolvedOpenTelemetryOptions(TypedDict):
     """A client's `open_telemetry` option as `client.open_telemetry` reads it back.
 
-    It is the option that the client was given, with `propagation` and what that left out of `traces` filled in from
-    the environment variables, as they were when the client was constructed, or else from the defaults. Spread it into
-    the option of a copy of the client:
+    It is the option that the client was given, with the defaults for `propagation` and for what that left out of
+    `traces`. A client that was given no option has what the environment variables said when it was constructed. Spread
+    it into the option of a copy of the client:
     `client.with_options(open_telemetry={**client.open_telemetry, "conversation_id": ...})`.
     """
 
@@ -204,7 +206,14 @@ class ResolvedOpenTelemetryOptions(TypedDict):
 
 
 OpenTelemetryClientOption: TypeAlias = Union[OpenTelemetryOptions, Literal[False], None]
-"""The `open_telemetry` client option. `False` disables the client's spans, and `None` leaves the option unset."""
+"""The `open_telemetry` client option. `False` disables the client's spans, and `None` leaves the option unset.
+
+The environment variables `ANTHROPIC_OPEN_TELEMETRY`, `ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE`,
+`ANTHROPIC_OPEN_TELEMETRY_TRACES_MAX_CONTENT_BYTES` and `ANTHROPIC_OPEN_TELEMETRY_PROPAGATION` set `traces.enabled`,
+`traces.content_mode`, `traces.max_content_bytes` and `propagation` for a client whose option is unset. A client that is
+given the option, even `{}`, reads none of them, and what the option leaves out has its default. A copy of a client
+(`with_options`, `copy`) whose option is unset has the client's own, so it reads none of them either.
+"""
 
 
 class RequestOptions(TypedDict, total=False):

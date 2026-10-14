@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import os
 import json
+import base64
+import pathlib
+import threading
 from typing import Any, Set, Dict, List, Tuple, TypeVar, cast
 
 import httpx2
@@ -681,6 +684,48 @@ class TestSyncMessages:
 
 
 class TestAsyncMessages:
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_file_input_is_read_when_the_stream_is_entered(
+        self, respx_mock: MockRouter, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+        image = tmp_path / "image.png"
+        image.write_bytes(b"image")
+        loop_thread = threading.current_thread()
+        read_on_loop_thread: list[bool] = []
+        read_bytes = pathlib.Path.read_bytes
+
+        def observed_read_bytes(self: pathlib.Path) -> bytes:
+            read_on_loop_thread.append(threading.current_thread() is loop_thread)
+            return read_bytes(self)
+
+        monkeypatch.setattr(pathlib.Path, "read_bytes", observed_read_bytes)
+
+        manager = async_client.beta.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-3-opus-latest",
+        )
+        # Creating the manager must not block the event loop on the file: the read is awaited once it is entered.
+        assert read_on_loop_thread == []
+
+        async with manager as stream:
+            await stream.until_done()
+
+        assert read_on_loop_thread == [False]
+        sent = json.loads(route.calls.last.request.content)
+        assert sent["messages"][0]["content"][0]["source"]["data"] == base64.b64encode(b"image").decode()
+
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:

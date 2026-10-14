@@ -17,6 +17,7 @@ from ..._response import (
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
+from ...lib._tracing import get, count, attributes
 from ...types.messages import batch_create_params
 from ..._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ...types.messages.message_batch import MessageBatch
@@ -112,6 +113,9 @@ class Batches(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.batches.create",
                 span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
                 span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,
@@ -512,6 +516,9 @@ class AsyncBatches(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.batches.create",
                 span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
                 span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,

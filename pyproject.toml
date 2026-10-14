@@ -89,6 +89,7 @@ dev = [
     "packaging",
     "tomli; python_version < '3.11'",
     "httpx2>=2.9",
+    "opentelemetry-sdk",
 ]
 pydantic-v1 = [
     "pydantic>=1.10.0,<2",

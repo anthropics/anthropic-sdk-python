@@ -9,7 +9,7 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from ..._types import Timeout, NotGiven, not_given
+from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import asyncify, is_given
 from ..._client import Anthropic, AsyncAnthropic
 from ..._models import FinalRequestOptions
@@ -86,6 +86,7 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     _creds_state: _GoogleCredentialsState
     _base_url_deferred: bool
     _base_url_overridden: bool
+    _otel_platform = "google_cloud"
 
     @property
     @override
@@ -209,6 +210,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -234,6 +236,9 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
                 workspace ID is still needed to derive the base URL; pass `base_url`
                 to construct without one. Mutually exclusive with the credential
                 arguments.
+            open_telemetry: OpenTelemetry tracing of this client's API calls. `False`
+                disables the spans, and `traces.content_mode` set to `"content"` adds the
+                content of requests and responses to them.
         """
         _reject_skip_auth_conflict(skip_auth=skip_auth, token_provider=token_provider, credentials=credentials)
 
@@ -287,6 +292,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
             base_url=resolved_base_url if resolved_base_url is not None else "",
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -367,6 +373,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -428,6 +435,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client or self._client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
@@ -465,6 +473,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -525,6 +534,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
             base_url=resolved_base_url if resolved_base_url is not None else "",
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -600,6 +610,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None | NotGiven = not_given,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -657,6 +668,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client or self._client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,

@@ -87,13 +87,10 @@ from ._request import APIRequest
 from ._tracing import (
     ApiCall,
     get_tracer,
-    end_api_call_span,
     start_api_call_span,
     inject_trace_headers,
     remove_trace_headers,
     resolve_open_telemetry,
-    set_created_id_attribute,
-    end_api_call_span_when_body_ends,
 )
 from ._response import (
     APIResponse,
@@ -130,6 +127,7 @@ from ._middleware import (
     validate_async_middleware,
 )
 from ._utils._json import openapi_dumps
+from .lib._tracing import OpenTelemetryConfig, finish_api_call_span
 from ._utils._httpx import get_environment_proxies
 
 log: logging.Logger = logging.getLogger(__name__)
@@ -428,6 +426,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
     _middleware: tuple[MiddlewareInput, ...]
+    _gen_ai_provider_name: str = "anthropic"
+    _otel_platform: str | None = None
 
     def __init__(
         self,
@@ -471,6 +471,9 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         options = resolve_open_telemetry(open_telemetry)
         self._open_telemetry = options
         self._lazy_tracer: Tracer | None | NotGiven = not_given
+        self._otel = OpenTelemetryConfig(
+            options, provider_name=self._gen_ai_provider_name, platform=self._otel_platform
+        )
 
     @property
     def _tracer(self) -> Tracer | None:
@@ -479,22 +482,23 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         The client gets it when it first needs it, so constructing or copying a client calls nothing of OpenTelemetry.
         """
         if isinstance(self._lazy_tracer, NotGiven):
-            self._lazy_tracer = get_tracer(self._open_telemetry, self._version)
+            self._lazy_tracer = get_tracer(self._open_telemetry, self._version, scope=self._otel.instrumentation_scope)
         return self._lazy_tracer
 
-    def _copy_open_telemetry(self, open_telemetry: OpenTelemetryClientOption | NotGiven) -> OpenTelemetryClientOption:
-        """The `open_telemetry` option of a copy of this client: the one given, or else this client's own.
+    def _copy_open_telemetry(self, open_telemetry: OpenTelemetryClientOption) -> OpenTelemetryClientOption:
+        """The `open_telemetry` option of a copy of this client: the one given, or else, for `None`, this client's own.
 
-        The one given replaces this client's whole option: nothing of this client's is merged into it.
+        The one given replaces this client's whole option: nothing of this client's is merged into it. This client's
+        own is resolved, so the environment variables do not apply to a copy.
         """
-        return {**self._open_telemetry} if isinstance(open_telemetry, NotGiven) else open_telemetry
+        return {**self._open_telemetry} if open_telemetry is None else open_telemetry
 
     @property
     def open_telemetry(self) -> ResolvedOpenTelemetryOptions:
         """This client's `open_telemetry` option, with `propagation` and every field of its `traces` set.
 
-        The fields that the option given to the client left out have the values that the client uses: those of the
-        environment variables when it was constructed, or else the defaults. A client that was given `False` has
+        The fields that the option given to the client left out have their defaults. A client that was given no option
+        has what the environment variables said when it was constructed. A client that was given `False` has
         `{"traces": {"enabled": False, ...}}`. The value is a copy, so changing it does not change the client.
 
         `with_options` replaces the whole option, so a copy of the client that changes one field starts from this value:
@@ -1216,20 +1220,17 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
         start_time = time.time_ns()
         propagation = self._open_telemetry["propagation"]
-        span = start_api_call_span(self._tracer, self.base_url, options, {}, propagation=propagation)
+        span = start_api_call_span(
+            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+        )
         if span is None:
             return self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
-        call = ApiCall(
-            span,
-            start_time,
-            records_content=self._open_telemetry["traces"]["content_mode"] == "content",
-            propagation=propagation,
-        )
+        call = ApiCall(span, start_time, records_content=self._otel.records_content, propagation=propagation)
         try:
             with trace.use_span(span, end_on_exit=False, record_exception=False, set_status_on_exception=False):
                 return self._request(cast_to, options, stream=stream, stream_cls=stream_cls, call=call)
         except BaseException as err:
-            end_api_call_span(span, call.result(options, error=err, cast_to=cast_to))
+            finish_api_call_span(self, span, call.result(options, error=err, cast_to=cast_to))
             raise
 
     def _request(
@@ -1271,8 +1272,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
                         )
                         if call is not None:
                             call_result = call.result(options, response=response, data=result, cast_to=cast_to)
-                            set_created_id_attribute(call.span, call_result)
-                            end_api_call_span_when_body_ends(call.span, response, call_result)
+                            finish_api_call_span(self, call.span, call_result)
                         return result
                 else:
                     request = APIRequest(
@@ -1290,11 +1290,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
                                 chain_result.http_response if isinstance(chain_result, BaseAPIResponse) else None
                             )
                             call_result = call.result(options, response=last_response, data=value, cast_to=cast_to)
-                            set_created_id_attribute(call.span, call_result)
-                            if last_response is None:
-                                end_api_call_span(call.span, call_result)
-                            else:
-                                end_api_call_span_when_body_ends(call.span, last_response, call_result)
+                            finish_api_call_span(self, call.span, call_result)
                         return cast(Union[ResponseT, _StreamT], value)
                     response = chain_result.http_response
             except Exception as err:
@@ -2000,20 +1996,17 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
 
         start_time = time.time_ns()
         propagation = self._open_telemetry["propagation"]
-        span = start_api_call_span(self._tracer, self.base_url, options, {}, propagation=propagation)
+        span = start_api_call_span(
+            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+        )
         if span is None:
             return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
-        call = ApiCall(
-            span,
-            start_time,
-            records_content=self._open_telemetry["traces"]["content_mode"] == "content",
-            propagation=propagation,
-        )
+        call = ApiCall(span, start_time, records_content=self._otel.records_content, propagation=propagation)
         try:
             with trace.use_span(span, end_on_exit=False, record_exception=False, set_status_on_exception=False):
                 return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls, call=call)
         except BaseException as err:
-            end_api_call_span(span, call.result(options, error=err, cast_to=cast_to))
+            finish_api_call_span(self, span, call.result(options, error=err, cast_to=cast_to))
             raise
 
     async def _request(
@@ -2055,8 +2048,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
                         )
                         if call is not None:
                             call_result = call.result(options, response=response, data=result, cast_to=cast_to)
-                            set_created_id_attribute(call.span, call_result)
-                            end_api_call_span_when_body_ends(call.span, response, call_result)
+                            finish_api_call_span(self, call.span, call_result)
                         return result
                 else:
                     request = APIRequest(
@@ -2074,11 +2066,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
                                 chain_result.http_response if isinstance(chain_result, BaseAPIResponse) else None
                             )
                             call_result = call.result(options, response=last_response, data=value, cast_to=cast_to)
-                            set_created_id_attribute(call.span, call_result)
-                            if last_response is None:
-                                end_api_call_span(call.span, call_result)
-                            else:
-                                end_api_call_span_when_body_ends(call.span, last_response, call_result)
+                            finish_api_call_span(self, call.span, call_result)
                         return cast(Union[ResponseT, _AsyncStreamT], value)
                     response = chain_result.http_response
             except Exception as err:

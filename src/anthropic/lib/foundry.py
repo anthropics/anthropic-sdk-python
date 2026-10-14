@@ -8,7 +8,7 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from .._types import Timeout, NotGiven, not_given
+from .._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from .._utils import is_given
 from .._client import Anthropic, AsyncAnthropic
 from .._compat import model_copy
@@ -38,7 +38,8 @@ class MutuallyExclusiveAuthError(AnthropicError):
         )
 
 
-class BaseFoundryClient(BaseClient[_HttpxClientT, _DefaultStreamT]): ...
+class BaseFoundryClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
+    _otel_platform = "foundry"
 
 
 class MessagesFoundry(Messages):
@@ -102,6 +103,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -119,6 +121,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -136,6 +139,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -150,6 +154,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         Args:
             resource: Your Foundry resource name, e.g. `example-resource` for `https://example-resource.services.ai.azure.com/anthropic/`
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
+            open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
@@ -175,6 +180,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -212,6 +218,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -248,6 +255,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client or self._client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
@@ -320,6 +328,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -337,6 +346,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -354,6 +364,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -368,6 +379,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         Args:
             resource: Your Foundry resource name, e.g. `example-resource` for `https://example-resource.services.ai.azure.com/anthropic/`
             azure_ad_token_provider: A function that returns an Azure Active Directory token, will be invoked on every request.
+            open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
         resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
@@ -393,6 +405,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -430,6 +443,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -466,6 +480,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client or self._client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,

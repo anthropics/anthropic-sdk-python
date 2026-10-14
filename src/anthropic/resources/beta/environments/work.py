@@ -1265,6 +1265,11 @@ class AsyncWork(AsyncAPIResource):
         and return without owning the stop call (webhook-dispatch shape — each
         item is handed off to another process that calls `stop` when done).
 
+        Each item has an OpenTelemetry span, `anthropic.environment.work`,
+        when the client has spans, open from when the poll returns the item
+        until the loop asks for the next item or stops. It is not the current
+        span in the loop body, so a span that the body starts is its sibling.
+
         Args:
           environment_id: The self-hosted environment to claim work from.
           environment_key: The environment key — used as the Bearer credential

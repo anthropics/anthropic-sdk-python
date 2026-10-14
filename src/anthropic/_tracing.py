@@ -50,48 +50,73 @@ URL_PATH = "url.path"
 URL_QUERY = "url.query"
 URL_SCHEME = "url.scheme"
 
+CONVERSATION_ID = "gen_ai.conversation.id"
+SESSION_THREAD_ID = "anthropic.session.thread.id"
+
 DEFAULT_MAX_CONTENT_BYTES = 750_000
-"""The `traces.max_content_bytes` of a client whose option and environment give none."""
+"""The default `traces.max_content_bytes`."""
 
 
 def resolve_open_telemetry(option: OpenTelemetryClientOption) -> ResolvedOpenTelemetryOptions:
-    """`option` with `propagation` and every field of `traces`: what `option` says, or the environment, or the default.
+    """`option` with `propagation` and every field of its `traces`.
+
+    The environment variables are for a client that is given no option, `None`: `env_open_telemetry` makes its option
+    from them. An option that is given is complete, even `{}`: `propagation`, or a field of `traces`, that it leaves out
+    has the default, whatever the environment says.
 
     `False` is short for `{"traces": False}`. A client resolves the option that it is given once, when it is
     constructed, and a copy of it that is given no other option has the resolved one. So a later change to the
     environment does not reach a client that exists, nor those copies.
 
-    A `max_content_bytes` below 1 is not valid. In `option` it is the default, whatever the environment says, and
-    in the environment it is ignored.
+    A `max_content_bytes` below 1 is not valid: in `option` it is the default, and in the environment it is ignored.
     """
-    options: OpenTelemetryOptions = {"traces": False} if option is False else {**(option or {})}
+    options: OpenTelemetryOptions
+    if option is None:
+        options = env_open_telemetry()
+    elif option is False:
+        options = {"traces": False}
+    else:
+        options = option
     traces = traces_of(options)
 
     enabled = traces.get("enabled")
-    if enabled is None:
-        enabled = os.environ.get("ANTHROPIC_OPEN_TELEMETRY", "").lower() != "false"
-    content_mode = traces.get("content_mode")
-    if content_mode is None:
-        content = os.environ.get("ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE", "").lower() == "content"
-        content_mode = "content" if content else "metadata_only"
     max_content_bytes = traces.get("max_content_bytes")
-    if max_content_bytes is None:
-        max_content_bytes = env_max_content_bytes() or DEFAULT_MAX_CONTENT_BYTES
-    elif max_content_bytes < 1:
-        max_content_bytes = DEFAULT_MAX_CONTENT_BYTES
     propagation = options.get("propagation")
-    if propagation is None:
-        propagation = os.environ.get("ANTHROPIC_OPEN_TELEMETRY_PROPAGATION", "").lower() != "false"
 
     resolved: ResolvedOpenTelemetryOptions = {
-        "propagation": propagation,
-        "traces": {"enabled": enabled, "content_mode": content_mode, "max_content_bytes": max_content_bytes},
+        "propagation": True if propagation is None else propagation,
+        "traces": {
+            "enabled": True if enabled is None else enabled,
+            "content_mode": traces.get("content_mode") or "metadata_only",
+            "max_content_bytes": (
+                DEFAULT_MAX_CONTENT_BYTES if max_content_bytes is None or max_content_bytes < 1 else max_content_bytes
+            ),
+        },
     }
     if (tracer_provider := options.get("tracer_provider")) is not None:
         resolved["tracer_provider"] = tracer_provider
     if (conversation_id := options.get("conversation_id")) is not None:
         resolved["conversation_id"] = conversation_id
     return resolved
+
+
+def env_open_telemetry() -> OpenTelemetryOptions:
+    """The option that the environment variables make, for a client that is given no `open_telemetry` option.
+
+    It has only what a variable changes from the default. Nothing else reads these variables.
+    """
+    traces: OpenTelemetryTraces = {}
+    if os.environ.get("ANTHROPIC_OPEN_TELEMETRY", "").lower() == "false":
+        traces["enabled"] = False
+    if os.environ.get("ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE", "").lower() == "content":
+        traces["content_mode"] = "content"
+    if (max_content_bytes := env_max_content_bytes()) is not None:
+        traces["max_content_bytes"] = max_content_bytes
+
+    options: OpenTelemetryOptions = {"traces": traces}
+    if os.environ.get("ANTHROPIC_OPEN_TELEMETRY_PROPAGATION", "").lower() == "false":
+        options["propagation"] = False
+    return options
 
 
 def env_max_content_bytes() -> int | None:
@@ -268,6 +293,8 @@ def start_api_call_span(
             attributes={
                 **server_attributes(base_url),
                 **request_attributes(options),
+                # Before `attributes`, whose conversation ID is the one that the application set.
+                **conversation_attributes(method_attributes),
                 **attributes,
                 **method_attributes,
             },
@@ -324,17 +351,6 @@ def end_api_call_span_when_body_ends(
     set_response_status_code(span, result)
     set_resend_count(span, result)
     response.stream = span_ending_stream(response.stream, FirstEnd(observer or StreamedBodyObserver(span)))
-
-
-def set_created_id_attribute(span: Span, result: ApiCallResult) -> None:
-    """Sets the ID of the object that the call created, from the response field that `span_created_id` names."""
-    created = result.options.span_created_id
-    if created is None or result.error is not None:
-        return
-    attribute, field = (created, "id") if isinstance(created, str) else created
-    created_id: object = getattr(result.data, field, None)
-    if isinstance(created_id, str):
-        span.set_attribute(attribute, created_id)
 
 
 StreamEnd = Literal["read", "closed", "failed"]
@@ -580,11 +596,14 @@ def set_error_status(span: Span, error: BaseException, type: str | None = None) 
 
 
 def error_type(error: BaseException) -> str:
+    """The `error.type` of a failed operation: the type of the API's error envelope, or else the status code."""
     if isinstance(error, (APITimeoutError, httpx2.TimeoutException)):
         return "client_timeout_error"
     if isinstance(error, (APIConnectionError, httpx2.TransportError)):
         return "connection_error"
     if isinstance(error, APIStatusError):
+        if error.type:
+            return str(error.type)
         # An `error` event has the status of the response that opened its stream, which is no error.
         if error.status_code >= 400:
             return str(error.status_code)
@@ -597,6 +616,12 @@ def request_attributes(options: FinalRequestOptions) -> dict[str, AttributeValue
     if options.span_route is not None:
         attributes[HTTP_ROUTE] = options.span_route
     return attributes
+
+
+def conversation_attributes(method_attributes: Mapping[str, AttributeValue]) -> dict[str, AttributeValue]:
+    """The ID of the Session thread in the call's path as the conversation's ID: a Session thread is a conversation."""
+    thread_id = method_attributes.get(SESSION_THREAD_ID)
+    return {} if thread_id is None else {CONVERSATION_ID: thread_id}
 
 
 def server_attributes(base_url: httpx2.URL) -> dict[str, AttributeValue]:
