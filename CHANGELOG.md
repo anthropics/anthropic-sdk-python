@@ -6,6 +6,11 @@
 
 * **api:** return a Console organization's usage-tier spend cap as a read-only spend limit
 
+
+### Chores
+
+* **ci:** speed up breaking change detection
+
 ## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-14)
 
 ### Features
