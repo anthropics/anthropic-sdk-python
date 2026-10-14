@@ -76,6 +76,8 @@ for message in runner:
     rich.print(message)
 ```
 
+Leaving the loop early does not end the runner: `runner.until_done()` resumes it and returns the final message. To stop a runner you will not resume, call `runner.close()` (`await runner.close()` for the async runner), which also ends its OpenTelemetry span.
+
 ### Running tools while the reply streams
 
 By default, the runner runs a reply's tools after your loop body for that reply ends. With `run_tools_eagerly=True` and `stream=True`, each tool runs as soon as the model finishes writing its call. To hold a call until your loop body ends, pass it to `runner.defer_tool_call()` when you see it. It won't have run yet. `runner.deferred_tool_calls` lists the held calls, so read it after the stream ends.

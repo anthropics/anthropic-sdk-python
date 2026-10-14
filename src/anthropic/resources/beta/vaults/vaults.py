@@ -120,6 +120,9 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.create",
+                span_route="/v1/vaults",
+                span_created_id="anthropic.vault.id",
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -181,6 +184,9 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.retrieve",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -253,6 +259,9 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.update",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -324,6 +333,8 @@ class Vaults(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.vaults.list",
+                span_route="/v1/vaults",
             ),
             model=BetaManagedAgentsVault,
         )
@@ -385,6 +396,9 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.delete",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -446,6 +460,9 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.archive",
+                span_route="/v1/vaults/{vault_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -539,6 +556,9 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.create",
+                span_route="/v1/vaults",
+                span_created_id="anthropic.vault.id",
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -600,6 +620,9 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.retrieve",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -672,6 +695,9 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.update",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -743,6 +769,8 @@ class AsyncVaults(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.vaults.list",
+                span_route="/v1/vaults",
             ),
             model=BetaManagedAgentsVault,
         )
@@ -804,6 +832,9 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.delete",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -865,6 +896,9 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.vaults.archive",
+                span_route="/v1/vaults/{vault_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )

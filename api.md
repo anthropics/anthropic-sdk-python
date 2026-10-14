@@ -1549,6 +1549,8 @@ from anthropic.types.beta import (
     BetaManagedAgentsAnthropicSkillParams,
     BetaManagedAgentsAutoPolicy,
     BetaManagedAgentsAutoPolicyParam,
+    BetaManagedAgentsAWSRoleExecutionIdentity,
+    BetaManagedAgentsAWSRoleExecutionIdentityParams,
     BetaManagedAgentsBashToolConfig,
     BetaManagedAgentsBashToolConfigParams,
     BetaManagedAgentsCustomSkill,
@@ -1569,6 +1571,8 @@ from anthropic.types.beta import (
     BetaManagedAgentsEffortMediumParam,
     BetaManagedAgentsEffortXhigh,
     BetaManagedAgentsEffortXhighParam,
+    BetaManagedAgentsExecutionIdentity,
+    BetaManagedAgentsExecutionIdentityParams,
     BetaManagedAgentsGlobToolConfig,
     BetaManagedAgentsGlobToolConfigParams,
     BetaManagedAgentsGrepToolConfig,
@@ -1616,6 +1620,8 @@ from anthropic.types.beta import (
     BetaManagedAgentsMultiagent20261001Params,
     BetaManagedAgentsReadToolConfig,
     BetaManagedAgentsReadToolConfigParams,
+    BetaManagedAgentsServiceAccountExecutionIdentity,
+    BetaManagedAgentsServiceAccountExecutionIdentityParams,
     BetaManagedAgentsSessionThreadAgent,
     BetaManagedAgentsSkillParams,
     BetaManagedAgentsURLMCPServerParams,
@@ -3028,3 +3034,67 @@ Methods:
 - <code title="get /v1/organizations/plugin_marketplaces?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace.py">SyncPageCursor[BetaPluginMarketplace]</a></code>
 - <code title="post /v1/organizations/plugin_marketplaces/validate_archive?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">validate_archive</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_validate_archive_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace_validation_report.py">BetaPluginMarketplaceValidationReport</a></code>
 - <code title="post /v1/organizations/plugin_marketplaces/validate_repository?beta=true">client.beta.organization.plugin_marketplaces.<a href="./src/anthropic/resources/beta/organization/plugin_marketplaces.py">validate_repository</a>(\*\*<a href="src/anthropic/types/beta/organization/plugin_marketplace_validate_repository_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_plugin_marketplace_validation_report.py">BetaPluginMarketplaceValidationReport</a></code>
+
+### TelemetryDestinations
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaDeletedTelemetryDestination,
+    BetaTelemetryDestination,
+    BetaTelemetryDestinationContentMode,
+    BetaTelemetryDestinationDeliveryHealth,
+    BetaTelemetryDestinationDisabledReason,
+    BetaTelemetryDestinationDisabledReasonCaller,
+    BetaTelemetryDestinationDisabledReasonInvalidAddress,
+    BetaTelemetryDestinationDisabledReasonRedirect,
+    BetaTelemetryDestinationDisabledReasonSustainedFailure,
+    BetaTelemetryDestinationState,
+    BetaTelemetryDestinationStateDisabled,
+    BetaTelemetryDestinationStateDisabledParams,
+    BetaTelemetryDestinationStateEnabled,
+    BetaTelemetryDestinationStateEnabledParams,
+    BetaTelemetryDestinationStateParams,
+    BetaTelemetryDestinationTestFailure,
+    BetaTelemetryDestinationTestResponse,
+    BetaTelemetryDestinationTestResult,
+    BetaTelemetryDestinationTestSuccess,
+    BetaTelemetryDestinationTraces,
+    BetaTelemetryDestinationTracesParams,
+    BetaTelemetryDestinationWorkspaces,
+    BetaTelemetryDestinationWorkspacesAll,
+    BetaTelemetryDestinationWorkspacesAllParams,
+    BetaTelemetryDestinationWorkspacesExclude,
+    BetaTelemetryDestinationWorkspacesExcludeParams,
+    BetaTelemetryDestinationWorkspacesInclude,
+    BetaTelemetryDestinationWorkspacesIncludeParams,
+    BetaTelemetryDestinationWorkspacesParams,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/telemetry_destinations?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/telemetry_destination_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">BetaTelemetryDestination</a></code>
+- <code title="get /v1/organizations/telemetry_destinations/{destination_id}?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">retrieve</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">BetaTelemetryDestination</a></code>
+- <code title="post /v1/organizations/telemetry_destinations/{destination_id}?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">update</a>(destination_id, \*\*<a href="src/anthropic/types/beta/organization/telemetry_destination_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">BetaTelemetryDestination</a></code>
+- <code title="get /v1/organizations/telemetry_destinations?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/telemetry_destination_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">SyncPageCursor[BetaTelemetryDestination]</a></code>
+- <code title="delete /v1/organizations/telemetry_destinations/{destination_id}?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">delete</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_telemetry_destination.py">BetaDeletedTelemetryDestination</a></code>
+- <code title="post /v1/organizations/telemetry_destinations/{destination_id}/test?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">test</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination_test_response.py">BetaTelemetryDestinationTestResponse</a></code>
+
+#### Workspaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization.telemetry_destinations import (
+    BetaDeletedTelemetryDestinationWorkspace,
+    BetaTelemetryDestinationWorkspace,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/telemetry_destinations/{destination_id}/workspaces?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">list</a>(destination_id, \*\*<a href="src/anthropic/types/beta/organization/telemetry_destinations/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_telemetry_destination_workspace.py">SyncPageCursor[BetaTelemetryDestinationWorkspace]</a></code>
+- <code title="post /v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">add</a>(workspace_id, \*, destination_id) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_telemetry_destination_workspace.py">BetaTelemetryDestinationWorkspace</a></code>
+- <code title="delete /v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">remove</a>(workspace_id, \*, destination_id) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_deleted_telemetry_destination_workspace.py">BetaDeletedTelemetryDestinationWorkspace</a></code>

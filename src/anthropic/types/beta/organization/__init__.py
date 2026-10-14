@@ -53,6 +53,7 @@ from .rbac_group_update_params import RBACGroupUpdateParams as RBACGroupUpdatePa
 from .beta_analytics_token_type import BetaAnalyticsTokenType as BetaAnalyticsTokenType
 from .beta_analytics_user_actor import BetaAnalyticsUserActor as BetaAnalyticsUserActor
 from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedInferenceGeo
+from .beta_telemetry_destination import BetaTelemetryDestination as BetaTelemetryDestination
 from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCreateParams
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
 from .rbac_group_delete_response import RBACGroupDeleteResponse as RBACGroupDeleteResponse
@@ -96,6 +97,7 @@ from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as B
 from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
+from .beta_telemetry_destination_state import BetaTelemetryDestinationState as BetaTelemetryDestinationState
 from .compliance_setting_update_params import ComplianceSettingUpdateParams as ComplianceSettingUpdateParams
 from .plugin_marketplace_update_params import PluginMarketplaceUpdateParams as PluginMarketplaceUpdateParams
 from .beta_analytics_connector_activity import BetaAnalyticsConnectorActivity as BetaAnalyticsConnectorActivity
@@ -103,10 +105,13 @@ from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics as 
 from .beta_analytics_tool_action_counts import BetaAnalyticsToolActionCounts as BetaAnalyticsToolActionCounts
 from .beta_spend_limit_rbac_group_scope import BetaSpendLimitRBACGroupScope as BetaSpendLimitRBACGroupScope
 from .beta_spend_limit_user_scope_param import BetaSpendLimitUserScopeParam as BetaSpendLimitUserScopeParam
+from .beta_telemetry_destination_traces import BetaTelemetryDestinationTraces as BetaTelemetryDestinationTraces
+from .telemetry_destination_list_params import TelemetryDestinationListParams as TelemetryDestinationListParams
 from .beta_analytics_claude_code_metrics import BetaAnalyticsClaudeCodeMetrics as BetaAnalyticsClaudeCodeMetrics
 from .beta_analytics_claude_tag_category import BetaAnalyticsClaudeTagCategory as BetaAnalyticsClaudeTagCategory
 from .beta_api_key_service_account_actor import BetaAPIKeyServiceAccountActor as BetaAPIKeyServiceAccountActor
 from .beta_aws_external_key_config_param import BetaAWSExternalKeyConfigParam as BetaAWSExternalKeyConfigParam
+from .beta_deleted_telemetry_destination import BetaDeletedTelemetryDestination as BetaDeletedTelemetryDestination
 from .beta_gcp_external_key_config_param import BetaGCPExternalKeyConfigParam as BetaGCPExternalKeyConfigParam
 from .beta_organization_rate_limit_value import BetaOrganizationRateLimitValue as BetaOrganizationRateLimitValue
 from .plugin_marketplace_retrieve_params import PluginMarketplaceRetrieveParams as PluginMarketplaceRetrieveParams
@@ -115,6 +120,8 @@ from .beta_analytics_inference_geo_filter import BetaAnalyticsInferenceGeoFilter
 from .beta_analytics_skill_cowork_metrics import BetaAnalyticsSkillCoworkMetrics as BetaAnalyticsSkillCoworkMetrics
 from .beta_analytics_skill_office_metrics import BetaAnalyticsSkillOfficeMetrics as BetaAnalyticsSkillOfficeMetrics
 from .beta_spend_limit_organization_scope import BetaSpendLimitOrganizationScope as BetaSpendLimitOrganizationScope
+from .telemetry_destination_create_params import TelemetryDestinationCreateParams as TelemetryDestinationCreateParams
+from .telemetry_destination_update_params import TelemetryDestinationUpdateParams as TelemetryDestinationUpdateParams
 from .beta_analytics_plugin_cowork_metrics import BetaAnalyticsPluginCoworkMetrics as BetaAnalyticsPluginCoworkMetrics
 from .beta_analytics_usage_bucketed_result import BetaAnalyticsUsageBucketedResult as BetaAnalyticsUsageBucketedResult
 from .beta_azure_external_key_config_param import BetaAzureExternalKeyConfigParam as BetaAzureExternalKeyConfigParam
@@ -132,6 +139,9 @@ from .beta_service_account_workspace_member import (
     BetaServiceAccountWorkspaceMember as BetaServiceAccountWorkspaceMember,
 )
 from .beta_spend_limit_scoped_api_key_actor import BetaSpendLimitScopedAPIKeyActor as BetaSpendLimitScopedAPIKeyActor
+from .beta_telemetry_destination_workspaces import (
+    BetaTelemetryDestinationWorkspaces as BetaTelemetryDestinationWorkspaces,
+)
 from .beta_analytics_cost_report_time_bucket import (
     BetaAnalyticsCostReportTimeBucket as BetaAnalyticsCostReportTimeBucket,
 )
@@ -143,6 +153,9 @@ from .beta_plugin_target_organization_member import (
 )
 from .beta_spend_limit_workspace_scope_param import (
     BetaSpendLimitWorkspaceScopeParam as BetaSpendLimitWorkspaceScopeParam,
+)
+from .beta_telemetry_destination_test_result import (
+    BetaTelemetryDestinationTestResult as BetaTelemetryDestinationTestResult,
 )
 from .beta_analytics_connector_cowork_metrics import (
     BetaAnalyticsConnectorCoworkMetrics as BetaAnalyticsConnectorCoworkMetrics,
@@ -165,6 +178,18 @@ from .beta_data_residency_update_config_param import (
 from .beta_external_key_unattached_attachment import (
     BetaExternalKeyUnattachedAttachment as BetaExternalKeyUnattachedAttachment,
 )
+from .beta_telemetry_destination_content_mode import (
+    BetaTelemetryDestinationContentMode as BetaTelemetryDestinationContentMode,
+)
+from .beta_telemetry_destination_state_params import (
+    BetaTelemetryDestinationStateParams as BetaTelemetryDestinationStateParams,
+)
+from .beta_telemetry_destination_test_failure import (
+    BetaTelemetryDestinationTestFailure as BetaTelemetryDestinationTestFailure,
+)
+from .beta_telemetry_destination_test_success import (
+    BetaTelemetryDestinationTestSuccess as BetaTelemetryDestinationTestSuccess,
+)
 from .beta_analytics_skill_claude_code_metrics import (
     BetaAnalyticsSkillClaudeCodeMetrics as BetaAnalyticsSkillClaudeCodeMetrics,
 )
@@ -176,6 +201,15 @@ from .beta_organization_rate_limit_files_group import (
 )
 from .beta_organization_rate_limit_model_group import (
     BetaOrganizationRateLimitModelGroup as BetaOrganizationRateLimitModelGroup,
+)
+from .beta_telemetry_destination_state_enabled import (
+    BetaTelemetryDestinationStateEnabled as BetaTelemetryDestinationStateEnabled,
+)
+from .beta_telemetry_destination_test_response import (
+    BetaTelemetryDestinationTestResponse as BetaTelemetryDestinationTestResponse,
+)
+from .beta_telemetry_destination_traces_params import (
+    BetaTelemetryDestinationTracesParams as BetaTelemetryDestinationTracesParams,
 )
 from .beta_analytics_plugin_claude_code_metrics import (
     BetaAnalyticsPluginClaudeCodeMetrics as BetaAnalyticsPluginClaudeCodeMetrics,
@@ -189,8 +223,20 @@ from .beta_plugin_marketplace_validation_report import (
 from .beta_spend_limit_organization_scope_param import (
     BetaSpendLimitOrganizationScopeParam as BetaSpendLimitOrganizationScopeParam,
 )
+from .beta_telemetry_destination_state_disabled import (
+    BetaTelemetryDestinationStateDisabled as BetaTelemetryDestinationStateDisabled,
+)
+from .beta_telemetry_destination_workspaces_all import (
+    BetaTelemetryDestinationWorkspacesAll as BetaTelemetryDestinationWorkspacesAll,
+)
 from .beta_analytics_single_day_activity_summary import (
     BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
+)
+from .beta_telemetry_destination_delivery_health import (
+    BetaTelemetryDestinationDeliveryHealth as BetaTelemetryDestinationDeliveryHealth,
+)
+from .beta_telemetry_destination_disabled_reason import (
+    BetaTelemetryDestinationDisabledReason as BetaTelemetryDestinationDisabledReason,
 )
 from .plugin_marketplace_validate_archive_params import (
     PluginMarketplaceValidateArchiveParams as PluginMarketplaceValidateArchiveParams,
@@ -207,11 +253,20 @@ from .beta_analytics_connector_claude_code_metrics import (
 from .beta_compliance_settings_state_enabled_param import (
     BetaComplianceSettingsStateEnabledParam as BetaComplianceSettingsStateEnabledParam,
 )
+from .beta_telemetry_destination_workspaces_params import (
+    BetaTelemetryDestinationWorkspacesParams as BetaTelemetryDestinationWorkspacesParams,
+)
 from .beta_compliance_settings_state_disabled_param import (
     BetaComplianceSettingsStateDisabledParam as BetaComplianceSettingsStateDisabledParam,
 )
 from .beta_organization_rate_limit_web_search_group import (
     BetaOrganizationRateLimitWebSearchGroup as BetaOrganizationRateLimitWebSearchGroup,
+)
+from .beta_telemetry_destination_workspaces_exclude import (
+    BetaTelemetryDestinationWorkspacesExclude as BetaTelemetryDestinationWorkspacesExclude,
+)
+from .beta_telemetry_destination_workspaces_include import (
+    BetaTelemetryDestinationWorkspacesInclude as BetaTelemetryDestinationWorkspacesInclude,
 )
 from .plugin_marketplace_validate_repository_params import (
     PluginMarketplaceValidateRepositoryParams as PluginMarketplaceValidateRepositoryParams,
@@ -228,14 +283,35 @@ from .beta_analytics_connector_office_product_metrics import (
 from .beta_plugin_marketplace_validation_plugin_error import (
     BetaPluginMarketplaceValidationPluginError as BetaPluginMarketplaceValidationPluginError,
 )
+from .beta_telemetry_destination_state_enabled_params import (
+    BetaTelemetryDestinationStateEnabledParams as BetaTelemetryDestinationStateEnabledParams,
+)
+from .beta_telemetry_destination_state_disabled_params import (
+    BetaTelemetryDestinationStateDisabledParams as BetaTelemetryDestinationStateDisabledParams,
+)
+from .beta_telemetry_destination_workspaces_all_params import (
+    BetaTelemetryDestinationWorkspacesAllParams as BetaTelemetryDestinationWorkspacesAllParams,
+)
 from .beta_plugin_marketplace_validation_plugin_warning import (
     BetaPluginMarketplaceValidationPluginWarning as BetaPluginMarketplaceValidationPluginWarning,
+)
+from .beta_telemetry_destination_disabled_reason_caller import (
+    BetaTelemetryDestinationDisabledReasonCaller as BetaTelemetryDestinationDisabledReasonCaller,
 )
 from .beta_plugin_marketplace_validation_plugin_warnings import (
     BetaPluginMarketplaceValidationPluginWarnings as BetaPluginMarketplaceValidationPluginWarnings,
 )
 from .beta_analytics_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics as BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_telemetry_destination_disabled_reason_redirect import (
+    BetaTelemetryDestinationDisabledReasonRedirect as BetaTelemetryDestinationDisabledReasonRedirect,
+)
+from .beta_telemetry_destination_workspaces_exclude_params import (
+    BetaTelemetryDestinationWorkspacesExcludeParams as BetaTelemetryDestinationWorkspacesExcludeParams,
+)
+from .beta_telemetry_destination_workspaces_include_params import (
+    BetaTelemetryDestinationWorkspacesIncludeParams as BetaTelemetryDestinationWorkspacesIncludeParams,
 )
 from .beta_analytics_skill_chat_cowork_unified_chat_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics as BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
@@ -245,6 +321,12 @@ from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
 )
 from .beta_analytics_skill_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics as BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_telemetry_destination_disabled_reason_invalid_address import (
+    BetaTelemetryDestinationDisabledReasonInvalidAddress as BetaTelemetryDestinationDisabledReasonInvalidAddress,
+)
+from .beta_telemetry_destination_disabled_reason_sustained_failure import (
+    BetaTelemetryDestinationDisabledReasonSustainedFailure as BetaTelemetryDestinationDisabledReasonSustainedFailure,
 )
 from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics as BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,

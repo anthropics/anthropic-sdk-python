@@ -111,6 +111,9 @@ class RateLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )
@@ -205,6 +208,9 @@ class AsyncRateLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )

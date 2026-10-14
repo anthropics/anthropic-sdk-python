@@ -133,6 +133,14 @@ from .service_accounts.service_accounts import (
     ServiceAccountsWithStreamingResponse,
     AsyncServiceAccountsWithStreamingResponse,
 )
+from .telemetry_destinations.telemetry_destinations import (
+    TelemetryDestinations,
+    AsyncTelemetryDestinations,
+    TelemetryDestinationsWithRawResponse,
+    AsyncTelemetryDestinationsWithRawResponse,
+    TelemetryDestinationsWithStreamingResponse,
+    AsyncTelemetryDestinationsWithStreamingResponse,
+)
 
 __all__ = ["Organization", "AsyncOrganization"]
 
@@ -199,6 +207,10 @@ class Organization(SyncAPIResource):
         return PluginMarketplaces(self._client)
 
     @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinations:
+        return TelemetryDestinations(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -238,6 +250,8 @@ class Organization(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=BetaOrganization,
         )
@@ -305,6 +319,10 @@ class AsyncOrganization(AsyncAPIResource):
         return AsyncPluginMarketplaces(self._client)
 
     @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinations:
+        return AsyncTelemetryDestinations(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -344,6 +362,8 @@ class AsyncOrganization(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=BetaOrganization,
         )
@@ -417,6 +437,10 @@ class OrganizationWithRawResponse:
     def plugin_marketplaces(self) -> PluginMarketplacesWithRawResponse:
         return PluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
 
+    @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinationsWithRawResponse:
+        return TelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -485,6 +509,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithRawResponse:
         return AsyncPluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
+
+    @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithRawResponse:
+        return AsyncTelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
 
 
 class OrganizationWithStreamingResponse:
@@ -555,6 +583,10 @@ class OrganizationWithStreamingResponse:
     def plugin_marketplaces(self) -> PluginMarketplacesWithStreamingResponse:
         return PluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
 
+    @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinationsWithStreamingResponse:
+        return TelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -623,3 +655,7 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithStreamingResponse:
         return AsyncPluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
+
+    @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithStreamingResponse:
+        return AsyncTelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)

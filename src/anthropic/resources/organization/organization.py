@@ -166,6 +166,8 @@ class Organization(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=OrganizationInfo,
         )
@@ -248,6 +250,8 @@ class AsyncOrganization(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=OrganizationInfo,
         )

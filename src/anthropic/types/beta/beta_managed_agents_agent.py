@@ -9,6 +9,7 @@ from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
 from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_execution_identity import BetaManagedAgentsExecutionIdentity
 from .beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
 from .beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
 
@@ -36,6 +37,13 @@ class BetaManagedAgentsAgent(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     description: Optional[str] = None
+
+    execution_identity: BetaManagedAgentsExecutionIdentity
+    """Execution principal for runs of this agent.
+
+    Always present; `{"type": "service_account"}` when runs carry no customer-named
+    principal.
+    """
 
     mcp_servers: List[BetaManagedAgentsMCPServerURLDefinition]
 

@@ -153,6 +153,8 @@ class Projects(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.apps.chat.projects.list",
+                span_route="/v1/organizations/analytics/apps/chat/projects",
             ),
             model=BetaAnalyticsProjectActivity,
         )
@@ -289,6 +291,8 @@ class AsyncProjects(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.apps.chat.projects.list",
+                span_route="/v1/organizations/analytics/apps/chat/projects",
             ),
             model=BetaAnalyticsProjectActivity,
         )

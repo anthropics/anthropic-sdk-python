@@ -157,6 +157,9 @@ class Skills(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.skills.list",
+                span_route="/v1/organizations/analytics/skills",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsSkillActivity,
         )
@@ -297,6 +300,9 @@ class AsyncSkills(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                span_name="anthropic.organization.analytics.skills.list",
+                span_route="/v1/organizations/analytics/skills",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsSkillActivity,
         )

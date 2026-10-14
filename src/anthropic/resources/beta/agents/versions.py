@@ -111,6 +111,9 @@ class Versions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.agents.versions.list",
+                span_route="/v1/agents/{agent_id}/versions",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -204,6 +207,9 @@ class AsyncVersions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.agents.versions.list",
+                span_route="/v1/agents/{agent_id}/versions",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             model=BetaManagedAgentsAgent,
         )

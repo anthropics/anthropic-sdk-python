@@ -49,6 +49,7 @@ from .._retry import TRANSIENT_ERRORS
 from ._poller import _is_status, aiter_work, _is_fatal_4xx
 from ..._types import Headers, NotGiven, not_given
 from ..._utils import is_mapping
+from .._tracing import WorkSpan, as_current_span
 from ..._exceptions import APIStatusError
 from .._scoped_client import _copy_client_with_bearer_auth
 from ..tools._memories import (
@@ -156,6 +157,11 @@ class _Lease:
         """True once the item belongs to the queue or another worker, so this one must not stop it."""
         return self._end_reason in (_LeaseEndReason.LEASE_LOST, _LeaseEndReason.ASSUMED_LOST)
 
+    @property
+    def kept(self) -> bool:
+        """False once a heartbeat failed for good, so the worker stops before it has finished with the item."""
+        return not self.lost and self._end_reason is not _LeaseEndReason.HEARTBEAT_REJECTED
+
 
 def _server_lease_state(err: APIStatusError) -> Mapping[str, object]:
     """The server's view of the lease carried by a 412 heartbeat response, or empty if absent."""
@@ -253,6 +259,12 @@ def _flattened_causes(exc: BaseException) -> str:
     if not inner:
         return str(exc)
     return "; ".join(_flattened_causes(e) for e in inner)
+
+
+def _first_cause(exc: BaseException) -> BaseException:
+    """The first cause under an exception group, which anyio wraps a failed request in."""
+    inner = getattr(exc, "exceptions", None)
+    return _first_cause(inner[0]) if inner else exc
 
 
 def _has_memory_store(session: BetaManagedAgentsSession) -> bool:
@@ -509,6 +521,12 @@ class EnvironmentWorker:
         `client.beta.environments.work.poller` and running the per-item flow
         for each.
 
+        Each work item has the poller's OpenTelemetry span,
+        `anthropic.environment.work`, when the client has spans. It is the
+        current span while the item is handled, so the spans of the worker's
+        requests and tools for the item are its children. `handle_item` has no
+        such span.
+
         Raises:
           ValueError: if `environment_id` / `environment_key` were not passed
             to the constructor.
@@ -523,20 +541,30 @@ class EnvironmentWorker:
         poll_client = _copy_client_with_bearer_auth(
             self._client, auth_token=environment_key, helper="environments-work-poller"
         )
+        work_span = WorkSpan()
         async for work_item in aiter_work(
             poll_client.beta.environments.work,
             environment_id=environment_id,
             worker_id=self._worker_id,
             auto_stop=False,
             extra_headers=self._extra_headers,
+            _work_span=work_span,
         ):
+            lease = _Lease()
             try:
-                await self._handle_item(work_item, environment_key)
+                with as_current_span(work_span.span):
+                    await self._handle_item(work_item, environment_key, lease)
+                work_span.end(finished=lease.kept)
             except Exception as e:  # noqa: BLE001
                 # One bad item fails that item, not the worker: the teardown
                 # already stopped or released it, so polling continues.
                 # Cancellation is a BaseException and still ends the loop.
+                # An error after the lease is gone is a side effect of losing it, not a failed item.
+                work_span.end(_first_cause(e) if lease.kept else None, finished=lease.kept)
                 log.error("work item failed work_id=%s error=%s", work_item.id, _flattened_causes(e))
+            except BaseException as e:
+                work_span.end(e)
+                raise
 
     async def handle_item(
         self,
@@ -619,7 +647,9 @@ class EnvironmentWorker:
         )
         await self._handle_item(work_item, environment_key)
 
-    async def _handle_item(self, work_item: BetaSelfHostedWork, environment_key: str | None) -> None:
+    async def _handle_item(
+        self, work_item: BetaSelfHostedWork, environment_key: str | None, lease: _Lease | None = None
+    ) -> None:
         """The per-item body shared by `run`'s poll loop and `handle_item`.
 
         Runs a `SessionToolRunner` for the work item's session while
@@ -635,6 +665,9 @@ class EnvironmentWorker:
         those per-item calls. A secret that yields no token falls back to
         `environment_key`; with no key available either, the item fails
         rather than run unauthenticated.
+
+        `lease` is the caller's view of the item's lease, which says afterward
+        whether the worker kept it until it stopped.
         """
         # Lazy import: keeps the host-only `agent_toolset` module out of this
         # module's import graph (see the note next to the imports).
@@ -684,7 +717,7 @@ class EnvironmentWorker:
             )
         else:
             log.debug("memory stores disabled for this item work_id=%s", work_item.id)
-        lease = _Lease()
+        lease = lease or _Lease()
         try:
             # The queue also sends "healthcheck" items, which the generated type does not model.
             work_type: str = work_item.data.type

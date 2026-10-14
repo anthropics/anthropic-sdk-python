@@ -8,7 +8,14 @@ import httpx2
 
 from . import _exceptions
 from ._qs import Querystring
-from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
+from ._types import (
+    Omit,
+    Timeout,
+    NotGiven,
+    RequestOptions,
+    OpenTelemetryClientOption,
+    not_given,
+)
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -168,6 +175,9 @@ class Anthropic(SyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
@@ -304,6 +314,7 @@ class Anthropic(SyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -468,6 +479,7 @@ class Anthropic(SyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -530,6 +542,8 @@ class Anthropic(SyncAPIClient):
             **_extra_kwargs,
         )
         client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
         return client
 
     # Alias for `copy` for nicer inline usage, e.g.
@@ -610,6 +624,9 @@ class AsyncAnthropic(AsyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
@@ -738,6 +755,7 @@ class AsyncAnthropic(AsyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -896,6 +914,7 @@ class AsyncAnthropic(AsyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -958,6 +977,8 @@ class AsyncAnthropic(AsyncAPIClient):
             **_extra_kwargs,
         )
         client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
         return client
 
     # Alias for `copy` for nicer inline usage, e.g.

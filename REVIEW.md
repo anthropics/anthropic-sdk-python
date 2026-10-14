@@ -14,7 +14,7 @@
 - A fix made to one copy of logic that exists more than once
 - A behavior change with no test that fails before it and passes after
 - A hand-written list of fields, variants or names that generated code also
-  carries, with no tripwire test
+  carries, where a missed member would cause a bug, with no tripwire test
 - A comment that restates the code, or that runs past three lines on a symbol
   that is not public
 

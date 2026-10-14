@@ -103,6 +103,9 @@ class DeploymentRuns(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployment_runs.retrieve",
+                span_route="/v1/deployment_runs/{deployment_run_id}",
+                span_attributes={"anthropic.deployment_run.id": deployment_run_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -202,6 +205,8 @@ class DeploymentRuns(SyncAPIResource):
                     "page": page,
                     "trigger_type": trigger_type,
                 },
+                span_name="anthropic.deployment_runs.list",
+                span_route="/v1/deployment_runs",
             ),
             model=BetaManagedAgentsDeploymentRun,
         )
@@ -284,6 +289,9 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployment_runs.retrieve",
+                span_route="/v1/deployment_runs/{deployment_run_id}",
+                span_attributes={"anthropic.deployment_run.id": deployment_run_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -383,6 +391,8 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                     "page": page,
                     "trigger_type": trigger_type,
                 },
+                span_name="anthropic.deployment_runs.list",
+                span_route="/v1/deployment_runs",
             ),
             model=BetaManagedAgentsDeploymentRun,
         )

@@ -142,6 +142,9 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.create",
+                span_route="/v1/dreams",
+                span_created_id="anthropic.dream.id",
             ),
             cast_to=BetaDream,
         )
@@ -209,6 +212,9 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.retrieve",
+                span_route="/v1/dreams/{dream_id}",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -304,6 +310,8 @@ class Dreams(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.dreams.list",
+                span_route="/v1/dreams",
             ),
             model=BetaDream,
         )
@@ -374,6 +382,9 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.archive",
+                span_route="/v1/dreams/{dream_id}/archive",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -444,6 +455,9 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.cancel",
+                span_route="/v1/dreams/{dream_id}/cancel",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -563,6 +577,9 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.create",
+                span_route="/v1/dreams",
+                span_created_id="anthropic.dream.id",
             ),
             cast_to=BetaDream,
         )
@@ -630,6 +647,9 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.retrieve",
+                span_route="/v1/dreams/{dream_id}",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -725,6 +745,8 @@ class AsyncDreams(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.dreams.list",
+                span_route="/v1/dreams",
             ),
             model=BetaDream,
         )
@@ -795,6 +817,9 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.archive",
+                span_route="/v1/dreams/{dream_id}/archive",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -865,6 +890,9 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.dreams.cancel",
+                span_route="/v1/dreams/{dream_id}/cancel",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )

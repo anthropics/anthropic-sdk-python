@@ -76,6 +76,9 @@ class APIKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.api_keys.retrieve",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -124,6 +127,9 @@ class APIKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.api_keys.update",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -188,6 +194,8 @@ class APIKeys(SyncAPIResource):
                     "status": status,
                     "workspace_id": workspace_id,
                 },
+                span_name="anthropic.organization.api_keys.list",
+                span_route="/v1/organizations/api_keys",
             ),
             model=BetaAPIKey,
         )
@@ -247,6 +255,9 @@ class AsyncAPIKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.api_keys.retrieve",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -295,6 +306,9 @@ class AsyncAPIKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.api_keys.update",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -359,6 +373,8 @@ class AsyncAPIKeys(AsyncAPIResource):
                     "status": status,
                     "workspace_id": workspace_id,
                 },
+                span_name="anthropic.organization.api_keys.list",
+                span_route="/v1/organizations/api_keys",
             ),
             model=BetaAPIKey,
         )

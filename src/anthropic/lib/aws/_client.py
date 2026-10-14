@@ -5,7 +5,7 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from ..._types import Omit, Timeout, NotGiven, not_given
+from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import asyncify
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
@@ -31,6 +31,7 @@ class AnthropicAWS(Anthropic):
     workspace_id: str | None
     _use_sigv4: bool
     _skip_auth: bool
+    _otel_platform = "aws"
 
     def __init__(
         self,
@@ -48,6 +49,9 @@ class AnthropicAWS(Anthropic):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -113,6 +117,7 @@ class AnthropicAWS(Anthropic):
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -187,6 +192,7 @@ class AnthropicAWS(Anthropic):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -216,6 +222,7 @@ class AnthropicAWS(Anthropic):
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             set_default_headers=set_default_headers,
             default_query=default_query,
@@ -245,6 +252,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
     workspace_id: str | None
     _use_sigv4: bool
     _skip_auth: bool
+    _otel_platform = "aws"
 
     def __init__(
         self,
@@ -262,6 +270,9 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
@@ -327,6 +338,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
@@ -401,6 +413,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -430,6 +443,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             set_default_headers=set_default_headers,
             default_query=default_query,
