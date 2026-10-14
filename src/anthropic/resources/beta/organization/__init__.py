@@ -126,6 +126,14 @@ from .plugin_marketplaces import (
     PluginMarketplacesWithStreamingResponse,
     AsyncPluginMarketplacesWithStreamingResponse,
 )
+from .telemetry_destinations import (
+    TelemetryDestinations,
+    AsyncTelemetryDestinations,
+    TelemetryDestinationsWithRawResponse,
+    AsyncTelemetryDestinationsWithRawResponse,
+    TelemetryDestinationsWithStreamingResponse,
+    AsyncTelemetryDestinationsWithStreamingResponse,
+)
 
 __all__ = [
     "APIKeys",
@@ -218,6 +226,12 @@ __all__ = [
     "AsyncPluginMarketplacesWithRawResponse",
     "PluginMarketplacesWithStreamingResponse",
     "AsyncPluginMarketplacesWithStreamingResponse",
+    "TelemetryDestinations",
+    "AsyncTelemetryDestinations",
+    "TelemetryDestinationsWithRawResponse",
+    "AsyncTelemetryDestinationsWithRawResponse",
+    "TelemetryDestinationsWithStreamingResponse",
+    "AsyncTelemetryDestinationsWithStreamingResponse",
     "Organization",
     "AsyncOrganization",
     "OrganizationWithRawResponse",

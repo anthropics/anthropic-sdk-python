@@ -116,6 +116,9 @@ class Threads(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -194,6 +197,9 @@ class Threads(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -260,6 +266,9 @@ class Threads(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -349,6 +358,9 @@ class AsyncThreads(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -427,6 +439,9 @@ class AsyncThreads(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -493,6 +508,9 @@ class AsyncThreads(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )

@@ -135,6 +135,9 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.create",
+                span_route="/v1/environments",
+                span_created_id="anthropic.environment.id",
             ),
             cast_to=BetaEnvironment,
         )
@@ -194,6 +197,9 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.retrieve",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -279,6 +285,9 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.update",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -351,6 +360,8 @@ class Environments(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.environments.list",
+                span_route="/v1/environments",
             ),
             model=BetaEnvironment,
         )
@@ -411,6 +422,9 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.delete",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironmentDeleteResponse,
         )
@@ -472,6 +486,9 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.archive",
+                span_route="/v1/environments/{environment_id}/archive",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -578,6 +595,9 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.create",
+                span_route="/v1/environments",
+                span_created_id="anthropic.environment.id",
             ),
             cast_to=BetaEnvironment,
         )
@@ -637,6 +657,9 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.retrieve",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -722,6 +745,9 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.update",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -794,6 +820,8 @@ class AsyncEnvironments(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.environments.list",
+                span_route="/v1/environments",
             ),
             model=BetaEnvironment,
         )
@@ -854,6 +882,9 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.delete",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironmentDeleteResponse,
         )
@@ -915,6 +946,9 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.environments.archive",
+                span_route="/v1/environments/{environment_id}/archive",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )

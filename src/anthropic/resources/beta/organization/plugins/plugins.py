@@ -206,6 +206,9 @@ class Plugins(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.create",
+                span_route="/v1/organizations/plugins",
+                span_created_id="anthropic.organization.plugin.id",
             ),
             cast_to=BetaPlugin,
         )
@@ -280,6 +283,9 @@ class Plugins(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                span_name="anthropic.organization.plugins.retrieve",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaPlugin,
         )
@@ -368,6 +374,9 @@ class Plugins(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.update",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaPlugin,
         )
@@ -487,6 +496,8 @@ class Plugins(SyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                span_name="anthropic.organization.plugins.list",
+                span_route="/v1/organizations/plugins",
             ),
             model=BetaPlugin,
         )
@@ -560,6 +571,9 @@ class Plugins(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.delete",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaDeletedPlugin,
         )
@@ -710,6 +724,9 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.create",
+                span_route="/v1/organizations/plugins",
+                span_created_id="anthropic.organization.plugin.id",
             ),
             cast_to=BetaPlugin,
         )
@@ -784,6 +801,9 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                span_name="anthropic.organization.plugins.retrieve",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaPlugin,
         )
@@ -872,6 +892,9 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.update",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaPlugin,
         )
@@ -991,6 +1014,8 @@ class AsyncPlugins(AsyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                span_name="anthropic.organization.plugins.list",
+                span_route="/v1/organizations/plugins",
             ),
             model=BetaPlugin,
         )
@@ -1064,6 +1089,9 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugins.delete",
+                span_route="/v1/organizations/plugins/{plugin_id}",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             cast_to=BetaDeletedPlugin,
         )

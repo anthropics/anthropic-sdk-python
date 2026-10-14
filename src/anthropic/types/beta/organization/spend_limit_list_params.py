@@ -18,12 +18,7 @@ class SpendLimitListParams(TypedDict, total=False):
     scope_type: Optional[
         List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
     ]
-    """Return only limits with these scope types.
-
-    A Claude Console organization has `organization` and `workspace` limits; a
-    Claude Enterprise organization has `organization`, `seat_tier`, `rbac_group`,
-    `organization_service` and `user` limits. Omit for all.
-    """
+    """Return only limits with these scope types. Omit for all."""
 
     betas: List[AnthropicBetaParam]
     """

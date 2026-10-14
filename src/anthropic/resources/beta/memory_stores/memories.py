@@ -130,6 +130,10 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.create",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
+                span_created_id="gen_ai.memory.record.id",
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -208,6 +212,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -309,6 +316,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.update",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -402,6 +412,10 @@ class Memories(SyncAPIResource):
                     "path_prefix": path_prefix,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memories.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_content_query_params=("page",),
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -482,6 +496,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"expected_content_sha256": expected_content_sha256},
+                span_name="anthropic.memory_stores.memories.delete",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )
@@ -587,6 +604,10 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.create",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
+                span_created_id="gen_ai.memory.record.id",
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -665,6 +686,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -766,6 +790,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.update",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -859,6 +886,10 @@ class AsyncMemories(AsyncAPIResource):
                     "path_prefix": path_prefix,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memories.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_content_query_params=("page",),
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -939,6 +970,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"expected_content_sha256": expected_content_sha256},
+                span_name="anthropic.memory_stores.memories.delete",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )

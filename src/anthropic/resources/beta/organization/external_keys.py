@@ -88,6 +88,9 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.create",
+                span_route="/v1/organizations/external_keys",
+                span_created_id="anthropic.organization.external_key.id",
             ),
             cast_to=BetaExternalKey,
         )
@@ -128,6 +131,9 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.retrieve",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -187,6 +193,9 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.update",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -234,6 +243,8 @@ class ExternalKeys(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.external_keys.list",
+                span_route="/v1/organizations/external_keys",
             ),
             model=BetaExternalKey,
         )
@@ -276,6 +287,9 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.delete",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -321,6 +335,9 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.validate",
+                span_route="/v1/organizations/external_keys/{external_key_id}/validate",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyValidateResponse,
         )
@@ -389,6 +406,9 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.create",
+                span_route="/v1/organizations/external_keys",
+                span_created_id="anthropic.organization.external_key.id",
             ),
             cast_to=BetaExternalKey,
         )
@@ -429,6 +449,9 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.retrieve",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -488,6 +511,9 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.update",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -535,6 +561,8 @@ class AsyncExternalKeys(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.external_keys.list",
+                span_route="/v1/organizations/external_keys",
             ),
             model=BetaExternalKey,
         )
@@ -577,6 +605,9 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.delete",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -622,6 +653,9 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.external_keys.validate",
+                span_route="/v1/organizations/external_keys/{external_key_id}/validate",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyValidateResponse,
         )

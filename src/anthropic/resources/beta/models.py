@@ -100,6 +100,9 @@ class Models(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -182,6 +185,8 @@ class Models(SyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )
@@ -264,6 +269,9 @@ class AsyncModels(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -346,6 +354,8 @@ class AsyncModels(AsyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )

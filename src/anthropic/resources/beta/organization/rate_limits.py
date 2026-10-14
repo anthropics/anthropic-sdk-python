@@ -102,6 +102,8 @@ class RateLimits(SyncAPIResource):
                     "model": model,
                     "page": page,
                 },
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )
@@ -188,6 +190,8 @@ class AsyncRateLimits(AsyncAPIResource):
                     "model": model,
                     "page": page,
                 },
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )

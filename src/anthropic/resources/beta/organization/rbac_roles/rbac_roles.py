@@ -89,6 +89,9 @@ class RBACRoles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_roles.retrieve",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             cast_to=BetaRBACRole,
         )
@@ -137,6 +140,8 @@ class RBACRoles(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_roles.list",
+                span_route="/v1/organizations/rbac_roles",
             ),
             model=BetaRBACRole,
         )
@@ -202,6 +207,9 @@ class AsyncRBACRoles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_roles.retrieve",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             cast_to=BetaRBACRole,
         )
@@ -250,6 +258,8 @@ class AsyncRBACRoles(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_roles.list",
+                span_route="/v1/organizations/rbac_roles",
             ),
             model=BetaRBACRole,
         )

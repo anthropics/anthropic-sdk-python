@@ -126,6 +126,12 @@ class MemoryVersions(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -240,6 +246,9 @@ class MemoryVersions(SyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -310,6 +319,12 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -409,6 +424,12 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -523,6 +544,9 @@ class AsyncMemoryVersions(AsyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -593,6 +617,12 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )

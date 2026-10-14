@@ -213,6 +213,8 @@ class UserCostReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.analytics.user_cost_report.list",
+                span_route="/v1/organizations/analytics/user_cost_report",
             ),
             model=BetaAnalyticsCostUsersItem,
         )
@@ -405,6 +407,8 @@ class AsyncUserCostReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                span_name="anthropic.organization.analytics.user_cost_report.list",
+                span_route="/v1/organizations/analytics/user_cost_report",
             ),
             model=BetaAnalyticsCostUsersItem,
         )

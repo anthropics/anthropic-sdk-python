@@ -22,7 +22,7 @@ class TestAgents:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         agent = client.beta.agents.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
@@ -30,9 +30,13 @@ class TestAgents:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         agent = client.beta.agents.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
             description="A general-purpose starter agent.",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -78,7 +82,7 @@ class TestAgents:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.agents.with_raw_response.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         )
 
@@ -90,7 +94,7 @@ class TestAgents:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.agents.with_streaming_response.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         ) as response:
             assert not response.is_closed
@@ -161,6 +165,10 @@ class TestAgents:
         agent = client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -170,7 +178,7 @@ class TestAgents:
             ],
             metadata={"foo": "string"},
             model={
-                "id": "claude-opus-5",
+                "id": "claude-opus-5-5",
                 "effort": "low",
                 "inference_geo": "inference_geo",
                 "speed": "standard",
@@ -336,7 +344,7 @@ class TestAsyncAgents:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
@@ -344,9 +352,13 @@ class TestAsyncAgents:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
             description="A general-purpose starter agent.",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -392,7 +404,7 @@ class TestAsyncAgents:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.agents.with_raw_response.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         )
 
@@ -404,7 +416,7 @@ class TestAsyncAgents:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.agents.with_streaming_response.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             name="My First Agent",
         ) as response:
             assert not response.is_closed
@@ -475,6 +487,10 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
+            execution_identity={
+                "role_arn": "role_arn",
+                "type": "aws_role",
+            },
             mcp_servers=[
                 {
                     "name": "example-mcp",
@@ -484,7 +500,7 @@ class TestAsyncAgents:
             ],
             metadata={"foo": "string"},
             model={
-                "id": "claude-opus-5",
+                "id": "claude-opus-5-5",
                 "effort": "low",
                 "inference_geo": "inference_geo",
                 "speed": "standard",

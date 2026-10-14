@@ -11,8 +11,8 @@ from __future__ import annotations
 import httpx2
 import pytest
 
-from anthropic import Anthropic, AsyncAnthropic
-from anthropic.lib._scoped_client import _copy_client_with_bearer_auth
+from anthropic import Anthropic, AsyncAnthropic, OpenTelemetryOptions
+from anthropic.lib._scoped_client import ClientT, copy_scoped_client, _copy_client_with_bearer_auth
 
 
 def test_sets_bearer_auth_token_on_copy() -> None:
@@ -153,3 +153,63 @@ async def test_scoped_sub_client_sends_only_bearer_on_the_wire() -> None:
     assert req.headers.get("x-api-key") is None
     # Helper telemetry is on every scoped request.
     assert req.headers.get("x-stainless-helper") == "environments-worker"
+
+
+def test_copy_of_a_scoped_client_keeps_its_bearer_alone(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A new client reads `ANTHROPIC_CUSTOM_HEADERS` again, and a custom header goes before the client's own
+    credentials. A plain `copy()` of the scoped sub-client would send these in place of its Bearer."""
+    monkeypatch.setenv(
+        "ANTHROPIC_CUSTOM_HEADERS", "authorization: Bearer env-secret\nX-Api-Key: env-api-key\nx-team: a"
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "env-account-key")
+
+    def copy_of_scoped(parent: ClientT) -> ClientT:
+        scoped = _copy_client_with_bearer_auth(parent, auth_token="env-key", helper="session-tool-runner")
+        assert scoped.open_telemetry == parent.open_telemetry
+        return copy_scoped_client(scoped, open_telemetry={**scoped.open_telemetry, "conversation_id": "conv_1"})
+
+    open_telemetry: OpenTelemetryOptions = {"traces": {"content_mode": "content", "max_content_bytes": 4096}}
+    sync_copy = copy_of_scoped(Anthropic(api_key="parent-key", open_telemetry=open_telemetry))
+    async_copy = copy_of_scoped(AsyncAnthropic(api_key="parent-key", open_telemetry=open_telemetry))
+
+    assert isinstance(sync_copy, Anthropic) and isinstance(async_copy, AsyncAnthropic)
+    for copy in (sync_copy, async_copy):
+        # The copy has the option that it is given, whole: the scoped client's own with the conversation ID.
+        assert copy.open_telemetry == {
+            "propagation": True,
+            "traces": {"enabled": True, "content_mode": "content", "max_content_bytes": 4096},
+            "conversation_id": "conv_1",
+        }
+        assert copy.api_key is None
+        assert copy.default_headers["Authorization"] == "Bearer env-key"
+        assert "X-Api-Key" not in copy.default_headers
+        assert {key.lower() for key in copy.default_headers} >= {"x-team", "x-stainless-helper"}
+        assert not {"authorization", "x-api-key"} & {key.lower() for key in copy._custom_headers}
+
+
+def test_scoped_client_and_its_copy_keep_what_the_parent_read_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE", "content")
+    monkeypatch.setenv("ANTHROPIC_OPEN_TELEMETRY_TRACES_MAX_CONTENT_BYTES", "4096")
+    monkeypatch.setenv("ANTHROPIC_OPEN_TELEMETRY_PROPAGATION", "false")
+    sync_parent, async_parent = Anthropic(api_key="parent-key"), AsyncAnthropic(api_key="parent-key")
+    resolved = {
+        "propagation": False,
+        "traces": {"enabled": True, "content_mode": "content", "max_content_bytes": 4096},
+    }
+    assert sync_parent.open_telemetry == async_parent.open_telemetry == resolved
+
+    # The variables are the parent's alone: no copy reads them again.
+    monkeypatch.setenv("ANTHROPIC_OPEN_TELEMETRY", "false")
+    monkeypatch.setenv("ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE", "metadata_only")
+    monkeypatch.delenv("ANTHROPIC_OPEN_TELEMETRY_TRACES_MAX_CONTENT_BYTES")
+    monkeypatch.delenv("ANTHROPIC_OPEN_TELEMETRY_PROPAGATION")
+
+    def scoped_and_copy(parent: ClientT) -> tuple[ClientT, ClientT]:
+        scoped = _copy_client_with_bearer_auth(parent, auth_token="env-key", helper="session-tool-runner")
+        return scoped, copy_scoped_client(scoped, open_telemetry={**scoped.open_telemetry, "conversation_id": "conv_1"})
+
+    for scoped, copy in (scoped_and_copy(sync_parent), scoped_and_copy(async_parent)):
+        assert scoped.open_telemetry == resolved
+        assert copy.open_telemetry == {**resolved, "conversation_id": "conv_1"}

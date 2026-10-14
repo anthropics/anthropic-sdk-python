@@ -9,7 +9,7 @@ import httpx2
 from ... import _exceptions
 from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
-from ..._types import NotGiven, not_given
+from ..._types import NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
 from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
@@ -37,6 +37,9 @@ _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStrea
 
 
 class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
+    _gen_ai_provider_name = "gcp.vertex_ai"
+    _otel_platform = "vertex"
+
     @typed_cached_property
     def region(self) -> str:
         raise RuntimeError("region not set")
@@ -105,6 +108,9 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
@@ -134,6 +140,7 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=default_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -192,6 +199,7 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -231,6 +239,7 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
@@ -269,6 +278,9 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
@@ -298,6 +310,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=default_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -356,6 +369,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -395,6 +409,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,

@@ -93,6 +93,9 @@ class Members(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_groups.members.list",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             model=BetaRBACGroupMember,
         )
@@ -142,6 +145,10 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.members.add",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
+                span_created_id=("anthropic.organization.rbac_group.member.id", "user_id"),
             ),
             cast_to=BetaRBACGroupMember,
         )
@@ -194,6 +201,12 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.members.remove",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.rbac_group.id": rbac_group_id,
+                    "anthropic.organization.rbac_group.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )
@@ -270,6 +283,9 @@ class AsyncMembers(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_groups.members.list",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
             model=BetaRBACGroupMember,
         )
@@ -319,6 +335,10 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.members.add",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
+                span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
+                span_created_id=("anthropic.organization.rbac_group.member.id", "user_id"),
             ),
             cast_to=BetaRBACGroupMember,
         )
@@ -371,6 +391,12 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.rbac_groups.members.remove",
+                span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.rbac_group.id": rbac_group_id,
+                    "anthropic.organization.rbac_group.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )

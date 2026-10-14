@@ -76,6 +76,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -103,7 +106,8 @@ class Users(SyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -123,6 +127,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -189,6 +196,8 @@ class Users(SyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=BetaOrganizationUser,
         )
@@ -227,6 +236,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )
@@ -286,6 +298,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -313,7 +328,8 @@ class AsyncUsers(AsyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -333,6 +349,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -399,6 +418,8 @@ class AsyncUsers(AsyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=BetaOrganizationUser,
         )
@@ -437,6 +458,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )

@@ -164,6 +164,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.create",
+                span_route="/v1/deployments",
+                span_created_id="anthropic.deployment.id",
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -225,6 +228,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.retrieve",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -340,6 +346,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.update",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -428,6 +437,8 @@ class Deployments(SyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                span_name="anthropic.deployments.list",
+                span_route="/v1/deployments",
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -489,6 +500,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.archive",
+                span_route="/v1/deployments/{deployment_id}/archive",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -550,6 +564,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.pause",
+                span_route="/v1/deployments/{deployment_id}/pause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -611,6 +628,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.run",
+                span_route="/v1/deployments/{deployment_id}/run",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -672,6 +692,9 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.unpause",
+                span_route="/v1/deployments/{deployment_id}/unpause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -804,6 +827,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.create",
+                span_route="/v1/deployments",
+                span_created_id="anthropic.deployment.id",
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -865,6 +891,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.retrieve",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -980,6 +1009,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.update",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1068,6 +1100,8 @@ class AsyncDeployments(AsyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                span_name="anthropic.deployments.list",
+                span_route="/v1/deployments",
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -1129,6 +1163,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.archive",
+                span_route="/v1/deployments/{deployment_id}/archive",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1190,6 +1227,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.pause",
+                span_route="/v1/deployments/{deployment_id}/pause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1251,6 +1291,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.run",
+                span_route="/v1/deployments/{deployment_id}/run",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -1312,6 +1355,9 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.deployments.unpause",
+                span_route="/v1/deployments/{deployment_id}/unpause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )

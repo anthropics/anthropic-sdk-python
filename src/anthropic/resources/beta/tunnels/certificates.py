@@ -113,6 +113,10 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.create",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
+                span_created_id="anthropic.tunnel.certificate.id",
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -189,6 +193,9 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -272,6 +279,9 @@ class Certificates(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.tunnels.certificates.list",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             model=BetaTunnelCertificate,
         )
@@ -351,6 +361,9 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.archive",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -446,6 +459,10 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.create",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
+                span_created_id="anthropic.tunnel.certificate.id",
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -522,6 +539,9 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -605,6 +625,9 @@ class AsyncCertificates(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.tunnels.certificates.list",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             model=BetaTunnelCertificate,
         )
@@ -684,6 +707,9 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.tunnels.certificates.archive",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )

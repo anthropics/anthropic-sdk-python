@@ -24,6 +24,7 @@ from ...types import RawMessageStreamEvent
 from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
+from .._tracing import share_message_snapshot, withhold_message_snapshot
 from ..._streaming import Stream, AsyncStream
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
@@ -52,6 +53,7 @@ class MessageStream(Generic[ResponseFormatT]):
         self.__final_message_snapshot: ParsedMessage[ResponseFormatT] | None = None
         self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
+        share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
     @property
     def response(self) -> httpx2.Response:
@@ -129,14 +131,25 @@ class MessageStream(Generic[ResponseFormatT]):
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
+    def _current_snapshot_or_none(self) -> ParsedMessage[ResponseFormatT] | None:
+        return self.__final_message_snapshot
+
     def __stream__(self) -> Iterator[ParsedMessageStreamEvent[ResponseFormatT]]:
         for sse_event in self._raw_stream:
-            self.__final_message_snapshot = accumulate_event(
-                event=sse_event,
-                current_snapshot=self.__final_message_snapshot,
-                json_bufs=self.__json_bufs,
-                output_format=self.__output_format,
-            )
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
+            try:
+                self.__final_message_snapshot = accumulate_event(
+                    event=sse_event,
+                    current_snapshot=self.__final_message_snapshot,
+                    json_bufs=self.__json_bufs,
+                    output_format=self.__output_format,
+                )
+            except Exception:
+                withhold_message_snapshot(self._raw_stream)
+                raise
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -205,6 +218,7 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         self.__final_message_snapshot: ParsedMessage[ResponseFormatT] | None = None
         self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
+        share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
     @property
     def response(self) -> httpx2.Response:
@@ -282,14 +296,25 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
+    def _current_snapshot_or_none(self) -> ParsedMessage[ResponseFormatT] | None:
+        return self.__final_message_snapshot
+
     async def __stream__(self) -> AsyncIterator[ParsedMessageStreamEvent[ResponseFormatT]]:
         async for sse_event in self._raw_stream:
-            self.__final_message_snapshot = accumulate_event(
-                event=sse_event,
-                current_snapshot=self.__final_message_snapshot,
-                json_bufs=self.__json_bufs,
-                output_format=self.__output_format,
-            )
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
+            try:
+                self.__final_message_snapshot = accumulate_event(
+                    event=sse_event,
+                    current_snapshot=self.__final_message_snapshot,
+                    json_bufs=self.__json_bufs,
+                    output_format=self.__output_format,
+                )
+            except Exception:
+                withhold_message_snapshot(self._raw_stream)
+                raise
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -425,9 +450,7 @@ def build_events(
 
         events_to_fire.append(event_to_fire)
     else:
-        # we only want exhaustive checking for linters, not at runtime
-        if TYPE_CHECKING:  # type: ignore[unreachable]
-            assert_never(event)
+        events_to_fire.append(cast("ParsedMessageStreamEvent[ResponseFormatT]", event))
 
     return events_to_fire
 

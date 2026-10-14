@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import warnings
 from abc import ABC, abstractmethod
@@ -19,13 +20,30 @@ from typing import (
     AsyncIterator,
     cast,
 )
-from contextlib import contextmanager, asynccontextmanager
+from contextlib import (
+    ExitStack,
+    AsyncExitStack,
+    AbstractContextManager,
+    aclosing,
+    contextmanager,
+    asynccontextmanager,
+)
+from collections.abc import Generator, AsyncGenerator
 from typing_extensions import Literal, TypedDict, override
 
 import httpx2
+from opentelemetry.trace import Span
 
 from ..._types import Body, Query, Headers, NotGiven
 from ..._utils import is_list, is_given, is_mapping, consume_sync_iterator, consume_async_iterator
+from .._tracing import (
+    ToolRun,
+    tool_use_span,
+    as_current_span,
+    end_tool_runner_span,
+    set_tool_runner_status,
+    start_tool_runner_span,
+)
 from ..streaming import BetaMessageStream, BetaAsyncMessageStream, ParsedBetaMessageStreamEvent
 from ...types.beta import (
     BetaMessage,
@@ -71,6 +89,8 @@ from ...types.beta.beta_compaction_config_param import BetaCompactionConfigParam
 from ...types.beta.beta_tool_result_block_param import BetaToolResultBlockParam
 
 if TYPE_CHECKING:
+    from types import AsyncGeneratorType
+
     from ..._client import Anthropic, AsyncAnthropic
 
 
@@ -186,11 +206,41 @@ class BaseToolRunner(Generic[AnyFunctionToolT, AnyToolsetT, ResponseFormatT]):
         self._cached_tool_call_response: BetaMessageParam | None = None
         self._max_iterations = max_iterations
         self._iteration_count = 0
+        self._closed = False
+        """Whether the application closed the runner. A loop that is working when it does stops before its next
+        request."""
+
         self._pending_compaction: BetaCompactionConfigParam | None = None
         self._messages_being_compacted: Iterable[BetaMessageParam] | None = None
         self._pending_tool_changes: list[BetaRequestToolAdditionBlockParam | BetaRequestToolRemovalBlockParam] = []
         self._eager_tool_calls: EagerToolCalls | None = None
         """The tool calls of the streamed reply being handled. It is `None` without `run_tools_eagerly`."""
+
+        self._tool_runner_span: Span | None = None
+        """The span of the run, which a tool that runs while the application reads a reply is a child of too."""
+
+        self._running_eager_tool = False
+        """Whether a tool is running inside a read of a streamed reply. The loop is then suspended, and closing it
+        would close the reply under that read, so a close from such a tool only stops the loop at its next step."""
+
+    def _start_tool_runner_span(self, client: Anthropic | AsyncAnthropic) -> Span | None:
+        """Starts the `anthropic.messages.tool_runner` span of one run, or returns `None` when tracing is off."""
+        self._tool_runner_span = start_tool_runner_span(client, model=self._params["model"], params=self._params)
+        return self._tool_runner_span
+
+    def _tool_use_span(
+        self, client: Anthropic | AsyncAnthropic, tool: object, tool_use: BetaToolUseBlock
+    ) -> AbstractContextManager[ToolRun]:
+        """The span of one run of `tool` for the call `tool_use`. The result the runner sends back, an error result
+        too, is made inside it."""
+        return tool_use_span(
+            client,
+            tool,
+            tool_use_id=tool_use.id,
+            tool_name=tool_use.name,
+            input=tool_use.input,
+            toolset_name=tool_use.toolset_name,
+        )
 
     def set_messages_params(
         self,
@@ -379,6 +429,8 @@ class BaseToolRunner(Generic[AnyFunctionToolT, AnyToolsetT, ResponseFormatT]):
         self._pending_tool_changes = []
 
     def _should_stop(self) -> bool:
+        if self._closed:
+            return True
         if self._max_iterations is not None and self._iteration_count >= self._max_iterations:
             return True
         return False
@@ -454,6 +506,17 @@ class BaseSyncToolRunner(
         for item in self._iterator:
             yield item
 
+    def close(self) -> None:
+        """Stop the runner early and end its span. Use it when you won't resume the runner with `until_done()`.
+
+        Iterating a closed runner yields nothing. Closing a runner that is done has no effect.
+        """
+        self._closed = True
+        # A loop that is working, such as one whose tool calls this, cannot be closed from inside. It stops at its next
+        # step, as does one whose tool runs while the application reads a reply.
+        if not self._running_eager_tool and inspect.getgeneratorstate(self._iterator) != inspect.GEN_RUNNING:
+            self._iterator.close()
+
     @abstractmethod
     @contextmanager
     def _handle_request(self, params: ParseMessageCreateParamsBase[ResponseFormatT]) -> Iterator[RunnerItemT]:
@@ -478,7 +541,37 @@ class BaseSyncToolRunner(
         if compaction is not None:
             yield from self._compact(compaction)
 
-    def __run__(self) -> Iterator[RunnerItemT]:
+    def __run__(self) -> Generator[RunnerItemT, None, None]:
+        tool_runner_span = self._start_tool_runner_span(self._client)
+        steps = self._steps()
+        try:
+            try:
+                while True:
+                    # The runner's own code runs with its span current. Each step enters the span again, because the
+                    # application resumes the runner from its own context.
+                    with as_current_span(tool_runner_span):
+                        try:
+                            item = next(steps)
+                        except StopIteration:
+                            break
+                    # Outside the span, so that the application's code between iterations keeps its own context.
+                    yield item
+                # A closed runner stops here too, and closing leaves the status unset.
+                if not self._closed:
+                    set_tool_runner_status(tool_runner_span)
+            except BaseException as err:
+                # Closing a suspended runner raises `GeneratorExit` here, which leaves the status unset.
+                set_tool_runner_status(tool_runner_span, err)
+                raise
+            finally:
+                # Closing the request is the runner's code too, so it runs with the span current.
+                with as_current_span(tool_runner_span):
+                    steps.close()
+        finally:
+            end_tool_runner_span(tool_runner_span)
+
+    def _steps(self) -> Generator[RunnerItemT, None, None]:
+        """The runner's loop. `__run__` drives it, one step for each item."""
         stop_reason: BetaStopReason | None = None
         while not self._should_stop():
             self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
@@ -506,7 +599,7 @@ class BaseSyncToolRunner(
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 yield from self._compact_after_final_turn(message)
-                return
+                break
 
             if next_step == "resume":
                 if not self._messages_modified:
@@ -516,7 +609,7 @@ class BaseSyncToolRunner(
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     yield from self._compact_after_final_turn(message)
-                    return
+                    break
                 if not self._messages_modified:
                     self.append_messages(message, response)
 
@@ -605,7 +698,8 @@ class BaseSyncToolRunner(
                         "is_error": True,
                     }
                 else:
-                    result = self._run_tool(tool, tool_use)
+                    with self._tool_use_span(self._client, tool, tool_use) as run:
+                        run.result = result = self._run_tool(tool, tool_use)
 
                 if eager_calls is not None:
                     eager_calls.record(tool_use, result)
@@ -641,7 +735,9 @@ class BaseSyncToolRunner(
         toolset = self._toolset_for(tool_use)
         if toolset is None:
             return self._toolset_not_found_result(tool_use)
-        return toolset.tool_result(tool_use)
+        with self._tool_use_span(self._client, toolset, tool_use) as run:
+            run.result = result = toolset.tool_result(tool_use)
+        return result
 
     def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
@@ -744,7 +840,8 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
     def _handle_request(
         self, params: ParseMessageCreateParamsBase[ResponseFormatT]
     ) -> Iterator[BetaMessageStream[ResponseFormatT]]:
-        with self._client.beta.messages.stream(**params, **self._options) as stream:
+        with ExitStack() as stack:
+            stream = stack.enter_context(self._client.beta.messages.stream(**params, **self._options))
             self._last_message = stream.get_final_message
             if self._run_tools_eagerly:
                 self._eager_tool_calls = EagerToolCalls()
@@ -776,13 +873,27 @@ class BetaStreamingToolRunner(BaseSyncToolRunner[BetaMessageStream[ResponseForma
                     if calls.is_held(moved_on_from):
                         calls.waiting_toolsets.add(family)
                     if family not in calls.waiting_toolsets:
-                        member_result = self._run_toolset_member(moved_on_from)
+                        self._running_eager_tool = True
+                        try:
+                            # The application resumed the reply from its own context, as it resumes the loop.
+                            with as_current_span(self._tool_runner_span):
+                                member_result = self._run_toolset_member(moved_on_from)
+                        finally:
+                            self._running_eager_tool = False
                         calls.record(moved_on_from, member_result)
                         if member_result.get("is_error"):
                             calls.waiting_toolsets.add(family)
                 # A call to a tool the runner doesn't have gets its error result with the tool response.
                 elif tool is not None and not calls.is_held(moved_on_from):
-                    calls.record(moved_on_from, self._run_tool(tool, moved_on_from))
+                    self._running_eager_tool = True
+                    try:
+                        # The application resumed the reply from its own context, as it resumes the loop.
+                        with as_current_span(self._tool_runner_span):
+                            with self._tool_use_span(self._client, tool, moved_on_from) as run:
+                                run.result = result = self._run_tool(tool, moved_on_from)
+                    finally:
+                        self._running_eager_tool = False
+                    calls.record(moved_on_from, result)
 
             moved_on_from = calls.track(event)
             yield event
@@ -817,11 +928,33 @@ class BaseAsyncToolRunner(
         ) = None
 
     async def __anext__(self) -> RunnerItemT:
+        # A close from another task can still be unwinding the loop, which cannot be asked for an item meanwhile.
+        # No lock is needed: neither `close` nor this check awaits before it acts on `_closed`.
+        if self._closed and cast("AsyncGeneratorType[RunnerItemT, None]", self._iterator).ag_running:
+            raise StopAsyncIteration
         return await self._iterator.__anext__()
 
     async def __aiter__(self) -> AsyncIterator[RunnerItemT]:
-        async for item in self._iterator:
+        while True:
+            try:
+                item = await self.__anext__()
+            except StopAsyncIteration:
+                return
             yield item
+
+    async def close(self) -> None:
+        """Stop the runner early and end its span. Use it when you won't resume the runner with `until_done()`.
+
+        Iterating a closed runner yields nothing. Closing a runner that is done has no effect.
+        """
+        self._closed = True
+        # A loop that another task is driving, or is already closing, cannot be closed concurrently. It stops at its
+        # next step, as does one whose tool runs while the application reads a reply.
+        if (
+            not self._running_eager_tool
+            and not cast("AsyncGeneratorType[RunnerItemT, None]", self._iterator).ag_running
+        ):
+            await self._iterator.aclose()
 
     @abstractmethod
     @asynccontextmanager
@@ -831,7 +964,7 @@ class BaseAsyncToolRunner(
         raise NotImplementedError()
         yield  # type: ignore[unreachable]
 
-    async def _compact(self, compaction: BetaCompactionConfigParam) -> AsyncIterator[RunnerItemT]:
+    async def _compact(self, compaction: BetaCompactionConfigParam) -> AsyncGenerator[RunnerItemT, None]:
         last_message = self._last_message
         try:
             async with self._handle_request(self._pop_compaction_request_params(compaction)) as item:
@@ -846,13 +979,46 @@ class BaseAsyncToolRunner(
 
     async def _compact_after_final_turn(
         self, message: ParsedBetaMessage[ResponseFormatT]
-    ) -> AsyncIterator[RunnerItemT]:
+    ) -> AsyncGenerator[RunnerItemT, None]:
         compaction = self._prepare_compaction_after_final_turn(message)
         if compaction is not None:
-            async for item in self._compact(compaction):
-                yield item
+            # Closing the runner closes the compaction request with it, as `yield from` does in the sync runner.
+            async with aclosing(self._compact(compaction)) as items:
+                async for item in items:
+                    yield item
 
-    async def __run__(self) -> AsyncIterator[RunnerItemT]:
+    async def __run__(self) -> AsyncGenerator[RunnerItemT, None]:
+        tool_runner_span = self._start_tool_runner_span(self._client)
+        steps = self._steps()
+        try:
+            try:
+                while True:
+                    # The runner's own code runs with its span current. Each step enters the span again, because the
+                    # application resumes the runner from its own context.
+                    with as_current_span(tool_runner_span):
+                        try:
+                            item = await steps.__anext__()
+                        except StopAsyncIteration:
+                            break
+                    # Outside the span, so that the application's code between iterations keeps its own context.
+                    yield item
+                # A closed runner stops here too, and closing leaves the status unset.
+                if not self._closed:
+                    set_tool_runner_status(tool_runner_span)
+            except BaseException as err:
+                # Closing a suspended runner raises `GeneratorExit` here, which leaves the status unset.
+                set_tool_runner_status(tool_runner_span, err)
+                raise
+            finally:
+                # Closing the request is the runner's code too, so it runs with the span current. The status is
+                # settled by now: at the end of the event loop this can fail, when the loop is closing `steps` itself.
+                with as_current_span(tool_runner_span):
+                    await steps.aclose()
+        finally:
+            end_tool_runner_span(tool_runner_span)
+
+    async def _steps(self) -> AsyncGenerator[RunnerItemT, None]:
+        """The runner's loop. `__run__` drives it, one step for each item."""
         stop_reason: BetaStopReason | None = None
         while not self._should_stop():
             self._send_pending_tool_changes(hold=stop_reason == "pause_turn")
@@ -860,8 +1026,9 @@ class BaseAsyncToolRunner(
             turn_paused = _determine_next_step_from_stop_reason(stop_reason) == "resume"
             compaction = None if turn_paused else self._pending_compaction
             if compaction is not None:
-                async for item in self._compact(compaction):
-                    yield item
+                async with aclosing(self._compact(compaction)) as items:
+                    async for item in items:
+                        yield item
                 continue
 
             async with self._handle_request(self._params) as item:
@@ -880,9 +1047,10 @@ class BaseAsyncToolRunner(
             next_step = _determine_next_step_from_stop_reason(stop_reason)
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
-                async for item in self._compact_after_final_turn(message):
-                    yield item
-                return
+                async with aclosing(self._compact_after_final_turn(message)) as items:
+                    async for item in items:
+                        yield item
+                break
 
             if next_step == "resume":
                 if not self._messages_modified:
@@ -891,9 +1059,10 @@ class BaseAsyncToolRunner(
                 response = await self.generate_tool_call_response()
                 if response is None:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
-                    async for item in self._compact_after_final_turn(message):
-                        yield item
-                    return
+                    async with aclosing(self._compact_after_final_turn(message)) as items:
+                        async for item in items:
+                            yield item
+                    break
                 if not self._messages_modified:
                     self.append_messages(message, response)
 
@@ -1002,7 +1171,8 @@ class BaseAsyncToolRunner(
                         "is_error": True,
                     }
                 else:
-                    result = await self._run_tool(tool, tool_use)
+                    with self._tool_use_span(self._client, tool, tool_use) as run:
+                        run.result = result = await self._run_tool(tool, tool_use)
 
                 if eager_calls is not None:
                     eager_calls.record(tool_use, result)
@@ -1038,7 +1208,9 @@ class BaseAsyncToolRunner(
         toolset = self._toolset_for(tool_use)
         if toolset is None:
             return self._toolset_not_found_result(tool_use)
-        return await toolset.tool_result(tool_use)
+        with self._tool_use_span(self._client, toolset, tool_use) as run:
+            run.result = result = await toolset.tool_result(tool_use)
+        return result
 
 
 class BetaAsyncToolRunner(BaseAsyncToolRunner[ParsedBetaMessage[ResponseFormatT], ResponseFormatT]):
@@ -1122,7 +1294,8 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
     async def _handle_request(
         self, params: ParseMessageCreateParamsBase[ResponseFormatT]
     ) -> AsyncIterator[BetaAsyncMessageStream[ResponseFormatT]]:
-        async with self._client.beta.messages.stream(**params, **self._options) as stream:
+        async with AsyncExitStack() as stack:
+            stream = await stack.enter_async_context(self._client.beta.messages.stream(**params, **self._options))
             self._last_message = stream.get_final_message
             if self._run_tools_eagerly:
                 self._eager_tool_calls = EagerToolCalls()
@@ -1154,13 +1327,27 @@ class BetaAsyncStreamingToolRunner(BaseAsyncToolRunner[BetaAsyncMessageStream[Re
                     if calls.is_held(moved_on_from):
                         calls.waiting_toolsets.add(family)
                     if family not in calls.waiting_toolsets:
-                        member_result = await self._run_toolset_member(moved_on_from)
+                        self._running_eager_tool = True
+                        try:
+                            # The application resumed the reply from its own context, as it resumes the loop.
+                            with as_current_span(self._tool_runner_span):
+                                member_result = await self._run_toolset_member(moved_on_from)
+                        finally:
+                            self._running_eager_tool = False
                         calls.record(moved_on_from, member_result)
                         if member_result.get("is_error"):
                             calls.waiting_toolsets.add(family)
                 # A call to a tool the runner doesn't have gets its error result with the tool response.
                 elif tool is not None and not calls.is_held(moved_on_from):
-                    calls.record(moved_on_from, await self._run_tool(tool, moved_on_from))
+                    self._running_eager_tool = True
+                    try:
+                        # The application resumed the reply from its own context, as it resumes the loop.
+                        with as_current_span(self._tool_runner_span):
+                            with self._tool_use_span(self._client, tool, moved_on_from) as run:
+                                run.result = result = await self._run_tool(tool, moved_on_from)
+                    finally:
+                        self._running_eager_tool = False
+                    calls.record(moved_on_from, result)
 
             moved_on_from = calls.track(event)
             yield event

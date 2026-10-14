@@ -30,9 +30,10 @@ from collections.abc import Callable, Sequence, AsyncIterator
 import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
-from ..._types import Headers
+from ..._types import Headers, OpenTelemetryOptions
+from .._tracing import tool_use_span
 from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content, tool_result_content
-from .._scoped_client import _copy_client_with_bearer_auth
+from .._scoped_client import copy_scoped_client, _copy_client_with_bearer_auth
 from ._beta_functions import (
     ToolError,
     BetaRunnableTool,
@@ -42,10 +43,13 @@ from ._beta_functions import (
 )
 from .._stainless_helpers import helper_header
 from ...types.beta.sessions import (
+    BetaManagedAgentsSessionEvent,
     BetaManagedAgentsAgentToolUseEvent,
+    BetaManagedAgentsStreamSessionEvents,
     BetaManagedAgentsAgentCustomToolUseEvent,
     BetaManagedAgentsUserToolConfirmationEvent,
 )
+from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 from ...types.beta.sessions.beta_managed_agents_user_tool_result_event_params import (
     Content as _SessionContent,
     BetaManagedAgentsUserToolResultEventParams,
@@ -305,33 +309,45 @@ def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> Async
     return client.with_options(default_headers=helper_header("session-tool-runner"))
 
 
-def _to_session_content(content: BetaFunctionToolResultType | None) -> list[_SessionContent]:
+def _to_session_content(
+    content: BetaFunctionToolResultType | None,
+) -> tuple[list[_SessionContent], Sequence[_SessionContent | BetaContent]]:
     """Bridge Messages-API tool-result content to the narrower Sessions-API content union.
 
     The two APIs share text/image/document/search_result block shapes but use
     distinct nominal TypedDicts; ToolReference blocks have no Sessions equivalent
     so they are stringified. A tool that returned `None` reads `(no output)`.
+
+    Also returns the content that the tool's span records, in which a
+    stringified block stays the block itself.
     """
     if content is None:
-        return [{"type": "text", "text": "(no output)"}]
+        return _to_session_content("(no output)")
     if isinstance(content, str):
-        return [{"type": "text", "text": content or "(no output)"}]
+        text_only: list[_SessionContent] = [{"type": "text", "text": content or "(no output)"}]
+        return text_only, text_only
     out: list[_SessionContent] = []
+    recorded: list[_SessionContent | BetaContent] = []
     for block in content:
         kind = block.get("type")
         if kind == "text":
             text = cast("str", block.get("text") or "(no output)")
             out.append({"type": "text", "text": text})
+            recorded.append(out[-1])
         elif kind in ("image", "document", "search_result"):
             out.append(cast("_SessionContent", block))
+            recorded.append(block)
         else:
             out.append({"type": "text", "text": json.dumps(block)})
-    return out or [{"type": "text", "text": "(no output)"}]
+            recorded.append(block)
+    if not out:
+        return _to_session_content("(no output)")
+    return out, recorded
 
 
 def _build_result_event(
     ev: DispatchedToolUseEvent,
-    content: BetaFunctionToolResultType | None,
+    session_content: list[_SessionContent],
     is_error: bool,
 ) -> DispatchedToolResultParams:
     """Build the result-event params matching `ev`'s tool-call kind.
@@ -341,7 +357,6 @@ def _build_result_event(
     call (`agent.tool_use`) with a `user.tool_result` keyed by
     `tool_use_id`. Both use the codegen'd event-params TypedDicts.
     """
-    session_content = _to_session_content(content)
     if ev.type == "agent.custom_tool_use":
         custom_result: BetaManagedAgentsUserCustomToolResultEventParams = {
             "type": "user.custom_tool_result",
@@ -453,6 +468,7 @@ class SessionToolRunner:
         # sub-client: Bearer-only when an environment key is set, otherwise the
         # caller's own client with the helper-telemetry header layered on.
         self._scoped = _scoped_client(client, environment_key)
+        self._bearer_scoped = environment_key is not None
         # Per-request passthrough headers: threaded into every event stream /
         # list / send via that call's `extra_headers=` (make_request_options)
         # — never assigned onto the client, so client state is not mutated.
@@ -495,6 +511,12 @@ class SessionToolRunner:
         rather than threading a shared state object through free functions.
         """
         self._events: AsyncEvents = self._scoped.beta.sessions.events
+        # The events resources of the copies of the client that `_events_for` makes, by conversation ID.
+        self._events_by_conversation: dict[str, AsyncEvents] = {}
+        # The session's primary thread, whose tool events name no thread (`_note_primary_thread`). The live stream
+        # tells it only while `_history_read`: after a history read that failed, its events may start mid-log.
+        self._primary_thread_id: str | None = None
+        self._history_read = False
         log.info("session tool runner starting session_id=%s", self.session_id)
         self._tools_by_name: dict[str, BetaAnyRunnableTool] = tool_registry(self.tools)
         # `_seen` dedups tool-call events across the stream and the reconcile
@@ -584,6 +606,7 @@ class SessionToolRunner:
         list_failed = False
         try:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
+                self._note_primary_thread(ev)
                 if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                     # Mark the event seen so the live stream doesn't re-enqueue it, but
                     # decide whether it still needs executing from `_answered`, not
@@ -617,6 +640,7 @@ class SessionToolRunner:
             # untouched since the history we read may be incomplete.
             log.warning("reconcile list failed; skipping pending enqueue error=%s", e)
             list_failed = True
+        self._history_read = not list_failed
         if list_failed:
             # Roll back the ids we added to `_seen` so the live stream can
             # re-process them rather than silently dedup what we never finished
@@ -671,6 +695,8 @@ class SessionToolRunner:
                         # clock itself defers the countdown while gated calls
                         # are held or in flight (see `_IdleClock.hold`).
                         self._idle_clock.note_event(ev)
+                        if self._history_read:
+                            self._note_primary_thread(ev)
                         if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                             if ev.id not in self._seen:
                                 self._seen.add(ev.id)
@@ -698,6 +724,21 @@ class SessionToolRunner:
             with anyio.move_on_after(backoff):
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
+
+    def _note_primary_thread(self, ev: BetaManagedAgentsSessionEvent | BetaManagedAgentsStreamSessionEvents) -> None:
+        """Remembers the thread of the log's first `session.thread_status_*` event as the session's primary thread.
+
+        Only the primary thread exists when the session first runs, so the first such event of a log is its own.
+        """
+        if self._primary_thread_id is not None:
+            return
+        if (
+            ev.type == "session.thread_status_running"
+            or ev.type == "session.thread_status_idle"
+            or ev.type == "session.thread_status_rescheduled"
+            or ev.type == "session.thread_status_terminated"
+        ) and ev.session_thread_id:
+            self._primary_thread_id = ev.session_thread_id
 
     async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
         """Enqueue `ev` for dispatch, honoring its evaluated permission.
@@ -881,24 +922,27 @@ class SessionToolRunner:
             is_error = False
             sent = False
         else:
-            content: BetaFunctionToolResultType | None  # a tool may return None whatever its annotation says
-            is_error = False
             input_ = dict(ev.input)
-            try:
-                with anyio.fail_after(TOOL_TIMEOUT):
-                    content = tool_result_content(await run_runnable_tool(tool, input_))
-            except TimeoutError:
-                content = f"tool {ev.name!r} timed out"
-                is_error = True
-            except ToolError as e:
-                content = tool_error_content(e)
-                is_error = True
-            except Exception as e:
-                log.exception("tool %s raised", ev.name)
-                content = tool_error_content(e)
-                is_error = True
-            tool_result = _build_result_event(ev, content, is_error)
-            sent = await self._send_result(tool_result, ev.id)
+            # An event of the primary thread names no thread.
+            conversation_id = ev.session_thread_id or self._primary_thread_id
+            with tool_use_span(
+                self._scoped,
+                tool,
+                tool_use_id=ev.id,
+                tool_name=ev.name,
+                input=input_,
+                # The event types do not declare the field yet, so it is read as an event that has it gives it.
+                toolset_name=getattr(ev, "toolset_name", None),
+                agent_tool=ev.type == "agent.tool_use",
+                session_id=self.session_id,
+                session_thread_id=ev.session_thread_id,
+                conversation_id=conversation_id,
+            ) as run:
+                result_event, run.content = await self._call_tool(tool, ev, input_)
+                run.result = result_event
+            tool_result = result_event
+            is_error = result_event.get("is_error") is True
+            sent = await self._send_result(result_event, ev.id, conversation_id)
         await self._surface_call(
             DispatchedToolCall(
                 event=ev,
@@ -911,20 +955,69 @@ class SessionToolRunner:
             )
         )
 
-    async def _send_result(self, tool_result: DispatchedToolResultParams, tool_use_id: str) -> bool:
+    async def _call_tool(
+        self, tool: BetaAnyRunnableTool, ev: DispatchedToolUseEvent, input_: dict[str, object]
+    ) -> tuple[DispatchedToolResultParams, Sequence[_SessionContent | BetaContent]]:
+        """Runs `tool` for `ev` and builds the result event, turning a timeout or an error into an error result.
+
+        Also returns the result's content as the tool's span records it.
+        """
+        content: BetaFunctionToolResultType | None  # a tool may return None whatever its annotation says
+        is_error = False
+        try:
+            with anyio.fail_after(TOOL_TIMEOUT):
+                content = tool_result_content(await run_runnable_tool(tool, input_))
+        except TimeoutError:
+            content = f"tool {ev.name!r} timed out"
+            is_error = True
+        except ToolError as e:
+            content = tool_error_content(e)
+            is_error = True
+        except Exception as e:
+            log.exception("tool %s raised", ev.name)
+            content = tool_error_content(e)
+            is_error = True
+        session_content, recorded = _to_session_content(content)
+        return _build_result_event(ev, session_content, is_error), recorded
+
+    def _events_for(self, conversation_id: str | None) -> AsyncEvents:
+        """The events resource that sends the result of a tool call whose span has `conversation_id`.
+
+        The spans of its requests have the conversation ID of the tool's span. When the client's options
+        set none, that is the ID of the call's thread, and a copy of the client that sets it sends the result.
+        The copy has the client's other OpenTelemetry options.
+        """
+        if conversation_id is None or self._scoped._tracer is None or self._scoped._otel.conversation_id:
+            return self._events
+        if conversation_id not in self._events_by_conversation:
+            open_telemetry: OpenTelemetryOptions = {**self._scoped.open_telemetry, "conversation_id": conversation_id}
+            client = (
+                copy_scoped_client(self._scoped, open_telemetry=open_telemetry)
+                if self._bearer_scoped
+                else self._scoped.with_options(open_telemetry=open_telemetry)
+            )
+            self._events_by_conversation[conversation_id] = client.beta.sessions.events
+        return self._events_by_conversation[conversation_id]
+
+    async def _send_result(
+        self, tool_result: DispatchedToolResultParams, tool_use_id: str, conversation_id: str | None
+    ) -> bool:
         """Post `tool_result` back to the session, retrying transient failures
         with jittered exponential backoff until the send retry window elapses.
 
         `tool_use_id` is the originating tool-call event id — passed
         explicitly because the result params key it differently
         (`tool_use_id` vs `custom_tool_use_id`) depending on the kind.
+
+        `conversation_id` is the ID of the thread of the tool call, when the runner knows it.
         """
+        events = self._events_for(conversation_id)
         start = time.monotonic()
         last_err: Exception | None = None
         attempt = 0
         for attempt in itertools.count(1):
             try:
-                await self._events.send(
+                await events.send(
                     self.session_id,
                     events=[tool_result],
                     extra_headers=self.extra_headers,

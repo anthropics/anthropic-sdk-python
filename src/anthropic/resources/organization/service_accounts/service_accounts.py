@@ -110,6 +110,9 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.create",
+                span_route="/v1/organizations/service_accounts",
+                span_created_id="anthropic.organization.service_account.id",
             ),
             cast_to=ServiceAccount,
         )
@@ -155,6 +158,9 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.retrieve",
+                span_route="/v1/organizations/service_accounts/{service_account_id}",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
@@ -216,6 +222,9 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.update",
+                span_route="/v1/organizations/service_accounts/{service_account_id}",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
@@ -273,6 +282,8 @@ class ServiceAccounts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.service_accounts.list",
+                span_route="/v1/organizations/service_accounts",
             ),
             model=ServiceAccount,
         )
@@ -323,6 +334,9 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.archive",
+                span_route="/v1/organizations/service_accounts/{service_account_id}/archive",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
@@ -408,6 +422,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.create",
+                span_route="/v1/organizations/service_accounts",
+                span_created_id="anthropic.organization.service_account.id",
             ),
             cast_to=ServiceAccount,
         )
@@ -453,6 +470,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.retrieve",
+                span_route="/v1/organizations/service_accounts/{service_account_id}",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
@@ -514,6 +534,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.update",
+                span_route="/v1/organizations/service_accounts/{service_account_id}",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
@@ -571,6 +594,8 @@ class AsyncServiceAccounts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.service_accounts.list",
+                span_route="/v1/organizations/service_accounts",
             ),
             model=ServiceAccount,
         )
@@ -621,6 +646,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.service_accounts.archive",
+                span_route="/v1/organizations/service_accounts/{service_account_id}/archive",
+                span_attributes={"anthropic.organization.service_account.id": service_account_id},
             ),
             cast_to=ServiceAccount,
         )
