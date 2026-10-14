@@ -8,6 +8,7 @@ from .beta_spend_limit_user_scope import BetaSpendLimitUserScope
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope
 from .beta_spend_limit_rbac_group_scope import BetaSpendLimitRBACGroupScope
+from .beta_spend_limit_usage_tier_scope import BetaSpendLimitUsageTierScope
 from .beta_spend_limit_organization_scope import BetaSpendLimitOrganizationScope
 from .beta_spend_limit_scoped_api_key_actor import BetaSpendLimitScopedAPIKeyActor
 from .beta_spend_limit_organization_service_scope import BetaSpendLimitOrganizationServiceScope
@@ -26,6 +27,7 @@ Scope: TypeAlias = Annotated[
         BetaSpendLimitOrganizationServiceScope,
         BetaSpendLimitOrganizationScope,
         BetaSpendLimitWorkspaceScope,
+        BetaSpendLimitUsageTierScope,
     ],
     UnionDiscriminator("type"),
 ]
@@ -38,6 +40,7 @@ Source: TypeAlias = Annotated[
         BetaSpendLimitOrganizationServiceScope,
         BetaSpendLimitOrganizationScope,
         BetaSpendLimitWorkspaceScope,
+        BetaSpendLimitUsageTierScope,
     ],
     UnionDiscriminator("type"),
 ]
