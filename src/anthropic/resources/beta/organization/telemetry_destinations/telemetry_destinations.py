@@ -32,6 +32,7 @@ from .....types.beta.organization import (
 )
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_telemetry_destination import BetaTelemetryDestination
+from .....types.beta.organization.beta_telemetry_destination_test import BetaTelemetryDestinationTest
 from .....types.beta.organization.beta_deleted_telemetry_destination import BetaDeletedTelemetryDestination
 from .....types.beta.organization.beta_telemetry_destination_state_params import BetaTelemetryDestinationStateParams
 from .....types.beta.organization.beta_telemetry_destination_traces_params import BetaTelemetryDestinationTracesParams
@@ -496,6 +497,71 @@ class TelemetryDestinations(SyncAPIResource):
             cast_to=BetaDeletedTelemetryDestination,
         )
 
+    def test(
+        self,
+        destination_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaTelemetryDestinationTest:
+        """
+        Send one test span, named `anthropic.test`, to the destination with its
+        registered headers, once and without retries, and report the destination's
+        answer. The response is 200 whether or not the destination answered with a 2xx
+        status: its `result` has the type `success`, or the type `failure` and the
+        reason in `error`. The destination's configuration, `state` and
+        `delivery_health` do not change. A disabled destination can be tested too. Wait
+        10 seconds between tests of one destination; a request that comes sooner may be
+        answered with status 429.
+
+        Args:
+          destination_id: ID of the destination to test (starts with `tdst_`).
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not destination_id:
+            raise ValueError(f"Expected a non-empty value for `destination_id` but received {destination_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["telemetry-destinations-2026-08-11"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
+        return self._post(
+            path_template(
+                "/v1/organizations/telemetry_destinations/{destination_id}/test?beta=true",
+                destination_id=destination_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.telemetry_destinations.test",
+                span_route="/v1/organizations/telemetry_destinations/{destination_id}/test",
+                span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
+            ),
+            cast_to=BetaTelemetryDestinationTest,
+        )
+
 
 class AsyncTelemetryDestinations(AsyncAPIResource):
     @cached_property
@@ -951,6 +1017,71 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
             cast_to=BetaDeletedTelemetryDestination,
         )
 
+    async def test(
+        self,
+        destination_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaTelemetryDestinationTest:
+        """
+        Send one test span, named `anthropic.test`, to the destination with its
+        registered headers, once and without retries, and report the destination's
+        answer. The response is 200 whether or not the destination answered with a 2xx
+        status: its `result` has the type `success`, or the type `failure` and the
+        reason in `error`. The destination's configuration, `state` and
+        `delivery_health` do not change. A disabled destination can be tested too. Wait
+        10 seconds between tests of one destination; a request that comes sooner may be
+        answered with status 429.
+
+        Args:
+          destination_id: ID of the destination to test (starts with `tdst_`).
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not destination_id:
+            raise ValueError(f"Expected a non-empty value for `destination_id` but received {destination_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["telemetry-destinations-2026-08-11"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
+        return await self._post(
+            path_template(
+                "/v1/organizations/telemetry_destinations/{destination_id}/test?beta=true",
+                destination_id=destination_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.telemetry_destinations.test",
+                span_route="/v1/organizations/telemetry_destinations/{destination_id}/test",
+                span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
+            ),
+            cast_to=BetaTelemetryDestinationTest,
+        )
+
 
 class TelemetryDestinationsWithRawResponse:
     def __init__(self, telemetry_destinations: TelemetryDestinations) -> None:
@@ -970,6 +1101,9 @@ class TelemetryDestinationsWithRawResponse:
         )
         self.delete = to_raw_response_wrapper(
             telemetry_destinations.delete,
+        )
+        self.test = to_raw_response_wrapper(
+            telemetry_destinations.test,
         )
 
     @cached_property
@@ -996,6 +1130,9 @@ class AsyncTelemetryDestinationsWithRawResponse:
         self.delete = async_to_raw_response_wrapper(
             telemetry_destinations.delete,
         )
+        self.test = async_to_raw_response_wrapper(
+            telemetry_destinations.test,
+        )
 
     @cached_property
     def workspaces(self) -> AsyncWorkspacesWithRawResponse:
@@ -1021,6 +1158,9 @@ class TelemetryDestinationsWithStreamingResponse:
         self.delete = to_streamed_response_wrapper(
             telemetry_destinations.delete,
         )
+        self.test = to_streamed_response_wrapper(
+            telemetry_destinations.test,
+        )
 
     @cached_property
     def workspaces(self) -> WorkspacesWithStreamingResponse:
@@ -1045,6 +1185,9 @@ class AsyncTelemetryDestinationsWithStreamingResponse:
         )
         self.delete = async_to_streamed_response_wrapper(
             telemetry_destinations.delete,
+        )
+        self.test = async_to_streamed_response_wrapper(
+            telemetry_destinations.test,
         )
 
     @cached_property

@@ -10,6 +10,7 @@ from tests.utils import assert_matches_type
 from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.types.beta.organization import (
     BetaTelemetryDestination,
+    BetaTelemetryDestinationTest,
     BetaDeletedTelemetryDestination,
 )
 
@@ -254,6 +255,52 @@ class TestTelemetryDestinations:
                 destination_id="",
             )
 
+    @parametrize
+    def test_method_test(self, client: Anthropic) -> None:
+        telemetry_destination = client.beta.organization.telemetry_destinations.test(
+            destination_id="destination_id",
+        )
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    def test_method_test_with_all_params(self, client: Anthropic) -> None:
+        telemetry_destination = client.beta.organization.telemetry_destinations.test(
+            destination_id="destination_id",
+            betas=["message-batches-2024-09-24"],
+        )
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    def test_raw_response_test(self, client: Anthropic) -> None:
+        response = client.beta.organization.telemetry_destinations.with_raw_response.test(
+            destination_id="destination_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        telemetry_destination = response.parse()
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    def test_streaming_response_test(self, client: Anthropic) -> None:
+        with client.beta.organization.telemetry_destinations.with_streaming_response.test(
+            destination_id="destination_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            telemetry_destination = response.parse()
+            assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_test(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `destination_id` but received ''"):
+            client.beta.organization.telemetry_destinations.with_raw_response.test(
+                destination_id="",
+            )
+
 
 class TestAsyncTelemetryDestinations:
     parametrize = pytest.mark.parametrize(
@@ -492,5 +539,51 @@ class TestAsyncTelemetryDestinations:
     async def test_path_params_delete(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `destination_id` but received ''"):
             await async_client.beta.organization.telemetry_destinations.with_raw_response.delete(
+                destination_id="",
+            )
+
+    @parametrize
+    async def test_method_test(self, async_client: AsyncAnthropic) -> None:
+        telemetry_destination = await async_client.beta.organization.telemetry_destinations.test(
+            destination_id="destination_id",
+        )
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    async def test_method_test_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        telemetry_destination = await async_client.beta.organization.telemetry_destinations.test(
+            destination_id="destination_id",
+            betas=["message-batches-2024-09-24"],
+        )
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    async def test_raw_response_test(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.organization.telemetry_destinations.with_raw_response.test(
+            destination_id="destination_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        telemetry_destination = await response.parse()
+        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_test(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.organization.telemetry_destinations.with_streaming_response.test(
+            destination_id="destination_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            telemetry_destination = await response.parse()
+            assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_test(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `destination_id` but received ''"):
+            await async_client.beta.organization.telemetry_destinations.with_raw_response.test(
                 destination_id="",
             )
