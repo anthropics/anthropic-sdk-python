@@ -6,6 +6,7 @@
 
 * **api:** add execution_identity to Managed Agents agents
 * **api:** add organization_type_not_supported error to spend limit lists
+* **api:** add telemetry destinations to the Admin API
 * **client:** add OpenTelemetry tracing for API calls, streaming and tool runs
 
 
