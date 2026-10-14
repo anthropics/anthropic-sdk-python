@@ -4,6 +4,7 @@
 
 ### Features
 
+* **api:** add the speed parameter and usage.speed to Messages
 * **api:** return a Console organization's usage-tier spend cap as a read-only spend limit
 
 

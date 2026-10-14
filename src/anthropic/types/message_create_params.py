@@ -166,6 +166,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     details.
     """
 
+    speed: Optional[Literal["standard", "fast"]]
+    """The inference speed mode for this request.
+
+    `"fast"` enables high output-tokens-per-second inference.
+    """
+
     stop_sequences: SequenceNotStr[str]
     """Custom text sequences that will cause the model to stop generating.
 
