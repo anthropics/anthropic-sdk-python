@@ -3056,8 +3056,8 @@ from anthropic.types.beta.organization import (
     BetaTelemetryDestinationStateEnabled,
     BetaTelemetryDestinationStateEnabledParams,
     BetaTelemetryDestinationStateParams,
-    BetaTelemetryDestinationTest,
     BetaTelemetryDestinationTestFailure,
+    BetaTelemetryDestinationTestResponse,
     BetaTelemetryDestinationTestResult,
     BetaTelemetryDestinationTestSuccess,
     BetaTelemetryDestinationTraces,
@@ -3080,7 +3080,7 @@ Methods:
 - <code title="post /v1/organizations/telemetry_destinations/{destination_id}?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">update</a>(destination_id, \*\*<a href="src/anthropic/types/beta/organization/telemetry_destination_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">BetaTelemetryDestination</a></code>
 - <code title="get /v1/organizations/telemetry_destinations?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/telemetry_destination_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination.py">SyncPageCursor[BetaTelemetryDestination]</a></code>
 - <code title="delete /v1/organizations/telemetry_destinations/{destination_id}?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">delete</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_telemetry_destination.py">BetaDeletedTelemetryDestination</a></code>
-- <code title="post /v1/organizations/telemetry_destinations/{destination_id}/test?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">test</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination_test.py">BetaTelemetryDestinationTest</a></code>
+- <code title="post /v1/organizations/telemetry_destinations/{destination_id}/test?beta=true">client.beta.organization.telemetry_destinations.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/telemetry_destinations.py">test</a>(destination_id) -> <a href="./src/anthropic/types/beta/organization/beta_telemetry_destination_test_response.py">BetaTelemetryDestinationTestResponse</a></code>
 
 #### Workspaces
 

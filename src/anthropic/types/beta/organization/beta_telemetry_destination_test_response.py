@@ -3,10 +3,10 @@ from typing_extensions import Literal
 from ...._models import BaseModel
 from .beta_telemetry_destination_test_result import BetaTelemetryDestinationTestResult
 
-__all__ = ["BetaTelemetryDestinationTest"]
+__all__ = ["BetaTelemetryDestinationTestResponse"]
 
 
-class BetaTelemetryDestinationTest(BaseModel):
+class BetaTelemetryDestinationTestResponse(BaseModel):
     """The result of one test span sent to a destination."""
 
     result: BetaTelemetryDestinationTestResult

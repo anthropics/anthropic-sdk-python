@@ -93,7 +93,6 @@ from .beta_analytics_project_activity import BetaAnalyticsProjectActivity as Bet
 from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as BetaAnalyticsUsageUsersItem
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
-from .beta_telemetry_destination_test import BetaTelemetryDestinationTest as BetaTelemetryDestinationTest
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
 from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
@@ -205,6 +204,9 @@ from .beta_organization_rate_limit_model_group import (
 )
 from .beta_telemetry_destination_state_enabled import (
     BetaTelemetryDestinationStateEnabled as BetaTelemetryDestinationStateEnabled,
+)
+from .beta_telemetry_destination_test_response import (
+    BetaTelemetryDestinationTestResponse as BetaTelemetryDestinationTestResponse,
 )
 from .beta_telemetry_destination_traces_params import (
     BetaTelemetryDestinationTracesParams as BetaTelemetryDestinationTracesParams,

@@ -10,8 +10,8 @@ from tests.utils import assert_matches_type
 from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.types.beta.organization import (
     BetaTelemetryDestination,
-    BetaTelemetryDestinationTest,
     BetaDeletedTelemetryDestination,
+    BetaTelemetryDestinationTestResponse,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -260,7 +260,7 @@ class TestTelemetryDestinations:
         telemetry_destination = client.beta.organization.telemetry_destinations.test(
             destination_id="destination_id",
         )
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     def test_method_test_with_all_params(self, client: Anthropic) -> None:
@@ -268,7 +268,7 @@ class TestTelemetryDestinations:
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
         )
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     def test_raw_response_test(self, client: Anthropic) -> None:
@@ -279,7 +279,7 @@ class TestTelemetryDestinations:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         telemetry_destination = response.parse()
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     def test_streaming_response_test(self, client: Anthropic) -> None:
@@ -290,7 +290,7 @@ class TestTelemetryDestinations:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             telemetry_destination = response.parse()
-            assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+            assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -547,7 +547,7 @@ class TestAsyncTelemetryDestinations:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.test(
             destination_id="destination_id",
         )
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     async def test_method_test_with_all_params(self, async_client: AsyncAnthropic) -> None:
@@ -555,7 +555,7 @@ class TestAsyncTelemetryDestinations:
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
         )
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     async def test_raw_response_test(self, async_client: AsyncAnthropic) -> None:
@@ -566,7 +566,7 @@ class TestAsyncTelemetryDestinations:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         telemetry_destination = await response.parse()
-        assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+        assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
     @parametrize
     async def test_streaming_response_test(self, async_client: AsyncAnthropic) -> None:
@@ -577,7 +577,7 @@ class TestAsyncTelemetryDestinations:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             telemetry_destination = await response.parse()
-            assert_matches_type(BetaTelemetryDestinationTest, telemetry_destination, path=["response"])
+            assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

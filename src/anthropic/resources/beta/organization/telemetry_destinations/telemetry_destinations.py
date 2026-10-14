@@ -32,9 +32,9 @@ from .....types.beta.organization import (
 )
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_telemetry_destination import BetaTelemetryDestination
-from .....types.beta.organization.beta_telemetry_destination_test import BetaTelemetryDestinationTest
 from .....types.beta.organization.beta_deleted_telemetry_destination import BetaDeletedTelemetryDestination
 from .....types.beta.organization.beta_telemetry_destination_state_params import BetaTelemetryDestinationStateParams
+from .....types.beta.organization.beta_telemetry_destination_test_response import BetaTelemetryDestinationTestResponse
 from .....types.beta.organization.beta_telemetry_destination_traces_params import BetaTelemetryDestinationTracesParams
 from .....types.beta.organization.beta_telemetry_destination_workspaces_params import (
     BetaTelemetryDestinationWorkspacesParams,
@@ -508,7 +508,7 @@ class TelemetryDestinations(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> BetaTelemetryDestinationTest:
+    ) -> BetaTelemetryDestinationTestResponse:
         """
         Send one test span, named `anthropic.test`, to the destination with its
         registered headers, once and without retries, and report the destination's
@@ -559,7 +559,7 @@ class TelemetryDestinations(SyncAPIResource):
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/test",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
             ),
-            cast_to=BetaTelemetryDestinationTest,
+            cast_to=BetaTelemetryDestinationTestResponse,
         )
 
 
@@ -1028,7 +1028,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> BetaTelemetryDestinationTest:
+    ) -> BetaTelemetryDestinationTestResponse:
         """
         Send one test span, named `anthropic.test`, to the destination with its
         registered headers, once and without retries, and report the destination's
@@ -1079,7 +1079,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/test",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
             ),
-            cast_to=BetaTelemetryDestinationTest,
+            cast_to=BetaTelemetryDestinationTestResponse,
         )
 
 

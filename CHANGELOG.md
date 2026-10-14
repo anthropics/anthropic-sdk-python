@@ -13,6 +13,7 @@
 
 ### Bug Fixes
 
+* **api:** rename telemetry destination test response model
 * **streaming:** pass unknown event types through the message stream helpers
 * **streaming:** stop raising "Unexpected event order" for an event before message_start
 
