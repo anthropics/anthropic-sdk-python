@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.14.0...v1.15.0) (2026-10-14)
+## [1.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.14.0...v1.15.0) (2026-10-15)
 
 ### Features
 
@@ -11,6 +11,7 @@
 ### Chores
 
 * **ci:** speed up breaking change detection
+* **internal:** simplify the script that formats code blocks in docs
 
 ## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-14)
 
