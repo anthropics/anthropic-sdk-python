@@ -122,6 +122,8 @@ class Summaries(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.analytics.summaries.list",
+                span_route="/v1/organizations/analytics/summaries",
             ),
             model=BetaAnalyticsSingleDayActivitySummary,
         )
@@ -226,6 +228,8 @@ class AsyncSummaries(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.analytics.summaries.list",
+                span_route="/v1/organizations/analytics/summaries",
             ),
             model=BetaAnalyticsSingleDayActivitySummary,
         )

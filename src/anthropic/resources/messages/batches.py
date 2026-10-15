@@ -17,6 +17,7 @@ from ..._response import (
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
+from ...lib._tracing import get, count, attributes
 from ...types.messages import batch_create_params
 from ..._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ...types.messages.message_batch import MessageBatch
@@ -110,6 +111,12 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,
         )
@@ -163,6 +170,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -229,6 +239,8 @@ class Batches(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=MessageBatch,
         )
@@ -282,6 +294,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -341,6 +356,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -403,6 +421,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=JSONLDecoder[MessageBatchIndividualResponse],
             stream=True,
@@ -493,6 +514,12 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,
         )
@@ -546,6 +573,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -612,6 +642,8 @@ class AsyncBatches(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=MessageBatch,
         )
@@ -665,6 +697,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -724,6 +759,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -786,6 +824,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=AsyncJSONLDecoder[MessageBatchIndividualResponse],
             stream=True,

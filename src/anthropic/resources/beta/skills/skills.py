@@ -140,6 +140,9 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.create",
+                span_route="/v1/skills",
+                span_created_id="anthropic.skill.id",
             ),
             cast_to=BetaSkill,
         )
@@ -200,6 +203,9 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.retrieve",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaSkill,
         )
@@ -278,6 +284,8 @@ class Skills(SyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                span_name="anthropic.skills.list",
+                span_route="/v1/skills",
             ),
             model=BetaSkill,
         )
@@ -338,6 +346,9 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.delete",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaDeletedSkill,
         )
@@ -441,6 +452,9 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.create",
+                span_route="/v1/skills",
+                span_created_id="anthropic.skill.id",
             ),
             cast_to=BetaSkill,
         )
@@ -501,6 +515,9 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.retrieve",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaSkill,
         )
@@ -579,6 +596,8 @@ class AsyncSkills(AsyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                span_name="anthropic.skills.list",
+                span_route="/v1/skills",
             ),
             model=BetaSkill,
         )
@@ -639,6 +658,9 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.delete",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaDeletedSkill,
         )

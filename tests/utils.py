@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+import gc
 import os
 import traceback
 import contextlib
-from typing import Any, TypeVar, Iterator, Sequence, cast
+from typing import Any, Generic, TypeVar, Iterator, Sequence, cast
 from datetime import date, datetime
-from typing_extensions import Literal, get_args, get_origin, assert_type
+from dataclasses import dataclass
+from collections.abc import Callable, Awaitable, AsyncIterator
+from typing_extensions import Literal, get_args, override, get_origin, assert_type
 
-from anthropic._types import Omit, NoneType
+import anyio
+import httpx2
+
+from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
+from anthropic._types import Omit, Headers, NoneType
 from anthropic._utils import (
     is_dict,
     is_list,
@@ -20,6 +27,13 @@ from anthropic._utils import (
 )
 from anthropic._compat import PYDANTIC_V1, field_outer_type, get_model_fields
 from anthropic._models import BaseModel
+from anthropic._response import (
+    APIResponse,
+    AsyncAPIResponse,
+    to_raw_response_wrapper,
+    async_to_raw_response_wrapper,
+)
+from anthropic._base_client import make_request_options
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 
@@ -162,3 +176,183 @@ def update_env(**new_env: str | Omit) -> Iterator[None]:
     finally:
         os.environ.clear()
         os.environ.update(old)
+
+
+_T = TypeVar("_T")
+_RequestedT = TypeVar("_RequestedT")
+_KeptT = TypeVar("_KeptT")
+
+EVENT = "event: completion\ndata: {}\n\n".encode()
+
+
+class Body(httpx2.SyncByteStream, httpx2.AsyncByteStream):
+    """A response body that counts how often it is closed. It holds more than a test reads."""
+
+    def __init__(self) -> None:
+        self.chunks = [EVENT] * 100
+        self.closes = 0
+
+    @override
+    def __iter__(self) -> Iterator[bytes]:
+        yield from self.chunks
+
+    @override
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        for chunk in self.chunks:
+            yield chunk
+
+    @override
+    def close(self) -> None:
+        self.closes += 1
+
+    @override
+    async def aclose(self) -> None:
+        self.close()
+
+    def transport(self) -> httpx2.MockTransport:
+        return httpx2.MockTransport(lambda _: httpx2.Response(200, stream=self))
+
+    async def wait_closed(self) -> None:
+        """An event loop closes what was dropped once it gets to run, and one generator after the other."""
+        with anyio.fail_after(10):
+            while not self.closes:
+                await anyio.sleep(0)
+
+
+Request = Callable[..., Stream[object]]
+AsyncRequest = Callable[..., Awaitable[AsyncStream[object]]]
+
+
+def requester(client: Anthropic, body: Body, *, stream_cls: type[Stream[object]] = Stream[object]) -> Request:
+    """A method shaped like a generated streaming method, whose response is `body`."""
+    client = client.with_options(http_client=httpx2.Client(transport=body.transport()))
+
+    def request(*, extra_headers: Headers | None = None) -> Stream[object]:
+        return client.get(
+            "/stream",
+            cast_to=object,
+            options=make_request_options(extra_headers=extra_headers),
+            stream=True,
+            stream_cls=stream_cls,
+        )
+
+    return request
+
+
+def async_requester(
+    client: AsyncAnthropic, body: Body, *, stream_cls: type[AsyncStream[object]] = AsyncStream[object]
+) -> AsyncRequest:
+    """A method shaped like a generated streaming method, whose response is `body`."""
+    client = client.with_options(http_client=httpx2.AsyncClient(transport=body.transport()))
+
+    async def request(*, extra_headers: Headers | None = None) -> AsyncStream[object]:
+        return await client.get(
+            "/stream",
+            cast_to=object,
+            options=make_request_options(extra_headers=extra_headers),
+            stream=True,
+            stream_cls=stream_cls,
+        )
+
+    return request
+
+
+@contextlib.contextmanager
+def without_collection() -> Iterator[None]:
+    gc.disable()
+    try:
+        yield
+    finally:
+        gc.enable()
+
+
+def itself(held: _T) -> _T:
+    return held
+
+
+def in_a_cycle(held: object) -> None:
+    """Drops `held` in a way that leaves it to the garbage collector to free it."""
+    cycle = [held]
+    cycle.append(cycle)
+
+
+def collect(client: Anthropic) -> None:
+    """Collects garbage and checks that this closes what was dropped, so that it means something if the rest is open."""
+    dropped = Body()
+    stream = requester(client, dropped)()
+    next(stream)
+    in_a_cycle(stream)
+    del stream
+    gc.collect()
+    assert dropped.closes == 1
+
+
+async def async_collect(client: AsyncAnthropic) -> None:
+    """Collects garbage and checks that this closes what was dropped, so that it means something if the rest is open."""
+    dropped = Body()
+    stream = await async_requester(client, dropped)()
+    await anext(stream)
+    in_a_cycle(stream)
+    del stream
+    gc.collect()
+    await dropped.wait_closed()
+    assert dropped.closes == 1
+
+
+@dataclass(frozen=True)
+class Held(Generic[_RequestedT, _KeptT]):
+    """What the caller holds of a response."""
+
+    request: Callable[[Request], _RequestedT]
+    keep: Callable[[_RequestedT], _KeptT]
+    iterate: Callable[[_KeptT], Iterator[object]]
+
+
+def stream(request: Request) -> Stream[object]:
+    return request()
+
+
+def raw_response(request: Request) -> APIResponse[Stream[object]]:
+    return to_raw_response_wrapper(request)()
+
+
+STREAMS = {
+    "stream": Held(stream, itself, itself),
+    "iter(stream)": Held(stream, iter, itself),
+    "raw_response": Held(raw_response, itself, lambda held: held.parse()),
+    "raw_response.parse()": Held(raw_response, lambda r: r.parse(), itself),
+}
+
+
+@dataclass(frozen=True)
+class AsyncHeld(Generic[_RequestedT, _KeptT]):
+    """What the caller holds of a response."""
+
+    request: Callable[[AsyncRequest], Awaitable[_RequestedT]]
+    keep: Callable[[_RequestedT], _KeptT]
+    iterate: Callable[[_KeptT], AsyncIterator[object]]
+
+
+async def async_stream(request: AsyncRequest) -> AsyncStream[object]:
+    return await request()
+
+
+async def async_raw_response(request: AsyncRequest) -> AsyncAPIResponse[AsyncStream[object]]:
+    return await async_to_raw_response_wrapper(request)()
+
+
+async def async_parsed_raw_response(request: AsyncRequest) -> AsyncStream[object]:
+    return await (await async_raw_response(request)).parse()
+
+
+async def async_parse(response: AsyncAPIResponse[AsyncStream[object]]) -> AsyncIterator[object]:
+    async for event in await response.parse():
+        yield event
+
+
+ASYNC_STREAMS = {
+    "stream": AsyncHeld(async_stream, itself, itself),
+    "aiter(stream)": AsyncHeld(async_stream, aiter, itself),
+    "raw_response": AsyncHeld(async_raw_response, itself, async_parse),
+    "await raw_response.parse()": AsyncHeld(async_parsed_raw_response, itself, itself),
+}

@@ -109,6 +109,9 @@ class Workspaces(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.rules.workspaces.list",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             model=BetaFederationRuleWorkspace,
         )
@@ -174,6 +177,10 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.workspaces.add",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
+                span_created_id=("anthropic.organization.federation_rule.workspace.id", "workspace_id"),
             ),
             cast_to=BetaFederationRuleWorkspace,
         )
@@ -237,6 +244,12 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.workspaces.remove",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
+                span_attributes={
+                    "anthropic.organization.federation_rule.id": federation_rule_id,
+                    "anthropic.organization.federation_rule.workspace.id": workspace_id,
+                },
             ),
             cast_to=WorkspaceRemoveResponse,
         )
@@ -328,6 +341,9 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.rules.workspaces.list",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             model=BetaFederationRuleWorkspace,
         )
@@ -393,6 +409,10 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.workspaces.add",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
+                span_created_id=("anthropic.organization.federation_rule.workspace.id", "workspace_id"),
             ),
             cast_to=BetaFederationRuleWorkspace,
         )
@@ -456,6 +476,12 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.workspaces.remove",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
+                span_attributes={
+                    "anthropic.organization.federation_rule.id": federation_rule_id,
+                    "anthropic.organization.federation_rule.workspace.id": workspace_id,
+                },
             ),
             cast_to=WorkspaceRemoveResponse,
         )

@@ -92,6 +92,9 @@ class Permissions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_roles.permissions.list",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             model=BetaRBACRolePermission,
         )
@@ -168,6 +171,9 @@ class AsyncPermissions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.rbac_roles.permissions.list",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             model=BetaRBACRolePermission,
         )

@@ -118,6 +118,9 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                span_name="anthropic.organization.plugin_marketplaces.retrieve",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -193,6 +196,9 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.update",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -293,6 +299,8 @@ class PluginMarketplaces(SyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                span_name="anthropic.organization.plugin_marketplaces.list",
+                span_route="/v1/organizations/plugin_marketplaces",
             ),
             model=BetaPluginMarketplace,
         )
@@ -386,6 +394,8 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.validate_archive",
+                span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -480,6 +490,8 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.validate_repository",
+                span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -577,6 +589,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                span_name="anthropic.organization.plugin_marketplaces.retrieve",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -652,6 +667,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.update",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -752,6 +770,8 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                span_name="anthropic.organization.plugin_marketplaces.list",
+                span_route="/v1/organizations/plugin_marketplaces",
             ),
             model=BetaPluginMarketplace,
         )
@@ -845,6 +865,8 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.validate_archive",
+                span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -939,6 +961,8 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.plugin_marketplaces.validate_repository",
+                span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )

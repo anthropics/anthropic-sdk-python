@@ -25,6 +25,7 @@ from typing_extensions import (
     Protocol,
     TypeAlias,
     TypedDict,
+    NotRequired,
     SupportsIndex,
     overload,
     override,
@@ -36,6 +37,8 @@ import pydantic
 from httpx2 import Timeout, Response
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import TracerProvider
+
     from ._models import BaseModel
     from ._response import APIResponse, AsyncAPIResponse
 
@@ -110,6 +113,107 @@ if TYPE_CHECKING:
     NoneType: Type[None]
 else:
     NoneType = type(None)
+
+
+class OpenTelemetryTraces(TypedDict, total=False):
+    """The `traces` field of the `open_telemetry` client option: the client's spans."""
+
+    enabled: bool
+    """Whether the client emits spans. `False` disables them, and then the other fields are not used.
+
+    Defaults to `True`.
+    """
+
+    content_mode: Literal["metadata_only", "content"]
+    """Whether the client's spans have the content of its requests and responses, with `content`.
+
+    Defaults to `metadata_only`.
+    """
+
+    max_content_bytes: int
+    """The size in bytes that the content of one span is kept within, in content mode.
+
+    A span with more content has only what fits, and `anthropic.content.truncated`. The SDK measures content by the
+    bytes of its JSON in UTF-8. At least 1, and a smaller value is 750,000. Defaults to 750,000.
+    """
+
+
+class ResolvedOpenTelemetryTraces(TypedDict):
+    """The `traces` of the option that `client.open_telemetry` reads back, which has every field."""
+
+    enabled: bool
+    """Whether the client emits spans."""
+
+    content_mode: Literal["metadata_only", "content"]
+    """Whether the client's spans have the content of its requests and responses, with `content`."""
+
+    max_content_bytes: int
+    """The size in bytes that the content of one span is kept within, in content mode."""
+
+
+class OpenTelemetryOptions(TypedDict, total=False):
+    """The `open_telemetry` client option.
+
+    A client that is given it, even empty, reads none of the `ANTHROPIC_OPEN_TELEMETRY*` environment variables: a field
+    that it leaves out has its default.
+    """
+
+    tracer_provider: TracerProvider
+    """The tracer provider that creates the client's spans, in place of the one registered with the OpenTelemetry API."""
+
+    propagation: bool
+    """Whether the client's requests carry the trace context of their span, in the headers of the registered propagator.
+
+    Set `False` for an application whose HTTP client instrumentation already propagates the trace context, so that a
+    request does not carry it twice. The client's spans are not affected. Defaults to `True`.
+    """
+
+    traces: OpenTelemetryTraces | ResolvedOpenTelemetryTraces | bool
+    """The client's spans. `True` and `False` are short for `{"enabled": True}` and `{"enabled": False}`.
+
+    The `traces` that `client.open_telemetry` reads back are accepted as they are.
+    """
+
+    conversation_id: str
+    """Links the spans of the client's requests to one conversation, as `gen_ai.conversation.id`. Not sent to the API.
+
+    Set it for the requests of one conversation with
+    `client.with_options(open_telemetry={**client.open_telemetry, "conversation_id": ...})`.
+    The option given to `with_options` replaces the client's whole option, and `client.open_telemetry` has the client's.
+    """
+
+
+class ResolvedOpenTelemetryOptions(TypedDict):
+    """A client's `open_telemetry` option as `client.open_telemetry` reads it back.
+
+    It is the option that the client was given, with the defaults for `propagation` and for what that left out of
+    `traces`. A client that was given no option has what the environment variables said when it was constructed. Spread
+    it into the option of a copy of the client:
+    `client.with_options(open_telemetry={**client.open_telemetry, "conversation_id": ...})`.
+    """
+
+    tracer_provider: NotRequired[TracerProvider]
+    """The tracer provider that the client was given. Absent when its spans go to the registered one."""
+
+    propagation: bool
+    """Whether the client's requests carry the trace context of their span."""
+
+    traces: ResolvedOpenTelemetryTraces
+    """The client's spans."""
+
+    conversation_id: NotRequired[str]
+    """The conversation that the spans of the client's requests are linked to. Absent when the client has none."""
+
+
+OpenTelemetryClientOption: TypeAlias = Union[OpenTelemetryOptions, Literal[False], None]
+"""The `open_telemetry` client option. `False` disables the client's spans, and `None` leaves the option unset.
+
+The environment variables `ANTHROPIC_OPEN_TELEMETRY`, `ANTHROPIC_OPEN_TELEMETRY_TRACES_CONTENT_MODE`,
+`ANTHROPIC_OPEN_TELEMETRY_TRACES_MAX_CONTENT_BYTES` and `ANTHROPIC_OPEN_TELEMETRY_PROPAGATION` set `traces.enabled`,
+`traces.content_mode`, `traces.max_content_bytes` and `propagation` for a client whose option is unset. A client that is
+given the option, even `{}`, reads none of them, and what the option leaves out has its default. A copy of a client
+(`with_options`, `copy`) whose option is unset has the client's own, so it reads none of them either.
+"""
 
 
 class RequestOptions(TypedDict, total=False):

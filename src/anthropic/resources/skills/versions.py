@@ -112,6 +112,10 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=SkillVersion,
         )
@@ -170,6 +174,9 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=SkillVersion,
         )
@@ -232,6 +239,9 @@ class Versions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=SkillVersion,
         )
@@ -289,6 +299,9 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=DeletedSkillVersion,
         )
@@ -373,6 +386,10 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=SkillVersion,
         )
@@ -431,6 +448,9 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=SkillVersion,
         )
@@ -493,6 +513,9 @@ class AsyncVersions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=SkillVersion,
         )
@@ -550,6 +573,9 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=DeletedSkillVersion,
         )

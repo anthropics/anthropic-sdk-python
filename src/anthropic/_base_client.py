@@ -24,6 +24,7 @@ from typing import (
     Generic,
     Mapping,
     TypeVar,
+    Callable,
     Iterable,
     Iterator,
     Optional,
@@ -40,6 +41,9 @@ import httpx2
 import pydantic
 from httpx2 import URL, Proxy, HTTPTransport, AsyncHTTPTransport
 from pydantic import PrivateAttr
+from opentelemetry import trace
+from opentelemetry.trace import Tracer
+from opentelemetry.util.types import AttributeValue
 
 from . import _exceptions
 from ._qs import Querystring
@@ -61,6 +65,8 @@ from ._types import (
     AsyncBinaryTypes,
     HttpxRequestFiles,
     ModelBuilderProtocol,
+    OpenTelemetryClientOption,
+    ResolvedOpenTelemetryOptions,
     omit,
     not_given,
 )
@@ -78,6 +84,14 @@ from ._utils import (
 from ._compat import PYDANTIC_V1, model_copy, model_dump
 from ._models import GenericModel, FinalRequestOptions, validate_type, construct_type
 from ._request import APIRequest
+from ._tracing import (
+    ApiCall,
+    get_tracer,
+    start_api_call_span,
+    inject_trace_headers,
+    remove_trace_headers,
+    resolve_open_telemetry,
+)
 from ._response import (
     APIResponse,
     BaseAPIResponse,
@@ -113,6 +127,7 @@ from ._middleware import (
     validate_async_middleware,
 )
 from ._utils._json import openapi_dumps
+from .lib._tracing import OpenTelemetryConfig, finish_api_call_span
 from ._utils._httpx import get_environment_proxies
 
 log: logging.Logger = logging.getLogger(__name__)
@@ -411,6 +426,8 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
     _middleware: tuple[MiddlewareInput, ...]
+    _gen_ai_provider_name: str = "anthropic"
+    _otel_platform: str | None = None
 
     def __init__(
         self,
@@ -420,6 +437,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         _strict_response_validation: bool,
         max_retries: int = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None = DEFAULT_TIMEOUT,
+        open_telemetry: OpenTelemetryClientOption = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
@@ -431,6 +449,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         self.max_retries = max_retries
         self._timeout = timeout
         self._timeout_overridden = False
+        self._set_open_telemetry(open_telemetry)
         self._custom_headers = custom_headers or {}
         self._custom_query = custom_query or {}
         self._strict_response_validation = _strict_response_validation
@@ -442,6 +461,53 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             raise TypeError(
                 "max_retries cannot be None. If you want to disable retries, pass `0`; if you want unlimited retries, pass `math.inf` or a very high number; if you want the default behavior, pass `anthropic.DEFAULT_MAX_RETRIES`"
             )
+
+    def _set_open_telemetry(self, open_telemetry: OpenTelemetryClientOption) -> None:
+        """Sets this client's `open_telemetry` option, and has it get its tracer anew. Nothing else sets the option.
+
+        The constructor calls this, and so does `copy`, on the client it made, with what `_copy_open_telemetry` gives.
+        """
+        # The environment is read here only. A copy of the client that is given no option has the resolved one.
+        options = resolve_open_telemetry(open_telemetry)
+        self._open_telemetry = options
+        self._lazy_tracer: Tracer | None | NotGiven = not_given
+        self._otel = OpenTelemetryConfig(
+            options, provider_name=self._gen_ai_provider_name, platform=self._otel_platform
+        )
+
+    @property
+    def _tracer(self) -> Tracer | None:
+        """This client's tracer, or `None` when it has no spans.
+
+        The client gets it when it first needs it, so constructing or copying a client calls nothing of OpenTelemetry.
+        """
+        if isinstance(self._lazy_tracer, NotGiven):
+            self._lazy_tracer = get_tracer(self._open_telemetry, self._version, scope=self._otel.instrumentation_scope)
+        return self._lazy_tracer
+
+    def _copy_open_telemetry(self, open_telemetry: OpenTelemetryClientOption) -> OpenTelemetryClientOption:
+        """The `open_telemetry` option of a copy of this client: the one given, or else, for `None`, this client's own.
+
+        The one given replaces this client's whole option: nothing of this client's is merged into it. This client's
+        own is resolved, so the environment variables do not apply to a copy.
+        """
+        return {**self._open_telemetry} if open_telemetry is None else open_telemetry
+
+    @property
+    def open_telemetry(self) -> ResolvedOpenTelemetryOptions:
+        """This client's `open_telemetry` option, with `propagation` and every field of its `traces` set.
+
+        The fields that the option given to the client left out have their defaults. A client that was given no option
+        has what the environment variables said when it was constructed. A client that was given `False` has
+        `{"traces": {"enabled": False, ...}}`. The value is a copy, so changing it does not change the client.
+
+        `with_options` replaces the whole option, so a copy of the client that changes one field starts from this value:
+
+        ```py
+        client.with_options(open_telemetry={**client.open_telemetry, "conversation_id": "conv_123"})
+        ```
+        """
+        return {**self._open_telemetry, "traces": {**self._open_telemetry["traces"]}}
 
     def _enforce_trailing_slash(self, url: URL) -> URL:
         if url.raw_path.endswith(b"/"):
@@ -1010,6 +1076,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         base_url: str | URL,
         max_retries: int = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.Client | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
@@ -1049,6 +1116,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
             version=version,
             # cast to a valid type because mypy doesn't understand our type narrowing
             timeout=cast(Timeout, timeout),
+            open_telemetry=open_telemetry,
             base_url=base_url,
             max_retries=max_retries,
             custom_query=custom_query,
@@ -1143,17 +1211,46 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         stream: bool = False,
         stream_cls: type[_StreamT] | None = None,
     ) -> ResponseT | _StreamT:
-        cast_to = self._maybe_override_cast_to(cast_to, options)
-
         # create a copy of the options we were given so that if the
         # options are mutated later & we then retry, the retries are
         # given the original options
-        input_options = self._copy_and_prepare(options)
+        options = self._copy_and_prepare(options)
+        if self._tracer is None:
+            return self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
+
+        start_time = time.time_ns()
+        propagation = self._open_telemetry["propagation"]
+        span = start_api_call_span(
+            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+        )
+        if span is None:
+            return self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
+        call = ApiCall(span, start_time, records_content=self._otel.records_content, propagation=propagation)
+        try:
+            with trace.use_span(span, end_on_exit=False, record_exception=False, set_status_on_exception=False):
+                return self._request(cast_to, options, stream=stream, stream_cls=stream_cls, call=call)
+        except BaseException as err:
+            finish_api_call_span(self, span, call.result(options, error=err, cast_to=cast_to))
+            raise
+
+    def _request(
+        self,
+        cast_to: Type[ResponseT],
+        options: FinalRequestOptions,
+        *,
+        stream: bool = False,
+        stream_cls: type[_StreamT] | None = None,
+        call: ApiCall | None = None,
+    ) -> ResponseT | _StreamT:
+        cast_to = self._maybe_override_cast_to(cast_to, options)
+
+        input_options = options
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
 
-        chain = self._middleware_chain
+        # The prebuilt chain has no call to record its attempts on.
+        chain = self._middleware_chain if call is None or not self._middleware else self._build_middleware_chain(call)
         max_retries = input_options.get_max_retries(self.max_retries)
 
         for retries_taken in range(max_retries + 1):
@@ -1162,10 +1259,10 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
             try:
                 if chain is None:
                     response, prepared = self._attempt_request(
-                        model_copy(input_options), stream=stream, retries_taken=retries_taken
+                        model_copy(input_options), stream=stream, retries_taken=retries_taken, call=call
                     )
                     if response.is_success:
-                        return self._process_response(
+                        result = self._process_response(
                             cast_to=cast_to,
                             options=prepared,
                             response=response,
@@ -1173,6 +1270,10 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
                             stream_cls=stream_cls,
                             retries_taken=retries_taken,
                         )
+                        if call is not None:
+                            call_result = call.result(options, response=response, data=result, cast_to=cast_to)
+                            finish_api_call_span(self, call.span, call_result)
+                        return result
                 else:
                     request = APIRequest(
                         options=model_copy(input_options),
@@ -1181,10 +1282,17 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
                         stream_cls=stream_cls,
                         retries_taken=retries_taken,
                     )
-                    result: Any = chain(request)
-                    if not isinstance(result, BaseAPIResponse) or result.http_response.is_success:
-                        return cast(Union[ResponseT, _StreamT], self._finalize_middleware_result(result, request))
-                    response = result.http_response
+                    chain_result: Any = chain(request)
+                    if not isinstance(chain_result, BaseAPIResponse) or chain_result.http_response.is_success:
+                        value = self._finalize_middleware_result(chain_result, request)
+                        if call is not None:
+                            last_response = (
+                                chain_result.http_response if isinstance(chain_result, BaseAPIResponse) else None
+                            )
+                            call_result = call.result(options, response=last_response, data=value, cast_to=cast_to)
+                            finish_api_call_span(self, call.span, call_result)
+                        return cast(Union[ResponseT, _StreamT], value)
+                    response = chain_result.http_response
             except Exception as err:
                 should_retry, failed_response = self._should_retry_exception(err)
                 if remaining_retries <= 0 or not should_retry:
@@ -1223,19 +1331,22 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
         raise RuntimeError("could not resolve response (should never happen)")
 
-    def _build_middleware_chain(self) -> CallNext | None:
+    def _build_middleware_chain(self, call: ApiCall | None = None) -> CallNext | None:
         """Build the middleware invocation chain.
 
         The chain only depends on the immutable `self._middleware` tuple so it is built
         once at construction time. It is invoked once per HTTP attempt, inside the
-        SDK's retry loop, with that attempt's `APIRequest`.
+        SDK's retry loop, with that attempt's `APIRequest`. A traced API call builds
+        its own, whose attempts are recorded on `call`.
         """
         if not self._middleware:
             return None
 
         def base_handler(req: APIRequest) -> APIResponse[Any]:
             options = _prepare_middleware_options(req)
-            response, prepared = self._attempt_request(options, stream=req.stream, retries_taken=req.retries_taken)
+            response, prepared = self._attempt_request(
+                options, stream=req.stream, retries_taken=req.retries_taken, call=call
+            )
             return cast(
                 "APIResponse[Any]",
                 self._process_response(
@@ -1290,6 +1401,7 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         *,
         stream: bool = False,
         retries_taken: int = 0,
+        call: ApiCall | None = None,
     ) -> tuple[httpx2.Response, FinalRequestOptions]:
         """Prepare, build and send a single HTTP attempt.
 
@@ -1297,11 +1409,14 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         options it was sent with — status handling (the retry policy, raising typed
         errors for the caller) happens above, where middleware can inspect error
         responses first. Connection failures raise typed errors (`APITimeoutError`,
-        `APIConnectionError`).
+        `APIConnectionError`). `call`, an API call that has a span, records the attempt.
         """
         options = self._prepare_options(options)
 
         request = self._build_request(options, retries_taken=retries_taken)
+        if call is not None and call.propagation:
+            # `_prepare_request` may sign the headers, and `inject_trace_headers` sets these after it.
+            remove_trace_headers(call.span, request.headers)
         self._prepare_request(request)
 
         kwargs: HttpxSendArgs = {}
@@ -1313,6 +1428,10 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
 
         log.debug("Sending HTTP Request: %s %s", request.method, request.url)
 
+        if call is not None:
+            call.sending(request, options)
+            if call.propagation:
+                inject_trace_headers(call.span, request.headers)
         try:
             response = self._client.send(
                 request,
@@ -1732,6 +1851,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         _strict_response_validation: bool,
         max_retries: int = DEFAULT_MAX_RETRIES,
         timeout: float | Timeout | None | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         http_client: httpx2.AsyncClient | None = None,
         custom_headers: Mapping[str, str] | None = None,
         custom_query: Mapping[str, object] | None = None,
@@ -1771,6 +1891,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             base_url=base_url,
             # cast to a valid type because mypy doesn't understand our type narrowing
             timeout=cast(Timeout, timeout),
+            open_telemetry=open_telemetry,
             max_retries=max_retries,
             custom_query=custom_query,
             custom_headers=custom_headers,
@@ -1866,17 +1987,46 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             # so resolve it in a worker thread rather than on the event loop
             self._platform = await asyncify(get_platform)()
 
-        cast_to = self._maybe_override_cast_to(cast_to, options)
-
         # create a copy of the options we were given so that if the
         # options are mutated later & we then retry, the retries are
         # given the original options
-        input_options = await self._copy_and_prepare(options)
+        options = await self._copy_and_prepare(options)
+        if self._tracer is None:
+            return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
+
+        start_time = time.time_ns()
+        propagation = self._open_telemetry["propagation"]
+        span = start_api_call_span(
+            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+        )
+        if span is None:
+            return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
+        call = ApiCall(span, start_time, records_content=self._otel.records_content, propagation=propagation)
+        try:
+            with trace.use_span(span, end_on_exit=False, record_exception=False, set_status_on_exception=False):
+                return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls, call=call)
+        except BaseException as err:
+            finish_api_call_span(self, span, call.result(options, error=err, cast_to=cast_to))
+            raise
+
+    async def _request(
+        self,
+        cast_to: Type[ResponseT],
+        options: FinalRequestOptions,
+        *,
+        stream: bool = False,
+        stream_cls: type[_AsyncStreamT] | None = None,
+        call: ApiCall | None = None,
+    ) -> ResponseT | _AsyncStreamT:
+        cast_to = self._maybe_override_cast_to(cast_to, options)
+
+        input_options = options
         if input_options.idempotency_key is None and input_options.method.lower() != "get":
             # ensure the idempotency key is reused between requests
             input_options.idempotency_key = self._idempotency_key()
 
-        chain = self._middleware_chain
+        # The prebuilt chain has no call to record its attempts on.
+        chain = self._middleware_chain if call is None or not self._middleware else self._build_middleware_chain(call)
         max_retries = input_options.get_max_retries(self.max_retries)
 
         for retries_taken in range(max_retries + 1):
@@ -1885,10 +2035,10 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             try:
                 if chain is None:
                     response, prepared = await self._attempt_request(
-                        model_copy(input_options), stream=stream, retries_taken=retries_taken
+                        model_copy(input_options), stream=stream, retries_taken=retries_taken, call=call
                     )
                     if response.is_success:
-                        return await self._process_response(
+                        result = await self._process_response(
                             cast_to=cast_to,
                             options=prepared,
                             response=response,
@@ -1896,6 +2046,10 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
                             stream_cls=stream_cls,
                             retries_taken=retries_taken,
                         )
+                        if call is not None:
+                            call_result = call.result(options, response=response, data=result, cast_to=cast_to)
+                            finish_api_call_span(self, call.span, call_result)
+                        return result
                 else:
                     request = APIRequest(
                         options=model_copy(input_options),
@@ -1904,12 +2058,17 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
                         stream_cls=stream_cls,
                         retries_taken=retries_taken,
                     )
-                    result: Any = await chain(request)
-                    if not isinstance(result, BaseAPIResponse) or result.http_response.is_success:
-                        return cast(
-                            Union[ResponseT, _AsyncStreamT], await self._finalize_middleware_result(result, request)
-                        )
-                    response = result.http_response
+                    chain_result: Any = await chain(request)
+                    if not isinstance(chain_result, BaseAPIResponse) or chain_result.http_response.is_success:
+                        value = await self._finalize_middleware_result(chain_result, request)
+                        if call is not None:
+                            last_response = (
+                                chain_result.http_response if isinstance(chain_result, BaseAPIResponse) else None
+                            )
+                            call_result = call.result(options, response=last_response, data=value, cast_to=cast_to)
+                            finish_api_call_span(self, call.span, call_result)
+                        return cast(Union[ResponseT, _AsyncStreamT], value)
+                    response = chain_result.http_response
             except Exception as err:
                 should_retry, failed_response = self._should_retry_exception(err)
                 if remaining_retries <= 0 or not should_retry:
@@ -1948,12 +2107,13 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
 
         raise RuntimeError("could not resolve response (should never happen)")
 
-    def _build_middleware_chain(self) -> AsyncCallNext | None:
+    def _build_middleware_chain(self, call: ApiCall | None = None) -> AsyncCallNext | None:
         """Build the middleware invocation chain.
 
         The chain only depends on the immutable `self._middleware` tuple so it is built
         once at construction time. It is invoked once per HTTP attempt, inside the
-        SDK's retry loop, with that attempt's `APIRequest`.
+        SDK's retry loop, with that attempt's `APIRequest`. A traced API call builds
+        its own, whose attempts are recorded on `call`.
         """
         if not self._middleware:
             return None
@@ -1961,7 +2121,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         async def base_handler(req: APIRequest) -> AsyncAPIResponse[Any]:
             options = _prepare_middleware_options(req)
             response, prepared = await self._attempt_request(
-                options, stream=req.stream, retries_taken=req.retries_taken
+                options, stream=req.stream, retries_taken=req.retries_taken, call=call
             )
             return cast(
                 "AsyncAPIResponse[Any]",
@@ -2021,6 +2181,7 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         *,
         stream: bool = False,
         retries_taken: int = 0,
+        call: ApiCall | None = None,
     ) -> tuple[httpx2.Response, FinalRequestOptions]:
         """Prepare, build and send a single HTTP attempt.
 
@@ -2028,11 +2189,14 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         options it was sent with — status handling (the retry policy, raising typed
         errors for the caller) happens above, where middleware can inspect error
         responses first. Connection failures raise typed errors (`APITimeoutError`,
-        `APIConnectionError`).
+        `APIConnectionError`). `call`, an API call that has a span, records the attempt.
         """
         options = await self._prepare_options(options)
 
         request = self._build_request(options, retries_taken=retries_taken)
+        if call is not None and call.propagation:
+            # `_prepare_request` may sign the headers, and `inject_trace_headers` sets these after it.
+            remove_trace_headers(call.span, request.headers)
         await self._prepare_request(request)
 
         kwargs: HttpxSendArgs = {}
@@ -2044,6 +2208,10 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
 
         log.debug("Sending HTTP Request: %s %s", request.method, request.url)
 
+        if call is not None:
+            call.sending(request, options)
+            if call.propagation:
+                inject_trace_headers(call.span, request.headers)
         try:
             response = await self._client.send(
                 request,
@@ -2353,6 +2521,11 @@ def make_request_options(
     extra_body: Body | None = None,
     timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     post_parser: PostParser | NotGiven = not_given,
+    span_name: str | None = None,
+    span_route: str | None = None,
+    span_content_query_params: Tuple[str, ...] = (),
+    span_attributes: Mapping[str, AttributeValue] | Callable[[object], Mapping[str, AttributeValue]] | None = None,
+    span_created_id: str | Tuple[str, str] | None = None,
 ) -> RequestOptions:
     """Create a dict of type RequestOptions without keys of NotGiven values."""
     options: RequestOptions = {}
@@ -2374,6 +2547,30 @@ def make_request_options(
     if is_given(post_parser):
         # internal
         options["post_parser"] = post_parser  # type: ignore
+
+    if span_name is not None:
+        # internal
+        options["span_name"] = span_name  # type: ignore
+
+    if span_route is not None:
+        # internal
+        options["span_route"] = span_route  # type: ignore
+
+    if span_name is not None and query is not None:
+        # internal: the names of the query parameters that the endpoint defines
+        options["span_query_params"] = tuple(query)  # type: ignore
+
+    if span_content_query_params:
+        # internal: the query parameters that are content on this endpoint only
+        options["span_content_query_params"] = span_content_query_params  # type: ignore
+
+    if span_attributes is not None:
+        # internal
+        options["span_attributes"] = span_attributes  # type: ignore
+
+    if span_created_id is not None:
+        # internal
+        options["span_created_id"] = span_created_id  # type: ignore
 
     return options
 
