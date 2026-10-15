@@ -102,7 +102,8 @@ class Events(SyncAPIResource):
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -180,7 +181,8 @@ class Events(SyncAPIResource):
         Args:
           events: Events to send to the `session`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -255,7 +257,8 @@ class Events(SyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -371,7 +374,8 @@ class AsyncEvents(AsyncAPIResource):
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -449,7 +453,8 @@ class AsyncEvents(AsyncAPIResource):
         Args:
           events: Events to send to the `session`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -524,7 +529,8 @@ class AsyncEvents(AsyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

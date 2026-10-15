@@ -116,7 +116,8 @@ class Deployments(SyncAPIResource):
           vault_ids: Vault IDs for stored credentials the agent can use during sessions created from
               this deployment. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -190,7 +191,8 @@ class Deployments(SyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -296,7 +298,8 @@ class Deployments(SyncAPIResource):
           vault_ids: Vault IDs. Full replacement. Omit to preserve; send empty array or null to
               clear. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -391,7 +394,8 @@ class Deployments(SyncAPIResource):
           status: Filter by status: `active` or `paused`. Omit for both. To include archived
               deployments, use `include_archived` instead; the two cannot be combined.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -462,7 +466,8 @@ class Deployments(SyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to archive.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -526,7 +531,8 @@ class Deployments(SyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to pause.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -590,7 +596,8 @@ class Deployments(SyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to run.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -654,7 +661,8 @@ class Deployments(SyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to unpause.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -779,7 +787,8 @@ class AsyncDeployments(AsyncAPIResource):
           vault_ids: Vault IDs for stored credentials the agent can use during sessions created from
               this deployment. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -853,7 +862,8 @@ class AsyncDeployments(AsyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -959,7 +969,8 @@ class AsyncDeployments(AsyncAPIResource):
           vault_ids: Vault IDs. Full replacement. Omit to preserve; send empty array or null to
               clear. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1054,7 +1065,8 @@ class AsyncDeployments(AsyncAPIResource):
           status: Filter by status: `active` or `paused`. Omit for both. To include archived
               deployments, use `include_archived` instead; the two cannot be combined.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1125,7 +1137,8 @@ class AsyncDeployments(AsyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to archive.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1189,7 +1202,8 @@ class AsyncDeployments(AsyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to pause.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1253,7 +1267,8 @@ class AsyncDeployments(AsyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to run.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1317,7 +1332,8 @@ class AsyncDeployments(AsyncAPIResource):
         Args:
           deployment_id: Unique identifier of the deployment to unpause.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

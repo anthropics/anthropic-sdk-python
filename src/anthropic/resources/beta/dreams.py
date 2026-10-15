@@ -100,7 +100,8 @@ class Dreams(SyncAPIResource):
           output_behavior: Which memory store a dream writes its result to. Defaults to `create_new` when
               left out of a create request.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -174,7 +175,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to get (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -265,7 +267,8 @@ class Dreams(SyncAPIResource):
               Repeat the parameter to give more than one status. Leave it out to return dreams
               of every status.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -344,7 +347,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to archive (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -417,7 +421,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to cancel (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -535,7 +540,8 @@ class AsyncDreams(AsyncAPIResource):
           output_behavior: Which memory store a dream writes its result to. Defaults to `create_new` when
               left out of a create request.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -609,7 +615,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to get (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -700,7 +707,8 @@ class AsyncDreams(AsyncAPIResource):
               Repeat the parameter to give more than one status. Leave it out to return dreams
               of every status.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -779,7 +787,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to archive (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -852,7 +861,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to cancel (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

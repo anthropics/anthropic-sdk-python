@@ -108,7 +108,8 @@ class UserProfiles(SyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -178,7 +179,8 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -280,7 +282,8 @@ class UserProfiles(SyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -376,7 +379,8 @@ class UserProfiles(SyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -444,7 +448,8 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -570,7 +575,8 @@ class AsyncUserProfiles(AsyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -640,7 +646,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -742,7 +749,8 @@ class AsyncUserProfiles(AsyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -838,7 +846,8 @@ class AsyncUserProfiles(AsyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -906,7 +915,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

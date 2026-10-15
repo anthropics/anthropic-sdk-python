@@ -80,7 +80,8 @@ class Workspaces(SyncAPIResource):
           page: Opaque cursor from a previous response's `next_page`. Leave it out to get the
               first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -159,7 +160,8 @@ class Workspaces(SyncAPIResource):
 
           workspace_id: ID of the workspace to add (`wrkspc_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -236,7 +238,8 @@ class Workspaces(SyncAPIResource):
 
           workspace_id: ID of the workspace to remove (`wrkspc_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -335,7 +338,8 @@ class AsyncWorkspaces(AsyncAPIResource):
           page: Opaque cursor from a previous response's `next_page`. Leave it out to get the
               first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -414,7 +418,8 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           workspace_id: ID of the workspace to add (`wrkspc_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -491,7 +496,8 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           workspace_id: ID of the workspace to remove (`wrkspc_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 

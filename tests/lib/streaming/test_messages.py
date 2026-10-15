@@ -491,6 +491,23 @@ class TestSyncMessages:
         stop_event.model_dump()
         stop_event.model_dump_json()
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_speed_is_forwarded(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+            speed="fast",
+        ) as stream:
+            stream.until_done()
+
+        request_body = json.loads(route.calls.last.request.content)
+        assert request_body["speed"] == "fast"
+
 
 class TestAsyncMessages:
     @pytest.mark.asyncio
@@ -752,6 +769,24 @@ class TestAsyncMessages:
         # must not emit `PydanticSerializationUnexpectedValue` warnings
         stop_event.model_dump()
         stop_event.model_dump_json()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_speed_is_forwarded(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-opus-4-7",
+            speed="fast",
+        ) as stream:
+            await stream.until_done()
+
+        request_body = json.loads(route.calls.last.request.content)
+        assert request_body["speed"] == "fast"
 
 
 def test_message_delta_fields_are_all_accumulated() -> None:

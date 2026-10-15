@@ -96,6 +96,7 @@ class TestBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
@@ -516,6 +517,7 @@ class TestAsyncBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [

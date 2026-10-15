@@ -202,8 +202,9 @@ class SpendLimits(SyncAPIResource):
         For a Claude Enterprise organization, this deletes a per-user override, and the
         member falls back to any inherited spend limit at that period. Its seat-tier,
         group, and organization-level rows cannot be deleted via this endpoint. A Claude
-        Console organization deletes its organization and workspace limits. Deleting
-        them through the API is in an early access preview.
+        Console organization deletes its organization and workspace limits, but not its
+        `usage_tier` limit. Deleting organization and workspace limits through the API
+        is in an early access preview.
 
         Args:
           spend_limit_id: ID of the Spend Limit.
@@ -461,8 +462,9 @@ class AsyncSpendLimits(AsyncAPIResource):
         For a Claude Enterprise organization, this deletes a per-user override, and the
         member falls back to any inherited spend limit at that period. Its seat-tier,
         group, and organization-level rows cannot be deleted via this endpoint. A Claude
-        Console organization deletes its organization and workspace limits. Deleting
-        them through the API is in an early access preview.
+        Console organization deletes its organization and workspace limits, but not its
+        `usage_tier` limit. Deleting organization and workspace limits through the API
+        is in an early access preview.
 
         Args:
           spend_limit_id: ID of the Spend Limit.

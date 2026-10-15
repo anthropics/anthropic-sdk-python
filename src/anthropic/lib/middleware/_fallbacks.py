@@ -46,6 +46,8 @@ log: logging.Logger = logging.getLogger("anthropic.lib.middleware")
 
 _MESSAGES_PATH = "/v1/messages"
 
+CAPACITY_ERROR_STATUSES = (429, 529)
+
 DEFAULT_BETAS: tuple[AnthropicBetaParam, ...] = ("fallback-credit-2026-07-01",)
 """Betas sent by default; override with the `betas` option."""
 
@@ -152,6 +154,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
     capacity errors, `null` otherwise). A refusal surfaced to the client rather
     than retried is reported through the `anthropic.lib.middleware` logger.
 
+    A `speed: "fast"` request that falls back to an entry with no `speed`, and
+    is rejected there with a 429 or 529, is retried once on that entry without
+    `speed`. Set `speed: "fast"` on the entry to keep it fast-only.
+
     To keep later requests on the model that accepted, run them inside a shared
     `BetaFallbackState` context; requests sharing that state start directly at
     the pinned fallback. Reuse one state across whatever scope the pin should
@@ -210,7 +216,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
         initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
-        response = call_next(initial_request)
+        if start_index == -1:
+            response = call_next(initial_request)
+        else:
+            response, _ = send_hop(initial_request, self._fallbacks[start_index], call_next)
         if not response.http_response.is_success:
             return response
 
@@ -243,9 +252,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin(index)
             token = _credit_token(message)
             category = _refusal_category(message)
-            res = call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
+            entry = self._fallbacks[index]
+            res, _ = send_hop(request.copy(body=_merged_body(body, entry, token)), entry, call_next)
             if res.http_response.is_success:
-                to_model = str(self._fallbacks[index]["model"])
+                to_model = str(entry["model"])
                 seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
@@ -279,7 +289,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
         initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
-        response = await call_next(initial_request)
+        if start_index == -1:
+            response = await call_next(initial_request)
+        else:
+            response, _ = await async_send_hop(initial_request, self._fallbacks[start_index], call_next)
         if not response.http_response.is_success:
             return response
 
@@ -312,9 +325,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin(index)
             token = _credit_token(message)
             category = _refusal_category(message)
-            res = await call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
+            entry = self._fallbacks[index]
+            res, _ = await async_send_hop(request.copy(body=_merged_body(body, entry, token)), entry, call_next)
             if res.http_response.is_success:
-                to_model = str(self._fallbacks[index]["model"])
+                to_model = str(entry["model"])
                 seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
@@ -538,7 +552,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 for attempt in range(2):
                     hop_request = request.copy(body=chain.hop_body(entry, continuation))
                     try:
-                        res_b = call_next(hop_request)
+                        res_b, entry = send_hop(hop_request, entry, call_next)
                     except Exception as err:
                         log.error(
                             "anthropic-sdk: BetaRefusalFallbackMiddleware: fallback request to %s failed: %s",
@@ -657,7 +671,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 for attempt in range(2):
                     hop_request = request.copy(body=chain.hop_body(entry, continuation))
                     try:
-                        res_b = await call_next(hop_request)
+                        res_b, entry = await async_send_hop(hop_request, entry, call_next)
                     except Exception as err:
                         log.error(
                             "anthropic-sdk: BetaRefusalFallbackMiddleware: fallback request to %s failed: %s",
@@ -1195,7 +1209,7 @@ class _ChainState:
         if delta is not None:
             details = _as_dict(delta.get("stop_details"))
             if details is not None:
-                details["recommended_model"] = failure.model if failure.status in (429, 529) else None
+                details["recommended_model"] = failure.model if failure.status in CAPACITY_ERROR_STATUSES else None
         usage = _as_dict(event.get("usage")) or {}
         usage["iterations"] = _copy.deepcopy(self.iterations)
         event["usage"] = usage
@@ -1481,6 +1495,49 @@ def _prepend_seam_blocks_async(response: AsyncAPIResponse[Any], seams: list[dict
         options=response._options,
         retries_taken=response.retries_taken,
     )
+
+
+def send_hop(
+    request: APIRequest, entry: BetaFallbackParam, call_next: CallNext
+) -> tuple[APIResponse[Any], BetaFallbackParam]:
+    """Send a request built from `entry`, resending it once without `speed` when it
+    inherited `fast` and was rejected with a capacity error. Also returns the entry to
+    build any later resend of the same hop from: `entry`, with `speed` unset if dropped."""
+    response = call_next(request)
+    resend = without_rejected_fast_speed(request, entry, response.status_code)
+    if resend is None:
+        return response, entry
+
+    response.close()
+    return call_next(resend), {**entry, "speed": None}
+
+
+async def async_send_hop(
+    request: APIRequest, entry: BetaFallbackParam, call_next: AsyncCallNext
+) -> tuple[AsyncAPIResponse[Any], BetaFallbackParam]:
+    response = await call_next(request)
+    resend = without_rejected_fast_speed(request, entry, response.status_code)
+    if resend is None:
+        return response, entry
+
+    await response.close()
+    return await call_next(resend), {**entry, "speed": None}
+
+
+def without_rejected_fast_speed(request: APIRequest, entry: BetaFallbackParam, status_code: int) -> APIRequest | None:
+    """The hop's `request` to resend, or `None` when its result stands. `speed` is
+    dropped, not set to `standard`: a model without fast mode rejects the parameter."""
+    body = _as_dict(request.json)
+    if status_code not in CAPACITY_ERROR_STATUSES or "speed" in entry or body is None or body.get("speed") != "fast":
+        return None
+
+    log.warning(
+        "anthropic-sdk: BetaRefusalFallbackMiddleware: fast fallback request to %s was rejected "
+        "(HTTP %s); retrying without `speed`",
+        entry["model"],
+        status_code,
+    )
+    return request.copy(body=_patch(body, {"speed": None}))
 
 
 def _apply_hop(body: dict[str, Any], entry: BetaFallbackParam) -> dict[str, Any]:

@@ -19,7 +19,10 @@ class TunnelListParams(TypedDict, total=False):
     """Opaque pagination cursor from a previous `list_tunnels` response."""
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

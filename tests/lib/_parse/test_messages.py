@@ -1,6 +1,9 @@
+import json
 from typing import Any, List, cast
 
+import httpx2
 import pytest
+from respx import MockRouter
 from pydantic import BaseModel
 from inline_snapshot import external, snapshot
 
@@ -16,6 +19,18 @@ class OrderItem(BaseModel):
 class OrderDetails(BaseModel):
     items: List[OrderItem]
     total: float
+
+
+MESSAGE = {
+    "id": "msg_01Speed",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-5-5",
+    "content": [{"type": "text", "text": "Hello there!"}],
+    "stop_reason": "end_turn",
+    "stop_sequence": None,
+    "usage": {"input_tokens": 10, "output_tokens": 5},
+}
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
@@ -74,6 +89,21 @@ class TestSyncParse:
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
 
+    def test_parse_forwards_speed(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """Test sync messages.parse() sends speed in the request body."""
+
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
+
+        client.messages.parse(
+            model="claude-sonnet-5-5",
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            max_tokens=1024,
+            speed="fast",
+        )
+
+        request_body = json.loads(respx_mock.calls.last.request.content)
+        assert request_body["speed"] == "fast"
+
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 class TestAsyncParse:
@@ -130,6 +160,21 @@ class TestAsyncParse:
         assert len(response.parsed_output.items) == 2
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
+
+    async def test_parse_forwards_speed(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        """Test async messages.parse() sends speed in the request body."""
+
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
+
+        await async_client.messages.parse(
+            model="claude-sonnet-5-5",
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            max_tokens=1024,
+            speed="fast",
+        )
+
+        request_body = json.loads(respx_mock.calls.last.request.content)
+        assert request_body["speed"] == "fast"
 
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")

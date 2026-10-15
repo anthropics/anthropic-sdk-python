@@ -126,7 +126,8 @@ class TelemetryDestinations(SyncAPIResource):
           traces: The settings for the traces that the destination receives. If you leave it out,
               every setting takes its default.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -190,7 +191,8 @@ class TelemetryDestinations(SyncAPIResource):
         Args:
           destination_id: ID of the destination (`tdst_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -308,7 +310,8 @@ class TelemetryDestinations(SyncAPIResource):
               the destination's list has more than 750 workspaces. Remove workspaces one at a
               time until 750 or fewer remain, then send the update again.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -392,7 +395,8 @@ class TelemetryDestinations(SyncAPIResource):
               match. An ID that isn't the ID of one of the organization's workspaces doesn't
               match any destination, not even one whose type is `all`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -458,7 +462,8 @@ class TelemetryDestinations(SyncAPIResource):
         Args:
           destination_id: ID of the destination (`tdst_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -522,7 +527,8 @@ class TelemetryDestinations(SyncAPIResource):
         Args:
           destination_id: ID of the destination to test (starts with `tdst_`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -646,7 +652,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
           traces: The settings for the traces that the destination receives. If you leave it out,
               every setting takes its default.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -710,7 +717,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         Args:
           destination_id: ID of the destination (`tdst_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -828,7 +836,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
               the destination's list has more than 750 workspaces. Remove workspaces one at a
               time until 750 or fewer remain, then send the update again.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -912,7 +921,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
               match. An ID that isn't the ID of one of the organization's workspaces doesn't
               match any destination, not even one whose type is `all`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -978,7 +988,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         Args:
           destination_id: ID of the destination (`tdst_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 
@@ -1042,7 +1053,8 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         Args:
           destination_id: ID of the destination to test (starts with `tdst_`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `telemetry-destinations-2026-08-11`
+              in this header.
 
           extra_headers: Send extra headers
 

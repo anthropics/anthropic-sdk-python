@@ -132,6 +132,7 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -269,6 +270,14 @@ class Messages(SyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -422,6 +431,7 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -568,6 +578,14 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -711,6 +729,7 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -857,6 +876,14 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -999,6 +1026,7 @@ class Messages(SyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1055,6 +1083,7 @@ class Messages(SyncAPIResource):
                 "metadata": metadata,
                 "output_config": output_config,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "stream": stream,
                 "system": system,
@@ -1090,6 +1119,7 @@ class Messages(SyncAPIResource):
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1175,6 +1205,7 @@ class Messages(SyncAPIResource):
                 "output_config": merged_output_config,
                 "container": container,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "tools": tools,
@@ -1211,6 +1242,7 @@ class Messages(SyncAPIResource):
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1296,6 +1328,7 @@ class Messages(SyncAPIResource):
                 "metadata": metadata,
                 "output_config": merged_output_config,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
@@ -1324,6 +1357,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -1428,6 +1462,13 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -1593,6 +1634,7 @@ class Messages(SyncAPIResource):
                 "model": model,
                 "cache_control": cache_control,
                 "output_config": merged_output_config,
+                "speed": speed,
                 "system": system,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
@@ -1649,6 +1691,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1786,6 +1829,14 @@ class AsyncMessages(AsyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1939,6 +1990,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2085,6 +2137,14 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -2228,6 +2288,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2374,6 +2435,14 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -2516,6 +2585,7 @@ class AsyncMessages(AsyncAPIResource):
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -2572,6 +2642,7 @@ class AsyncMessages(AsyncAPIResource):
                 "metadata": metadata,
                 "output_config": output_config,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "stream": stream,
                 "system": system,
@@ -2607,6 +2678,7 @@ class AsyncMessages(AsyncAPIResource):
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2691,6 +2763,7 @@ class AsyncMessages(AsyncAPIResource):
                 "output_config": merged_output_config,
                 "container": container,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "tools": tools,
@@ -2727,6 +2800,7 @@ class AsyncMessages(AsyncAPIResource):
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2812,6 +2886,7 @@ class AsyncMessages(AsyncAPIResource):
                 "metadata": metadata,
                 "output_config": merged_output_config,
                 "service_tier": service_tier,
+                "speed": speed,
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
@@ -2840,6 +2915,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -2944,6 +3020,13 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -3109,6 +3192,7 @@ class AsyncMessages(AsyncAPIResource):
                 "model": model,
                 "cache_control": cache_control,
                 "output_config": merged_output_config,
+                "speed": speed,
                 "system": system,
                 "thinking": thinking,
                 "tool_choice": tool_choice,
