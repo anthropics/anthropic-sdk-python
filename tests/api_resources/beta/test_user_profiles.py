@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -32,10 +30,20 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.create(
             access_type="application",
             external_id="user_12345",
+            external_user_details={
+                "account_status": "active",
+                "country": "country",
+                "email_hash": "x",
+                "entity_type": "individual",
+                "name_hash": "x",
+                "onboarded_at": parse_datetime("2019-12-27T18:11:19.117Z"),
+                "reference_id": "x",
+            },
             external_user_onboarded_at=parse_datetime("2024-11-02T08:15:00Z"),
             metadata={},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -71,6 +79,7 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -118,10 +127,20 @@ class TestUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             access_type="application",
             external_id="user_12345",
+            external_user_details={
+                "account_status": "active",
+                "country": "country",
+                "email_hash": "x",
+                "entity_type": "individual",
+                "name_hash": "x",
+                "onboarded_at": parse_datetime("2019-12-27T18:11:19.117Z"),
+                "reference_id": "x",
+            },
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -169,6 +188,7 @@ class TestUserProfiles:
             order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
@@ -204,6 +224,7 @@ class TestUserProfiles:
         user_profile = client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -254,10 +275,20 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.create(
             access_type="application",
             external_id="user_12345",
+            external_user_details={
+                "account_status": "active",
+                "country": "country",
+                "email_hash": "x",
+                "entity_type": "individual",
+                "name_hash": "x",
+                "onboarded_at": parse_datetime("2019-12-27T18:11:19.117Z"),
+                "reference_id": "x",
+            },
             external_user_onboarded_at=parse_datetime("2024-11-02T08:15:00Z"),
             metadata={},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -293,6 +324,7 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -340,10 +372,20 @@ class TestAsyncUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             access_type="application",
             external_id="user_12345",
+            external_user_details={
+                "account_status": "active",
+                "country": "country",
+                "email_hash": "x",
+                "entity_type": "individual",
+                "name_hash": "x",
+                "onboarded_at": parse_datetime("2019-12-27T18:11:19.117Z"),
+                "reference_id": "x",
+            },
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -391,6 +433,7 @@ class TestAsyncUserProfiles:
             order_by="created_at",
             page="page",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
@@ -426,6 +469,7 @@ class TestAsyncUserProfiles:
         user_profile = await async_client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 

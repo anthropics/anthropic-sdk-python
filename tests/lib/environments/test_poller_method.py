@@ -1,9 +1,9 @@
-"""Tests for ``iter_work`` / ``aiter_work`` (the implementations behind
-``client.beta.environments.work.poller()``).
+"""Tests for `iter_work` / `aiter_work` (the implementations behind
+`client.beta.environments.work.poller()`).
 
 We don't need a real HTTP mock here because the generators only ever talk to
-a ``Work``/``AsyncWork`` resource through three methods (``poll``, ``ack``,
-``stop``). The fakes below stand in for that resource and let each test feed
+a `Work`/`AsyncWork` resource through three methods (`poll`, `ack`,
+`stop`). The fakes below stand in for that resource and let each test feed
 a script of poll responses while recording ack/stop call sites.
 """
 
@@ -12,15 +12,27 @@ from __future__ import annotations
 import time
 import asyncio
 import logging
+from types import SimpleNamespace
 from typing import Any, cast
 from collections.abc import AsyncIterator
+from typing_extensions import override
 
 import httpx2
 import pytest
+from respx import MockRouter
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, StatusCode
+from opentelemetry.sdk.trace import TracerProvider, sampling
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-from anthropic import APIStatusError
+from anthropic import Anthropic, APIStatusError, AsyncAnthropic
 from anthropic.lib.environments import _poller as poller_mod
 from anthropic.lib.environments._poller import iter_work, aiter_work
+
+from ...test_open_telemetry import TRACING_FAILURES, failing_tracing
+from ..tools.test_open_telemetry import Spans, span_id, parent_id, attributes
+
+base_url = "http://127.0.0.1:4010"
 
 
 class _StubWorkData:
@@ -28,7 +40,7 @@ class _StubWorkData:
 
 
 class _StubWork:
-    """Minimal stand-in for ``BetaSelfHostedWork`` — only fields the poller reads."""
+    """Minimal stand-in for `BetaSelfHostedWork` — only fields the poller reads."""
 
     def __init__(self, *, id: str = "work_1") -> None:
         self.id = id
@@ -42,11 +54,13 @@ def _api_status_error(code: int) -> APIStatusError:
 
 
 class FakeWork:
-    """Sync resource fake. ``poll_script`` is consumed in order; values are
-    either ``BetaSelfHostedWork``-shaped stubs, ``None`` (no work available),
-    ``Exception`` instances (raised from poll), or callables producing one of
+    """Sync resource fake. `poll_script` is consumed in order; values are
+    either `BetaSelfHostedWork`-shaped stubs, `None` (no work available),
+    `Exception` instances (raised from poll), or callables producing one of
     those (so a script step can also move a fake clock).
     """
+
+    _client = SimpleNamespace(_tracer=None)
 
     def __init__(self, poll_script: list[Any]) -> None:
         self._poll_script = list(poll_script)
@@ -66,6 +80,8 @@ class FakeWork:
 
 
 class FakeAsyncWork:
+    _client = SimpleNamespace(_tracer=None)
+
     def __init__(self, poll_script: list[Any]) -> None:
         self._poll_script = list(poll_script)
         self.poll_calls: list[dict[str, Any]] = []
@@ -87,7 +103,7 @@ class _StopTest(BaseException):
     """Sentinel used to break a poller out of its infinite loop in tests.
 
     Inherits from BaseException so it bypasses the generator's
-    ``except Exception`` arms (which would otherwise treat the empty-script
+    `except Exception` arms (which would otherwise treat the empty-script
     error as a transient poll failure and retry forever).
     """
 
@@ -180,7 +196,7 @@ def test_iter_work_raises_on_permanent_4xx() -> None:
 
 
 def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> None:
-    """A 409 from ``stop`` means the work already ended; it is neither logged
+    """A 409 from `stop` means the work already ended; it is neither logged
     nor allowed to break the loop."""
     fake = FakeWork(poll_script=[_StubWork(id="work_done")])
 
@@ -198,7 +214,7 @@ def test_iter_work_stop_conflict_is_silent(caplog: pytest.LogCaptureFixture) -> 
 
 
 def test_iter_work_backs_off_on_httpx_transport_error() -> None:
-    """A raw ``httpx`` transport error (not wrapped in an SDK ``APIError``) is
+    """A raw `httpx` transport error (not wrapped in an SDK `APIError`) is
     still transient and must be retried, not propagated."""
     fake = FakeWork(poll_script=[httpx2.ConnectError("connection refused"), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
@@ -209,9 +225,9 @@ def test_iter_work_backs_off_on_httpx_transport_error() -> None:
 
 
 def test_iter_work_propagates_non_api_error_instead_of_retrying() -> None:
-    """A programming error (here ``KeyError``) is not a transient API/transport
+    """A programming error (here `KeyError`) is not a transient API/transport
     failure, so it must propagate immediately rather than be swallowed and
-    retried forever. ``poll`` is only called once — no backoff/retry."""
+    retried forever. `poll` is only called once — no backoff/retry."""
     fake = FakeWork(poll_script=[KeyError("bug"), _StubWork(id="work_2")])
     it = iter_work(cast(Any, fake), environment_id="env_1")
 
@@ -221,7 +237,7 @@ def test_iter_work_propagates_non_api_error_instead_of_retrying() -> None:
 
 
 def test_iter_work_propagates_non_api_error_from_ack() -> None:
-    """Same for a non-API error raised by ``ack`` — it propagates rather than
+    """Same for a non-API error raised by `ack` — it propagates rather than
     backing off and retrying."""
     fake = FakeWork(poll_script=[_StubWork(id="work_bad")])
 
@@ -324,8 +340,8 @@ def test_iter_work_block_ms_none_omits_param() -> None:
 
 
 class _FakeClock:
-    """Stands in for the ``time`` module inside the poller: a settable
-    monotonic clock plus a no-op ``sleep``."""
+    """Stands in for the `time` module inside the poller: a settable
+    monotonic clock plus a no-op `sleep`."""
 
     def __init__(self) -> None:
         self.now = 0.0
@@ -478,10 +494,10 @@ async def test_aiter_work_drain_auto_stop_false_dispatch_shape() -> None:
 
 # ---------- extra_headers per-request passthrough ---------------------------
 #
-# These assert the caller-supplied ``extra_headers`` actually reaches every
-# underlying ``poll`` / ``ack`` / ``stop`` call (the resource methods route it
-# through ``make_request_options``). The fakes record the kwargs each method
-# was called with, so a missing thread-through shows up as ``None``.
+# These assert the caller-supplied `extra_headers` actually reaches every
+# underlying `poll` / `ack` / `stop` call (the resource methods route it
+# through `make_request_options`). The fakes record the kwargs each method
+# was called with, so a missing thread-through shows up as `None`.
 
 _EXTRA = {"x-trace-id": "trace-123"}
 
@@ -548,3 +564,251 @@ async def test_aiter_work_threads_extra_headers_into_force_stop() -> None:
     assert fake.stop_calls[0][0] == "work_bad"
     assert fake.stop_calls[0][1]["force"] is True
     assert fake.stop_calls[0][1]["extra_headers"] == _EXTRA
+
+
+# ---------- the OpenTelemetry span of each work item -------------------------
+#
+# These go through a real client, so that the spans of the poller's own requests
+# are there to be the children of the item's span.
+
+
+def _work_json(work_id: str) -> dict[str, Any]:
+    return {
+        "id": work_id,
+        "type": "work",
+        "environment_id": "env_1",
+        "state": "active",
+        "created_at": "2026-01-01T00:00:00Z",
+        "metadata": {},
+        "data": {"type": "session", "id": f"sesn_{work_id}"},
+    }
+
+
+NO_WORK = httpx2.Response(200, content=b"null", headers={"content-type": "application/json"})
+
+
+def _mock_work_api(
+    respx_mock: MockRouter, polls: list[httpx2.Response], actions: tuple[str, ...] = ("ack", "stop")
+) -> None:
+    respx_mock.get("/v1/environments/env_1/work/poll").mock(side_effect=polls)
+    for action in actions:
+        respx_mock.post(path__regex=rf"/v1/environments/env_1/work/\w+/{action}").mock(
+            return_value=httpx2.Response(200, json=_work_json("work_1"))
+        )
+
+
+class _StartAttributes(sampling.Sampler):
+    """Keeps the attributes that each span starts with, which is all that a sampler is given."""
+
+    def __init__(self) -> None:
+        self.started: dict[str, dict[str, Any]] = {}
+
+    @override
+    def should_sample(self, *args: Any, **kwargs: Any) -> sampling.SamplingResult:
+        name, attributes = kwargs.get("name", args[2] if len(args) > 2 else None), kwargs.get("attributes")
+        self.started[str(name)] = dict(attributes or (args[4] if len(args) > 4 else None) or {})
+        return sampling.ALWAYS_ON.should_sample(*args, **kwargs)
+
+    @override
+    def get_description(self) -> str:
+        return "start attributes"
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_each_work_item_has_a_span_until_the_next_item(sync: bool, respx_mock: MockRouter) -> None:
+    spans = Spans()
+    sampler = _StartAttributes()
+    spans.provider = TracerProvider(sampler=sampler)
+    spans.provider.add_span_processor(SimpleSpanProcessor(spans.exporter))
+    _mock_work_api(
+        respx_mock,
+        [
+            httpx2.Response(200, json=_work_json("work_1")),
+            httpx2.Response(200, json=_work_json("work_2")),
+            NO_WORK,
+        ],
+    )
+    # What the consumer sees while it has each item: the current span, and how many item spans have ended.
+    seen: list[tuple[str, int, int]] = []
+
+    def consume(item: Any) -> None:
+        seen.append((item.id, span_id(trace.get_current_span()), len(spans.named("anthropic.environment.work"))))
+        with app.start_as_current_span("app.handle"):
+            pass
+
+    app = spans.provider.get_tracer("app")
+    with app.start_as_current_span("app") as app_span:
+        if sync:
+            client = Anthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+            for item in iter_work(client.beta.environments.work, environment_id="env_1", block_ms=None, drain=True):
+                consume(item)
+        else:
+            async_client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+            async for item in async_client.beta.environments.work.poller(
+                environment_id="env_1", environment_key="env_key", block_ms=None, drain=True
+            ):
+                consume(item)
+
+    # An item's span is open, and not current, in the consumer's code, and asking for the next item ends it.
+    assert seen == [("work_1", span_id(app_span), 0), ("work_2", span_id(app_span), 1)]
+    first, second = spans.named("anthropic.environment.work")
+    for work_span, work_id in ((first, "work_1"), (second, "work_2")):
+        assert parent_id(work_span) == span_id(app_span)
+        assert work_span.kind == SpanKind.INTERNAL
+        assert work_span.status.status_code == StatusCode.OK
+        assert attributes(work_span) == {
+            "gen_ai.provider.name": "anthropic",
+            "anthropic.environment.id": "env_1",
+            "anthropic.environment.work.id": work_id,
+            "anthropic.session.id": f"sesn_{work_id}",
+        }
+    assert sampler.started["anthropic.environment.work"] == attributes(second)
+    # The requests for an item are in its span, and a poll is in the span that is current when it is sent.
+    for name in ("anthropic.environments.work.ack", "anthropic.environments.work.stop"):
+        assert [parent_id(span) for span in spans.named(name)] == [span_id(first), span_id(second)]
+    assert {parent_id(span) for span in spans.named("anthropic.environments.work.poll")} == {span_id(app_span)}
+    # So is a span that the consumer starts for an item, which makes it a sibling of the item's span.
+    assert [parent_id(span) for span in spans.named("app.handle")] == [span_id(app_span)] * 2
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_work_span_ends_ok_when_the_consumer_stops_polling(sync: bool, respx_mock: MockRouter) -> None:
+    spans = Spans()
+    # The consumer owns the stop request, so the poller sends none.
+    _mock_work_api(respx_mock, [httpx2.Response(200, json=_work_json("work_1"))], actions=("ack",))
+
+    if sync:
+        client = Anthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+        items = iter_work(client.beta.environments.work, environment_id="env_1", auto_stop=False)
+        next(items)
+        assert spans.named("anthropic.environment.work") == []
+        cast(Any, items).close()
+    else:
+        async_client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+        async_items = async_client.beta.environments.work.poller(
+            environment_id="env_1", environment_key="env_key", auto_stop=False
+        )
+        await async_items.__anext__()
+        assert spans.named("anthropic.environment.work") == []
+        await cast(Any, async_items).aclose()
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.OK
+    # No span was current around the consumer's calls, so the item's span is a root span.
+    assert work_span.parent is None
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_work_span_fails_when_the_item_cannot_be_acked(sync: bool, respx_mock: MockRouter) -> None:
+    spans = Spans()
+    respx_mock.get("/v1/environments/env_1/work/poll").mock(
+        side_effect=[httpx2.Response(200, json=_work_json("work_1")), NO_WORK]
+    )
+    error = {"type": "error", "error": {"type": "not_found_error", "message": "No such work."}}
+    respx_mock.post("/v1/environments/env_1/work/work_1/ack").mock(return_value=httpx2.Response(404, json=error))
+    respx_mock.post("/v1/environments/env_1/work/work_1/stop").mock(
+        return_value=httpx2.Response(200, json=_work_json("work_1"))
+    )
+
+    if sync:
+        client = Anthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+        work = client.beta.environments.work
+        assert list(iter_work(work, environment_id="env_1", block_ms=None, drain=True)) == []
+    else:
+        async_client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+        poller = async_client.beta.environments.work.poller(
+            environment_id="env_1", environment_key="env_key", block_ms=None, drain=True
+        )
+        assert [item async for item in poller] == []
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.ERROR
+    # The type of the failed request's span.
+    ack = spans.one("anthropic.environments.work.ack")
+    assert attributes(work_span)["error.type"] == attributes(ack)["error.type"] == "not_found_error"
+    assert parent_id(spans.one("anthropic.environments.work.stop")) == span_id(work_span)
+
+
+# The router does not count a request that its route interrupts.
+@pytest.mark.respx(base_url=base_url, assert_all_called=False)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_work_span_has_no_status_when_polling_is_interrupted_during_the_ack(
+    sync: bool, respx_mock: MockRouter
+) -> None:
+    spans = Spans()
+    respx_mock.get("/v1/environments/env_1/work/poll").mock(
+        return_value=httpx2.Response(200, json=_work_json("work_1"))
+    )
+    # Neither is an `Exception`: each is the application stopping the poller, as `KeyboardInterrupt` is.
+    interrupt = _StopTest if sync else asyncio.CancelledError
+
+    def interrupted(_request: httpx2.Request) -> httpx2.Response:
+        raise interrupt
+
+    respx_mock.post("/v1/environments/env_1/work/work_1/ack").mock(side_effect=interrupted)
+
+    with pytest.raises(interrupt):
+        if sync:
+            client = Anthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+            next(iter_work(client.beta.environments.work, environment_id="env_1"))
+        else:
+            async_client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
+            poller = async_client.beta.environments.work.poller(environment_id="env_1", environment_key="env_key")
+            await poller.__anext__()
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
+
+
+async def _polled_work_ids(sync: bool, open_telemetry: Any) -> list[str]:
+    """The IDs of the items that a draining poller of a client with `open_telemetry` gives."""
+    if sync:
+        client = Anthropic(base_url=base_url, api_key="key", open_telemetry=open_telemetry)
+        work = client.beta.environments.work
+        return [item.id for item in iter_work(work, environment_id="env_1", block_ms=None, drain=True)]
+    async_client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=open_telemetry)
+    poller = async_client.beta.environments.work.poller(
+        environment_id="env_1", environment_key="env_key", block_ms=None, drain=True
+    )
+    return [item.id async for item in poller]
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_a_work_item_without_data_is_acked_and_given_with_a_span(sync: bool, respx_mock: MockRouter) -> None:
+    spans = Spans()
+    _mock_work_api(respx_mock, [httpx2.Response(200, json={**_work_json("work_1"), "data": None}), NO_WORK])
+
+    assert await _polled_work_ids(sync, spans.option()) == ["work_1"]
+
+    assert respx_mock.calls.call_count == 4
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.OK
+    assert attributes(work_span) == {
+        "gen_ai.provider.name": "anthropic",
+        "anthropic.environment.id": "env_1",
+        "anthropic.environment.work.id": "work_1",
+    }
+
+
+@TRACING_FAILURES
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_tracing_that_fails_leaves_the_poller_as_it_is(sync: bool, failure: str, respx_mock: MockRouter) -> None:
+    _mock_work_api(
+        respx_mock,
+        [
+            httpx2.Response(200, json=_work_json("work_1")),
+            httpx2.Response(200, json=_work_json("work_2")),
+            NO_WORK,
+        ],
+    )
+
+    assert await _polled_work_ids(sync, failing_tracing(failure)) == ["work_1", "work_2"]
+
+    # Three polls, and an ack and a stop for each item.
+    assert respx_mock.calls.call_count == 7

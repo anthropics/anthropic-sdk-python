@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
@@ -17,7 +15,7 @@ from .versions import (
     AsyncVersionsWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -29,10 +27,9 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ....types.beta import (
     BetaManagedAgentsMultiagentParams,
-    agent_list_params,
+    BetaManagedAgentsExecutionIdentityParams,
     agent_create_params,
     agent_update_params,
-    agent_retrieve_params,
 )
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -40,6 +37,7 @@ from ....types.beta.beta_managed_agents_agent import BetaManagedAgentsAgent
 from ....types.beta.beta_managed_agents_skill_params import BetaManagedAgentsSkillParams
 from ....types.beta.beta_managed_agents_multiagent_params import BetaManagedAgentsMultiagentParams
 from ....types.beta.beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
+from ....types.beta.beta_managed_agents_execution_identity_params import BetaManagedAgentsExecutionIdentityParams
 
 __all__ = ["Agents", "AsyncAgents"]
 
@@ -74,6 +72,7 @@ class Agents(SyncAPIResource):
         model: agent_create_params.Model,
         name: str,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
@@ -96,12 +95,15 @@ class Agents(SyncAPIResource):
 
         Accepts the
               [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-              e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+              e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
               control
 
           name: Human-readable name for the agent.
 
           description: Description of what the agent does.
+
+          execution_identity: Execution principal for runs of this agent. Omitting it, sending null, or
+              sending `{"type": "service_account"}` stores the default.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array. Every server must be referenced by an `mcp_toolset` in `tools`;
@@ -111,17 +113,23 @@ class Agents(SyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 
           system: System prompt for the agent.
 
-          tools: Tool configurations available to the agent. Maximum of 128 tools across all
+          tools: Tool configurations available to the agent. Maximum of 256 tools across all
               toolsets allowed.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -145,22 +153,26 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/agents?beta=true",
-            body=maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "execution_identity": execution_identity,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.create",
+                span_route="/v1/agents",
+                span_created_id="gen_ai.agent.id",
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -179,15 +191,23 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -218,7 +238,10 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
+                span_name="anthropic.agents.retrieve",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -228,6 +251,7 @@ class Agents(SyncAPIResource):
         agent_id: str,
         *,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
@@ -246,12 +270,16 @@ class Agents(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
+
+          execution_identity: Execution principal for runs of this agent. Full replacement. Omit to preserve;
+              send null or `{"type": "service_account"}` to restore the default.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -265,11 +293,11 @@ class Agents(SyncAPIResource):
 
           model: Model identifier. Accepts the
               [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-              e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+              e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Full replacement. Omit to preserve; send
+              null to clear.
 
           name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
@@ -278,7 +306,7 @@ class Agents(SyncAPIResource):
           system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
-              send empty array or null to clear. Maximum of 128 tools across all toolsets
+              send empty array or null to clear. Maximum of 256 tools across all toolsets
               allowed.
 
           version: The agent's current version, used to prevent concurrent overwrites. Obtain this
@@ -287,6 +315,13 @@ class Agents(SyncAPIResource):
               omit to apply the update unconditionally.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -312,23 +347,27 @@ class Agents(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "execution_identity": execution_identity,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.update",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -366,6 +405,13 @@ class Agents(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -394,16 +440,15 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.agents.list",
+                span_route="/v1/agents",
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -425,7 +470,16 @@ class Agents(SyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -452,7 +506,13 @@ class Agents(SyncAPIResource):
         return self._post(
             path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.archive",
+                span_route="/v1/agents/{agent_id}/archive",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -488,6 +548,7 @@ class AsyncAgents(AsyncAPIResource):
         model: agent_create_params.Model,
         name: str,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         multiagent: Optional[BetaManagedAgentsMultiagentParams] | Omit = omit,
@@ -510,12 +571,15 @@ class AsyncAgents(AsyncAPIResource):
 
         Accepts the
               [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-              e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+              e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
               control
 
           name: Human-readable name for the agent.
 
           description: Description of what the agent does.
+
+          execution_identity: Execution principal for runs of this agent. Omitting it, sending null, or
+              sending `{"type": "service_account"}` stores the default.
 
           mcp_servers: MCP servers this agent connects to. Maximum 20. Names must be unique within the
               array. Every server must be referenced by an `mcp_toolset` in `tools`;
@@ -525,17 +589,23 @@ class AsyncAgents(AsyncAPIResource):
           metadata: Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars, values up
               to 512 chars.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration.
 
           skills: Skills available to the agent.
 
           system: System prompt for the agent.
 
-          tools: Tool configurations available to the agent. Maximum of 128 tools across all
+          tools: Tool configurations available to the agent. Maximum of 256 tools across all
               toolsets allowed.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -559,22 +629,26 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/agents?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "model": model,
-                    "name": name,
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "multiagent": multiagent,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                },
-                agent_create_params.AgentCreateParams,
-            ),
+            body={
+                "model": model,
+                "name": name,
+                "description": description,
+                "execution_identity": execution_identity,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "multiagent": multiagent,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.create",
+                span_route="/v1/agents",
+                span_created_id="gen_ai.agent.id",
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -593,15 +667,23 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Get Agent
+        """
+        Get Agent
 
         Args:
-          version: Agent version.
+          agent_id: Unique identifier of the agent to retrieve.
 
-        Omit for the most recent version. Must be at least 1 if
+          version: Agent version. Omit for the most recent version. Must be at least 1 if
               specified.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -632,7 +714,10 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"version": version}, agent_retrieve_params.AgentRetrieveParams),
+                query={"version": version},
+                span_name="anthropic.agents.retrieve",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -642,6 +727,7 @@ class AsyncAgents(AsyncAPIResource):
         agent_id: str,
         *,
         description: Optional[str] | Omit = omit,
+        execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams] | Omit = omit,
         mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]] | Omit = omit,
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         model: agent_update_params.Model | Omit = omit,
@@ -660,12 +746,16 @@ class AsyncAgents(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsAgent:
-        """Update Agent
+        """
+        Update Agent
 
         Args:
-          description: Description.
+          agent_id: Unique identifier of the agent to update.
 
-        Omit to preserve; send empty string or null to clear.
+          description: Description. Omit to preserve; send empty string or null to clear.
+
+          execution_identity: Execution principal for runs of this agent. Full replacement. Omit to preserve;
+              send null or `{"type": "service_account"}` to restore the default.
 
           mcp_servers: MCP servers. Full replacement. Omit to preserve; send empty array or `null` to
               clear. Names must be unique. Maximum 20. Every server must be referenced by an
@@ -679,11 +769,11 @@ class AsyncAgents(AsyncAPIResource):
 
           model: Model identifier. Accepts the
               [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-              e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+              e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
               control. Omit to preserve. Cannot be cleared.
 
-          multiagent: A coordinator topology: the session's primary thread orchestrates work by
-              spawning session threads, each running an agent drawn from the `agents` roster.
+          multiagent: Multiagent orchestration configuration. Full replacement. Omit to preserve; send
+              null to clear.
 
           name: Human-readable name. Must be non-empty. Omit to preserve. Cannot be cleared.
 
@@ -692,7 +782,7 @@ class AsyncAgents(AsyncAPIResource):
           system: System prompt. Omit to preserve; send empty string or null to clear.
 
           tools: Tool configurations available to the agent. Full replacement. Omit to preserve;
-              send empty array or null to clear. Maximum of 128 tools across all toolsets
+              send empty array or null to clear. Maximum of 256 tools across all toolsets
               allowed.
 
           version: The agent's current version, used to prevent concurrent overwrites. Obtain this
@@ -701,6 +791,13 @@ class AsyncAgents(AsyncAPIResource):
               omit to apply the update unconditionally.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -726,23 +823,27 @@ class AsyncAgents(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "mcp_servers": mcp_servers,
-                    "metadata": metadata,
-                    "model": model,
-                    "multiagent": multiagent,
-                    "name": name,
-                    "skills": skills,
-                    "system": system,
-                    "tools": tools,
-                    "version": version,
-                },
-                agent_update_params.AgentUpdateParams,
-            ),
+            body={
+                "description": description,
+                "execution_identity": execution_identity,
+                "mcp_servers": mcp_servers,
+                "metadata": metadata,
+                "model": model,
+                "multiagent": multiagent,
+                "name": name,
+                "skills": skills,
+                "system": system,
+                "tools": tools,
+                "version": version,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.update",
+                span_route="/v1/agents/{agent_id}",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )
@@ -780,6 +881,13 @@ class AsyncAgents(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -808,16 +916,15 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    agent_list_params.AgentListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.agents.list",
+                span_route="/v1/agents",
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -839,7 +946,16 @@ class AsyncAgents(AsyncAPIResource):
         Archive Agent
 
         Args:
+          agent_id: Unique identifier of the agent to archive.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -866,7 +982,13 @@ class AsyncAgents(AsyncAPIResource):
         return await self._post(
             path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.agents.archive",
+                span_route="/v1/agents/{agent_id}/archive",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             cast_to=BetaManagedAgentsAgent,
         )

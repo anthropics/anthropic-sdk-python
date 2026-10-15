@@ -1,13 +1,15 @@
 # fork of https://github.com/asottile/blacken-docs adapted for ruff
 from __future__ import annotations
 
+import os
 import re
 import sys
 import argparse
+import tempfile
 import textwrap
 import contextlib
 import subprocess
-from typing import Match, Optional, Sequence, Generator, NamedTuple, cast
+from typing import Match, Callable, Optional, Sequence, Generator, NamedTuple, cast
 
 MD_RE = re.compile(
     r"(?P<before>^(?P<indent> *)```\s*python\n)" r"(?P<code>.*?)" r"(?P<after>^(?P=indent)```\s*$)",
@@ -32,6 +34,7 @@ class CodeBlockError(NamedTuple):
 
 def format_str(
     src: str,
+    format_code_block: Callable[[str], str],
 ) -> tuple[str, Sequence[CodeBlockError]]:
     errors: list[CodeBlockError] = []
 
@@ -119,13 +122,44 @@ def format_code_block(code: str) -> str:
     )
 
 
+def format_code_blocks(blocks: Sequence[str]) -> dict[str, str]:
+    """Formats all the given blocks with one run of ruff, as starting ruff takes far longer than formatting a block.
+
+    Returns nothing if ruff can't format one of them. `format_code_block` then says which one.
+    """
+    # without a path, ruff formats the whole directory
+    if not blocks:
+        return {}
+
+    # in this directory, so that ruff finds the same config as for `script.py`
+    with tempfile.TemporaryDirectory(prefix=".ruffen-docs-", dir=os.curdir) as directory:
+        paths = [os.path.join(directory, f"{index}.py") for index in range(len(blocks))]
+        for index, block in enumerate(blocks):
+            with open(paths[index], "w", encoding="UTF-8") as f:
+                f.write(block)
+
+        result = subprocess.run(
+            [sys.executable, "-m", "ruff", "format", "--quiet", f"--line-length={DEFAULT_LINE_LENGTH}", *paths],
+            stderr=subprocess.DEVNULL,
+        )
+        if result.returncode != 0:
+            return {}
+
+        formatted: dict[str, str] = {}
+        for index, block in enumerate(blocks):
+            with open(paths[index], encoding="UTF-8") as f:
+                formatted[block] = f.read()
+        return formatted
+
+
 def format_file(
     filename: str,
     skip_errors: bool,
+    format_code_block: Callable[[str], str],
 ) -> int:
     with open(filename, encoding="UTF-8") as f:
         contents = f.read()
-    new_contents, errors = format_str(contents)
+    new_contents, errors = format_str(contents, format_code_block)
     for error in errors:
         lineno = contents[: error.offset].count("\n") + 1
         print(f"{filename}:{lineno}: code block parse error {error.exc}")
@@ -157,9 +191,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("filenames", nargs="*")
     args = parser.parse_args(argv)
 
+    blocks: list[str] = []
+
+    def collect(code: str) -> str:
+        blocks.append(code)
+        return code
+
+    for filename in args.filenames:
+        with open(filename, encoding="UTF-8") as f:
+            format_str(f.read(), collect)
+
+    formatted = format_code_blocks(blocks)
+
+    def format_collected(code: str) -> str:
+        return formatted[code] if code in formatted else format_code_block(code)
+
     retv = 0
     for filename in args.filenames:
-        retv |= format_file(filename, skip_errors=args.skip_errors)
+        retv |= format_file(filename, skip_errors=args.skip_errors, format_code_block=format_collected)
     return retv
 
 

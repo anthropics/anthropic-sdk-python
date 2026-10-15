@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
@@ -16,7 +14,7 @@ from .events import (
     AsyncEventsWithStreamingResponse,
 )
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -27,9 +25,9 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
-from .....types.beta.sessions import thread_list_params
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.sessions.beta_managed_agents_session_thread import BetaManagedAgentsSessionThread
+from .....types.beta.sessions.beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["Threads", "AsyncThreads"]
 
@@ -78,6 +76,13 @@ class Threads(SyncAPIResource):
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -107,7 +112,13 @@ class Threads(SyncAPIResource):
                 "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -118,6 +129,7 @@ class Threads(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -136,7 +148,19 @@ class Threads(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -168,13 +192,14 @@ class Threads(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -198,6 +223,13 @@ class Threads(SyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -230,7 +262,13 @@ class Threads(SyncAPIResource):
                 thread_id=thread_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -280,6 +318,13 @@ class AsyncThreads(AsyncAPIResource):
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -309,7 +354,13 @@ class AsyncThreads(AsyncAPIResource):
                 "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -320,6 +371,7 @@ class AsyncThreads(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -338,7 +390,19 @@ class AsyncThreads(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -370,13 +434,14 @@ class AsyncThreads(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -400,6 +465,13 @@ class AsyncThreads(AsyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -432,7 +504,13 @@ class AsyncThreads(AsyncAPIResource):
                 thread_id=thread_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )

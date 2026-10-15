@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -35,4 +33,4 @@ class BetaManagedAgentsUserMessageEvent(BaseModel):
     type: Literal["user.message"]
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the agent finished processing this message."""

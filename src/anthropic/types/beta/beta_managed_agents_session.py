@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, List, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -27,14 +25,10 @@ class BetaManagedAgentsSession(BaseModel):
     """
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the session was archived. Null if not archived."""
 
     budget: Optional[BetaManagedAgentsBudgetLimit] = None
-    """A hard spend ceiling.
-
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
-    """
+    """The session's enforced spend ceiling, or null when no budget is set."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""
@@ -52,10 +46,16 @@ class BetaManagedAgentsSession(BaseModel):
     resources: List[BetaManagedAgentsSessionResource]
 
     stats: BetaManagedAgentsSessionStats
-    """Timing statistics for a session."""
+    """Timing statistics for the session."""
 
     status: Literal["rescheduling", "running", "idle", "terminated"]
-    """SessionStatus enum"""
+    """
+    - `rescheduling` - Transient error occurred, retrying automatically.
+    - `running` - Agent is actively executing.
+    - `idle` - Agent is waiting for input, including user messages or tool
+      confirmations. Sessions start in idle.
+    - `terminated` - Session has ended, either due to an error or completion.
+    """
 
     title: Optional[str] = None
 
@@ -65,7 +65,7 @@ class BetaManagedAgentsSession(BaseModel):
     """A timestamp in RFC 3339 format"""
 
     usage: BetaManagedAgentsSessionUsage
-    """Cumulative token usage for a session across all turns."""
+    """Cumulative token usage for the session."""
 
     vault_ids: List[str]
     """Vault IDs attached to the session at creation.

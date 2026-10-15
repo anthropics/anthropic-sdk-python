@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
@@ -10,7 +8,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -20,11 +18,14 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import user_profile_list_params, user_profile_create_params, user_profile_update_params
+from ...types.beta import (
+    BetaUserProfileExternalUserDetailsParams,
+)
 from ..._base_client import AsyncPaginator, make_request_options
 from ...types.anthropic_beta_param import AnthropicBetaParam
 from ...types.beta.beta_user_profile import BetaUserProfile
 from ...types.beta.beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL
+from ...types.beta.beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
 __all__ = ["UserProfiles", "AsyncUserProfiles"]
 
@@ -54,10 +55,12 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -69,16 +72,32 @@ class UserProfiles(SyncAPIResource):
         Create User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: How the platform uses the API for this entity. `application` (default): the
+              profile represents an individual end-user of the platform's product.
+              `passthrough`: the profile identifies a company the platform resells Claude
+              access to.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters.
+              characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
+              header only.
+
+          external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
+              RFC 3339 format: for an `application` profile, when the end-user signed up; for
+              a `passthrough` profile, when the company became the platform's customer. Must
+              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
+              under the `user-profiles-2026-08-18` beta header; under
+              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -91,6 +110,13 @@ class UserProfiles(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -104,7 +130,8 @@ class UserProfiles(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -112,18 +139,22 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             "/v1/user_profiles?beta=true",
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -133,6 +164,7 @@ class UserProfiles(SyncAPIResource):
         user_profile_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -144,7 +176,16 @@ class UserProfiles(SyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -161,7 +202,8 @@ class UserProfiles(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -170,7 +212,13 @@ class UserProfiles(SyncAPIResource):
         return self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -181,10 +229,12 @@ class UserProfiles(SyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -196,16 +246,31 @@ class UserProfiles(SyncAPIResource):
         Update User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
+          access_type: If present, replaces the stored access type. Omit to leave unchanged.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters.
+              255 characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Each field sent replaces the stored value; omit a field to leave it unchanged.
+              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
+              `user-profiles-2026-09-04` beta header only.
+
+          external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
+              once set, the value cannot be cleared and `null` is rejected. Must be a complete
+              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
+              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
+              `external_user_details.onboarded_at` instead.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -216,6 +281,13 @@ class UserProfiles(SyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -232,7 +304,8 @@ class UserProfiles(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -240,18 +313,22 @@ class UserProfiles(SyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -264,6 +341,7 @@ class UserProfiles(SyncAPIResource):
         order_by: Literal["created_at", "name"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -275,15 +353,37 @@ class UserProfiles(SyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order: Query parameter for order
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
 
-          order_by: Query parameter for order_by
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
 
-          page: Query parameter for page
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -298,7 +398,8 @@ class UserProfiles(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -312,15 +413,14 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -330,6 +430,7 @@ class UserProfiles(SyncAPIResource):
         user_profile_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -341,7 +442,16 @@ class UserProfiles(SyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -358,7 +468,8 @@ class UserProfiles(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -369,7 +480,13 @@ class UserProfiles(SyncAPIResource):
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )
@@ -400,10 +517,12 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Literal["application", "passthrough"] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -415,16 +534,32 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: How the platform uses the API for this entity. `application` (default): the
+              profile represents an individual end-user of the platform's product.
+              `passthrough`: the profile identifies a company the platform resells Claude
+              access to.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters.
+              characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
+              header only.
+
+          external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
+              RFC 3339 format: for an `application` profile, when the end-user signed up; for
+              a `passthrough` profile, when the company became the platform's customer. Must
+              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
+              under the `user-profiles-2026-08-18` beta header; under
+              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -437,6 +572,13 @@ class AsyncUserProfiles(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -450,7 +592,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -458,18 +601,22 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             "/v1/user_profiles?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_create_params.UserProfileCreateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -479,6 +626,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         user_profile_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -490,7 +638,16 @@ class AsyncUserProfiles(AsyncAPIResource):
         Get User Profile
 
         Args:
+          user_profile_id: The ID of the user profile to get (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -507,7 +664,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -516,7 +674,13 @@ class AsyncUserProfiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -527,10 +691,12 @@ class AsyncUserProfiles(AsyncAPIResource):
         *,
         access_type: Optional[Literal["application", "passthrough"]] | Omit = omit,
         external_id: Optional[str] | Omit = omit,
+        external_user_details: BetaUserProfileExternalUserDetailsParams | Omit = omit,
         external_user_onboarded_at: Union[str, datetime] | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -542,16 +708,31 @@ class AsyncUserProfiles(AsyncAPIResource):
         Update User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          user_profile_id: The ID of the user profile to update (`uprof_...`).
+
+          access_type: If present, replaces the stored access type. Omit to leave unchanged.
+
+              - `application` - The user profile represents an individual end-user of a
+                product that the platform builds on the API. New profiles get this value by
+                default.
+              - `passthrough` - The user profile represents a company that the platform
+                resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters.
+              255 characters. Accepted under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
+              `external_user_details.reference_id` instead.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_details: Details about the entity this profile represents, as the platform states them.
+              Each field sent replaces the stored value; omit a field to leave it unchanged.
+              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
+              `user-profiles-2026-09-04` beta header only.
+
+          external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
+              once set, the value cannot be cleared and `null` is rejected. Must be a complete
+              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
+              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
+              `external_user_details.onboarded_at` instead.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -562,6 +743,13 @@ class AsyncUserProfiles(AsyncAPIResource):
               characters.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -578,7 +766,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -586,18 +775,22 @@ class AsyncUserProfiles(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
-            body=await async_maybe_transform(
-                {
-                    "access_type": access_type,
-                    "external_id": external_id,
-                    "external_user_onboarded_at": external_user_onboarded_at,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                user_profile_update_params.UserProfileUpdateParams,
-            ),
+            body={
+                "access_type": access_type,
+                "external_id": external_id,
+                "external_user_details": external_user_details,
+                "external_user_onboarded_at": external_user_onboarded_at,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -610,6 +803,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         order_by: Literal["created_at", "name"] | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -621,15 +815,37 @@ class AsyncUserProfiles(AsyncAPIResource):
         List User Profiles
 
         Args:
-          limit: Query parameter for limit
+          limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
-          order: Query parameter for order
+          order: The sort direction, applied to the field that `order_by` selects. Defaults to
+              `desc`.
 
-          order_by: Query parameter for order_by
+              - `asc` - Oldest first when `order_by` is `created_at`, or names in ascending
+                order when `order_by` is `name`.
+              - `desc` - Newest first when `order_by` is `created_at`, or names in descending
+                order when `order_by` is `name`. This is the default.
 
-          page: Query parameter for page
+          order_by: The field to sort user profiles by, in the direction that `order` sets. Defaults
+              to `created_at`.
+
+              - `created_at` - Sort by when each user profile was created. This is the
+                default.
+              - `name` - Sort by `name`, ignoring the case of ASCII letters. Profiles without
+                a name come last in either direction.
+
+          page: The cursor for the page to return, taken from `next_page` in a previous
+              response.
+
+              Leave it out to get the first page.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -644,7 +860,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -658,15 +875,14 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "order": order,
-                        "order_by": order_by,
-                        "page": page,
-                    },
-                    user_profile_list_params.UserProfileListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "order": order,
+                    "order_by": order_by,
+                    "page": page,
+                },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -676,6 +892,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         user_profile_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -687,7 +904,16 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create Enrollment URL
 
         Args:
+          user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
+
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -704,7 +930,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -715,7 +942,13 @@ class AsyncUserProfiles(AsyncAPIResource):
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )

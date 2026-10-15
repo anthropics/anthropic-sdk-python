@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import os
+import json
+import base64
+import pathlib
+import threading
 from typing import Any, Set, TypeVar, Iterator, cast
 
 import httpx2
@@ -34,6 +38,26 @@ INVALID_TOOL_JSON_ERROR = (
 )
 
 
+FOLLOW_UP_MESSAGE = {
+    "id": "msg_01FollowUp",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-4-5",
+    "content": [{"type": "text", "text": "It is sunny in Paris."}],
+    "stop_reason": "end_turn",
+    "stop_sequence": None,
+    "usage": {"input_tokens": 400, "output_tokens": 10},
+}
+
+EXPECTED_TOOL_USE_PARAM = {
+    "type": "tool_use",
+    "id": "toolu_01NRLabsLyVHZPKxbKvkfSMn",
+    "name": "get_weather",
+    "input": {"location": "Paris"},
+    "caller": {"type": "direct"},
+}
+
+
 def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
     assert message.id == "msg_4QpJur2dWWDjF6C758FbBw5vm12BaVipnK"
     assert message.model == "claude-3-opus-latest"
@@ -61,6 +85,32 @@ def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message:
         "content_block_stop",
         "message_delta",
     ]
+
+
+def assert_unknown_events_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
+    event_types: list[str] = [e.type for e in events]
+    assert event_types == [
+        "future_event",
+        "content_block_stop",
+        "message_start",
+        "content_block_start",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_delta",
+        "text",
+        "content_block_stop",
+        "future_event",
+        "message_delta",
+        "message_stop",
+        "future_event",
+    ]
+    assert events[0].to_dict() == {"type": "future_event", "usage": {"input_tokens": 99, "output_tokens": 99}}
+
+    assert message.to_dict()["content"] == [{"type": "text", "text": "Hello there!"}]
+    assert message.stop_reason == "end_turn"
+    assert message.usage.to_dict() == {"input_tokens": 11, "output_tokens": 6}
 
 
 def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], message: Message) -> None:
@@ -224,6 +274,25 @@ class TestSyncMessages:
 
             assert_basic_response([event for event in stream], stream.get_final_message())
 
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    @pytest.mark.respx(base_url=base_url)
+    def test_unknown_events_are_passed_through(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("unknown_events_response.txt"))
+        )
+
+        with client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+        ) as stream:
+            assert_unknown_events_response([event for event in stream], stream.get_final_message())
+
     @pytest.mark.respx(base_url=base_url)
     def test_context_manager(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
@@ -281,7 +350,7 @@ class TestSyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert not isinstance(cast(Any, stream), Stream)
 
@@ -296,7 +365,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event for event in stream], stream.get_final_message())
 
@@ -310,7 +379,7 @@ class TestSyncMessages:
             with sync_client.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "What's the weather in Paris?"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             ) as stream:
                 stream.until_done()
 
@@ -323,9 +392,44 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_tool_use_caller_unset(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_round_trip(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                httpx2.Response(200, content=get_response("tool_use_response.txt")),
+                httpx2.Response(200, json=FOLLOW_UP_MESSAGE),
+            ]
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "What is the weather in Paris?"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            message = stream.get_final_message()
+
+        # accumulated blocks must be reusable as request params without leaking accumulator state
+        sync_client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {"role": "user", "content": "What is the weather in Paris?"},
+                {"role": "assistant", "content": message.content},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "tool_result", "tool_use_id": "toolu_01NRLabsLyVHZPKxbKvkfSMn", "content": "Sunny"}
+                    ],
+                },
+            ],
+            model="claude-sonnet-5-5",
+        )
+
+        request_body = json.loads(route.calls.last.request.content)
+        assert request_body["messages"][1]["content"][1] == EXPECTED_TOOL_USE_PARAM
 
     @pytest.mark.respx(base_url=base_url)
     def test_refusal_stop_details_propagated(self, respx_mock: MockRouter) -> None:
@@ -349,7 +453,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(stream.get_final_message())
 
@@ -362,7 +466,7 @@ class TestSyncMessages:
         with sync_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_omitted_usage_response(stream.get_final_message())
 
@@ -391,6 +495,48 @@ class TestSyncMessages:
 class TestAsyncMessages:
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
+    async def test_file_input_is_read_when_the_stream_is_entered(
+        self, respx_mock: MockRouter, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
+        )
+        image = tmp_path / "image.png"
+        image.write_bytes(b"image")
+        loop_thread = threading.current_thread()
+        read_on_loop_thread: list[bool] = []
+        read_bytes = pathlib.Path.read_bytes
+
+        def observed_read_bytes(self: pathlib.Path) -> bytes:
+            read_on_loop_thread.append(threading.current_thread() is loop_thread)
+            return read_bytes(self)
+
+        monkeypatch.setattr(pathlib.Path, "read_bytes", observed_read_bytes)
+
+        manager = async_client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-3-opus-latest",
+        )
+        # Creating the manager must not block the event loop on the file: the read is awaited once it is entered.
+        assert read_on_loop_thread == []
+
+        async with manager as stream:
+            await stream.until_done()
+
+        assert read_on_loop_thread == [False]
+        sent = json.loads(route.calls.last.request.content)
+        assert sent["messages"][0]["content"][0]["source"]["data"] == base64.b64encode(b"image").decode()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
     async def test_basic_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
@@ -409,6 +555,28 @@ class TestAsyncMessages:
             assert not isinstance(cast(Any, stream), AsyncStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
+
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_unknown_events_are_passed_through(
+        self, async_client: AsyncAnthropic, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("unknown_events_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Say hello there!",
+                }
+            ],
+            model="claude-3-opus-latest",
+        ) as stream:
+            assert_unknown_events_response([event async for event in stream], await stream.get_final_message())
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
@@ -470,7 +638,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert not isinstance(cast(Any, stream), AsyncStream)
 
@@ -486,7 +654,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_server_tool_use_response([event async for event in stream], await stream.get_final_message())
 
@@ -501,7 +669,7 @@ class TestAsyncMessages:
             async with async_client.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "What's the weather in Paris?"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             ) as stream:
                 await stream.until_done()
 
@@ -515,7 +683,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "What is the weather in Paris?"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_tool_use_caller_unset(await stream.get_final_message())
 
@@ -543,7 +711,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_fields_response(await stream.get_final_message())
 
@@ -559,7 +727,7 @@ class TestAsyncMessages:
         async with async_client.messages.stream(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Say hello there!"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_omitted_usage_response(await stream.get_final_message())
 

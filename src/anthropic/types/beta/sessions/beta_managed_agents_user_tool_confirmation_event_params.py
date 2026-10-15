@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -12,7 +10,7 @@ class BetaManagedAgentsUserToolConfirmationEventParams(TypedDict, total=False):
     """Parameters for confirming or denying a tool execution request."""
 
     result: Required[Literal["allow", "deny"]]
-    """UserToolConfirmationResult enum"""
+    """The confirmation result: 'allow' or 'deny'."""
 
     tool_use_id: Required[str]
     """

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -31,10 +29,10 @@ class BetaManagedAgentsCredential(BaseModel):
     """Unique identifier for the credential."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the credential was archived. Null if not archived."""
 
     auth: Auth
-    """Authentication details for a credential."""
+    """Authentication configuration for this credential."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""

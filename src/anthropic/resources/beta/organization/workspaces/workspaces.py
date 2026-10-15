@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Optional
@@ -15,7 +13,7 @@ from .members import (
     AsyncMembersWithStreamingResponse,
 )
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from .rate_limits import (
     RateLimits,
@@ -41,11 +39,6 @@ from .service_accounts import (
     AsyncServiceAccountsWithRawResponse,
     ServiceAccountsWithStreamingResponse,
     AsyncServiceAccountsWithStreamingResponse,
-)
-from .....types.beta.organization import (
-    workspace_list_params,
-    workspace_create_params,
-    workspace_update_params,
 )
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_workspace import BetaWorkspace
@@ -146,18 +139,21 @@ class Workspaces(SyncAPIResource):
         }
         return self._post(
             "/v1/organizations/workspaces?beta=true",
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "data_residency": data_residency,
-                    "display_color": display_color,
-                    "external_key_id": external_key_id,
-                    "tags": tags,
-                },
-                workspace_create_params.WorkspaceCreateParams,
-            ),
+            body={
+                "name": name,
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "tags": tags,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=BetaWorkspace,
         )
@@ -192,7 +188,13 @@ class Workspaces(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -250,18 +252,21 @@ class Workspaces(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
-            body=maybe_transform(
-                {
-                    "data_residency": data_residency,
-                    "display_color": display_color,
-                    "external_key_id": external_key_id,
-                    "name": name,
-                    "tags": tags,
-                },
-                workspace_update_params.WorkspaceUpdateParams,
-            ),
+            body={
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "name": name,
+                "tags": tags,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -272,6 +277,7 @@ class Workspaces(SyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
+        include_default: bool | Omit = omit,
         limit: int | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -291,6 +297,8 @@ class Workspaces(SyncAPIResource):
               page of results immediately before this object.
 
           include_archived: Whether to include Workspaces that have been archived in the response
+
+          include_default: Whether to include the organization's default Workspace in the response
 
           limit: Number of items to return per page.
 
@@ -312,15 +320,15 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "include_archived": include_archived,
+                    "include_default": include_default,
+                    "limit": limit,
+                },
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=BetaWorkspace,
         )
@@ -353,7 +361,13 @@ class Workspaces(SyncAPIResource):
         return self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -450,18 +464,21 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return await self._post(
             "/v1/organizations/workspaces?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "data_residency": data_residency,
-                    "display_color": display_color,
-                    "external_key_id": external_key_id,
-                    "tags": tags,
-                },
-                workspace_create_params.WorkspaceCreateParams,
-            ),
+            body={
+                "name": name,
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "tags": tags,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=BetaWorkspace,
         )
@@ -496,7 +513,13 @@ class AsyncWorkspaces(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -554,18 +577,21 @@ class AsyncWorkspaces(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
-            body=await async_maybe_transform(
-                {
-                    "data_residency": data_residency,
-                    "display_color": display_color,
-                    "external_key_id": external_key_id,
-                    "name": name,
-                    "tags": tags,
-                },
-                workspace_update_params.WorkspaceUpdateParams,
-            ),
+            body={
+                "data_residency": data_residency,
+                "display_color": display_color,
+                "external_key_id": external_key_id,
+                "name": name,
+                "tags": tags,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -576,6 +602,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
         include_archived: bool | Omit = omit,
+        include_default: bool | Omit = omit,
         limit: int | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -595,6 +622,8 @@ class AsyncWorkspaces(AsyncAPIResource):
               page of results immediately before this object.
 
           include_archived: Whether to include Workspaces that have been archived in the response
+
+          include_default: Whether to include the organization's default Workspace in the response
 
           limit: Number of items to return per page.
 
@@ -616,15 +645,15 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                    },
-                    workspace_list_params.WorkspaceListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "include_archived": include_archived,
+                    "include_default": include_default,
+                    "limit": limit,
+                },
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=BetaWorkspace,
         )
@@ -657,7 +686,13 @@ class AsyncWorkspaces(AsyncAPIResource):
         return await self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )

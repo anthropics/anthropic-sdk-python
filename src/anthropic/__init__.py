@@ -1,9 +1,19 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 import typing as _t
 
 from . import types
-from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, omit, not_given
+from ._types import (
+    NOT_GIVEN,
+    Omit,
+    NoneType,
+    NotGiven,
+    OpenTelemetryTraces,
+    OpenTelemetryOptions,
+    OpenTelemetryClientOption,
+    ResolvedOpenTelemetryTraces,
+    ResolvedOpenTelemetryOptions,
+    omit,
+    not_given,
+)
 from ._utils import file_from_path
 from ._client import Client, Stream, Timeout, Anthropic, AsyncClient, AsyncStream, AsyncAnthropic, RequestOptions
 from ._models import BaseModel
@@ -22,12 +32,14 @@ from ._exceptions import (
     APITimeoutError,
     BadRequestError,
     OverloadedError,
+    CredentialsError,
     APIConnectionError,
     AuthenticationError,
     InternalServerError,
     RequestTooLargeError,
     DeadlineExceededError,
     PermissionDeniedError,
+    IdentityTokenFileError,
     ServiceUnavailableError,
     UnprocessableEntityError,
     APIWebhookValidationError,
@@ -76,8 +88,15 @@ __all__ = [
     "OverloadedError",
     "DeadlineExceededError",
     "RetryableError",
+    "CredentialsError",
+    "IdentityTokenFileError",
     "Timeout",
     "RequestOptions",
+    "OpenTelemetryClientOption",
+    "OpenTelemetryOptions",
+    "OpenTelemetryTraces",
+    "ResolvedOpenTelemetryOptions",
+    "ResolvedOpenTelemetryTraces",
     "Client",
     "AsyncClient",
     "Stream",

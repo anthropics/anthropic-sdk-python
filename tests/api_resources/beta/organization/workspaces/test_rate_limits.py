@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -30,6 +28,7 @@ class TestRateLimits:
         rate_limit = client.beta.organization.workspaces.rate_limits.list(
             workspace_id="workspace_id",
             group_type="batch",
+            include_inherited=True,
             limit=1,
             page="page",
         )
@@ -84,6 +83,7 @@ class TestAsyncRateLimits:
         rate_limit = await async_client.beta.organization.workspaces.rate_limits.list(
             workspace_id="workspace_id",
             group_type="batch",
+            include_inherited=True,
             limit=1,
             page="page",
         )

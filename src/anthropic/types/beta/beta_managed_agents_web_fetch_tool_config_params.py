@@ -1,17 +1,19 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from ..._types import SequenceNotStr
+from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam
 from .beta_managed_agents_always_ask_policy_param import BetaManagedAgentsAlwaysAskPolicyParam
 from .beta_managed_agents_always_allow_policy_param import BetaManagedAgentsAlwaysAllowPolicyParam
+from .beta_managed_agents_web_fetch_url_sources_params import BetaManagedAgentsWebFetchURLSourcesParams
 
 __all__ = ["BetaManagedAgentsWebFetchToolConfigParams", "PermissionPolicy"]
 
-PermissionPolicy: TypeAlias = Union[BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam]
+PermissionPolicy: TypeAlias = Union[
+    BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam, BetaManagedAgentsAutoPolicyParam
+]
 
 
 class BetaManagedAgentsWebFetchToolConfigParams(TypedDict, total=False):
@@ -49,6 +51,12 @@ class BetaManagedAgentsWebFetchToolConfigParams(TypedDict, total=False):
     """
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Permission policy for this tool.
+
+    Controls whether tool calls are auto-approved or require confirmation.
+    """
 
     type: Literal["web_fetch"]
+
+    url_sources: Optional[BetaManagedAgentsWebFetchURLSourcesParams]
+    """Which sources contribute URLs the tool may fetch. Omit to allow every source."""

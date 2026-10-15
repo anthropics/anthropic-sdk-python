@@ -1,12 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
 from datetime import datetime
-from typing_extensions import Literal, Required, Annotated, TypedDict
+from typing_extensions import Literal, Required, TypedDict
 
-from ...._utils import PropertyInfo
 from .beta_managed_agents_mcp_oauth_refresh_params import BetaManagedAgentsMCPOAuthRefreshParams
 
 __all__ = ["BetaManagedAgentsMCPOAuthCreateParams"]
@@ -23,8 +20,8 @@ class BetaManagedAgentsMCPOAuthCreateParams(TypedDict, total=False):
 
     type: Required[Literal["mcp_oauth"]]
 
-    expires_at: Annotated[Union[str, datetime, None], PropertyInfo(format="iso8601")]
+    expires_at: Union[str, datetime, None]
     """A timestamp in RFC 3339 format"""
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshParams]
-    """OAuth refresh token parameters for creating a credential with refresh support."""
+    """Refresh token configuration, if the credential supports token refresh."""

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from typing_extensions import Literal
 
@@ -7,8 +5,10 @@ from .model import Model
 from .usage import Usage
 from .._models import BaseModel
 from .container import Container
+from .diagnostics import Diagnostics
 from .stop_reason import StopReason
 from .content_block import ContentBlock, ContentBlock as ContentBlock
+from .message_param import MessageParam
 from .refusal_stop_details import RefusalStopDetails
 
 __all__ = ["Message"]
@@ -22,9 +22,9 @@ class Message(BaseModel):
     """
 
     container: Optional[Container] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     content: List[ContentBlock]
@@ -62,6 +62,13 @@ class Message(BaseModel):
     ```
     """
 
+    diagnostics: Optional[Diagnostics] = None
+    """Request-level diagnostics.
+
+    `null` when the request did not supply `diagnostics`, or when it did and no
+    prompt-cache divergence was detected.
+    """
+
     model: Model
     """The model that will complete your prompt.
 
@@ -76,7 +83,10 @@ class Message(BaseModel):
     """
 
     stop_details: Optional[RefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[StopReason] = None
     """The reason that we stopped.
@@ -127,3 +137,9 @@ class Message(BaseModel):
     Total input tokens in a request is the summation of `input_tokens`,
     `cache_creation_input_tokens`, and `cache_read_input_tokens`.
     """
+
+    def to_param(self) -> MessageParam:
+        """Convert this response Message to a MessageParam so it can be passed back
+        to the API as an input message, e.g. in the `messages` param.
+        """
+        return MessageParam(role=self.role, content=list(self.content))

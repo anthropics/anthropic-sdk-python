@@ -1,14 +1,14 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
-from typing import Union
+from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from ...._models import BaseModel, UnionDiscriminator
+from .beta_managed_agents_session_refusal import BetaManagedAgentsSessionRefusal
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_budget_reached import BetaManagedAgentsSessionBudgetReached
 from .beta_managed_agents_session_requires_action import BetaManagedAgentsSessionRequiresAction
 from .beta_managed_agents_session_retries_exhausted import BetaManagedAgentsSessionRetriesExhausted
+from .beta_managed_agents_session_refusal_stop_details import BetaManagedAgentsSessionRefusalStopDetails
 
 __all__ = ["BetaManagedAgentsSessionThreadStatusIdleEvent", "StopReason"]
 
@@ -18,6 +18,7 @@ StopReason: TypeAlias = Annotated[
         BetaManagedAgentsSessionRequiresAction,
         BetaManagedAgentsSessionRetriesExhausted,
         BetaManagedAgentsSessionBudgetReached,
+        BetaManagedAgentsSessionRefusal,
     ],
     UnionDiscriminator("type"),
 ]
@@ -36,12 +37,17 @@ class BetaManagedAgentsSessionThreadStatusIdleEvent(BaseModel):
     """Name of the agent the thread runs."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp of the status transition."""
 
     session_thread_id: str
     """Public sthr\\__ ID of the thread that went idle."""
 
+    stop_details: Optional[BetaManagedAgentsSessionRefusalStopDetails] = None
+    """Structured information about why the thread stopped.
+
+    `null` when there is nothing more to report.
+    """
+
     stop_reason: StopReason
-    """The agent completed its turn naturally and is ready for the next user message."""
 
     type: Literal["session.thread_status_idle"]

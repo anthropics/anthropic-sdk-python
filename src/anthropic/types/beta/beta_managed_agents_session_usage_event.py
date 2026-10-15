@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -18,16 +16,15 @@ class BetaManagedAgentsSessionUsageEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the snapshot was taken."""
 
     type: Literal["session.usage"]
 
     usage: BetaManagedAgentsSessionUsageSnapshot
-    """Point-in-time snapshot of a session's cumulative usage."""
+    """The session's cumulative usage at the snapshot time."""
 
     budget: Optional[BetaManagedAgentsBudgetLimit] = None
-    """A hard spend ceiling.
-
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    """
+    The session's configured budget at the snapshot time, or null when the session
+    has no budget.
     """

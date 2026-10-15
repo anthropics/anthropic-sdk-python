@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Iterable, Optional
@@ -11,6 +9,7 @@ from .message_param import MessageParam
 from .metadata_param import MetadataParam
 from .text_block_param import TextBlockParam
 from .tool_union_param import ToolUnionParam
+from .diagnostics_param import DiagnosticsParam
 from .tool_choice_param import ToolChoiceParam
 from .output_config_param import OutputConfigParam
 from .thinking_config_param import ThinkingConfigParam
@@ -63,7 +62,10 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     If the final message uses the `assistant` role, the response content will
     continue immediately from the content in that message. This can be used to
-    constrain part of the model's response.
+    constrain part of the model's response. This is called prefill. On models that
+    don't support prefill, creating a message that ends with a partial `assistant`
+    response returns a 400 error. See
+    [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
     Example with a single `user` message:
 
@@ -81,7 +83,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     ]
     ```
 
-    Example with a partially-filled response from Claude:
+    Example with a partially-filled response from Claude, for models that support
+    prefill:
 
     ```json
     [
@@ -133,6 +136,14 @@ class MessageCreateParamsBase(TypedDict, total=False):
     container: Optional[MessageCreateParamsContainerParam]
     """Container identifier for reuse across requests."""
 
+    diagnostics: Optional[DiagnosticsParam]
+    """Request-level diagnostics.
+
+    Supply `previous_message_id` to have the response include
+    `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that
+    prior request.
+    """
+
     inference_geo: Optional[str]
     """Specifies the geographic region for inference processing.
 
@@ -176,15 +187,16 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
     thinking: ThinkingConfigParam
-    """Configuration for enabling Claude's extended thinking.
+    """Configuration for Claude's thinking.
 
-    When enabled, responses include `thinking` content blocks showing Claude's
-    thinking process before the final answer. Requires a minimum budget of 1,024
-    tokens and counts towards your `max_tokens` limit.
+    With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+    `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+    at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-    See
-    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-    for details.
+    Which `type` values are accepted, and what happens when you omit `thinking`,
+    depend on the model. See
+    [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+    for each model's behavior.
     """
 
     tool_choice: ToolChoiceParam
@@ -282,6 +294,14 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Metadata: TypeAlias = MetadataParam
@@ -304,8 +324,13 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 
@@ -313,8 +338,13 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 

@@ -1,16 +1,21 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
 import httpx2
 
 from . import _exceptions
 from ._qs import Querystring
-from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
+from ._types import (
+    Omit,
+    Timeout,
+    NotGiven,
+    RequestOptions,
+    OpenTelemetryClientOption,
+    not_given,
+)
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -19,6 +24,7 @@ from ._utils import (
 from ._compat import model_copy, cached_property
 from ._models import FinalRequestOptions
 from ._version import __version__
+from ._constants import ANTHROPIC_API_VERSION
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._middleware import MiddlewareInput
@@ -37,36 +43,37 @@ from .lib.credentials import (
     CredentialsFile,
     AccessTokenProvider,
     BaseURLBoundProvider,
+    AsyncAccessTokenProvider,
     default_credentials,
 )
 from .lib.credentials._auth import (
     warn_env_static_shadows_auto_discovery,
     warn_explicit_static_shadows_credentials,
 )
+from .lib.credentials._close import has_async_close, close_credentials, async_close_credentials
+from .lib.credentials._types import is_async_token_provider
 from .lib.credentials._constants import _has_auto_discoverable_credentials
 
 
 def _is_base_client(client: object) -> bool:
-    """True only for the base ``Anthropic`` / ``AsyncAnthropic`` classes, not subclasses.
+    """True only for the base `Anthropic` / `AsyncAnthropic` classes, not subclasses.
 
-    Subclasses (``AnthropicAWS``, ``AnthropicFoundry``) have their own auth paths
-    and must not run the credential chain or forward ``credentials`` through their
-    ``__init__`` (which doesn't accept the kwarg).
+    Subclasses (`AnthropicAWS`, `AnthropicFoundry`) have their own auth paths
+    and must not run the credential chain or forward `credentials` through their
+    `__init__` (which doesn't accept the kwarg).
     """
     return type(client) in (Anthropic, AsyncAnthropic)
 
 
-def _close_credentials(credentials: object) -> None:
-    """Release any resources owned by a credential provider, if it exposes ``close()``."""
-    close = getattr(credentials, "close", None)
-    if close is not None:
-        close()
+_ProviderT = TypeVar(
+    "_ProviderT", "AccessTokenProvider | None", "AccessTokenProvider | AsyncAccessTokenProvider | None"
+)
 
 
-def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url: str) -> AccessTokenProvider | None:
+def _bind_credentials_base_url(credentials: _ProviderT, base_url: str) -> _ProviderT:
     """Return the provider this client should exchange tokens through.
 
-    See :class:`BaseURLBoundProvider`; any other provider (plain callables,
+    See `BaseURLBoundProvider`; any other provider (plain callables,
     custom impls) is returned untouched and resolves its own exchange URL.
     """
     if isinstance(credentials, BaseURLBoundProvider):
@@ -75,17 +82,17 @@ def _bind_credentials_base_url(credentials: AccessTokenProvider | None, base_url
 
 
 def _keeps_base_url(current: httpx2.URL, requested: str | httpx2.URL | None) -> bool:
-    """Whether a ``copy()`` stays on the parent's deployment.
+    """Whether a `copy()` stays on the parent's deployment.
 
     Tokens are only valid for the deployment that minted them, so the parent's
-    :class:`TokenCache` is only shared in that case.
+    `TokenCache` is only shared in that case.
     """
     return requested is None or str(httpx2.URL(requested)).rstrip("/") == str(current).rstrip("/")
 
 
 def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
-    """Warn when an explicit ``api_key=`` / ``auth_token=`` argument shadows
-    an explicit ``credentials=`` provider. Call *after* any copy-inheritance
+    """Warn when an explicit `api_key=` / `auth_token=` argument shadows
+    an explicit `credentials=` provider. Call *after* any copy-inheritance
     merging so the params reflect the resolved values."""
     if credentials is None:
         return
@@ -96,9 +103,9 @@ def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, creden
 
 
 def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
-    """Warn when an ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` from the
+    """Warn when an `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from the
     environment is set alongside signals that would normally drive profile /
-    federation auto-discovery (``ANTHROPIC_PROFILE``, a ``configs/`` directory,
+    federation auto-discovery (`ANTHROPIC_PROFILE`, a `configs/` directory,
     or the workload-identity env trio). Per the credential-precedence spec,
     the static credential wins and auto-discovery is silently skipped."""
     if not _has_auto_discoverable_credentials():
@@ -112,12 +119,13 @@ def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
 # --- end credentials support ---
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages
+    from .resources import beta, files, models, skills, messages, organization
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
+    from .resources.organization.organization import Organization, AsyncOrganization
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
@@ -167,6 +175,9 @@ class Anthropic(SyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
@@ -187,26 +198,26 @@ class Anthropic(SyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
-           ``credentials=``, ``config=``, or ``profile=``. When any of these
+        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When any of these
            is passed, environment variables are not consulted for credentials.
-        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
            variables.
-        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
-           profile from ``<config_dir>/configs/<profile>.json``.
+        3. `ANTHROPIC_PROFILE` environment variable — loads the named
+           profile from `<config_dir>/configs/<profile>.json`.
         4. Workload identity federation environment variables —
-           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
-           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+           `ANTHROPIC_IDENTITY_TOKEN[_FILE]` +
+           `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`.
         5. The active profile on disk — the profile named by
-           ``<config_dir>/active_config``, or ``default``.
+           `<config_dir>/active_config`, or `default`.
 
-        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+        `credentials=`, `config=`, and `profile=` are mutually exclusive.
 
         If a static credential is supplied alongside a credentials provider
-        (``credentials=`` / ``config=`` / ``profile=``), or if
-        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        (`credentials=` / `config=` / `profile=`), or if
+        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
-        precedence and a one-shot warning is logged on the ``anthropic``
+        precedence and a one-shot warning is logged on the `anthropic`
         logger.
         """
         # --- credentials support (hand-written, upstream to Stainless) ---
@@ -274,6 +285,14 @@ class Anthropic(SyncAPIClient):
                 credential_headers = result.extra_headers
                 if not base_url_is_explicit and result.base_url:
                     base_url = result.base_url
+
+        if is_async_token_provider(credentials):
+            raise TypeError("`Anthropic` cannot await an async `credentials` provider; use `AsyncAnthropic` instead.")
+        if has_async_close(credentials):
+            raise TypeError(
+                "`Anthropic` cannot await this `credentials` provider's `async def close()`; use `AsyncAnthropic` instead."
+            )
+
         credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
         _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
@@ -295,6 +314,7 @@ class Anthropic(SyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -327,6 +347,12 @@ class Anthropic(SyncAPIClient):
         from .resources.skills import Skills
 
         return Skills(self)
+
+    @cached_property
+    def organization(self) -> Organization:
+        from .resources.organization import Organization
+
+        return Organization(self)
 
     @cached_property
     def beta(self) -> Beta:
@@ -378,7 +404,7 @@ class Anthropic(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
@@ -424,7 +450,7 @@ class Anthropic(SyncAPIClient):
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
         # so body replay is handled for us. The single-shot guard relies on
-        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # `x-stainless-retry-count` being `"0"` on the first attempt
         # (see _base_client.py); if a caller Omit()s that header the guard
         # silently no-ops, which fails safe (no retry, surface the 401).
         if response.status_code == 401 and self._token_cache is not None:
@@ -436,7 +462,7 @@ class Anthropic(SyncAPIClient):
     @override
     def close(self) -> None:
         super().close()
-        _close_credentials(self.credentials)
+        close_credentials(self.credentials)
 
     # --- end credentials support ---
 
@@ -453,6 +479,7 @@ class Anthropic(SyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -501,7 +528,7 @@ class Anthropic(SyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -514,6 +541,10 @@ class Anthropic(SyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
@@ -575,7 +606,7 @@ class AsyncAnthropic(AsyncAPIClient):
     api_key: str | None
     auth_token: str | None
     webhook_key: str | None
-    credentials: AccessTokenProvider | None
+    credentials: AccessTokenProvider | AsyncAccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
 
@@ -584,7 +615,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None = None,
+        credentials: AccessTokenProvider | AsyncAccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
@@ -593,6 +624,9 @@ class AsyncAnthropic(AsyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
@@ -613,26 +647,26 @@ class AsyncAnthropic(AsyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — ``api_key=``, ``auth_token=``,
-           ``credentials=``, ``config=``, or ``profile=``. When any of these
+        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When any of these
            is passed, environment variables are not consulted for credentials.
-        2. ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` environment
+        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
            variables.
-        3. ``ANTHROPIC_PROFILE`` environment variable — loads the named
-           profile from ``<config_dir>/configs/<profile>.json``.
+        3. `ANTHROPIC_PROFILE` environment variable — loads the named
+           profile from `<config_dir>/configs/<profile>.json`.
         4. Workload identity federation environment variables —
-           ``ANTHROPIC_IDENTITY_TOKEN[_FILE]`` +
-           ``ANTHROPIC_FEDERATION_RULE_ID`` + ``ANTHROPIC_ORGANIZATION_ID``.
+           `ANTHROPIC_IDENTITY_TOKEN[_FILE]` +
+           `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`.
         5. The active profile on disk — the profile named by
-           ``<config_dir>/active_config``, or ``default``.
+           `<config_dir>/active_config`, or `default`.
 
-        ``credentials=``, ``config=``, and ``profile=`` are mutually exclusive.
+        `credentials=`, `config=`, and `profile=` are mutually exclusive.
 
         If a static credential is supplied alongside a credentials provider
-        (``credentials=`` / ``config=`` / ``profile=``), or if
-        ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` is set alongside a
+        (`credentials=` / `config=` / `profile=`), or if
+        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
-        precedence and a one-shot warning is logged on the ``anthropic``
+        precedence and a one-shot warning is logged on the `anthropic`
         logger.
         """
         # --- credentials support (hand-written, upstream to Stainless) ---
@@ -721,6 +755,7 @@ class AsyncAnthropic(AsyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -753,6 +788,12 @@ class AsyncAnthropic(AsyncAPIClient):
         from .resources.skills import AsyncSkills
 
         return AsyncSkills(self)
+
+    @cached_property
+    def organization(self) -> AsyncOrganization:
+        from .resources.organization import AsyncOrganization
+
+        return AsyncOrganization(self)
 
     @cached_property
     def beta(self) -> AsyncBeta:
@@ -804,7 +845,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
@@ -844,7 +885,7 @@ class AsyncAnthropic(AsyncAPIClient):
         # is re-sent with a freshly minted Bearer token. The base-client retry
         # loop rebuilds the request from FinalRequestOptions on each attempt,
         # so body replay is handled for us. The single-shot guard relies on
-        # ``x-stainless-retry-count`` being ``"0"`` on the first attempt
+        # `x-stainless-retry-count` being `"0"` on the first attempt
         # (see _base_client.py); if a caller Omit()s that header the guard
         # silently no-ops, which fails safe (no retry, surface the 401).
         if response.status_code == 401 and self._token_cache is not None:
@@ -856,9 +897,7 @@ class AsyncAnthropic(AsyncAPIClient):
     @override
     async def close(self) -> None:
         await super().close()
-        # Credential providers expose a sync close() even from the async client —
-        # they own a sync httpx2.Client for the token-exchange POST.
-        _close_credentials(self.credentials)
+        await async_close_credentials(self.credentials)
 
     # --- end credentials support ---
 
@@ -867,7 +906,7 @@ class AsyncAnthropic(AsyncAPIClient):
         *,
         api_key: str | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None | NotGiven = not_given,
+        credentials: AccessTokenProvider | AsyncAccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
         webhook_key: str | None = None,
@@ -875,6 +914,7 @@ class AsyncAnthropic(AsyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -923,7 +963,7 @@ class AsyncAnthropic(AsyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -936,6 +976,10 @@ class AsyncAnthropic(AsyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
@@ -1023,6 +1067,12 @@ class AnthropicWithRawResponse:
         return SkillsWithRawResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithRawResponse:
+        from .resources.organization import OrganizationWithRawResponse
+
+        return OrganizationWithRawResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithRawResponse:
         from .resources.beta import BetaWithRawResponse
 
@@ -1058,6 +1108,12 @@ class AsyncAnthropicWithRawResponse:
         from .resources.skills import AsyncSkillsWithRawResponse
 
         return AsyncSkillsWithRawResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithRawResponse:
+        from .resources.organization import AsyncOrganizationWithRawResponse
+
+        return AsyncOrganizationWithRawResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithRawResponse:
@@ -1097,6 +1153,12 @@ class AnthropicWithStreamedResponse:
         return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithStreamingResponse:
+        from .resources.organization import OrganizationWithStreamingResponse
+
+        return OrganizationWithStreamingResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithStreamingResponse:
         from .resources.beta import BetaWithStreamingResponse
 
@@ -1132,6 +1194,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.skills import AsyncSkillsWithStreamingResponse
 
         return AsyncSkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithStreamingResponse:
+        from .resources.organization import AsyncOrganizationWithStreamingResponse
+
+        return AsyncOrganizationWithStreamingResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithStreamingResponse:

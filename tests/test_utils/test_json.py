@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import datetime
+from types import MappingProxyType
 from typing import Union
+from collections import deque
 
 import pydantic
 
 from anthropic import _compat
-from anthropic._utils._json import openapi_dumps
+from anthropic._utils._json import openapi_dumps, openapi_dumps_str
 
 
 class TestOpenapiDumps:
@@ -15,11 +17,33 @@ class TestOpenapiDumps:
         json_bytes = openapi_dumps(data)
         assert json_bytes == b'{"key":"value","number":42}'
 
+    def test_str_variant(self) -> None:
+        data = {"key": "välue", "when": datetime.date(2023, 1, 1)}
+        json_str = openapi_dumps_str(data)
+
+        assert isinstance(json_str, str)
+        assert json_str == '{"key":"välue","when":"2023-01-01"}'
+        assert openapi_dumps(data) == json_str.encode()
+
     def test_datetime_serialization(self) -> None:
         dt = datetime.datetime(2023, 1, 1, 12, 0, 0)
         data = {"datetime": dt}
         json_bytes = openapi_dumps(data)
         assert json_bytes == b'{"datetime":"2023-01-01T12:00:00"}'
+
+    def test_date_serialization(self) -> None:
+        json_bytes = openapi_dumps({"date": datetime.date(2023, 1, 1), "list": [datetime.date(2023, 1, 2)]})
+        assert json_bytes == b'{"date":"2023-01-01","list":["2023-01-02"]}'
+
+    def test_iterables_and_mappings(self) -> None:
+        d = {"k": 3}
+        json_bytes = openapi_dumps(
+            {"gen": (i for i in range(2)), "map": MappingProxyType({"a": (1,)}), "set": {2}, "keys": d.keys()}
+        )
+
+        assert json_bytes == b'{"gen":[0,1],"map":{"a":[1]},"set":[2],"keys":["k"]}'
+        others = [range(2), deque([1]), frozenset({2}), d.values(), map(str, (1,))]
+        assert openapi_dumps(others) == b'[[0,1],[1],[2],[3],["1"]]'
 
     def test_pydantic_model_serialization(self) -> None:
         class User(pydantic.BaseModel):
@@ -101,12 +125,12 @@ class TestOpenapiDumps:
         json_bytes = openapi_dumps(data)
         assert json_bytes == b'{"user":{"name":"Diana","address":{"street":"123 Main St"}}}'
 
-        address_with_city = Address(street="456 Oak Ave", city="Boston")
+        address_with_city = Address(street="456 Elm Ave", city="Boston")
         user_verified = User(name="Eve", address=address_with_city, verified=True)
         data = {"user": user_verified}
         json_bytes = openapi_dumps(data)
         assert (
-            json_bytes == b'{"user":{"name":"Eve","address":{"street":"456 Oak Ave","city":"Boston"},"verified":true}}'
+            json_bytes == b'{"user":{"name":"Eve","address":{"street":"456 Elm Ave","city":"Boston"},"verified":true}}'
         )
 
     def test_pydantic_model_with_optional_fields(self) -> None:

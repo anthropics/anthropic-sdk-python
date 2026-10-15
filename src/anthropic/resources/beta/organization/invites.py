@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
@@ -8,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,7 +17,6 @@ from ...._response import (
 )
 from ....pagination import SyncPage, AsyncPage
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import invite_list_params, invite_create_params
 from ....types.beta.organization.invite_delete_response import InviteDeleteResponse
 from ....types.beta.organization.beta_organization_invite import BetaOrganizationInvite
 
@@ -75,7 +72,8 @@ class Invites(SyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; inviting with the `managed` role requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           rbac_group_ids: RBAC group IDs to assign to the User when the Invite is accepted. A non-empty
               array is accepted only for a Claude Enterprise organization with RBAC groups,
@@ -91,16 +89,19 @@ class Invites(SyncAPIResource):
         """
         return self._post(
             "/v1/organizations/invites?beta=true",
-            body=maybe_transform(
-                {
-                    "email": email,
-                    "role": role,
-                    "rbac_group_ids": rbac_group_ids,
-                },
-                invite_create_params.InviteCreateParams,
-            ),
+            body={
+                "email": email,
+                "role": role,
+                "rbac_group_ids": rbac_group_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -135,7 +136,13 @@ class Invites(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -200,17 +207,16 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                        "statuses": statuses,
-                    },
-                    invite_list_params.InviteListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                    "statuses": statuses,
+                },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=BetaOrganizationInvite,
         )
@@ -245,7 +251,13 @@ class Invites(SyncAPIResource):
         return self._delete(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )
@@ -300,7 +312,8 @@ class AsyncInvites(AsyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; inviting with the `managed` role requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           rbac_group_ids: RBAC group IDs to assign to the User when the Invite is accepted. A non-empty
               array is accepted only for a Claude Enterprise organization with RBAC groups,
@@ -316,16 +329,19 @@ class AsyncInvites(AsyncAPIResource):
         """
         return await self._post(
             "/v1/organizations/invites?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "email": email,
-                    "role": role,
-                    "rbac_group_ids": rbac_group_ids,
-                },
-                invite_create_params.InviteCreateParams,
-            ),
+            body={
+                "email": email,
+                "role": role,
+                "rbac_group_ids": rbac_group_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -360,7 +376,13 @@ class AsyncInvites(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=BetaOrganizationInvite,
         )
@@ -425,17 +447,16 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                        "statuses": statuses,
-                    },
-                    invite_list_params.InviteListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                    "statuses": statuses,
+                },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=BetaOrganizationInvite,
         )
@@ -470,7 +491,13 @@ class AsyncInvites(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )

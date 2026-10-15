@@ -1,8 +1,10 @@
 # Note: initially copied from https://github.com/florimondmanca/httpx-sse/blob/master/src/httpx_sse/_decoders.py
 from __future__ import annotations
 
+import sys
 import json
 import inspect
+from copy import copy
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, Iterator, Optional, AsyncIterator, cast
 from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, runtime_checkable
@@ -10,11 +12,13 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 import httpx2
 
 from ._utils import is_dict, extract_type_var_from_base
+from ._compat import cached_property
 from ._exceptions import APITimeoutError, APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
     from ._models import FinalRequestOptions
+    from ._tracing import StreamObserver
 
 
 _T = TypeVar("_T")
@@ -40,13 +44,28 @@ class Stream(Generic[_T]):
         self._client = client
         self._options = options
         self._decoder = client._make_sse_decoder()
-        self._iterator = self.__stream__()
+
+    @cached_property
+    def _iterator(self) -> Iterator[_T]:
+        # On a copy, as a generator that referred to this stream would form a cycle with it, which would leave it to
+        # the garbage collector to close a dropped stream. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__stream__()
+
+    @property
+    def _observer(self) -> Optional[StreamObserver]:
+        # A stand-in for the response, such as a mock with a `spec`, may have no `stream`.
+        return getattr(getattr(self.response, "stream", None), "stream_observer", None)
 
     def __next__(self) -> _T:
-        return self._iterator.__next__()
+        item = self._iterator.__next__()
+        if (observer := self._observer) is not None:
+            observer.item(item)
+        return item
 
     def __iter__(self) -> Iterator[_T]:
         for item in self._iterator:
+            if (observer := self._observer) is not None:
+                observer.item(item)
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
@@ -71,6 +90,9 @@ class Stream(Generic[_T]):
         response = self.response
         process_data = self._client._process_response_data
         iterator = self._iter_events()
+
+        if (observer := self._observer) is not None:
+            observer.begin()
 
         try:
             for sse in iterator:
@@ -124,6 +146,13 @@ class Stream(Generic[_T]):
                     or sse.event == "event_start"
                     or sse.event == "event_delta"
                     or sse.event == "system.message"
+                    or sse.event == "workflow_run.created"
+                    or sse.event == "workflow_run.status_running"
+                    or sse.event == "workflow_run.status_idle"
+                    or sse.event == "workflow_run.status_ended"
+                    or sse.event == "workflow_run.error"
+                    or sse.event == "workflow_run.phase_started"
+                    or sse.event == "workflow_run.phase_ended"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
@@ -148,9 +177,19 @@ class Stream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+            if (observer := self._observer) is not None:
+                observer.end("read")
+        except Exception as err:
+            if (observer := self._observer) is not None:
+                observer.end("failed", err)
+            raise
         finally:
-            # Ensure the response is closed even if the consumer doesn't read all data
-            response.close()
+            if sys.is_finalizing():
+                # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
+                response.is_closed = True
+            else:
+                # Ensure the response is closed even if the consumer doesn't read all data
+                response.close()
 
     def __enter__(self) -> Self:
         return self
@@ -169,6 +208,8 @@ class Stream(Generic[_T]):
 
         Automatically called if the response body is read to completion.
         """
+        if (observer := self._observer) is not None:
+            observer.end("closed")
         self.response.close()
 
 
@@ -192,13 +233,28 @@ class AsyncStream(Generic[_T]):
         self._client = client
         self._options = options
         self._decoder = client._make_sse_decoder()
-        self._iterator = self.__stream__()
+
+    @cached_property
+    def _iterator(self) -> AsyncIterator[_T]:
+        # On a copy, as a generator that referred to this stream would form a cycle with it, which would leave it to
+        # the garbage collector to close a dropped stream. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__stream__()
+
+    @property
+    def _observer(self) -> Optional[StreamObserver]:
+        # A stand-in for the response, such as a mock with a `spec`, may have no `stream`.
+        return getattr(getattr(self.response, "stream", None), "stream_observer", None)
 
     async def __anext__(self) -> _T:
-        return await self._iterator.__anext__()
+        item = await self._iterator.__anext__()
+        if (observer := self._observer) is not None:
+            observer.item(item)
+        return item
 
     async def __aiter__(self) -> AsyncIterator[_T]:
         async for item in self._iterator:
+            if (observer := self._observer) is not None:
+                observer.item(item)
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
@@ -224,6 +280,9 @@ class AsyncStream(Generic[_T]):
         response = self.response
         process_data = self._client._process_response_data
         iterator = self._iter_events()
+
+        if (observer := self._observer) is not None:
+            observer.begin()
 
         try:
             async for sse in iterator:
@@ -277,6 +336,13 @@ class AsyncStream(Generic[_T]):
                     or sse.event == "event_start"
                     or sse.event == "event_delta"
                     or sse.event == "system.message"
+                    or sse.event == "workflow_run.created"
+                    or sse.event == "workflow_run.status_running"
+                    or sse.event == "workflow_run.status_idle"
+                    or sse.event == "workflow_run.status_ended"
+                    or sse.event == "workflow_run.error"
+                    or sse.event == "workflow_run.phase_started"
+                    or sse.event == "workflow_run.phase_ended"
                 ):
                     data = sse.json()
                     if is_dict(data) and "type" not in data:
@@ -301,9 +367,19 @@ class AsyncStream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+            if (observer := self._observer) is not None:
+                observer.end("read")
+        except Exception as err:
+            if (observer := self._observer) is not None:
+                observer.end("failed", err)
+            raise
         finally:
-            # Ensure the response is closed even if the consumer doesn't read all data
-            await response.aclose()
+            if sys.is_finalizing():
+                # Closing at interpreter shutdown can crash CPython 3.13; mark it closed instead.
+                response.is_closed = True
+            else:
+                # Ensure the response is closed even if the consumer doesn't read all data
+                await response.aclose()
 
     async def __aenter__(self) -> Self:
         return self
@@ -322,6 +398,8 @@ class AsyncStream(Generic[_T]):
 
         Automatically called if the response body is read to completion.
         """
+        if (observer := self._observer) is not None:
+            observer.end("closed")
         await self.response.aclose()
 
 

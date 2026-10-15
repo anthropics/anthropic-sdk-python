@@ -305,6 +305,17 @@ class TestShapeBContinuation:
         assert "signature" in appended["content"][0]
 
     @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        collect(client.beta.messages.create(**PARAMS, thinking={"type": "between_tools"}, stream=True))
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
     def test_appends_the_fallback_credit_beta_to_both_the_original_and_hop_requests(
         self, respx_mock: MockRouter
     ) -> None:
@@ -315,8 +326,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["interleaved-thinking-2025-05-14"]))
 
         assert beta_headers(respx_mock) == [
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
         ]
 
     @pytest.mark.respx(base_url=base_url)
@@ -329,8 +340,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["fallback-credit-2026-06-01"]))
 
         assert beta_headers(respx_mock) == [
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
         ]
 
 
@@ -603,7 +614,8 @@ class TestEdgeCases:
         client = make_lenient_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
 
         with pytest.raises(
-            AnthropicError, match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\."
+            AnthropicError,
+            match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\.",
         ):
             client.beta.messages.create(
                 model="claude-fable-5",

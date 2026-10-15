@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Mapping, Optional, cast
@@ -18,7 +16,7 @@ from ...._types import (
     omit,
     not_given,
 )
-from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, extract_files, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -37,7 +35,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.skills import version_list_params, version_create_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.skills.beta_skill_version import BetaSkillVersion
 from ....types.beta.skills.beta_deleted_skill_version import BetaDeletedSkillVersion
@@ -94,6 +91,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -121,10 +125,17 @@ class Versions(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            body=maybe_transform(body, version_create_params.VersionCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=BetaSkillVersion,
         )
@@ -159,6 +170,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -183,7 +201,13 @@ class Versions(SyncAPIResource):
         return self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BetaSkillVersion,
         )
@@ -219,6 +243,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -246,13 +277,13 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=BetaSkillVersion,
         )
@@ -286,6 +317,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -310,7 +348,13 @@ class Versions(SyncAPIResource):
         return self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BetaDeletedSkillVersion,
         )
@@ -344,6 +388,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -371,7 +422,13 @@ class Versions(SyncAPIResource):
                 "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.download",
+                span_route="/v1/skills/{skill_id}/versions/{version}/content",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -426,6 +483,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -453,10 +517,17 @@ class AsyncVersions(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            body=await async_maybe_transform(body, version_create_params.VersionCreateParams),
+            body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=BetaSkillVersion,
         )
@@ -491,6 +562,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -515,7 +593,13 @@ class AsyncVersions(AsyncAPIResource):
         return await self._get(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BetaSkillVersion,
         )
@@ -551,6 +635,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -578,13 +669,13 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=BetaSkillVersion,
         )
@@ -618,6 +709,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -642,7 +740,13 @@ class AsyncVersions(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BetaDeletedSkillVersion,
         )
@@ -676,6 +780,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -703,7 +814,13 @@ class AsyncVersions(AsyncAPIResource):
                 "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.skills.versions.download",
+                span_route="/v1/skills/{skill_id}/versions/{version}/content",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )

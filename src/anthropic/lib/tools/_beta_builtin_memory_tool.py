@@ -78,7 +78,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -191,7 +191,7 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -305,9 +305,9 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
 
 
 def _secure_mkdir(path: Path, mode: int = _DIR_CREATE_MODE) -> None:
-    """Create ``path`` and any missing parents with ``mode``, regardless of umask.
+    """Create `path` and any missing parents with `mode`, regardless of umask.
 
-    ``Path.mkdir(parents=True, mode=...)`` and ``os.makedirs(mode=...)`` apply the
+    `Path.mkdir(parents=True, mode=...)` and `os.makedirs(mode=...)` apply the
     requested mode only to the final (leaf) directory; intermediate parents are
     created with the process umask default, which can be world-writable under a
     permissive umask. We create each missing component explicitly so the entire

@@ -1,0 +1,8 @@
+from .beta_computer_left_mouse_down_tool_use_block import BetaComputerLeftMouseDownToolUseBlock
+
+__all__ = ["BetaResponseComputerLeftMouseDownToolUseBlock"]
+
+BetaResponseComputerLeftMouseDownToolUseBlock = BetaComputerLeftMouseDownToolUseBlock
+"""
+BetaResponseComputerLeftMouseDownToolUseBlock has been renamed to BetaComputerLeftMouseDownToolUseBlock
+"""

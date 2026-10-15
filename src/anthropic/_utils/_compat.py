@@ -29,10 +29,6 @@ def is_union(tp: Optional[Type[Any]]) -> bool:
         return tp is Union or tp is types.UnionType  # type: ignore[comparison-overlap]
 
 
-def is_typeddict(tp: Type[Any]) -> bool:
-    return typing_extensions.is_typeddict(tp)
-
-
 def is_literal_type(tp: Type[Any]) -> bool:
     return get_origin(tp) in _LITERAL_TYPES
 

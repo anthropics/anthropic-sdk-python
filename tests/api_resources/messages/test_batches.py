@@ -1,4 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 from __future__ import annotations
 
 import os
@@ -21,6 +20,18 @@ from anthropic.types.messages import (
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
+def mock_results(respx_mock: MockRouter) -> None:
+    # the mock server's example results_url points at the production API
+    respx_mock.get("/v1/messages/batches/message_batch_id").mock(
+        return_value=httpx2.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
+    )
+    respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
+        return_value=httpx2.Response(
+            200, content=json.dumps({"custom_id": "my-custom-id-1", "result": {"type": "canceled"}})
+        )
+    )
+
+
 class TestBatches:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
@@ -38,7 +49,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -59,7 +70,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -74,6 +85,7 @@ class TestBatches:
                                 }
                             ],
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -160,7 +172,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -185,7 +197,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -401,9 +413,10 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_raw_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_raw_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = client.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
         )
@@ -413,9 +426,10 @@ class TestBatches:
         for item in stream:
             assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_streaming_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_streaming_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         with client.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
         ) as response:
@@ -455,7 +469,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -476,7 +490,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -491,6 +505,7 @@ class TestAsyncBatches:
                                 }
                             ],
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -577,7 +592,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -602,7 +617,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -818,9 +833,10 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_raw_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = await async_client.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
         )
@@ -830,9 +846,10 @@ class TestAsyncBatches:
         async for item in stream:
             assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    async def test_streaming_response_results(self, async_client: AsyncAnthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_streaming_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         async with async_client.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
         ) as response:

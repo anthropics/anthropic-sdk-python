@@ -1,18 +1,18 @@
-"""Tests for :class:`EnvironmentWorker`.
+"""Tests for `EnvironmentWorker`.
 
 The worker composes the control-plane poller, the per-session
-``AgentToolContext`` / skill download, the lease heartbeat, and the session tool
-runner. We stub ``aiter_work``, the session tool runner, and the worker's
-``_copy_client_with_bearer_auth`` helper so each test can drive a single
+`AgentToolContext` / skill download, the lease heartbeat, and the session tool
+runner. We stub `aiter_work`, the session tool runner, and the worker's
+`_copy_client_with_bearer_auth` helper so each test can drive a single
 claimed work item and assert the surrounding plumbing (skip non-session work,
-heartbeat the lease, force-stop on exit) — via both the ``run()`` poll loop
-and the single-item ``handle_item()`` entry point.
+heartbeat the lease, force-stop on exit) — via both the `run()` poll loop
+and the single-item `handle_item()` entry point.
 
 After the auth refactor, heartbeat / force-stop traffic flows through a
 Bearer-only sub-client the worker constructs via the shared
-``_copy_client_with_bearer_auth`` util. The tests intercept that helper so they
+`_copy_client_with_bearer_auth` util. The tests intercept that helper so they
 can route those calls to a recording fake without spinning up a real
-``AsyncAnthropic`` (and the httpx pool that comes with it).
+`AsyncAnthropic` (and the httpx pool that comes with it).
 """
 
 from __future__ import annotations
@@ -33,9 +33,13 @@ from typing_extensions import override
 import anyio
 import httpx2
 import pytest
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, StatusCode
 
 from anthropic import Anthropic, APIStatusError, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
+from anthropic._tracing import resolve_open_telemetry
+from anthropic.lib._tracing import OpenTelemetryConfig
 from anthropic.lib.environments import _worker as worker_mod
 from anthropic.lib.environments._worker import (
     EnvironmentWorker,
@@ -46,11 +50,12 @@ from anthropic.lib.environments._worker import (
 )
 from anthropic.lib.tools._tool_dispatch import run_runnable_tool
 
+from ..tools.test_open_telemetry import Spans, span_id, parent_id, attributes
 from ..tools.test_session_runner import _SyncTool
 
 
 def _encode_secret(payload: dict[str, Any]) -> str:
-    """Build a work-item ``secret`` the way the control plane does: URL-safe
+    """Build a work-item `secret` the way the control plane does: URL-safe
     base64 of a JSON payload, without padding."""
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
 
@@ -212,7 +217,7 @@ def _install_run_session_tools(
         }
 
         async def _iter() -> AsyncIterator[Any]:
-            # With no ``serve`` the session completes on its own (no tool
+            # With no `serve` the session completes on its own (no tool
             # calls) once the lease heartbeat has had a chance to land, and
             # the run ends via the normal session-completion path; the
             # heartbeat keeps the lease alive throughout and is stopped on the
@@ -268,8 +273,8 @@ async def test_environment_worker_serves_session(monkeypatch: pytest.MonkeyPatch
     assert work.stop_calls[0]["work_id"] == "w_1"
     assert work.stop_calls[0]["force"] is True
     # Auth flows through scoped sub-clients tagged with the right helper.
-    # ``run()`` builds an ``environments-work-poller``-tagged client for ``aiter_work``;
-    # each handled item builds an ``environments-worker``-tagged client for the
+    # `run()` builds an `environments-work-poller`-tagged client for `aiter_work`;
+    # each handled item builds an `environments-worker`-tagged client for the
     # heartbeat and force-stop. The environment key flows into both.
     assert scoped_calls == [
         {"auth_token": "env_key", "helper": "environments-work-poller"},
@@ -333,7 +338,7 @@ async def test_environment_worker_accepts_tools_factory(monkeypatch: pytest.Monk
 async def test_environment_worker_prefers_work_item_secret(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """A claimed item carrying a per-item ``secret`` payload authenticates that
+    """A claimed item carrying a per-item `secret` payload authenticates that
     item's heartbeat / force-stop / session-runner calls with the sessions
     token extracted from it; polling stays on the environment key. Neither the
     payload nor the token ever reaches the logs."""
@@ -522,7 +527,7 @@ async def test_heartbeat_412_releases_item_without_stopping_it(
 async def test_control_plane_stop_still_force_stops(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """A heartbeat reporting ``state == "stopped"`` ends the run and the item
+    """A heartbeat reporting `state == "stopped"` ends the run and the item
     is still force-stopped on the way out — only a *lost* lease skips that."""
     work = _FakeWorkResource(heartbeat_state="stopped")
     sessions = _FakeSessions()
@@ -647,8 +652,8 @@ async def test_handle_item_services_a_single_claimed_item(monkeypatch: pytest.Mo
     assert len(work.stop_calls) == 1
     assert work.stop_calls[0]["work_id"] == "w_1"
     assert work.stop_calls[0]["force"] is True
-    # ``handle_item`` doesn't poll, so only the heartbeat/force-stop scoped
-    # client is built — tagged ``environments-worker``.
+    # `handle_item` doesn't poll, so only the heartbeat/force-stop scoped
+    # client is built — tagged `environments-worker`.
     assert scoped_calls == [{"auth_token": "env_key", "helper": "environments-worker"}]
 
 
@@ -686,7 +691,7 @@ async def test_handle_item_falls_back_to_env_vars(monkeypatch: pytest.MonkeyPatc
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_uses_constructor_environment_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``environment_key`` resolves to the worker's own key when not passed and
+    """`environment_key` resolves to the worker's own key when not passed and
     no env var is set."""
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -711,9 +716,9 @@ async def test_handle_item_uses_constructor_environment_key(monkeypatch: pytest.
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_uses_work_secret_argument(monkeypatch: pytest.MonkeyPatch) -> None:
-    """An explicit ``work_secret`` payload supplies the per-item Bearer
-    credential (its sessions token); ``environment_key`` is still required but
-    only used as the fallback."""
+    """An explicit `work_secret` payload supplies the per-item Bearer
+    credential (its sessions token); an `environment_key` passed alongside it
+    is only the fallback."""
     secret = _encode_secret({"sessions_token": "sessions-token-arg"})
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -741,10 +746,10 @@ async def test_handle_item_uses_work_secret_argument(monkeypatch: pytest.MonkeyP
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
 async def test_handle_item_falls_back_to_work_secret_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``work_secret`` falls back to ``ANTHROPIC_WORK_SECRET`` (the env var the
-    ``worker poll --on-work`` command sets alongside the others); when neither
+    """`work_secret` falls back to `ANTHROPIC_WORK_SECRET` (the env var the
+    `worker poll --on-work` command sets alongside the others); when neither
     is present the environment key is used — the existing
-    ``test_handle_item_*`` cases cover that path."""
+    `test_handle_item_*` cases cover that path."""
     secret = _encode_secret({"sessions_token": "sessions-token-env"})
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()
@@ -773,7 +778,13 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
     sessions = _FakeSessions()
     client = _fake_client(work, sessions)
 
-    for var in ("ANTHROPIC_WORK_ID", "ANTHROPIC_ENVIRONMENT_ID", "ANTHROPIC_SESSION_ID", "ANTHROPIC_ENVIRONMENT_KEY"):
+    for var in (
+        "ANTHROPIC_WORK_ID",
+        "ANTHROPIC_ENVIRONMENT_ID",
+        "ANTHROPIC_SESSION_ID",
+        "ANTHROPIC_ENVIRONMENT_KEY",
+        "ANTHROPIC_WORK_SECRET",
+    ):
         monkeypatch.delenv(var, raising=False)
 
     worker = EnvironmentWorker(client, workdir=".")
@@ -782,7 +793,7 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
     with pytest.raises(ValueError, match=r"handle_item: work_id is required — pass it or set ANTHROPIC_WORK_ID"):
         await worker.handle_item()
 
-    # environment_key still missing even though the others are supplied.
+    # environment_key still missing, and no work secret to stand in for it.
     with pytest.raises(
         ValueError, match=r"handle_item: environment_key is required — pass it or set ANTHROPIC_ENVIRONMENT_KEY"
     ):
@@ -791,17 +802,68 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
 @pytest.mark.asyncio()
+async def test_handle_item_runs_keyless_on_a_token_bearing_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With no environment key anywhere — argument, constructor, or env var —
+    a work secret whose payload carries a sessions token is credential enough:
+    every per-item call rides that token. (The on-prem Kubernetes sandbox hands
+    the pod only the short-lived secret; the pod never holds the key.)"""
+    secret = _encode_secret({"sessions_token": "sessions-token-keyless"})
+    work = _FakeWorkResource(heartbeat_state="running")
+    sessions = _FakeSessions()
+    client = _fake_client(work, sessions)
+    scoped_calls = _install_scoped_client(monkeypatch, work, sessions)
+    record: dict[str, Any] = {}
+    _install_run_session_tools(monkeypatch, record)
+    monkeypatch.delenv("ANTHROPIC_ENVIRONMENT_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_WORK_SECRET", raising=False)
+
+    worker = EnvironmentWorker(client, workdir=".")
+    await asyncio.wait_for(
+        worker.handle_item(work_id="w_1", environment_id="e_1", session_id="s_1", work_secret=secret),
+        timeout=5,
+    )
+
+    assert scoped_calls == [{"auth_token": "sessions-token-keyless", "helper": "environments-worker"}]
+    assert record["run"]["environment_key"] == "sessions-token-keyless"
+    assert sessions.retrieve_calls == ["s_1"]
+    assert work.stop_calls[0]["work_id"] == "w_1"
+
+
+@pytest.mark.asyncio()
+async def test_handle_item_keyless_with_a_tokenless_secret_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A work secret that yields no sessions token, with no environment key to
+    fall back to, must not run the item unauthenticated: the error names both
+    ways out (a token-bearing secret, or the key), and no call is made."""
+    work = _FakeWorkResource()
+    sessions = _FakeSessions()
+    client = _fake_client(work, sessions)
+    scoped_calls = _install_scoped_client(monkeypatch, work, sessions)
+    monkeypatch.delenv("ANTHROPIC_ENVIRONMENT_KEY", raising=False)
+
+    worker = EnvironmentWorker(client, workdir=".")
+    with pytest.raises(ValueError, match=r"sessions_token, or an environment key"):
+        await worker.handle_item(
+            work_id="w_1", environment_id="e_1", session_id="s_1", work_secret="not-a-valid-payload"
+        )
+
+    assert scoped_calls == []
+    assert work.heartbeat_calls == []
+    assert work.stop_calls == []
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
+@pytest.mark.asyncio()
 async def test_worker_threads_extra_headers_into_poll_heartbeat_stop_and_runner(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A worker-level ``extra_headers`` is threaded, unchanged, into every
+    """A worker-level `extra_headers` is threaded, unchanged, into every
     per-request call the worker drives: the poll loop (forwarded to
-    ``aiter_work``), the lease heartbeat, the force-stop, and the session
+    `aiter_work`), the lease heartbeat, the force-stop, and the session
     tool runner.
 
     The worker does no header munging — it passes the caller's mapping
-    through to each call's ``extra_headers=``. Auth stays on the scoped
-    sub-clients the worker builds (``env_key`` Bearer), independent of this
+    through to each call's `extra_headers=`. Auth stays on the scoped
+    sub-clients the worker builds (`env_key` Bearer), independent of this
     passthrough.
     """
     work = _FakeWorkResource(heartbeat_state="running")
@@ -848,8 +910,8 @@ async def test_worker_threads_extra_headers_into_poll_heartbeat_stop_and_runner(
 
 
 def test_work_resource_worker_builds_environment_worker() -> None:
-    """``client.beta.environments.work.worker(...)`` builds an ``EnvironmentWorker``
-    bound to the client, with the options threaded through (mirrors ``poller``)."""
+    """`client.beta.environments.work.worker(...)` builds an `EnvironmentWorker`
+    bound to the client, with the options threaded through (mirrors `poller`)."""
     client = AsyncAnthropic(api_key="x")
     worker = client.beta.environments.work.worker(
         environment_id="e_1",
@@ -897,9 +959,9 @@ def test_work_resource_worker_defaults() -> None:
 
 
 def test_work_resource_worker_and_poller_async_only() -> None:
-    """``worker()`` / ``poller()`` build an async-only ``EnvironmentWorker`` /
-    ``aiter_work`` generator, so they live on ``AsyncWork`` and are NOT exposed
-    on the sync ``Work`` resource (calling them from the sync client would hand
+    """`worker()` / `poller()` build an async-only `EnvironmentWorker` /
+    `aiter_work` generator, so they live on `AsyncWork` and are NOT exposed
+    on the sync `Work` resource (calling them from the sync client would hand
     back coroutines/async iterators that can't run without an event loop)."""
     async_work = AsyncAnthropic(api_key="x").beta.environments.work
     assert hasattr(async_work, "worker")
@@ -916,7 +978,7 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
     """Regression: the lease heartbeat must already be running while skills are
     downloaded.
 
-    Skill setup (``AgentToolContext.__aenter__``) can take longer than the
+    Skill setup (`AgentToolContext.__aenter__`) can take longer than the
     lease TTL. If the first heartbeat only fired *after* that download (the old
     ordering) the lease could lapse mid-download and another worker would
     reclaim the item — both then serve the same session (split-brain). We make
@@ -990,9 +1052,9 @@ async def test_heartbeat_starts_before_skill_download(monkeypatch: pytest.Monkey
 
 # ---------- heartbeat loop ---------------------------------------------------
 #
-# ``_heartbeat_loop`` is driven directly with a scripted ``work`` fake and a
+# `_heartbeat_loop` is driven directly with a scripted `work` fake and a
 # fake clock, so the lease-staleness ceiling can be crossed without real
-# waiting. The first scripted beat reports ``ttl_seconds=0`` so the loop keeps
+# waiting. The first scripted beat reports `ttl_seconds=0` so the loop keeps
 # the (patched, tiny) default interval instead of the 1 s floor it applies to
 # a server-provided ttl.
 
@@ -1010,8 +1072,8 @@ class _FakeClock:
 
 
 class _ScriptedHeartbeatWork:
-    """``heartbeat`` pops ``(clock_advance, outcome)`` per call: an exception is
-    raised, ``_HANG`` never returns, anything else is the response."""
+    """`heartbeat` pops `(clock_advance, outcome)` per call: an exception is
+    raised, `_HANG` never returns, anything else is the response."""
 
     def __init__(self, clock: _FakeClock, script: list[tuple[float, Any]]) -> None:
         self._clock = clock
@@ -1095,7 +1157,7 @@ async def test_heartbeat_permanent_4xx_stops_immediately(
 
 @pytest.mark.asyncio()
 async def test_heartbeat_keeps_beating_while_a_sync_tool_blocks(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Heartbeat loop and tool call share one task group, as they do in ``_handle_item``."""
+    """Heartbeat loop and tool call share one task group, as they do in `_handle_item`."""
     monkeypatch.setattr(worker_mod, "_HEARTBEAT_DEFAULT", _FAST_INTERVAL)
     in_tool, release = threading.Event(), threading.Event()
 
@@ -1131,3 +1193,184 @@ async def test_heartbeat_keeps_beating_while_a_sync_tool_blocks(monkeypatch: pyt
 
     assert result == "ok"
     assert work.beats_during_tool >= 3
+
+
+# ---------- the OpenTelemetry span of each work item -------------------------
+#
+# The worker polls with the real `aiter_work` here, which starts the span of
+# each item that a poll returns.
+
+
+class _StopRun(BaseException):
+    """Ends a worker's poll loop once its queue is empty."""
+
+
+class _PolledWorkResource(_FakeWorkResource):
+    """The work resource of a client that has spans, which answers the worker's polls with `items`."""
+
+    def __init__(self, spans: Spans, items: list[Any], **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._client = SimpleNamespace(
+            _tracer=spans.provider.get_tracer("sdk"),
+            _otel=OpenTelemetryConfig(resolve_open_telemetry(None), provider_name="anthropic"),
+        )
+        self._items = list(items)
+
+    async def poll(self, _environment_id: str, **_kwargs: Any) -> Any:
+        if not self._items:
+            raise _StopRun
+        return self._items.pop(0)
+
+    async def ack(self, work_id: str, **_kwargs: Any) -> None:
+        pass
+
+
+def _polling_worker(monkeypatch: pytest.MonkeyPatch, work: _PolledWorkResource, serve: Any) -> EnvironmentWorker:
+    sessions = _FakeSessions()
+    _install_scoped_client(monkeypatch, work, sessions)
+    _install_run_session_tools(monkeypatch, {}, serve=serve)
+    return EnvironmentWorker(_fake_client(work, sessions), environment_id="e_1", environment_key="env_key", tools=[])
+
+
+async def _never() -> None:
+    await asyncio.sleep(30)
+
+
+async def test_environment_worker_handles_an_item_in_its_span(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item(), _work_item(work_id="w_2")], heartbeat_state="running")
+    current: list[int] = []
+
+    async def serve() -> None:
+        current.append(span_id(trace.get_current_span()))
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with spans.provider.get_tracer("app").start_as_current_span("app") as app_span:
+        with pytest.raises(_StopRun):
+            await asyncio.wait_for(worker.run(), timeout=5)
+
+    first, second = spans.named("anthropic.environment.work")
+    # Whatever the worker does for an item has the item's span current, so its spans are children of it.
+    assert current == [span_id(first), span_id(second)]
+    for work_span, work_id in ((first, "w_1"), (second, "w_2")):
+        assert parent_id(work_span) == span_id(app_span)
+        assert work_span.kind == SpanKind.INTERNAL
+        assert work_span.status.status_code == StatusCode.OK
+        assert attributes(work_span) == {
+            "gen_ai.provider.name": "anthropic",
+            "anthropic.environment.id": "e_1",
+            "anthropic.environment.work.id": work_id,
+            "anthropic.session.id": "s_1",
+        }
+
+
+async def test_environment_worker_ends_the_span_ok_when_the_item_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    # The first heartbeat says that the item is stopping, which ends its handling without an error.
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="stopping")
+    worker = _polling_worker(monkeypatch, work, _never)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.OK
+    # No span was current when the worker started, so the item's span is a root span.
+    assert work_span.parent is None
+
+
+@pytest.mark.parametrize(
+    ("error", "error_type"),
+    [
+        (
+            _api_status_error(404, {"type": "error", "error": {"type": "not_found_error", "message": "gone"}}),
+            "not_found_error",
+        ),
+        (RuntimeError("the tools could not start"), "client_error"),
+    ],
+    ids=["api-error", "other-error"],
+)
+async def test_environment_worker_fails_the_span_of_an_item_that_it_cannot_handle(
+    monkeypatch: pytest.MonkeyPatch, error: Exception, error_type: str
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="running")
+
+    async def serve() -> None:
+        raise error
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.ERROR
+    assert attributes(work_span)["error.type"] == error_type
+
+
+@pytest.mark.parametrize(
+    "heartbeat_error", [_lease_lost_error(), _api_status_error(403)], ids=["lease-lost", "heartbeat-rejected"]
+)
+async def test_environment_worker_leaves_the_span_unset_when_it_loses_the_lease(
+    monkeypatch: pytest.MonkeyPatch, heartbeat_error: Exception
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_error=heartbeat_error)
+    worker = _polling_worker(monkeypatch, work, _never)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
+
+
+async def test_environment_worker_leaves_the_span_unset_when_losing_the_lease_raises_an_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_error=_lease_lost_error())
+    # The heartbeat finds the lease lost once the worker serves the session.
+    serving = work.heartbeat_gate = asyncio.Event()
+
+    async def serve() -> None:
+        serving.set()
+        try:
+            await _never()
+        finally:
+            # What the lost lease interrupts fails in turn.
+            raise RuntimeError("the connection was dropped")
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
+
+
+async def test_environment_worker_leaves_the_span_unset_when_it_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="running")
+    serving = asyncio.Event()
+
+    async def serve() -> None:
+        serving.set()
+        await _never()
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    run = asyncio.ensure_future(worker.run())
+    await asyncio.wait_for(serving.wait(), timeout=5)
+    run.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await run
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)

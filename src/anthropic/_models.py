@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import sys
+import types
 import inspect
 import weakref
 from typing import (
@@ -8,8 +10,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Type,
+    Tuple,
     Union,
     Generic,
+    Mapping,
     TypeVar,
     Callable,
     Iterable,
@@ -82,6 +86,7 @@ from ._constants import RAW_RESPONSE_HEADER
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler, ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema, core_schema
+    from opentelemetry.util.types import AttributeValue
     from pydantic_core.core_schema import ModelField, ModelSchema, LiteralSchema, ModelFieldsSchema
 else:
     try:
@@ -89,6 +94,9 @@ else:
     except ImportError:
         CoreSchema = None
         core_schema = None
+
+    # pydantic can't resolve the forward reference that this alias can hold, and request options are never validated.
+    AttributeValue = Any
 
 __all__ = ["BaseModel", "GenericModel"]
 
@@ -729,6 +737,14 @@ class CachedDiscriminatorType(Protocol):
 DISCRIMINATOR_CACHE: weakref.WeakKeyDictionary[type, DiscriminatorDetails] = weakref.WeakKeyDictionary()
 
 
+def _discriminator_cache_key(union: type) -> type:
+    if sys.version_info < (3, 14) and isinstance(cast(object, union), types.UnionType):
+        # `X | Y` can't be weakly referenced before Python 3.14, so key on the equal `typing.Union[X, Y]`.
+        # That object may be held only by `typing`'s LRU cache, so the cache entry can be dropped and rebuilt.
+        return cast(type, cast(Any, Union)[get_args(union)])
+    return union
+
+
 class DiscriminatorDetails:
     field_name: str
     """The name of the discriminator field in the variant class, e.g.
@@ -771,7 +787,8 @@ class DiscriminatorDetails:
 
 
 def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any, ...]) -> DiscriminatorDetails | None:
-    cached = DISCRIMINATOR_CACHE.get(union)
+    key = _discriminator_cache_key(union)
+    cached = DISCRIMINATOR_CACHE.get(key)
     if cached is not None:
         return cached
 
@@ -814,7 +831,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
                 field_schema = field["schema"]
 
                 if field_schema["type"] == "literal":
-                    for entry in cast("LiteralSchema", field_schema)["expected"]:
+                    for entry in cast("LiteralSchema", field_schema)["expected"]:  # pyright: ignore[reportUnnecessaryCast]
                         if isinstance(entry, str):
                             mapping[entry] = variant
 
@@ -826,7 +843,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         discriminator_field=discriminator_field_name,
         discriminator_alias=discriminator_alias,
     )
-    DISCRIMINATOR_CACHE.setdefault(union, details)
+    DISCRIMINATOR_CACHE.setdefault(key, details)
     return details
 
 
@@ -838,12 +855,12 @@ def _extract_field_schema_pv2(model: type[BaseModel], field_name: str) -> ModelF
     if schema["type"] != "model":
         return None
 
-    schema = cast("ModelSchema", schema)
+    schema = cast("ModelSchema", schema)  # pyright: ignore[reportUnnecessaryCast]
     fields_schema = schema["schema"]
     if fields_schema["type"] != "model-fields":
         return None
 
-    fields_schema = cast("ModelFieldsSchema", fields_schema)
+    fields_schema = cast("ModelFieldsSchema", fields_schema)  # pyright: ignore[reportUnnecessaryCast]
     field = fields_schema["fields"].get(field_name)
     if not field:
         return None
@@ -972,6 +989,14 @@ class FinalRequestOptions(pydantic.BaseModel):
     idempotency_key: Union[str, None] = None
     post_parser: Union[Callable[[Any], Any], NotGiven] = NotGiven()
     follow_redirects: Union[bool, None] = None
+    # Set by the SDK method that makes the API call, for the call's span. Not public options.
+    span_name: Optional[str] = None
+    span_route: Optional[str] = None
+    span_query_params: Tuple[str, ...] = ()
+    # The query parameters that are content on this endpoint only.
+    span_content_query_params: Tuple[str, ...] = ()
+    span_attributes: Union[Mapping[str, AttributeValue], Callable[[object], Mapping[str, AttributeValue]], None] = None
+    span_created_id: Union[str, Tuple[str, str], None] = None
 
     content: Union[bytes, bytearray, IO[bytes], Iterable[bytes], AsyncIterable[bytes], None] = None
     # It should be noted that we cannot use `json` here as that would override

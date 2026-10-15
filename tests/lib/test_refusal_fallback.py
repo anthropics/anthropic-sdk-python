@@ -121,7 +121,12 @@ class TestRefusalFallback:
         # a `fallback` seam block is prepended at the model boundary — the same
         # block shape the streaming splice emits
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
@@ -237,8 +242,18 @@ class TestRefusalFallback:
         assert state.index == 1
         # one seam per model boundary, in hop order, ahead of the served content
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "mid-model"}, "trigger": {"type": "refusal", "category": None}},
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "mid-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -263,7 +278,12 @@ class TestRefusalFallback:
 
         assert result.model == "last-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -308,6 +328,40 @@ class TestRefusalFallback:
         assert bodies[0]["max_tokens"] == 1024
         # explicit None unsets: absent from the retried request, not sent as null
         assert "max_tokens" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_entry_that_sets_thinking_overrides_between_tools(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware([{"model": "fallback-model", "thinking": {"type": "between_tools"}}])
+            ]
+        )
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "between_tools"}
 
     @pytest.mark.respx(base_url=base_url)
     def test_each_hop_patches_the_original_params_not_the_previous_hop(self, respx_mock: MockRouter) -> None:
@@ -544,7 +598,7 @@ class TestBetaHeader:
 
         create_message(client)
 
-        assert beta_headers(respx_mock) == ["fallback-credit-2027-01-01, interleaved-thinking-2025-05-14"]
+        assert beta_headers(respx_mock) == ["fallback-credit-2027-01-01,interleaved-thinking-2025-05-14"]
 
     @pytest.mark.respx(base_url=base_url)
     def test_empty_betas_sends_no_beta_header(self, respx_mock: MockRouter) -> None:
@@ -571,7 +625,7 @@ class TestBetaHeader:
 
         create_message(client, betas=["interleaved-thinking-2025-05-14"])
 
-        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14, fallback-credit-2026-07-01"]
+        assert beta_headers(respx_mock) == ["interleaved-thinking-2025-05-14,fallback-credit-2026-07-01"]
 
 
 def helper_headers(respx_mock: MockRouter) -> list[list[str]]:
@@ -641,7 +695,12 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "fallback-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
@@ -664,6 +723,20 @@ class TestAsyncRefusalFallback:
 
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model", "fallback-model"]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        await client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "disabled"}
 
     @pytest.mark.respx(base_url=base_url)
     async def test_walks_each_hop_through_the_chain_until_a_model_accepts(self, respx_mock: MockRouter) -> None:

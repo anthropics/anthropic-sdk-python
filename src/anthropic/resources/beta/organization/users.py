@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import Literal
@@ -7,7 +5,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -18,7 +16,6 @@ from ...._response import (
 )
 from ....pagination import SyncPage, AsyncPage
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import user_list_params, user_update_params
 from ....types.beta.organization.user_remove_response import UserRemoveResponse
 from ....types.beta.organization.beta_organization_user import BetaOrganizationUser
 
@@ -75,7 +72,13 @@ class Users(SyncAPIResource):
         return self._get(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -103,7 +106,8 @@ class Users(SyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -117,9 +121,15 @@ class Users(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._post(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
-            body=maybe_transform({"role": role}, user_update_params.UserUpdateParams),
+            body={"role": role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -179,16 +189,15 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                    },
-                    user_list_params.UserListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=BetaOrganizationUser,
         )
@@ -223,7 +232,13 @@ class Users(SyncAPIResource):
         return self._delete(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )
@@ -279,7 +294,13 @@ class AsyncUsers(AsyncAPIResource):
         return await self._get(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -307,7 +328,8 @@ class AsyncUsers(AsyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -321,9 +343,15 @@ class AsyncUsers(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._post(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
-            body=await async_maybe_transform({"role": role}, user_update_params.UserUpdateParams),
+            body={"role": role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=BetaOrganizationUser,
         )
@@ -383,16 +411,15 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "email": email,
-                        "limit": limit,
-                        "roles": roles,
-                    },
-                    user_list_params.UserListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "email": email,
+                    "limit": limit,
+                    "roles": roles,
+                },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=BetaOrganizationUser,
         )
@@ -427,7 +454,13 @@ class AsyncUsers(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )

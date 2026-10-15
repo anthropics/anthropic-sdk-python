@@ -13,7 +13,7 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
+from anthropic import APIStatusError, AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import FinalRequestOptions
 from anthropic.lib.bedrock._client import _prepare_options
@@ -350,10 +350,16 @@ def test_chunk_bytes_to_sse_drops_chunk_without_type_or_completion() -> None:
 
 def _eventstream_chunk_frame(payload: t.Mapping[str, object]) -> bytes:
     """Encode `payload` as one `chunk` event in AWS eventstream binary framing."""
-    headers = b""
-    for name, value in ((":message-type", "event"), (":event-type", "chunk"), (":content-type", "application/json")):
-        headers += bytes([len(name)]) + name.encode() + b"\x07" + struct.pack(">H", len(value)) + value.encode()
     body = json.dumps({"bytes": base64.b64encode(json.dumps(payload).encode()).decode()}).encode()
+    return _eventstream_frame(
+        {":message-type": "event", ":event-type": "chunk", ":content-type": "application/json"}, body
+    )
+
+
+def _eventstream_frame(header_values: t.Mapping[str, str], body: bytes) -> bytes:
+    headers = b""
+    for name, value in header_values.items():
+        headers += bytes([len(name)]) + name.encode() + b"\x07" + struct.pack(">H", len(value)) + value.encode()
     prelude = struct.pack(">II", 12 + len(headers) + len(body) + 4, len(headers))
     prelude += struct.pack(">I", binascii.crc32(prelude) & 0xFFFFFFFF)
     message = prelude + headers + body
@@ -416,6 +422,56 @@ async def test_stream_skips_typeless_chunk_async(respx_mock: MockRouter) -> None
     assert [e.type for e in events] == ["message_start", "message_stop"]
     assert events[0].type == "message_start" and events[0].message.id == "msg_1"
     assert events[1].to_dict()["amazon-bedrock-invocationMetrics"] == _INVOCATION_METRICS
+
+
+_THROTTLING_MESSAGE = "Too many requests, please wait before trying again."
+_EXCEPTION_FRAME = _eventstream_frame(
+    {":message-type": "exception", ":exception-type": "throttlingException", ":content-type": "application/json"},
+    json.dumps({"message": _THROTTLING_MESSAGE}).encode(),
+)
+_ERROR_FRAME = _eventstream_frame(
+    {":message-type": "error", ":error-code": "InternalFailure", ":error-message": "Something went wrong."}, b""
+)
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(
+    "frame, error",
+    [
+        (_EXCEPTION_FRAME, {"type": "throttlingException", "message": _THROTTLING_MESSAGE}),
+        (_ERROR_FRAME, {"type": "InternalFailure", "message": "Something went wrong."}),
+    ],
+    ids=["exception", "error"],
+)
+async def test_stream_raises_api_error_for_error_frame(
+    frame: bytes, error: t.Dict[str, str], sync: bool, respx_mock: MockRouter
+) -> None:
+    respx_mock.post(_STREAM_URL).mock(
+        return_value=httpx2.Response(
+            200,
+            content=_eventstream_chunk_frame(_TYPELESS_CHUNK_STREAM[0]) + frame,
+            headers={"content-type": "application/vnd.amazon.eventstream"},
+        )
+    )
+    received: t.List[str] = []
+
+    with pytest.raises(APIStatusError) as exc_info:
+        if sync:
+            for event in sync_client.messages.create(
+                max_tokens=8, messages=[{"role": "user", "content": "hi"}], model="anthropic.claude-x", stream=True
+            ):
+                received.append(event.type)
+        else:
+            async for event in await async_client.messages.create(
+                max_tokens=8, messages=[{"role": "user", "content": "hi"}], model="anthropic.claude-x", stream=True
+            ):
+                received.append(event.type)
+
+    assert received == ["message_start"]
+    assert exc_info.type is APIStatusError
+    assert exc_info.value.body == {"type": "error", "error": error}
 
 
 @pytest.mark.respx()

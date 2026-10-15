@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -19,7 +17,6 @@ class ToolUseBlock(BaseModel):
     id: str
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     input: Dict[str, object]
 

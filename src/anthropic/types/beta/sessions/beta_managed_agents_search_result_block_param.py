@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Iterable
@@ -15,7 +13,7 @@ class BetaManagedAgentsSearchResultBlockParam(TypedDict, total=False):
     """A block containing a web search result."""
 
     citations: Required[BetaManagedAgentsSearchResultCitationsParam]
-    """Citation settings for a search result."""
+    """Citation settings for this search result."""
 
     content: Required[Iterable[BetaManagedAgentsSearchResultContentParam]]
     """Array of text content blocks from the search result."""

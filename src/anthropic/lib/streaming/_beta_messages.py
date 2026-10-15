@@ -15,6 +15,7 @@ from anthropic.types.beta.beta_server_tool_use_block import BetaServerToolUseBlo
 from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
+from .._tracing import share_message_snapshot, withhold_message_snapshot
 from ._beta_types import (
     BetaCitationEvent,
     BetaThinkingEvent,
@@ -53,7 +54,9 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
+        self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
+        share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
     @property
     def response(self) -> httpx2.Response:
@@ -131,14 +134,26 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
+    def _current_snapshot_or_none(self) -> ParsedBetaMessage[ResponseFormatT] | None:
+        return self.__final_message_snapshot
+
     def __stream__(self) -> Iterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]:
         for sse_event in self._raw_stream:
-            self.__final_message_snapshot = accumulate_event(
-                event=sse_event,
-                current_snapshot=self.__final_message_snapshot,
-                request_headers=self.response.request.headers,
-                output_format=self.__output_format,
-            )
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedBetaMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
+            try:
+                self.__final_message_snapshot = accumulate_event(
+                    event=sse_event,
+                    current_snapshot=self.__final_message_snapshot,
+                    json_bufs=self.__json_bufs,
+                    request_headers=self.response.request.headers,
+                    output_format=self.__output_format,
+                )
+            except Exception:
+                withhold_message_snapshot(self._raw_stream)
+                raise
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -205,7 +220,9 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
+        self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
+        share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
     @property
     def response(self) -> httpx2.Response:
@@ -283,14 +300,26 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         assert self.__final_message_snapshot is not None
         return self.__final_message_snapshot
 
+    def _current_snapshot_or_none(self) -> ParsedBetaMessage[ResponseFormatT] | None:
+        return self.__final_message_snapshot
+
     async def __stream__(self) -> AsyncIterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]:
         async for sse_event in self._raw_stream:
-            self.__final_message_snapshot = accumulate_event(
-                event=sse_event,
-                current_snapshot=self.__final_message_snapshot,
-                request_headers=self.response.request.headers,
-                output_format=self.__output_format,
-            )
+            if self.__final_message_snapshot is None and sse_event.type != "message_start":
+                yield cast("ParsedBetaMessageStreamEvent[ResponseFormatT]", sse_event)
+                continue
+
+            try:
+                self.__final_message_snapshot = accumulate_event(
+                    event=sse_event,
+                    current_snapshot=self.__final_message_snapshot,
+                    json_bufs=self.__json_bufs,
+                    request_headers=self.response.request.headers,
+                    output_format=self.__output_format,
+                )
+            except Exception:
+                withhold_message_snapshot(self._raw_stream)
+                raise
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -436,14 +465,10 @@ def build_events(
 
         events_to_fire.append(event_to_fire)
     else:
-        # we only want exhaustive checking for linters, not at runtime
-        if TYPE_CHECKING:  # type: ignore[unreachable]
-            assert_never(event)
+        events_to_fire.append(cast("ParsedBetaMessageStreamEvent[ResponseFormatT]", event))
 
     return events_to_fire
 
-
-JSON_BUF_PROPERTY = "__json_buf"
 
 TRACKS_TOOL_INPUT = (
     BetaToolUseBlock,
@@ -456,6 +481,7 @@ def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
+    json_bufs: dict[int, bytes],
     request_headers: httpx2.Headers,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
@@ -501,10 +527,7 @@ def accumulate_event(
             if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
-                # we need to keep track of the raw JSON string as well so that we can
-                # re-parse it for each delta, for now we just store it as an untyped
-                # property on the snapshot
-                json_buf = cast(bytes, getattr(content, JSON_BUF_PROPERTY, b""))
+                json_buf = json_bufs.get(event.index, b"")
                 json_buf += bytes(event.delta.partial_json, "utf-8")
 
                 if json_buf:
@@ -520,7 +543,7 @@ def accumulate_event(
                             f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
                         ) from e
 
-                setattr(content, JSON_BUF_PROPERTY, json_buf)
+                json_bufs[event.index] = json_buf
         elif event.delta.type == "citations_delta":
             if content.type == "text":
                 if not content.citations:

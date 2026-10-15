@@ -1,0 +1,13 @@
+from __future__ import annotations
+
+from typing import Union
+from typing_extensions import TypeAlias
+
+from .beta_managed_agents_multiagent_advisor_enabled_params import BetaManagedAgentsMultiagentAdvisorEnabledParams
+from .beta_managed_agents_multiagent_advisor_disabled_params import BetaManagedAgentsMultiagentAdvisorDisabledParams
+
+__all__ = ["BetaManagedAgentsMultiagentAdvisorParams"]
+
+BetaManagedAgentsMultiagentAdvisorParams: TypeAlias = Union[
+    BetaManagedAgentsMultiagentAdvisorEnabledParams, BetaManagedAgentsMultiagentAdvisorDisabledParams
+]

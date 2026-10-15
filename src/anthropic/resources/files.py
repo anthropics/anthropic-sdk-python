@@ -1,15 +1,12 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Mapping, Optional, cast
 
 import httpx2
 
-from ..types import file_list_params, file_upload_params
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, SequenceNotStr, omit, not_given
-from .._utils import extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from .._utils import extract_files, path_template, strip_not_given
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -90,6 +87,13 @@ class Files(SyncAPIResource):
           page: Opaque page cursor returned in a prior list response's `next_page`. Prefixed
               `page_`.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -107,14 +111,13 @@ class Files(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ids": ids,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    file_list_params.FileListParams,
-                ),
+                query={
+                    "ids": ids,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=FileMetadata,
         )
@@ -137,6 +140,13 @@ class Files(SyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -151,7 +161,13 @@ class Files(SyncAPIResource):
         return self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=DeletedFile,
         )
@@ -174,6 +190,13 @@ class Files(SyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -189,7 +212,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -212,6 +241,13 @@ class Files(SyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -226,7 +262,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=FileMetadata,
         )
@@ -256,6 +298,13 @@ class Files(SyncAPIResource):
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -280,10 +329,16 @@ class Files(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/v1/files",
-            body=maybe_transform(body, file_upload_params.FileUploadParams),
+            body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=FileMetadata,
         )
@@ -340,6 +395,13 @@ class AsyncFiles(AsyncAPIResource):
           page: Opaque page cursor returned in a prior list response's `next_page`. Prefixed
               `page_`.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -357,14 +419,13 @@ class AsyncFiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ids": ids,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    file_list_params.FileListParams,
-                ),
+                query={
+                    "ids": ids,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=FileMetadata,
         )
@@ -387,6 +448,13 @@ class AsyncFiles(AsyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -401,7 +469,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=DeletedFile,
         )
@@ -424,6 +498,13 @@ class AsyncFiles(AsyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -439,7 +520,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )
@@ -462,6 +549,13 @@ class AsyncFiles(AsyncAPIResource):
         Args:
           file_id: ID of the File.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -476,7 +570,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=FileMetadata,
         )
@@ -506,6 +606,13 @@ class AsyncFiles(AsyncAPIResource):
           expires_in_seconds: Seconds from upload until the file expires and its bytes become permanently
               unavailable. Must be between 3600 (one hour) and 7776000 (ninety days).
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -530,10 +637,16 @@ class AsyncFiles(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/v1/files",
-            body=await async_maybe_transform(body, file_upload_params.FileUploadParams),
+            body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=FileMetadata,
         )

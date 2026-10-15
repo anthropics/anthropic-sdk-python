@@ -22,7 +22,7 @@ jobs:
   lint:
     timeout-minutes: 10
     name: lint
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -45,7 +45,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -82,8 +82,16 @@ jobs:
   test:
     timeout-minutes: 10
     name: test
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: oldest python
+            python: '>=3.10.0'
+          - name: newest python
+            python: '>=3.14.0'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -96,12 +104,14 @@ jobs:
         run: ./scripts/bootstrap
 
       - name: Run tests
+        env:
+          UV_PYTHON: ${{ matrix.python }}
         run: ./scripts/test
 
   detect_breaking_changes:
     timeout-minutes: 10
     name: detect-breaking-changes
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: |-
       (github.event_name == 'push' &&
        !startsWith(github.ref, 'refs/heads/release-please--')) ||

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
@@ -15,7 +13,7 @@ __all__ = ["CredentialCreateParams", "Auth"]
 
 class CredentialCreateParams(TypedDict, total=False):
     auth: Required[Auth]
-    """Authentication details for creating a credential."""
+    """Authentication configuration for the credential."""
 
     display_name: Optional[str]
     """Human-readable name for the credential. Up to 255 characters."""
@@ -30,6 +28,14 @@ class CredentialCreateParams(TypedDict, total=False):
     """Optional header to specify the beta version(s) you want to use."""
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Auth: TypeAlias = Union[
