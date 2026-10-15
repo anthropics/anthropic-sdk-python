@@ -274,6 +274,11 @@ class Messages(SyncAPIResource):
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
 
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -576,6 +581,11 @@ class Messages(SyncAPIResource):
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
 
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -868,6 +878,11 @@ class Messages(SyncAPIResource):
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1450,6 +1465,11 @@ class Messages(SyncAPIResource):
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
 
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           system: System prompt.
 
               A system prompt is a way of providing context and instructions to Claude, such
@@ -1813,6 +1833,11 @@ class AsyncMessages(AsyncAPIResource):
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
 
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -2115,6 +2140,11 @@ class AsyncMessages(AsyncAPIResource):
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
 
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -2407,6 +2437,11 @@ class AsyncMessages(AsyncAPIResource):
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2987,6 +3022,11 @@ class AsyncMessages(AsyncAPIResource):
 
           speed: The inference speed mode for this request. `"fast"` enables high
               output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
