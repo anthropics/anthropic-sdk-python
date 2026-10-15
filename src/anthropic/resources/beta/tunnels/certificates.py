@@ -74,7 +74,8 @@ class Certificates(SyncAPIResource):
           ca_certificate_pem: PEM-encoded X.509 CA certificate. Must contain exactly one certificate and no
               private-key material. Maximum 8KB.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -149,7 +150,8 @@ class Certificates(SyncAPIResource):
 
           certificate_id: ID of the certificate (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -235,7 +237,8 @@ class Certificates(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnel_certificates` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -317,7 +320,8 @@ class Certificates(SyncAPIResource):
 
           certificate_id: ID of the certificate to archive (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -420,7 +424,8 @@ class AsyncCertificates(AsyncAPIResource):
           ca_certificate_pem: PEM-encoded X.509 CA certificate. Must contain exactly one certificate and no
               private-key material. Maximum 8KB.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -495,7 +500,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           certificate_id: ID of the certificate (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -581,7 +587,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnel_certificates` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -663,7 +670,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           certificate_id: ID of the certificate to archive (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
