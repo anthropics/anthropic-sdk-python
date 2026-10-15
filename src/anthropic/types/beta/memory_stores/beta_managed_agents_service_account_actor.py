@@ -7,10 +7,10 @@ __all__ = ["BetaManagedAgentsServiceAccountActor"]
 
 class BetaManagedAgentsServiceAccountActor(BaseModel):
     """
-    Attribution for a write made by a workload authenticated as a service account, for example via Workload Identity Federation.
+    A workload authenticated as a service account, for example via Workload Identity Federation.
     """
 
     service_account_id: str
-    """ID of the service account that performed the write (a `svac_...` value)."""
+    """ID of the service account (a `svac_...` value)."""
 
     type: Literal["service_account_actor"]

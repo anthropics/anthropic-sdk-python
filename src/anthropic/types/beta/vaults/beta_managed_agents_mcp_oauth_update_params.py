@@ -24,4 +24,4 @@ class BetaManagedAgentsMCPOAuthUpdateParams(TypedDict, total=False):
     """A timestamp in RFC 3339 format"""
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshUpdateParams]
-    """Parameters for updating OAuth refresh token configuration."""
+    """Updated refresh token configuration."""

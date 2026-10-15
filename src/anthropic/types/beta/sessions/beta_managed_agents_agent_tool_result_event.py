@@ -28,7 +28,7 @@ class BetaManagedAgentsAgentToolResultEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this event was processed."""
 
     tool_use_id: str
     """The id of the `agent.tool_use` event this result corresponds to."""

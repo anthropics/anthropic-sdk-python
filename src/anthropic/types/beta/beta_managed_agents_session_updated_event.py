@@ -19,21 +19,22 @@ class BetaManagedAgentsSessionUpdatedEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the update was applied."""
 
     type: Literal["session.updated"]
 
     agent: Optional[BetaManagedAgentsSessionAgent] = None
-    """Resolved `agent` definition for a `session`.
+    """The session's effective agent configuration after the update.
 
-    Snapshot of the `agent` at `session` creation time.
+    Present only when the update changed `agent` (tools or mcp_servers); when
+    present it is the full materialised snapshot, not a diff.
     """
 
     budget: Optional[BetaManagedAgentsBudgetLimit] = None
-    """A hard spend ceiling.
-
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    """
+    The session's budget after the update: the new budget when set or replaced, or
+    null when the update removed it. Present only when the update changed the
+    budget.
     """
 
     metadata: Optional[Dict[str, str]] = None

@@ -10,7 +10,7 @@ __all__ = ["BetaManagedAgentsAgentCustomToolUseEvent"]
 class BetaManagedAgentsAgentCustomToolUseEvent(BaseModel):
     """Event emitted when the agent calls a custom tool.
 
-    The session goes idle until the client sends a `user.custom_tool_result` event with the result.
+    The session goes idle until the client sends a `user.custom_tool_result` event with the result. The client can send it as soon as this event arrives, without waiting for `session.status_idle`.
     """
 
     id: str
@@ -23,7 +23,7 @@ class BetaManagedAgentsAgentCustomToolUseEvent(BaseModel):
     """Name of the custom tool being called."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this tool use was processed."""
 
     type: Literal["agent.custom_tool_use"]
 

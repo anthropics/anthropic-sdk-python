@@ -54,7 +54,7 @@ message = client.beta.messages.create(
     tools=[get_weather],
     # ...
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     messages=[{"role": "user", "content": "What is 2 + 2?"}],
 )
 ```
@@ -68,13 +68,45 @@ We provide a `client.beta.messages.tool_runner()` method that can automatically 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     tools=[sum],
     messages=[{"role": "user", "content": "What is 9 + 10?"}],
 )
 for message in runner:
     rich.print(message)
 ```
+
+Leaving the loop early does not end the runner: `runner.until_done()` resumes it and returns the final message. To stop a runner you will not resume, call `runner.close()` (`await runner.close()` for the async runner), which also ends its OpenTelemetry span.
+
+### Running tools while the reply streams
+
+By default, the runner runs a reply's tools after your loop body for that reply ends. With `run_tools_eagerly=True` and `stream=True`, each tool runs as soon as the model finishes writing its call. To hold a call until your loop body ends, pass it to `runner.defer_tool_call()` when you see it. It won't have run yet. `runner.deferred_tool_calls` lists the held calls, so read it after the stream ends.
+
+```py
+runner = client.beta.messages.tool_runner(
+    max_tokens=1024,
+    model="claude-sonnet-5-5",
+    tools=[list_files, delete_file],
+    messages=[{"role": "user", "content": "Clean up the log files in /tmp/demo."}],
+    stream=True,
+    run_tools_eagerly=True,
+)
+for stream in runner:
+    for event in stream:
+        if event.type == "content_block_start" and event.content_block.type == "tool_use":
+            if event.content_block.name == "delete_file":
+                runner.defer_tool_call(event.content_block)
+
+    held = runner.deferred_tool_calls
+    if held and not confirm(held):
+        break
+```
+
+Here, `break` means the held call never runs. A call that ran while the reply streamed can't be taken back: if the reply is then cut short, or you replace the history, the model never gets its result and may ask for the same call again. So defer calls that aren't safe to run twice. See [`examples/tools_runner_deferred_streaming.py`](examples/tools_runner_deferred_streaming.py).
+
+The calls run one at a time, in the order the model has moved on from them, and reading the stream waits while one runs.
+
+A toolset call, such as a browser or computer action, runs while the reply streams too, and its toolset's `confirm` is still asked before it runs. Once a toolset's call is held, that toolset's later calls in the reply wait with it until your loop body ends. Once one fails, they are not run at all.
 
 ### Compacting the conversation
 
@@ -83,7 +115,7 @@ With the `compact-2026-09-04` beta you decide when a conversation is compacted: 
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     betas=["compact-2026-09-04"],
     tools=[search_docs],
     messages=[{"role": "user", "content": "Find every page that mentions rate limits."}],
@@ -110,7 +142,7 @@ A few things to know:
 - `context_management`, `stop_sequences`, a `tool_choice` that forces a tool (`any` or `tool`) and the output format (`output_format` or `output_config["format"]`, including the one in each of the `fallbacks`) are left out of the compaction request, because the API doesn't accept them together with `compaction`, and are sent again afterwards. `compact_before_next_turn()` raises if `context_management` has a `compact_*` edit.
 - While you're handling the compaction response, `append_messages()` and replacing `messages` with `set_messages_params()` raise, because the compaction response is about to replace the messages. Other params can still be changed.
 - If the API returns no summary, the runner logs a warning and keeps the history as it is.
-- If the run ends on a turn that was cut short with tool calls that never ran (`stop_reason == "max_tokens"`, for example), the pending compaction is skipped with a warning. It is also skipped if the run stops at `max_iterations` or you `break` out of the loop.
+- If the run ends on a turn that was cut short with tool calls whose results were never sent (`stop_reason == "max_tokens"`, for example), the pending compaction is skipped with a warning. It is also skipped if the run stops at `max_iterations` or you `break` out of the loop.
 - The `compaction` param itself can't be set on a tool runner, because every request in the loop would compact again.
 
 ### Adding and removing tools during a run
@@ -120,7 +152,7 @@ Changing the `tools` param in the middle of a conversation misses the prompt cac
 ```py
 runner = client.beta.messages.tool_runner(
     max_tokens=1024,
-    model="claude-sonnet-4-5-20250929",
+    model="claude-sonnet-5-5",
     betas=["inline-tools-2026-09-15"],
     tools=[get_time],
     messages=[{"role": "user", "content": "Find a slot for a 30 minute call with Sam next week."}],
@@ -132,7 +164,7 @@ for message in runner:
         runner.remove_tools(find_free_slots)  # or by name: "find_free_slots"
 ```
 
-`add_tools()` takes what `tool_runner(tools=...)` takes: function tools and raw tool definitions. The whole definition is sent to the model either way.
+`add_tools()` takes function tools and raw tool definitions, as `tool_runner(tools=...)` does, but not a runnable toolset, a raw definition of a toolset the runner has, or a tool named like one of its toolsets. The whole definition is sent to the model either way.
 
 - A function tool can be called from the request that carries its definition. If a tool of the same name is already there, the new function replaces it straight away: a call the model has already made in the message you're handling runs the new one.
 - Raw definitions are for server tools, such as `{"type": "web_search_20250305", "name": "web_search"}`, which the API runs. The tool runner never runs one: a call to it gets a "not found" error result and a warning, and it stops running a function tool of the same name straight away.
@@ -149,9 +181,18 @@ A few things to know:
 - After a paused turn (`pause_turn`) the turn is sent back as it came, and the changes go out with the request after that.
 - Changes still waiting when the run ends are never sent.
 - The runner doesn't add the beta for you, so pass `betas=["inline-tools-2026-09-15"]`.
-- Changing `tools` with `set_messages_params()` still works, but misses the prompt cache.
+- Changing `tools` with `set_messages_params()` misses the prompt cache and changes only what is sent, not which function tools the runner runs: one added this way is answered "not found", and one dropped this way still runs if the model calls it.
 - Use either these methods or `tool_addition` / `tool_removal` blocks you append yourself for a given tool, not both.
 - In the rare case where a compaction response comes back without `tool_changes` even though the messages it summarized added or removed tools, the model goes back to the tools in `tools`, and the tool runner doesn't detect it. Call `add_tools()` / `remove_tools()` again after that compaction if you need the change restored.
+- Runnable toolsets, such as a browser or computer toolset, can't be added or removed this way: a runner keeps the ones it was created with.
+
+## Browser toolset
+
+The browser toolset has its own guide, [browser-toolset.md](browser-toolset.md): subclassing `BetaAbstractBrowserToolset20260801` (or its async twin) to drive a real browser, its options, policies and result types, and how to run one safely.
+
+## Computer toolset
+
+The computer toolset has its own guide, [computer-toolset.md](computer-toolset.md): subclassing `BetaAbstractComputerToolset20260801` (or its async twin) to drive a desktop, its options and result types, coordinate scaling, the image-size limit, and how to run one safely.
 
 ## ToolError
 
@@ -176,4 +217,4 @@ def take_screenshot(url: str) -> str:
     return result.data
 ```
 
-If a plain exception is raised, its `repr()` will be sent to the model as a text error and logged. `ToolError` is not logged since it represents an intentional error response.
+If a plain exception is raised, its `repr()` will be sent to the model as a text error and logged. `ToolError` is not logged since it represents an intentional error response. From a browser or computer toolset, only a `ToolError`'s text blocks are sent.

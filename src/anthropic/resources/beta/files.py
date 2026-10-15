@@ -143,6 +143,8 @@ class Files(SyncAPIResource):
                     "page": page,
                     "scope_id": scope_id,
                 },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=BetaFileMetadata,
         )
@@ -197,7 +199,13 @@ class Files(SyncAPIResource):
         return self._delete(
             path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaDeletedFile,
         )
@@ -253,7 +261,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -308,7 +322,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaFileMetadata,
         )
@@ -383,7 +403,13 @@ class Files(SyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=BetaFileMetadata,
         )
@@ -485,6 +511,8 @@ class AsyncFiles(AsyncAPIResource):
                     "page": page,
                     "scope_id": scope_id,
                 },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=BetaFileMetadata,
         )
@@ -539,7 +567,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaDeletedFile,
         )
@@ -595,7 +629,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )
@@ -650,7 +690,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaFileMetadata,
         )
@@ -725,7 +771,13 @@ class AsyncFiles(AsyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=BetaFileMetadata,
         )

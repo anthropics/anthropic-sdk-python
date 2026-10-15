@@ -25,4 +25,4 @@ class BetaEffortCapability(BaseModel):
     """Whether this capability is supported by the model."""
 
     xhigh: Optional[BetaCapabilitySupport] = None
-    """Indicates whether a capability is supported."""
+    """Whether the model supports xhigh effort level."""

@@ -16,7 +16,7 @@ class BetaManagedAgentsUserInterruptEvent(BaseModel):
     type: Literal["user.interrupt"]
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the interrupt was processed."""
 
     session_thread_id: Optional[str] = None
     """

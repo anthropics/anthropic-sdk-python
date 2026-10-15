@@ -11,7 +11,12 @@ __all__ = ["BetaOutputConfigParam"]
 
 class BetaOutputConfigParam(TypedDict, total=False):
     effort: Optional[Literal["low", "medium", "high", "xhigh", "max"]]
-    """All possible effort levels."""
+    """How much effort the model should put into its response.
+
+    Higher effort levels may result in more thorough analysis but take longer.
+
+    Valid values are `low`, `medium`, `high`, `xhigh`, or `max`.
+    """
 
     format: Optional[BetaJSONOutputFormatParam]
     """A schema to specify Claude's output format in responses.
@@ -21,4 +26,4 @@ class BetaOutputConfigParam(TypedDict, total=False):
     """
 
     task_budget: Optional[BetaTokenTaskBudgetParam]
-    """User-configurable total token budget across contexts."""
+    """Configuration for token budget tracking across contexts."""

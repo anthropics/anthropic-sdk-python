@@ -25,6 +25,6 @@ class BetaManagedAgentsModelRequestFailedError(BaseModel):
     """Human-readable error description."""
 
     retry_status: RetryStatus
-    """What the client should do next in response to this error."""
+    """What the client should do next."""
 
     type: Literal["model_request_failed_error"]

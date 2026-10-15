@@ -47,9 +47,11 @@ from ...._base_client import (
     merge_headers,
     make_request_options,
 )
+from ....lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
+from ....lib.tools._toolsets import BetaRunnableToolset, BetaAsyncRunnableToolset
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
 from ....lib._parse._transform import transform_schema
 from ....lib._stainless_helpers import (
@@ -61,13 +63,10 @@ from ....lib._stainless_helpers import (
 )
 from ....lib.tools._tool_params import BetaToolLike, to_tool_params as _to_tool_params
 from ....types.beta.beta_message import BetaMessage
+from ....lib.tools._tool_dispatch import partition_sync_tools, partition_async_tools
 from ....lib.tools._beta_functions import (
-    BetaFunctionTool,
     BetaRunnableTool,
-    BetaAsyncFunctionTool,
     BetaAsyncRunnableTool,
-    BetaBuiltinFunctionTool,
-    BetaAsyncBuiltinFunctionTool,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
@@ -90,6 +89,7 @@ from ....types.beta.beta_request_mcp_server_url_definition_param import BetaRequ
 
 if TYPE_CHECKING:
     from ...._client import Anthropic, AsyncAnthropic
+
 
 __all__ = ["Messages", "AsyncMessages"]
 
@@ -192,7 +192,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -210,7 +213,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -253,14 +257,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -269,8 +274,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -294,8 +300,12 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -313,9 +323,13 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -327,10 +341,14 @@ class Messages(SyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -338,15 +356,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -525,7 +544,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -543,7 +565,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -583,22 +606,27 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -607,8 +635,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -632,8 +661,12 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -651,9 +684,13 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -671,15 +708,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -858,7 +896,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -876,7 +917,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -916,22 +958,27 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -940,8 +987,9 @@ class Messages(SyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -965,8 +1013,12 @@ class Messages(SyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -984,9 +1036,13 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1004,15 +1060,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -1211,7 +1268,13 @@ class Messages(SyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -1273,12 +1336,6 @@ class Messages(SyncAPIResource):
                 UserWarning,
                 stacklevel=3,
             )
-
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
 
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(
@@ -1359,6 +1416,9 @@ class Messages(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -1371,7 +1431,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1409,10 +1469,11 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
         diagnostics: Optional[BetaDiagnosticsParam] | Omit = omit,
@@ -1447,9 +1508,10 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1484,8 +1546,9 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1514,8 +1577,22 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. A toolset call, such as a browser or computer action, runs early too, and its toolset's
+              `confirm` is still asked before it runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -1547,18 +1624,10 @@ class Messages(SyncAPIResource):
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
-            _stainless_helper_header(tools, messages),
             extra_headers or {},
         )
 
-        runnable_tools: list[BetaRunnableTool] = []
-        raw_tools: list[BetaToolUnionParam] = []
-
-        for tool in tools:
-            if isinstance(tool, (BetaFunctionTool, BetaBuiltinFunctionTool)):
-                runnable_tools.append(tool)
-            else:
-                raw_tools.append(tool)
+        runnable_tools, raw_tools = partition_sync_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
@@ -1599,6 +1668,7 @@ class Messages(SyncAPIResource):
                 },
                 client=cast("Anthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaToolRunner[ResponseFormatT](
             tools=runnable_tools,
@@ -1735,7 +1805,13 @@ class Messages(SyncAPIResource):
                 "stream": True,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -1795,7 +1871,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -1813,7 +1892,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -1856,14 +1936,15 @@ class Messages(SyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -1874,9 +1955,13 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -1884,15 +1969,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2026,7 +2112,13 @@ class Messages(SyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.count_tokens",
+                span_route="/v1/messages/count_tokens",
+                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )
@@ -2130,7 +2222,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -2148,7 +2243,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -2191,14 +2287,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2207,8 +2304,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2232,8 +2330,12 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2251,9 +2353,13 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2265,10 +2371,14 @@ class AsyncMessages(AsyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -2276,15 +2386,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2463,7 +2574,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -2481,7 +2595,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -2521,22 +2636,27 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2545,8 +2665,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2570,8 +2691,12 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2589,9 +2714,13 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2609,15 +2738,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2796,7 +2926,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -2814,7 +2947,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -2854,22 +2988,27 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           container: Container identifier for reuse across requests.
 
@@ -2878,8 +3017,9 @@ class AsyncMessages(AsyncAPIResource):
               This allows you to control how Claude manages context across multiple requests,
               such as whether to clear function results or not.
 
-          diagnostics: Request-level diagnostics. Currently carries the previous response id for
-              prompt-cache divergence reporting.
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           fallback_credit_token: The `fallback_credit_token` from a prior refusal's `stop_details`.
 
@@ -2903,8 +3043,12 @@ class AsyncMessages(AsyncAPIResource):
 
           fallbacks: Opt-in server-side retry on one or more substitute models when the requested
               model declines for policy reasons. Tried in order: if the first entry also
-              declines, the second is tried, and so on. The string "default" requests the
-              requested model's server-defined default fallback configuration.
+              declines, the second is tried, and so on. Some models don't support fallbacks;
+              on those models, a list of fallback models returns a 400 error. See
+              [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+              The string "default" requests the requested model's server-defined default
+              fallback configuration. On a model that doesn't support fallbacks, the request
+              runs on the requested model alone, so a declined request stays declined.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2922,9 +3066,13 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2942,15 +3090,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -3149,7 +3298,13 @@ class AsyncMessages(AsyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -3211,11 +3366,6 @@ class AsyncMessages(AsyncAPIResource):
                 UserWarning,
                 stacklevel=3,
             )
-        betas = [beta for beta in betas] if is_given(betas) else []
-
-        if "structured-outputs-2025-12-15" not in betas:
-            # Ensure structured outputs beta is included for parse method
-            betas.append("structured-outputs-2025-12-15")
 
         tools = _to_tool_params(tools)
         extra_headers = merge_headers(
@@ -3296,6 +3446,9 @@ class AsyncMessages(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -3308,7 +3461,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3346,9 +3499,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         stream: Literal[True],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3384,9 +3538,10 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         stream: bool,
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3421,8 +3576,9 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
-        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam],
+        tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
+        run_tools_eagerly: bool = False,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3451,8 +3607,22 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
-        """Create a Message stream"""
+        """Create a Message stream
+
+        Args:
+          run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
+              once you are done with the reply. This is optimistic: if the reply is interrupted or changes
+              course, the tool may have already run, so use `runner.defer_tool_call()` to hold the calls that
+              aren't safe to run twice. The calls run one at a time, and reading the stream waits while one
+              runs. A toolset call, such as a browser or computer action, runs early too, and its toolset's
+              `confirm` is still asked before it runs. Requires `stream=True`.
+
+              This will be the default in a future version.
+        """
         _validate_output_config_conflict(output_config, output_format)
+
+        if run_tools_eagerly and not stream:
+            raise ValueError("`run_tools_eagerly=True` and `stream=False` are mutually exclusive")
 
         if model in DEPRECATED_MODELS:
             warnings.warn(
@@ -3477,18 +3647,10 @@ class AsyncMessages(AsyncAPIResource):
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
-            _stainless_helper_header(tools, messages),
             extra_headers or {},
         )
 
-        runnable_tools: list[BetaAsyncRunnableTool] = []
-        raw_tools: list[BetaToolUnionParam] = []
-
-        for tool in tools:
-            if isinstance(tool, (BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)):
-                runnable_tools.append(tool)
-            else:
-                raw_tools.append(tool)
+        runnable_tools, raw_tools = partition_async_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
@@ -3529,6 +3691,7 @@ class AsyncMessages(AsyncAPIResource):
                 },
                 client=cast("AsyncAnthropic", self._client),
                 max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=run_tools_eagerly,
             )
         return BetaAsyncToolRunner[ResponseFormatT](
             tools=runnable_tools,
@@ -3663,7 +3826,13 @@ class AsyncMessages(AsyncAPIResource):
                 "stream": True,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -3723,7 +3892,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -3741,7 +3913,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -3784,14 +3957,15 @@ class AsyncMessages(AsyncAPIResource):
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
-          compaction: Compact the whole conversation and return a signed `compaction` block, alone,
-              that a later request sends back first in `messages`, in place of the messages it
-              summarizes. There is no trigger and no pause flag: sending the parameter
-              compacts, and nothing is sampled after the block.
+          compaction: Compaction configuration.
 
-              The summarization prompt is the server's own unless `instructions` are given,
-              which then replace it for this request; a value that is empty or only whitespace
-              counts as absent.
+              When set on `POST /v1/messages`, the request is a compaction request: the
+              conversation in `messages` is summarized and the response holds only the
+              resulting `compaction` block (`stop_reason` `"compaction"`), which later
+              requests send first in `messages` in place of the messages it summarizes.
+              `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+              count it returns is for the conversation in `messages` as sent. Cannot be
+              combined with `context_management`.
 
           context_management: Context management configuration.
 
@@ -3802,9 +3976,13 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
-          speed: Inference speed mode. `fast` provides significantly faster output token
-              generation at premium pricing. Not all models support `fast`; invalid
-              combinations are rejected at create time.
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -3812,15 +3990,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -3954,7 +4133,13 @@ class AsyncMessages(AsyncAPIResource):
                 "tools": tools,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.count_tokens",
+                span_route="/v1/messages/count_tokens",
+                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )

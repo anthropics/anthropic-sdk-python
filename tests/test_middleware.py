@@ -413,11 +413,11 @@ class TestAPIRequest:
         )
         request = APIRequest(options=options, cast_to=Message)
 
-        copied = request.copy(body={"model": "claude-sonnet-4-5"}, headers={"x-trace-id": "123"})
+        copied = request.copy(body={"model": "claude-sonnet-5-5"}, headers={"x-trace-id": "123"})
 
         assert copied is not request
         assert copied.options is not request.options
-        assert copied.json == {"model": "claude-sonnet-4-5"}
+        assert copied.json == {"model": "claude-sonnet-5-5"}
         assert copied.headers == {"x-trace-id": "123"}
         assert copied.method == "post"
         assert copied.url == "/v1/messages"
@@ -689,7 +689,7 @@ class TestSyncMiddleware:
     def test_request_mutation_changes_outgoing_request(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
-        client = make_sync_client(middleware=[MutateBody(model="claude-sonnet-4-5", max_tokens=4096)])
+        client = make_sync_client(middleware=[MutateBody(model="claude-sonnet-5-5", max_tokens=4096)])
 
         message = client.messages.create(
             max_tokens=1024,
@@ -701,7 +701,7 @@ class TestSyncMiddleware:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         sent = request_body(calls[0])
-        assert sent["model"] == "claude-sonnet-4-5"
+        assert sent["model"] == "claude-sonnet-5-5"
         assert sent["max_tokens"] == 4096
         assert sent["messages"] == [{"role": "user", "content": "Hello"}]
 
@@ -710,11 +710,11 @@ class TestSyncMiddleware:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx2.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
-        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         message = client.messages.create(
             max_tokens=1024,
@@ -723,12 +723,12 @@ class TestSyncMiddleware:
         )
 
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
         assert request_body(calls[0])["model"] == "claude-opus-4-6"
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
 
     @pytest.mark.respx(base_url=base_url)
     def test_retry_with_modified_params_on_request_too_large(self, respx_mock: MockRouter) -> None:
@@ -986,7 +986,7 @@ class TestSyncMiddleware:
             ]
         )
 
-        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         stream = client.messages.create(
             max_tokens=1024,
@@ -998,7 +998,7 @@ class TestSyncMiddleware:
         assert isinstance(stream, Stream)
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
         stream.close()
 
     @pytest.mark.respx(base_url=base_url)
@@ -1449,7 +1449,7 @@ class TestAsyncMiddleware:
     async def test_request_mutation_changes_outgoing_request(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
-        client = make_async_client(middleware=[MutateBody(model="claude-sonnet-4-5", max_tokens=4096)])
+        client = make_async_client(middleware=[MutateBody(model="claude-sonnet-5-5", max_tokens=4096)])
 
         message = await client.messages.create(
             max_tokens=1024,
@@ -1461,7 +1461,7 @@ class TestAsyncMiddleware:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         sent = request_body(calls[0])
-        assert sent["model"] == "claude-sonnet-4-5"
+        assert sent["model"] == "claude-sonnet-5-5"
         assert sent["max_tokens"] == 4096
 
     @pytest.mark.respx(base_url=base_url)
@@ -1469,11 +1469,11 @@ class TestAsyncMiddleware:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx2.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
-        client = make_async_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_async_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         message = await client.messages.create(
             max_tokens=1024,
@@ -1482,12 +1482,12 @@ class TestAsyncMiddleware:
         )
 
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
         assert request_body(calls[0])["model"] == "claude-opus-4-6"
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
     async def test_short_circuit_skips_http_request(self, respx_mock: MockRouter) -> None:
@@ -2077,7 +2077,7 @@ class TestLibClientMiddleware:
         respx_mock.post(self.bedrock_url).mock(
             side_effect=[
                 httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx2.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
@@ -2088,7 +2088,7 @@ class TestLibClientMiddleware:
                 if response.status_code != 529:
                     return response
                 fallback = request.copy(
-                    body={**middleware_request_body(request), "model": "claude-sonnet-4-5"},
+                    body={**middleware_request_body(request), "model": "claude-sonnet-5-5"},
                 )
                 return call_next(fallback)
 
@@ -2099,13 +2099,13 @@ class TestLibClientMiddleware:
             model="claude-opus-4-6",
         )
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         # the fallback model is reflected in the rewritten URL of the second wire request
         first = cast("MockRequestCall", respx_mock.calls[0]).request
         second = cast("MockRequestCall", respx_mock.calls[1]).request
         assert first.url.path == "/model/claude-opus-4-6/invoke"
-        assert second.url.path == "/model/claude-sonnet-4-5/invoke"
+        assert second.url.path == "/model/claude-sonnet-5-5/invoke"
 
     def test_foundry_clients_accept_middleware(self) -> None:
         recorder = RecordingMiddleware()

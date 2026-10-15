@@ -28,9 +28,9 @@ class BetaManagedAgentsUserCustomToolResultEvent(BaseModel):
     """Unique identifier for this event."""
 
     custom_tool_use_id: str
-    """
-    The id of the `agent.custom_tool_use` event this result corresponds to, which
-    can be found in the last `session.status_idle`
+    """The id of the `agent.custom_tool_use` event this result corresponds to.
+
+    It is also listed in the last `session.status_idle`
     [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids)
     `stop_reason.event_ids` field.
     """
@@ -44,7 +44,7 @@ class BetaManagedAgentsUserCustomToolResultEvent(BaseModel):
     """Whether the tool execution resulted in an error."""
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this result was processed."""
 
     session_thread_id: Optional[str] = None
     """Set by the server to the subagent thread this result was routed to.

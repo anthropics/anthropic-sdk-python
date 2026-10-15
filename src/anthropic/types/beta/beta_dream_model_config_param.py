@@ -20,8 +20,7 @@ class BetaDreamModelConfigParam(TypedDict, total=False):
     """
 
     speed: Optional[Literal["standard", "fast"]]
-    """Inference speed mode.
+    """How fast the model generates output for the dream. Defaults to `standard`.
 
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    Dreams accept only `standard`.
     """

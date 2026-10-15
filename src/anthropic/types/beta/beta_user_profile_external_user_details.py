@@ -15,11 +15,8 @@ class BetaUserProfileExternalUserDetails(BaseModel):
 
     account_status: Optional[Literal["active", "suspended", "blocked"]] = None
     """
-    The status of the entity's account on the platform, as the platform states it:
-    `active`; `suspended`, when the platform has restricted the account and may
-    restore it; or `blocked`, when the platform has barred it. It records the
-    platform's decision only; the statuses in `trust_grants` are Anthropic's and do
-    not follow it.
+    The status of the entity's account on the platform: `active`, `suspended` or
+    `blocked`. `null` until the platform supplies one.
 
     - `active` - The platform has neither restricted nor barred the account of the
       entity that the user profile represents.
@@ -43,8 +40,8 @@ class BetaUserProfileExternalUserDetails(BaseModel):
 
     entity_type: Optional[Literal["individual", "business", "non_profit", "government"]] = None
     """
-    What kind of entity the profile represents, as the platform states it:
-    `individual`, `business`, `non_profit` or `government`.
+    What kind of entity the profile represents: `individual`, `business`,
+    `non_profit` or `government`. `null` until the platform supplies one.
     """
 
     name_hash: Optional[str] = None
@@ -54,7 +51,10 @@ class BetaUserProfileExternalUserDetails(BaseModel):
     """
 
     onboarded_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    When the entity opened its account with the platform, as stated by the platform,
+    in RFC 3339 format (UTC). `null` until the platform supplies one.
+    """
 
     reference_id: Optional[str] = None
     """The platform's own reference for the entity.

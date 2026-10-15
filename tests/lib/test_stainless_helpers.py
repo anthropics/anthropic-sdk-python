@@ -70,7 +70,7 @@ class TestSyncWireHeaders:
         tool = _Tool()
         tag_helper(tool, "mcp_tool")
         client.beta.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[tool],
@@ -100,7 +100,7 @@ class TestSyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
@@ -114,7 +114,7 @@ class TestSyncWireHeaders:
     def test_count_tokens_takes_a_tool_object(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
         result = client.beta.messages.count_tokens(
-            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+            model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
         )
         assert result.input_tokens == 3
         assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
@@ -122,12 +122,11 @@ class TestSyncWireHeaders:
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
     def test_parse_merges_caller_extra_headers(self, client: Anthropic, respx_mock: respx.MockRouter) -> None:
         # caller-supplied betas, user_profile_id, and extra_headers must all
-        # survive parse()'s hand-written merge alongside the injected
-        # structured-outputs beta and the helper tag
+        # survive parse()'s merge alongside the helper tag
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             betas=["fake-beta-2026-01-01"],
@@ -136,8 +135,7 @@ class TestSyncWireHeaders:
         )
 
         headers = respx_mock.calls.last.request.headers
-        # injected structured-outputs beta is appended to caller betas, not dropped
-        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01"
         assert headers["anthropic-user-profile-id"] == "upi_123"
         assert headers["X-Custom"] == "1"
         # helper tag accumulates with the caller's on one line (append-header semantics)
@@ -149,7 +147,7 @@ class TestSyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             extra_headers={"anthropic-beta": "explicit-only"},
@@ -169,7 +167,7 @@ class TestAsyncWireHeaders:
         tool = _Tool()
         tag_helper(tool, "mcp_tool")
         await async_client.beta.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[tool],
@@ -201,7 +199,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
@@ -217,7 +215,7 @@ class TestAsyncWireHeaders:
     ) -> None:
         respx_mock.post("/v1/messages/count_tokens").mock(return_value=httpx2.Response(200, json={"input_tokens": 3}))
         result = await async_client.beta.messages.count_tokens(
-            model="claude-sonnet-4-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
+            model="claude-sonnet-5-5", messages=[{"role": "user", "content": "hello"}], tools=[_Tool()]
         )
         assert result.input_tokens == 3
         assert json.loads(respx_mock.calls.last.request.content)["tools"] == [_Tool().to_dict()]
@@ -229,7 +227,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             betas=["fake-beta-2026-01-01"],
@@ -238,7 +236,7 @@ class TestAsyncWireHeaders:
         )
 
         headers = respx_mock.calls.last.request.headers
-        assert headers["anthropic-beta"] == "fake-beta-2026-01-01,structured-outputs-2025-12-15"
+        assert headers["anthropic-beta"] == "fake-beta-2026-01-01"
         assert headers["anthropic-user-profile-id"] == "upi_123"
         assert headers["X-Custom"] == "1"
         assert headers.get_list(STAINLESS_HELPER_HEADER) == ["beta.messages.parse, caller-tag"]
@@ -250,7 +248,7 @@ class TestAsyncWireHeaders:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=_message_json()))
 
         await async_client.beta.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             extra_headers={"anthropic-beta": "explicit-only"},

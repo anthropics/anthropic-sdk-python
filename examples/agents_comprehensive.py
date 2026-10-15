@@ -54,7 +54,7 @@ def main() -> None:
     # Create v1 of the agent with the built-in toolset, an MCP server, and a custom tool
     agent_v1 = anthropic.beta.agents.create(
         name="comprehensive-example-agent",
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         system="You are a helpful assistant.",
         mcp_servers=[{"type": "url", "name": MCP_SERVER_NAME, "url": MCP_SERVER_URL}],
         tools=[
@@ -119,7 +119,9 @@ def main() -> None:
                         }
                     ],
                 )
-            if event.type == "session.status_idle" and event.stop_reason and event.stop_reason.type == "end_turn":
+            # A `requires_action` idle waits on the tool result sent above; after any
+            # other idle nothing more arrives, so stop reading.
+            if event.type == "session.status_idle" and event.stop_reason.type != "requires_action":
                 break
 
 

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ...._client import AsyncAnthropic
     from ....lib.tools._beta_session_runner import SessionToolRunner, BetaAnyRunnableTool
 
-from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -30,6 +30,7 @@ from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from ....types.beta.sessions.beta_managed_agents_event_params import BetaManagedAgentsEventParams
 from ....types.beta.sessions.beta_managed_agents_session_event import BetaManagedAgentsSessionEvent
+from ....types.beta.sessions.beta_managed_agents_session_event_type import BetaManagedAgentsSessionEventType
 from ....types.beta.sessions.beta_managed_agents_send_session_events import BetaManagedAgentsSendSessionEvents
 from ....types.beta.sessions.beta_managed_agents_stream_session_events import BetaManagedAgentsStreamSessionEvents
 
@@ -67,7 +68,7 @@ class Events(SyncAPIResource):
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
-        types: SequenceNotStr[str] | Omit = omit,
+        types: List[BetaManagedAgentsSessionEventType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -101,7 +102,8 @@ class Events(SyncAPIResource):
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -150,6 +152,9 @@ class Events(SyncAPIResource):
                     "page": page,
                     "types": types,
                 },
+                span_name="anthropic.sessions.events.list",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -176,7 +181,8 @@ class Events(SyncAPIResource):
         Args:
           events: Events to send to the `session`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -211,7 +217,13 @@ class Events(SyncAPIResource):
             path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
             body={"events": events},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.events.send",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSendSessionEvents,
         )
@@ -245,7 +257,8 @@ class Events(SyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -284,6 +297,9 @@ class Events(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.events.stream",
+                span_route="/v1/sessions/{session_id}/events/stream",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents
@@ -324,7 +340,7 @@ class AsyncEvents(AsyncAPIResource):
         limit: int | Omit = omit,
         order: Literal["asc", "desc"] | Omit = omit,
         page: str | Omit = omit,
-        types: SequenceNotStr[str] | Omit = omit,
+        types: List[BetaManagedAgentsSessionEventType] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -358,7 +374,8 @@ class AsyncEvents(AsyncAPIResource):
           types: Filter by event type. Values match the `type` field on returned events (for
               example, `user.message` or `agent.tool_use`). Omit to return all event types.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -407,6 +424,9 @@ class AsyncEvents(AsyncAPIResource):
                     "page": page,
                     "types": types,
                 },
+                span_name="anthropic.sessions.events.list",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -433,7 +453,8 @@ class AsyncEvents(AsyncAPIResource):
         Args:
           events: Events to send to the `session`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -468,7 +489,13 @@ class AsyncEvents(AsyncAPIResource):
             path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
             body={"events": events},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.sessions.events.send",
+                span_route="/v1/sessions/{session_id}/events",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=BetaManagedAgentsSendSessionEvents,
         )
@@ -502,7 +529,8 @@ class AsyncEvents(AsyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -541,6 +569,9 @@ class AsyncEvents(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.events.stream",
+                span_route="/v1/sessions/{session_id}/events/stream",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionEvents

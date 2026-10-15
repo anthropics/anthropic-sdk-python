@@ -5,6 +5,7 @@ import json
 import logging
 import threading
 from typing import Any, List, Protocol, cast
+from typing_extensions import Literal
 
 import httpx2
 import pytest
@@ -14,6 +15,7 @@ from anthropic import (
     Omit,
     Anthropic,
     AnthropicError,
+    APIStatusError,
     AsyncAnthropic,
     BetaFallbackState,
     BetaRefusalFallbackMiddleware,
@@ -67,6 +69,10 @@ def refusal(model: str, fallback_credit_token: str | None = None) -> httpx2.Resp
     )
 
 
+def error(status: int) -> httpx2.Response:
+    return httpx2.Response(status, json={"type": "error", "error": {"type": "api_error", "message": "nope"}})
+
+
 class MockRequestCall(Protocol):
     request: httpx2.Request
 
@@ -77,6 +83,7 @@ def create_message(
     betas: List[AnthropicBetaParam] | Omit = omit,
     fallbacks: List[BetaFallbackParam] | Omit = omit,
     output_config: BetaOutputConfigParam | Omit = omit,
+    speed: Literal["standard", "fast"] | Omit = omit,
 ) -> BetaMessage:
     return client.beta.messages.create(
         model="primary-model",
@@ -85,14 +92,18 @@ def create_message(
         betas=betas,
         fallbacks=fallbacks,
         output_config=output_config,
+        speed=speed,
     )
 
 
-async def create_message_async(client: AsyncAnthropic) -> BetaMessage:
+async def create_message_async(
+    client: AsyncAnthropic, *, speed: Literal["standard", "fast"] | Omit = omit
+) -> BetaMessage:
     return await client.beta.messages.create(
         model="primary-model",
         max_tokens=1024,
         messages=[{"role": "user", "content": "hi"}],
+        speed=speed,
     )
 
 
@@ -104,6 +115,15 @@ def request_bodies(respx_mock: MockRouter) -> list[dict[str, Any]]:
 def beta_headers(respx_mock: MockRouter) -> list[str | None]:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     return [call.request.headers.get("anthropic-beta") for call in calls]
+
+
+def without_speed(body: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in body.items() if key != "speed"}
+
+
+def resend_warnings(caplog: pytest.LogCaptureFixture) -> list[str]:
+    messages = [record.getMessage() for record in caplog.records if record.name == LOGGER_NAME]
+    return [message for message in messages if "retrying without `speed`" in message]
 
 
 class TestRefusalFallback:
@@ -121,7 +141,12 @@ class TestRefusalFallback:
         # a `fallback` seam block is prepended at the model boundary — the same
         # block shape the streaming splice emits
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
@@ -237,8 +262,18 @@ class TestRefusalFallback:
         assert state.index == 1
         # one seam per model boundary, in hop order, ahead of the served content
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "mid-model"}, "trigger": {"type": "refusal", "category": None}},
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "mid-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -263,7 +298,12 @@ class TestRefusalFallback:
 
         assert result.model == "last-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "mid-model"}, "to": {"model": "last-model"}, "trigger": {"type": "refusal", "category": None}},
+            {
+                "type": "fallback",
+                "from": {"model": "mid-model"},
+                "to": {"model": "last-model"},
+                "trigger": {"type": "refusal", "category": None},
+            },
             {"type": "text", "text": "ok"},
         ]
         bodies = request_bodies(respx_mock)
@@ -308,6 +348,40 @@ class TestRefusalFallback:
         assert bodies[0]["max_tokens"] == 1024
         # explicit None unsets: absent from the retried request, not sent as null
         assert "max_tokens" not in bodies[1]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_entry_that_sets_thinking_overrides_between_tools(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_sync_client(
+            middleware=[
+                BetaRefusalFallbackMiddleware([{"model": "fallback-model", "thinking": {"type": "between_tools"}}])
+            ]
+        )
+
+        client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "between_tools"}
 
     @pytest.mark.respx(base_url=base_url)
     def test_each_hop_patches_the_original_params_not_the_previous_hop(self, respx_mock: MockRouter) -> None:
@@ -641,7 +715,12 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "fallback-model"
         assert [block.to_dict() for block in result.content] == [
-            {"type": "fallback", "from": {"model": "primary-model"}, "to": {"model": "fallback-model"}, "trigger": {"type": "refusal", "category": None}}
+            {
+                "type": "fallback",
+                "from": {"model": "primary-model"},
+                "to": {"model": "fallback-model"},
+                "trigger": {"type": "refusal", "category": None},
+            }
         ]
         bodies = request_bodies(respx_mock)
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model"]
@@ -666,6 +745,20 @@ class TestAsyncRefusalFallback:
         assert [body["model"] for body in bodies] == ["primary-model", "fallback-model", "fallback-model"]
 
     @pytest.mark.respx(base_url=base_url)
+    async def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[refusal("primary-model", "tok"), message("fallback-model")])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        await client.beta.messages.create(
+            model="primary-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "hi"}],
+            thinking={"type": "between_tools"},
+        )
+
+        assert request_bodies(respx_mock)[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
     async def test_walks_each_hop_through_the_chain_until_a_model_accepts(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[refusal("primary-model"), refusal("mid-model"), message("last-model")]
@@ -680,6 +773,211 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "last-model"
         assert state.index == 1
+
+
+FAILED_HOPS_THAT_ARE_NOT_RESENT = [
+    pytest.param({"model": "fallback-model", "speed": "fast"}, "fast", 429, id="the-entry-sets-fast"),
+    pytest.param({"model": "fallback-model"}, omit, 429, id="no-speed"),
+    pytest.param({"model": "fallback-model"}, "standard", 429, id="standard-speed"),
+    pytest.param({"model": "fallback-model"}, "fast", 400, id="http-400"),
+    pytest.param({"model": "fallback-model"}, "fast", 500, id="http-500"),
+]
+
+
+class TestRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        result = create_message(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert result.stop_reason == "end_turn"
+        assert [block.type for block in result.content] == ["fallback"]
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("primary-model", "fast"),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
+        assert bodies[2] == without_speed(bodies[1])
+        assert len(resend_warnings(caplog)) == 1
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            create_message(client, speed=speed)
+
+        assert exc_info.value.status_code == status
+        assert len(respx_mock.calls) == 2
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_resend_that_is_rate_limited_too_surfaces_to_the_app(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(429), error(429), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            create_message(client, speed="fast")
+
+        assert exc_info.value.status_code == 429
+        assert [body.get("speed") for body in request_bodies(respx_mock)] == ["fast", "fast", None]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error(429), message("fallback-model"), error(429), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            result = create_message(client, speed="fast")
+            create_message(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert state.index == 0
+        # the second request starts fast again: the dropped `speed` is not remembered
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[error(429), message("primary-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError):
+            create_message(client, speed="fast")
+
+        assert len(respx_mock.calls) == 1
+
+
+class TestAsyncRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    async def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        result = await create_message_async(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert result.stop_reason == "end_turn"
+        assert [block.type for block in result.content] == ["fallback"]
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("primary-model", "fast"),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
+        assert bodies[2] == without_speed(bodies[1])
+        assert len(resend_warnings(caplog)) == 1
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    async def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            await create_message_async(client, speed=speed)
+
+        assert exc_info.value.status_code == status
+        assert len(respx_mock.calls) == 2
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_resend_that_is_rate_limited_too_surfaces_to_the_app(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(429), error(429), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            await create_message_async(client, speed="fast")
+
+        assert exc_info.value.status_code == 429
+        assert [body.get("speed") for body in request_bodies(respx_mock)] == ["fast", "fast", None]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error(429), message("fallback-model"), error(429), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            result = await create_message_async(client, speed="fast")
+            await create_message_async(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert state.index == 0
+        # the second request starts fast again: the dropped `speed` is not remembered
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[error(429), message("primary-model")])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError):
+            await create_message_async(client, speed="fast")
+
+        assert len(respx_mock.calls) == 1
 
 
 class TestBetaFallbackState:

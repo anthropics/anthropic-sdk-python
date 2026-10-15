@@ -82,7 +82,16 @@ class Members(SyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -130,7 +139,16 @@ class Members(SyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -188,6 +206,9 @@ class Members(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.members.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceMember,
         )
@@ -232,7 +253,14 @@ class Members(SyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.member.id", "user_id"),
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -276,7 +304,16 @@ class Members(SyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )
@@ -341,7 +378,16 @@ class AsyncMembers(AsyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -389,7 +435,16 @@ class AsyncMembers(AsyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -447,6 +502,9 @@ class AsyncMembers(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.members.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceMember,
         )
@@ -491,7 +549,14 @@ class AsyncMembers(AsyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.member.id", "user_id"),
             ),
             cast_to=BetaWorkspaceMember,
         )
@@ -535,7 +600,16 @@ class AsyncMembers(AsyncAPIResource):
                 user_id=user_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )

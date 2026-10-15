@@ -117,7 +117,13 @@ class Issuers(SyncAPIResource):
                 "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.create",
+                span_route="/v1/organizations/federation_issuers",
+                span_created_id="anthropic.organization.federation_issuer.id",
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -169,7 +175,13 @@ class Issuers(SyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.retrieve",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -263,7 +275,13 @@ class Issuers(SyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.update",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -326,6 +344,8 @@ class Issuers(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.issuers.list",
+                span_route="/v1/organizations/federation_issuers",
             ),
             model=BetaFederationIssuer,
         )
@@ -382,7 +402,13 @@ class Issuers(SyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.archive",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -482,7 +508,13 @@ class AsyncIssuers(AsyncAPIResource):
                 "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.create",
+                span_route="/v1/organizations/federation_issuers",
+                span_created_id="anthropic.organization.federation_issuer.id",
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -534,7 +566,13 @@ class AsyncIssuers(AsyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.retrieve",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -628,7 +666,13 @@ class AsyncIssuers(AsyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.update",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -691,6 +735,8 @@ class AsyncIssuers(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.issuers.list",
+                span_route="/v1/organizations/federation_issuers",
             ),
             model=BetaFederationIssuer,
         )
@@ -747,7 +793,13 @@ class AsyncIssuers(AsyncAPIResource):
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.federation.issuers.archive",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )

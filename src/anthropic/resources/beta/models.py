@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import List
+from typing_extensions import Literal
 
 import httpx2
 
@@ -95,7 +96,13 @@ class Models(SyncAPIResource):
         return self._get(
             path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -105,6 +112,7 @@ class Models(SyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        lifecycle: List[Literal["active", "deprecated", "retired"]] | Omit = omit,
         limit: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -127,6 +135,11 @@ class Models(SyncAPIResource):
 
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
+
+          lifecycle: Filter the list to models in any of the given lifecycle stages (`active`,
+              `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the
+              `active` and `deprecated` models; `retired` models appear only when `retired` is
+              requested explicitly.
 
           limit: Number of items to return per page.
 
@@ -169,8 +182,11 @@ class Models(SyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )
@@ -249,7 +265,13 @@ class AsyncModels(AsyncAPIResource):
         return await self._get(
             path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -259,6 +281,7 @@ class AsyncModels(AsyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        lifecycle: List[Literal["active", "deprecated", "retired"]] | Omit = omit,
         limit: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
@@ -281,6 +304,11 @@ class AsyncModels(AsyncAPIResource):
 
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
+
+          lifecycle: Filter the list to models in any of the given lifecycle stages (`active`,
+              `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the
+              `active` and `deprecated` models; `retired` models appear only when `retired` is
+              requested explicitly.
 
           limit: Number of items to return per page.
 
@@ -323,8 +351,11 @@ class AsyncModels(AsyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )

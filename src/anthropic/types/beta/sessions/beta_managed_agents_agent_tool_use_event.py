@@ -22,18 +22,22 @@ class BetaManagedAgentsAgentToolUseEvent(BaseModel):
     """Name of the agent tool being used."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this event was processed."""
 
     type: Literal["agent.tool_use"]
 
     evaluated_permission: Optional[BetaManagedAgentsAgentEvaluatedPermission] = None
-    """AgentEvaluatedPermission enum"""
+    """The evaluated permission policy for this tool invocation."""
 
     evaluation: Optional[BetaManagedAgentsAgentToolEvaluation] = None
     """
-    Names the resolved permission_policy that produced evaluated_permission, and
-    under auto carries the judgement. Open union: clients must tolerate unknown
-    variants.
+    Which resolved permission_policy produced evaluated_permission: always_allow,
+    always_ask, or auto (with the server's per-invocation judgement). Absent only
+    when the server refused the call before any policy applied (for example, the
+    named tool is not enabled in the session); such a refusal has
+    evaluated_permission deny. An event recorded before this field existed reads as
+    the arm its evaluated_permission implies (always_allow for allow, always_ask for
+    ask).
     """
 
     session_thread_id: Optional[str] = None

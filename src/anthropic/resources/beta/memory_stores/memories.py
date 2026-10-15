@@ -87,7 +87,8 @@ class Memories(SyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -130,6 +131,10 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.create",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
+                span_created_id="gen_ai.memory.record.id",
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -163,7 +168,8 @@ class Memories(SyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -208,6 +214,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -254,14 +263,13 @@ class Memories(SyncAPIResource):
               case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
               path unchanged.
 
-          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
-              stored `content_sha256` equals the supplied value. On mismatch, the request
-              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
-              retry against the fresh state. If the precondition fails but the stored state
-              already exactly matches the requested `content` and `path`, the server returns
-              200 instead of 409.
+          precondition: Optional optimistic-concurrency precondition. When supplied, the update applies
+              only if the memory's current state matches; on mismatch the request returns
+              `memory_precondition_failed_error` (HTTP 409). When omitted, the update is
+              unconditional.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -311,6 +319,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.update",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -358,7 +369,8 @@ class Memories(SyncAPIResource):
               omitted). `full` populates `content` on each item and caps `limit` at 20; use
               this as the bulk-read path for export and sync.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -404,6 +416,10 @@ class Memories(SyncAPIResource):
                     "path_prefix": path_prefix,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memories.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_content_query_params=("page",),
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -439,7 +455,8 @@ class Memories(SyncAPIResource):
               If the hashes differ, the request fails with HTTP status 409 and nothing is
               deleted.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -484,6 +501,9 @@ class Memories(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"expected_content_sha256": expected_content_sha256},
+                span_name="anthropic.memory_stores.memories.delete",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )
@@ -546,7 +566,8 @@ class AsyncMemories(AsyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -589,6 +610,10 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.create",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
+                span_created_id="gen_ai.memory.record.id",
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -622,7 +647,8 @@ class AsyncMemories(AsyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -667,6 +693,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -713,14 +742,13 @@ class AsyncMemories(AsyncAPIResource):
               case-sensitive. The memory's `id` is preserved across renames. Omit to leave the
               path unchanged.
 
-          precondition: Optimistic-concurrency precondition: the update applies only if the memory's
-              stored `content_sha256` equals the supplied value. On mismatch, the request
-              returns `memory_precondition_failed_error` (HTTP 409); re-read the memory and
-              retry against the fresh state. If the precondition fails but the stored state
-              already exactly matches the requested `content` and `path`, the server returns
-              200 instead of 409.
+          precondition: Optional optimistic-concurrency precondition. When supplied, the update applies
+              only if the memory's current state matches; on mismatch the request returns
+              `memory_precondition_failed_error` (HTTP 409). When omitted, the update is
+              unconditional.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -770,6 +798,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                span_name="anthropic.memory_stores.memories.update",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsMemory,
         )
@@ -817,7 +848,8 @@ class AsyncMemories(AsyncAPIResource):
               omitted). `full` populates `content` on each item and caps `limit` at 20; use
               this as the bulk-read path for export and sync.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -863,6 +895,10 @@ class AsyncMemories(AsyncAPIResource):
                     "path_prefix": path_prefix,
                     "view": view,
                 },
+                span_name="anthropic.memory_stores.memories.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memories",
+                span_content_query_params=("page",),
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsMemoryListItem
@@ -898,7 +934,8 @@ class AsyncMemories(AsyncAPIResource):
               If the hashes differ, the request fails with HTTP status 409 and nothing is
               deleted.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -943,6 +980,9 @@ class AsyncMemories(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"expected_content_sha256": expected_content_sha256},
+                span_name="anthropic.memory_stores.memories.delete",
+                span_route="/v1/memory_stores/{memory_store_id}/memories/{memory_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id, "gen_ai.memory.record.id": memory_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemory,
         )

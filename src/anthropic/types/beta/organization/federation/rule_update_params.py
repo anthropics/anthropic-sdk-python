@@ -34,12 +34,7 @@ class RuleUpdateParams(TypedDict, total=False):
     """
 
     match: Optional[BetaFederationRuleMatchParam]
-    """Does the incoming JWT qualify?
-
-    All populated fields must pass; omitted fields are skipped. At least one of
-    `subject_prefix` (other than a wildcard-only value like `*`), `claims`, or
-    `condition` is required; `audience` alone is not sufficient.
-    """
+    """Replaces the entire match object. All populated matcher fields must pass."""
 
     name: Optional[str]
     """Replaces the slug identifier (lowercase, digits, hyphens).
@@ -55,7 +50,7 @@ class RuleUpdateParams(TypedDict, total=False):
     """
 
     target: Optional[BetaServiceAccountTargetParam]
-    """Bind to a fixed service account by ID."""
+    """Replaces the entire target object. Currently always a `service_account` target."""
 
     token_lifetime_seconds: Optional[int]
     """

@@ -14,10 +14,13 @@ class BetaTunnel(BaseModel):
     """Unique identifier for the tunnel, prefixed with `tnl_`."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """RFC 3339 datetime string indicating when the tunnel was archived.
+
+    Null if it is not archived.
+    """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """RFC 3339 datetime string indicating when the tunnel was created."""
 
     display_name: Optional[str] = None
     """Human-readable name for the tunnel (1-255 characters). Null if unset."""

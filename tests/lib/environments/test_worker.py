@@ -33,9 +33,13 @@ from typing_extensions import override
 import anyio
 import httpx2
 import pytest
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, StatusCode
 
 from anthropic import Anthropic, APIStatusError, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
+from anthropic._tracing import resolve_open_telemetry
+from anthropic.lib._tracing import OpenTelemetryConfig
 from anthropic.lib.environments import _worker as worker_mod
 from anthropic.lib.environments._worker import (
     EnvironmentWorker,
@@ -46,6 +50,7 @@ from anthropic.lib.environments._worker import (
 )
 from anthropic.lib.tools._tool_dispatch import run_runnable_tool
 
+from ..tools.test_open_telemetry import Spans, span_id, parent_id, attributes
 from ..tools.test_session_runner import _SyncTool
 
 
@@ -1188,3 +1193,184 @@ async def test_heartbeat_keeps_beating_while_a_sync_tool_blocks(monkeypatch: pyt
 
     assert result == "ok"
     assert work.beats_during_tool >= 3
+
+
+# ---------- the OpenTelemetry span of each work item -------------------------
+#
+# The worker polls with the real `aiter_work` here, which starts the span of
+# each item that a poll returns.
+
+
+class _StopRun(BaseException):
+    """Ends a worker's poll loop once its queue is empty."""
+
+
+class _PolledWorkResource(_FakeWorkResource):
+    """The work resource of a client that has spans, which answers the worker's polls with `items`."""
+
+    def __init__(self, spans: Spans, items: list[Any], **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._client = SimpleNamespace(
+            _tracer=spans.provider.get_tracer("sdk"),
+            _otel=OpenTelemetryConfig(resolve_open_telemetry(None), provider_name="anthropic"),
+        )
+        self._items = list(items)
+
+    async def poll(self, _environment_id: str, **_kwargs: Any) -> Any:
+        if not self._items:
+            raise _StopRun
+        return self._items.pop(0)
+
+    async def ack(self, work_id: str, **_kwargs: Any) -> None:
+        pass
+
+
+def _polling_worker(monkeypatch: pytest.MonkeyPatch, work: _PolledWorkResource, serve: Any) -> EnvironmentWorker:
+    sessions = _FakeSessions()
+    _install_scoped_client(monkeypatch, work, sessions)
+    _install_run_session_tools(monkeypatch, {}, serve=serve)
+    return EnvironmentWorker(_fake_client(work, sessions), environment_id="e_1", environment_key="env_key", tools=[])
+
+
+async def _never() -> None:
+    await asyncio.sleep(30)
+
+
+async def test_environment_worker_handles_an_item_in_its_span(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item(), _work_item(work_id="w_2")], heartbeat_state="running")
+    current: list[int] = []
+
+    async def serve() -> None:
+        current.append(span_id(trace.get_current_span()))
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with spans.provider.get_tracer("app").start_as_current_span("app") as app_span:
+        with pytest.raises(_StopRun):
+            await asyncio.wait_for(worker.run(), timeout=5)
+
+    first, second = spans.named("anthropic.environment.work")
+    # Whatever the worker does for an item has the item's span current, so its spans are children of it.
+    assert current == [span_id(first), span_id(second)]
+    for work_span, work_id in ((first, "w_1"), (second, "w_2")):
+        assert parent_id(work_span) == span_id(app_span)
+        assert work_span.kind == SpanKind.INTERNAL
+        assert work_span.status.status_code == StatusCode.OK
+        assert attributes(work_span) == {
+            "gen_ai.provider.name": "anthropic",
+            "anthropic.environment.id": "e_1",
+            "anthropic.environment.work.id": work_id,
+            "anthropic.session.id": "s_1",
+        }
+
+
+async def test_environment_worker_ends_the_span_ok_when_the_item_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    # The first heartbeat says that the item is stopping, which ends its handling without an error.
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="stopping")
+    worker = _polling_worker(monkeypatch, work, _never)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.OK
+    # No span was current when the worker started, so the item's span is a root span.
+    assert work_span.parent is None
+
+
+@pytest.mark.parametrize(
+    ("error", "error_type"),
+    [
+        (
+            _api_status_error(404, {"type": "error", "error": {"type": "not_found_error", "message": "gone"}}),
+            "not_found_error",
+        ),
+        (RuntimeError("the tools could not start"), "client_error"),
+    ],
+    ids=["api-error", "other-error"],
+)
+async def test_environment_worker_fails_the_span_of_an_item_that_it_cannot_handle(
+    monkeypatch: pytest.MonkeyPatch, error: Exception, error_type: str
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="running")
+
+    async def serve() -> None:
+        raise error
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.ERROR
+    assert attributes(work_span)["error.type"] == error_type
+
+
+@pytest.mark.parametrize(
+    "heartbeat_error", [_lease_lost_error(), _api_status_error(403)], ids=["lease-lost", "heartbeat-rejected"]
+)
+async def test_environment_worker_leaves_the_span_unset_when_it_loses_the_lease(
+    monkeypatch: pytest.MonkeyPatch, heartbeat_error: Exception
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_error=heartbeat_error)
+    worker = _polling_worker(monkeypatch, work, _never)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
+
+
+async def test_environment_worker_leaves_the_span_unset_when_losing_the_lease_raises_an_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_error=_lease_lost_error())
+    # The heartbeat finds the lease lost once the worker serves the session.
+    serving = work.heartbeat_gate = asyncio.Event()
+
+    async def serve() -> None:
+        serving.set()
+        try:
+            await _never()
+        finally:
+            # What the lost lease interrupts fails in turn.
+            raise RuntimeError("the connection was dropped")
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    with pytest.raises(_StopRun):
+        await asyncio.wait_for(worker.run(), timeout=5)
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
+
+
+async def test_environment_worker_leaves_the_span_unset_when_it_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+    spans = Spans()
+    work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="running")
+    serving = asyncio.Event()
+
+    async def serve() -> None:
+        serving.set()
+        await _never()
+
+    worker = _polling_worker(monkeypatch, work, serve)
+
+    run = asyncio.ensure_future(worker.run())
+    await asyncio.wait_for(serving.wait(), timeout=5)
+    run.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await run
+
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)

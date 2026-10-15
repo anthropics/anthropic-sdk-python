@@ -20,8 +20,29 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     path parameter of subsequent calls.
     """
 
+    archived_at: Optional[datetime] = None
+    """Timestamp when the store was archived, or `null` if active.
+
+    Set once and never cleared; archiving is one-way. Archived stores are read-only
+    and cannot be attached to new sessions.
+    """
+
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the store was created."""
+
+    description: str
+    """Free-text description of what the store contains, up to 1024 characters.
+
+    Included in the agent's system prompt when the store is attached, so word it to
+    be useful to the agent. Empty string when unset.
+    """
+
+    metadata: Dict[str, str]
+    """
+    Arbitrary key-value tags for your own bookkeeping (such as the end user a store
+    belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
+    Returned on retrieve/list but not filterable.
+    """
 
     name: str
     """Human-readable name for the store.
@@ -33,21 +54,7 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     type: Literal["memory_store"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
-
-    archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
-
-    description: Optional[str] = None
-    """Free-text description of what the store contains, up to 1024 characters.
-
-    Included in the agent's system prompt when the store is attached, so word it to
-    be useful to the agent. Empty string when unset.
     """
-
-    metadata: Optional[Dict[str, str]] = None
-    """
-    Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-    belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-    Returned on retrieve/list but not filterable.
+    Timestamp when the store's `name`, `description`, or `metadata` was last
+    modified. Memory writes inside the store do not advance this.
     """

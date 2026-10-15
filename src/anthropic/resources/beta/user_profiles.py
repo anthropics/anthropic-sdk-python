@@ -72,11 +72,10 @@ class UserProfiles(SyncAPIResource):
         Create User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: How the platform uses the API for this entity. `application` (default): the
+              profile represents an individual end-user of the platform's product.
+              `passthrough`: the profile identifies a company the platform resells Claude
+              access to.
 
               - `application` - The user profile represents an individual end-user of a
                 product that the platform builds on the API. New profiles get this value by
@@ -93,7 +92,12 @@ class UserProfiles(SyncAPIResource):
               Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
               header only.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
+              RFC 3339 format: for an `application` profile, when the end-user signed up; for
+              a `passthrough` profile, when the company became the platform's customer. Must
+              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
+              under the `user-profiles-2026-08-18` beta header; under
+              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -104,7 +108,8 @@ class UserProfiles(SyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -144,7 +149,13 @@ class UserProfiles(SyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -168,7 +179,8 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -202,7 +214,13 @@ class UserProfiles(SyncAPIResource):
         return self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -232,11 +250,7 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to update (`uprof_...`).
 
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: If present, replaces the stored access type. Omit to leave unchanged.
 
               - `application` - The user profile represents an individual end-user of a
                 product that the platform builds on the API. New profiles get this value by
@@ -254,7 +268,11 @@ class UserProfiles(SyncAPIResource):
               Once set, a value cannot be cleared and `null` is rejected. Accepted under the
               `user-profiles-2026-09-04` beta header only.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
+              once set, the value cannot be cleared and `null` is rejected. Must be a complete
+              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
+              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
+              `external_user_details.onboarded_at` instead.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -264,7 +282,8 @@ class UserProfiles(SyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -306,7 +325,13 @@ class UserProfiles(SyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -354,7 +379,8 @@ class UserProfiles(SyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -397,6 +423,8 @@ class UserProfiles(SyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -420,7 +448,8 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -456,7 +485,13 @@ class UserProfiles(SyncAPIResource):
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )
@@ -504,11 +539,10 @@ class AsyncUserProfiles(AsyncAPIResource):
         Create User Profile
 
         Args:
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: How the platform uses the API for this entity. `application` (default): the
+              profile represents an individual end-user of the platform's product.
+              `passthrough`: the profile identifies a company the platform resells Claude
+              access to.
 
               - `application` - The user profile represents an individual end-user of a
                 product that the platform builds on the API. New profiles get this value by
@@ -525,7 +559,12 @@ class AsyncUserProfiles(AsyncAPIResource):
               Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
               header only.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
+              RFC 3339 format: for an `application` profile, when the end-user signed up; for
+              a `passthrough` profile, when the company became the platform's customer. Must
+              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
+              under the `user-profiles-2026-08-18` beta header; under
+              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -536,7 +575,8 @@ class AsyncUserProfiles(AsyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -576,7 +616,13 @@ class AsyncUserProfiles(AsyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create",
+                span_route="/v1/user_profiles",
+                span_created_id="anthropic.user_profile.id",
             ),
             cast_to=BetaUserProfile,
         )
@@ -600,7 +646,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -634,7 +681,13 @@ class AsyncUserProfiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.retrieve",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -664,11 +717,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to update (`uprof_...`).
 
-          access_type: How the platform uses the API on behalf of the entity this profile represents.
-              `application`: the platform sells a product that uses the API behind the scenes,
-              and the profile represents an individual end-user of that product.
-              `passthrough`: the platform resells raw inference, and the profile identifies
-              the resold-to company.
+          access_type: If present, replaces the stored access type. Omit to leave unchanged.
 
               - `application` - The user profile represents an individual end-user of a
                 product that the platform builds on the API. New profiles get this value by
@@ -686,7 +735,11 @@ class AsyncUserProfiles(AsyncAPIResource):
               Once set, a value cannot be cleared and `null` is rejected. Accepted under the
               `user-profiles-2026-09-04` beta header only.
 
-          external_user_onboarded_at: A timestamp in RFC 3339 format
+          external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
+              once set, the value cannot be cleared and `null` is rejected. Must be a complete
+              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
+              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
+              `external_user_details.onboarded_at` instead.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -696,7 +749,8 @@ class AsyncUserProfiles(AsyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -738,7 +792,13 @@ class AsyncUserProfiles(AsyncAPIResource):
                 "name": name,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.update",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfile,
         )
@@ -786,7 +846,8 @@ class AsyncUserProfiles(AsyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -829,6 +890,8 @@ class AsyncUserProfiles(AsyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                span_name="anthropic.user_profiles.list",
+                span_route="/v1/user_profiles",
             ),
             model=BetaUserProfile,
         )
@@ -852,7 +915,8 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
+              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -888,7 +952,13 @@ class AsyncUserProfiles(AsyncAPIResource):
                 "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.create_enrollment_url",
+                span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
             ),
             cast_to=BetaUserProfileEnrollmentURL,
         )

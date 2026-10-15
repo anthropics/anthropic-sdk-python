@@ -36,9 +36,13 @@ class BetaManagedAgentsUserDefineOutcomeEvent(BaseModel):
     """
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the outcome was accepted."""
 
     rubric: Rubric
-    """Rubric for grading the quality of an outcome."""
+    """How to grade the outcome.
+
+    File rubrics are currently resolved to their text content; clients should handle
+    both variants.
+    """
 
     type: Literal["user.define_outcome"]

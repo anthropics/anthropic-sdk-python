@@ -24,4 +24,4 @@ class BetaManagedAgentsMCPToolConfigParams(TypedDict, total=False):
     """Whether this tool is enabled. Overrides the `default_config` setting."""
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Permission policy for this tool. Overrides the `default_config` setting."""

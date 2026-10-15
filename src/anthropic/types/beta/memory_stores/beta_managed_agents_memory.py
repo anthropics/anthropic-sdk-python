@@ -34,7 +34,7 @@ class BetaManagedAgentsMemory(BaseModel):
     """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this memory was created, in RFC 3339 format."""
 
     memory_store_id: str
     """ID of the memory store this memory belongs to (a `memstore_...` value)."""
@@ -58,7 +58,12 @@ class BetaManagedAgentsMemory(BaseModel):
     type: Literal["memory"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this memory was last modified, in RFC 3339 format.
+
+    Use this as a cheap freshness signal; for who made the change, look up the head
+    version's `created_by` via
+    [List memory versions](/en/api/beta/memory_stores/memory_versions/list).
+    """
 
     content: Optional[str] = None
     """The memory's UTF-8 text content.

@@ -21,4 +21,4 @@ class BetaManagedAgentsAgentToolset20260401Params(TypedDict, total=False):
     """Per-tool configuration overrides."""
 
     default_config: Optional[BetaManagedAgentsAgentToolsetDefaultConfigParams]
-    """Default configuration for all tools in a toolset."""
+    """Default configuration applied to all tools in this set."""

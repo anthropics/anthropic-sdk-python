@@ -19,7 +19,7 @@ class TestThreads:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
@@ -27,7 +27,7 @@ class TestThreads:
     @parametrize
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -37,7 +37,7 @@ class TestThreads:
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.with_raw_response.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -49,7 +49,7 @@ class TestThreads:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.with_streaming_response.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -64,7 +64,7 @@ class TestThreads:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             client.beta.sessions.threads.with_raw_response.retrieve(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -74,7 +74,6 @@ class TestThreads:
                 session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.list(
@@ -82,19 +81,18 @@ class TestThreads:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
+            statuses=["running"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.with_raw_response.list(
@@ -106,7 +104,6 @@ class TestThreads:
         thread = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.with_streaming_response.list(
@@ -120,7 +117,6 @@ class TestThreads:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
@@ -131,7 +127,7 @@ class TestThreads:
     @parametrize
     def test_method_archive(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
@@ -139,7 +135,7 @@ class TestThreads:
     @parametrize
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -149,7 +145,7 @@ class TestThreads:
     @parametrize
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.with_raw_response.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -161,7 +157,7 @@ class TestThreads:
     @parametrize
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.with_streaming_response.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -176,7 +172,7 @@ class TestThreads:
     def test_path_params_archive(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             client.beta.sessions.threads.with_raw_response.archive(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -195,7 +191,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
@@ -203,7 +199,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -213,7 +209,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.with_raw_response.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -225,7 +221,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.with_streaming_response.retrieve(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -240,7 +236,7 @@ class TestAsyncThreads:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             await async_client.beta.sessions.threads.with_raw_response.retrieve(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 
@@ -250,7 +246,6 @@ class TestAsyncThreads:
                 session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.list(
@@ -258,19 +253,18 @@ class TestAsyncThreads:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
+            statuses=["running"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.with_raw_response.list(
@@ -282,7 +276,6 @@ class TestAsyncThreads:
         thread = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.with_streaming_response.list(
@@ -296,7 +289,6 @@ class TestAsyncThreads:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
@@ -307,7 +299,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
@@ -315,7 +307,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
@@ -325,7 +317,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.with_raw_response.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         )
 
@@ -337,7 +329,7 @@ class TestAsyncThreads:
     @parametrize
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.with_streaming_response.archive(
-            thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+            thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
         ) as response:
             assert not response.is_closed
@@ -352,7 +344,7 @@ class TestAsyncThreads:
     async def test_path_params_archive(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `session_id` but received ''"):
             await async_client.beta.sessions.threads.with_raw_response.archive(
-                thread_id="sthr_011CZkZVWa6oIjw0rgXZpnBt",
+                thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
                 session_id="",
             )
 

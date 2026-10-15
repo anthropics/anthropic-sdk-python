@@ -11,23 +11,111 @@ instead of each carrying its own copy. Consumed by the runner helpers only.
 
 from __future__ import annotations
 
+import re
 import inspect
-from typing import Union, TypeVar, Iterable, Awaitable, cast
-from typing_extensions import Protocol
+from typing import Union, TypeVar, Iterable, Awaitable, cast, overload
+from typing_extensions import Literal, Protocol
 
 from anyio.to_thread import run_sync
 
-from ._beta_functions import ToolError, BetaFunctionTool, BetaBuiltinFunctionTool, BetaFunctionToolResultType
+from ..._utils import is_dict
+from ...types.beta import BetaToolUnionParam
+from ._beta_functions import (
+    ToolError,
+    BetaFunctionTool,
+    BetaRunnableTool,
+    BetaAsyncFunctionTool,
+    BetaAsyncRunnableTool,
+    BetaBuiltinFunctionTool,
+    BetaFunctionToolResultType,
+    BetaAsyncBuiltinFunctionTool,
+)
+from ._toolsets._errors import ToolsetContractError
+from ._toolsets._runnable import (
+    TOOLSET_CLASSES,
+    BetaRunnableToolset,
+    BetaAnyRunnableToolset,
+    BetaAsyncRunnableToolset,
+)
+from ._toolsets._sanitize import error_text, well_formed
 from ...types.beta.beta_message_param import BetaMessageParam
 from ...types.beta.beta_compaction_block import BetaCompactionBlock
 from ...types.beta.beta_content_block_param import BetaContentBlockParam
+from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 from ...types.beta.beta_request_tool_removal_block_param import BetaRequestToolRemovalBlockParam
 from ...types.beta.beta_request_tool_addition_block_param import (
     Tool as _ToolChangeTool,
     BetaRequestToolAdditionBlockParam,
 )
 
-__all__ = ["tool_registry", "tool_error_content", "run_runnable_tool", "available_tool_names"]
+__all__ = [
+    "tool_registry",
+    "index_runnables",
+    "partition_sync_tools",
+    "partition_async_tools",
+    "wrong_flavour_error",
+    "tool_error_content",
+    "tool_result_content",
+    "run_runnable_tool",
+    "available_tool_names",
+    "tool_family",
+]
+
+_SYNC_RUNNABLES = (BetaFunctionTool, BetaBuiltinFunctionTool, BetaRunnableToolset)
+_ASYNC_RUNNABLES = (BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool, BetaAsyncRunnableToolset)
+
+
+def wrong_flavour_error(tool: object, *, expected: Literal["sync", "async"]) -> Exception:
+    """The error for a sync tool or toolset handed to the async runner (or the reverse), raised when the
+    runner is built. A toolset mismatch is a `ToolsetContractError`."""
+    if expected == "sync":
+        message = (
+            f"Received an async tool or toolset ({type(tool).__name__}) in the synchronous tool_runner. Create the "
+            "runner from an AsyncAnthropic client (and await its result), or pass a synchronous tool or "
+            "toolset here."
+        )
+    else:
+        message = (
+            f"Received a synchronous tool or toolset ({type(tool).__name__}) in the asynchronous tool_runner. Create "
+            "the runner from an Anthropic client, or pass an async tool or toolset here."
+        )
+    if isinstance(tool, TOOLSET_CLASSES):
+        return ToolsetContractError(message)
+    return TypeError(message)
+
+
+def partition_sync_tools(
+    tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
+) -> tuple[list[BetaRunnableTool | BetaRunnableToolset], list[BetaToolUnionParam]]:
+    """Split a synchronous `tool_runner`'s `tools` argument into the runnable objects the runner dispatches (function
+    tools and toolsets) and the raw `tools[]` params that go on the wire as given. An async runnable raises
+    `wrong_flavour_error`."""
+    runnable: list[BetaRunnableTool | BetaRunnableToolset] = []
+    raw: list[BetaToolUnionParam] = []
+    for tool in tools:
+        if isinstance(tool, _SYNC_RUNNABLES):
+            runnable.append(tool)
+        elif isinstance(tool, _ASYNC_RUNNABLES):
+            raise wrong_flavour_error(tool, expected="sync")
+        else:
+            raw.append(tool)
+    return runnable, raw
+
+
+def partition_async_tools(
+    tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
+) -> tuple[list[BetaAsyncRunnableTool | BetaAsyncRunnableToolset], list[BetaToolUnionParam]]:
+    """The async twin of `partition_sync_tools`: a synchronous runnable raises `wrong_flavour_error`."""
+    runnable: list[BetaAsyncRunnableTool | BetaAsyncRunnableToolset] = []
+    raw: list[BetaToolUnionParam] = []
+    for tool in tools:
+        if isinstance(tool, _ASYNC_RUNNABLES):
+            runnable.append(tool)
+        elif isinstance(tool, _SYNC_RUNNABLES):
+            raise wrong_flavour_error(tool, expected="async")
+        else:
+            raw.append(tool)
+    return runnable, raw
 
 
 class _NamedTool(Protocol):
@@ -45,14 +133,30 @@ class _CallableTool(Protocol):
 
 
 NamedToolT = TypeVar("NamedToolT", bound=_NamedTool)
+ToolsetT = TypeVar("ToolsetT", bound=BetaAnyRunnableToolset)
 
 
 def tool_registry(tools: Iterable[NamedToolT]) -> dict[str, NamedToolT]:
-    """Index `tools` by their `name` for O(1) dispatch lookup.
-
-    On a duplicate name the later tool wins, matching a plain dict comprehension.
-    """
+    """Index the named `tools` by their `name`. On a duplicate name the later tool wins."""
     return {tool.name: tool for tool in tools}
+
+
+def index_runnables(
+    tools: Iterable[NamedToolT | ToolsetT],
+) -> tuple[dict[str, NamedToolT], dict[str, ToolsetT]]:
+    """Index a runner's tools by `name` and its toolsets by family (`toolset_name`).
+
+    A toolset's `tools[]` entry has no `name`, so toolsets are indexed apart and never shadow a
+    same-named custom tool. On a duplicate key the later one wins.
+    """
+    by_name: dict[str, NamedToolT] = {}
+    by_family: dict[str, ToolsetT] = {}
+    for tool in tools:
+        if isinstance(tool, TOOLSET_CLASSES):
+            by_family[tool.toolset_name] = tool
+        else:
+            by_name[tool.name] = tool
+    return by_name, by_family
 
 
 def available_tool_names(messages: Iterable[BetaMessageParam], tool_names: Iterable[str]) -> set[str]:
@@ -133,16 +237,50 @@ def _changed_tool_name(tool: _ToolChangeTool) -> str | None:
     return None
 
 
+def tool_family(definition: BetaToolUnionParam) -> str:
+    """A tool definition's family, as the API computes it for a toolset: its `type` ("custom" when absent) without a
+    trailing `_YYYYMMDD` date and then without `_toolset`. `browser_toolset_20260801` and any later dated version are
+    "browser"."""
+    return re.sub(r"_\d{8}$", "", definition.get("type") or "custom").removesuffix("_toolset")
+
+
 def tool_error_content(exc: BaseException) -> BetaFunctionToolResultType:
     """Render an exception raised by a tool as tool-result content.
 
-    A `ToolError` carries its own structured content; anything else is
-    rendered with `repr` (which, unlike `str`, keeps the exception type).
-    The caller owns the `is_error` flag and any logging.
+    A `ToolError` has its own structured content, made well formed but
+    never cut. Anything else is rendered with `repr` (which, unlike `str`, keeps
+    the exception type), well formed and cut to the field limit so the next
+    request can include it whatever the exception's text holds. The caller owns
+    the `is_error` flag and any logging.
     """
     if isinstance(exc, ToolError):
-        return exc.content
-    return repr(exc)
+        return tool_result_content(exc.content)
+    return error_text(exc)
+
+
+@overload
+def tool_result_content(content: None) -> None: ...
+@overload
+def tool_result_content(content: BetaFunctionToolResultType) -> BetaFunctionToolResultType: ...
+def tool_result_content(content: BetaFunctionToolResultType | None) -> BetaFunctionToolResultType | None:
+    """A tool's result, or a `ToolError`'s content, in a form the next request
+    can encode: an unpaired surrogate in a string, or in a text block's text, is
+    folded to U+FFFD. Nothing is cut and no block is dropped, so the length and
+    shape stay the tool's own. A tool that returns `None` (whatever its
+    annotation says) sends `content: null`.
+    """
+    if content is None:
+        return None
+    if isinstance(content, str):
+        return well_formed(content)
+
+    blocks = list(content)
+    for i, block in enumerate(blocks):
+        if is_dict(block) and block.get("type") == "text":
+            text = block.get("text")
+            if isinstance(text, str) and (fixed := well_formed(text)) != text:
+                blocks[i] = cast(BetaContent, {**block, "text": fixed})
+    return blocks
 
 
 async def run_runnable_tool(tool: _CallableTool, input: dict[str, object]) -> BetaFunctionToolResultType:

@@ -25,4 +25,4 @@ class EffortCapability(BaseModel):
     """Whether this capability is supported by the model."""
 
     xhigh: Optional[CapabilitySupport] = None
-    """Indicates whether a capability is supported."""
+    """Whether the model supports xhigh effort level."""

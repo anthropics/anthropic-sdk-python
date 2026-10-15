@@ -4,6 +4,7 @@ import httpx2
 
 RAW_RESPONSE_HEADER = "X-Stainless-Raw-Response"
 OVERRIDE_CAST_TO_HEADER = "____stainless_override_cast_to"
+ANTHROPIC_API_VERSION = "2023-06-01"
 
 # default timeout is 10 minutes
 DEFAULT_TIMEOUT = httpx2.Timeout(timeout=10 * 60, connect=5.0)

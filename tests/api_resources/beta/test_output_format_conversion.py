@@ -40,7 +40,7 @@ class TestOutputFormatConversion:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=User,
         )
 
@@ -64,7 +64,7 @@ class TestOutputFormatConversion:
             client.beta.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format={"type": "json_schema", "schema": {"type": "string"}},  # type: ignore[arg-type]
             )
 
@@ -99,7 +99,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.parse(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=SimpleModel,
             )
 
@@ -129,7 +129,7 @@ class TestOutputFormatNoDeprecationWarning:
             with client.beta.messages.stream(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=Answer,
             ):
                 pass
@@ -161,7 +161,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.create(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
             )
 
     def test_no_warning_when_using_output_config(self, client: Anthropic, respx_mock: MockRouter) -> None:
@@ -187,7 +187,7 @@ class TestOutputFormatNoDeprecationWarning:
             client.beta.messages.create(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_config={"format": {"type": "json_schema", "schema": {"type": "object"}}},
             )
 
@@ -205,18 +205,18 @@ class TestOutputConfigConflict:
             client.beta.messages.parse(
                 max_tokens=1024,
                 messages=[{"role": "user", "content": "Test"}],
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 output_format=TestModel,
                 output_config={"format": {"type": "json_schema", "schema": {"type": "string"}}},
             )
 
 
 class TestStructuredOutputsBetaHeader:
-    """Test that structured-outputs-2025-12-15 beta header is added for .parse()."""
+    """Test that .parse() sends the caller's betas and adds none of its own."""
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
-    def test_parse_adds_structured_outputs_beta_header(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        """Verify .parse() auto-adds structured-outputs-2025-12-15 beta header."""
+    def test_parse_does_not_add_beta_header(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """Verify .parse() sends no beta header when the caller passes no betas."""
 
         class DataModel(BaseModel):
             value: int
@@ -239,17 +239,16 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
         )
 
         request = respx_mock.calls.last.request
-        assert "anthropic-beta" in request.headers
-        assert "structured-outputs-2025-12-15" in request.headers["anthropic-beta"]
+        assert "anthropic-beta" not in request.headers
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
-    def test_parse_preserves_existing_betas(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        """Verify .parse() preserves other beta headers when adding structured-outputs."""
+    def test_parse_sends_caller_betas_unchanged(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """Verify .parse() sends exactly the betas the caller passes."""
 
         class DataModel(BaseModel):
             value: int
@@ -272,19 +271,17 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
             betas=["some-other-beta-feature"],
         )
 
         request = respx_mock.calls.last.request
-        beta_header = request.headers["anthropic-beta"]
-        assert "structured-outputs-2025-12-15" in beta_header
-        assert "some-other-beta-feature" in beta_header
+        assert request.headers["anthropic-beta"] == "some-other-beta-feature"
 
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
-    def test_parse_does_not_duplicate_beta_header(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        """Verify .parse() doesn't duplicate structured-outputs beta if already present."""
+    def test_parse_sends_explicit_structured_outputs_beta_once(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """Verify .parse() sends the structured-outputs beta once when the caller passes it."""
 
         class DataModel(BaseModel):
             value: int
@@ -307,15 +304,13 @@ class TestStructuredOutputsBetaHeader:
         client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=DataModel,
             betas=["structured-outputs-2025-12-15"],
         )
 
         request = respx_mock.calls.last.request
-        beta_header = request.headers["anthropic-beta"]
-        # Should only appear once
-        assert beta_header.count("structured-outputs-2025-12-15") == 1
+        assert request.headers["anthropic-beta"] == "structured-outputs-2025-12-15"
 
 
 class TestAsyncOutputFormatConversion:
@@ -346,7 +341,7 @@ class TestAsyncOutputFormatConversion:
         await async_client.beta.messages.parse(
             max_tokens=1024,
             messages=[{"role": "user", "content": "Test"}],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             output_format=User,
         )
 

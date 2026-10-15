@@ -6,9 +6,13 @@ from typing_extensions import TypeAlias
 from .beta_thinking_config_enabled_param import BetaThinkingConfigEnabledParam
 from .beta_thinking_config_adaptive_param import BetaThinkingConfigAdaptiveParam
 from .beta_thinking_config_disabled_param import BetaThinkingConfigDisabledParam
+from .beta_thinking_config_between_tools_param import BetaThinkingConfigBetweenToolsParam
 
 __all__ = ["BetaThinkingConfigParam"]
 
 BetaThinkingConfigParam: TypeAlias = Union[
-    BetaThinkingConfigEnabledParam, BetaThinkingConfigDisabledParam, BetaThinkingConfigAdaptiveParam
+    BetaThinkingConfigEnabledParam,
+    BetaThinkingConfigDisabledParam,
+    BetaThinkingConfigBetweenToolsParam,
+    BetaThinkingConfigAdaptiveParam,
 ]

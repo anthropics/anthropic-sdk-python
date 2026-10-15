@@ -8,7 +8,14 @@ import httpx2
 
 from . import _exceptions
 from ._qs import Querystring
-from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
+from ._types import (
+    Omit,
+    Timeout,
+    NotGiven,
+    RequestOptions,
+    OpenTelemetryClientOption,
+    not_given,
+)
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -17,6 +24,7 @@ from ._utils import (
 from ._compat import model_copy, cached_property
 from ._models import FinalRequestOptions
 from ._version import __version__
+from ._constants import ANTHROPIC_API_VERSION
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._middleware import MiddlewareInput
@@ -111,12 +119,13 @@ def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
 # --- end credentials support ---
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages
+    from .resources import beta, files, models, skills, messages, organization
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
+    from .resources.organization.organization import Organization, AsyncOrganization
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
@@ -166,6 +175,9 @@ class Anthropic(SyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
@@ -302,6 +314,7 @@ class Anthropic(SyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -334,6 +347,12 @@ class Anthropic(SyncAPIClient):
         from .resources.skills import Skills
 
         return Skills(self)
+
+    @cached_property
+    def organization(self) -> Organization:
+        from .resources.organization import Organization
+
+        return Organization(self)
 
     @cached_property
     def beta(self) -> Beta:
@@ -385,7 +404,7 @@ class Anthropic(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
@@ -460,6 +479,7 @@ class Anthropic(SyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -508,7 +528,7 @@ class Anthropic(SyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -521,6 +541,10 @@ class Anthropic(SyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
@@ -600,6 +624,9 @@ class AsyncAnthropic(AsyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
@@ -728,6 +755,7 @@ class AsyncAnthropic(AsyncAPIClient):
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -760,6 +788,12 @@ class AsyncAnthropic(AsyncAPIClient):
         from .resources.skills import AsyncSkills
 
         return AsyncSkills(self)
+
+    @cached_property
+    def organization(self) -> AsyncOrganization:
+        from .resources.organization import AsyncOrganization
+
+        return AsyncOrganization(self)
 
     @cached_property
     def beta(self) -> AsyncBeta:
@@ -811,7 +845,7 @@ class AsyncAnthropic(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
@@ -880,6 +914,7 @@ class AsyncAnthropic(AsyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -928,7 +963,7 @@ class AsyncAnthropic(AsyncAPIClient):
                 if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
                     _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
         # --- end credentials support ---
-        return self.__class__(
+        client = self.__class__(
             api_key=api_key or self.api_key,
             auth_token=auth_token or self.auth_token,
             webhook_key=webhook_key or self.webhook_key,
@@ -941,6 +976,10 @@ class AsyncAnthropic(AsyncAPIClient):
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
             **_extra_kwargs,
         )
+        client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
+        return client
 
     # Alias for `copy` for nicer inline usage, e.g.
     # client.with_options(timeout=10).foo.create(...)
@@ -1028,6 +1067,12 @@ class AnthropicWithRawResponse:
         return SkillsWithRawResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithRawResponse:
+        from .resources.organization import OrganizationWithRawResponse
+
+        return OrganizationWithRawResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithRawResponse:
         from .resources.beta import BetaWithRawResponse
 
@@ -1063,6 +1108,12 @@ class AsyncAnthropicWithRawResponse:
         from .resources.skills import AsyncSkillsWithRawResponse
 
         return AsyncSkillsWithRawResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithRawResponse:
+        from .resources.organization import AsyncOrganizationWithRawResponse
+
+        return AsyncOrganizationWithRawResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithRawResponse:
@@ -1102,6 +1153,12 @@ class AnthropicWithStreamedResponse:
         return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
+    def organization(self) -> organization.OrganizationWithStreamingResponse:
+        from .resources.organization import OrganizationWithStreamingResponse
+
+        return OrganizationWithStreamingResponse(self._client.organization)
+
+    @cached_property
     def beta(self) -> beta.BetaWithStreamingResponse:
         from .resources.beta import BetaWithStreamingResponse
 
@@ -1137,6 +1194,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.skills import AsyncSkillsWithStreamingResponse
 
         return AsyncSkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
+    def organization(self) -> organization.AsyncOrganizationWithStreamingResponse:
+        from .resources.organization import AsyncOrganizationWithStreamingResponse
+
+        return AsyncOrganizationWithStreamingResponse(self._client.organization)
 
     @cached_property
     def beta(self) -> beta.AsyncBetaWithStreamingResponse:

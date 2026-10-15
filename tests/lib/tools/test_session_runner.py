@@ -78,10 +78,19 @@ def _tool_use(
     input: dict[str, Any],
     *,
     evaluated_permission: str | None = None,
+    session_thread_id: str | None = None,
 ) -> _StubEvent:
     # `evaluated_permission` is always present on the real (typed) event —
     # `None` unless the server evaluated a permission policy for the call.
-    return _StubEvent("agent.tool_use", id=id, name=name, input=input, evaluated_permission=evaluated_permission)
+    # So is `session_thread_id`, which is `None` for a call of the primary thread.
+    return _StubEvent(
+        "agent.tool_use",
+        id=id,
+        name=name,
+        input=input,
+        evaluated_permission=evaluated_permission,
+        session_thread_id=session_thread_id,
+    )
 
 
 def _tool_result(tool_use_id: str) -> _StubEvent:
@@ -93,10 +102,10 @@ def _tool_confirmation(tool_use_id: str, result: str) -> _StubEvent:
     return _StubEvent("user.tool_confirmation", id=f"conf_{tool_use_id}", tool_use_id=tool_use_id, result=result)
 
 
-def _custom_tool_use(id: str, name: str, input: dict[str, Any]) -> _StubEvent:
+def _custom_tool_use(id: str, name: str, input: dict[str, Any], *, session_thread_id: str | None = None) -> _StubEvent:
     """A CUSTOM (user-defined) tool call — the agent emits `agent.custom_tool_use`
     rather than `agent.tool_use` for these."""
-    return _StubEvent("agent.custom_tool_use", id=id, name=name, input=input)
+    return _StubEvent("agent.custom_tool_use", id=id, name=name, input=input, session_thread_id=session_thread_id)
 
 
 def _custom_tool_result(custom_tool_use_id: str) -> _StubEvent:
@@ -107,8 +116,12 @@ def _terminated() -> _StubEvent:
     return _StubEvent("session.status_terminated")
 
 
+def _idle(stop_reason: str) -> _StubEvent:
+    return _StubEvent("session.status_idle", stop_reason=_StubEvent(stop_reason))
+
+
 def _idle_end_turn() -> _StubEvent:
-    return _StubEvent("session.status_idle", stop_reason=_StubEvent("end_turn"))
+    return _idle("end_turn")
 
 
 def _result_content(item: DispatchedToolCall) -> Any:
@@ -269,12 +282,22 @@ class _FakeClient:
     """Minimal stand-in for `AsyncAnthropic` — only exposes the resource path
     the runner reads."""
 
+    _tracer = None
+
     def __init__(self, events: FakeAsyncEvents) -> None:
         self.beta = type(
             "_Beta",
             (),
             {"sessions": type("_Sessions", (), {"events": events})()},
         )()
+
+    @property
+    def open_telemetry(self) -> dict[str, Any]:
+        return {}
+
+    def with_options(self, **_options: Any) -> _FakeClient:
+        """The copy that sends a thread's tool results is this client: the fake events record every send."""
+        return self
 
 
 async def _run_with_fakes(
@@ -333,6 +356,32 @@ async def test_yields_completed_tool_call() -> None:
     assert sent["type"] == "user.tool_result"
     assert sent["tool_use_id"] == "tu_1"
     assert sent["is_error"] is False
+
+
+@pytest.mark.asyncio()
+async def test_a_tool_that_returns_none_posts_no_output_and_the_loop_goes_on() -> None:
+    # A tool with nothing to say returns None: the result reads "(no output)", it is not an error, and the next
+    # call in the stream is still dispatched.
+    async def silent(_input: dict[str, Any]) -> Any:
+        return None
+
+    async def echo(input: dict[str, Any]) -> str:
+        return f"got {input.get('x')}"
+
+    events = FakeAsyncEvents(
+        stream_events=[_tool_use("tu_1", "silent", {}), _tool_use("tu_2", "echo", {"x": 1}), _terminated()]
+    )
+
+    items = [
+        item
+        async for item in _run_with_fakes(events=events, tools=[_FakeTool("silent", silent), _FakeTool("echo", echo)])
+    ]
+
+    assert [item.tool_use_id for item in items] == ["tu_1", "tu_2"]
+    assert items[0].is_error is False and items[0].posted is True
+    assert _result_text(items[0]) == "(no output)"
+    assert _result_text(items[1]) == "got 1"
+    assert len(events.send_calls) == 2
 
 
 @pytest.mark.asyncio()
@@ -552,7 +601,11 @@ async def test_skips_unowned_builtin_and_custom_tools_by_default() -> None:
 
 
 @pytest.mark.asyncio()
-async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
+@pytest.mark.parametrize(
+    ("approved", "in_history"),
+    [(False, True), (True, True), (True, False)],
+)
+async def test_skipped_unowned_tool_does_not_trip_idle(approved: bool, in_history: bool) -> None:
     """A skipped (unanswered) unowned tool_use stays OUT of the end-turn
     accounting: reconcile sees history ending on an `end_turn` idle but with
     the unowned tool_use still unanswered, so it must NOT arm the idle
@@ -561,11 +614,19 @@ async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
     A correct runner therefore stays alive past `max_idle` (the iterator
     never completes); a buggy one would idle-stop almost immediately.
     """
+    # An end_turn idle with the unowned tool_use still unanswered.
+    unanswered = (
+        [
+            _tool_use("evt_pending", "not_ours", {}, evaluated_permission="ask"),
+            _idle_end_turn(),
+            _tool_confirmation("evt_pending", "allow"),
+        ]
+        if approved
+        else [_tool_use("evt_pending", "not_ours", {}), _idle_end_turn()]
+    )
     events = FakeAsyncEvents(
-        # No live events — the reconcile pass drives the test. History ends on
-        # an end_turn idle with the unowned tool_use still unanswered.
-        list_events=[_tool_use("evt_pending", "not_ours", {}), _idle_end_turn()],
-        stream_events=[],
+        list_events=unanswered if in_history else [],
+        stream_events=[] if in_history else unanswered,
     )
     seen: list[DispatchedToolCall] = []
 
@@ -579,7 +640,7 @@ async def test_skipped_unowned_tool_does_not_trip_idle() -> None:
     with pytest.raises((asyncio.TimeoutError, TimeoutError)):
         await asyncio.wait_for(drive(), timeout=1.0)
 
-    assert len(seen) >= 1, "reconcile must still surface the unowned call"
+    assert len(seen) >= 1, "the unowned call must still be surfaced"
     call = seen[0]
     assert call.tool_use_id == "evt_pending"
     assert call.posted is False
@@ -1056,11 +1117,13 @@ async def test_ungated_tool_with_stray_deny_verdict_resolves_as_denied() -> None
 
 
 @pytest.mark.asyncio()
-async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
+@pytest.mark.parametrize("in_history", [False, True])
+async def test_deny_after_end_turn_resumes_idle_stop(in_history: bool) -> None:
     """A `deny` that resolves the last held call must let the idle countdown
     resume: the session already went idle (`end_turn`) while the call was
     held, the denial produces no further stream events, and the runner must
-    stop on its own instead of waiting forever."""
+    stop on its own instead of waiting forever. The same three events read
+    from history after a reconnect must end the same way."""
     counter = {"calls": 0}
 
     async def gated(_input: dict[str, Any]) -> str:
@@ -1068,12 +1131,14 @@ async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
         return "ran"
 
     tool = _FakeTool("gated", gated)
+    denied_after_idle = [
+        _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+        _idle_end_turn(),
+        _tool_confirmation("tu_1", "deny"),
+    ]
     events = FakeAsyncEvents(
-        stream_events=[
-            _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
-            _idle_end_turn(),
-            _tool_confirmation("tu_1", "deny"),
-        ]
+        list_events=denied_after_idle if in_history else [],
+        stream_events=[] if in_history else denied_after_idle,
     )
 
     async def drive() -> list[DispatchedToolCall]:
@@ -1087,6 +1152,34 @@ async def test_deny_after_live_end_turn_resumes_idle_stop() -> None:
     assert events.send_calls == []
     assert len(items) == 1
     assert items[0].confirmation == "deny"
+
+
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("in_history", [False, True])
+async def test_allow_after_end_turn_resumes_idle_stop(in_history: bool) -> None:
+    """The `allow` twin of the test above: the released call runs and posts its
+    result, nothing else arrives, and the runner must still stop on its own."""
+
+    async def gated(_input: dict[str, Any]) -> str:
+        return "ran"
+
+    allowed_after_idle = [
+        _tool_use("tu_1", "gated", {}, evaluated_permission="ask"),
+        _idle_end_turn(),
+        _tool_confirmation("tu_1", "allow"),
+    ]
+    events = FakeAsyncEvents(
+        list_events=allowed_after_idle if in_history else [],
+        stream_events=[] if in_history else allowed_after_idle,
+    )
+
+    async def drive() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("gated", gated)], max_idle=0.05)]
+
+    items = await asyncio.wait_for(drive(), timeout=2.0)
+
+    assert [item.confirmation for item in items] == ["allow"]
+    assert len(events.send_calls) == 1
 
 
 @pytest.mark.asyncio()
@@ -1152,14 +1245,35 @@ async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest
 
 
 @pytest.mark.asyncio()
-async def test_idle_after_end_turn_ends_iteration() -> None:
-    # The session goes idle with stop_reason end_turn and nothing else happens;
-    # after `max_idle` seconds the runner stops on its own.
-    events = FakeAsyncEvents(stream_events=[_idle_end_turn()])
+@pytest.mark.parametrize(
+    "stop_reason", ["end_turn", "refusal", "retries_exhausted", "budget_reached", "newer_than_this_sdk"]
+)
+@pytest.mark.parametrize("in_history", [False, True])
+async def test_idle_after_turn_ends_ends_iteration(stop_reason: str, in_history: bool) -> None:
+    # The turn ends, the session goes idle and nothing else happens; after
+    # `max_idle` seconds the runner stops on its own, whatever ended the turn.
+    # Only the history shows a turn that ended before the runner attached.
+    idle = _idle(stop_reason)
+    events = FakeAsyncEvents(list_events=[idle] if in_history else [], stream_events=[] if in_history else [idle])
 
-    items = [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+    async def drive() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
 
-    assert items == []
+    assert await asyncio.wait_for(drive(), timeout=2.0) == []
+
+
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("in_history", [False, True])
+async def test_requires_action_idle_does_not_end_iteration(in_history: bool) -> None:
+    # The session is waiting on a client, so its turn is not over.
+    idle = _idle("requires_action")
+    events = FakeAsyncEvents(list_events=[idle] if in_history else [], stream_events=[] if in_history else [idle])
+
+    async def drive() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+
+    with pytest.raises((asyncio.TimeoutError, TimeoutError)):
+        await asyncio.wait_for(drive(), timeout=0.5)
 
 
 @pytest.mark.asyncio()
@@ -1677,7 +1791,7 @@ def test_environments_public_reexports() -> None:
 
 
 def _to_session_content(content: Any) -> list[Any]:
-    return cast("list[Any]", session_runner_mod._to_session_content(content))  # pyright: ignore[reportPrivateUsage]
+    return cast("list[Any]", session_runner_mod._to_session_content(content)[0])  # pyright: ignore[reportPrivateUsage]
 
 
 def test_to_session_content_text_passthrough() -> None:

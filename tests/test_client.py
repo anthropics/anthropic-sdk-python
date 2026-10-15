@@ -20,7 +20,7 @@ from respx import MockRouter
 from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
-from anthropic._types import Omit
+from anthropic._types import Omit, Timeout, NotGiven, not_given
 from anthropic._utils import asyncify
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
@@ -381,6 +381,95 @@ class TestAnthropic:
             assert timeout == DEFAULT_TIMEOUT  # our default
 
             client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        ("timeout", "assigned", "copy_options", "expected"),
+        [
+            pytest.param(not_given, not_given, None, 600, id="unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, None, DEFAULT_TIMEOUT.read, id="set to the default"),
+            pytest.param(30, not_given, None, 30, id="set"),
+            pytest.param(None, not_given, None, None, id="set to none"),
+            pytest.param(not_given, not_given, {"max_retries": 1}, 600, id="copy of unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of set"),
+            pytest.param(not_given, not_given, {"timeout": DEFAULT_TIMEOUT}, DEFAULT_TIMEOUT.read, id="copy that sets"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, None, DEFAULT_TIMEOUT.read, id="assigned the default"),
+            pytest.param(not_given, 30, None, 30, id="assigned"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of assigned"),
+        ],
+    )
+    def test_method_default_timeout(
+        self,
+        respx_mock: MockRouter,
+        timeout: float | Timeout | None | NotGiven,
+        assigned: float | Timeout | None | NotGiven,
+        copy_options: dict[str, Any] | None,
+        expected: float | None,
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+        if not isinstance(assigned, NotGiven):
+            client.timeout = assigned
+        if copy_options is not None:
+            client = client.with_options(**copy_options)
+
+        response = client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == expected
+
+        client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("timeout", [not_given, 30], ids=["unset", "set"])
+    def test_method_default_timeout_request_option(self, respx_mock: MockRouter, timeout: float | NotGiven) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        response = client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+            timeout=7,
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == 7
+
+        client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_default_timeout_http_client_option(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        with httpx2.Client(timeout=30) as http_client:
+            client = Anthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+            response = client.messages.with_raw_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-opus-5-5",
+            )
+
+        assert response.http_request.extensions["timeout"]["read"] == 30
 
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
@@ -1204,7 +1293,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__enter__()
 
         assert _get_open_connections(client) == 0
@@ -1226,7 +1315,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__enter__()
         assert _get_open_connections(client) == 0
 
@@ -1266,7 +1355,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -1304,7 +1393,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -1342,7 +1431,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
@@ -1676,6 +1765,97 @@ class TestAsyncAnthropic:
             assert timeout == DEFAULT_TIMEOUT  # our default
 
             await client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        ("timeout", "assigned", "copy_options", "expected"),
+        [
+            pytest.param(not_given, not_given, None, 600, id="unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, None, DEFAULT_TIMEOUT.read, id="set to the default"),
+            pytest.param(30, not_given, None, 30, id="set"),
+            pytest.param(None, not_given, None, None, id="set to none"),
+            pytest.param(not_given, not_given, {"max_retries": 1}, 600, id="copy of unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of set"),
+            pytest.param(not_given, not_given, {"timeout": DEFAULT_TIMEOUT}, DEFAULT_TIMEOUT.read, id="copy that sets"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, None, DEFAULT_TIMEOUT.read, id="assigned the default"),
+            pytest.param(not_given, 30, None, 30, id="assigned"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of assigned"),
+        ],
+    )
+    async def test_method_default_timeout(
+        self,
+        respx_mock: MockRouter,
+        timeout: float | Timeout | None | NotGiven,
+        assigned: float | Timeout | None | NotGiven,
+        copy_options: dict[str, Any] | None,
+        expected: float | None,
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+        if not isinstance(assigned, NotGiven):
+            client.timeout = assigned
+        if copy_options is not None:
+            client = client.with_options(**copy_options)
+
+        response = await client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == expected
+
+        await client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("timeout", [not_given, 30], ids=["unset", "set"])
+    async def test_method_default_timeout_request_option(
+        self, respx_mock: MockRouter, timeout: float | NotGiven
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        response = await client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+            timeout=7,
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == 7
+
+        await client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_default_timeout_http_client_option(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        async with httpx2.AsyncClient(timeout=30) as http_client:
+            client = AsyncAnthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+            response = await client.messages.with_raw_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-opus-5-5",
+            )
+
+        assert response.http_request.extensions["timeout"]["read"] == 30
 
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
@@ -2518,7 +2698,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__aenter__()
 
         assert _get_open_connections(async_client) == 0
@@ -2540,7 +2720,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__aenter__()
         assert _get_open_connections(async_client) == 0
 
@@ -2580,7 +2760,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -2618,7 +2798,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -2656,7 +2836,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 

@@ -22,7 +22,7 @@ jobs:
   lint:
     timeout-minutes: 10
     name: lint
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -45,7 +45,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -82,8 +82,16 @@ jobs:
   test:
     timeout-minutes: 10
     name: test
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: oldest python
+            python: '>=3.10.0'
+          - name: newest python
+            python: '>=3.14.0'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -96,12 +104,14 @@ jobs:
         run: ./scripts/bootstrap
 
       - name: Run tests
+        env:
+          UV_PYTHON: ${{ matrix.python }}
         run: ./scripts/test
 
   detect_breaking_changes:
     timeout-minutes: 10
     name: detect-breaking-changes
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: |-
       (github.event_name == 'push' &&
        !startsWith(github.ref, 'refs/heads/release-please--')) ||
@@ -111,7 +121,7 @@ jobs:
       # tags, so the base ref is available) so `git merge-base`
       # below can resolve the fork point. filter: blob:none keeps the
       # fetch cheap: commit metadata is downloaded eagerly, file blobs
-      # only when a later `git checkout` asks for them.
+      # only when a later git command needs them.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
@@ -142,6 +152,22 @@ jobs:
           echo "Comparing against $BASE_REF"
           BASE_SHA=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "")
           echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+
+      - name: Download the base commit's files
+        if: env.BASE_SHA != ''
+        run: |
+          # scripts/detect-breaking-changes restores old files with `git checkout <commit> -- <path>`, which downloads each
+          # file this clone lacks in a separate request. So first download all the base commit's missing files in one request.
+          # Without noop, git tells the server which commits this clone has, and the server leaves out those commits' files.
+          MISSING=$(git rev-list --objects --no-walk --missing=print "$BASE_SHA" | sed -n 's/^?//p') || true
+          # Never run the fetch with an empty list: git would then fetch branches, not files.
+          if [ -z "$MISSING" ]; then
+            echo "Found no files of base commit $BASE_SHA left to download."
+          elif echo "$MISSING" | git -c fetch.negotiationAlgorithm=noop fetch --quiet --no-tags --no-write-fetch-head --stdin origin; then
+            echo "Downloaded the $(echo "$MISSING" | wc -l) missing file(s) of base commit $BASE_SHA in one request."
+          else
+            echo "::warning::Could not download the files of base commit $BASE_SHA in one request (the error is in the log of the Download the base commit's files step, which still passes). The rest of the job will try to download the files it needs one at a time, which is slower."
+          fi
 
       - name: Detect removed symbols
         if: env.BASE_SHA != ''

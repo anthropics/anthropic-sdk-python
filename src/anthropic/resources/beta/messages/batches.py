@@ -18,6 +18,7 @@ from ...._response import (
 from ....pagination import SyncPage, AsyncPage
 from ...._exceptions import AnthropicError
 from ...._base_client import AsyncPaginator, make_request_options
+from ....lib._tracing import get, count, attributes
 from ...._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ....types.beta.messages import batch_create_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
@@ -115,7 +116,16 @@ class Batches(SyncAPIResource):
             "/v1/messages/batches?beta=true",
             body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=BetaMessageBatch,
         )
@@ -179,7 +189,13 @@ class Batches(SyncAPIResource):
         return self._get(
             path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -260,6 +276,8 @@ class Batches(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=BetaMessageBatch,
         )
@@ -323,7 +341,13 @@ class Batches(SyncAPIResource):
         return self._delete(
             path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaDeletedMessageBatch,
         )
@@ -395,7 +419,13 @@ class Batches(SyncAPIResource):
                 "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -468,7 +498,13 @@ class Batches(SyncAPIResource):
         return self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=JSONLDecoder[BetaMessageBatchIndividualResponse],
             stream=True,
@@ -562,7 +598,16 @@ class AsyncBatches(AsyncAPIResource):
             "/v1/messages/batches?beta=true",
             body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=BetaMessageBatch,
         )
@@ -626,7 +671,13 @@ class AsyncBatches(AsyncAPIResource):
         return await self._get(
             path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -707,6 +758,8 @@ class AsyncBatches(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=BetaMessageBatch,
         )
@@ -770,7 +823,13 @@ class AsyncBatches(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaDeletedMessageBatch,
         )
@@ -842,7 +901,13 @@ class AsyncBatches(AsyncAPIResource):
                 "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -915,7 +980,13 @@ class AsyncBatches(AsyncAPIResource):
         return await self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=AsyncJSONLDecoder[BetaMessageBatchIndividualResponse],
             stream=True,

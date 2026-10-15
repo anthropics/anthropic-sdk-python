@@ -23,6 +23,6 @@ class BetaManagedAgentsAgentMessageEvent(BaseModel):
     """Array of text blocks comprising the agent response."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this response was generated."""
 
     type: Literal["agent.message"]

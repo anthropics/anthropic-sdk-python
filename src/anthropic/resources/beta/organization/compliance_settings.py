@@ -60,7 +60,12 @@ class ComplianceSettings(SyncAPIResource):
         return self._get(
             "/v1/organizations/compliance_settings?beta=true",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -107,7 +112,12 @@ class ComplianceSettings(SyncAPIResource):
             "/v1/organizations/compliance_settings?beta=true",
             body={"state": state},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -154,7 +164,12 @@ class AsyncComplianceSettings(AsyncAPIResource):
         return await self._get(
             "/v1/organizations/compliance_settings?beta=true",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -201,7 +216,12 @@ class AsyncComplianceSettings(AsyncAPIResource):
             "/v1/organizations/compliance_settings?beta=true",
             body={"state": state},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )

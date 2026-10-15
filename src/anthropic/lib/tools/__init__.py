@@ -10,6 +10,7 @@ from ._beta_functions import (
     beta_tool,
     beta_async_tool,
 )
+from ._toolsets._runnable import BetaRunnableToolset, BetaAsyncRunnableToolset
 from ._beta_builtin_memory_tool import BetaAbstractMemoryTool, BetaAsyncAbstractMemoryTool
 
 __all__ = [
@@ -23,6 +24,8 @@ __all__ = [
     "BetaAsyncStreamingToolRunner",
     "BetaStreamingToolRunner",
     "BetaAsyncToolRunner",
+    "BetaRunnableToolset",
+    "BetaAsyncRunnableToolset",
     "BetaFunctionToolResultType",
     "BetaAbstractMemoryTool",
     "BetaAsyncAbstractMemoryTool",

@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "1.8.0"
+version = "1.15.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "MIT"
@@ -10,6 +10,7 @@ authors = [
 
 dependencies = [
   "httpx2>=2.0.0, <3",
+  "opentelemetry-api>=1.1.0, <2",
   "pydantic>=1.10.0, <3",
   "typing-extensions>=4.14, <5",
   "anyio>=4.1.0, <5",
@@ -88,6 +89,7 @@ dev = [
     "packaging",
     "tomli; python_version < '3.11'",
     "httpx2>=2.9",
+    "opentelemetry-sdk",
 ]
 pydantic-v1 = [
     "pydantic>=1.10.0,<2",
@@ -221,3 +223,6 @@ known-first-party = ["anthropic", "tests"]
 "scripts/**.py" = ["T201", "T203"]
 "tests/**.py" = ["T201", "T203"]
 "examples/**.py" = ["T201", "T203"]
+# the abstract toolsets' default member bodies ignore their arguments; subclasses use them
+"src/anthropic/lib/tools/_toolsets/_browser.py" = ["ARG002"]
+"src/anthropic/lib/tools/_toolsets/_computer.py" = ["ARG002"]

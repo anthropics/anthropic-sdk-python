@@ -78,7 +78,6 @@ class TestMemoryVersions:
                 memory_store_id="memory_store_id",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         memory_version = client.beta.memory_stores.memory_versions.list(
@@ -86,7 +85,6 @@ class TestMemoryVersions:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         memory_version = client.beta.memory_stores.memory_versions.list(
@@ -106,7 +104,6 @@ class TestMemoryVersions:
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.memory_stores.memory_versions.with_raw_response.list(
@@ -118,7 +115,6 @@ class TestMemoryVersions:
         memory_version = response.parse()
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.memory_stores.memory_versions.with_streaming_response.list(
@@ -132,7 +128,6 @@ class TestMemoryVersions:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     def test_path_params_list(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `memory_store_id` but received ''"):
@@ -263,7 +258,6 @@ class TestAsyncMemoryVersions:
                 memory_store_id="memory_store_id",
             )
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         memory_version = await async_client.beta.memory_stores.memory_versions.list(
@@ -271,7 +265,6 @@ class TestAsyncMemoryVersions:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         memory_version = await async_client.beta.memory_stores.memory_versions.list(
@@ -291,7 +284,6 @@ class TestAsyncMemoryVersions:
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.memory_stores.memory_versions.with_raw_response.list(
@@ -303,7 +295,6 @@ class TestAsyncMemoryVersions:
         memory_version = await response.parse()
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.memory_stores.memory_versions.with_streaming_response.list(
@@ -317,7 +308,6 @@ class TestAsyncMemoryVersions:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="buildURL drops path-level query params")
     @parametrize
     async def test_path_params_list(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `memory_store_id` but received ''"):

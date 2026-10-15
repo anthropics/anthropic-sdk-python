@@ -26,10 +26,12 @@ class DeploymentUpdateParams(TypedDict, total=False):
     """
 
     budget: Optional[BetaManagedAgentsBudgetLimitParam]
-    """A hard spend ceiling.
+    """Spend ceiling for future sessions.
 
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    Full replacement. Omit to preserve; send null to clear (sessions created
+    afterwards are uncapped). The deployment agent's model must have a public list
+    price, or the request is rejected; a multiagent roster is re-validated in full
+    when each fire copies the cap, which fails closed the same way.
     """
 
     description: Optional[str]
@@ -66,9 +68,9 @@ class DeploymentUpdateParams(TypedDict, total=False):
     """
 
     schedule: Optional[BetaManagedAgentsScheduleParams]
-    """5-field POSIX cron schedule.
+    """Cron schedule.
 
-    Literal wall-clock matching in the configured timezone.
+    Full replacement. Omit to preserve; send null to clear (revert to manual-only).
     """
 
     vault_ids: Optional[SequenceNotStr[str]]
@@ -79,7 +81,10 @@ class DeploymentUpdateParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

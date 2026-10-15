@@ -62,7 +62,10 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     If the final message uses the `assistant` role, the response content will
     continue immediately from the content in that message. This can be used to
-    constrain part of the model's response.
+    constrain part of the model's response. This is called prefill. On models that
+    don't support prefill, creating a message that ends with a partial `assistant`
+    response returns a 400 error. See
+    [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
     Example with a single `user` message:
 
@@ -80,7 +83,8 @@ class MessageCountTokensParams(TypedDict, total=False):
     ]
     ```
 
-    Example with a partially-filled response from Claude:
+    Example with a partially-filled response from Claude, for models that support
+    prefill:
 
     ```json
     [
@@ -130,15 +134,15 @@ class MessageCountTokensParams(TypedDict, total=False):
     """
 
     compaction: Optional[BetaCompactionConfigParam]
-    """
-    Compact the whole conversation and return a signed `compaction` block, alone,
-    that a later request sends back first in `messages`, in place of the messages it
-    summarizes. There is no trigger and no pause flag: sending the parameter
-    compacts, and nothing is sampled after the block.
+    """Compaction configuration.
 
-    The summarization prompt is the server's own unless `instructions` are given,
-    which then replace it for this request; a value that is empty or only whitespace
-    counts as absent.
+    When set on `POST /v1/messages`, the request is a compaction request: the
+    conversation in `messages` is summarized and the response holds only the
+    resulting `compaction` block (`stop_reason` `"compaction"`), which later
+    requests send first in `messages` in place of the messages it summarizes.
+    `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+    count it returns is for the conversation in `messages` as sent. Cannot be
+    combined with `context_management`.
     """
 
     context_management: Optional[BetaContextManagementConfigParam]
@@ -155,10 +159,14 @@ class MessageCountTokensParams(TypedDict, total=False):
     """Configuration options for the model's output, such as the output format."""
 
     speed: Optional[Literal["standard", "fast"]]
-    """Inference speed mode.
+    """The inference speed mode for this request.
 
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    `"fast"` enables high output-tokens-per-second inference.
+
+    Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+    value. See
+    [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+    which models.
     """
 
     system: Union[str, Iterable[BetaTextBlockParam]]
@@ -170,15 +178,16 @@ class MessageCountTokensParams(TypedDict, total=False):
     """
 
     thinking: BetaThinkingConfigParam
-    """Configuration for enabling Claude's extended thinking.
+    """Configuration for Claude's thinking.
 
-    When enabled, responses include `thinking` content blocks showing Claude's
-    thinking process before the final answer. Requires a minimum budget of 1,024
-    tokens and counts towards your `max_tokens` limit.
+    With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+    `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+    at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-    See
-    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-    for details.
+    Which `type` values are accepted, and what happens when you omit `thinking`,
+    depend on the model. See
+    [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+    for each model's behavior.
     """
 
     tool_choice: BetaToolChoiceParam

@@ -102,7 +102,16 @@ class ServiceAccounts(SyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -168,7 +177,16 @@ class ServiceAccounts(SyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -238,6 +256,9 @@ class ServiceAccounts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.service_accounts.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -304,7 +325,14 @@ class ServiceAccounts(SyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.service_account.id", "service_account_id"),
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -366,7 +394,16 @@ class ServiceAccounts(SyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=ServiceAccountRemoveResponse,
         )
@@ -449,7 +486,16 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -515,7 +561,16 @@ class AsyncServiceAccounts(AsyncAPIResource):
             ),
             body={"workspace_role": workspace_role},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -585,6 +640,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.service_accounts.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -651,7 +709,14 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 "workspace_role": workspace_role,
             },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.service_account.id", "service_account_id"),
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -713,7 +778,16 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 service_account_id=service_account_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.organization.workspaces.service_accounts.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=ServiceAccountRemoveResponse,
         )

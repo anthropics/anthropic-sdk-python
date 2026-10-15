@@ -22,10 +22,8 @@ class BetaBrowserToolset20260801(BaseModel):
     """Create a cache control breakpoint at this content block."""
 
     configs: Optional[BetaBrowserToolsetConfigs] = None
-    """
-    Per-member configuration for `browser_toolset_20260801`: one optional field per
-    member tool, keyed by the member name — the same name the member's `tool_use`
-    blocks carry. Every member is an accepted key, and a member's defaults apply
-    wherever its key is absent. Unknown keys are rejected: the field set is this
-    toolset version's complete member set.
+    """Sparse per-member overrides, keyed by member name.
+
+    Absent, null, and {} are equivalent; a member's defaults apply wherever its key
+    is absent.
     """

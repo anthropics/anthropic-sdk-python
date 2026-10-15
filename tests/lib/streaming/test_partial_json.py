@@ -26,7 +26,7 @@ class TestPartialJson:
                     caller=BetaDirectCaller(type="direct"),
                 )
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             stop_reason=None,
             stop_sequence=None,
             usage=BetaUsage(input_tokens=10, output_tokens=10),
@@ -120,7 +120,7 @@ class TestPartialJson:
                     caller=BetaDirectCaller(type="direct"),
                 )
             ],
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             stop_reason=None,
             stop_sequence=None,
             usage=BetaUsage(input_tokens=10, output_tokens=10),

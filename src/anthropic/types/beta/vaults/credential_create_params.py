@@ -13,7 +13,7 @@ __all__ = ["CredentialCreateParams", "Auth"]
 
 class CredentialCreateParams(TypedDict, total=False):
     auth: Required[Auth]
-    """Authentication details for creating a credential."""
+    """Authentication configuration for the credential."""
 
     display_name: Optional[str]
     """Human-readable name for the credential. Up to 255 characters."""
@@ -25,7 +25,10 @@ class CredentialCreateParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

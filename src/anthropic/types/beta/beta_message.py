@@ -24,9 +24,9 @@ class BetaMessage(BaseModel):
     """
 
     container: Optional[BetaContainer] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     content: List[BetaContentBlock]
@@ -71,9 +71,10 @@ class BetaMessage(BaseModel):
     """
 
     diagnostics: Optional[BetaDiagnostics] = None
-    """
-    Request-level diagnostics: why the prompt cache could not fully reuse the prefix
-    of the request named by `diagnostics.previous_message_id`.
+    """Request-level diagnostics.
+
+    `null` when the request did not supply `diagnostics`, or when it did and no
+    prompt-cache divergence was detected.
     """
 
     model: Model
@@ -90,7 +91,10 @@ class BetaMessage(BaseModel):
     """
 
     stop_details: Optional[BetaRefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[BetaStopReason] = None
     """The reason that we stopped.

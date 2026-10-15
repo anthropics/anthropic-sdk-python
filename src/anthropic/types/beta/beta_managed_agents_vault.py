@@ -14,7 +14,7 @@ class BetaManagedAgentsVault(BaseModel):
     """Unique identifier for the vault."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the vault was archived. Null if not archived."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""

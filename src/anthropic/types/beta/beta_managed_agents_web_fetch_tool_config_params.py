@@ -7,6 +7,7 @@ from ..._types import SequenceNotStr
 from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam
 from .beta_managed_agents_always_ask_policy_param import BetaManagedAgentsAlwaysAskPolicyParam
 from .beta_managed_agents_always_allow_policy_param import BetaManagedAgentsAlwaysAllowPolicyParam
+from .beta_managed_agents_web_fetch_url_sources_params import BetaManagedAgentsWebFetchURLSourcesParams
 
 __all__ = ["BetaManagedAgentsWebFetchToolConfigParams", "PermissionPolicy"]
 
@@ -50,6 +51,12 @@ class BetaManagedAgentsWebFetchToolConfigParams(TypedDict, total=False):
     """
 
     permission_policy: Optional[PermissionPolicy]
-    """Permission policy for tool execution."""
+    """Permission policy for this tool.
+
+    Controls whether tool calls are auto-approved or require confirmation.
+    """
 
     type: Literal["web_fetch"]
+
+    url_sources: Optional[BetaManagedAgentsWebFetchURLSourcesParams]
+    """Which sources contribute URLs the tool may fetch. Omit to allow every source."""

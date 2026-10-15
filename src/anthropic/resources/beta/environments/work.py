@@ -118,7 +118,13 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.retrieve",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -191,7 +197,13 @@ class Work(SyncAPIResource):
             ),
             body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.update",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -258,6 +270,9 @@ class Work(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.environments.work.list",
+                span_route="/v1/environments/{environment_id}/work",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             model=BetaSelfHostedWork,
         )
@@ -317,7 +332,13 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.ack",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -393,6 +414,9 @@ class Work(SyncAPIResource):
                     "desired_ttl_seconds": desired_ttl_seconds,
                     "expected_last_heartbeat": expected_last_heartbeat,
                 },
+                span_name="anthropic.environments.work.heartbeat",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -466,6 +490,9 @@ class Work(SyncAPIResource):
                     "block_ms": block_ms,
                     "reclaim_older_than_ms": reclaim_older_than_ms,
                 },
+                span_name="anthropic.environments.work.poll",
+                span_route="/v1/environments/{environment_id}/work/poll",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -521,7 +548,13 @@ class Work(SyncAPIResource):
         return self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stats",
+                span_route="/v1/environments/{environment_id}/work/stats",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -593,7 +626,13 @@ class Work(SyncAPIResource):
             ),
             body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stop",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -682,7 +721,13 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.retrieve",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -755,7 +800,13 @@ class AsyncWork(AsyncAPIResource):
             ),
             body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.update",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -822,6 +873,9 @@ class AsyncWork(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.environments.work.list",
+                span_route="/v1/environments/{environment_id}/work",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             model=BetaSelfHostedWork,
         )
@@ -881,7 +935,13 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.ack",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -957,6 +1017,9 @@ class AsyncWork(AsyncAPIResource):
                     "desired_ttl_seconds": desired_ttl_seconds,
                     "expected_last_heartbeat": expected_last_heartbeat,
                 },
+                span_name="anthropic.environments.work.heartbeat",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -1030,6 +1093,9 @@ class AsyncWork(AsyncAPIResource):
                     "block_ms": block_ms,
                     "reclaim_older_than_ms": reclaim_older_than_ms,
                 },
+                span_name="anthropic.environments.work.poll",
+                span_route="/v1/environments/{environment_id}/work/poll",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1085,7 +1151,13 @@ class AsyncWork(AsyncAPIResource):
         return await self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stats",
+                span_route="/v1/environments/{environment_id}/work/stats",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -1157,7 +1229,13 @@ class AsyncWork(AsyncAPIResource):
             ),
             body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stop",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1186,6 +1264,11 @@ class AsyncWork(AsyncAPIResource):
         shape). Pass `drain=True, auto_stop=False` to drain whatever is queued
         and return without owning the stop call (webhook-dispatch shape — each
         item is handed off to another process that calls `stop` when done).
+
+        Each item has an OpenTelemetry span, `anthropic.environment.work`,
+        when the client has spans, open from when the poll returns the item
+        until the loop asks for the next item or stops. It is not the current
+        span in the loop body, so a span that the body starts is its sibling.
 
         Args:
           environment_id: The self-hosted environment to claim work from.
@@ -1327,8 +1410,8 @@ class AsyncWork(AsyncAPIResource):
             (default) uses the built-in 256 KiB cap; a positive int sets a custom
             cap; `None` disables the cap.
           max_idle: Seconds to keep running after the session goes idle with
-            `stop_reason` `end_turn`. Defaults to `DEFAULT_MAX_IDLE` (60s)
-            when not given. `None` disables it.
+            any `stop_reason` but `requires_action`. Defaults to
+            `DEFAULT_MAX_IDLE` (60s) when not given. `None` disables it.
           memory_sync_interval: How often (seconds) to sync the session's
             attached memory stores; `None` disables memory. Defaults to
             `DEFAULT_MEMORY_SYNC_INTERVAL` (15s) when not given.

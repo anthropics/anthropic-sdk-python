@@ -116,6 +116,8 @@ class Files(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=FileMetadata,
         )
@@ -159,7 +161,13 @@ class Files(SyncAPIResource):
         return self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=DeletedFile,
         )
@@ -204,7 +212,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -248,7 +262,13 @@ class Files(SyncAPIResource):
         return self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=FileMetadata,
         )
@@ -312,7 +332,13 @@ class Files(SyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=FileMetadata,
         )
@@ -398,6 +424,8 @@ class AsyncFiles(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=FileMetadata,
         )
@@ -441,7 +469,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=DeletedFile,
         )
@@ -486,7 +520,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )
@@ -530,7 +570,13 @@ class AsyncFiles(AsyncAPIResource):
         return await self._get(
             path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=FileMetadata,
         )
@@ -594,7 +640,13 @@ class AsyncFiles(AsyncAPIResource):
             body=body,
             files=files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=FileMetadata,
         )

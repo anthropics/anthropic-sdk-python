@@ -19,7 +19,7 @@ class BetaManagedAgentsSessionUsageSnapshot(BaseModel):
     """
 
     cache_creation: Optional[BetaManagedAgentsCacheCreationUsage] = None
-    """Prompt-cache creation token usage broken down by cache lifetime."""
+    """Tokens used to create prompt cache entries, broken down by cache TTL."""
 
     cache_read_input_tokens: Optional[int] = None
     """Total tokens read from prompt cache."""
@@ -28,10 +28,13 @@ class BetaManagedAgentsSessionUsageSnapshot(BaseModel):
     """Total input tokens consumed across all turns."""
 
     list_cost: Optional[BetaMonetaryAmount] = None
-    """A monetary amount in a specific currency."""
+    """
+    Cumulative list cost of the session across all turns, priced at public list
+    rates.
+    """
 
     output_tokens: Optional[int] = None
     """Total output tokens generated across all turns."""
 
     server_tool_use: Optional[BetaManagedAgentsServerToolUsage] = None
-    """Cumulative count of server-executed tool invocations, broken down by tool."""
+    """Cumulative server-executed tool usage across all turns."""

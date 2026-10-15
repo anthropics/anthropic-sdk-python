@@ -48,6 +48,7 @@ class RateLimits(SyncAPIResource):
         *,
         group_type: Optional[Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]]
         | Omit = omit,
+        include_inherited: bool | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -58,11 +59,13 @@ class RateLimits(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaWorkspaceRateLimit]:
         """
-        List rate-limit overrides configured for a workspace.
+        List a workspace's rate limits.
 
-        Returns only the groups and limiter types that have a workspace-level override.
-        Groups without overrides inherit the organization limits and are not listed; use
-        `GET /v1/organizations/rate_limits` to see those.
+        By default, returns only the groups and limiter types that have a
+        workspace-level override. With `include_inherited=true`, returns every group
+        with organization-level limits the workspace can see, listing for each the
+        values it inherits from the organization as well as its own overrides. Each
+        value's `source` says which it is.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -71,6 +74,9 @@ class RateLimits(SyncAPIResource):
           workspace_id: The ID of the workspace.
 
           group_type: Filter by group type.
+
+          include_inherited: Also list the limiter values the workspace inherits from the organization,
+              including groups with no workspace-level override.
 
           limit: Maximum number of items to return per page. Ranges from `1` to `1000`.
 
@@ -101,9 +107,13 @@ class RateLimits(SyncAPIResource):
                 timeout=timeout,
                 query={
                     "group_type": group_type,
+                    "include_inherited": include_inherited,
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )
@@ -135,6 +145,7 @@ class AsyncRateLimits(AsyncAPIResource):
         *,
         group_type: Optional[Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]]
         | Omit = omit,
+        include_inherited: bool | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -145,11 +156,13 @@ class AsyncRateLimits(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaWorkspaceRateLimit, AsyncPageCursor[BetaWorkspaceRateLimit]]:
         """
-        List rate-limit overrides configured for a workspace.
+        List a workspace's rate limits.
 
-        Returns only the groups and limiter types that have a workspace-level override.
-        Groups without overrides inherit the organization limits and are not listed; use
-        `GET /v1/organizations/rate_limits` to see those.
+        By default, returns only the groups and limiter types that have a
+        workspace-level override. With `include_inherited=true`, returns every group
+        with organization-level limits the workspace can see, listing for each the
+        values it inherits from the organization as well as its own overrides. Each
+        value's `source` says which it is.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -158,6 +171,9 @@ class AsyncRateLimits(AsyncAPIResource):
           workspace_id: The ID of the workspace.
 
           group_type: Filter by group type.
+
+          include_inherited: Also list the limiter values the workspace inherits from the organization,
+              including groups with no workspace-level override.
 
           limit: Maximum number of items to return per page. Ranges from `1` to `1000`.
 
@@ -188,9 +204,13 @@ class AsyncRateLimits(AsyncAPIResource):
                 timeout=timeout,
                 query={
                     "group_type": group_type,
+                    "include_inherited": include_inherited,
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )

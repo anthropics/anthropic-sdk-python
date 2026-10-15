@@ -9,8 +9,8 @@ and yields one `DispatchedToolCall` per completed call. A call the
 server gated behind user confirmation (`evaluated_permission` `ask`, e.g.
 an `always_ask` tool) is held until its `user.tool_confirmation` event
 arrives — executed on `allow`, never executed on `deny`. It also stops
-itself once the session has been idle (`stop_reason` `end_turn`) for
-`max_idle` seconds. It does **not** touch the work-item lease — wrap it in
+itself once the session has been idle (any `stop_reason` but `requires_action`)
+for `max_idle` seconds. It does **not** touch the work-item lease — wrap it in
 `anthropic.lib.environments.EnvironmentWorker` if you need heartbeating /
 force-stop.
 """
@@ -30,9 +30,10 @@ from collections.abc import Callable, Sequence, AsyncIterator
 import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
-from ..._types import Headers
-from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content
-from .._scoped_client import _copy_client_with_bearer_auth
+from ..._types import Headers, OpenTelemetryOptions
+from .._tracing import tool_use_span
+from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content, tool_result_content
+from .._scoped_client import copy_scoped_client, _copy_client_with_bearer_auth
 from ._beta_functions import (
     ToolError,
     BetaRunnableTool,
@@ -42,10 +43,13 @@ from ._beta_functions import (
 )
 from .._stainless_helpers import helper_header
 from ...types.beta.sessions import (
+    BetaManagedAgentsSessionEvent,
     BetaManagedAgentsAgentToolUseEvent,
+    BetaManagedAgentsStreamSessionEvents,
     BetaManagedAgentsAgentCustomToolUseEvent,
     BetaManagedAgentsUserToolConfirmationEvent,
 )
+from ...types.beta.beta_tool_result_block_param import Content as BetaContent
 from ...types.beta.sessions.beta_managed_agents_user_tool_result_event_params import (
     Content as _SessionContent,
     BetaManagedAgentsUserToolResultEventParams,
@@ -131,21 +135,20 @@ SEND_BACKOFF_CAP = 30.0
 # can no longer be ours.
 SEND_RETRY_WINDOW = 300.0
 # Grace period, in seconds, that the runner keeps running after the session goes
-# idle with stop_reason `end_turn` before it stops; any new event in that
-# window resets it. `max_idle=None` disables it (run until the session ends).
+# idle with any stop_reason but `requires_action` before it stops; any new event
+# in that window resets it. `max_idle=None` disables it (run until the session ends).
 DEFAULT_MAX_IDLE = 60.0
 
 log = logging.getLogger(__name__)
 
 
 class _IdleClock:
-    """Tracks how long the session has been idle after an `end_turn` stop.
+    """Tracks how long the session has been idle since its turn ended.
 
-    `end_turn_at` is the monotonic timestamp of the most recent
-    `session.status_idle` event with `stop_reason.type == "end_turn"` for
-    which no newer event has since arrived; `None` whenever the session is not
-    in that state. `SessionToolRunner._idle_watchdog` stops the runner
-    once it has been set for `max_idle` seconds.
+    `turn_ended_at` is the monotonic timestamp of the most recent event that
+    `ends_turn` and that no newer event has followed; `None` whenever the
+    session is not in that state. `SessionToolRunner._idle_watchdog` stops the
+    runner once it has been set for `max_idle` seconds.
 
     Confirmation-gated calls pause the clock while they are unresolved:
     `hold` / `release` count them — from the moment a call is held
@@ -158,14 +161,14 @@ class _IdleClock:
     The clock is event-driven, not polled: every armed-state change signals the
     `wake` event so the watchdog wakes immediately instead of waiting out
     a poll interval. The watchdog captures `wake` *before* it reads
-    `end_turn_at`, so a change landing between the read and the wait still
+    `turn_ended_at`, so a change landing between the read and the wait still
     wakes it.
     """
 
-    __slots__ = ("end_turn_at", "wake", "_holds", "_arm_deferred")
+    __slots__ = ("turn_ended_at", "wake", "_holds", "_arm_deferred")
 
     def __init__(self) -> None:
-        self.end_turn_at: float | None = None
+        self.turn_ended_at: float | None = None
         self.wake = anyio.Event()
         self._holds = 0
         self._arm_deferred = False
@@ -176,17 +179,16 @@ class _IdleClock:
         self.wake = anyio.Event()
 
     def note_event(self, ev: object) -> None:
-        """Arm the clock on an `end_turn` idle, disarm it on anything else.
+        """Arm the clock on an idle that ends the turn, disarm it on anything else.
 
         `user.tool_confirmation` events are neutral: they signal neither agent
         activity nor an idle, and their effect on the clock flows through
         `hold` / `release` instead — disarming here would discard
         the deferred arm the verdict is about to settle.
         """
-        ev_type = getattr(ev, "type", None)
-        if ev_type == "user.tool_confirmation":
+        if getattr(ev, "type", None) == "user.tool_confirmation":
             return
-        if ev_type == "session.status_idle" and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn":
+        if ends_turn(ev):
             self.arm()
         else:
             self.disarm()
@@ -201,32 +203,32 @@ class _IdleClock:
         if self._holds:
             self._arm_deferred = True
             return
-        self.end_turn_at = time.monotonic()
+        self.turn_ended_at = time.monotonic()
         self._signal()
 
     def disarm(self) -> None:
         """Cancel the idle countdown; only signals on an actual transition."""
         self._arm_deferred = False
-        if self.end_turn_at is not None:
-            self.end_turn_at = None
+        if self.turn_ended_at is not None:
+            self.turn_ended_at = None
             self._signal()
 
     def hold(self) -> None:
         """Pause the countdown while a gated call is held or in flight."""
         self._holds += 1
-        if self.end_turn_at is not None:
+        if self.turn_ended_at is not None:
             # Defensive: a hold taken while armed converts the running
             # countdown into a deferred one.
             self._arm_deferred = True
-            self.end_turn_at = None
+            self.turn_ended_at = None
             self._signal()
 
     def release(self) -> None:
         """Drop one hold; the last release applies any deferred arm.
 
-        Once nothing gated is held or in flight, a deferred `end_turn`
-        countdown starts now (with a fresh grace window) so the runner can
-        still time out — any newer event disarms it again as usual.
+        Once nothing gated is held or in flight, a deferred countdown starts
+        now (with a fresh grace window) so the runner can still time out — any
+        newer event disarms it again as usual.
         """
         self._holds -= 1
         if self._holds == 0 and self._arm_deferred:
@@ -307,31 +309,45 @@ def _scoped_client(client: AsyncAnthropic, environment_key: str | None) -> Async
     return client.with_options(default_headers=helper_header("session-tool-runner"))
 
 
-def _to_session_content(content: BetaFunctionToolResultType) -> list[_SessionContent]:
+def _to_session_content(
+    content: BetaFunctionToolResultType | None,
+) -> tuple[list[_SessionContent], Sequence[_SessionContent | BetaContent]]:
     """Bridge Messages-API tool-result content to the narrower Sessions-API content union.
 
     The two APIs share text/image/document/search_result block shapes but use
     distinct nominal TypedDicts; ToolReference blocks have no Sessions equivalent
-    so they are stringified.
+    so they are stringified. A tool that returned `None` reads `(no output)`.
+
+    Also returns the content that the tool's span records, in which a
+    stringified block stays the block itself.
     """
+    if content is None:
+        return _to_session_content("(no output)")
     if isinstance(content, str):
-        return [{"type": "text", "text": content or "(no output)"}]
+        text_only: list[_SessionContent] = [{"type": "text", "text": content or "(no output)"}]
+        return text_only, text_only
     out: list[_SessionContent] = []
+    recorded: list[_SessionContent | BetaContent] = []
     for block in content:
         kind = block.get("type")
         if kind == "text":
             text = cast("str", block.get("text") or "(no output)")
             out.append({"type": "text", "text": text})
+            recorded.append(out[-1])
         elif kind in ("image", "document", "search_result"):
             out.append(cast("_SessionContent", block))
+            recorded.append(block)
         else:
             out.append({"type": "text", "text": json.dumps(block)})
-    return out or [{"type": "text", "text": "(no output)"}]
+            recorded.append(block)
+    if not out:
+        return _to_session_content("(no output)")
+    return out, recorded
 
 
 def _build_result_event(
     ev: DispatchedToolUseEvent,
-    content: BetaFunctionToolResultType,
+    session_content: list[_SessionContent],
     is_error: bool,
 ) -> DispatchedToolResultParams:
     """Build the result-event params matching `ev`'s tool-call kind.
@@ -341,7 +357,6 @@ def _build_result_event(
     call (`agent.tool_use`) with a `user.tool_result` keyed by
     `tool_use_id`. Both use the codegen'd event-params TypedDicts.
     """
-    session_content = _to_session_content(content)
     if ev.type == "agent.custom_tool_use":
         custom_result: BetaManagedAgentsUserCustomToolResultEventParams = {
             "type": "user.custom_tool_result",
@@ -373,9 +388,9 @@ class SessionToolRunner:
 
     Iteration ends when the session terminates (`session.status_terminated` /
     `session.deleted`), when the consumer breaks out of the loop, or — once
-    the session has gone idle with `stop_reason` `end_turn` — when
+    the session has gone idle with any `stop_reason` but `requires_action` — when
     `max_idle` seconds elapse with no new event (any new event resets the
-    countdown; it re-arms on the next `end_turn` idle). `max_idle=None`
+    countdown; it re-arms on the next such idle). `max_idle=None`
     disables that last condition. On exit it runs each tool's optional cleanup:
     the `close` hook and, for tools defined as an (async) context manager, its
     `__exit__` / `__aexit__`. It does **not** touch the work-item lease —
@@ -453,6 +468,7 @@ class SessionToolRunner:
         # sub-client: Bearer-only when an environment key is set, otherwise the
         # caller's own client with the helper-telemetry header layered on.
         self._scoped = _scoped_client(client, environment_key)
+        self._bearer_scoped = environment_key is not None
         # Per-request passthrough headers: threaded into every event stream /
         # list / send via that call's `extra_headers=` (make_request_options)
         # — never assigned onto the client, so client state is not mutated.
@@ -495,6 +511,12 @@ class SessionToolRunner:
         rather than threading a shared state object through free functions.
         """
         self._events: AsyncEvents = self._scoped.beta.sessions.events
+        # The events resources of the copies of the client that `_events_for` makes, by conversation ID.
+        self._events_by_conversation: dict[str, AsyncEvents] = {}
+        # The session's primary thread, whose tool events name no thread (`_note_primary_thread`). The live stream
+        # tells it only while `_history_read`: after a history read that failed, its events may start mid-log.
+        self._primary_thread_id: str | None = None
+        self._history_read = False
         log.info("session tool runner starting session_id=%s", self.session_id)
         self._tools_by_name: dict[str, BetaAnyRunnableTool] = tool_registry(self.tools)
         # `_seen` dedups tool-call events across the stream and the reconcile
@@ -580,10 +602,11 @@ class SessionToolRunner:
         with `user.custom_tool_result` when computing which calls are answered.
         """
         pending: list[DispatchedToolUseEvent] = []
-        last_was_end_turn = False
+        last_ended_turn = False
         list_failed = False
         try:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
+                self._note_primary_thread(ev)
                 if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                     # Mark the event seen so the live stream doesn't re-enqueue it, but
                     # decide whether it still needs executing from `_answered`, not
@@ -605,10 +628,10 @@ class SessionToolRunner:
                     # their verdict on every reconcile.
                     if ev.tool_use_id not in self._answered:
                         self._confirmations[ev.tool_use_id] = ev.result
-                last_was_end_turn = (
-                    ev.type == "session.status_idle"
-                    and getattr(getattr(ev, "stop_reason", None), "type", None) == "end_turn"
-                )
+                # Neutral here as in `_IdleClock.note_event`: a verdict is neither
+                # agent activity nor an idle.
+                if ev.type != "user.tool_confirmation":
+                    last_ended_turn = ends_turn(ev)
         except Exception as e:
             # Pagination may have failed partway through; the `_answered` set
             # could be incomplete, so dispatching `pending` now would risk
@@ -617,6 +640,7 @@ class SessionToolRunner:
             # untouched since the history we read may be incomplete.
             log.warning("reconcile list failed; skipping pending enqueue error=%s", e)
             list_failed = True
+        self._history_read = not list_failed
         if list_failed:
             # Roll back the ids we added to `_seen` so the live stream can
             # re-process them rather than silently dedup what we never finished
@@ -637,16 +661,21 @@ class SessionToolRunner:
             await self._apply_verdict(held, self._confirmations[held.id])
         # Routing resolves denied calls in place (marking them answered) and
         # holds ask-gated calls for their `user.tool_confirmation`. If the
-        # most recent event in history is an `end_turn` idle and no tool work
+        # most recent event in history ends the turn and no tool work
         # is outstanding, the session is done — arm the idle clock so the
-        # watchdog counts down even if that `end_turn` arrived during a
+        # watchdog counts down even if that idle arrived during a
         # disconnect. Gated calls don't count as outstanding here whether still
         # held or just released to the dispatch queue: the clock holds them
         # (`_IdleClock.hold`), so this `arm` is deferred until they resolve.
+        # A released call this runner doesn't own still waits on its owner.
         outstanding = [
-            ev for ev in unanswered if ev.id not in self._answered and ev.id not in self._awaiting_confirmation
+            ev
+            for ev in unanswered
+            if ev.id not in self._answered
+            and ev.id not in self._awaiting_confirmation
+            and not (ev.id in self._confirmations and ev.name in self._tools_by_name)
         ]
-        if last_was_end_turn and not outstanding:
+        if last_ended_turn and not outstanding:
             self._idle_clock.arm()
 
     async def _stream_loop(self) -> None:
@@ -661,11 +690,13 @@ class SessionToolRunner:
                     await self._reconcile()
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
-                        # Arm/disarm the idle clock: an `end_turn` idle starts
+                        # Arm/disarm the idle clock: an idle that ends the turn starts
                         # the grace countdown, any other event cancels it. The
                         # clock itself defers the countdown while gated calls
                         # are held or in flight (see `_IdleClock.hold`).
                         self._idle_clock.note_event(ev)
+                        if self._history_read:
+                            self._note_primary_thread(ev)
                         if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                             if ev.id not in self._seen:
                                 self._seen.add(ev.id)
@@ -693,6 +724,21 @@ class SessionToolRunner:
             with anyio.move_on_after(backoff):
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
+
+    def _note_primary_thread(self, ev: BetaManagedAgentsSessionEvent | BetaManagedAgentsStreamSessionEvents) -> None:
+        """Remembers the thread of the log's first `session.thread_status_*` event as the session's primary thread.
+
+        Only the primary thread exists when the session first runs, so the first such event of a log is its own.
+        """
+        if self._primary_thread_id is not None:
+            return
+        if (
+            ev.type == "session.thread_status_running"
+            or ev.type == "session.thread_status_idle"
+            or ev.type == "session.thread_status_rescheduled"
+            or ev.type == "session.thread_status_terminated"
+        ) and ev.session_thread_id:
+            self._primary_thread_id = ev.session_thread_id
 
     async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
         """Enqueue `ev` for dispatch, honoring its evaluated permission.
@@ -868,28 +914,35 @@ class SessionToolRunner:
                 ev.name,
                 ev.id,
             )
+            if confirmation == "allow":
+                # The approval kept the idle countdown deferred on this call.
+                # Drop it instead of starting it: the owner still has to answer.
+                self._idle_clock.disarm()
             tool_result = None
             is_error = False
             sent = False
         else:
-            content: BetaFunctionToolResultType
-            is_error = False
             input_ = dict(ev.input)
-            try:
-                with anyio.fail_after(TOOL_TIMEOUT):
-                    content = await run_runnable_tool(tool, input_)
-            except TimeoutError:
-                content = f"tool {ev.name!r} timed out"
-                is_error = True
-            except ToolError as e:
-                content = tool_error_content(e)
-                is_error = True
-            except Exception as e:
-                log.exception("tool %s raised", ev.name)
-                content = tool_error_content(e)
-                is_error = True
-            tool_result = _build_result_event(ev, content, is_error)
-            sent = await self._send_result(tool_result, ev.id)
+            # An event of the primary thread names no thread.
+            conversation_id = ev.session_thread_id or self._primary_thread_id
+            with tool_use_span(
+                self._scoped,
+                tool,
+                tool_use_id=ev.id,
+                tool_name=ev.name,
+                input=input_,
+                # The event types do not declare the field yet, so it is read as an event that has it gives it.
+                toolset_name=getattr(ev, "toolset_name", None),
+                agent_tool=ev.type == "agent.tool_use",
+                session_id=self.session_id,
+                session_thread_id=ev.session_thread_id,
+                conversation_id=conversation_id,
+            ) as run:
+                result_event, run.content = await self._call_tool(tool, ev, input_)
+                run.result = result_event
+            tool_result = result_event
+            is_error = result_event.get("is_error") is True
+            sent = await self._send_result(result_event, ev.id, conversation_id)
         await self._surface_call(
             DispatchedToolCall(
                 event=ev,
@@ -902,20 +955,69 @@ class SessionToolRunner:
             )
         )
 
-    async def _send_result(self, tool_result: DispatchedToolResultParams, tool_use_id: str) -> bool:
+    async def _call_tool(
+        self, tool: BetaAnyRunnableTool, ev: DispatchedToolUseEvent, input_: dict[str, object]
+    ) -> tuple[DispatchedToolResultParams, Sequence[_SessionContent | BetaContent]]:
+        """Runs `tool` for `ev` and builds the result event, turning a timeout or an error into an error result.
+
+        Also returns the result's content as the tool's span records it.
+        """
+        content: BetaFunctionToolResultType | None  # a tool may return None whatever its annotation says
+        is_error = False
+        try:
+            with anyio.fail_after(TOOL_TIMEOUT):
+                content = tool_result_content(await run_runnable_tool(tool, input_))
+        except TimeoutError:
+            content = f"tool {ev.name!r} timed out"
+            is_error = True
+        except ToolError as e:
+            content = tool_error_content(e)
+            is_error = True
+        except Exception as e:
+            log.exception("tool %s raised", ev.name)
+            content = tool_error_content(e)
+            is_error = True
+        session_content, recorded = _to_session_content(content)
+        return _build_result_event(ev, session_content, is_error), recorded
+
+    def _events_for(self, conversation_id: str | None) -> AsyncEvents:
+        """The events resource that sends the result of a tool call whose span has `conversation_id`.
+
+        The spans of its requests have the conversation ID of the tool's span. When the client's options
+        set none, that is the ID of the call's thread, and a copy of the client that sets it sends the result.
+        The copy has the client's other OpenTelemetry options.
+        """
+        if conversation_id is None or self._scoped._tracer is None or self._scoped._otel.conversation_id:
+            return self._events
+        if conversation_id not in self._events_by_conversation:
+            open_telemetry: OpenTelemetryOptions = {**self._scoped.open_telemetry, "conversation_id": conversation_id}
+            client = (
+                copy_scoped_client(self._scoped, open_telemetry=open_telemetry)
+                if self._bearer_scoped
+                else self._scoped.with_options(open_telemetry=open_telemetry)
+            )
+            self._events_by_conversation[conversation_id] = client.beta.sessions.events
+        return self._events_by_conversation[conversation_id]
+
+    async def _send_result(
+        self, tool_result: DispatchedToolResultParams, tool_use_id: str, conversation_id: str | None
+    ) -> bool:
         """Post `tool_result` back to the session, retrying transient failures
         with jittered exponential backoff until the send retry window elapses.
 
         `tool_use_id` is the originating tool-call event id — passed
         explicitly because the result params key it differently
         (`tool_use_id` vs `custom_tool_use_id`) depending on the kind.
+
+        `conversation_id` is the ID of the thread of the tool call, when the runner knows it.
         """
+        events = self._events_for(conversation_id)
         start = time.monotonic()
         last_err: Exception | None = None
         attempt = 0
         for attempt in itertools.count(1):
             try:
-                await self._events.send(
+                await events.send(
                     self.session_id,
                     events=[tool_result],
                     extra_headers=self.extra_headers,
@@ -943,11 +1045,11 @@ class SessionToolRunner:
         return False
 
     async def _idle_watchdog(self) -> None:
-        """Stop the runner once the session has been idle (`end_turn`) for
-        `max_idle` seconds with no new events.
+        """Stop the runner once `max_idle` seconds have passed since the turn
+        ended with no new events.
 
         Event-driven: it blocks on the idle clock's wake event rather than
-        polling. Capturing `clock.wake` *before* reading `clock.end_turn_at`
+        polling. Capturing `clock.wake` *before* reading `clock.turn_ended_at`
         closes the race where the clock changes between the read and the wait.
         """
         max_idle = self.max_idle
@@ -955,14 +1057,14 @@ class SessionToolRunner:
         clock = self._idle_clock
         while not self._stop.is_set():
             wake = clock.wake
-            at = clock.end_turn_at
+            at = clock.turn_ended_at
             if at is None:
                 # Not armed: block until the clock arms (or the runner stops).
                 await _wait_first(wake, self._stop)
                 continue
             remaining = max_idle - (time.monotonic() - at)
             if remaining <= 0:
-                log.info("session idle after end_turn for %.0fs; stopping", max_idle)
+                log.info("session idle for %.0fs after its turn ended; stopping", max_idle)
                 self._stop.set()
                 return
             # Armed: wait out the remaining grace, waking early if the clock
@@ -975,6 +1077,18 @@ class SessionToolRunner:
         """When `_stop` is set, close the work stream so `_dispatch_loop` exits."""
         await self._stop.wait()
         await self._send_work.aclose()
+
+
+def ends_turn(ev: object) -> bool:
+    """Whether `ev` is a `session.status_idle` whose turn is over.
+
+    Only `requires_action` leaves the turn open: the session resumes once a
+    client resolves the events it names. Every other stop reason ends the turn,
+    including one newer than this SDK's types.
+    """
+    if getattr(ev, "type", None) != "session.status_idle":
+        return False
+    return getattr(getattr(ev, "stop_reason", None), "type", None) != "requires_action"
 
 
 async def _wait_first(*events: anyio.Event) -> None:

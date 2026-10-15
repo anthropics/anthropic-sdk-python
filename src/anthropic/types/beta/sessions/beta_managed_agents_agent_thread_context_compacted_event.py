@@ -13,6 +13,6 @@ class BetaManagedAgentsAgentThreadContextCompactedEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when compaction was processed."""
 
     type: Literal["agent.thread_context_compacted"]

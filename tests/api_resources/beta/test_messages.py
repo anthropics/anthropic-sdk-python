@@ -28,7 +28,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -44,7 +44,7 @@ class TestMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -186,7 +186,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -204,7 +204,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -224,7 +224,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
         message_stream.response.close()
@@ -241,7 +241,7 @@ class TestMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
@@ -383,7 +383,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
 
@@ -401,7 +401,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -421,7 +421,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -436,7 +436,7 @@ class TestMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -558,7 +558,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -575,7 +575,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -601,7 +601,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(BetaMessage, message, path=["response"])
 
@@ -617,7 +617,7 @@ class TestAsyncMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -759,7 +759,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -777,7 +777,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -797,7 +797,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -814,7 +814,7 @@ class TestAsyncMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
@@ -956,7 +956,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
 
@@ -974,7 +974,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -994,7 +994,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(BetaMessageTokensCount, message, path=["response"])
 
@@ -1009,7 +1009,7 @@ class TestAsyncMessages:
                     "output_config": {"effort": "low"},
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -1132,7 +1132,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -1149,7 +1149,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

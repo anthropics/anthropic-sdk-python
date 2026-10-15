@@ -6,7 +6,9 @@ __all__ = ["BetaDreamOutput"]
 
 
 class BetaDreamOutput(BaseModel):
-    """The memory store that holds a dream's result, as an entry in `outputs`."""
+    """
+    An entry in a dream's `outputs` that references the memory store holding its result.
+    """
 
     memory_store_id: str
     """The ID of the memory store that the dream writes its result to (`memstore_...`).

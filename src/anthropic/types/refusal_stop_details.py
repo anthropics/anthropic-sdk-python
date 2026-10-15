@@ -10,7 +10,9 @@ class RefusalStopDetails(BaseModel):
     """Structured information about a refusal."""
 
     category: Optional[Literal["cyber", "bio", "frontier_llm", "reasoning_extraction", "general_harms"]] = None
-    """The policy category that triggered a refusal.
+    """The policy category that triggered the refusal.
+
+    `null` when the refusal doesn't map to a named category.
 
     - `cyber` - The request could enable cyber harm, such as malware or exploit
       development. Benign cybersecurity work can also trigger this category.

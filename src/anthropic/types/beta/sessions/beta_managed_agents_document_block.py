@@ -26,7 +26,7 @@ class BetaManagedAgentsDocumentBlock(BaseModel):
     """
 
     source: Source
-    """Union type for document source variants."""
+    """The source of the document data."""
 
     type: Literal["document"]
 

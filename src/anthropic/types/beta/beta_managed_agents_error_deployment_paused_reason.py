@@ -10,6 +10,6 @@ class BetaManagedAgentsErrorDeploymentPausedReason(BaseModel):
     """A scheduled fire recorded a failed run whose error auto-pauses the deployment."""
 
     error: BetaManagedAgentsDeploymentPausedReasonError
-    """The error that triggered an auto-pause. Matches the failed run's `error.type`."""
+    """The failed run's error."""
 
     type: Literal["error"]

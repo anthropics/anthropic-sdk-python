@@ -24,4 +24,4 @@ class BetaManagedAgentsMCPToolsetParams(TypedDict, total=False):
     """Per-tool configuration overrides."""
 
     default_config: Optional[BetaManagedAgentsMCPToolsetDefaultConfigParams]
-    """Default configuration for all tools from an MCP server."""
+    """Default configuration for all tools from this server."""
