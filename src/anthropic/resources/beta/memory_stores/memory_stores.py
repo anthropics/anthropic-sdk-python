@@ -102,7 +102,8 @@ class MemoryStores(SyncAPIResource):
               belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
               Not visible to the agent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -170,7 +171,8 @@ class MemoryStores(SyncAPIResource):
           memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
               Enumerate IDs via `GET /v1/memory_stores`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -250,7 +252,8 @@ class MemoryStores(SyncAPIResource):
               Renaming changes the slug used for the store's `mount_path` in sessions created
               after the update.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -336,7 +339,8 @@ class MemoryStores(SyncAPIResource):
           page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
               previous response to fetch the next page; omit for the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -407,7 +411,8 @@ class MemoryStores(SyncAPIResource):
               Required. Deletion cascades to all memories and memory versions in the store and
               cannot be undone.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -473,7 +478,8 @@ class MemoryStores(SyncAPIResource):
               Archiving is one-way and idempotent; archived stores cannot be unarchived.
               Enumerate IDs via `GET /v1/memory_stores`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -580,7 +586,8 @@ class AsyncMemoryStores(AsyncAPIResource):
               belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
               Not visible to the agent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -648,7 +655,8 @@ class AsyncMemoryStores(AsyncAPIResource):
           memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
               Enumerate IDs via `GET /v1/memory_stores`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -728,7 +736,8 @@ class AsyncMemoryStores(AsyncAPIResource):
               Renaming changes the slug used for the store's `mount_path` in sessions created
               after the update.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -814,7 +823,8 @@ class AsyncMemoryStores(AsyncAPIResource):
           page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
               previous response to fetch the next page; omit for the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -885,7 +895,8 @@ class AsyncMemoryStores(AsyncAPIResource):
               Required. Deletion cascades to all memories and memory versions in the store and
               cannot be undone.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -951,7 +962,8 @@ class AsyncMemoryStores(AsyncAPIResource):
               Archiving is one-way and idempotent; archived stores cannot be unarchived.
               Enumerate IDs via `GET /v1/memory_stores`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

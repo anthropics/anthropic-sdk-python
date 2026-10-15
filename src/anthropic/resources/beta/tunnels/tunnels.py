@@ -83,7 +83,8 @@ class Tunnels(SyncAPIResource):
         Args:
           display_name: Optional human-readable name for the tunnel (1-255 characters).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -152,7 +153,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -229,7 +231,8 @@ class Tunnels(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnels` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -305,7 +308,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -378,7 +382,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -453,7 +458,8 @@ class Tunnels(SyncAPIResource):
 
           reason: Optional free-text reason for the rotation, recorded for audit.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -551,7 +557,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           display_name: Optional human-readable name for the tunnel (1-255 characters).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -620,7 +627,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -697,7 +705,8 @@ class AsyncTunnels(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnels` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -773,7 +782,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -846,7 +856,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -921,7 +932,8 @@ class AsyncTunnels(AsyncAPIResource):
 
           reason: Optional free-text reason for the rotation, recorded for audit.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

@@ -2837,6 +2837,7 @@ from anthropic.types.beta.organization import (
     BetaSpendLimitRBACGroupScope,
     BetaSpendLimitScopedAPIKeyActor,
     BetaSpendLimitSeatTierScope,
+    BetaSpendLimitUsageTierScope,
     BetaSpendLimitUserActor,
     BetaSpendLimitUserScope,
     BetaSpendLimitUserScopeParam,

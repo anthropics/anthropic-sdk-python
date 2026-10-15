@@ -81,7 +81,8 @@ class MemoryVersions(SyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -193,7 +194,8 @@ class MemoryVersions(SyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -275,7 +277,8 @@ class MemoryVersions(SyncAPIResource):
 
           memory_version_id: The ID of the memory version to redact (`memver_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -379,7 +382,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -491,7 +495,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
               default to `full`; list, create, and update operations default to `basic`.
               Listing with `view=full` caps `limit` at 20.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -573,7 +578,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
 
           memory_version_id: The ID of the memory version to redact (`memver_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

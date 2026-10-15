@@ -8263,7 +8263,7 @@ USAGE_FIELDS_RECORDED = {
     "output_tokens_details",
     "service_tier",
 }
-USAGE_FIELDS_WITHOUT_AN_ATTRIBUTE = {"inference_geo", "server_tool_use"}
+USAGE_FIELDS_WITHOUT_AN_ATTRIBUTE = {"inference_geo", "server_tool_use", "speed"}
 
 
 @pytest.mark.parametrize(
@@ -8273,7 +8273,7 @@ USAGE_FIELDS_WITHOUT_AN_ATTRIBUTE = {"inference_geo", "server_tool_use"}
         (
             BetaUsage,
             USAGE_FIELDS_RECORDED | {"iterations"},
-            USAGE_FIELDS_WITHOUT_AN_ATTRIBUTE | {"fallback_credit", "speed"},
+            USAGE_FIELDS_WITHOUT_AN_ATTRIBUTE | {"fallback_credit"},
         ),
         (CacheCreation, {"ephemeral_1h_input_tokens", "ephemeral_5m_input_tokens"}, set[str]()),
         (BetaCacheCreation, {"ephemeral_1h_input_tokens", "ephemeral_5m_input_tokens"}, set[str]()),
