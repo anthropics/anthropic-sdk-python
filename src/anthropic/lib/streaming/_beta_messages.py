@@ -29,6 +29,7 @@ from ._beta_types import (
 )
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
+from ._partial_json import PartialJsonBuffer
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
@@ -54,7 +55,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
-        self.__json_bufs: dict[int, bytes] = {}
+        self.__json_bufs: dict[int, PartialJsonBuffer] = {}
         self.__output_format = output_format
         share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
@@ -220,7 +221,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
-        self.__json_bufs: dict[int, bytes] = {}
+        self.__json_bufs: dict[int, PartialJsonBuffer] = {}
         self.__output_format = output_format
         share_message_snapshot(raw_stream, self._current_snapshot_or_none)
 
@@ -481,7 +482,7 @@ def accumulate_event(
     *,
     event: BetaRawMessageStreamEvent,
     current_snapshot: ParsedBetaMessage[ResponseFormatT] | None,
-    json_bufs: dict[int, bytes],
+    json_bufs: dict[int, PartialJsonBuffer],
     request_headers: httpx2.Headers,
     output_format: ResponseFormatT | NotGiven = not_given,
 ) -> ParsedBetaMessage[ResponseFormatT]:
@@ -527,23 +528,21 @@ def accumulate_event(
             if isinstance(content, TRACKS_TOOL_INPUT):
                 from jiter import from_json
 
-                json_buf = json_bufs.get(event.index, b"")
-                json_buf += bytes(event.delta.partial_json, "utf-8")
+                json_buf = json_bufs.setdefault(event.index, PartialJsonBuffer())
+                extends_open_string = json_buf.feed(bytes(event.delta.partial_json, "utf-8"))
 
                 if json_buf:
                     try:
                         anthropic_beta = request_headers.get("anthropic-beta", "") if request_headers else ""
 
                         if "fine-grained-tool-streaming-2025-05-14" in anthropic_beta:
-                            content.input = from_json(json_buf, partial_mode="trailing-strings")
-                        else:
-                            content.input = from_json(json_buf, partial_mode=True)
+                            content.input = from_json(json_buf.getvalue(), partial_mode="trailing-strings")
+                        elif not extends_open_string:
+                            content.input = from_json(json_buf.getvalue(), partial_mode=True)
                     except ValueError as e:
                         raise ValueError(
-                            f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.decode('utf-8')}"
+                            f"Unable to parse tool parameter JSON from model. Please retry your request or adjust your prompt. Error: {e}. JSON: {json_buf.getvalue().decode('utf-8')}"
                         ) from e
-
-                json_bufs[event.index] = json_buf
         elif event.delta.type == "citations_delta":
             if content.type == "text":
                 if not content.citations:

@@ -21,7 +21,13 @@ from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
 from anthropic.types.message_delta_usage import MessageDeltaUsage
 from anthropic.types.raw_message_delta_event import Delta as RawMessageDelta, RawMessageDeltaEvent
 
-from .helpers import get_response, to_async_iter
+from .helpers import (
+    get_response,
+    to_async_iter,
+    record_parsed_json_sizes,
+    get_long_tool_input_response,
+    assert_long_tool_input_parsed,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -384,6 +390,37 @@ class TestSyncMessages:
                 stream.until_done()
 
     @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_invalid_escape_in_long_string(self, respx_mock: MockRouter) -> None:
+        tool_input = '{"content": "' + "line " * 20 + "\\q" + "line " * 20 + '"}'
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_long_tool_input_response(tool_input))
+        )
+
+        with pytest.raises(ValueError, match=r"^Unable to parse tool parameter JSON from model.*invalid escape"):
+            with sync_client.messages.stream(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Write the notes file"}],
+                model="claude-sonnet-5-5",
+            ) as stream:
+                stream.until_done()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_tool_use_long_string_input(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, content=get_long_tool_input_response()))
+        parsed_sizes = record_parsed_json_sizes(monkeypatch)
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Write the notes file"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            snapshots = [event.snapshot for event in stream if event.type == "input_json"]
+            tool_use = stream.get_final_message().content[0]
+
+        assert tool_use.type == "tool_use"
+        assert_long_tool_input_parsed(snapshots, tool_use.input, parsed_sizes)
+
+    @pytest.mark.respx(base_url=base_url)
     def test_tool_use_caller_omitted(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_tool_use_response_without_caller())
@@ -689,6 +726,25 @@ class TestAsyncMessages:
                 model="claude-sonnet-5-5",
             ) as stream:
                 await stream.until_done()
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_tool_use_long_string_input(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_long_tool_input_response()))
+        )
+        parsed_sizes = record_parsed_json_sizes(monkeypatch)
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Write the notes file"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            snapshots = [event.snapshot async for event in stream if event.type == "input_json"]
+            tool_use = (await stream.get_final_message()).content[0]
+
+        assert tool_use.type == "tool_use"
+        assert_long_tool_input_parsed(snapshots, tool_use.input, parsed_sizes)
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
