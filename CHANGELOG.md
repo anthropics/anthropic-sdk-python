@@ -1,10 +1,15 @@
 # Changelog
 
-## [1.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.15.0...v1.16.0) (2026-10-15)
+## [1.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.15.0...v1.16.0) (2026-10-16)
 
 ### Features
 
 * **client:** yield server-sent events with unrecognized event names
+
+
+### Chores
+
+* **docs:** correct plugin manifest_version and reach descriptions
 
 ## [1.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.14.0...v1.15.0) (2026-10-15)
 
