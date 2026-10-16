@@ -13,7 +13,7 @@ class BetaManagedAgentsMCPOAuthCreateParams(TypedDict, total=False):
     """Parameters for creating an MCP OAuth credential."""
 
     access_token: Required[str]
-    """OAuth access token."""
+    """The OAuth access token to send to the MCP server."""
 
     mcp_server_url: Required[str]
     """URL of the MCP server this credential authenticates against."""

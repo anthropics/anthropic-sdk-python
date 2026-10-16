@@ -18,7 +18,7 @@ class BetaManagedAgentsMCPOAuthUpdateParams(TypedDict, total=False):
     type: Required[Literal["mcp_oauth"]]
 
     access_token: Optional[str]
-    """Updated OAuth access token."""
+    """The new OAuth access token to replace the stored one."""
 
     expires_at: Union[str, datetime, None]
     """When the credential's access token expires, in RFC 3339.
