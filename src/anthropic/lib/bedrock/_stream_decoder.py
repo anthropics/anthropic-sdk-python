@@ -65,13 +65,14 @@ class AWSEventStreamDecoder:
         if not chunk:
             return None
 
-        return _chunk_bytes_to_sse(chunk.get("bytes"))  # pyright: ignore[reportArgumentType]
+        raw = chunk.get("bytes")
+        if not raw:
+            return None
+
+        return _chunk_bytes_to_sse(raw)
 
 
-def _chunk_bytes_to_sse(raw: bytes | None) -> ServerSentEvent | None:
-    if raw is None or not isinstance(raw, (bytes, bytearray)):  # pyright: ignore[reportUnnecessaryIsInstance]
-        return None
-
+def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:
     decoded = raw.decode()
     data: Any
     try:
