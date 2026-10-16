@@ -21,7 +21,10 @@ class BetaManagedAgentsMCPOAuthCreateParams(TypedDict, total=False):
     type: Required[Literal["mcp_oauth"]]
 
     expires_at: Union[str, datetime, None]
-    """A timestamp in RFC 3339 format"""
+    """When `access_token` expires, in RFC 3339.
+
+    Must be in the future.
+    """
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshParams]
     """Refresh token configuration, if the credential supports token refresh."""
