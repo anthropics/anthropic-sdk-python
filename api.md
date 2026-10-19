@@ -810,6 +810,8 @@ Types:
 from anthropic.types.organization.workspaces import (
     WorkspaceRateLimit,
     WorkspaceRateLimitOrganizationSource,
+    WorkspaceRateLimitType,
+    WorkspaceRateLimitUpdateValueParam,
     WorkspaceRateLimitValue,
     WorkspaceRateLimitWorkspaceSource,
 )
@@ -817,6 +819,7 @@ from anthropic.types.organization.workspaces import (
 
 Methods:
 
+- <code title="post /v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}">client.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/organization/workspaces/rate_limits.py">update</a>(rate_limit_id, \*, workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/rate_limit_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspaces/workspace_rate_limit.py">WorkspaceRateLimit</a></code>
 - <code title="get /v1/organizations/workspaces/{workspace_id}/rate_limits">client.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/organization/workspaces/rate_limits.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/organization/workspaces/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/workspaces/workspace_rate_limit.py">SyncPageCursor[WorkspaceRateLimit]</a></code>
 
 ### Members
@@ -2672,6 +2675,8 @@ Types:
 from anthropic.types.beta.organization.workspaces import (
     BetaWorkspaceRateLimit,
     BetaWorkspaceRateLimitOrganizationSource,
+    BetaWorkspaceRateLimitType,
+    BetaWorkspaceRateLimitUpdateValueParam,
     BetaWorkspaceRateLimitValue,
     BetaWorkspaceRateLimitWorkspaceSource,
 )
@@ -2679,6 +2684,7 @@ from anthropic.types.beta.organization.workspaces import (
 
 Methods:
 
+- <code title="post /v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}?beta=true">client.beta.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/beta/organization/workspaces/rate_limits.py">update</a>(rate_limit_id, \*, workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/rate_limit_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/workspaces/beta_workspace_rate_limit.py">BetaWorkspaceRateLimit</a></code>
 - <code title="get /v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true">client.beta.organization.workspaces.rate_limits.<a href="./src/anthropic/resources/beta/organization/workspaces/rate_limits.py">list</a>(workspace_id, \*\*<a href="src/anthropic/types/beta/organization/workspaces/rate_limit_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/workspaces/beta_workspace_rate_limit.py">SyncPageCursor[BetaWorkspaceRateLimit]</a></code>
 
 #### Members
