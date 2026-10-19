@@ -292,7 +292,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
             # should never be hit
             raise ValueError("Unable to handle auth")
 
-        options = model_copy(options)
+        options = model_copy(super()._prepare_options(options))
         options.headers = merge_headers(auth, options.headers or {})
         return options
 
@@ -516,7 +516,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
             # should never be hit
             raise ValueError("Unable to handle auth")
 
-        options = model_copy(options)
+        options = model_copy(await super()._prepare_options(options))
         options.headers = merge_headers(auth, options.headers or {})
         return options
 

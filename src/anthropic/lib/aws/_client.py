@@ -18,7 +18,7 @@ from ._credentials import (
 )
 from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
-from ..._base_client import DEFAULT_MAX_RETRIES
+from ..._base_client import DEFAULT_MAX_RETRIES, FinalRequestOptions
 from ..credentials._types import AccessTokenProvider
 
 
@@ -149,6 +149,11 @@ class AnthropicAWS(Anthropic):
         if self._use_sigv4 or self._skip_auth:
             return
         super()._validate_headers(headers, omitted)
+
+    @override
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        reject_action_url_request(options)
+        return super()._prepare_options(options)
 
     @override
     def _prepare_request(self, request: httpx2.Request) -> None:
@@ -372,6 +377,11 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         super()._validate_headers(headers, omitted)
 
     @override
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        reject_action_url_request(options)
+        return await super()._prepare_options(options)
+
+    @override
     async def _prepare_request(self, request: httpx2.Request) -> None:
         if not self._use_sigv4:
             return
@@ -462,3 +472,9 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         )
 
     with_options = copy  # type: ignore[assignment]
+
+
+def reject_action_url_request(options: FinalRequestOptions) -> None:
+    path = options.url.partition("?")[0]
+    if path.startswith("/v1/user_profiles/") and path.endswith("/action_urls"):
+        raise AnthropicError("User profile action URLs are not supported in the AWS client.")
