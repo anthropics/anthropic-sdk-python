@@ -119,13 +119,14 @@ def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
 # --- end credentials support ---
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages, organization
+    from .resources import beta, files, models, skills, messages, organization, user_profiles
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
     from .resources.organization.organization import Organization, AsyncOrganization
+    from .resources.user_profiles.user_profiles import UserProfiles, AsyncUserProfiles
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
@@ -347,6 +348,12 @@ class Anthropic(SyncAPIClient):
         from .resources.skills import Skills
 
         return Skills(self)
+
+    @cached_property
+    def user_profiles(self) -> UserProfiles:
+        from .resources.user_profiles import UserProfiles
+
+        return UserProfiles(self)
 
     @cached_property
     def organization(self) -> Organization:
@@ -790,6 +797,12 @@ class AsyncAnthropic(AsyncAPIClient):
         return AsyncSkills(self)
 
     @cached_property
+    def user_profiles(self) -> AsyncUserProfiles:
+        from .resources.user_profiles import AsyncUserProfiles
+
+        return AsyncUserProfiles(self)
+
+    @cached_property
     def organization(self) -> AsyncOrganization:
         from .resources.organization import AsyncOrganization
 
@@ -1067,6 +1080,12 @@ class AnthropicWithRawResponse:
         return SkillsWithRawResponse(self._client.skills)
 
     @cached_property
+    def user_profiles(self) -> user_profiles.UserProfilesWithRawResponse:
+        from .resources.user_profiles import UserProfilesWithRawResponse
+
+        return UserProfilesWithRawResponse(self._client.user_profiles)
+
+    @cached_property
     def organization(self) -> organization.OrganizationWithRawResponse:
         from .resources.organization import OrganizationWithRawResponse
 
@@ -1108,6 +1127,12 @@ class AsyncAnthropicWithRawResponse:
         from .resources.skills import AsyncSkillsWithRawResponse
 
         return AsyncSkillsWithRawResponse(self._client.skills)
+
+    @cached_property
+    def user_profiles(self) -> user_profiles.AsyncUserProfilesWithRawResponse:
+        from .resources.user_profiles import AsyncUserProfilesWithRawResponse
+
+        return AsyncUserProfilesWithRawResponse(self._client.user_profiles)
 
     @cached_property
     def organization(self) -> organization.AsyncOrganizationWithRawResponse:
@@ -1153,6 +1178,12 @@ class AnthropicWithStreamedResponse:
         return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
+    def user_profiles(self) -> user_profiles.UserProfilesWithStreamingResponse:
+        from .resources.user_profiles import UserProfilesWithStreamingResponse
+
+        return UserProfilesWithStreamingResponse(self._client.user_profiles)
+
+    @cached_property
     def organization(self) -> organization.OrganizationWithStreamingResponse:
         from .resources.organization import OrganizationWithStreamingResponse
 
@@ -1194,6 +1225,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.skills import AsyncSkillsWithStreamingResponse
 
         return AsyncSkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
+    def user_profiles(self) -> user_profiles.AsyncUserProfilesWithStreamingResponse:
+        from .resources.user_profiles import AsyncUserProfilesWithStreamingResponse
+
+        return AsyncUserProfilesWithStreamingResponse(self._client.user_profiles)
 
     @cached_property
     def organization(self) -> organization.AsyncOrganizationWithStreamingResponse:

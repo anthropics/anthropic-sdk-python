@@ -7,30 +7,43 @@ from typing_extensions import Literal
 
 import httpx2
 
-from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ..._utils import is_given, path_template, strip_not_given
-from ..._compat import cached_property
-from ..._resource import SyncAPIResource, AsyncAPIResource
-from ..._response import (
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ...._utils import is_given, path_template, strip_not_given
+from ...._compat import cached_property
+from .action_urls import (
+    ActionURLs,
+    AsyncActionURLs,
+    ActionURLsWithRawResponse,
+    AsyncActionURLsWithRawResponse,
+    ActionURLsWithStreamingResponse,
+    AsyncActionURLsWithStreamingResponse,
+)
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import (
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ...pagination import SyncPageCursor, AsyncPageCursor
-from ...types.beta import (
+from ....pagination import SyncPageCursor, AsyncPageCursor
+from ....types.beta import (
     BetaUserProfileExternalUserDetailsParams,
 )
-from ..._base_client import AsyncPaginator, make_request_options
-from ...types.anthropic_beta_param import AnthropicBetaParam
-from ...types.beta.beta_user_profile import BetaUserProfile
-from ...types.beta.beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL
-from ...types.beta.beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
+from ...._base_client import AsyncPaginator, make_request_options
+from ....types.anthropic_beta_param import AnthropicBetaParam
+from ....types.beta.beta_user_profile import BetaUserProfile
+from ....types.beta.beta_deleted_user_profile import BetaDeletedUserProfile
+from ....types.beta.beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL
+from ....types.beta.beta_user_profile_external_user_details_params import BetaUserProfileExternalUserDetailsParams
 
 __all__ = ["UserProfiles", "AsyncUserProfiles"]
 
 
 class UserProfiles(SyncAPIResource):
+    @cached_property
+    def action_urls(self) -> ActionURLs:
+        return ActionURLs(self._client)
+
     @cached_property
     def with_raw_response(self) -> UserProfilesWithRawResponse:
         """
@@ -84,20 +97,22 @@ class UserProfiles(SyncAPIResource):
                 resells Claude access to.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters. Accepted under the `user-profiles-2026-03-24` and
-              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
-              `external_user_details.reference_id` instead.
+              characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; without one of them, send
+              `external_user_details.reference_id`.
 
           external_user_details: Details about the entity this profile represents, as the platform states them.
-              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
-              header only.
+              Every field is optional. Not accepted under the legacy
+              `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers, which
+              take the top-level `external_id` (and, under `user-profiles-2026-08-18`,
+              `external_user_onboarded_at`) instead.
 
           external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
               RFC 3339 format: for an `application` profile, when the end-user signed up; for
               a `passthrough` profile, when the company became the platform's customer. Must
-              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
-              under the `user-profiles-2026-08-18` beta header; under
-              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
+              be a complete timestamp no more than 1 minute in the future. Optional. Legacy
+              field, accepted only under the `user-profiles-2026-08-18` beta header; without a
+              legacy header, send `external_user_details.onboarded_at`.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -108,8 +123,7 @@ class UserProfiles(SyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -179,8 +193,7 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -259,20 +272,21 @@ class UserProfiles(SyncAPIResource):
                 resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters. Accepted under the `user-profiles-2026-03-24` and
-              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
-              `external_user_details.reference_id` instead.
+              255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24`
+              and `user-profiles-2026-08-18` beta headers; without one of them, send
+              `external_user_details.reference_id`.
 
           external_user_details: Details about the entity this profile represents, as the platform states them.
               Each field sent replaces the stored value; omit a field to leave it unchanged.
-              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
-              `user-profiles-2026-09-04` beta header only.
+              Once set, a value cannot be cleared and `null` is rejected. Not accepted under
+              the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta
+              headers.
 
           external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
               once set, the value cannot be cleared and `null` is rejected. Must be a complete
-              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
-              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
-              `external_user_details.onboarded_at` instead.
+              RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted
+              only under the `user-profiles-2026-08-18` beta header; without a legacy header,
+              send `external_user_details.onboarded_at`.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -282,8 +296,7 @@ class UserProfiles(SyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -379,8 +392,7 @@ class UserProfiles(SyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -429,6 +441,70 @@ class UserProfiles(SyncAPIResource):
             model=BetaUserProfile,
         )
 
+    def delete(
+        self,
+        user_profile_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaDeletedUserProfile:
+        """
+        Delete User Profile
+
+        Args:
+          user_profile_id: The ID of the user profile to delete (`uprof_...`).
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not user_profile_id:
+            raise ValueError(f"Expected a non-empty value for `user_profile_id` but received {user_profile_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
+                    if is_given(betas)
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
+        return self._delete(
+            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.delete",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
+            ),
+            cast_to=BetaDeletedUserProfile,
+        )
+
     def create_enrollment_url(
         self,
         user_profile_id: str,
@@ -448,8 +524,7 @@ class UserProfiles(SyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -498,6 +573,10 @@ class UserProfiles(SyncAPIResource):
 
 
 class AsyncUserProfiles(AsyncAPIResource):
+    @cached_property
+    def action_urls(self) -> AsyncActionURLs:
+        return AsyncActionURLs(self._client)
+
     @cached_property
     def with_raw_response(self) -> AsyncUserProfilesWithRawResponse:
         """
@@ -551,20 +630,22 @@ class AsyncUserProfiles(AsyncAPIResource):
                 resells Claude access to.
 
           external_id: Platform's own identifier for this user. Not enforced unique. Maximum 255
-              characters. Accepted under the `user-profiles-2026-03-24` and
-              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
-              `external_user_details.reference_id` instead.
+              characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and
+              `user-profiles-2026-08-18` beta headers; without one of them, send
+              `external_user_details.reference_id`.
 
           external_user_details: Details about the entity this profile represents, as the platform states them.
-              Every field is optional. Accepted under the `user-profiles-2026-09-04` beta
-              header only.
+              Every field is optional. Not accepted under the legacy
+              `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers, which
+              take the top-level `external_id` (and, under `user-profiles-2026-08-18`,
+              `external_user_onboarded_at`) instead.
 
           external_user_onboarded_at: When the entity this profile represents opened its account with the platform, in
               RFC 3339 format: for an `application` profile, when the end-user signed up; for
               a `passthrough` profile, when the company became the platform's customer. Must
-              be a complete timestamp no more than 1 minute in the future. Optional. Accepted
-              under the `user-profiles-2026-08-18` beta header; under
-              `user-profiles-2026-09-04` send `external_user_details.onboarded_at` instead.
+              be a complete timestamp no more than 1 minute in the future. Optional. Legacy
+              field, accepted only under the `user-profiles-2026-08-18` beta header; without a
+              legacy header, send `external_user_details.onboarded_at`.
 
           metadata: Free-form key-value data to attach to this user profile. Maximum 16 keys, with
               keys up to 64 characters and values up to 512 characters. Values must be
@@ -575,8 +656,7 @@ class AsyncUserProfiles(AsyncAPIResource):
               (`access_type` `passthrough`), that company's name where known. Maximum 255
               characters.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -646,8 +726,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to get (`uprof_...`).
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -726,20 +805,21 @@ class AsyncUserProfiles(AsyncAPIResource):
                 resells Claude access to.
 
           external_id: If present, replaces the stored external_id. Omit to leave unchanged. Maximum
-              255 characters. Accepted under the `user-profiles-2026-03-24` and
-              `user-profiles-2026-08-18` beta headers; under `user-profiles-2026-09-04` send
-              `external_user_details.reference_id` instead.
+              255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24`
+              and `user-profiles-2026-08-18` beta headers; without one of them, send
+              `external_user_details.reference_id`.
 
           external_user_details: Details about the entity this profile represents, as the platform states them.
               Each field sent replaces the stored value; omit a field to leave it unchanged.
-              Once set, a value cannot be cleared and `null` is rejected. Accepted under the
-              `user-profiles-2026-09-04` beta header only.
+              Once set, a value cannot be cleared and `null` is rejected. Not accepted under
+              the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta
+              headers.
 
           external_user_onboarded_at: If present, replaces the stored account creation time. Omit to leave unchanged;
               once set, the value cannot be cleared and `null` is rejected. Must be a complete
-              RFC 3339 timestamp no more than 1 minute in the future. Accepted under the
-              `user-profiles-2026-08-18` beta header; under `user-profiles-2026-09-04` send
-              `external_user_details.onboarded_at` instead.
+              RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted
+              only under the `user-profiles-2026-08-18` beta header; without a legacy header,
+              send `external_user_details.onboarded_at`.
 
           metadata: Key-value pairs to merge into the stored metadata. Keys provided overwrite
               existing values. To remove a key, set its value to an empty string. Keys not
@@ -749,8 +829,7 @@ class AsyncUserProfiles(AsyncAPIResource):
           name: If present, replaces the stored name. Omit to leave unchanged. Maximum 255
               characters.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -846,8 +925,7 @@ class AsyncUserProfiles(AsyncAPIResource):
 
               Leave it out to get the first page.
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -896,6 +974,70 @@ class AsyncUserProfiles(AsyncAPIResource):
             model=BetaUserProfile,
         )
 
+    async def delete(
+        self,
+        user_profile_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaDeletedUserProfile:
+        """
+        Delete User Profile
+
+        Args:
+          user_profile_id: The ID of the user profile to delete (`uprof_...`).
+
+          betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not user_profile_id:
+            raise ValueError(f"Expected a non-empty value for `user_profile_id` but received {user_profile_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["user-profiles-2026-08-18"]))
+                    if is_given(betas)
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
+        return await self._delete(
+            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.user_profiles.delete",
+                span_route="/v1/user_profiles/{user_profile_id}",
+                span_attributes={"anthropic.user_profile.id": user_profile_id},
+            ),
+            cast_to=BetaDeletedUserProfile,
+        )
+
     async def create_enrollment_url(
         self,
         user_profile_id: str,
@@ -915,8 +1057,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         Args:
           user_profile_id: The ID of the user profile to create an enrollment URL for (`uprof_...`).
 
-          betas: This endpoint is in beta: requests must send `user-profiles-2026-03-24`,
-              `user-profiles-2026-08-18`, or `user-profiles-2026-09-04` in this header.
+          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -980,9 +1121,16 @@ class UserProfilesWithRawResponse:
         self.list = to_raw_response_wrapper(
             user_profiles.list,
         )
+        self.delete = to_raw_response_wrapper(
+            user_profiles.delete,
+        )
         self.create_enrollment_url = to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
+
+    @cached_property
+    def action_urls(self) -> ActionURLsWithRawResponse:
+        return ActionURLsWithRawResponse(self._user_profiles.action_urls)
 
 
 class AsyncUserProfilesWithRawResponse:
@@ -1001,9 +1149,16 @@ class AsyncUserProfilesWithRawResponse:
         self.list = async_to_raw_response_wrapper(
             user_profiles.list,
         )
+        self.delete = async_to_raw_response_wrapper(
+            user_profiles.delete,
+        )
         self.create_enrollment_url = async_to_raw_response_wrapper(
             user_profiles.create_enrollment_url,
         )
+
+    @cached_property
+    def action_urls(self) -> AsyncActionURLsWithRawResponse:
+        return AsyncActionURLsWithRawResponse(self._user_profiles.action_urls)
 
 
 class UserProfilesWithStreamingResponse:
@@ -1022,9 +1177,16 @@ class UserProfilesWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             user_profiles.list,
         )
+        self.delete = to_streamed_response_wrapper(
+            user_profiles.delete,
+        )
         self.create_enrollment_url = to_streamed_response_wrapper(
             user_profiles.create_enrollment_url,
         )
+
+    @cached_property
+    def action_urls(self) -> ActionURLsWithStreamingResponse:
+        return ActionURLsWithStreamingResponse(self._user_profiles.action_urls)
 
 
 class AsyncUserProfilesWithStreamingResponse:
@@ -1043,6 +1205,13 @@ class AsyncUserProfilesWithStreamingResponse:
         self.list = async_to_streamed_response_wrapper(
             user_profiles.list,
         )
+        self.delete = async_to_streamed_response_wrapper(
+            user_profiles.delete,
+        )
         self.create_enrollment_url = async_to_streamed_response_wrapper(
             user_profiles.create_enrollment_url,
         )
+
+    @cached_property
+    def action_urls(self) -> AsyncActionURLsWithStreamingResponse:
+        return AsyncActionURLsWithStreamingResponse(self._user_profiles.action_urls)

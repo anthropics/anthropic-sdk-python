@@ -546,6 +546,51 @@ Methods:
 - <code title="get /v1/skills/{skill_id}/versions">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">list</a>(skill_id, \*\*<a href="src/anthropic/types/skills/version_list_params.py">params</a>) -> <a href="./src/anthropic/types/skills/skill_version.py">SyncPageCursor[SkillVersion]</a></code>
 - <code title="delete /v1/skills/{skill_id}/versions/{version}">client.skills.versions.<a href="./src/anthropic/resources/skills/versions.py">delete</a>(version, \*, skill_id) -> <a href="./src/anthropic/types/skills/deleted_skill_version.py">DeletedSkillVersion</a></code>
 
+# UserProfiles
+
+Types:
+
+```python
+from anthropic.types import (
+    DeletedUserProfile,
+    UserProfile,
+    UserProfileAccessType,
+    UserProfileCyberProgram,
+    UserProfileCyberRequirements,
+    UserProfileCyberTier,
+    UserProfileEfsFeature,
+    UserProfileEfsProgram,
+    UserProfileExternalUserAccountStatus,
+    UserProfileExternalUserDetails,
+    UserProfileExternalUserDetailsParams,
+    UserProfileExternalUserEntityType,
+    UserProfileListOrder,
+    UserProfileListOrderBy,
+    UserProfileProgramStatus,
+    UserProfilePrograms,
+)
+```
+
+Methods:
+
+- <code title="post /v1/user_profiles">client.user_profiles.<a href="./src/anthropic/resources/user_profiles/user_profiles.py">create</a>(\*\*<a href="src/anthropic/types/user_profile_create_params.py">params</a>) -> <a href="./src/anthropic/types/user_profile.py">UserProfile</a></code>
+- <code title="get /v1/user_profiles/{user_profile_id}">client.user_profiles.<a href="./src/anthropic/resources/user_profiles/user_profiles.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/user_profile.py">UserProfile</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}">client.user_profiles.<a href="./src/anthropic/resources/user_profiles/user_profiles.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/user_profile_update_params.py">params</a>) -> <a href="./src/anthropic/types/user_profile.py">UserProfile</a></code>
+- <code title="get /v1/user_profiles">client.user_profiles.<a href="./src/anthropic/resources/user_profiles/user_profiles.py">list</a>(\*\*<a href="src/anthropic/types/user_profile_list_params.py">params</a>) -> <a href="./src/anthropic/types/user_profile.py">SyncPageCursor[UserProfile]</a></code>
+- <code title="delete /v1/user_profiles/{user_profile_id}">client.user_profiles.<a href="./src/anthropic/resources/user_profiles/user_profiles.py">delete</a>(user_profile_id) -> <a href="./src/anthropic/types/deleted_user_profile.py">DeletedUserProfile</a></code>
+
+## ActionURLs
+
+Types:
+
+```python
+from anthropic.types.user_profiles import UserProfileActionURL, UserProfileEnrollEndUserActionParam
+```
+
+Methods:
+
+- <code title="post /v1/user_profiles/{user_profile_id}/action_urls">client.user_profiles.action_urls.<a href="./src/anthropic/resources/user_profiles/action_urls.py">create</a>(user_profile_id, \*\*<a href="src/anthropic/types/user_profiles/action_url_create_params.py">params</a>) -> <a href="./src/anthropic/types/user_profiles/user_profile_action_url.py">UserProfileActionURL</a></code>
+
 # Organization
 
 Types:
@@ -2307,6 +2352,7 @@ Types:
 
 ```python
 from anthropic.types.beta import (
+    BetaDeletedUserProfile,
     BetaUserProfile,
     BetaUserProfileEnrollmentURL,
     BetaUserProfileExternalUserDetails,
@@ -2317,11 +2363,27 @@ from anthropic.types.beta import (
 
 Methods:
 
-- <code title="post /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">create</a>(\*\*<a href="src/anthropic/types/beta/user_profile_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
-- <code title="get /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
-- <code title="post /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profile_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
-- <code title="get /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">list</a>(\*\*<a href="src/anthropic/types/beta/user_profile_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">SyncPageCursor[BetaUserProfile]</a></code>
-- <code title="post /v1/user_profiles/{user_profile_id}/enrollment_url?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles.py">create_enrollment_url</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile_enrollment_url.py">BetaUserProfileEnrollmentURL</a></code>
+- <code title="post /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">create</a>(\*\*<a href="src/anthropic/types/beta/user_profile_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="get /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profile_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">BetaUserProfile</a></code>
+- <code title="get /v1/user_profiles?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">list</a>(\*\*<a href="src/anthropic/types/beta/user_profile_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/beta_user_profile.py">SyncPageCursor[BetaUserProfile]</a></code>
+- <code title="delete /v1/user_profiles/{user_profile_id}?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">delete</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_deleted_user_profile.py">BetaDeletedUserProfile</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}/enrollment_url?beta=true">client.beta.user_profiles.<a href="./src/anthropic/resources/beta/user_profiles/user_profiles.py">create_enrollment_url</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/beta_user_profile_enrollment_url.py">BetaUserProfileEnrollmentURL</a></code>
+
+### ActionURLs
+
+Types:
+
+```python
+from anthropic.types.beta.user_profiles import (
+    BetaUserProfileActionURL,
+    BetaUserProfileEnrollEndUserActionParam,
+)
+```
+
+Methods:
+
+- <code title="post /v1/user_profiles/{user_profile_id}/action_urls?beta=true">client.beta.user_profiles.action_urls.<a href="./src/anthropic/resources/beta/user_profiles/action_urls.py">create</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profiles/action_url_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/user_profiles/beta_user_profile_action_url.py">BetaUserProfileActionURL</a></code>
 
 ## Dreams
 

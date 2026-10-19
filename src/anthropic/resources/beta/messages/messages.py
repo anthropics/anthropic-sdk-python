@@ -451,7 +451,7 @@ class Messages(SyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -803,7 +803,7 @@ class Messages(SyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -1155,7 +1155,7 @@ class Messages(SyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -2064,7 +2064,7 @@ class Messages(SyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -2481,7 +2481,7 @@ class AsyncMessages(AsyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -2833,7 +2833,7 @@ class AsyncMessages(AsyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -3185,7 +3185,7 @@ class AsyncMessages(AsyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -4085,7 +4085,7 @@ class AsyncMessages(AsyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).

@@ -4,6 +4,7 @@
 
 ### Features
 
+* **api:** make User Profiles generally available
 * **client:** yield server-sent events with unrecognized event names
 
 
