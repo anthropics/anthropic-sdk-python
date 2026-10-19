@@ -11,16 +11,10 @@ __all__ = ["MemoryStoreListParams"]
 
 class MemoryStoreListParams(TypedDict, total=False):
     created_at_gte: Union[str, datetime]
-    """Return only stores whose `created_at` is at or after this time (inclusive).
-
-    Sent on the wire as `created_at[gte]`.
-    """
+    """Return only memory stores created at or after this time (inclusive)."""
 
     created_at_lte: Union[str, datetime]
-    """Return only stores whose `created_at` is at or before this time (inclusive).
-
-    Sent on the wire as `created_at[lte]`.
-    """
+    """Return only memory stores created at or before this time (inclusive)."""
 
     include_archived: bool
     """When `true`, archived stores are included in the results.
@@ -35,10 +29,9 @@ class MemoryStoreListParams(TypedDict, total=False):
     """
 
     page: str
-    """Opaque pagination cursor (a `page_...` value).
+    """The `next_page` value from a previous response, to get the next page.
 
-    Pass the `next_page` value from a previous response to fetch the next page; omit
-    for the first page.
+    Omit it to get the first page.
     """
 
     betas: List[AnthropicBetaParam]

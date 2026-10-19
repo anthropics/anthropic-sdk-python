@@ -84,23 +84,31 @@ class MemoryStores(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """Create a memory store
+        """
+        Create a Memory Store
 
         Args:
-          name: Human-readable name for the store.
+          name: The name of the memory store, 1 to 255 characters long, without control
+              characters. Names don't have to be unique in a workspace.
 
-        Required; 1–255 characters; no control
-              characters. The mount-path slug under `/mnt/memory/` is derived from this name
-              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
-              unique within a workspace.
+              In a session, the store's directory under `/mnt/memory/` is based on this name.
+              The name is lowercased and every run of characters other than ASCII letters and
+              digits becomes one hyphen. The session's memory store resource gives the exact
+              path in `mount_path`.
 
-          description: Free-text description of what the store contains, up to 1024 characters.
+              See the
+              [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#how-the-agent-accesses-memory)
+              to learn more about how agents access memory stores.
+
+          description: Free-text description of what the store contains, up to 1,024 characters.
               Included in the agent's system prompt when the store is attached, so word it to
               be useful to the agent.
 
-          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-              Not visible to the agent.
+          metadata: Key-value pairs for your own use, such as the end user that the store belongs
+              to. The agent doesn't see them.
+
+              A store has at most 16 pairs. Keys are 1 to 64 characters long and values at
+              most 512 characters.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -165,11 +173,10 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Retrieve a memory store
+        Retrieve a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
-              Enumerate IDs via `GET /v1/memory_stores`.
+          memory_store_id: The ID of the memory store to retrieve (`memstore_...`).
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -234,23 +241,28 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Update a memory store
+        Update a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to update (a `memstore_...` identifier). Required.
-              Enumerate IDs via `GET /v1/memory_stores`. Updating an archived store
-              returns 400.
+          memory_store_id: The ID of the memory store to update (`memstore_...`).
 
-          description: New description for the store, up to 1024 characters. Pass an empty string to
+              The request fails with HTTP status 400 if the store is archived.
+
+          description: New description for the store, up to 1,024 characters. Pass an empty string to
               clear it.
 
-          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
-              Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
-              each) with values up to 512 chars.
+          metadata: Changes to apply to the memory store's metadata. Keys you leave out keep their
+              values.
 
-          name: New human-readable name for the store. 1–255 characters; no control characters.
-              Renaming changes the slug used for the store's `mount_path` in sessions created
-              after the update.
+              Set a key to a string to add or replace it, or to `null` to remove it. After the
+              change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64
+              characters long and values at most 512 characters.
+
+          name: The new name of the memory store, 1 to 255 characters long, without control
+              characters.
+
+              Sessions created after the change use the new name for the store's directory
+              under `/mnt/memory/`.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -321,14 +333,12 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryStore]:
         """
-        List memory stores
+        List Memory Stores
 
         Args:
-          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
-              on the wire as `created_at[gte]`.
+          created_at_gte: Return only memory stores created at or after this time (inclusive).
 
-          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
-              Sent on the wire as `created_at[lte]`.
+          created_at_lte: Return only memory stores created at or before this time (inclusive).
 
           include_archived: When `true`, archived stores are included in the results. Defaults to `false`
               (archived stores are excluded).
@@ -336,8 +346,8 @@ class MemoryStores(SyncAPIResource):
           limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted.
 
-          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
-              previous response to fetch the next page; omit for the first page.
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -404,12 +414,13 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        Delete a memory store
+        Delete a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to permanently delete (a `memstore_...` identifier).
-              Required. Deletion cascades to all memories and memory versions in the store and
-              cannot be undone.
+          memory_store_id: The ID of the memory store to delete (`memstore_...`).
+
+              Deleting a store also deletes all its memories and memory versions. It can't be
+              undone.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -471,12 +482,13 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Archive a memory store
+        Archive a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to archive (a `memstore_...` identifier). Required.
-              Archiving is one-way and idempotent; archived stores cannot be unarchived.
-              Enumerate IDs via `GET /v1/memory_stores`.
+          memory_store_id: The ID of the memory store to archive (`memstore_...`).
+
+              Archiving can't be undone. Archiving a store that is already archived returns it
+              unchanged.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -568,23 +580,31 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """Create a memory store
+        """
+        Create a Memory Store
 
         Args:
-          name: Human-readable name for the store.
+          name: The name of the memory store, 1 to 255 characters long, without control
+              characters. Names don't have to be unique in a workspace.
 
-        Required; 1–255 characters; no control
-              characters. The mount-path slug under `/mnt/memory/` is derived from this name
-              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
-              unique within a workspace.
+              In a session, the store's directory under `/mnt/memory/` is based on this name.
+              The name is lowercased and every run of characters other than ASCII letters and
+              digits becomes one hyphen. The session's memory store resource gives the exact
+              path in `mount_path`.
 
-          description: Free-text description of what the store contains, up to 1024 characters.
+              See the
+              [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#how-the-agent-accesses-memory)
+              to learn more about how agents access memory stores.
+
+          description: Free-text description of what the store contains, up to 1,024 characters.
               Included in the agent's system prompt when the store is attached, so word it to
               be useful to the agent.
 
-          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-              Not visible to the agent.
+          metadata: Key-value pairs for your own use, such as the end user that the store belongs
+              to. The agent doesn't see them.
+
+              A store has at most 16 pairs. Keys are 1 to 64 characters long and values at
+              most 512 characters.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -649,11 +669,10 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Retrieve a memory store
+        Retrieve a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to retrieve (a `memstore_...` identifier). Required.
-              Enumerate IDs via `GET /v1/memory_stores`.
+          memory_store_id: The ID of the memory store to retrieve (`memstore_...`).
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -718,23 +737,28 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Update a memory store
+        Update a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to update (a `memstore_...` identifier). Required.
-              Enumerate IDs via `GET /v1/memory_stores`. Updating an archived store
-              returns 400.
+          memory_store_id: The ID of the memory store to update (`memstore_...`).
 
-          description: New description for the store, up to 1024 characters. Pass an empty string to
+              The request fails with HTTP status 400 if the store is archived.
+
+          description: New description for the store, up to 1,024 characters. Pass an empty string to
               clear it.
 
-          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
-              Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
-              each) with values up to 512 chars.
+          metadata: Changes to apply to the memory store's metadata. Keys you leave out keep their
+              values.
 
-          name: New human-readable name for the store. 1–255 characters; no control characters.
-              Renaming changes the slug used for the store's `mount_path` in sessions created
-              after the update.
+              Set a key to a string to add or replace it, or to `null` to remove it. After the
+              change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64
+              characters long and values at most 512 characters.
+
+          name: The new name of the memory store, 1 to 255 characters long, without control
+              characters.
+
+              Sessions created after the change use the new name for the store's directory
+              under `/mnt/memory/`.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -805,14 +829,12 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryStore, AsyncPageCursor[BetaManagedAgentsMemoryStore]]:
         """
-        List memory stores
+        List Memory Stores
 
         Args:
-          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
-              on the wire as `created_at[gte]`.
+          created_at_gte: Return only memory stores created at or after this time (inclusive).
 
-          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
-              Sent on the wire as `created_at[lte]`.
+          created_at_lte: Return only memory stores created at or before this time (inclusive).
 
           include_archived: When `true`, archived stores are included in the results. Defaults to `false`
               (archived stores are excluded).
@@ -820,8 +842,8 @@ class AsyncMemoryStores(AsyncAPIResource):
           limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted.
 
-          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
-              previous response to fetch the next page; omit for the first page.
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -888,12 +910,13 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        Delete a memory store
+        Delete a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to permanently delete (a `memstore_...` identifier).
-              Required. Deletion cascades to all memories and memory versions in the store and
-              cannot be undone.
+          memory_store_id: The ID of the memory store to delete (`memstore_...`).
+
+              Deleting a store also deletes all its memories and memory versions. It can't be
+              undone.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.
@@ -955,12 +978,13 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Archive a memory store
+        Archive a Memory Store
 
         Args:
-          memory_store_id: ID of the memory store to archive (a `memstore_...` identifier). Required.
-              Archiving is one-way and idempotent; archived stores cannot be unarchived.
-              Enumerate IDs via `GET /v1/memory_stores`.
+          memory_store_id: The ID of the memory store to archive (`memstore_...`).
+
+              Archiving can't be undone. Archiving a store that is already archived returns it
+              unchanged.
 
           betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
               `managed-agents-2026-04-01` in this header.

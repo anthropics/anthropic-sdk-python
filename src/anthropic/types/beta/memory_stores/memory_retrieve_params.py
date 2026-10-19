@@ -14,12 +14,12 @@ class MemoryRetrieveParams(TypedDict, total=False):
     """The ID of the memory store that holds the memory (`memstore_...`)."""
 
     view: BetaManagedAgentsMemoryView
-    """Selects which projection of a `memory` or `memory_version` the server returns.
+    """Whether a `memory` or `memory_version` in the response includes its `content`.
 
-    `basic` returns the object with `content` set to `null`; `full` populates
-    `content`. When omitted, the default is endpoint-specific: retrieve operations
-    default to `full`; list, create, and update operations default to `basic`.
-    Listing with `view=full` caps `limit` at 20.
+    Defaults to `full` on retrieve operations and to `basic` on list, create, and
+    update operations.
+
+    With `full`, list operations return at most 20 items per page.
     """
 
     betas: List[AnthropicBetaParam]
