@@ -784,6 +784,7 @@ async def test_bash_outer_cancel_closes_subprocess_no_stale_state(tmp_path: Path
 
 
 @needs_pydantic_v2
+@needs_symlinks
 async def test_read_through_symlink_escape_is_rejected(tmp_path: Path) -> None:
     """resolve_path realpaths, so a symlink that escapes the workdir is caught."""
     outside = tmp_path / "outside"
@@ -886,6 +887,7 @@ async def test_glob_rejects_dotdot_pattern(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+@needs_symlinks
 async def test_glob_post_filters_symlink_escape(tmp_path: Path) -> None:
     """A symlink traversed mid-pattern must not let a glob result escape the workdir."""
     outside = tmp_path / "outside"
@@ -911,6 +913,7 @@ async def test_glob_drops_matches_that_cannot_be_canonicalised(tmp_path: Path) -
 
 
 @needs_pydantic_v2
+@needs_symlinks
 async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The fallback walker must not read through a symlink that escapes the workdir."""
     secret = tmp_path / "secret.txt"

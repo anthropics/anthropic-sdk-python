@@ -4,9 +4,9 @@ import base64
 import struct
 import typing as t
 import binascii
-import tempfile
 import threading
 from typing import TypedDict, cast
+from pathlib import Path
 from typing_extensions import Protocol
 
 import httpx2
@@ -61,13 +61,12 @@ def profiles() -> t.List[AwsConfigProfile]:
 def mock_aws_config(
     profiles: t.List[AwsConfigProfile],
     monkeypatch: t.Any,
+    tmp_path: Path,
 ) -> t.Iterable[None]:
-    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
-        for profile in profiles:
-            temp_file.write(profile_to_ini(profile))
-        temp_file.flush()
-        monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
-        yield
+    config_file = tmp_path / "aws_config"
+    config_file.write_text("".join(profile_to_ini(profile) for profile in profiles))
+    monkeypatch.setenv("AWS_CONFIG_FILE", str(config_file))
+    yield
 
 
 @pytest.mark.respx()
