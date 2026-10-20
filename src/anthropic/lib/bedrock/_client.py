@@ -9,8 +9,9 @@ import httpx2
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
-from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
+from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
+from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
 from ..._streaming import Stream, AsyncStream
@@ -30,26 +31,12 @@ from ...resources.messages import Messages, AsyncMessages
 
 DEFAULT_VERSION = "bedrock-2023-05-31"
 
-USER_PROFILE_ID_HEADER = "anthropic-user-profile-id"
-
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
-def keep_client_user_profile_header(options: FinalRequestOptions) -> None:
-    """An unset `user_profile_id` argument arrives as `Omit`, which would otherwise hide the client's header."""
-    if is_given(options.headers):
-        options.headers = {
-            name: value
-            for name, value in options.headers.items()
-            if not (name.lower() == USER_PROFILE_ID_HEADER and isinstance(value, Omit))
-        }
-
-
 def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
-    options = model_copy(input_options, deep=True)
-
-    keep_client_user_profile_header(options)
+    options = model_copy(_keep_client_header_params(input_options), deep=True)
 
     if is_dict(options.json_data):
         options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)

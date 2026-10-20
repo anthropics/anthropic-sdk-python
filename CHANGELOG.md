@@ -11,6 +11,12 @@
 * **google-cloud:** use the v1 endpoints and add the organization endpoint
 
 
+### Bug Fixes
+
+* **bedrock:** keep a workspace ID set in default_headers on the Bedrock and Mantle clients
+* **google-cloud:** keep workspace and user profile IDs set in default_headers
+
+
 ### Chores
 
 * **ci:** skip the changelog check on draft pull requests

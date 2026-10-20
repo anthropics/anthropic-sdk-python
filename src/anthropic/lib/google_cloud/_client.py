@@ -377,7 +377,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
                 self._project = self._creds_state.adc_project
             self._resolve_deferred_base_url()
 
-        return options
+        return super()._prepare_options(options)
 
     @override
     def _prepare_request(self, request: httpx2.Request) -> None:
@@ -609,7 +609,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
                 self._project = self._creds_state.adc_project
             self._resolve_deferred_base_url()
 
-        return options
+        return await super()._prepare_options(options)
 
     @override
     async def _prepare_request(self, request: httpx2.Request) -> None:
