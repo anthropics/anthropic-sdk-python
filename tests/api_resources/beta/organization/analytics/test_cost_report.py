@@ -8,7 +8,7 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from tests.utils import assert_matches_type
 from anthropic._utils import parse_datetime
-from anthropic.pagination import SyncPageCursor, AsyncPageCursor
+from anthropic.pagination import SyncReportPageCursor, AsyncReportPageCursor
 from anthropic.types.beta.organization import BetaAnalyticsCostReportTimeBucket
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -22,7 +22,7 @@ class TestCostReport:
         cost_report = client.beta.organization.analytics.cost_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
         )
-        assert_matches_type(SyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
@@ -44,7 +44,7 @@ class TestCostReport:
             speeds=["fast"],
             user_ids=["string"],
         )
-        assert_matches_type(SyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
@@ -55,7 +55,7 @@ class TestCostReport:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         cost_report = response.parse()
-        assert_matches_type(SyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
@@ -66,7 +66,7 @@ class TestCostReport:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             cost_report = response.parse()
-            assert_matches_type(SyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+            assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -81,7 +81,7 @@ class TestAsyncCostReport:
         cost_report = await async_client.beta.organization.analytics.cost_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
         )
-        assert_matches_type(AsyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
@@ -103,7 +103,7 @@ class TestAsyncCostReport:
             speeds=["fast"],
             user_ids=["string"],
         )
-        assert_matches_type(AsyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
@@ -114,7 +114,7 @@ class TestAsyncCostReport:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         cost_report = await response.parse()
-        assert_matches_type(AsyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+        assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
@@ -125,6 +125,8 @@ class TestAsyncCostReport:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             cost_report = await response.parse()
-            assert_matches_type(AsyncPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"])
+            assert_matches_type(
+                AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket], cost_report, path=["response"]
+            )
 
         assert cast(Any, response.is_closed) is True

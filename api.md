@@ -2871,25 +2871,25 @@ Methods:
 
 Methods:
 
-- <code title="get /v1/organizations/analytics/usage_report?beta=true">client.beta.organization.analytics.usage_report.<a href="./src/anthropic/resources/beta/organization/analytics/usage_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/usage_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_usage_report_time_bucket.py">SyncPageCursor[BetaAnalyticsUsageReportTimeBucket]</a></code>
+- <code title="get /v1/organizations/analytics/usage_report?beta=true">client.beta.organization.analytics.usage_report.<a href="./src/anthropic/resources/beta/organization/analytics/usage_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/usage_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_usage_report_time_bucket.py">SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket]</a></code>
 
 #### UserUsageReport
 
 Methods:
 
-- <code title="get /v1/organizations/analytics/user_usage_report?beta=true">client.beta.organization.analytics.user_usage_report.<a href="./src/anthropic/resources/beta/organization/analytics/user_usage_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/user_usage_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_usage_users_item.py">SyncPageCursor[BetaAnalyticsUsageUsersItem]</a></code>
+- <code title="get /v1/organizations/analytics/user_usage_report?beta=true">client.beta.organization.analytics.user_usage_report.<a href="./src/anthropic/resources/beta/organization/analytics/user_usage_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/user_usage_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_usage_users_item.py">SyncReportPageCursor[BetaAnalyticsUsageUsersItem]</a></code>
 
 #### CostReport
 
 Methods:
 
-- <code title="get /v1/organizations/analytics/cost_report?beta=true">client.beta.organization.analytics.cost_report.<a href="./src/anthropic/resources/beta/organization/analytics/cost_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/cost_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_cost_report_time_bucket.py">SyncPageCursor[BetaAnalyticsCostReportTimeBucket]</a></code>
+- <code title="get /v1/organizations/analytics/cost_report?beta=true">client.beta.organization.analytics.cost_report.<a href="./src/anthropic/resources/beta/organization/analytics/cost_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/cost_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_cost_report_time_bucket.py">SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket]</a></code>
 
 #### UserCostReport
 
 Methods:
 
-- <code title="get /v1/organizations/analytics/user_cost_report?beta=true">client.beta.organization.analytics.user_cost_report.<a href="./src/anthropic/resources/beta/organization/analytics/user_cost_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/user_cost_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_cost_users_item.py">SyncPageCursor[BetaAnalyticsCostUsersItem]</a></code>
+- <code title="get /v1/organizations/analytics/user_cost_report?beta=true">client.beta.organization.analytics.user_cost_report.<a href="./src/anthropic/resources/beta/organization/analytics/user_cost_report.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/user_cost_report_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_cost_users_item.py">SyncReportPageCursor[BetaAnalyticsCostUsersItem]</a></code>
 
 ### SpendLimits
 
