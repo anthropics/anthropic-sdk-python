@@ -14,6 +14,8 @@ jobs:
       id-token: write
     env:
       NODE_OPTIONS: --use-openssl-ca
+      UV_NATIVE_TLS: 'true'
+      UV_SYSTEM_CERTS: 'true'
 
     steps:
       - name: Set up CA certificates
