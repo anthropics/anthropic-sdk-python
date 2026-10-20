@@ -13,7 +13,7 @@ import httpx2
 
 from ._utils import extract_type_var_from_base
 from ._compat import cached_property
-from ._exceptions import AnthropicError, APITimeoutError, APIConnectionError
+from ._exceptions import APITimeoutError, APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -73,11 +73,7 @@ class Stream(Generic[_T]):
             yield from self._decoder.iter_bytes(self.response.iter_bytes())
         except httpx2.TimeoutException as err:
             raise APITimeoutError(request=self.response.request) from err
-        except Exception as err:
-            if isinstance(err, AnthropicError):
-                # SDK-originated errors already carry their own type; don't wrap.
-                raise
-
+        except httpx2.TransportError as err:
             raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
@@ -211,11 +207,7 @@ class AsyncStream(Generic[_T]):
                 yield sse
         except httpx2.TimeoutException as err:
             raise APITimeoutError(request=self.response.request) from err
-        except Exception as err:
-            if isinstance(err, AnthropicError):
-                # SDK-originated errors already carry their own type; don't wrap.
-                raise
-
+        except httpx2.TransportError as err:
             raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
