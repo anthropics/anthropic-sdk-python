@@ -22,13 +22,18 @@ class MemoryVersionListParams(TypedDict, total=False):
     """Return versions created at or before this time (inclusive)."""
 
     limit: int
-    """The maximum number of versions to return per page. Defaults to 20."""
+    """The maximum number of versions to return per page, from 1 to 100.
+
+    Defaults to 20.
+
+    With `view=full`, a page holds at most 20 versions.
+    """
 
     memory_id: str
     """Return only versions of the memory with this ID (`mem_...`).
 
-    The filter still works after the memory is deleted. The results then include the
-    version whose `operation` is `deleted`.
+    The filter still works after the memory is deleted. While that memory's versions
+    are retained, the results include the version whose `operation` is `deleted`.
     """
 
     operation: BetaManagedAgentsMemoryVersionOperation
@@ -47,12 +52,12 @@ class MemoryVersionListParams(TypedDict, total=False):
     """Return only versions written by the session with this ID."""
 
     view: BetaManagedAgentsMemoryView
-    """Selects which projection of a `memory` or `memory_version` the server returns.
+    """Whether a `memory` or `memory_version` in the response includes its `content`.
 
-    `basic` returns the object with `content` set to `null`; `full` populates
-    `content`. When omitted, the default is endpoint-specific: retrieve operations
-    default to `full`; list, create, and update operations default to `basic`.
-    Listing with `view=full` caps `limit` at 20.
+    Defaults to `full` on retrieve operations and to `basic` on list, create, and
+    update operations.
+
+    With `full`, list operations return at most 20 items per page.
     """
 
     betas: List[AnthropicBetaParam]

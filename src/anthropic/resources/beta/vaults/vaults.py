@@ -70,7 +70,7 @@ class Vaults(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Create Vault
+        """Create a Vault
 
         Args:
           display_name: Human-readable name for the vault.
@@ -142,7 +142,7 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Get Vault
+        Retrieve a Vault
 
         Args:
           vault_id: Unique identifier of the vault to retrieve.
@@ -209,7 +209,7 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Update Vault
+        Update a Vault
 
         Args:
           vault_id: Unique identifier of the vault to update.
@@ -288,11 +288,13 @@ class Vaults(SyncAPIResource):
         List Vaults
 
         Args:
-          include_archived: Whether to include archived vaults in the results.
+          include_archived: Whether to include archived vaults in the results. Defaults to `false`.
 
           limit: Maximum number of vaults to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_vaults` response.
+          page: The `next_page` value from a previous
+              [List Vaults](https://platform.claude.com/docs/en/api/beta/vaults/list)
+              response, to get the next page. Leave it out to get the first page.
 
           betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
               header.
@@ -357,7 +359,7 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedVault:
         """
-        Delete Vault
+        Delete a Vault
 
         Args:
           vault_id: Unique identifier of the vault to delete.
@@ -422,7 +424,7 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Archive Vault
+        Archive a Vault
 
         Args:
           vault_id: Unique identifier of the vault to archive.
@@ -512,7 +514,7 @@ class AsyncVaults(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Create Vault
+        """Create a Vault
 
         Args:
           display_name: Human-readable name for the vault.
@@ -584,7 +586,7 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Get Vault
+        Retrieve a Vault
 
         Args:
           vault_id: Unique identifier of the vault to retrieve.
@@ -651,7 +653,7 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Update Vault
+        Update a Vault
 
         Args:
           vault_id: Unique identifier of the vault to update.
@@ -730,11 +732,13 @@ class AsyncVaults(AsyncAPIResource):
         List Vaults
 
         Args:
-          include_archived: Whether to include archived vaults in the results.
+          include_archived: Whether to include archived vaults in the results. Defaults to `false`.
 
           limit: Maximum number of vaults to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_vaults` response.
+          page: The `next_page` value from a previous
+              [List Vaults](https://platform.claude.com/docs/en/api/beta/vaults/list)
+              response, to get the next page. Leave it out to get the first page.
 
           betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
               header.
@@ -799,7 +803,7 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedVault:
         """
-        Delete Vault
+        Delete a Vault
 
         Args:
           vault_id: Unique identifier of the vault to delete.
@@ -864,7 +868,7 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Archive Vault
+        Archive a Vault
 
         Args:
           vault_id: Unique identifier of the vault to archive.

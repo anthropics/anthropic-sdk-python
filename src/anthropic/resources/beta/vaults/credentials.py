@@ -63,7 +63,7 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Create Credential
+        Create a Credential
 
         Args:
           vault_id: Identifier of the vault to create the credential in.
@@ -142,7 +142,7 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Get Credential
+        Retrieve a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -219,15 +219,15 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Update Credential
+        Update a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
 
           credential_id: Unique identifier of the credential to update.
 
-          auth: Updated authentication configuration. The `type` is immutable; the variant sent
-              must match the stored credential's type.
+          auth: New authentication settings for the credential. The `type` must match the
+              credential's current type, which can't be changed.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
 
@@ -313,11 +313,13 @@ class Credentials(SyncAPIResource):
         Args:
           vault_id: Identifier of the vault to list credentials for.
 
-          include_archived: Whether to include archived credentials in the results.
+          include_archived: Whether to include archived credentials in the results. Defaults to `false`.
 
           limit: Maximum number of credentials to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_credentials` response.
+          page: The `next_page` value from a previous
+              [List Credentials](https://platform.claude.com/docs/en/api/beta/vaults/credentials/list)
+              response, to get the next page. Leave it out to get the first page.
 
           betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
               header.
@@ -386,7 +388,7 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedCredential:
         """
-        Delete Credential
+        Delete a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -460,7 +462,7 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Archive Credential
+        Archive a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -534,7 +536,7 @@ class Credentials(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredentialValidation:
         """
-        Validate Credential
+        Validate an MCP OAuth Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -631,7 +633,7 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Create Credential
+        Create a Credential
 
         Args:
           vault_id: Identifier of the vault to create the credential in.
@@ -710,7 +712,7 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Get Credential
+        Retrieve a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -787,15 +789,15 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Update Credential
+        Update a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
 
           credential_id: Unique identifier of the credential to update.
 
-          auth: Updated authentication configuration. The `type` is immutable; the variant sent
-              must match the stored credential's type.
+          auth: New authentication settings for the credential. The `type` must match the
+              credential's current type, which can't be changed.
 
           display_name: Updated human-readable name for the credential. 1-255 characters.
 
@@ -881,11 +883,13 @@ class AsyncCredentials(AsyncAPIResource):
         Args:
           vault_id: Identifier of the vault to list credentials for.
 
-          include_archived: Whether to include archived credentials in the results.
+          include_archived: Whether to include archived credentials in the results. Defaults to `false`.
 
           limit: Maximum number of credentials to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_credentials` response.
+          page: The `next_page` value from a previous
+              [List Credentials](https://platform.claude.com/docs/en/api/beta/vaults/credentials/list)
+              response, to get the next page. Leave it out to get the first page.
 
           betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
               header.
@@ -954,7 +958,7 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedCredential:
         """
-        Delete Credential
+        Delete a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -1028,7 +1032,7 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredential:
         """
-        Archive Credential
+        Archive a Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.
@@ -1102,7 +1106,7 @@ class AsyncCredentials(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsCredentialValidation:
         """
-        Validate Credential
+        Validate an MCP OAuth Credential
 
         Args:
           vault_id: Identifier of the vault containing the credential.

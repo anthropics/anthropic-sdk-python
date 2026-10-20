@@ -300,8 +300,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     user_profile_id: str
     """The user profile ID to attribute this request to.
 
-    Use when acting on behalf of a party other than your organization. Requires the
-    `user-profiles` beta header.
+    Use when acting on behalf of a party other than your organization.
     """
 
     workspace_id: str

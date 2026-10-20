@@ -10,13 +10,17 @@ __all__ = ["CredentialListParams"]
 
 class CredentialListParams(TypedDict, total=False):
     include_archived: bool
-    """Whether to include archived credentials in the results."""
+    """Whether to include archived credentials in the results. Defaults to `false`."""
 
     limit: int
     """Maximum number of credentials to return per page. Defaults to 20, maximum 100."""
 
     page: str
-    """Opaque pagination token from a previous `list_credentials` response."""
+    """
+    The `next_page` value from a previous
+    [List Credentials](https://platform.claude.com/docs/en/api/beta/vaults/credentials/list)
+    response, to get the next page. Leave it out to get the first page.
+    """
 
     betas: List[AnthropicBetaParam]
     """

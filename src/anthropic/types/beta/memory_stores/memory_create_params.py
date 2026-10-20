@@ -11,29 +11,29 @@ __all__ = ["MemoryCreateParams"]
 
 class MemoryCreateParams(TypedDict, total=False):
     content: Required[Optional[str]]
-    """UTF-8 text content for the new memory.
+    """The UTF-8 text content of the new memory. Pass `""` to create an empty memory.
 
-    Maximum 100 kB (102,400 bytes). Required; pass `""` explicitly to create an
-    empty memory.
+    The maximum size is 100 kB (102,400 bytes).
     """
 
     path: Required[str]
-    """Hierarchical path for the new memory, e.g.
+    """The path of the new memory, such as `/projects/foo/notes.md`.
 
-    `/projects/foo/notes.md`. Must start with `/`, contain at least one non-empty
-    segment, and be at most 1,024 bytes. Must not contain empty segments, `.` or
-    `..` segments, control or format characters, or the Unicode line and paragraph
-    separators (U+2028, U+2029), and must be NFC-normalized. Paths are
-    case-sensitive.
+    Paths are case-sensitive.
+
+    A path starts with `/` and has 1 to 20 segments. A segment can't be empty and
+    can't be `.` or `..`. A path can't contain control characters, format
+    characters, or the line and paragraph separators U+2028 and U+2029. It must be
+    in Unicode Normalization Form C and at most 1,024 bytes long.
     """
 
     view: BetaManagedAgentsMemoryView
-    """Selects which projection of a `memory` or `memory_version` the server returns.
+    """Whether a `memory` or `memory_version` in the response includes its `content`.
 
-    `basic` returns the object with `content` set to `null`; `full` populates
-    `content`. When omitted, the default is endpoint-specific: retrieve operations
-    default to `full`; list, create, and update operations default to `basic`.
-    Listing with `view=full` caps `limit` at 20.
+    Defaults to `full` on retrieve operations and to `basic` on list, create, and
+    update operations.
+
+    With `full`, list operations return at most 20 items per page.
     """
 
     betas: List[AnthropicBetaParam]

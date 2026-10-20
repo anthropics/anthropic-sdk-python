@@ -31,6 +31,7 @@ from .stop_reason import StopReason as StopReason
 from .deleted_file import DeletedFile as DeletedFile
 from .skill_params import SkillParams as SkillParams
 from .skill_source import SkillSource as SkillSource
+from .user_profile import UserProfile as UserProfile
 from .beta_currency import BetaCurrency as BetaCurrency
 from .content_block import ContentBlock as ContentBlock
 from .deleted_skill import DeletedSkill as DeletedSkill
@@ -116,6 +117,7 @@ from .computer_member_name import (
     COMPUTER_MEMBER_NAME_VALUES as COMPUTER_MEMBER_NAME_VALUES,
     ComputerMemberName as ComputerMemberName,
 )
+from .deleted_user_profile import DeletedUserProfile as DeletedUserProfile
 from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
@@ -135,6 +137,7 @@ from .output_tokens_details import OutputTokensDetails as OutputTokensDetails
 from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
 from .thinking_config_param import ThinkingConfigParam as ThinkingConfigParam
 from .tool_choice_any_param import ToolChoiceAnyParam as ToolChoiceAnyParam
+from .user_profile_programs import UserProfilePrograms as UserProfilePrograms
 from .web_fetch_block_param import WebFetchBlockParam as WebFetchBlockParam
 from .browser_hold_key_input import BrowserHoldKeyInput as BrowserHoldKeyInput
 from .browser_navigate_input import BrowserNavigateInput as BrowserNavigateInput
@@ -165,6 +168,8 @@ from .raw_message_start_event import RawMessageStartEvent as RawMessageStartEven
 from .redacted_thinking_block import RedactedThinkingBlock as RedactedThinkingBlock
 from .server_tools_capability import ServerToolsCapability as ServerToolsCapability
 from .tool_result_block_param import ToolResultBlockParam as ToolResultBlockParam
+from .user_profile_cyber_tier import UserProfileCyberTier as UserProfileCyberTier
+from .user_profile_list_order import UserProfileListOrder as UserProfileListOrder
 from .web_search_result_block import WebSearchResultBlock as WebSearchResultBlock
 from .browser_form_input_input import BrowserFormInputInput as BrowserFormInputInput
 from .browser_form_input_value import BrowserFormInputValue as BrowserFormInputValue
@@ -182,6 +187,10 @@ from .json_output_format_param import JSONOutputFormatParam as JSONOutputFormatP
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
 from .server_tool_caller_param import ServerToolCallerParam as ServerToolCallerParam
 from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
+from .user_profile_access_type import UserProfileAccessType as UserProfileAccessType
+from .user_profile_efs_feature import UserProfileEfsFeature as UserProfileEfsFeature
+from .user_profile_efs_program import UserProfileEfsProgram as UserProfileEfsProgram
+from .user_profile_list_params import UserProfileListParams as UserProfileListParams
 from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSourceParam
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
 from .browser_coordinate_target import BrowserCoordinateTarget as BrowserCoordinateTarget
@@ -220,6 +229,10 @@ from .content_block_source_param import ContentBlockSourceParam as ContentBlockS
 from .file_document_source_param import FileDocumentSourceParam as FileDocumentSourceParam
 from .memory_tool_20250818_param import MemoryTool20250818Param as MemoryTool20250818Param
 from .tool_reference_block_param import ToolReferenceBlockParam as ToolReferenceBlockParam
+from .user_profile_create_params import UserProfileCreateParams as UserProfileCreateParams
+from .user_profile_cyber_program import UserProfileCyberProgram as UserProfileCyberProgram
+from .user_profile_list_order_by import UserProfileListOrderBy as UserProfileListOrderBy
+from .user_profile_update_params import UserProfileUpdateParams as UserProfileUpdateParams
 from .browser_find_tool_use_block import BrowserFindToolUseBlock as BrowserFindToolUseBlock
 from .browser_get_page_text_input import BrowserGetPageTextInput as BrowserGetPageTextInput
 from .browser_left_mouse_up_input import BrowserLeftMouseUpInput as BrowserLeftMouseUpInput
@@ -238,6 +251,7 @@ from .image_transformations_param import ImageTransformationsParam as ImageTrans
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
 from .server_tool_caller_20260120 import ServerToolCaller20260120 as ServerToolCaller20260120
 from .server_tool_use_block_param import ServerToolUseBlockParam as ServerToolUseBlockParam
+from .user_profile_program_status import UserProfileProgramStatus as UserProfileProgramStatus
 from .web_fetch_tool_result_block import WebFetchToolResultBlock as WebFetchToolResultBlock
 from .web_fetch_url_sources_param import WebFetchURLSourcesParam as WebFetchURLSourcesParam
 from .browser_hover_tool_use_block import BrowserHoverToolUseBlock as BrowserHoverToolUseBlock
@@ -307,6 +321,7 @@ from .response_browser_tool_use_block import ResponseBrowserToolUseBlock as Resp
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param as ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as ToolTextEditor20250728Param
+from .user_profile_cyber_requirements import UserProfileCyberRequirements as UserProfileCyberRequirements
 from .web_fetch_url_source_none_param import WebFetchURLSourceNoneParam as WebFetchURLSourceNoneParam
 from .web_fetch_url_source_only_param import WebFetchURLSourceOnlyParam as WebFetchURLSourceOnlyParam
 from .bash_code_execution_output_block import BashCodeExecutionOutputBlock as BashCodeExecutionOutputBlock
@@ -360,6 +375,7 @@ from .computer_screenshot_tool_use_block import ComputerScreenshotToolUseBlock a
 from .computer_triple_click_config_param import ComputerTripleClickConfigParam as ComputerTripleClickConfigParam
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
 from .tool_search_tool_result_error_code import ToolSearchToolResultErrorCode as ToolSearchToolResultErrorCode
+from .user_profile_external_user_details import UserProfileExternalUserDetails as UserProfileExternalUserDetails
 from .web_search_tool_result_block_param import WebSearchToolResultBlockParam as WebSearchToolResultBlockParam
 from .browser_double_click_tool_use_block import BrowserDoubleClickToolUseBlock as BrowserDoubleClickToolUseBlock
 from .browser_middle_click_tool_use_block import BrowserMiddleClickToolUseBlock as BrowserMiddleClickToolUseBlock
@@ -438,6 +454,9 @@ from .code_execution_tool_result_error_param import (
 from .response_browser_scroll_tool_use_block import (
     ResponseBrowserScrollToolUseBlock as ResponseBrowserScrollToolUseBlock,
 )
+from .user_profile_external_user_entity_type import (
+    UserProfileExternalUserEntityType as UserProfileExternalUserEntityType,
+)
 from .computer_cursor_position_tool_use_block import (
     ComputerCursorPositionToolUseBlock as ComputerCursorPositionToolUseBlock,
 )
@@ -482,6 +501,12 @@ from .response_browser_scroll_to_tool_use_block import (
 )
 from .response_computer_hold_key_tool_use_block import (
     ResponseComputerHoldKeyToolUseBlock as ResponseComputerHoldKeyToolUseBlock,
+)
+from .user_profile_external_user_account_status import (
+    UserProfileExternalUserAccountStatus as UserProfileExternalUserAccountStatus,
+)
+from .user_profile_external_user_details_params import (
+    UserProfileExternalUserDetailsParams as UserProfileExternalUserDetailsParams,
 )
 from .web_fetch_url_source_tool_reference_param import (
     WebFetchURLSourceToolReferenceParam as WebFetchURLSourceToolReferenceParam,

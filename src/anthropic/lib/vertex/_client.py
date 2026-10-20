@@ -11,6 +11,7 @@ from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
 from ..._types import NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
+from ..._client import _keep_client_header_params
 from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
 from ..._version import __version__
@@ -433,7 +434,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
 
 
 def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | None, region: str) -> FinalRequestOptions:
-    options = model_copy(input_options, deep=True)
+    options = model_copy(_keep_client_header_params(input_options), deep=True)
 
     if is_dict(options.json_data):
         options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)

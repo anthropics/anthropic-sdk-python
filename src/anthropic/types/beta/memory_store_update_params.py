@@ -10,24 +10,28 @@ __all__ = ["MemoryStoreUpdateParams"]
 
 class MemoryStoreUpdateParams(TypedDict, total=False):
     description: Optional[str]
-    """New description for the store, up to 1024 characters.
+    """New description for the store, up to 1,024 characters.
 
     Pass an empty string to clear it.
     """
 
     metadata: Optional[Dict[str, Optional[str]]]
-    """Metadata patch.
+    """Changes to apply to the memory store's metadata.
 
-    Set a key to a string to upsert it, or to null to delete it. Omit the field to
-    preserve. The stored bag is limited to 16 keys (up to 64 chars each) with values
-    up to 512 chars.
+    Keys you leave out keep their values.
+
+    Set a key to a string to add or replace it, or to `null` to remove it. After the
+    change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64
+    characters long and values at most 512 characters.
     """
 
     name: Optional[str]
-    """New human-readable name for the store.
+    """
+    The new name of the memory store, 1 to 255 characters long, without control
+    characters.
 
-    1–255 characters; no control characters. Renaming changes the slug used for the
-    store's `mount_path` in sessions created after the update.
+    Sessions created after the change use the new name for the store's directory
+    under `/mnt/memory/`.
     """
 
     betas: List[AnthropicBetaParam]

@@ -46,6 +46,14 @@ from .organization import (
     OrganizationWithStreamingResponse,
     AsyncOrganizationWithStreamingResponse,
 )
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
 
 __all__ = [
     "Messages",
@@ -72,6 +80,12 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
+    "UserProfiles",
+    "AsyncUserProfiles",
+    "UserProfilesWithRawResponse",
+    "AsyncUserProfilesWithRawResponse",
+    "UserProfilesWithStreamingResponse",
+    "AsyncUserProfilesWithStreamingResponse",
     "Organization",
     "AsyncOrganization",
     "OrganizationWithRawResponse",

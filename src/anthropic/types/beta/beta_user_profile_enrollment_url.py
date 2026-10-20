@@ -8,7 +8,7 @@ __all__ = ["BetaUserProfileEnrollmentURL"]
 
 class BetaUserProfileEnrollmentURL(BaseModel):
     """
-    A URL to give to the entity that a user profile represents, so that the entity can enroll for a trust grant.
+    A URL to give to the entity that a user profile represents, so that the entity can enroll in a program.
     """
 
     expires_at: datetime

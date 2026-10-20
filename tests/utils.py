@@ -182,7 +182,7 @@ _T = TypeVar("_T")
 _RequestedT = TypeVar("_RequestedT")
 _KeptT = TypeVar("_KeptT")
 
-EVENT = "event: completion\ndata: {}\n\n".encode()
+EVENT = "event: unhandled\ndata: {}\n\n".encode()
 
 
 class Body(httpx2.SyncByteStream, httpx2.AsyncByteStream):
