@@ -2338,6 +2338,8 @@ from anthropic.types.beta import (
     BetaWebhookSessionThreadIdledEventData,
     BetaWebhookSessionThreadTerminatedEventData,
     BetaWebhookSessionUpdatedEventData,
+    BetaWebhookUserProfileEnforcementActionOpenedEventData,
+    BetaWebhookUserProfileEnforcementActionResolvedEventData,
     BetaWebhookVaultArchivedEventData,
     BetaWebhookVaultCreatedEventData,
     BetaWebhookVaultCredentialArchivedEventData,
@@ -3167,3 +3169,26 @@ Methods:
 - <code title="get /v1/organizations/telemetry_destinations/{destination_id}/workspaces?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">list</a>(destination_id, \*\*<a href="src/anthropic/types/beta/organization/telemetry_destinations/workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_telemetry_destination_workspace.py">SyncPageCursor[BetaTelemetryDestinationWorkspace]</a></code>
 - <code title="post /v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">add</a>(workspace_id, \*, destination_id) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_telemetry_destination_workspace.py">BetaTelemetryDestinationWorkspace</a></code>
 - <code title="delete /v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true">client.beta.organization.telemetry_destinations.workspaces.<a href="./src/anthropic/resources/beta/organization/telemetry_destinations/workspaces.py">remove</a>(workspace_id, \*, destination_id) -> <a href="./src/anthropic/types/beta/organization/telemetry_destinations/beta_deleted_telemetry_destination_workspace.py">BetaDeletedTelemetryDestinationWorkspace</a></code>
+
+### Webhooks
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaDeletedOrganizationWebhookEndpoint,
+    BetaNewOrganizationWebhookEndpoint,
+    BetaOrganizationWebhookEndpoint,
+    BetaOrganizationWebhookEndpointSigningSecret,
+    BetaOrganizationWebhookEndpointState,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/webhooks?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/webhook_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_new_organization_webhook_endpoint.py">BetaNewOrganizationWebhookEndpoint</a></code>
+- <code title="get /v1/organizations/webhooks/{webhook_endpoint_id}?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">retrieve</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint.py">BetaOrganizationWebhookEndpoint</a></code>
+- <code title="post /v1/organizations/webhooks/{webhook_endpoint_id}?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">update</a>(webhook_endpoint_id, \*\*<a href="src/anthropic/types/beta/organization/webhook_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint.py">BetaOrganizationWebhookEndpoint</a></code>
+- <code title="get /v1/organizations/webhooks?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/webhook_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint.py">SyncPage[BetaOrganizationWebhookEndpoint]</a></code>
+- <code title="delete /v1/organizations/webhooks/{webhook_endpoint_id}?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">delete</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_organization_webhook_endpoint.py">BetaDeletedOrganizationWebhookEndpoint</a></code>
+- <code title="post /v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret?beta=true">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">regenerate_signing_secret</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint_signing_secret.py">BetaOrganizationWebhookEndpointSigningSecret</a></code>

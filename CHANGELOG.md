@@ -4,6 +4,7 @@
 
 ### Features
 
+* **api:** add org webhook endpoints and user profile enforcement events
 * **api:** add RBAC Group owner-access error codes to the Admin API
 * **api:** document the unsupported_charset error code for plugin uploads
 
