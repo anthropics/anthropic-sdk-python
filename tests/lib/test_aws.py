@@ -541,6 +541,122 @@ async def test_sigv4_binary_file_upload(sync: bool, respx_mock: MockRouter) -> N
     assert calls[0].request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
 
 
+def respond_to_user_profiles(request: httpx2.Request) -> httpx2.Response:
+    if request.method == "DELETE":
+        return httpx2.Response(200, json={"id": "uprof_test", "type": "user_profile_deleted"})
+    if request.method == "GET" and request.url.path.endswith("/user_profiles"):
+        return httpx2.Response(200, json={"data": [], "next_page": None})
+    return httpx2.Response(200, json={"id": "uprof_test", "type": "user_profile"})
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_user_profiles_requests(sync: bool, respx_mock: MockRouter) -> None:
+    user_profiles_url = "https://aws-external-anthropic.us-east-1.api.aws/v1/user_profiles"
+    respx_mock.route(url__startswith=user_profiles_url).mock(side_effect=respond_to_user_profiles)
+
+    if sync:
+        client = AnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="us-east-1", workspace_id="ws-123"
+        )
+        client.user_profiles.create()
+        client.user_profiles.retrieve("uprof_test")
+        client.user_profiles.update("uprof_test")
+        client.user_profiles.list()
+        client.user_profiles.delete("uprof_test")
+    else:
+        async_client = AsyncAnthropicAWS(
+            aws_access_key="AKID", aws_secret_key="secret", aws_region="us-east-1", workspace_id="ws-123"
+        )
+        await async_client.user_profiles.create()
+        await async_client.user_profiles.retrieve("uprof_test")
+        await async_client.user_profiles.update("uprof_test")
+        await async_client.user_profiles.list()
+        await async_client.user_profiles.delete("uprof_test")
+
+    requests = [call.request for call in cast("list[MockRequestCall]", respx_mock.calls)]
+    assert [(request.method, str(request.url)) for request in requests] == [
+        ("POST", user_profiles_url),
+        ("GET", f"{user_profiles_url}/uprof_test"),
+        ("POST", f"{user_profiles_url}/uprof_test"),
+        ("GET", user_profiles_url),
+        ("DELETE", f"{user_profiles_url}/uprof_test"),
+    ]
+    for request in requests:
+        assert request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
+        assert request.headers["anthropic-workspace-id"] == "ws-123"
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_user_profile_id_header(sync: bool, respx_mock: MockRouter) -> None:
+    respx_mock.post("https://aws-external-anthropic.us-east-1.api.aws/v1/messages").mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    client_headers = {"anthropic-user-profile-id": "uprof_client"}
+
+    if sync:
+        client = AnthropicAWS(
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+            workspace_id="ws-123",
+            default_headers=client_headers,
+        )
+        client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude", user_profile_id="uprof_test"
+        )
+        client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude")
+    else:
+        async_client = AsyncAnthropicAWS(
+            aws_access_key="AKID",
+            aws_secret_key="secret",
+            aws_region="us-east-1",
+            workspace_id="ws-123",
+            default_headers=client_headers,
+        )
+        await async_client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude", user_profile_id="uprof_test"
+        )
+        await async_client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude"
+        )
+
+    requests = [call.request for call in cast("list[MockRequestCall]", respx_mock.calls)]
+    assert [request.headers["anthropic-user-profile-id"] for request in requests] == ["uprof_test", "uprof_client"]
+    for request in requests:
+        assert request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
+
+
+@pytest.mark.respx()
+def test_user_profile_action_urls_are_rejected(respx_mock: MockRouter) -> None:
+    client = AnthropicAWS(api_key="test-key", aws_region="us-east-1", workspace_id="ws-123")
+
+    with pytest.raises(AnthropicError, match="action URLs are not supported in the AWS client"):
+        client.user_profiles.action_urls.create("uprof_test", action={"type": "enroll_end_user"})
+    with pytest.raises(AnthropicError, match="action URLs are not supported in the AWS client"):
+        client.user_profiles.action_urls.with_raw_response.create("uprof_test", action={"type": "enroll_end_user"})
+    with pytest.raises(AnthropicError, match="action URLs are not supported in the AWS client"):
+        client.beta.user_profiles.action_urls.create("uprof_test", action={"type": "enroll_end_user"})
+
+    assert respx_mock.calls.call_count == 0
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_async_user_profile_action_urls_are_rejected(respx_mock: MockRouter) -> None:
+    client = AsyncAnthropicAWS(api_key="test-key", aws_region="us-east-1", workspace_id="ws-123")
+
+    with pytest.raises(AnthropicError, match="action URLs are not supported in the AWS client"):
+        await client.user_profiles.action_urls.create("uprof_test", action={"type": "enroll_end_user"})
+    with pytest.raises(AnthropicError, match="action URLs are not supported in the AWS client"):
+        await client.beta.user_profiles.action_urls.create("uprof_test", action={"type": "enroll_end_user"})
+
+    assert respx_mock.calls.call_count == 0
+
+
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()

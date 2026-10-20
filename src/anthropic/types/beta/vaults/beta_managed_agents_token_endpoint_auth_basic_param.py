@@ -9,6 +9,9 @@ class BetaManagedAgentsTokenEndpointAuthBasicParam(TypedDict, total=False):
     """Token endpoint uses HTTP Basic authentication with client credentials."""
 
     client_secret: Required[str]
-    """OAuth client secret."""
+    """
+    The OAuth client secret, sent to `token_endpoint` with HTTP Basic
+    authentication.
+    """
 
     type: Required[Literal["client_secret_basic"]]

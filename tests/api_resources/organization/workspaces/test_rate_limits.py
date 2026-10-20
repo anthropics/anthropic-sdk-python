@@ -17,6 +17,84 @@ class TestRateLimits:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
     @parametrize
+    def test_method_update(self, client: Anthropic) -> None:
+        rate_limit = client.organization.workspaces.rate_limits.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        )
+        assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+    @parametrize
+    def test_raw_response_update(self, client: Anthropic) -> None:
+        response = client.organization.workspaces.rate_limits.with_raw_response.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        rate_limit = response.parse()
+        assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+    @parametrize
+    def test_streaming_response_update(self, client: Anthropic) -> None:
+        with client.organization.workspaces.rate_limits.with_streaming_response.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            rate_limit = response.parse()
+            assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_update(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
+            client.organization.workspaces.rate_limits.with_raw_response.update(
+                rate_limit_id="rate_limit_id",
+                workspace_id="",
+                limits=[
+                    {
+                        "type": "fast_itpmca",
+                        "value": 0,
+                    }
+                ],
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `rate_limit_id` but received ''"):
+            client.organization.workspaces.rate_limits.with_raw_response.update(
+                rate_limit_id="",
+                workspace_id="workspace_id",
+                limits=[
+                    {
+                        "type": "fast_itpmca",
+                        "value": 0,
+                    }
+                ],
+            )
+
+    @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         rate_limit = client.organization.workspaces.rate_limits.list(
             workspace_id="workspace_id",
@@ -70,6 +148,84 @@ class TestAsyncRateLimits:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
+
+    @parametrize
+    async def test_method_update(self, async_client: AsyncAnthropic) -> None:
+        rate_limit = await async_client.organization.workspaces.rate_limits.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        )
+        assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+    @parametrize
+    async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.organization.workspaces.rate_limits.with_raw_response.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        rate_limit = await response.parse()
+        assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.organization.workspaces.rate_limits.with_streaming_response.update(
+            rate_limit_id="rate_limit_id",
+            workspace_id="workspace_id",
+            limits=[
+                {
+                    "type": "fast_itpmca",
+                    "value": 0,
+                }
+            ],
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            rate_limit = await response.parse()
+            assert_matches_type(WorkspaceRateLimit, rate_limit, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_update(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
+            await async_client.organization.workspaces.rate_limits.with_raw_response.update(
+                rate_limit_id="rate_limit_id",
+                workspace_id="",
+                limits=[
+                    {
+                        "type": "fast_itpmca",
+                        "value": 0,
+                    }
+                ],
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `rate_limit_id` but received ''"):
+            await async_client.organization.workspaces.rate_limits.with_raw_response.update(
+                rate_limit_id="",
+                workspace_id="workspace_id",
+                limits=[
+                    {
+                        "type": "fast_itpmca",
+                        "value": 0,
+                    }
+                ],
+            )
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:

@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -89,7 +89,7 @@ class UserUsageReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsUsageUsersItem]:
+    ) -> SyncReportPageCursor[BetaAnalyticsUsageUsersItem]:
         """
         Get per-user token usage across a date range.
 
@@ -179,7 +179,7 @@ class UserUsageReport(SyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/user_usage_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsUsageUsersItem],
+            page=SyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -276,7 +276,7 @@ class AsyncUserUsageReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsUsageUsersItem, AsyncPageCursor[BetaAnalyticsUsageUsersItem]]:
+    ) -> AsyncPaginator[BetaAnalyticsUsageUsersItem, AsyncReportPageCursor[BetaAnalyticsUsageUsersItem]]:
         """
         Get per-user token usage across a date range.
 
@@ -366,7 +366,7 @@ class AsyncUserUsageReport(AsyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/user_usage_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsUsageUsersItem],
+            page=AsyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

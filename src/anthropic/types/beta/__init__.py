@@ -157,6 +157,7 @@ from .beta_computer_member_name import (
 from .beta_computer_type_config import BetaComputerTypeConfig as BetaComputerTypeConfig
 from .beta_computer_wait_config import BetaComputerWaitConfig as BetaComputerWaitConfig
 from .beta_computer_zoom_config import BetaComputerZoomConfig as BetaComputerZoomConfig
+from .beta_deleted_user_profile import BetaDeletedUserProfile as BetaDeletedUserProfile
 from .beta_dream_sessions_input import BetaDreamSessionsInput as BetaDreamSessionsInput
 from .beta_fallback_block_param import BetaFallbackBlockParam as BetaFallbackBlockParam
 from .beta_input_transformation import BetaInputTransformation as BetaInputTransformation

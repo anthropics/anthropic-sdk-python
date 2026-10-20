@@ -131,6 +131,21 @@ def test_make_status_error_sync_async_parity(status_code: int) -> None:
 
 class TestAnthropic:
     @pytest.mark.respx(base_url=base_url)
+    def test_user_profile_id_header(self, respx_mock: MockRouter, client: Anthropic) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json={}))
+
+        client.messages.with_raw_response.create(
+            max_tokens=16,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude",
+            user_profile_id="uprof_test",
+        )
+
+        request = respx_mock.calls.last.request
+        assert request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(request.content)
+
+    @pytest.mark.respx(base_url=base_url)
     def test_raw_response(self, respx_mock: MockRouter, client: Anthropic) -> None:
         respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
@@ -1512,6 +1527,21 @@ class TestAnthropic:
 
 
 class TestAsyncAnthropic:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_user_profile_id_header(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json={}))
+
+        await async_client.messages.with_raw_response.create(
+            max_tokens=16,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude",
+            user_profile_id="uprof_test",
+        )
+
+        request = respx_mock.calls.last.request
+        assert request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(request.content)
+
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))

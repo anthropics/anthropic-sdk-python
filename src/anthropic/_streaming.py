@@ -11,7 +11,7 @@ from typing_extensions import Self, Protocol, TypeGuard, override, get_origin, r
 
 import httpx2
 
-from ._utils import is_dict, extract_type_var_from_base
+from ._utils import extract_type_var_from_base
 from ._compat import cached_property
 
 if TYPE_CHECKING:
@@ -90,71 +90,10 @@ class Stream(Generic[_T]):
 
         try:
             for sse in iterator:
-                if sse.event == "completion":
-                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
-
-                if (
-                    sse.event == "message_start"
-                    or sse.event == "message_delta"
-                    or sse.event == "message_stop"
-                    or sse.event == "content_block_start"
-                    or sse.event == "content_block_delta"
-                    or sse.event == "content_block_stop"
-                    or sse.event == "message"
-                    or sse.event == "user.message"
-                    or sse.event == "user.interrupt"
-                    or sse.event == "user.tool_confirmation"
-                    or sse.event == "user.custom_tool_result"
-                    or sse.event == "user.tool_result"
-                    or sse.event == "agent.message"
-                    or sse.event == "agent.thinking"
-                    or sse.event == "agent.tool_use"
-                    or sse.event == "agent.tool_result"
-                    or sse.event == "agent.mcp_tool_use"
-                    or sse.event == "agent.mcp_tool_result"
-                    or sse.event == "agent.custom_tool_use"
-                    or sse.event == "agent.thread_context_compacted"
-                    or sse.event == "session.status_running"
-                    or sse.event == "session.status_idle"
-                    or sse.event == "session.status_rescheduled"
-                    or sse.event == "session.status_terminated"
-                    or sse.event == "session.error"
-                    or sse.event == "session.deleted"
-                    or sse.event == "session.updated"
-                    or sse.event == "span.model_request_start"
-                    or sse.event == "span.model_request_end"
-                    or sse.event == "span.outcome_evaluation_start"
-                    or sse.event == "span.outcome_evaluation_ongoing"
-                    or sse.event == "span.outcome_evaluation_end"
-                    or sse.event == "user.define_outcome"
-                    or sse.event == "agent.thread_message_received"
-                    or sse.event == "agent.thread_message_sent"
-                    or sse.event == "agent.session_thread_message_received"
-                    or sse.event == "agent.session_thread_message_sent"
-                    or sse.event == "session.thread_created"
-                    or sse.event == "session.thread_status_created"
-                    or sse.event == "session.thread_status_running"
-                    or sse.event == "session.thread_status_idle"
-                    or sse.event == "session.thread_status_rescheduled"
-                    or sse.event == "session.thread_status_terminated"
-                    or sse.event == "event_start"
-                    or sse.event == "event_delta"
-                    or sse.event == "system.message"
-                    or sse.event == "workflow_run.created"
-                    or sse.event == "workflow_run.status_running"
-                    or sse.event == "workflow_run.status_idle"
-                    or sse.event == "workflow_run.status_ended"
-                    or sse.event == "workflow_run.error"
-                    or sse.event == "workflow_run.phase_started"
-                    or sse.event == "workflow_run.phase_ended"
-                ):
-                    data = sse.json()
-                    if is_dict(data) and "type" not in data:
-                        data["type"] = sse.event
-
-                    yield process_data(data=data, cast_to=cast_to, response=response)
-
                 if sse.event == "ping":
+                    continue
+
+                if sse.event is None:
                     continue
 
                 if sse.event == "error":
@@ -171,6 +110,11 @@ class Stream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+
+                if not sse.data:
+                    continue
+
+                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
             if (observer := self._observer) is not None:
                 observer.end("read")
         except Exception as err:
@@ -275,71 +219,10 @@ class AsyncStream(Generic[_T]):
 
         try:
             async for sse in iterator:
-                if sse.event == "completion":
-                    yield process_data(data=sse.json(), cast_to=cast_to, response=response)
-
-                if (
-                    sse.event == "message_start"
-                    or sse.event == "message_delta"
-                    or sse.event == "message_stop"
-                    or sse.event == "content_block_start"
-                    or sse.event == "content_block_delta"
-                    or sse.event == "content_block_stop"
-                    or sse.event == "message"
-                    or sse.event == "user.message"
-                    or sse.event == "user.interrupt"
-                    or sse.event == "user.tool_confirmation"
-                    or sse.event == "user.custom_tool_result"
-                    or sse.event == "user.tool_result"
-                    or sse.event == "agent.message"
-                    or sse.event == "agent.thinking"
-                    or sse.event == "agent.tool_use"
-                    or sse.event == "agent.tool_result"
-                    or sse.event == "agent.mcp_tool_use"
-                    or sse.event == "agent.mcp_tool_result"
-                    or sse.event == "agent.custom_tool_use"
-                    or sse.event == "agent.thread_context_compacted"
-                    or sse.event == "session.status_running"
-                    or sse.event == "session.status_idle"
-                    or sse.event == "session.status_rescheduled"
-                    or sse.event == "session.status_terminated"
-                    or sse.event == "session.error"
-                    or sse.event == "session.deleted"
-                    or sse.event == "session.updated"
-                    or sse.event == "span.model_request_start"
-                    or sse.event == "span.model_request_end"
-                    or sse.event == "span.outcome_evaluation_start"
-                    or sse.event == "span.outcome_evaluation_ongoing"
-                    or sse.event == "span.outcome_evaluation_end"
-                    or sse.event == "user.define_outcome"
-                    or sse.event == "agent.thread_message_received"
-                    or sse.event == "agent.thread_message_sent"
-                    or sse.event == "agent.session_thread_message_received"
-                    or sse.event == "agent.session_thread_message_sent"
-                    or sse.event == "session.thread_created"
-                    or sse.event == "session.thread_status_created"
-                    or sse.event == "session.thread_status_running"
-                    or sse.event == "session.thread_status_idle"
-                    or sse.event == "session.thread_status_rescheduled"
-                    or sse.event == "session.thread_status_terminated"
-                    or sse.event == "event_start"
-                    or sse.event == "event_delta"
-                    or sse.event == "system.message"
-                    or sse.event == "workflow_run.created"
-                    or sse.event == "workflow_run.status_running"
-                    or sse.event == "workflow_run.status_idle"
-                    or sse.event == "workflow_run.status_ended"
-                    or sse.event == "workflow_run.error"
-                    or sse.event == "workflow_run.phase_started"
-                    or sse.event == "workflow_run.phase_ended"
-                ):
-                    data = sse.json()
-                    if is_dict(data) and "type" not in data:
-                        data["type"] = sse.event
-
-                    yield process_data(data=data, cast_to=cast_to, response=response)
-
                 if sse.event == "ping":
+                    continue
+
+                if sse.event is None:
                     continue
 
                 if sse.event == "error":
@@ -356,6 +239,11 @@ class AsyncStream(Generic[_T]):
                         body=body,
                         response=self.response,
                     )
+
+                if not sse.data:
+                    continue
+
+                yield process_data(data=sse.json(), cast_to=cast_to, response=response)
             if (observer := self._observer) is not None:
                 observer.end("read")
         except Exception as err:

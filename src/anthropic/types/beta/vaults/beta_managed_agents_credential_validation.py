@@ -20,7 +20,10 @@ class BetaManagedAgentsCredentialValidation(BaseModel):
     """Whether the credential has a refresh token configured."""
 
     mcp_probe: Optional[BetaManagedAgentsMCPProbe] = None
-    """Details of the failing MCP probe step. Null when the probe succeeded."""
+    """
+    Details of the MCP probe step that failed, or `null` if the probe succeeded or
+    there was no access token to test.
+    """
 
     refresh: Optional[BetaManagedAgentsRefreshObject] = None
     """Details of the refresh-token exchange attempted on a 401.

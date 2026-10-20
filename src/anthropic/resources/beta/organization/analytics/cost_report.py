@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -88,7 +88,7 @@ class CostReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsCostReportTimeBucket]:
+    ) -> SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket]:
         """
         Get cost in USD over time across a date range.
 
@@ -163,7 +163,7 @@ class CostReport(SyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/cost_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsCostReportTimeBucket],
+            page=SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -256,7 +256,7 @@ class AsyncCostReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsCostReportTimeBucket, AsyncPageCursor[BetaAnalyticsCostReportTimeBucket]]:
+    ) -> AsyncPaginator[BetaAnalyticsCostReportTimeBucket, AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket]]:
         """
         Get cost in USD over time across a date range.
 
@@ -331,7 +331,7 @@ class AsyncCostReport(AsyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/cost_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsCostReportTimeBucket],
+            page=AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

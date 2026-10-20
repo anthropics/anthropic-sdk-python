@@ -10,13 +10,17 @@ __all__ = ["VaultListParams"]
 
 class VaultListParams(TypedDict, total=False):
     include_archived: bool
-    """Whether to include archived vaults in the results."""
+    """Whether to include archived vaults in the results. Defaults to `false`."""
 
     limit: int
     """Maximum number of vaults to return per page. Defaults to 20, maximum 100."""
 
     page: str
-    """Opaque pagination token from a previous `list_vaults` response."""
+    """
+    The `next_page` value from a previous
+    [List Vaults](https://platform.claude.com/docs/en/api/beta/vaults/list)
+    response, to get the next page. Leave it out to get the first page.
+    """
 
     betas: List[AnthropicBetaParam]
     """

@@ -51,14 +51,6 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
-from .user_profiles import (
-    UserProfiles,
-    AsyncUserProfiles,
-    UserProfilesWithRawResponse,
-    AsyncUserProfilesWithRawResponse,
-    UserProfilesWithStreamingResponse,
-    AsyncUserProfilesWithStreamingResponse,
-)
 from .vaults.vaults import (
     Vaults,
     AsyncVaults,
@@ -122,6 +114,14 @@ from .memory_stores.memory_stores import (
     AsyncMemoryStoresWithRawResponse,
     MemoryStoresWithStreamingResponse,
     AsyncMemoryStoresWithStreamingResponse,
+)
+from .user_profiles.user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]

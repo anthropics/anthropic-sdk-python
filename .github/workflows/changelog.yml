@@ -3,7 +3,7 @@ on:
   pull_request:
     branches:
       - 'synced/published'
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review]
 
 permissions:
   contents: read
@@ -14,6 +14,7 @@ jobs:
     runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     if: |-
       github.repository == 'anthropics/anthropic-sdk-python-private' &&
+      !github.event.pull_request.draft &&
       !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
 
     steps:

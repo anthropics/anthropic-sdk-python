@@ -22,6 +22,9 @@ class MockRequestCall(Protocol):
     request: httpx2.Request
 
 
+MODELS_URL = (
+    "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/"
+)
 TOOL_RUNNER_URL = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-haiku-4-5@20251001:rawPredict"
 
 
@@ -99,6 +102,52 @@ class TestAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    def test_user_profile_id_is_sent_in_the_header(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__startswith=MODELS_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+        self.client.beta.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+        self.client.messages.count_tokens(
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 3
+        for call in calls:
+            assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
+            assert "user_profile_id" not in json.loads(call.request.content)
+
+    @pytest.mark.respx()
+    def test_client_user_profile_id_is_kept(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__startswith=MODELS_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
+
+        client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+
+    def test_user_profiles_not_available(self) -> None:
+        assert not hasattr(self.client, "user_profiles")
+        assert not hasattr(self.client.beta, "user_profiles")
 
     def test_copy(self) -> None:
         copied = self.client.copy()
@@ -293,6 +342,54 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_user_profile_id_is_sent_in_the_header(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__startswith=MODELS_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        await self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+        await self.client.beta.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+        await self.client.messages.count_tokens(
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+            user_profile_id="uprof_test",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 3
+        for call in calls:
+            assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
+            assert "user_profile_id" not in json.loads(call.request.content)
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_client_user_profile_id_is_kept(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__startswith=MODELS_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
+
+        await client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+
+    def test_user_profiles_not_available(self) -> None:
+        assert not hasattr(self.client, "user_profiles")
+        assert not hasattr(self.client.beta, "user_profiles")
 
     def test_copy(self) -> None:
         copied = self.client.copy()

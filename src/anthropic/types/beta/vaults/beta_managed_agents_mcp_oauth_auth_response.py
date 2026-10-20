@@ -17,7 +17,10 @@ class BetaManagedAgentsMCPOAuthAuthResponse(BaseModel):
     type: Literal["mcp_oauth"]
 
     expires_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the credential's access token expires, in RFC 3339.
+
+    Absent if the expiry isn't known.
+    """
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshResponse] = None
     """Refresh token configuration, if the credential supports token refresh."""

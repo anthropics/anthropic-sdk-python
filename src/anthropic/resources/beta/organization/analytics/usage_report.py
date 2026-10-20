@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -86,7 +86,7 @@ class UsageReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsUsageReportTimeBucket]:
+    ) -> SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket]:
         """
         Get token usage over time across a date range.
 
@@ -161,7 +161,7 @@ class UsageReport(SyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/usage_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsUsageReportTimeBucket],
+            page=SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -252,7 +252,7 @@ class AsyncUsageReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsUsageReportTimeBucket, AsyncPageCursor[BetaAnalyticsUsageReportTimeBucket]]:
+    ) -> AsyncPaginator[BetaAnalyticsUsageReportTimeBucket, AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket]]:
         """
         Get token usage over time across a date range.
 
@@ -327,7 +327,7 @@ class AsyncUsageReport(AsyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/usage_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsUsageReportTimeBucket],
+            page=AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

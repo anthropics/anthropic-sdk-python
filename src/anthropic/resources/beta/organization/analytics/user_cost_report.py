@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -91,7 +91,7 @@ class UserCostReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsCostUsersItem]:
+    ) -> SyncReportPageCursor[BetaAnalyticsCostUsersItem]:
         """
         Get per-user cost in USD across a date range.
 
@@ -186,7 +186,7 @@ class UserCostReport(SyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/user_cost_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsCostUsersItem],
+            page=SyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -285,7 +285,7 @@ class AsyncUserCostReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsCostUsersItem, AsyncPageCursor[BetaAnalyticsCostUsersItem]]:
+    ) -> AsyncPaginator[BetaAnalyticsCostUsersItem, AsyncReportPageCursor[BetaAnalyticsCostUsersItem]]:
         """
         Get per-user cost in USD across a date range.
 
@@ -380,7 +380,7 @@ class AsyncUserCostReport(AsyncAPIResource):
         """
         return self._get_api_list(
             "/v1/organizations/analytics/user_cost_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsCostUsersItem],
+            page=AsyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
