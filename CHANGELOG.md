@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.17.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.16.0...v1.17.0) (2026-10-20)
+
+### Features
+
+* **api:** add RBAC Group owner-access error codes to the Admin API
+* **api:** document the unsupported_charset error code for plugin uploads
+
+
+### Bug Fixes
+
+* **bedrock:** keep a workspace ID set in default_headers on the Bedrock and Mantle clients
+* **google-cloud:** keep workspace and user profile IDs set in default_headers
+
+
+### Chores
+
+* **ci:** run the changelog check on a standard runner
+
 ## [1.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.15.0...v1.16.0) (2026-10-20)
 
 ### Features
@@ -9,12 +27,6 @@
 * **api:** make User Profiles generally available
 * **client:** yield server-sent events with unrecognized event names
 * **google-cloud:** use the v1 endpoints and add the organization endpoint
-
-
-### Bug Fixes
-
-* **bedrock:** keep a workspace ID set in default_headers on the Bedrock and Mantle clients
-* **google-cloud:** keep workspace and user profile IDs set in default_headers
 
 
 ### Chores
