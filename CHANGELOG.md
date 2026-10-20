@@ -8,6 +8,7 @@
 * **api:** add workspace rate-limit updates to the Admin API
 * **api:** make User Profiles generally available
 * **client:** yield server-sent events with unrecognized event names
+* **google-cloud:** use the v1 endpoints and add the organization endpoint
 
 
 ### Chores

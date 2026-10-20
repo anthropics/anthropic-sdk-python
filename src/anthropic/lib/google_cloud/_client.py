@@ -28,9 +28,25 @@ if TYPE_CHECKING:
     from google.auth.credentials import Credentials as GoogleCredentials  # type: ignore
 
 
+_LOCATION_URL_TEMPLATE = "https://claude.googleapis.com/v1/projects/{project}/locations/{location}"
+
 # The gateway base URL; stays overridable via the `base_url` argument and env var.
-DEFAULT_URL_TEMPLATE = (
-    "https://claude.googleapis.com/v1alpha/projects/{project}/locations/{location}/workspaces/{workspace_id}/invoke"
+DEFAULT_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/workspaces/{workspace_id}/invoke"
+
+# Organization-level routes are served from a base with no workspace in it.
+ORGANIZATION_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/claudeOrganization/invoke"
+
+_ORGANIZATION_PATH_PREFIXES = ("/v1/organizations/",)
+
+_MISSING_PROJECT_MESSAGE = (
+    "No `project` was provided and one could not be resolved from Google credentials. "
+    "Pass the `project` argument, set the `ANTHROPIC_GOOGLE_CLOUD_PROJECT` "
+    "environment variable, or provide `base_url` directly."
+)
+
+_MISSING_WORKSPACE_MESSAGE = (
+    "No workspace ID found. Set the `workspace_id` argument or the "
+    "`ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID` environment variable."
 )
 
 # Used when no location is configured; the gateway should always be addressed
@@ -96,9 +112,31 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     @base_url.setter
     def base_url(self, url: httpx2.URL | str) -> None:
         # An explicit post-construction assignment wins over (and cancels) the
-        # pending project back-fill.
+        # pending project back-fill, and turns off per-route base selection.
         self._base_url_deferred = False
+        self._base_url_overridden = True
         self._base_url = self._enforce_trailing_slash(url if isinstance(url, httpx2.URL) else httpx2.URL(url))
+
+    @override
+    def _prepare_url(self, url: str) -> httpx2.URL:
+        if self._base_url_overridden:
+            return super()._prepare_url(url)
+
+        merge_url = httpx2.URL(url)
+        if not merge_url.is_relative_url:
+            return merge_url
+
+        if merge_url.path.startswith(_ORGANIZATION_PATH_PREFIXES):
+            if self._project is None:
+                raise AnthropicError(_MISSING_PROJECT_MESSAGE)
+            base = self._enforce_trailing_slash(
+                httpx2.URL(ORGANIZATION_URL_TEMPLATE.format(project=self._project, location=self._location))
+            )
+            return base.copy_with(raw_path=base.raw_path + merge_url.raw_path.lstrip(b"/"))
+
+        if self.workspace_id is None:
+            raise AnthropicError(_MISSING_WORKSPACE_MESSAGE)
+        return super()._prepare_url(url)
 
     @property
     def google_credentials(self) -> GoogleCredentials | None:
@@ -118,16 +156,15 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if not self._base_url_deferred:
             return
         if self._project is None:
-            raise AnthropicError(
-                "No `project` was provided and one could not be resolved from Google credentials. "
-                "Pass the `project` argument, set the `ANTHROPIC_GOOGLE_CLOUD_PROJECT` "
-                "environment variable, or provide `base_url` directly."
+            raise AnthropicError(_MISSING_PROJECT_MESSAGE)
+        if self.workspace_id is not None:
+            self._base_url = self._enforce_trailing_slash(
+                httpx2.URL(
+                    DEFAULT_URL_TEMPLATE.format(
+                        project=self._project, location=self._location, workspace_id=self.workspace_id
+                    )
+                )
             )
-        # Deferred derivation implies auth, and constructing with auth requires a workspace ID.
-        assert self.workspace_id is not None
-        self.base_url = DEFAULT_URL_TEMPLATE.format(
-            project=self._project, location=self._location, workspace_id=self.workspace_id
-        )
         self._base_url_deferred = False
 
 
@@ -148,9 +185,6 @@ def _resolve_base_url(
     if base_url is not None:
         return base_url
 
-    # Derivation needs the workspace ID in the path; the constructors reject a
-    # missing workspace before calling this without an explicit base_url.
-    assert workspace_id is not None
     if project is None:
         if allow_deferred_project:
             return None
@@ -158,6 +192,9 @@ def _resolve_base_url(
             "No `project` was provided. Pass `project`, set the `ANTHROPIC_GOOGLE_CLOUD_PROJECT` "
             "environment variable, or provide `base_url` directly."
         )
+    if workspace_id is None:
+        # Organization-only client: there is no workspace base to derive.
+        return None
     return DEFAULT_URL_TEMPLATE.format(project=project, location=location, workspace_id=workspace_id)
 
 
@@ -231,11 +268,12 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
                 defaults to `global`, the region the gateway should normally be
                 addressed through.
             workspace_id: The Anthropic workspace ID (or `ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID`).
-                Required unless `skip_auth` is set with an explicit `base_url`.
-            skip_auth: For pre-authenticated proxies — skips token attachment. A
-                workspace ID is still needed to derive the base URL; pass `base_url`
-                to construct without one. Mutually exclusive with the credential
-                arguments.
+                When the URL is derived, required for every route outside
+                `/v1/organizations`; those are sent to the project's
+                organization endpoint instead.
+            skip_auth: For pre-authenticated proxies — skips token attachment.
+                Mutually exclusive with the credential arguments.
+            base_url: Overrides the derived gateway URL for every route.
             open_telemetry: OpenTelemetry tracing of this client's API calls. `False`
                 disables the spans, and `traces.content_mode` set to `"content"` adds the
                 content of requests and responses to them.
@@ -266,13 +304,8 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
 
         if workspace_id is None:
             workspace_id = os.environ.get("ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID")
-        # The workspace ID is required unless `skip_auth` is set together with an
-        # explicit base URL — no URL to derive.
-        if workspace_id is None and not (skip_auth and base_url is not None):
-            raise ValueError(
-                "No workspace ID found. Set the `workspace_id` argument or the "
-                "`ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID` environment variable."
-            )
+        # Not validated here: only a workspace route on a derived URL needs it, and
+        # `_prepare_url` reports it missing on the first such request.
         self.workspace_id = workspace_id
 
         resolved_base_url = _resolve_base_url(
@@ -283,7 +316,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
             # Without auth there are no Google credentials to back-fill the project from.
             allow_deferred_project=not skip_auth,
         )
-        self._base_url_deferred = resolved_base_url is None
+        self._base_url_deferred = base_url is None and self._project is None
 
         super().__init__(
             # Deferred case: pass an empty (valid) URL so the parent doesn't fall through to
@@ -508,13 +541,8 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
 
         if workspace_id is None:
             workspace_id = os.environ.get("ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID")
-        # The workspace ID is required unless `skip_auth` is set together with an
-        # explicit base URL — no URL to derive.
-        if workspace_id is None and not (skip_auth and base_url is not None):
-            raise ValueError(
-                "No workspace ID found. Set the `workspace_id` argument or the "
-                "`ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID` environment variable."
-            )
+        # Not validated here: only a workspace route on a derived URL needs it, and
+        # `_prepare_url` reports it missing on the first such request.
         self.workspace_id = workspace_id
 
         resolved_base_url = _resolve_base_url(
@@ -525,7 +553,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
             # Without auth there are no Google credentials to back-fill the project from.
             allow_deferred_project=not skip_auth,
         )
-        self._base_url_deferred = resolved_base_url is None
+        self._base_url_deferred = base_url is None and self._project is None
 
         super().__init__(
             # Deferred case: pass an empty (valid) URL so the parent doesn't fall through to

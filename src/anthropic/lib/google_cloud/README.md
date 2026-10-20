@@ -33,8 +33,9 @@ Precedence (first match wins, unless `skip_auth=True`):
    covers `gcloud auth application-default login`, `GOOGLE_APPLICATION_CREDENTIALS`,
    workload identity on GKE/Cloud Run, and the GCE/Cloud Functions metadata server.
 
-A `workspace_id` is required unless `skip_auth=True` with an explicit
-`base_url`. `skip_auth` is mutually exclusive
+When the URL is derived, a `workspace_id` is required for every route outside
+`/v1/organizations`; those organization-level routes are sent to the project's
+organization endpoint and need none. `skip_auth` is mutually exclusive
 with the credential arguments.
 
 ## Usage
@@ -155,6 +156,6 @@ async with client.messages.stream(
 |---|---|---|
 | `project` | `ANTHROPIC_GOOGLE_CLOUD_PROJECT` | Only needed when the base URL is derived; if omitted, back-filled from Google credentials on the first request. |
 | `location` | — | Required only when deriving the base URL. |
-| `workspace_id` | `ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID` | Required unless `skip_auth=True` with an explicit `base_url`. |
-| `base_url` | `ANTHROPIC_GOOGLE_CLOUD_BASE_URL` | Overrides the derived gateway URL. |
-| `skip_auth` | — | For pre-authenticated proxies: skips token attachment and the workspace requirement. |
+| `workspace_id` | `ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID` | Required when the URL is derived, except for organization-level routes. |
+| `base_url` | `ANTHROPIC_GOOGLE_CLOUD_BASE_URL` | Overrides the derived gateway URL for every route. |
+| `skip_auth` | — | For pre-authenticated proxies: skips token attachment. |
