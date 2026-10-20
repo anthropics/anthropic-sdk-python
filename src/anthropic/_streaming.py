@@ -13,6 +13,7 @@ import httpx2
 
 from ._utils import extract_type_var_from_base
 from ._compat import cached_property
+from ._exceptions import AnthropicError, APITimeoutError, APIConnectionError
 
 if TYPE_CHECKING:
     from ._client import Anthropic, AsyncAnthropic
@@ -68,7 +69,16 @@ class Stream(Generic[_T]):
             yield item
 
     def _iter_events(self) -> Iterator[ServerSentEvent]:
-        yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        try:
+            yield from self._decoder.iter_bytes(self.response.iter_bytes())
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=self.response.request) from err
+        except Exception as err:
+            if isinstance(err, AnthropicError):
+                # SDK-originated errors already carry their own type; don't wrap.
+                raise
+
+            raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
     def raw_events(response: httpx2.Response) -> Iterator[ServerSentEvent]:
@@ -196,8 +206,17 @@ class AsyncStream(Generic[_T]):
             yield item
 
     async def _iter_events(self) -> AsyncIterator[ServerSentEvent]:
-        async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
-            yield sse
+        try:
+            async for sse in self._decoder.aiter_bytes(self.response.aiter_bytes()):
+                yield sse
+        except httpx2.TimeoutException as err:
+            raise APITimeoutError(request=self.response.request) from err
+        except Exception as err:
+            if isinstance(err, AnthropicError):
+                # SDK-originated errors already carry their own type; don't wrap.
+                raise
+
+            raise APIConnectionError(request=self.response.request) from err
 
     @staticmethod
     def raw_events(response: httpx2.Response) -> AsyncIterator[ServerSentEvent]:
