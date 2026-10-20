@@ -26,6 +26,14 @@ from .api_keys import (
     APIKeysWithStreamingResponse,
     AsyncAPIKeysWithStreamingResponse,
 )
+from .webhooks import (
+    Webhooks,
+    AsyncWebhooks,
+    WebhooksWithRawResponse,
+    AsyncWebhooksWithRawResponse,
+    WebhooksWithStreamingResponse,
+    AsyncWebhooksWithStreamingResponse,
+)
 from ...._types import Body, Query, Headers, NotGiven, not_given
 from ...._compat import cached_property
 from .rate_limits import (
@@ -211,6 +219,10 @@ class Organization(SyncAPIResource):
         return TelemetryDestinations(self._client)
 
     @cached_property
+    def webhooks(self) -> Webhooks:
+        return Webhooks(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -321,6 +333,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def telemetry_destinations(self) -> AsyncTelemetryDestinations:
         return AsyncTelemetryDestinations(self._client)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooks:
+        return AsyncWebhooks(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
@@ -441,6 +457,10 @@ class OrganizationWithRawResponse:
     def telemetry_destinations(self) -> TelemetryDestinationsWithRawResponse:
         return TelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
 
+    @cached_property
+    def webhooks(self) -> WebhooksWithRawResponse:
+        return WebhooksWithRawResponse(self._organization.webhooks)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -513,6 +533,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithRawResponse:
         return AsyncTelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooksWithRawResponse:
+        return AsyncWebhooksWithRawResponse(self._organization.webhooks)
 
 
 class OrganizationWithStreamingResponse:
@@ -587,6 +611,10 @@ class OrganizationWithStreamingResponse:
     def telemetry_destinations(self) -> TelemetryDestinationsWithStreamingResponse:
         return TelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)
 
+    @cached_property
+    def webhooks(self) -> WebhooksWithStreamingResponse:
+        return WebhooksWithStreamingResponse(self._organization.webhooks)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -659,3 +687,7 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithStreamingResponse:
         return AsyncTelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooksWithStreamingResponse:
+        return AsyncWebhooksWithStreamingResponse(self._organization.webhooks)

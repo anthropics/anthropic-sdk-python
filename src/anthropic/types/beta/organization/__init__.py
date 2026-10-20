@@ -17,6 +17,7 @@ from .beta_analytics_user import BetaAnalyticsUser as BetaAnalyticsUser
 from .beta_data_residency import BetaDataResidency as BetaDataResidency
 from .beta_deleted_plugin import BetaDeletedPlugin as BetaDeletedPlugin
 from .beta_workspace_role import BetaWorkspaceRole as BetaWorkspaceRole
+from .webhook_list_params import WebhookListParams as WebhookListParams
 from .beta_service_account import BetaServiceAccount as BetaServiceAccount
 from .invite_create_params import InviteCreateParams as InviteCreateParams
 from .plugin_create_params import PluginCreateParams as PluginCreateParams
@@ -27,6 +28,8 @@ from .beta_plugin_api_actor import BetaPluginAPIActor as BetaPluginAPIActor
 from .beta_plugin_component import BetaPluginComponent as BetaPluginComponent
 from .beta_workspace_member import BetaWorkspaceMember as BetaWorkspaceMember
 from .rbac_role_list_params import RBACRoleListParams as RBACRoleListParams
+from .webhook_create_params import WebhookCreateParams as WebhookCreateParams
+from .webhook_update_params import WebhookUpdateParams as WebhookUpdateParams
 from .workspace_list_params import WorkspaceListParams as WorkspaceListParams
 from .beta_organization_user import BetaOrganizationUser as BetaOrganizationUser
 from .beta_plugin_owner_user import BetaPluginOwnerUser as BetaPluginOwnerUser
@@ -115,6 +118,7 @@ from .beta_aws_external_key_config_param import BetaAWSExternalKeyConfigParam as
 from .beta_deleted_telemetry_destination import BetaDeletedTelemetryDestination as BetaDeletedTelemetryDestination
 from .beta_gcp_external_key_config_param import BetaGCPExternalKeyConfigParam as BetaGCPExternalKeyConfigParam
 from .beta_organization_rate_limit_value import BetaOrganizationRateLimitValue as BetaOrganizationRateLimitValue
+from .beta_organization_webhook_endpoint import BetaOrganizationWebhookEndpoint as BetaOrganizationWebhookEndpoint
 from .plugin_marketplace_retrieve_params import PluginMarketplaceRetrieveParams as PluginMarketplaceRetrieveParams
 from .beta_analytics_cost_bucketed_result import BetaAnalyticsCostBucketedResult as BetaAnalyticsCostBucketedResult
 from .beta_analytics_inference_geo_filter import BetaAnalyticsInferenceGeoFilter as BetaAnalyticsInferenceGeoFilter
@@ -148,6 +152,9 @@ from .beta_analytics_cost_report_time_bucket import (
 )
 from .beta_compliance_settings_state_enabled import (
     BetaComplianceSettingsStateEnabled as BetaComplianceSettingsStateEnabled,
+)
+from .beta_new_organization_webhook_endpoint import (
+    BetaNewOrganizationWebhookEndpoint as BetaNewOrganizationWebhookEndpoint,
 )
 from .beta_plugin_target_organization_member import (
     BetaPluginTargetOrganizationMember as BetaPluginTargetOrganizationMember,
@@ -203,6 +210,9 @@ from .beta_organization_rate_limit_files_group import (
 from .beta_organization_rate_limit_model_group import (
     BetaOrganizationRateLimitModelGroup as BetaOrganizationRateLimitModelGroup,
 )
+from .beta_organization_webhook_endpoint_state import (
+    BetaOrganizationWebhookEndpointState as BetaOrganizationWebhookEndpointState,
+)
 from .beta_telemetry_destination_state_enabled import (
     BetaTelemetryDestinationStateEnabled as BetaTelemetryDestinationStateEnabled,
 )
@@ -232,6 +242,9 @@ from .beta_telemetry_destination_workspaces_all import (
 )
 from .beta_analytics_single_day_activity_summary import (
     BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
+)
+from .beta_deleted_organization_webhook_endpoint import (
+    BetaDeletedOrganizationWebhookEndpoint as BetaDeletedOrganizationWebhookEndpoint,
 )
 from .beta_telemetry_destination_delivery_health import (
     BetaTelemetryDestinationDeliveryHealth as BetaTelemetryDestinationDeliveryHealth,
@@ -292,6 +305,9 @@ from .beta_telemetry_destination_state_disabled_params import (
 )
 from .beta_telemetry_destination_workspaces_all_params import (
     BetaTelemetryDestinationWorkspacesAllParams as BetaTelemetryDestinationWorkspacesAllParams,
+)
+from .beta_organization_webhook_endpoint_signing_secret import (
+    BetaOrganizationWebhookEndpointSigningSecret as BetaOrganizationWebhookEndpointSigningSecret,
 )
 from .beta_plugin_marketplace_validation_plugin_warning import (
     BetaPluginMarketplaceValidationPluginWarning as BetaPluginMarketplaceValidationPluginWarning,

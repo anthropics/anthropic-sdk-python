@@ -788,6 +788,53 @@ async def test_client_user_profile_id_is_kept_async(respx_mock: MockRouter) -> N
 
 
 @pytest.mark.respx()
+def test_client_workspace_id_is_kept(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = sync_api_key_client.with_options(default_headers={"anthropic-workspace-id": "wrkspc_client"})
+
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_client_workspace_id_is_kept_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = async_api_key_client.with_options(default_headers={"anthropic-workspace-id": "wrkspc_client"})
+
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
 def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
     respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 

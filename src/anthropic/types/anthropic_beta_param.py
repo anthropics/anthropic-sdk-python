@@ -59,5 +59,6 @@ AnthropicBetaParam: TypeAlias = Union[
         "ce-plugins-2026-09-01",
         "spend-limit-reads-2026-09-26",
         "telemetry-destinations-2026-08-11",
+        "webhooks-2026-10-07",
     ],
 ]

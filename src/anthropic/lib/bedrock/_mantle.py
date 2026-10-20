@@ -8,9 +8,9 @@ import httpx2
 
 from ... import _exceptions
 from ..._qs import Querystring
-from ._client import USER_PROFILE_ID_HEADER, keep_client_user_profile_header
 from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
 from ..._utils import is_dict, asyncify, is_given
+from ..._client import _keep_client_header_params
 from ..._compat import cached_property
 from ..._version import __version__
 from ..aws._auth import get_auth_headers
@@ -39,6 +39,8 @@ from ...resources.beta.messages import Messages as BetaMessages, AsyncMessages a
 DEFAULT_SERVICE_NAME = "bedrock-mantle"
 
 _MANTLE_API_KEY_ENV_VARS = ("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY")
+
+USER_PROFILE_ID_HEADER = "anthropic-user-profile-id"
 
 USER_PROFILE_ID_BODY_PATHS = frozenset(
     {
@@ -113,14 +115,10 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         """Mantle reads the user profile ID from the body of these requests, and from the header on other routes."""
         body = options.json_data
         if options.url not in USER_PROFILE_ID_BODY_PATHS or not is_dict(body):
-            keep_client_user_profile_header(options)
             return options
 
         headers: Headers = options.headers or {}
-        user_profile_id = build_headers(headers)[0].get(USER_PROFILE_ID_HEADER)
-        if user_profile_id is None:
-            # An unset `user_profile_id` argument arrives as `Omit`, which would otherwise hide the client's header.
-            user_profile_id = build_headers(self._custom_headers)[0].get(USER_PROFILE_ID_HEADER)
+        user_profile_id = build_headers(self._custom_headers, headers)[0].get(USER_PROFILE_ID_HEADER)
         if user_profile_id is None:
             return options
 
@@ -288,7 +286,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return self._move_user_profile_id_to_body(options)
+        return self._move_user_profile_id_to_body(_keep_client_header_params(options))
 
     @override
     def _prepare_request(self, request: httpx2.Request) -> None:
@@ -491,7 +489,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return self._move_user_profile_id_to_body(options)
+        return self._move_user_profile_id_to_body(_keep_client_header_params(options))
 
     @override
     async def _prepare_request(self, request: httpx2.Request) -> None:

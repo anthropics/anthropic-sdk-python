@@ -788,6 +788,40 @@ class TestUserProfileID:
         assert "user_profile_id" not in json.loads(request.content)
 
     @pytest.mark.respx()
+    def test_client_workspace_id_is_kept(self, client: AnthropicBedrockMantle, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__startswith=MANTLE_MESSAGES_URL).mock(side_effect=respond_with_message)
+        client = client.with_options(default_headers={"Anthropic-Workspace-Id": "wrkspc_default"})
+
+        client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hi"}], model=MODEL)
+        client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "Hi"}], model=MODEL, workspace_id="wrkspc_argument"
+        )
+        client.messages.batches.create(requests=[])
+
+        default_request, argument_request, batch_request = sent_requests(respx_mock)
+        assert default_request.headers["anthropic-workspace-id"] == "wrkspc_default"
+        assert argument_request.headers["anthropic-workspace-id"] == "wrkspc_argument"
+        assert batch_request.headers["anthropic-workspace-id"] == "wrkspc_default"
+
+    @pytest.mark.respx()
+    async def test_async_client_workspace_id_is_kept(
+        self, async_client: AsyncAnthropicBedrockMantle, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__startswith=MANTLE_MESSAGES_URL).mock(side_effect=respond_with_message)
+        async_client = async_client.with_options(default_headers={"Anthropic-Workspace-Id": "wrkspc_default"})
+
+        await async_client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hi"}], model=MODEL)
+        await async_client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "Hi"}], model=MODEL, workspace_id="wrkspc_argument"
+        )
+        await async_client.messages.batches.create(requests=[])
+
+        default_request, argument_request, batch_request = sent_requests(respx_mock)
+        assert default_request.headers["anthropic-workspace-id"] == "wrkspc_default"
+        assert argument_request.headers["anthropic-workspace-id"] == "wrkspc_argument"
+        assert batch_request.headers["anthropic-workspace-id"] == "wrkspc_default"
+
+    @pytest.mark.respx()
     def test_per_request_omit_keeps_the_client_default(
         self, client: AnthropicBedrockMantle, respx_mock: MockRouter
     ) -> None:
