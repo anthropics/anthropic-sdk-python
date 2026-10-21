@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.17.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.17.0...v1.17.1) (2026-10-20)
+
+### Documentation
+
+* **api:** remove outdated system role note from messages description
+
 ## [1.17.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.16.0...v1.17.0) (2026-10-20)
 
 ### Features
