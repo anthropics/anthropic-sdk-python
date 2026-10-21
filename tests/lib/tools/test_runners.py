@@ -3521,3 +3521,102 @@ async def test_compact_before_next_turn_when_streaming_async(respx_mock: MockRou
     assert compaction["compaction"] == {"type": "summarize"}
     assert compaction["stream"] is True
     assert after["messages"] == _compaction_block_alone()
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_container_preserves_caller_settings_and_skills_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx2.Response(
+                200,
+                json={
+                    "id": "msg_1",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": "claude-haiku-4-5",
+                    "container": {"id": "server-created-123", "expires_at": "2026-10-07T00:00:00Z"},
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "toolu_1",
+                            "name": "get_weather",
+                            "input": {"location": "SF", "units": "f"},
+                        }
+                    ],
+                    "stop_reason": "tool_use",
+                    "usage": {"input_tokens": 1, "output_tokens": 1},
+                },
+            ),
+            _end_turn_response(),
+        ]
+    )
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        container_param = {
+            "skills": [{"type": "custom", "skill_id": "skill_test", "version": "1"}],
+        }
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[_sync_weather_tool()],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            container=cast(Any, container_param),
+        )
+        runner.until_done()
+
+    requests = _sent_request_bodies(respx_mock)
+    assert len(requests) == 2
+    # The second request must retain the skills configuration and adopt server-created ID
+    second_container = requests[1].get("container")
+    assert isinstance(second_container, dict)
+    assert second_container["id"] == "server-created-123"
+    assert second_container["skills"] == [{"type": "custom", "skill_id": "skill_test", "version": "1"}]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+def test_container_preserves_caller_explicit_pinned_id_sync(respx_mock: MockRouter) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx2.Response(
+                200,
+                json={
+                    "id": "msg_1",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": "claude-haiku-4-5",
+                    "container": {"id": "server-different-id", "expires_at": "2026-10-07T00:00:00Z"},
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "toolu_1",
+                            "name": "get_weather",
+                            "input": {"location": "SF", "units": "f"},
+                        }
+                    ],
+                    "stop_reason": "tool_use",
+                    "usage": {"input_tokens": 1, "output_tokens": 1},
+                },
+            ),
+            _end_turn_response(),
+        ]
+    )
+
+    with Anthropic(
+        base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
+    ) as client:
+        runner = client.beta.messages.tool_runner(
+            max_tokens=1024,
+            model="claude-haiku-4-5",
+            tools=[_sync_weather_tool()],
+            messages=[{"role": "user", "content": "What is the weather in SF?"}],
+            container="caller-pinned-id",
+        )
+        runner.until_done()
+
+    requests = _sent_request_bodies(respx_mock)
+    assert len(requests) == 2
+    assert requests[1].get("container") == "caller-pinned-id"
