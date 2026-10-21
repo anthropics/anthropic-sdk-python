@@ -34,15 +34,15 @@ MANDATORY_REFRESH_SECONDS = 30
 DEFAULT_PROFILE = "default"
 DEFAULT_BASE_URL = "https://api.anthropic.com"
 
-# Env vars — explicit auth (tier 0)
+# Env vars — explicit auth
 ENV_API_KEY = "ANTHROPIC_API_KEY"
 ENV_AUTH_TOKEN = "ANTHROPIC_AUTH_TOKEN"
 
-# Env vars — config dir + profile selection (tier 1)
+# Env vars — config dir + profile selection
 ENV_CONFIG_DIR = "ANTHROPIC_CONFIG_DIR"
 ENV_PROFILE = "ANTHROPIC_PROFILE"
 
-# Env vars — direct workload identity, bypassing config files (tier 2)
+# Env vars — direct workload identity, bypassing config files
 ENV_IDENTITY_TOKEN = "ANTHROPIC_IDENTITY_TOKEN"
 ENV_IDENTITY_TOKEN_FILE = "ANTHROPIC_IDENTITY_TOKEN_FILE"
 ENV_FEDERATION_RULE_ID = "ANTHROPIC_FEDERATION_RULE_ID"
@@ -191,7 +191,7 @@ def _credentials_file_path(profile: str) -> pathlib.Path:  # pyright: ignore[rep
 
 
 def _has_active_profile_config() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _chain
-    """Tighter auto-discover check for the tier-1 credential chain.
+    """Tighter auto-discover check for the active-profile step of the credential chain.
 
     Returns `True` only if the *active* profile's config file exists. The
     previous version returned `True` for any `.json` under `configs/`,
@@ -208,11 +208,9 @@ def _has_active_profile_config() -> bool:  # pyright: ignore[reportUnusedFunctio
 def _has_explicit_active_config() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _chain
     """True if the user wrote a non-empty `active_config` pointer file.
 
-    This is an explicit opt-in signal equivalent to setting `ANTHROPIC_PROFILE`:
-    the user has told us which profile to load. If the target config file is
-    missing or malformed, the chain should surface that error rather than
-    silently falling through — matching how `ANTHROPIC_PROFILE=missing`
-    behaves today.
+    The user has told us which profile is active. If the chain gets as far as
+    the active profile and the target config file is missing or malformed, it
+    should surface that error rather than silently falling through.
     """
     return _read_active_config_pointer() is not None
 
@@ -229,7 +227,7 @@ def resolve_identity_token_path(path: str | os.PathLike[str] | None = None) -> p
 
 def _has_auto_discoverable_credentials() -> bool:  # pyright: ignore[reportUnusedFunction] — used by _client
     """True if the environment / filesystem contains signals that would
-    normally drive the tier-1 (profile) or tier-2 (env federation) paths of
+    normally drive the profile or env federation paths of
     `default_credentials`.
 
     Used by the shadow-warning detection in the client constructor: if a

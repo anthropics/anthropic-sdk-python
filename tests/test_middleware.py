@@ -35,6 +35,7 @@ from anthropic import (
 from anthropic._models import FinalRequestOptions
 from anthropic.lib.aws import AnthropicAWS, AsyncAnthropicAWS
 from anthropic._response import BinaryAPIResponse, AsyncBinaryAPIResponse, StreamedBinaryAPIResponse
+from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
 from anthropic._base_client import BaseClient
 from anthropic.types.message import Message
@@ -1971,7 +1972,7 @@ class TestLibClientMiddleware:
         assert wire.url.path == "/model/claude-opus-4-6/invoke"
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "bedrock-2023-05-31"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_bedrock_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
@@ -2013,7 +2014,7 @@ class TestLibClientMiddleware:
         wire = cast("MockRequestCall", respx_mock.calls[0]).request
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "vertex-2023-10-16"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_vertex_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:

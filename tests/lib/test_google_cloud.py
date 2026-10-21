@@ -202,18 +202,16 @@ class TestAnthropicGoogleCloud:
         assert client.beta is not None
         assert client.messages.batches is not None
 
-    def test_no_spurious_env_shadow_warning(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_no_spurious_env_shadow_warning(
+        self, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
         # The base client's "unset ANTHROPIC_API_KEY" credential-precedence warning
         # is about its auto-discovery chain, which never engages for this subclass.
-        calls: list[Any] = []
-
-        def _record(**kwargs: object) -> None:
-            calls.append(kwargs)
-
-        monkeypatch.setattr("anthropic._client._warn_env_shadow", _record)
+        monkeypatch.setattr("anthropic.lib.credentials._auth._warn_once_seen", set[str]())
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-x")
+        monkeypatch.setenv("ANTHROPIC_PROFILE", "dev")
         AnthropicGoogleCloud(base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok")
-        assert calls == []
+        assert [r.getMessage() for r in caplog.records if r.name == "anthropic.lib.credentials._auth"] == []
 
 
 # ---------------------------------------------------------------------------
@@ -934,6 +932,7 @@ async def test_no_api_key_leak_async(respx_mock: MockRouter, monkeypatch: pytest
     calls = cast("list[Any]", respx_mock.calls)
     req = calls[0].request
     assert "x-api-key" not in {k.lower() for k in req.headers.keys()}
+    assert req.headers["Authorization"] == "Bearer tok"
 
 
 @pytest.mark.respx()

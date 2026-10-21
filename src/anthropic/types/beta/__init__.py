@@ -116,6 +116,7 @@ from .beta_self_hosted_config import BetaSelfHostedConfig as BetaSelfHostedConfi
 from .beta_server_tool_caller import BetaServerToolCaller as BetaServerToolCaller
 from .beta_tool_bash_20241022 import BetaToolBash20241022 as BetaToolBash20241022
 from .beta_tool_bash_20250124 import BetaToolBash20250124 as BetaToolBash20250124
+from .beta_user_message_param import BetaUserMessageParam as BetaUserMessageParam
 from .beta_webhook_event_data import BetaWebhookEventData as BetaWebhookEventData
 from .environment_list_params import EnvironmentListParams as EnvironmentListParams
 from .beta_browser_find_config import BetaBrowserFindConfig as BetaBrowserFindConfig
@@ -168,6 +169,7 @@ from .beta_mcp_tool_param_param import BetaMCPToolParamParam as BetaMCPToolParam
 from .beta_memory_tool_20250818 import BetaMemoryTool20250818 as BetaMemoryTool20250818
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_refusal_stop_details import BetaRefusalStopDetails as BetaRefusalStopDetails
+from .beta_system_message_param import BetaSystemMessageParam as BetaSystemMessageParam
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
 from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTurnsParam
 from .beta_tool_reference_block import BetaToolReferenceBlock as BetaToolReferenceBlock
@@ -186,6 +188,7 @@ from .beta_computer_scroll_input import BetaComputerScrollInput as BetaComputerS
 from .beta_fallback_credit_usage import BetaFallbackCreditUsage as BetaFallbackCreditUsage
 from .beta_mcp_tool_config_param import BetaMCPToolConfigParam as BetaMCPToolConfigParam
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock as BetaMCPToolResultBlock
+from .beta_message_content_param import BetaMessageContentParam as BetaMessageContentParam
 from .beta_output_behavior_param import BetaOutputBehaviorParam as BetaOutputBehaviorParam
 from .beta_output_tokens_details import BetaOutputTokensDetails as BetaOutputTokensDetails
 from .beta_server_tool_use_block import BetaServerToolUseBlock as BetaServerToolUseBlock
@@ -221,6 +224,7 @@ from .beta_tool_choice_tool_param import BetaToolChoiceToolParam as BetaToolChoi
 from .beta_toolset_tool_use_block import BetaToolsetToolUseBlock as BetaToolsetToolUseBlock
 from .beta_url_image_source_param import BetaURLImageSourceParam as BetaURLImageSourceParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
+from .beta_assistant_message_param import BetaAssistantMessageParam as BetaAssistantMessageParam
 from .beta_base64_pdf_source_param import BetaBase64PDFSourceParam as BetaBase64PDFSourceParam
 from .beta_browser_close_tab_input import BetaBrowserCloseTabInput as BetaBrowserCloseTabInput
 from .beta_browser_hold_key_config import BetaBrowserHoldKeyConfig as BetaBrowserHoldKeyConfig

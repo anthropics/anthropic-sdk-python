@@ -553,7 +553,7 @@ class TestAnthropic:
     def test_validate_headers(self) -> None:
         client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("X-Api-Key") == api_key
+        assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
         def no_default_credentials(**_kwargs: object) -> None:
             return None
@@ -565,18 +565,22 @@ class TestAnthropic:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
-        request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
-        assert request2.headers.get("X-Api-Key") is None
-        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
-        assert request3.headers.get("X-Api-Key") is None
-        request4 = client2._build_request(
-            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        request2 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"Authorization": Omit()})
         )
-        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+        assert request2.headers.get("Authorization") is None
+        request3 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": Omit()})
+        )
+        assert request3.headers.get("Authorization") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": "from-header"})
+        )
+        assert request4.headers.get_list("Authorization") == ["from-header"]
 
     def test_default_headers_case_insensitive(self) -> None:
         # replaces the SDK's own `User-Agent` rather than being sent next to it
@@ -1956,7 +1960,7 @@ class TestAsyncAnthropic:
     def test_validate_headers(self) -> None:
         client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("X-Api-Key") == api_key
+        assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
         def no_default_credentials(**_kwargs: object) -> None:
             return None
@@ -1968,18 +1972,22 @@ class TestAsyncAnthropic:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
-        request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
-        assert request2.headers.get("X-Api-Key") is None
-        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
-        assert request3.headers.get("X-Api-Key") is None
-        request4 = client2._build_request(
-            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        request2 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"Authorization": Omit()})
         )
-        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+        assert request2.headers.get("Authorization") is None
+        request3 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": Omit()})
+        )
+        assert request3.headers.get("Authorization") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": "from-header"})
+        )
+        assert request4.headers.get_list("Authorization") == ["from-header"]
 
     async def test_default_headers_case_insensitive(self) -> None:
         # replaces the SDK's own `User-Agent` rather than being sent next to it

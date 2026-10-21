@@ -21,12 +21,6 @@ class BetaRBACRole(BaseModel):
     store its `id`.
     """
 
-    name: str
-    """Deprecated: use `display_name` instead.
-
-    Name of the RBAC Role; always the same value as `display_name`.
-    """
-
     type: Literal["rbac_role"]
     """Object type.
 

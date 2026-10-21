@@ -50,6 +50,7 @@ from ...types.beta import (
     BetaMessageParam,
     BetaToolUseBlock,
     BetaToolUnionParam,
+    BetaUserMessageParam,
     BetaRequestToolRemovalBlockParam,
     BetaRequestToolAdditionBlockParam,
 )
@@ -203,7 +204,7 @@ class BaseToolRunner(Generic[AnyFunctionToolT, AnyToolsetT, ResponseFormatT]):
             options = {**options, "extra_headers": merged_headers}
         self._options = options
         self._messages_modified = False
-        self._cached_tool_call_response: BetaMessageParam | None = None
+        self._cached_tool_call_response: BetaUserMessageParam | None = None
         self._max_iterations = max_iterations
         self._iteration_count = 0
         self._closed = False
@@ -626,7 +627,7 @@ class BaseSyncToolRunner(
         assert last_message is not None
         return last_message
 
-    def generate_tool_call_response(self) -> BetaMessageParam | None:
+    def generate_tool_call_response(self) -> BetaUserMessageParam | None:
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
@@ -642,7 +643,7 @@ class BaseSyncToolRunner(
         self._cached_tool_call_response = response
         return response
 
-    def _generate_tool_call_response(self) -> BetaMessageParam | None:
+    def _generate_tool_call_response(self) -> BetaUserMessageParam | None:
         content = self._get_last_assistant_message_content()
         if not content:
             return None
@@ -1079,7 +1080,7 @@ class BaseAsyncToolRunner(
         assert last_message is not None
         return last_message
 
-    async def generate_tool_call_response(self) -> BetaMessageParam | None:
+    async def generate_tool_call_response(self) -> BetaUserMessageParam | None:
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
         Note the tool call response is cached, repeated calls to this method will return the same response.
@@ -1115,7 +1116,7 @@ class BaseAsyncToolRunner(
 
         return last_assistant_message.content
 
-    async def _generate_tool_call_response(self) -> BetaMessageParam | None:
+    async def _generate_tool_call_response(self) -> BetaUserMessageParam | None:
         content = await self._get_last_assistant_message_content()
         if not content:
             return None

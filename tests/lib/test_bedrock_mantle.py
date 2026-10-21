@@ -10,7 +10,7 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import Omit, AnthropicBedrockMantle, AsyncAnthropicBedrockMantle, omit
+from anthropic import Omit, Anthropic, AnthropicBedrockMantle, AsyncAnthropicBedrockMantle, omit
 from anthropic._compat import PYDANTIC_V1
 
 MANTLE_MESSAGES_URL = "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages"
@@ -214,6 +214,18 @@ class TestAuthPrecedence:
             base_url="https://example.com",
         )
         assert client.auth_headers == {}
+
+
+class TestVersionHeader:
+    def test_matches_the_first_party_client(self) -> None:
+        expected = Anthropic(api_key="test-key").default_headers["anthropic-version"]
+        client = AnthropicBedrockMantle(api_key="test-key", aws_region="us-east-1")
+        assert client.default_headers["anthropic-version"] == expected
+
+    def test_async_matches_the_first_party_client(self) -> None:
+        expected = Anthropic(api_key="test-key").default_headers["anthropic-version"]
+        client = AsyncAnthropicBedrockMantle(api_key="test-key", aws_region="us-east-1")
+        assert client.default_headers["anthropic-version"] == expected
 
 
 class TestSkipAuth:

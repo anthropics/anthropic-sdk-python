@@ -193,7 +193,7 @@ class TestAsyncAnthropicFoundry:
 
 class TestFoundryDoesNotLeakAnthropicAPIKey:
     """A stray ANTHROPIC_API_KEY in the environment must never be sent to the
-    Foundry endpoint as X-Api-Key, regardless of which auth mode is in use."""
+    Foundry endpoint, regardless of which auth mode is in use."""
 
     def test_no_x_api_key_with_azure_ad_token_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
@@ -214,6 +214,7 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
 
         assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
+        assert headers.get("authorization") is None
         assert "sk-ant-should-not-leak" not in headers.values()
 
     @pytest.mark.asyncio
@@ -241,6 +242,7 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
 
         assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
+        assert headers.get("authorization") is None
         assert "sk-ant-should-not-leak" not in headers.values()
 
 

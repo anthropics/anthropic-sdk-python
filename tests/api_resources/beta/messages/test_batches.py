@@ -70,8 +70,6 @@ class TestBatches:
                             {
                                 "content": "Hello, world",
                                 "role": "user",
-                                "clear_at": "next_user_message",
-                                "output_config": {"effort": "low"},
                             }
                         ],
                         "model": "claude-opus-5-5",
@@ -540,8 +538,6 @@ class TestAsyncBatches:
                             {
                                 "content": "Hello, world",
                                 "role": "user",
-                                "clear_at": "next_user_message",
-                                "output_config": {"effort": "low"},
                             }
                         ],
                         "model": "claude-opus-5-5",

@@ -11,7 +11,7 @@ from unittest import mock
 import httpx2
 import pytest
 
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import Anthropic, AsyncAnthropic, DefaultHttpxClient, DefaultAsyncHttpxClient
 from anthropic._types import Omit
 from anthropic._models import FinalRequestOptions
 from anthropic._base_client import make_request_options
@@ -100,9 +100,9 @@ class TestBuildHeaders:
     def test_api_key_header_override_does_not_send_two_credentials(self, client_cls: ClientClass) -> None:
         client = make_client(client_cls, api_key="sk-client-key")
 
-        request = build(client, **make_request_options(extra_headers={"x-api-key": "sk-request-key"}))
+        request = build(client, **make_request_options(extra_headers={"AUTHORIZATION": "Bearer sk-request-key"}))
 
-        assert request.headers.get_list("x-api-key") == ["sk-request-key"]
+        assert request.headers.get_list("authorization") == ["Bearer sk-request-key"]
 
     @both_clients
     def test_authorization_default_header_does_not_send_two_credentials(self, client_cls: ClientClass) -> None:
@@ -201,8 +201,8 @@ class TestCopy:
 
 @pytest.mark.usefixtures("no_ambient_credentials")
 class TestValidateHeaders:
-    """A caller-supplied `X-Api-Key` / `Authorization` header, or an explicit `Omit()` of one, counts as auth
-    being configured whatever its casing."""
+    """A caller-supplied `X-Api-Key` / `Authorization` header, or an explicit `Omit()` of `Authorization`, counts
+    as auth being configured whatever its casing."""
 
     @both_clients
     @pytest.mark.parametrize(
@@ -248,7 +248,7 @@ class TestValidateHeaders:
         assert request.headers.get_list("x-api-key") == ["sk-from-env"]
 
     @both_clients
-    @pytest.mark.parametrize("header", ["x-api-key", "authorization"])
+    @pytest.mark.parametrize("header", ["authorization", "AUTHORIZATION"])
     def test_auth_explicitly_omitted(self, client_cls: ClientClass, header: str) -> None:
         client = make_client(client_cls, api_key=None)
 
@@ -258,11 +258,37 @@ class TestValidateHeaders:
 
     @both_clients
     def test_auth_explicitly_omitted_on_the_client(self, client_cls: ClientClass) -> None:
-        client = make_client(client_cls, api_key=None, default_headers={"x-api-key": Omit()})
+        client = make_client(client_cls, api_key=None, default_headers={"authorization": Omit()})
 
         request = build(client)
 
-        assert "x-api-key" not in request.headers
+        assert "authorization" not in request.headers
+
+    @both_clients
+    async def test_api_key_moved_to_x_api_key_by_hand(self, client_cls: ClientClass) -> None:
+        requests: list[httpx2.Request] = []
+
+        def handler(request: httpx2.Request) -> httpx2.Response:
+            requests.append(request)
+            return httpx2.Response(200, json={"data": [], "has_more": False, "first_id": None, "last_id": None})
+
+        def send_x_api_key(request: httpx2.Request) -> httpx2.Request:
+            if request.headers.get("Authorization") == "Bearer sk-key":
+                del request.headers["Authorization"]
+                request.headers["X-Api-Key"] = "sk-key"
+            return request
+
+        http_client_cls = DefaultHttpxClient if client_cls is Anthropic else DefaultAsyncHttpxClient
+        http_client = http_client_cls(transport=httpx2.MockTransport(handler), auth=send_x_api_key)
+        client = make_client(client_cls, api_key="sk-key", http_client=http_client)
+
+        if isinstance(client, Anthropic):
+            client.models.list()
+        else:
+            await client.models.list()
+
+        assert requests[0].headers.get_list("x-api-key") == ["sk-key"]
+        assert "authorization" not in requests[0].headers
 
 
 class TestMultipartContentType:

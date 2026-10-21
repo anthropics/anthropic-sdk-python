@@ -67,11 +67,3 @@ class BetaAPIKey(BaseModel):
 
     For API Keys, this is always `"api_key"`.
     """
-
-    workspace_id: Optional[str] = None
-    """Deprecated: use `scope` instead.
-
-    ID of the Workspace associated with the API key, or `null` if the API key
-    belongs to the default Workspace. Also `null` for a principal-bound API key that
-    has no Workspace; `scope` tells the two apart.
-    """

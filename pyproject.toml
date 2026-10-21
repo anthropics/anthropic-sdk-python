@@ -3,7 +3,7 @@ name = "anthropic"
 version = "1.17.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
-license = "MIT"
+license = "Apache-2.0"
 authors = [
 { name = "Anthropic", email = "support@anthropic.com" },
 ]
@@ -34,7 +34,7 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: Microsoft :: Windows",
   "Topic :: Software Development :: Libraries :: Python Modules",
-  "License :: OSI Approved :: MIT License"
+  "License :: OSI Approved :: Apache Software License"
 ]
 
 [project.optional-dependencies]

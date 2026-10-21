@@ -325,7 +325,7 @@ class EnvironmentWorker:
     The `environment_key` is the worker's standing credential: polling
     always uses it, and per-session calls fall back to it when a work item's
     `secret` doesn't yield a sessions token (every request rides a
-    Bearer-only scoped sub-client, never the parent client's `X-Api-Key`).
+    Bearer-only scoped sub-client, never the parent client's API key).
     `handle_item` can run without it when the work item's `secret`
     carries a sessions token — that token then authorizes every per-item call.
 
