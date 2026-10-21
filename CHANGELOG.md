@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.0.0...v2.1.0) (2026-10-21)
+
+### Features
+
+* **api:** add enforcement status, actions and filter to user profiles
+
 ## [2.0.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.17.0...v2.0.0) (2026-10-21)
 
 ### ⚠ BREAKING CHANGES
