@@ -3,8 +3,6 @@ from __future__ import annotations
 from typing import List
 from typing_extensions import Literal, TypedDict
 
-from .anthropic_beta_param import AnthropicBetaParam
-
 __all__ = ["ModelListParams"]
 
 
@@ -34,9 +32,6 @@ class ModelListParams(TypedDict, total=False):
 
     Defaults to `20`. Ranges from `1` to `1000`.
     """
-
-    betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

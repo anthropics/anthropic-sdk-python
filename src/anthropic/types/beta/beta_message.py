@@ -8,9 +8,9 @@ from .beta_container import BetaContainer
 from .beta_diagnostics import BetaDiagnostics
 from .beta_stop_reason import BetaStopReason
 from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
-from .beta_message_param import BetaMessageParam
 from .beta_input_transformation import BetaInputTransformation
 from .beta_refusal_stop_details import BetaRefusalStopDetails
+from .beta_assistant_message_param import BetaAssistantMessageParam
 from .beta_context_management_response import BetaContextManagementResponse
 
 __all__ = ["BetaMessage"]
@@ -170,8 +170,8 @@ class BetaMessage(BaseModel):
     holds the serving model's entries and replaces the one in `message_start`.
     """
 
-    def to_param(self) -> BetaMessageParam:
+    def to_param(self) -> BetaAssistantMessageParam:
         """Convert this response BetaMessage to a BetaMessageParam so it can be passed back
         to the API as an input message, e.g. in the `messages` param.
         """
-        return BetaMessageParam(role=self.role, content=list(self.content))
+        return BetaAssistantMessageParam(role=self.role, content=list(self.content))

@@ -144,11 +144,11 @@ async def observe_as_self_hosted_worker() -> None:
 
     async def heartbeat(work_id: str, env_id: str, stop: anyio.Event) -> None:
         # Scope the environment key onto a sub-client so each request carries
-        # `Authorization: Bearer <env_key>` and no `X-Api-Key`, inheriting the
-        # parent's timeout / retries / http_client / default_headers. This is
-        # what `EnvironmentWorker` does internally for its heartbeat.
-        scoped = client.copy(auth_token=environment_key, credentials=None)
-        scoped.api_key = None
+        # `Authorization: Bearer <env_key>` in place of the parent's API key,
+        # inheriting the parent's timeout / retries / http_client /
+        # default_headers. A base URL that came from the parent's profile goes
+        # with the parent's credential, so pass it on.
+        scoped = client.copy(auth_token=environment_key, base_url=client.base_url)
         # The first beat claims the lease with NO_HEARTBEAT; later beats echo
         # the server's last value back.
         last = "NO_HEARTBEAT"

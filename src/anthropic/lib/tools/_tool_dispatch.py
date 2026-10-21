@@ -172,7 +172,7 @@ def available_tool_names(messages: Iterable[BetaMessageParam], tool_names: Itera
     """
     available = set(tool_names)
     for message in messages:
-        content = message["content"]
+        content = message.get("content", ())
         if isinstance(content, str):
             continue
         for block in content:

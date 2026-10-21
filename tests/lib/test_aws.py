@@ -245,6 +245,18 @@ async def test_skip_auth_region_request_url(
     assert "Authorization" not in calls[0].request.headers
 
 
+@_aws_client_classes
+def test_ambient_first_party_credentials_do_not_warn(
+    client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    _set_ambient_first_party_credentials(monkeypatch)
+    monkeypatch.setattr("anthropic.lib.credentials._auth._warn_once_seen", set[str]())
+
+    client_cls(skip_auth=True, aws_region="eu-west-1", workspace_id="ws-123")
+
+    assert [r.getMessage() for r in caplog.records if r.name == "anthropic.lib.credentials._auth"] == []
+
+
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
@@ -419,7 +431,8 @@ def test_api_key_request(respx_mock: MockRouter) -> None:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     assert len(calls) == 1
     assert str(calls[0].request.url) == "https://aws-external-anthropic.us-east-1.api.aws/v1/messages"
-    assert calls[0].request.headers["X-Api-Key"] == "test-key"
+    assert calls[0].request.headers["Authorization"] == "Bearer test-key"
+    assert "X-Api-Key" not in calls[0].request.headers
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
@@ -440,7 +453,8 @@ async def test_api_key_request_async(respx_mock: MockRouter) -> None:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     assert len(calls) == 1
     assert str(calls[0].request.url) == "https://aws-external-anthropic.us-east-1.api.aws/v1/messages"
-    assert calls[0].request.headers["X-Api-Key"] == "test-key"
+    assert calls[0].request.headers["Authorization"] == "Bearer test-key"
+    assert "X-Api-Key" not in calls[0].request.headers
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
@@ -735,6 +749,14 @@ def test_copy_overrides_aws_options() -> None:
 
 
 @_aws_client_classes
+def test_copy_with_auth_token_keeps_the_api_key(client_cls: _AWSClientClass) -> None:
+    client = client_cls(api_key="test-key", aws_region="us-east-1", workspace_id="ws-123")
+    copied = client.copy(auth_token="token")
+    assert copied._use_sigv4 is False
+    assert copied.auth_headers == {"Authorization": "Bearer test-key"}
+
+
+@_aws_client_classes
 def test_copy_region_change_rederives_base_url(client_cls: _AWSClientClass, monkeypatch: pytest.MonkeyPatch) -> None:
     _clear_aws_url_env(monkeypatch)
     _set_ambient_first_party_credentials(monkeypatch)
@@ -865,7 +887,7 @@ def test_copy_rejects_real_credentials_provider() -> None:
         workspace_id="ws-123",
     )
     with pytest.raises(TypeError, match="does not support a `credentials` provider"):
-        client.copy(credentials=StaticToken("token"))
+        client.copy(credentials=StaticToken("token"))  # pyright: ignore[reportArgumentType]
 
 
 def test_copy_rejects_real_credentials_provider_async() -> None:
@@ -876,13 +898,13 @@ def test_copy_rejects_real_credentials_provider_async() -> None:
         workspace_id="ws-123",
     )
     with pytest.raises(TypeError, match="does not support a `credentials` provider"):
-        client.copy(credentials=StaticToken("token"))
+        client.copy(credentials=StaticToken("token"))  # pyright: ignore[reportArgumentType]
 
 
 def test_scoped_bearer_client_helper_on_aws() -> None:
     # Regression: the environment poller / worker / session-tool-runner build a
     # scoped sub-client via `_copy_client_with_bearer_auth`, which calls
-    # `client.copy(credentials=None, ...)`. That must work on the AWS client and
+    # `client.copy(auth_token=..., ...)`. That must work on the AWS client and
     # yield a client that still signs with SigV4 (the bearer token is unused).
     from anthropic.lib._scoped_client import _copy_client_with_bearer_auth
 

@@ -17,6 +17,11 @@ from anthropic._types import Omit, omit
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError, BetaFunctionTool, BetaAsyncFunctionTool, BetaFunctionToolResultType
+from anthropic.types.beta import (
+    BetaUserMessageParam,
+    BetaRequestToolRemovalBlockParam,
+    BetaRequestToolAdditionBlockParam,
+)
 from anthropic.lib.tools._beta_runner import (
     _STOP_REASON_STEPS,
     BetaToolRunner,
@@ -298,7 +303,7 @@ class TestSyncRunTools:
         for message_iter in runner:
             if message_iter.content[0].type == "tool_use":
                 runner.append_messages(
-                    BetaMessageParam(
+                    BetaUserMessageParam(
                         role="user",
                         content=[
                             BetaToolResultBlockParam(
@@ -1032,7 +1037,9 @@ def _end_turn_response() -> httpx2.Response:
     )
 
 
-def _tool_reference_block(kind: Literal["tool_removal", "tool_addition"], name: str) -> BetaContentBlockParam:
+def _tool_reference_block(
+    kind: Literal["tool_removal", "tool_addition"], name: str
+) -> BetaRequestToolRemovalBlockParam | BetaRequestToolAdditionBlockParam:
     tool: BetaToolChangeToolReferenceParam = {"type": "tool_reference", "name": name}
     if kind == "tool_removal":
         return {"type": "tool_removal", "tool": tool}
@@ -1761,6 +1768,34 @@ async def test_tool_changes_made_before_the_first_request_follow_a_trailing_assi
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_removal_applies_when_the_history_has_a_system_message_without_content(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[_calls_tool("get_weather", "toolu_weather"), _end_turn_response()]
+    )
+    calls: list[str] = []
+    messages: list[BetaMessageParam] = [
+        {"role": "user", "content": "What is the weather in SF?"},
+        {"role": "system", "output_config": {"effort": "low"}},
+        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+    ]
+
+    with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+        await _run_with_tool_changes(
+            client if sync else async_client,
+            tools=[_recording_tool(sync, "get_weather", calls)],
+            script={},
+            messages=messages,
+        )
+
+    assert calls == []
+    assert _sent_request_bodies(respx_mock)[1]["messages"][:3] == messages
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
 @pytest.mark.parametrize("remove_by", ["tool", "name"])
 @_sync_and_async
 @pytest.mark.respx(base_url=base_url)
@@ -2237,12 +2272,12 @@ def _weather_tool(sync: bool, run: Callable[[str, Literal["c", "f"]], BetaFuncti
 
 async def _run_tool_use(
     client: Anthropic | AsyncAnthropic, *, tools: List[Any], messages: List[BetaMessageParam]
-) -> List[BetaMessageParam]:
+) -> List[BetaUserMessageParam]:
     """`_run_sync_tool_use` for either client."""
     runner: Any = client.beta.messages.tool_runner(
         max_tokens=1024, model="claude-haiku-4-5", tools=tools, messages=messages
     )
-    responses: List[BetaMessageParam] = []
+    responses: List[BetaUserMessageParam] = []
     if isinstance(client, Anthropic):
         for _ in runner:
             response = runner.generate_tool_call_response()

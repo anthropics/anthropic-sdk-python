@@ -88,6 +88,7 @@ from .file_upload_params import FileUploadParams as FileUploadParams
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .model_capabilities import ModelCapabilities as ModelCapabilities
 from .server_tool_caller import ServerToolCaller as ServerToolCaller
+from .user_message_param import UserMessageParam as UserMessageParam
 from .beta_error_response import BetaErrorResponse as BetaErrorResponse
 from .browser_hover_input import BrowserHoverInput as BrowserHoverInput
 from .browser_member_name import (
@@ -122,6 +123,7 @@ from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
 from .refusal_stop_details import RefusalStopDetails as RefusalStopDetails
+from .system_message_param import SystemMessageParam as SystemMessageParam
 from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_reference_block import ToolReferenceBlock as ToolReferenceBlock
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
@@ -132,6 +134,7 @@ from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
 from .browser_new_tab_input import BrowserNewTabInput as BrowserNewTabInput
 from .computer_member_input import ComputerMemberInput as ComputerMemberInput
 from .computer_scroll_input import ComputerScrollInput as ComputerScrollInput
+from .message_content_param import MessageContentParam as MessageContentParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
 from .output_tokens_details import OutputTokensDetails as OutputTokensDetails
 from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
@@ -153,6 +156,7 @@ from .tool_choice_none_param import ToolChoiceNoneParam as ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .toolset_tool_use_block import ToolsetToolUseBlock as ToolsetToolUseBlock
 from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
+from .assistant_message_param import AssistantMessageParam as AssistantMessageParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
 from .browser_close_tab_input import BrowserCloseTabInput as BrowserCloseTabInput
 from .browser_list_tabs_input import BrowserListTabsInput as BrowserListTabsInput

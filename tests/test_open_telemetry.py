@@ -8141,6 +8141,7 @@ class TestTracingFailures:
     ) -> None:
         route = respx_mock.post().mock(return_value=httpx2.Response(200, json=MESSAGE))
         called_names: list[str] = []
+        await close_what_earlier_tests_left_suspended()
 
         def refuse(name: str) -> Callable[..., Any]:
             def function(*_args: object, **_kwargs: object) -> Any:
@@ -8167,6 +8168,22 @@ class TestTracingFailures:
 
         assert route.call_count == 3 * len(clients)
         assert called_names == []
+
+
+async def close_what_earlier_tests_left_suspended() -> None:
+    """Closes the generators that earlier tests of this process walked away from, such as a tool runner's.
+
+    Python closes one when it frees it, which can be during a later test, and a tool runner that closes calls
+    OpenTelemetry.
+    """
+    while True:
+        gc.collect()
+        # The event loop closes an asynchronous generator in a task, which it starts on its next turn.
+        await asyncio.sleep(0)
+        closing = asyncio.all_tasks() - {asyncio.current_task()}
+        if not closing:
+            return
+        await asyncio.wait(closing)
 
 
 def ask_for_global_tracer_provider_again() -> None:

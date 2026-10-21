@@ -334,7 +334,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         )
         # Never inherit first-party static credentials from the environment — the
         # base reads ANTHROPIC_API_KEY/ANTHROPIC_AUTH_TOKEN when no explicit
-        # credential is passed, which would otherwise leak as `X-Api-Key` to the
+        # credential is passed, which would otherwise leak as `Authorization` to the
         # gateway host. `auth_headers` is also overridden below as a hard guarantee.
         self.api_key = None
         self.auth_token = None
@@ -343,7 +343,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
     @override
     def auth_headers(self) -> dict[str, str]:
         # Auth is a GCP bearer token attached in `_prepare_request`; never emit
-        # first-party `X-Api-Key` / `Authorization` headers from static credentials.
+        # a first-party `Authorization` header from static credentials.
         return {}
 
     @override
