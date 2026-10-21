@@ -11,7 +11,7 @@ permissions:
 jobs:
   changelog:
     name: changelog
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: 'ubuntu-latest'
     if: |-
       github.repository == 'anthropics/anthropic-sdk-python-private' &&
       !github.event.pull_request.draft &&

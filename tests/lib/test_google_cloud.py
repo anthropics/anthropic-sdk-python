@@ -491,6 +491,64 @@ def test_lowercase_authorization_header_respected(respx_mock: MockRouter) -> Non
 
 
 @pytest.mark.respx()
+def test_client_identity_headers_are_kept(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    client = AnthropicGoogleCloud(
+        base_url="https://example.test/",
+        workspace_id="wrkspc_x",
+        token_provider=lambda: "gcp-token",
+        default_headers={"anthropic-user-profile-id": "uprof_client", "anthropic-workspace-id": "wrkspc_client"},
+    )
+
+    client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+    client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "hi"}],
+        model="claude-haiku-4-5",
+        user_profile_id="uprof_request",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[Any]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
+async def test_client_identity_headers_are_kept_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    client = AsyncAnthropicGoogleCloud(
+        base_url="https://example.test/",
+        workspace_id="wrkspc_x",
+        token_provider=lambda: "gcp-token",
+        default_headers={"anthropic-user-profile-id": "uprof_client", "anthropic-workspace-id": "wrkspc_client"},
+    )
+
+    await client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+    await client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "hi"}],
+        model="claude-haiku-4-5",
+        user_profile_id="uprof_request",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[Any]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
 def test_custom_headers_env_flows_through(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     # ANTHROPIC_CUSTOM_HEADERS behaves like it does on other SDK clients.
     monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "x-custom-header: hello")
