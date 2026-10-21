@@ -31,6 +31,7 @@ from contextlib import (
 from collections.abc import Generator, AsyncGenerator
 from typing_extensions import Literal, TypedDict, override
 
+import anyio
 import httpx2
 from opentelemetry.trace import Span
 
@@ -921,6 +922,7 @@ class BaseAsyncToolRunner(
         )
         self._client = client
         self._iterator = self.__run__()
+        self._tool_response_lock = anyio.Lock()
         self._last_message: (
             Callable[[], Coroutine[None, None, ParsedBetaMessage[ResponseFormatT]]]
             | ParsedBetaMessage[ResponseFormatT]
@@ -1092,9 +1094,14 @@ class BaseAsyncToolRunner(
             log.debug("Returning cached tool call response.")
             return self._cached_tool_call_response
 
-        response = await self._generate_tool_call_response()
-        self._cached_tool_call_response = response
-        return response
+        async with self._tool_response_lock:
+            if self._cached_tool_call_response is not None:
+                log.debug("Returning cached tool call response.")
+                return self._cached_tool_call_response
+
+            response = await self._generate_tool_call_response()
+            self._cached_tool_call_response = response
+            return response
 
     async def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
