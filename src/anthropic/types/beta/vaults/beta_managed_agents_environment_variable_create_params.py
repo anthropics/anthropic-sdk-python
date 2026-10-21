@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import Literal, Required, TypedDict
@@ -20,7 +18,10 @@ class BetaManagedAgentsEnvironmentVariableCreateParams(TypedDict, total=False):
     """Name of the environment variable. Immutable after create."""
 
     secret_value: Required[str]
-    """Secret value. Write-only; never returned in responses."""
+    """The secret to substitute into the agent's outbound requests.
+
+    It's write-only and never returned in responses.
+    """
 
     type: Required[Literal["environment_variable"]]
 

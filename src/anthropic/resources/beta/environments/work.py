@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -17,7 +15,7 @@ if TYPE_CHECKING:
     from ....lib.environments._worker import EnvironmentWorker, EnvironmentWorkerTools
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -29,13 +27,6 @@ from ...._response import (
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
 from ....lib.tools._deprecations import UNRESTRICTED_PATHS_DEPRECATION, reject_unrestricted_paths
-from ....types.beta.environments import (
-    work_list_params,
-    work_poll_params,
-    work_stop_params,
-    work_update_params,
-    work_heartbeat_params,
-)
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.environments.beta_self_hosted_work import BetaSelfHostedWork
 from ....types.beta.environments.beta_self_hosted_work_queue_stats import BetaSelfHostedWorkQueueStats
@@ -89,6 +80,13 @@ class Work(SyncAPIResource):
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -120,7 +118,13 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.retrieve",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -154,6 +158,13 @@ class Work(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -184,9 +195,15 @@ class Work(SyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=maybe_transform({"metadata": metadata}, work_update_params.WorkUpdateParams),
+            body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.update",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -249,13 +266,13 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    work_list_params.WorkListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.environments.work.list",
+                span_route="/v1/environments/{environment_id}/work",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             model=BetaSelfHostedWork,
         )
@@ -315,7 +332,13 @@ class Work(SyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.ack",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -387,13 +410,13 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "desired_ttl_seconds": desired_ttl_seconds,
-                        "expected_last_heartbeat": expected_last_heartbeat,
-                    },
-                    work_heartbeat_params.WorkHeartbeatParams,
-                ),
+                query={
+                    "desired_ttl_seconds": desired_ttl_seconds,
+                    "expected_last_heartbeat": expected_last_heartbeat,
+                },
+                span_name="anthropic.environments.work.heartbeat",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -463,13 +486,13 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "block_ms": block_ms,
-                        "reclaim_older_than_ms": reclaim_older_than_ms,
-                    },
-                    work_poll_params.WorkPollParams,
-                ),
+                query={
+                    "block_ms": block_ms,
+                    "reclaim_older_than_ms": reclaim_older_than_ms,
+                },
+                span_name="anthropic.environments.work.poll",
+                span_route="/v1/environments/{environment_id}/work/poll",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -492,6 +515,13 @@ class Work(SyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -518,7 +548,13 @@ class Work(SyncAPIResource):
         return self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stats",
+                span_route="/v1/environments/{environment_id}/work/stats",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -551,6 +587,13 @@ class Work(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -581,9 +624,15 @@ class Work(SyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=maybe_transform({"force": force}, work_stop_params.WorkStopParams),
+            body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stop",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -634,6 +683,13 @@ class AsyncWork(AsyncAPIResource):
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -665,7 +721,13 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.retrieve",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -699,6 +761,13 @@ class AsyncWork(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -729,9 +798,15 @@ class AsyncWork(AsyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=await async_maybe_transform({"metadata": metadata}, work_update_params.WorkUpdateParams),
+            body={"metadata": metadata},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.update",
+                span_route="/v1/environments/{environment_id}/work/{work_id}",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -794,13 +869,13 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    work_list_params.WorkListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.environments.work.list",
+                span_route="/v1/environments/{environment_id}/work",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             model=BetaSelfHostedWork,
         )
@@ -860,7 +935,13 @@ class AsyncWork(AsyncAPIResource):
                 work_id=work_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.ack",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -932,13 +1013,13 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {
-                        "desired_ttl_seconds": desired_ttl_seconds,
-                        "expected_last_heartbeat": expected_last_heartbeat,
-                    },
-                    work_heartbeat_params.WorkHeartbeatParams,
-                ),
+                query={
+                    "desired_ttl_seconds": desired_ttl_seconds,
+                    "expected_last_heartbeat": expected_last_heartbeat,
+                },
+                span_name="anthropic.environments.work.heartbeat",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWorkHeartbeatResponse,
         )
@@ -1008,13 +1089,13 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {
-                        "block_ms": block_ms,
-                        "reclaim_older_than_ms": reclaim_older_than_ms,
-                    },
-                    work_poll_params.WorkPollParams,
-                ),
+                query={
+                    "block_ms": block_ms,
+                    "reclaim_older_than_ms": reclaim_older_than_ms,
+                },
+                span_name="anthropic.environments.work.poll",
+                span_route="/v1/environments/{environment_id}/work/poll",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1037,6 +1118,13 @@ class AsyncWork(AsyncAPIResource):
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1063,7 +1151,13 @@ class AsyncWork(AsyncAPIResource):
         return await self._get(
             path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stats",
+                span_route="/v1/environments/{environment_id}/work/stats",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaSelfHostedWorkQueueStats,
         )
@@ -1096,6 +1190,13 @@ class AsyncWork(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -1126,9 +1227,15 @@ class AsyncWork(AsyncAPIResource):
                 environment_id=environment_id,
                 work_id=work_id,
             ),
-            body=await async_maybe_transform({"force": force}, work_stop_params.WorkStopParams),
+            body={"force": force},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.environments.work.stop",
+                span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
+                span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
             ),
             cast_to=BetaSelfHostedWork,
         )
@@ -1149,14 +1256,19 @@ class AsyncWork(AsyncAPIResource):
 
         Each yielded item has been ack'd. The environment key authenticates the
         poll, ack, and stop calls via a scoped sub-client (built once per
-        call). Async only — available on :class:`~anthropic.AsyncAnthropic`
-        (the sync client does not expose ``poller``).
+        call). Async only — available on `anthropic.AsyncAnthropic`
+        (the sync client does not expose `poller`).
 
-        With the defaults this loops forever and calls ``stop`` after the
-        consuming ``async for`` body returns or raises (long-running runner
-        shape). Pass ``drain=True, auto_stop=False`` to drain whatever is queued
+        With the defaults this loops forever and calls `stop` after the
+        consuming `async for` body returns or raises (long-running runner
+        shape). Pass `drain=True, auto_stop=False` to drain whatever is queued
         and return without owning the stop call (webhook-dispatch shape — each
-        item is handed off to another process that calls ``stop`` when done).
+        item is handed off to another process that calls `stop` when done).
+
+        Each item has an OpenTelemetry span, `anthropic.environment.work`,
+        when the client has spans, open from when the poll returns the item
+        until the loop asks for the next item or stops. It is not the current
+        span in the loop body, so a span that the body starts is its sibling.
 
         Args:
           environment_id: The self-hosted environment to claim work from.
@@ -1166,21 +1278,21 @@ class AsyncWork(AsyncAPIResource):
             unique, hostname-prefixed id.
           block_ms: How long the server should hold an empty poll open before
             returning (long-poll). Server caps this at 999. Defaults to
-            ``POLL_BLOCK_MS`` (999) when not given. Pass ``None`` to omit for a
-            non-blocking poll — the server rejects ``0``.
+            `POLL_BLOCK_MS` (999) when not given. Pass `None` to omit for a
+            non-blocking poll — the server rejects `0`.
           reclaim_older_than_ms: Reclaim un-ack'd work older than this many ms.
             Forwarded to the underlying poll request.
           drain: When True, return after the first empty poll instead of
             sleeping and re-polling.
-          auto_stop: When True (default), call ``stop`` after the consumer's
+          auto_stop: When True (default), call `stop` after the consumer's
             loop body completes. Set False when handing items off to another
             process that owns the stop call.
           extra_headers: Optional headers passed through per request on the
             poll / ack / stop calls. They are threaded into each call's
-            ``extra_headers=`` and never assigned onto the client, so client
-            state is not mutated. Auth and ``x-stainless-helper`` are supplied
+            `extra_headers=` and never assigned onto the client, so client
+            state is not mutated. Auth and `x-stainless-helper` are supplied
             by the scoped sub-client built here (and the parent client's
-            ``default_headers`` propagate via its ``client.copy()``); a header
+            `default_headers` propagate via its `client.copy()`); a header
             given here overrides the scoped client's same-named default for
             that request, so use it for caller passthrough (e.g. trace ids),
             not to set auth.
@@ -1188,7 +1300,7 @@ class AsyncWork(AsyncAPIResource):
         # POLL_BLOCK_MS is resolved here, not used as a literal signature
         # default: importing _poller at module load would form an import cycle
         # (_poller imports this module) and pull the host-only environment lib
-        # into ``import anthropic``. The sentinel keeps a single source of truth
+        # into `import anthropic`. The sentinel keeps a single source of truth
         # for the default so it can't drift from the constant.
         from ....lib._scoped_client import _copy_client_with_bearer_auth
         from ....lib.environments._poller import POLL_BLOCK_MS, aiter_work
@@ -1261,66 +1373,66 @@ class AsyncWork(AsyncAPIResource):
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
     ) -> EnvironmentWorker:
-        """Build an :class:`~anthropic.lib.environments.EnvironmentWorker` bound to this async client.
+        """Build an `anthropic.lib.environments.EnvironmentWorker` bound to this async client.
 
         The full worker: it polls the environment for work, and for each claimed
         session sets up the workdir + downloads the session agent's skills, runs
-        the given ``tools`` against the session's tool-call events while
+        the given `tools` against the session's tool-call events while
         heartbeating the work-item lease, force-stops the work on exit, and
-        loops. Composed from this resource's :meth:`poller` and the per-session
+        loops. Composed from this resource's `poller` and the per-session
         session tool runner.
 
-        ``EnvironmentWorker`` is async only — its ``run`` / ``handle_item``
-        coroutines need an event loop. With this :class:`~anthropic.AsyncAnthropic`
-        client the returned worker is ready to ``await worker.run()`` (long-running
-        poll loop) or ``await worker.handle_item()`` (single already-claimed work
+        `EnvironmentWorker` is async only — its `run` / `handle_item`
+        coroutines need an event loop. With this `anthropic.AsyncAnthropic`
+        client the returned worker is ready to `await worker.run()` (long-running
+        poll loop) or `await worker.handle_item()` (single already-claimed work
         item). It can also be constructed directly:
-        ``EnvironmentWorker(client, ...)``.
+        `EnvironmentWorker(client, ...)`.
 
         Args:
           environment_id: The self-hosted environment to poll for work. Required
-            by ``EnvironmentWorker.run``; not used by
-            ``EnvironmentWorker.handle_item``.
+            by `EnvironmentWorker.run`; not used by
+            `EnvironmentWorker.handle_item`.
           environment_key: The environment key — the worker's single credential,
             used as Bearer auth on the control-plane and session-level calls.
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
-            ``AgentToolContext``. Defaults to ``beta_agent_toolset_20260401(env)``.
+            `AgentToolContext`. Defaults to `beta_agent_toolset_20260401(env)`.
             Async tools share the event loop with the lease heartbeat, so keep
             them non-blocking.
-          workdir: Base directory for the per-session ``AgentToolContext``.
-            Defaults to ``os.getcwd()`` captured when the worker is constructed
-            (TS parity: ``process.cwd()`` at construction).
+          workdir: Base directory for the per-session `AgentToolContext`.
+            Defaults to `os.getcwd()` captured when the worker is constructed
+            (TS parity: `process.cwd()` at construction).
           unrestricted_paths: Deprecated and no longer accepted; passing either
-            value raises ``TypeError`` (see ``AgentToolContext``).
-          max_file_bytes: Forwarded to the per-session ``AgentToolContext`` — the
-            size cap (bytes) for the ``read``/``edit`` tools. ``not_given``
+            value raises `TypeError` (see `AgentToolContext`).
+          max_file_bytes: Forwarded to the per-session `AgentToolContext` — the
+            size cap (bytes) for the `read`/`edit` tools. `not_given`
             (default) uses the built-in 256 KiB cap; a positive int sets a custom
-            cap; ``None`` disables the cap.
+            cap; `None` disables the cap.
           max_idle: Seconds to keep running after the session goes idle with
-            ``stop_reason`` ``end_turn``. Defaults to ``DEFAULT_MAX_IDLE`` (60s)
-            when not given. ``None`` disables it.
+            any `stop_reason` but `requires_action`. Defaults to
+            `DEFAULT_MAX_IDLE` (60s) when not given. `None` disables it.
           memory_sync_interval: How often (seconds) to sync the session's
-            attached memory stores; ``None`` disables memory. Defaults to
-            ``DEFAULT_MEMORY_SYNC_INTERVAL`` (15s) when not given.
-          memory_sync_deletions: ``"enabled"`` (default), ``"log_only"``, or
-            ``"disabled"``.
+            attached memory stores; `None` disables memory. Defaults to
+            `DEFAULT_MEMORY_SYNC_INTERVAL` (15s) when not given.
+          memory_sync_deletions: `"enabled"` (default), `"log_only"`, or
+            `"disabled"`.
           worker_id: Optional identifier sent on each poll. Defaults to a unique,
             hostname-prefixed id.
           extra_headers: Optional headers passed through per request on every
             call the worker makes (poll / ack / stop / heartbeat and the
             session tool runner's event stream / list / send). They are
-            threaded into each call's ``extra_headers=`` and never assigned
+            threaded into each call's `extra_headers=` and never assigned
             onto the client, so client state is not mutated. Auth and
-            ``x-stainless-helper`` are supplied by the worker's scoped
-            sub-clients (and the parent client's ``default_headers`` propagate
-            via their ``client.copy()``); a header given here overrides a
+            `x-stainless-helper` are supplied by the worker's scoped
+            sub-clients (and the parent client's `default_headers` propagate
+            via their `client.copy()`); a header given here overrides a
             scoped client's same-named default for that request, so use it for
             caller passthrough (e.g. trace ids), not to set auth.
         """
         # DEFAULT_MAX_IDLE resolved here rather than as a literal signature
         # default so the value can't drift from the constant; the lazy import
-        # also keeps the host-only environment lib out of ``import anthropic``.
+        # also keeps the host-only environment lib out of `import anthropic`.
         from ....lib.environments._worker import DEFAULT_MEMORY_SYNC_INTERVAL, EnvironmentWorker
         from ....lib.tools._beta_session_runner import DEFAULT_MAX_IDLE
 

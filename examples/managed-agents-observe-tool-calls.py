@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Observe every tool call with the low-level session tool runner.
 
-``client.beta.sessions.events.tool_runner(...)`` is the "observe every call"
+`client.beta.sessions.events.tool_runner(...)` is the "observe every call"
 path: an async iterable that attaches to a session's event stream, runs the
 matching local tool for each tool-call event, posts the result back, and yields
-one ``DispatchedToolCall`` per completed call. It does NOT manage a work-item
-lease — ``EnvironmentWorker`` is what does that.
+one `DispatchedToolCall` per completed call. It does NOT manage a work-item
+lease — `EnvironmentWorker` is what does that.
 
 This file has two scenarios:
 
@@ -20,7 +20,7 @@ This file has two scenarios:
             the work poller + the agent tool context + your OWN heartbeat task
             running in parallel with the tool_runner loop. Reach for this only
             when you need per-call visibility AND lease management together —
-            otherwise ``EnvironmentWorker`` already does both for you.
+            otherwise `EnvironmentWorker` already does both for you.
 
 Security model: the tools execute bash and file operations directly on the host.
 Run inside a container or other isolation boundary you control.
@@ -53,8 +53,8 @@ async def main() -> None:
     """Primary scenario: drive a session yourself and watch each tool call.
 
     No work queue and no lease are involved — we create the session, send a
-    prompt, and consume ``tool_runner`` directly. tool_runner is passed no
-    ``environment_key``, so it authenticates with the client's own credentials;
+    prompt, and consume `tool_runner` directly. tool_runner is passed no
+    `environment_key`, so it authenticates with the client's own credentials;
     that makes this scenario work against a non-self-hosted environment too.
     """
     logging.basicConfig(level=logging.INFO)
@@ -144,11 +144,11 @@ async def observe_as_self_hosted_worker() -> None:
 
     async def heartbeat(work_id: str, env_id: str, stop: anyio.Event) -> None:
         # Scope the environment key onto a sub-client so each request carries
-        # `Authorization: Bearer <env_key>` and no `X-Api-Key`, inheriting the
-        # parent's timeout / retries / http_client / default_headers. This is
-        # what `EnvironmentWorker` does internally for its heartbeat.
-        scoped = client.copy(auth_token=environment_key, credentials=None)
-        scoped.api_key = None
+        # `Authorization: Bearer <env_key>` in place of the parent's API key,
+        # inheriting the parent's timeout / retries / http_client /
+        # default_headers. A base URL that came from the parent's profile goes
+        # with the parent's credential, so pass it on.
+        scoped = client.copy(auth_token=environment_key, base_url=client.base_url)
         # The first beat claims the lease with NO_HEARTBEAT; later beats echo
         # the server's last value back.
         last = "NO_HEARTBEAT"

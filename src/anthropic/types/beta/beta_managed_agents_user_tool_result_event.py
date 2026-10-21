@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -49,10 +47,10 @@ class BetaManagedAgentsUserToolResultEvent(BaseModel):
     """Whether the tool execution resulted in an error."""
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this result was processed."""
 
     session_thread_id: Optional[str] = None
-    """Routes this result to a subagent thread.
+    """Set by the server to the subagent thread this result was routed to.
 
-    Copy from the `agent.tool_use` event's `session_thread_id`.
+    Omitted when it was routed to the primary thread.
     """

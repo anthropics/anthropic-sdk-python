@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -175,6 +173,7 @@ class TestWorkspaces:
             after_id="after_id",
             before_id="before_id",
             include_archived=True,
+            include_default=True,
             limit=1,
         )
         assert_matches_type(SyncPage[BetaWorkspace], workspace, path=["response"])
@@ -398,6 +397,7 @@ class TestAsyncWorkspaces:
             after_id="after_id",
             before_id="before_id",
             include_archived=True,
+            include_default=True,
             limit=1,
         )
         assert_matches_type(AsyncPage[BetaWorkspace], workspace, path=["response"])

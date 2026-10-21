@@ -148,3 +148,7 @@ You can release to package managers by using [the `Publish PyPI` GitHub action](
 
 If you need to manually release a package, you can run the `bin/publish-pypi` script with a `PYPI_TOKEN` set on
 the environment.
+
+## License
+
+By contributing to this repository, you agree that your contributions are licensed under the Apache License, Version 2.0 (see [LICENSE](LICENSE)).

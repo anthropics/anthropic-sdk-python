@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from .event_list_params import EventListParams as EventListParams
@@ -16,6 +14,7 @@ from .beta_managed_agents_file_rubric import BetaManagedAgentsFileRubric as Beta
 from .beta_managed_agents_image_block import BetaManagedAgentsImageBlock as BetaManagedAgentsImageBlock
 from .beta_managed_agents_text_rubric import BetaManagedAgentsTextRubric as BetaManagedAgentsTextRubric
 from .beta_managed_agents_event_params import BetaManagedAgentsEventParams as BetaManagedAgentsEventParams
+from .beta_managed_agents_inline_agent import BetaManagedAgentsInlineAgent as BetaManagedAgentsInlineAgent
 from .beta_managed_agents_billing_error import BetaManagedAgentsBillingError as BetaManagedAgentsBillingError
 from .beta_managed_agents_file_resource import BetaManagedAgentsFileResource as BetaManagedAgentsFileResource
 from .beta_managed_agents_session_event import BetaManagedAgentsSessionEvent as BetaManagedAgentsSessionEvent
@@ -23,6 +22,7 @@ from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError as 
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock as BetaManagedAgentsDocumentBlock
 from .beta_managed_agents_redacted_block import BetaManagedAgentsRedactedBlock as BetaManagedAgentsRedactedBlock
 from .beta_managed_agents_session_thread import BetaManagedAgentsSessionThread as BetaManagedAgentsSessionThread
+from .beta_managed_agents_session_refusal import BetaManagedAgentsSessionRefusal as BetaManagedAgentsSessionRefusal
 from .beta_managed_agents_session_end_turn import BetaManagedAgentsSessionEndTurn as BetaManagedAgentsSessionEndTurn
 from .beta_managed_agents_session_resource import BetaManagedAgentsSessionResource as BetaManagedAgentsSessionResource
 from .beta_managed_agents_span_model_usage import BetaManagedAgentsSpanModelUsage as BetaManagedAgentsSpanModelUsage
@@ -33,11 +33,20 @@ from .beta_managed_agents_image_block_param import BetaManagedAgentsImageBlockPa
 from .beta_managed_agents_file_rubric_params import (
     BetaManagedAgentsFileRubricParams as BetaManagedAgentsFileRubricParams,
 )
+from .beta_managed_agents_session_event_type import (
+    BetaManagedAgentsSessionEventType as BetaManagedAgentsSessionEventType,
+)
 from .beta_managed_agents_text_rubric_params import (
     BetaManagedAgentsTextRubricParams as BetaManagedAgentsTextRubricParams,
 )
 from .beta_managed_agents_user_message_event import (
     BetaManagedAgentsUserMessageEvent as BetaManagedAgentsUserMessageEvent,
+)
+from .beta_managed_agents_workflow_run_error import (
+    BetaManagedAgentsWorkflowRunError as BetaManagedAgentsWorkflowRunError,
+)
+from .beta_managed_agents_workflow_run_phase import (
+    BetaManagedAgentsWorkflowRunPhase as BetaManagedAgentsWorkflowRunPhase,
 )
 from .beta_managed_agents_agent_message_event import (
     BetaManagedAgentsAgentMessageEvent as BetaManagedAgentsAgentMessageEvent,
@@ -56,6 +65,9 @@ from .beta_managed_agents_session_error_event import (
 )
 from .beta_managed_agents_url_document_source import (
     BetaManagedAgentsURLDocumentSource as BetaManagedAgentsURLDocumentSource,
+)
+from .beta_managed_agents_workflow_run_result import (
+    BetaManagedAgentsWorkflowRunResult as BetaManagedAgentsWorkflowRunResult,
 )
 from .beta_managed_agents_agent_thinking_event import (
     BetaManagedAgentsAgentThinkingEvent as BetaManagedAgentsAgentThinkingEvent,
@@ -80,6 +92,9 @@ from .beta_managed_agents_session_thread_usage import (
 )
 from .beta_managed_agents_user_interrupt_event import (
     BetaManagedAgentsUserInterruptEvent as BetaManagedAgentsUserInterruptEvent,
+)
+from .beta_managed_agents_agent_tool_evaluation import (
+    BetaManagedAgentsAgentToolEvaluation as BetaManagedAgentsAgentToolEvaluation,
 )
 from .beta_managed_agents_memory_store_resource import (
     BetaManagedAgentsMemoryStoreResource as BetaManagedAgentsMemoryStoreResource,
@@ -107,6 +122,9 @@ from .beta_managed_agents_base64_document_source import (
 )
 from .beta_managed_agents_model_overloaded_error import (
     BetaManagedAgentsModelOverloadedError as BetaManagedAgentsModelOverloadedError,
+)
+from .beta_managed_agents_repository_clone_error import (
+    BetaManagedAgentsRepositoryCloneError as BetaManagedAgentsRepositoryCloneError,
 )
 from .beta_managed_agents_retry_status_exhausted import (
     BetaManagedAgentsRetryStatusExhausted as BetaManagedAgentsRetryStatusExhausted,
@@ -141,8 +159,14 @@ from .beta_managed_agents_agent_mcp_tool_use_event import (
 from .beta_managed_agents_model_rate_limited_error import (
     BetaManagedAgentsModelRateLimitedError as BetaManagedAgentsModelRateLimitedError,
 )
+from .beta_managed_agents_workflow_run_error_event import (
+    BetaManagedAgentsWorkflowRunErrorEvent as BetaManagedAgentsWorkflowRunErrorEvent,
+)
 from .beta_managed_agents_base64_image_source_param import (
     BetaManagedAgentsBase64ImageSourceParam as BetaManagedAgentsBase64ImageSourceParam,
+)
+from .beta_managed_agents_repository_checkout_error import (
+    BetaManagedAgentsRepositoryCheckoutError as BetaManagedAgentsRepositoryCheckoutError,
 )
 from .beta_managed_agents_search_result_block_param import (
     BetaManagedAgentsSearchResultBlockParam as BetaManagedAgentsSearchResultBlockParam,
@@ -162,6 +186,15 @@ from .beta_managed_agents_user_define_outcome_event import (
 from .beta_managed_agents_user_message_event_params import (
     BetaManagedAgentsUserMessageEventParams as BetaManagedAgentsUserMessageEventParams,
 )
+from .beta_managed_agents_workflow_run_result_error import (
+    BetaManagedAgentsWorkflowRunResultError as BetaManagedAgentsWorkflowRunResultError,
+)
+from .beta_managed_agents_agent_evaluated_permission import (
+    BetaManagedAgentsAgentEvaluatedPermission as BetaManagedAgentsAgentEvaluatedPermission,
+)
+from .beta_managed_agents_agent_tool_evaluation_auto import (
+    BetaManagedAgentsAgentToolEvaluationAuto as BetaManagedAgentsAgentToolEvaluationAuto,
+)
 from .beta_managed_agents_file_document_source_param import (
     BetaManagedAgentsFileDocumentSourceParam as BetaManagedAgentsFileDocumentSourceParam,
 )
@@ -173,6 +206,24 @@ from .beta_managed_agents_model_request_failed_error import (
 )
 from .beta_managed_agents_plain_text_document_source import (
     BetaManagedAgentsPlainTextDocumentSource as BetaManagedAgentsPlainTextDocumentSource,
+)
+from .beta_managed_agents_program_workflow_run_error import (
+    BetaManagedAgentsProgramWorkflowRunError as BetaManagedAgentsProgramWorkflowRunError,
+)
+from .beta_managed_agents_repository_forbidden_error import (
+    BetaManagedAgentsRepositoryForbiddenError as BetaManagedAgentsRepositoryForbiddenError,
+)
+from .beta_managed_agents_repository_not_found_error import (
+    BetaManagedAgentsRepositoryNotFoundError as BetaManagedAgentsRepositoryNotFoundError,
+)
+from .beta_managed_agents_timeout_workflow_run_error import (
+    BetaManagedAgentsTimeoutWorkflowRunError as BetaManagedAgentsTimeoutWorkflowRunError,
+)
+from .beta_managed_agents_unknown_workflow_run_error import (
+    BetaManagedAgentsUnknownWorkflowRunError as BetaManagedAgentsUnknownWorkflowRunError,
+)
+from .beta_managed_agents_workflow_run_created_event import (
+    BetaManagedAgentsWorkflowRunCreatedEvent as BetaManagedAgentsWorkflowRunCreatedEvent,
 )
 from .beta_managed_agents_agent_custom_tool_use_event import (
     BetaManagedAgentsAgentCustomToolUseEvent as BetaManagedAgentsAgentCustomToolUseEvent,
@@ -192,8 +243,14 @@ from .beta_managed_agents_system_message_event_params import (
 from .beta_managed_agents_user_interrupt_event_params import (
     BetaManagedAgentsUserInterruptEventParams as BetaManagedAgentsUserInterruptEventParams,
 )
+from .beta_managed_agents_workflow_run_result_stopped import (
+    BetaManagedAgentsWorkflowRunResultStopped as BetaManagedAgentsWorkflowRunResultStopped,
+)
 from .beta_managed_agents_base64_document_source_param import (
     BetaManagedAgentsBase64DocumentSourceParam as BetaManagedAgentsBase64DocumentSourceParam,
+)
+from .beta_managed_agents_session_refusal_stop_details import (
+    BetaManagedAgentsSessionRefusalStopDetails as BetaManagedAgentsSessionRefusalStopDetails,
 )
 from .beta_managed_agents_session_status_running_event import (
     BetaManagedAgentsSessionStatusRunningEvent as BetaManagedAgentsSessionStatusRunningEvent,
@@ -219,8 +276,20 @@ from .beta_managed_agents_user_custom_tool_result_event import (
 from .beta_managed_agents_user_tool_result_event_params import (
     BetaManagedAgentsUserToolResultEventParams as BetaManagedAgentsUserToolResultEventParams,
 )
+from .beta_managed_agents_workflow_run_result_completed import (
+    BetaManagedAgentsWorkflowRunResultCompleted as BetaManagedAgentsWorkflowRunResultCompleted,
+)
 from .beta_managed_agents_span_model_request_start_event import (
     BetaManagedAgentsSpanModelRequestStartEvent as BetaManagedAgentsSpanModelRequestStartEvent,
+)
+from .beta_managed_agents_workflow_run_phase_ended_event import (
+    BetaManagedAgentsWorkflowRunPhaseEndedEvent as BetaManagedAgentsWorkflowRunPhaseEndedEvent,
+)
+from .beta_managed_agents_workflow_run_status_idle_event import (
+    BetaManagedAgentsWorkflowRunStatusIdleEvent as BetaManagedAgentsWorkflowRunStatusIdleEvent,
+)
+from .beta_managed_agents_agent_auto_evaluated_permission import (
+    BetaManagedAgentsAgentAutoEvaluatedPermission as BetaManagedAgentsAgentAutoEvaluatedPermission,
 )
 from .beta_managed_agents_agent_thread_message_sent_event import (
     BetaManagedAgentsAgentThreadMessageSentEvent as BetaManagedAgentsAgentThreadMessageSentEvent,
@@ -228,8 +297,20 @@ from .beta_managed_agents_agent_thread_message_sent_event import (
 from .beta_managed_agents_mcp_authentication_failed_error import (
     BetaManagedAgentsMCPAuthenticationFailedError as BetaManagedAgentsMCPAuthenticationFailedError,
 )
+from .beta_managed_agents_repository_authentication_error import (
+    BetaManagedAgentsRepositoryAuthenticationError as BetaManagedAgentsRepositoryAuthenticationError,
+)
 from .beta_managed_agents_session_status_terminated_event import (
     BetaManagedAgentsSessionStatusTerminatedEvent as BetaManagedAgentsSessionStatusTerminatedEvent,
+)
+from .beta_managed_agents_thread_limit_workflow_run_error import (
+    BetaManagedAgentsThreadLimitWorkflowRunError as BetaManagedAgentsThreadLimitWorkflowRunError,
+)
+from .beta_managed_agents_workflow_run_status_ended_event import (
+    BetaManagedAgentsWorkflowRunStatusEndedEvent as BetaManagedAgentsWorkflowRunStatusEndedEvent,
+)
+from .beta_managed_agents_agent_tool_evaluation_always_ask import (
+    BetaManagedAgentsAgentToolEvaluationAlwaysAsk as BetaManagedAgentsAgentToolEvaluationAlwaysAsk,
 )
 from .beta_managed_agents_plain_text_document_source_param import (
     BetaManagedAgentsPlainTextDocumentSourceParam as BetaManagedAgentsPlainTextDocumentSourceParam,
@@ -243,11 +324,23 @@ from .beta_managed_agents_session_thread_status_idle_event import (
 from .beta_managed_agents_user_define_outcome_event_params import (
     BetaManagedAgentsUserDefineOutcomeEventParams as BetaManagedAgentsUserDefineOutcomeEventParams,
 )
+from .beta_managed_agents_workflow_run_phase_started_event import (
+    BetaManagedAgentsWorkflowRunPhaseStartedEvent as BetaManagedAgentsWorkflowRunPhaseStartedEvent,
+)
 from .beta_managed_agents_credential_host_unreachable_error import (
     BetaManagedAgentsCredentialHostUnreachableError as BetaManagedAgentsCredentialHostUnreachableError,
 )
 from .beta_managed_agents_span_outcome_evaluation_end_event import (
     BetaManagedAgentsSpanOutcomeEvaluationEndEvent as BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
+)
+from .beta_managed_agents_workflow_run_status_running_event import (
+    BetaManagedAgentsWorkflowRunStatusRunningEvent as BetaManagedAgentsWorkflowRunStatusRunningEvent,
+)
+from .beta_managed_agents_agent_tool_evaluation_always_allow import (
+    BetaManagedAgentsAgentToolEvaluationAlwaysAllow as BetaManagedAgentsAgentToolEvaluationAlwaysAllow,
+)
+from .beta_managed_agents_agent_auto_evaluated_permission_ask import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAsk as BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
 )
 from .beta_managed_agents_agent_thread_message_received_event import (
     BetaManagedAgentsAgentThreadMessageReceivedEvent as BetaManagedAgentsAgentThreadMessageReceivedEvent,
@@ -261,11 +354,20 @@ from .beta_managed_agents_span_outcome_evaluation_start_event import (
 from .beta_managed_agents_user_tool_confirmation_event_params import (
     BetaManagedAgentsUserToolConfirmationEventParams as BetaManagedAgentsUserToolConfirmationEventParams,
 )
+from .beta_managed_agents_agent_auto_evaluated_permission_deny import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionDeny as BetaManagedAgentsAgentAutoEvaluatedPermissionDeny,
+)
 from .beta_managed_agents_agent_thread_context_compacted_event import (
     BetaManagedAgentsAgentThreadContextCompactedEvent as BetaManagedAgentsAgentThreadContextCompactedEvent,
 )
+from .beta_managed_agents_max_workflow_runs_workflow_run_error import (
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunError as BetaManagedAgentsMaxWorkflowRunsWorkflowRunError,
+)
 from .beta_managed_agents_user_custom_tool_result_event_params import (
     BetaManagedAgentsUserCustomToolResultEventParams as BetaManagedAgentsUserCustomToolResultEventParams,
+)
+from .beta_managed_agents_agent_auto_evaluated_permission_allow import (
+    BetaManagedAgentsAgentAutoEvaluatedPermissionAllow as BetaManagedAgentsAgentAutoEvaluatedPermissionAllow,
 )
 from .beta_managed_agents_span_outcome_evaluation_ongoing_event import (
     BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent as BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,

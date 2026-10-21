@@ -46,7 +46,7 @@ from ._constants import (
     _credentials_file_path,
     resolve_identity_token_path,
 )
-from ..._exceptions import AnthropicError
+from ..._exceptions import AnthropicError, CredentialsError, IdentityTokenFileError
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -57,14 +57,14 @@ __all__ = ["StaticToken", "EnvToken", "CredentialsFile", "InMemoryConfig", "Iden
 
 
 def _coerce_expires_at(value: Any, source: Optional[pathlib.Path]) -> Optional[int]:
-    """Parse a credentials-file ``expires_at`` field into Unix seconds."""
+    """Parse a credentials-file `expires_at` field into Unix seconds."""
     if value is None:
         return None
     try:
         return int(value)
     except (TypeError, ValueError) as err:
         where = f"credentials file at {source}" if source is not None else "credentials"
-        raise AnthropicError(
+        raise CredentialsError(
             f"{where} has invalid 'expires_at' {value!r}; expected an integer "
             f"Unix timestamp in seconds. The SDK does not parse ISO8601 — convert "
             f"with int(datetime.timestamp()) before writing the file."
@@ -79,7 +79,7 @@ CREDENTIALS_FILE_TYPE = "oauth_token"
 CONFIG_FILE_VERSION = "1.0"
 CREDENTIALS_FILE_VERSION = "1.0"
 
-# Discriminator values for the config file's ``authentication.type`` field.
+# Discriminator values for the config file's `authentication.type` field.
 AUTH_TYPE_OIDC_FEDERATION = "oidc_federation"
 AUTH_TYPE_USER_OAUTH = "user_oauth"
 
@@ -116,7 +116,7 @@ def _fill_missing_from_env(config: Dict[str, Any], auth: Dict[str, Any]) -> None
 
 
 class StaticToken:
-    """An :class:`AccessTokenProvider` that always returns a fixed token with no expiry."""
+    """An `AccessTokenProvider` that always returns a fixed token with no expiry."""
 
     def __init__(self, token: str) -> None:
         self._token = token
@@ -127,7 +127,7 @@ class StaticToken:
 
 
 class EnvToken:
-    """An :class:`AccessTokenProvider` that reads ``ANTHROPIC_AUTH_TOKEN`` at call time."""
+    """An `AccessTokenProvider` that reads `ANTHROPIC_AUTH_TOKEN` at call time."""
 
     def __init__(self, env_var: str = ENV_AUTH_TOKEN) -> None:
         self._env_var = env_var
@@ -136,7 +136,7 @@ class EnvToken:
         del force_refresh
         value = os.environ.get(self._env_var)
         if value is None:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Environment variable {self._env_var} is not set. "
                 f"Set it or pass an explicit `credentials=` provider to the client."
             )
@@ -144,45 +144,45 @@ class EnvToken:
 
 
 class CredentialsFile:
-    """An :class:`AccessTokenProvider` backed by a named profile.
+    """An `AccessTokenProvider` backed by a named profile.
 
     A profile is a pair of files under the config directory
-    (``~/.config/anthropic/`` by default; override with ``ANTHROPIC_CONFIG_DIR``):
+    (`~/.config/anthropic/` by default; override with `ANTHROPIC_CONFIG_DIR`):
 
-    * ``configs/<profile>.json`` — non-secret. Holds the nested
-      ``"authentication"`` object (discriminated by its ``"type"`` field), plus
-      top-level ``organization_id``, ``workspace_id``, and ``base_url``.
-      The ``authentication`` object may contain a ``credentials_path`` field
+    * `configs/<profile>.json` — non-secret. Holds the nested
+      `"authentication"` object (discriminated by its `"type"` field), plus
+      top-level `organization_id`, `workspace_id`, and `base_url`.
+      The `authentication` object may contain a `credentials_path` field
       overriding the credentials file location.
-    * ``credentials/<profile>.json`` — secret (0600). Holds ``access_token``,
-      ``expires_at``, and (for ``user_oauth`` with a ``client_id``)
-      ``refresh_token``.
+    * `credentials/<profile>.json` — secret (0600). Holds `access_token`,
+      `expires_at`, and (for `user_oauth` with a `client_id`)
+      `refresh_token`.
 
     The split keeps secret material out of files that may need to be readable
     by config-only consumers, and lets the SDK enforce 0600 on the credentials
     file without locking out config readers.
 
-    Dispatches on the ``authentication.type`` discriminator:
+    Dispatches on the `authentication.type` discriminator:
 
-    ``"oidc_federation"``
+    `"oidc_federation"`
         OIDC workload identity federation. Lazily constructs a
-        :class:`WorkloadIdentityCredentials` delegate from the nested auth
-        fields plus the top-level ``organization_id`` and calls it to perform
+        `WorkloadIdentityCredentials` delegate from the nested auth
+        fields plus the top-level `organization_id` and calls it to perform
         the jwt-bearer exchange.
 
-    ``"user_oauth"``
+    `"user_oauth"`
         Output of an interactive PKCE login. If the auth block has a
-        ``client_id``, performs ``refresh_token`` grants on expiry and
+        `client_id`, performs `refresh_token` grants on expiry and
         writes the new tokens back to the credentials file (atomic replace,
-        refresh-token rotation supported). Without a ``client_id``, the
+        refresh-token rotation supported). Without a `client_id`, the
         credentials file is treated as externally rotated — the SDK re-reads
-        it on every invocation and returns whatever ``access_token`` is
+        it on every invocation and returns whatever `access_token` is
         there, no refresh grant attempted. This is the pattern for a
         sidecar/daemon that mints the access token out-of-band.
 
     Args:
-        profile: Profile name. ``None`` resolves via ``ANTHROPIC_PROFILE`` env
-            → ``<config_dir>/active_config`` pointer file → ``"default"``.
+        profile: Profile name. `None` resolves via `ANTHROPIC_PROFILE` env
+            → `<config_dir>/active_config` pointer file → `"default"`.
     """
 
     def __init__(
@@ -214,9 +214,9 @@ class CredentialsFile:
 
     @property
     def resolved_base_url(self) -> Optional[str]:
-        """The ``base_url`` declared in the profile config file, if any.
+        """The `base_url` declared in the profile config file, if any.
 
-        Returns ``None`` when the config has no top-level ``base_url`` key —
+        Returns `None` when the config has no top-level `base_url` key —
         callers should fall back to their own default rather than the
         provider's bound/default value, so a profile that *doesn't* pin a
         host never overrides an explicit client setting. Loads the config
@@ -227,12 +227,12 @@ class CredentialsFile:
         return str(raw).rstrip("/") if raw else None
 
     def bind_base_url(self, base_url: str) -> None:
-        """Adopt the owning client's ``base_url`` as a fallback for the token
-        exchange. Slots between the config file's own ``base_url`` field and
-        the hard-coded default; a ``base_url`` in the config file still wins.
+        """Adopt the owning client's `base_url` as a fallback for the token
+        exchange. Slots between the config file's own `base_url` field and
+        the hard-coded default; a `base_url` in the config file still wins.
 
         Rebinding affects every client holding this instance; clients bind
-        through :meth:`for_base_url` instead.
+        through `for_base_url` instead.
         """
         bound = base_url.rstrip("/")
         # Validate eagerly so an invalid bind fails at bind time, not at the
@@ -244,17 +244,17 @@ class CredentialsFile:
             _require_https(self._base_url, field=f"{self._config_path}: base_url")
 
     def for_base_url(self, base_url: str) -> "CredentialsFile":
-        """Return the provider a client with ``base_url`` should exchange through.
+        """Return the provider a client with `base_url` should exchange through.
 
         Binds in place, unless another client already bound this instance to a
-        different host (e.g. the parent of ``copy(base_url=...)``). That binding
+        different host (e.g. the parent of `copy(base_url=...)`). That binding
         is left alone, and what happens depends on the profile:
 
-        * pins its own ``base_url``: the bind is irrelevant, return ``self``.
-        * ``oidc_federation``: return a copy bound to ``base_url``. It shares the
+        * pins its own `base_url`: the bind is irrelevant, return `self`.
+        * `oidc_federation`: return a copy bound to `base_url`. It shares the
           identity token and http client, but not the on-disk token cache, whose
           tokens belong to the original deployment.
-        * ``user_oauth``: return ``self``. The refresh token is tied to the
+        * `user_oauth`: return `self`. The refresh token is tied to the
           deployment that issued it, so there is nothing per-host to copy.
         """
         bound = base_url.rstrip("/")
@@ -274,9 +274,9 @@ class CredentialsFile:
 
     def _resolve_base_url(self, config: Dict[str, Any]) -> str:
         """base_url precedence: top-level config field → bound (the owning
-        client's base_url, via :meth:`bind_base_url`) → default. Validated
+        client's base_url, via `bind_base_url`) → default. Validated
         against the scheme/TLS rules so a malicious config with
-        ``base_url="http://evil/"`` can't exfiltrate the assertion or refresh
+        `base_url="http://evil/"` can't exfiltrate the assertion or refresh
         token."""
         if config.get("base_url"):
             return str(config["base_url"]).rstrip("/")
@@ -285,7 +285,7 @@ class CredentialsFile:
         return DEFAULT_BASE_URL
 
     def extra_headers(self) -> Dict[str, str]:
-        """Return headers derived from the config file (e.g. ``workspace_id``).
+        """Return headers derived from the config file (e.g. `workspace_id`).
 
         Eagerly reads the config if not yet loaded. The returned dict is
         suitable for merging into the client's default headers.
@@ -302,34 +302,45 @@ class CredentialsFile:
         return headers
 
     def _load_config(self) -> Dict[str, Any]:
-        """Read and cache the config file, resolving ``base_url`` and ``credentials_path``."""
+        """Read and cache the config file, resolving `base_url` and `credentials_path`.
+
+        On Unix, refuses a file that group or others can write.
+        """
         if self._config is not None:
             return self._config
 
         try:
-            raw = self._config_path.read_text(encoding="utf-8")
+            with self._config_path.open(encoding="utf-8") as config_file:
+                if os.name == "posix":
+                    mode = stat.S_IMODE(os.fstat(config_file.fileno()).st_mode)
+                    if mode & 0o022:
+                        raise CredentialsError(
+                            f"Config file at {self._config_path} is writable by group or others (mode {mode:#o}); "
+                            f"run `chmod go-w {self._config_path}` before retrying."
+                        )
+                raw = config_file.read()
         except FileNotFoundError as err:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file not found at {self._config_path} (profile {self._profile!r}). "
                 f"Set {ENV_PROFILE} to select a different profile, or set {ENV_CONFIG_DIR} "
                 f"to relocate the config directory."
             ) from err
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Config file at {self._config_path} could not be read: {err}") from err
+            raise CredentialsError(f"Config file at {self._config_path} could not be read: {err}") from err
         try:
             raw_config: Any = json.loads(raw)
         except json.JSONDecodeError as err:
-            raise AnthropicError(f"Config file at {self._config_path} is not valid JSON: {err}") from err
+            raise CredentialsError(f"Config file at {self._config_path} is not valid JSON: {err}") from err
 
         if not isinstance(raw_config, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file at {self._config_path} must contain a JSON object, not {type(raw_config).__name__}."
             )
         config = cast("Dict[str, Any]", raw_config)
 
         raw_auth = config.get("authentication")
         if not isinstance(raw_auth, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Config file at {self._config_path} is missing the 'authentication' object. "
                 f'Expected shape: {{"authentication": {{"type": '
                 f'"{AUTH_TYPE_OIDC_FEDERATION}"|"{AUTH_TYPE_USER_OAUTH}", ...}}, ...}}'
@@ -356,14 +367,13 @@ class CredentialsFile:
         """Read the credentials file. Re-reads on every call — daemons rotate it.
 
         Secret values in the returned dict (every string field not in
-        ``_secrets._PLAIN_KEYS``) are :class:`SecretStr`-wrapped — unwrap
-        with ``_unwrap_secret`` at the point of use. Writing the dict back
-        through :meth:`_atomic_write_credentials` unwraps automatically.
+        `_secrets._PLAIN_KEYS`) are `SecretStr`-wrapped — unwrap
+        with `_unwrap_secret` at the point of use. Writing the dict back
+        through `_atomic_write_credentials` unwraps automatically.
 
-        On Unix, verifies the file is not group/world-readable. World-readable
-        credentials files are refused outright; group-readable files log a
-        warning but are accepted. The check is skipped on Windows where POSIX
-        mode bits don't carry the same meaning.
+        On Unix, refuses symlinks and any file readable or writable by group
+        or others (`mode & 0o077`). The check is skipped on Windows where
+        POSIX mode bits don't carry the same meaning.
         """
         assert self._credentials_path is not None  # set by _load_config
         path = self._credentials_path
@@ -371,26 +381,19 @@ class CredentialsFile:
             try:
                 file_stat = os.stat(path, follow_symlinks=False)
             except FileNotFoundError as err:
-                raise AnthropicError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
+                raise CredentialsError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
             except OSError as err:
-                raise AnthropicError(f"Credentials file at {path} could not be accessed: {err}") from err
+                raise CredentialsError(f"Credentials file at {path} could not be accessed: {err}") from err
             if stat.S_ISLNK(file_stat.st_mode):
-                raise AnthropicError(
+                raise CredentialsError(
                     f"Credentials file at {path} is a symlink; refusing to follow "
                     f"(move the real file into place to keep secret material on the expected filesystem)."
                 )
             mode = stat.S_IMODE(file_stat.st_mode)
-            if mode & 0o004:
-                raise AnthropicError(
-                    f"Credentials file at {path} is world-readable (mode {mode:#o}); "
+            if mode & 0o077:
+                raise CredentialsError(
+                    f"Credentials file at {path} is accessible by group or others (mode {mode:#o}); "
                     f"run `chmod 600 {path}` before retrying."
-                )
-            if mode & 0o070:
-                log.warning(
-                    "Credentials file at %s is group-readable (mode %#o); consider `chmod 600 %s`.",
-                    path,
-                    mode,
-                    path,
                 )
         try:
             # Read → parse → wrap in one expression: neither the raw file text
@@ -399,18 +402,18 @@ class CredentialsFile:
             # material on every error path in and below this method.
             creds: Dict[str, Any] = _wrap_secret_fields(json.loads(path.read_text(encoding="utf-8")))
         except FileNotFoundError as err:
-            raise AnthropicError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
+            raise CredentialsError(f"Credentials file not found at {path} (profile {self._profile!r}).") from err
         except json.JSONDecodeError as err:
             # The JSONDecodeError message carries only position info.
-            raise AnthropicError(f"Credentials file at {path} is not valid JSON: {err}") from _strip_traceback(err)
+            raise CredentialsError(f"Credentials file at {path} is not valid JSON: {err}") from _strip_traceback(err)
         except _NonObjectPayloadError as err:
             # Rejected inside the helper with the payload unbound — a scalar
             # credentials file is still secret material (e.g. a bare token).
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Credentials file at {path} must contain a JSON object, not {err.type_name}."
             ) from None
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Credentials file at {path} could not be read: {err}") from err
+            raise CredentialsError(f"Credentials file at {path} could not be read: {err}") from err
 
         # Validate discriminator if present; lenient if absent so hand-written
         # or older files keep working. Catches config/credentials drift early.
@@ -418,14 +421,14 @@ class CredentialsFile:
         if actual is not None and actual != CREDENTIALS_FILE_TYPE:
             assert self._config is not None  # _load_config always precedes _read_credentials
             auth_type = self._config["authentication"].get("type")
-            raise AnthropicError(
+            raise CredentialsError(
                 f"credentials file has type {actual!r}; expected {CREDENTIALS_FILE_TYPE!r} "
                 f"for authentication.type {auth_type!r}"
             )
         return creds
 
     def _get_http_client(self) -> httpx2.Client:
-        """Return an ``httpx2.Client``, lazily creating (and tracking) one we own."""
+        """Return an `httpx2.Client`, lazily creating (and tracking) one we own."""
         if self._http_client is not None:
             return self._http_client
         if self._owned_http_client is None:
@@ -433,7 +436,7 @@ class CredentialsFile:
         return self._owned_http_client
 
     def close(self) -> None:
-        """Close the owned ``httpx2.Client`` if we created one."""
+        """Close the owned `httpx2.Client` if we created one."""
         if self._owned_http_client is not None:
             self._owned_http_client.close()
             self._owned_http_client = None
@@ -443,11 +446,11 @@ class CredentialsFile:
     def reload(self) -> None:
         """Drop the cached config so the next call re-reads it from disk.
 
-        ``CredentialsFile`` caches the parsed config across calls to keep the
+        `CredentialsFile` caches the parsed config across calls to keep the
         hot path cheap; a daemon that rotates a profile in place (e.g. flips
-        ``"type": "user_oauth"`` to ``"type": "oidc_federation"``) will not be
+        `"type": "user_oauth"` to `"type": "oidc_federation"`) will not be
         picked up automatically. Callers that need to react to such changes
-        can call ``reload()`` to force a fresh read on the next ``__call__``.
+        can call `reload()` to force a fresh read on the next `__call__`.
         """
         self._config = None
         self._workload_delegate = None
@@ -455,8 +458,8 @@ class CredentialsFile:
     def _atomic_write_credentials(self, data: Dict[str, Any]) -> None:
         """Atomic write to the credentials file (NOT the config file).
 
-        ``data`` may hold :class:`SecretStr` token values (see
-        :meth:`_read_credentials`); they are unwrapped at dump time, so the
+        `data` may hold `SecretStr` token values (see
+        `_read_credentials`); they are unwrapped at dump time, so the
         on-disk format is unchanged and this frame's locals stay redacted if
         the write fails (e.g. ENOSPC) with a crash reporter capturing them.
         """
@@ -465,7 +468,7 @@ class CredentialsFile:
         parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         # mkstemp gives a unique temp name so concurrent writers (e.g.
         # gunicorn workers cold-starting together) don't race on a fixed
-        # ``.tmp`` path; whichever os.replace lands last wins, which is fine
+        # `.tmp` path; whichever os.replace lands last wins, which is fine
         # for a best-effort cache.
         fd, tmp = tempfile.mkstemp(dir=parent, prefix=f".{self._credentials_path.name}.", suffix=".tmp")
         try:
@@ -495,7 +498,7 @@ class CredentialsFile:
             pass
 
     def _auth_block(self) -> Dict[str, Any]:
-        """Return the cached ``authentication`` sub-object from the config file."""
+        """Return the cached `authentication` sub-object from the config file."""
         config = self._load_config()
         return cast("Dict[str, Any]", config["authentication"])
 
@@ -509,13 +512,13 @@ class CredentialsFile:
         if auth_type == AUTH_TYPE_USER_OAUTH:
             return self._call_user_oauth(auth, force_refresh=force_refresh)
 
-        raise AnthropicError(
+        raise CredentialsError(
             f"Unknown authentication.type {auth_type!r} at {self._config_path}. "
             f"Expected {AUTH_TYPE_OIDC_FEDERATION!r} or {AUTH_TYPE_USER_OAUTH!r}."
         )
 
     def _call_user_oauth(self, auth: Dict[str, Any], *, force_refresh: bool = False) -> AccessToken:
-        """Interactive-login profile. With a ``client_id`` in the auth block,
+        """Interactive-login profile. With a `client_id` in the auth block,
         we run the refresh_token grant on expiry; without one, we treat the
         credentials file as externally rotated and just read it fresh.
         """
@@ -524,7 +527,7 @@ class CredentialsFile:
         creds = self._read_credentials()
         access_token = creds.get("access_token")
         if not access_token:
-            raise AnthropicError(f"Credentials file at {self._credentials_path} is missing 'access_token'.")
+            raise CredentialsError(f"Credentials file at {self._credentials_path} is missing 'access_token'.")
 
         client_id = auth.get("client_id")
         if not client_id:
@@ -605,7 +608,7 @@ class CredentialsFile:
         raw_expires_in = payload.get("expires_in", 3600)
         try:
             expires_in = int(raw_expires_in)
-        except (TypeError, ValueError) as err:
+        except (TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 f"user_oauth refresh response has invalid 'expires_in' {raw_expires_in!r}; "
                 f"expected an integer number of seconds."
@@ -625,7 +628,7 @@ class CredentialsFile:
         return AccessToken(token=_unwrap_secret(new_access), expires_at=new_expires_at)
 
     def _read_credentials_if_exists(self) -> Optional[Dict[str, Any]]:
-        """``_read_credentials`` variant that returns ``None`` on absence
+        """`_read_credentials` variant that returns `None` on absence
         instead of raising — used by the federation disk-cache path where a
         missing credentials file just means "exchange now".
         """
@@ -647,9 +650,9 @@ class CredentialsFile:
         # the token there is unexpired, return it instead of re-exchanging.
         # The in-memory TokenCache layer applies the proactive 120s/30s policy
         # on top of this; the disk cache only matters across process restarts.
-        # ``_credentials_path`` is always set for ``CredentialsFile`` proper
-        # (``_load_config`` defaults it); subclasses (``InMemoryConfig``)
-        # leave it ``None`` to opt out of the disk cache entirely.
+        # `_credentials_path` is always set for `CredentialsFile` proper
+        # (`_load_config` defaults it); subclasses (`InMemoryConfig`)
+        # leave it `None` to opt out of the disk cache entirely.
         if self._credentials_path is None:
             return self._workload_delegate()
 
@@ -709,7 +712,7 @@ class CredentialsFile:
         if identity_token_cfg is not None:
             source = identity_token_cfg.get("source")
             if source != "file":
-                raise AnthropicError(f"identity_token source {source!r} is not supported; only 'file' is implemented")
+                raise CredentialsError(f"identity_token source {source!r} is not supported; only 'file' is implemented")
             identity_token_path = identity_token_cfg.get("path")
             if not identity_token_path:
                 # Empty/missing path is a config bug, not an env-var fallback
@@ -717,7 +720,7 @@ class CredentialsFile:
                 # meaning without a path. Without this check we'd silently
                 # fall through to ANTHROPIC_IDENTITY_TOKEN_FILE and override
                 # user intent.
-                raise AnthropicError(
+                raise CredentialsError(
                     f"identity_token source 'file' requires a non-empty path; "
                     f"profile {self._profile!r} at {self._config_path} has identity_token={identity_token_cfg!r}."
                 )
@@ -742,7 +745,7 @@ class CredentialsFile:
 
 
 class IdentityTokenFile:
-    """An :class:`IdentityTokenProvider` that reads a JWT from a file on every call.
+    """An `IdentityTokenProvider` that reads a JWT from a file on every call.
 
     Kubernetes projected service-account tokens (and similar) are rotated in place,
     so the file MUST be re-read on every invocation rather than cached.
@@ -751,7 +754,7 @@ class IdentityTokenFile:
     def __init__(self, path: Union[str, "os.PathLike[str]", None] = None) -> None:
         resolved = resolve_identity_token_path(path)
         if resolved is None:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"No identity token file path given. Pass `path=` or set the {ENV_IDENTITY_TOKEN_FILE} "
                 f"environment variable."
             )
@@ -765,50 +768,55 @@ class IdentityTokenFile:
         try:
             content = self._path.read_text(encoding="utf-8").strip()
         except FileNotFoundError as err:
-            raise AnthropicError(f"Identity token file not found at {self._path}.") from err
+            raise IdentityTokenFileError(f"Identity token file not found at {self._path}.", path=self._path) from err
         except PermissionError as err:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token file at {self._path} is not readable by this process: {err}. "
-                f"Check the file mode and the effective uid of the process."
+                f"Check the file mode and the effective uid of the process.",
+                path=self._path,
             ) from err
         except IsADirectoryError as err:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token path {self._path} is a directory, not a file. "
-                f"Point at the projected token file itself."
+                f"Point at the projected token file itself.",
+                path=self._path,
             ) from err
         except (OSError, UnicodeDecodeError) as err:
-            raise AnthropicError(f"Identity token file at {self._path} could not be read: {err}") from err
+            raise IdentityTokenFileError(
+                f"Identity token file at {self._path} could not be read: {err}", path=self._path
+            ) from err
         if not content:
-            raise AnthropicError(
+            raise IdentityTokenFileError(
                 f"Identity token file at {self._path} is empty. "
                 f"If this is a Kubernetes projected service-account token, check the "
-                f"volume mount and the serviceAccountToken projection audience."
+                f"volume mount and the serviceAccountToken projection audience.",
+                path=self._path,
             )
         return content
 
 
 class InMemoryConfig(CredentialsFile):
-    """An :class:`AccessTokenProvider` driven by an in-memory config dict
-    (same shape as ``configs/<profile>.json``) rather than files on disk.
+    """An `AccessTokenProvider` driven by an in-memory config dict
+    (same shape as `configs/<profile>.json`) rather than files on disk.
 
-    Intended for callers that want to construct an :class:`anthropic.Anthropic`
+    Intended for callers that want to construct an `anthropic.Anthropic`
     client with a fully programmatic credentials setup — equivalent to the Go
-    SDK's ``option.WithConfig`` / TypeScript SDK's ``ClientOptions.config``.
+    SDK's `option.WithConfig` / TypeScript SDK's `ClientOptions.config`.
 
-    Both ``authentication.type`` discriminator values are supported:
+    Both `authentication.type` discriminator values are supported:
 
-    ``"oidc_federation"``
-        ``authentication.credentials_path`` is **optional**. If set, exchanged
+    `"oidc_federation"`
+        `authentication.credentials_path` is **optional**. If set, exchanged
         tokens are cached to / read from that file (same atomic 0600 write as
-        :class:`CredentialsFile`). If omitted, every call performs a fresh
+        `CredentialsFile`). If omitted, every call performs a fresh
         jwt-bearer exchange with no on-disk cache.
 
-    ``"user_oauth"``
-        ``authentication.credentials_path`` is **required** — it is where the
+    `"user_oauth"`
+        `authentication.credentials_path` is **required** — it is where the
         access/refresh tokens live. Behaviour is identical to a file-backed
-        :class:`CredentialsFile` profile of the same shape.
+        `CredentialsFile` profile of the same shape.
 
-    The implementation subclasses :class:`CredentialsFile` so the dispatch,
+    The implementation subclasses `CredentialsFile` so the dispatch,
     refresh-grant, disk-cache and atomic-write logic are shared verbatim;
     only config loading and identity-token resolution are overridden.
     """
@@ -824,7 +832,7 @@ class InMemoryConfig(CredentialsFile):
     ) -> None:
         raw_auth = config.get("authentication")
         if not isinstance(raw_auth, dict):
-            raise AnthropicError(
+            raise CredentialsError(
                 "config dict is missing the 'authentication' object. "
                 f'Expected shape: {{"authentication": {{"type": "{AUTH_TYPE_OIDC_FEDERATION}"'
                 f'|"{AUTH_TYPE_USER_OAUTH}", ...}}, ...}}'
@@ -832,14 +840,14 @@ class InMemoryConfig(CredentialsFile):
         auth = cast("Dict[str, Any]", raw_auth)
         auth_type = auth.get("type")
         if auth_type not in (AUTH_TYPE_OIDC_FEDERATION, AUTH_TYPE_USER_OAUTH):
-            raise AnthropicError(
+            raise CredentialsError(
                 f"Unknown authentication.type {auth_type!r}. "
                 f"Expected {AUTH_TYPE_OIDC_FEDERATION!r} or {AUTH_TYPE_USER_OAUTH!r}."
             )
 
         credentials_path = auth.get("credentials_path")
         if auth_type == AUTH_TYPE_USER_OAUTH and not credentials_path:
-            raise AnthropicError(
+            raise CredentialsError(
                 f"authentication.type {AUTH_TYPE_USER_OAUTH!r} requires "
                 f"'authentication.credentials_path' (where the access/refresh tokens live). "
                 f"For profile-based resolution, use CredentialsFile instead."

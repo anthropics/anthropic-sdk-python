@@ -141,7 +141,7 @@ def conversation_loop():
                 print(f"\n[{i + 1}] {role}:")
                 print("-" * 40)
 
-                content = message["content"]
+                content = message.get("content")
                 if isinstance(content, str):
                     print(content[:500] + "..." if len(content) > 500 else content)
                 elif isinstance(content, list):
@@ -169,7 +169,7 @@ def conversation_loop():
         try:
             runner = client.beta.messages.tool_runner(
                 betas=["context-management-2025-06-27"],
-                model="claude-sonnet-5",
+                model="claude-sonnet-5-5",
                 max_tokens=2048,
                 system=DEFAULT_MEMORY_SYSTEM_PROMPT,
                 messages=messages,

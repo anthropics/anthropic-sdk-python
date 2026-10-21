@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import warnings
@@ -11,9 +9,8 @@ import httpx2
 import pydantic
 
 from ...types import (
+    DiagnosticsParam,
     ThinkingConfigParam,
-    message_create_params,
-    message_count_tokens_params,
 )
 from .batches import (
     Batches,
@@ -24,7 +21,7 @@ from .batches import (
     AsyncBatchesWithStreamingResponse,
 )
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, required_args, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, required_args, strip_not_given
 from ..._compat import cached_property
 from ..._models import TypeAdapter
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -40,6 +37,7 @@ from ..._base_client import (
     merge_headers,
     make_request_options,
 )
+from ...lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
 from ...lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ...types.message import Message
 from ...types.model_param import ModelParam
@@ -56,6 +54,7 @@ from ...lib._stainless_helpers import (
 )
 from ...types.text_block_param import TextBlockParam
 from ...types.tool_union_param import ToolUnionParam
+from ...types.diagnostics_param import DiagnosticsParam
 from ...types.tool_choice_param import ToolChoiceParam
 from ...types.output_config_param import OutputConfigParam
 from ...types.message_tokens_count import MessageTokensCount
@@ -88,6 +87,8 @@ DEPRECATED_MODELS = {
     "claude-sonnet-4-0": "June 15th, 2026",
     "claude-sonnet-4-20250514": "June 15th, 2026",
     "claude-mythos-preview": "June 30th, 2026",
+    "claude-sonnet-4-5": "November 30th, 2026",
+    "claude-sonnet-4-5-20250929": "November 30th, 2026",
 }
 
 MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6", "claude-mythos-preview"]
@@ -126,10 +127,12 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -183,7 +186,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -201,7 +207,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -231,8 +238,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -245,6 +251,10 @@ class Messages(SyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -260,6 +270,14 @@ class Messages(SyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -270,10 +288,14 @@ class Messages(SyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -281,15 +303,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -373,7 +396,14 @@ class Messages(SyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -395,10 +425,12 @@ class Messages(SyncAPIResource):
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -451,7 +483,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -469,7 +504,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -499,8 +535,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -509,15 +544,23 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -532,6 +575,14 @@ class Messages(SyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -549,15 +600,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -641,7 +693,14 @@ class Messages(SyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -663,10 +722,12 @@ class Messages(SyncAPIResource):
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -719,7 +780,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -737,7 +801,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -767,8 +832,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -777,15 +841,23 @@ class Messages(SyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -800,6 +872,14 @@ class Messages(SyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -817,15 +897,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -909,7 +990,14 @@ class Messages(SyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -930,10 +1018,12 @@ class Messages(SyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -979,30 +1069,33 @@ class Messages(SyncAPIResource):
         }
         return self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "container": container,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "stream": stream,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsStreaming
-                if stream
-                else message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "container": container,
+                "diagnostics": diagnostics,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": output_config,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "stream": stream,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=Message,
             stream=stream or False,
@@ -1016,12 +1109,14 @@ class Messages(SyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1096,28 +1191,33 @@ class Messages(SyncAPIResource):
         make_request = partial(
             self._post,
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "container": container,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "tools": tools,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParamsStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "diagnostics": diagnostics,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "container": container,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "tools": tools,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "stream": True,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=Message,
             stream=True,
@@ -1134,10 +1234,12 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1215,28 +1317,30 @@ class Messages(SyncAPIResource):
 
         return self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "diagnostics": diagnostics,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -1250,6 +1354,7 @@ class Messages(SyncAPIResource):
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -1287,7 +1392,10 @@ class Messages(SyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -1305,7 +1413,8 @@ class Messages(SyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -1335,8 +1444,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1350,6 +1458,13 @@ class Messages(SyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -1357,15 +1472,16 @@ class Messages(SyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -1449,7 +1565,14 @@ class Messages(SyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1502,21 +1625,25 @@ class Messages(SyncAPIResource):
 
         return self._post(
             "/v1/messages/count_tokens",
-            body=maybe_transform(
-                {
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "output_config": merged_output_config,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_count_tokens_params.MessageCountTokensParams,
-            ),
+            body={
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "output_config": merged_output_config,
+                "speed": speed,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.count_tokens",
+                span_route="/v1/messages/count_tokens",
+                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )
@@ -1555,10 +1682,12 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -1612,7 +1741,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -1630,7 +1762,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -1660,8 +1793,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1674,6 +1806,10 @@ class AsyncMessages(AsyncAPIResource):
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1689,6 +1825,14 @@ class AsyncMessages(AsyncAPIResource):
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
+
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
               Our models will normally stop when they have naturally completed their turn,
@@ -1699,10 +1843,14 @@ class AsyncMessages(AsyncAPIResource):
               the custom sequences, the response `stop_reason` value will be `"stop_sequence"`
               and the response `stop_sequence` value will contain the matched stop sequence.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           system: System prompt.
 
@@ -1710,15 +1858,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -1802,7 +1951,14 @@ class AsyncMessages(AsyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1824,10 +1980,12 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -1880,7 +2038,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -1898,7 +2059,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -1928,8 +2090,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1938,15 +2099,23 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -1961,6 +2130,14 @@ class AsyncMessages(AsyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -1978,15 +2155,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2070,7 +2248,14 @@ class AsyncMessages(AsyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -2092,10 +2277,12 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2148,7 +2335,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -2166,7 +2356,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -2196,8 +2387,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2206,15 +2396,23 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
-          stream: Whether to incrementally stream the response using server-sent events.
+          stream: Whether to incrementally stream the response using server-sent events. When
+              `true`, SDKs return a raw event stream.
 
-              See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-              for details.
+              In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+              `messages.stream()`. It sets `stream` for you and accumulates the events into
+              the final message. See
+              [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+              for an example in each language.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
           container: Container identifier for reuse across requests.
+
+          diagnostics: Request-level diagnostics. Supply `previous_message_id` to have the response
+              include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence
+              from that prior request.
 
           inference_geo: Specifies the geographic region for inference processing. If not specified, the
               workspace's `default_inference_geo` is used.
@@ -2229,6 +2427,14 @@ class AsyncMessages(AsyncAPIResource):
               Anthropic offers different levels of service for your API requests. See
               [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for
               details.
+
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           stop_sequences: Custom text sequences that will cause the model to stop generating.
 
@@ -2246,15 +2452,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2338,7 +2545,14 @@ class AsyncMessages(AsyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -2359,10 +2573,12 @@ class AsyncMessages(AsyncAPIResource):
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
@@ -2408,30 +2624,33 @@ class AsyncMessages(AsyncAPIResource):
         }
         return await self._post(
             "/v1/messages",
-            body=await async_maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "container": container,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "stream": stream,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsStreaming
-                if stream
-                else message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "container": container,
+                "diagnostics": diagnostics,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": output_config,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "stream": stream,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=Message,
             stream=stream or False,
@@ -2445,12 +2664,14 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[MessageParam],
         model: ModelParam,
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         inference_geo: Optional[str] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         container: Optional[MessageCreateParamsContainerParam] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2524,28 +2745,33 @@ class AsyncMessages(AsyncAPIResource):
 
         request = self._post(
             "/v1/messages",
-            body=maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "inference_geo": inference_geo,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "container": container,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "tools": tools,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "stream": True,
-                },
-                message_create_params.MessageCreateParamsStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "diagnostics": diagnostics,
+                "inference_geo": inference_geo,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "container": container,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "tools": tools,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "stream": True,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=Message,
             stream=True,
@@ -2562,10 +2788,12 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[MessageParam],
         model: ModelParam,
+        diagnostics: Optional[DiagnosticsParam] | Omit = omit,
         metadata: MetadataParam | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type[ResponseFormatT]] | Omit = omit,
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
@@ -2643,28 +2871,30 @@ class AsyncMessages(AsyncAPIResource):
 
         return await self._post(
             "/v1/messages",
-            body=await async_maybe_transform(
-                {
-                    "max_tokens": max_tokens,
-                    "messages": messages,
-                    "model": model,
-                    "metadata": metadata,
-                    "output_config": merged_output_config,
-                    "service_tier": service_tier,
-                    "stop_sequences": stop_sequences,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_create_params.MessageCreateParamsNonStreaming,
-            ),
+            body={
+                "max_tokens": max_tokens,
+                "messages": messages,
+                "model": model,
+                "diagnostics": diagnostics,
+                "metadata": metadata,
+                "output_config": merged_output_config,
+                "service_tier": service_tier,
+                "speed": speed,
+                "stop_sequences": stop_sequences,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                span_name="anthropic.messages.create",
+                span_route="/v1/messages",
+                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -2678,6 +2908,7 @@ class AsyncMessages(AsyncAPIResource):
         cache_control: Optional[CacheControlEphemeralParam] | Omit = omit,
         output_config: OutputConfigParam | Omit = omit,
         output_format: Optional[type] | Omit = omit,
+        speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         system: Union[str, Iterable[TextBlockParam]] | Omit = omit,
         thinking: ThinkingConfigParam | Omit = omit,
         tool_choice: ToolChoiceParam | Omit = omit,
@@ -2715,7 +2946,10 @@ class AsyncMessages(AsyncAPIResource):
 
               If the final message uses the `assistant` role, the response content will
               continue immediately from the content in that message. This can be used to
-              constrain part of the model's response.
+              constrain part of the model's response. This is called prefill. On models that
+              don't support prefill, creating a message that ends with a partial `assistant`
+              response returns a 400 error. See
+              [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
               Example with a single `user` message:
 
@@ -2733,7 +2967,8 @@ class AsyncMessages(AsyncAPIResource):
               ]
               ```
 
-              Example with a partially-filled response from Claude:
+              Example with a partially-filled response from Claude, for models that support
+              prefill:
 
               ```json
               [
@@ -2763,8 +2998,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2778,6 +3012,13 @@ class AsyncMessages(AsyncAPIResource):
 
           output_config: Configuration options for the model's output, such as the output format.
 
+          speed: The inference speed mode for this request. `"fast"` enables high
+              output-tokens-per-second inference.
+
+              Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+              value. See
+              [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+              which models.
 
           system: System prompt.
 
@@ -2785,15 +3026,16 @@ class AsyncMessages(AsyncAPIResource):
               as specifying a particular goal or role. See our
               [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
 
-          thinking: Configuration for enabling Claude's extended thinking.
+          thinking: Configuration for Claude's thinking.
 
-              When enabled, responses include `thinking` content blocks showing Claude's
-              thinking process before the final answer. Requires a minimum budget of 1,024
-              tokens and counts towards your `max_tokens` limit.
+              With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+              `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+              at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-              See
-              [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-              for details.
+              Which `type` values are accepted, and what happens when you omit `thinking`,
+              depend on the model. See
+              [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+              for each model's behavior.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2877,7 +3119,14 @@ class AsyncMessages(AsyncAPIResource):
               for more details.
 
           user_profile_id: The user profile ID to attribute this request to. Use when acting on behalf of a
-              party other than your organization. Requires the `user-profiles` beta header.
+              party other than your organization.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -2930,21 +3179,25 @@ class AsyncMessages(AsyncAPIResource):
 
         return await self._post(
             "/v1/messages/count_tokens",
-            body=await async_maybe_transform(
-                {
-                    "messages": messages,
-                    "model": model,
-                    "cache_control": cache_control,
-                    "output_config": merged_output_config,
-                    "system": system,
-                    "thinking": thinking,
-                    "tool_choice": tool_choice,
-                    "tools": tools,
-                },
-                message_count_tokens_params.MessageCountTokensParams,
-            ),
+            body={
+                "messages": messages,
+                "model": model,
+                "cache_control": cache_control,
+                "output_config": merged_output_config,
+                "speed": speed,
+                "system": system,
+                "thinking": thinking,
+                "tool_choice": tool_choice,
+                "tools": tools,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.messages.count_tokens",
+                span_route="/v1/messages/count_tokens",
+                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )

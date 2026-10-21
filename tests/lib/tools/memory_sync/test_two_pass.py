@@ -1,7 +1,7 @@
 """The sync's two passes: a content-free listing, then targeted fetches.
 
-A sync lists shas only (``basic`` view) and fetches a memory's body just
-before writing it to disk; only the download takes ``full`` pages, since
+A sync lists shas only (`basic` view) and fetches a memory's body just
+before writing it to disk; only the download takes `full` pages, since
 it needs every memory anyway. These tests pin that fetch discipline: a
 sync that writes nothing fetches nothing, a changed path fetches exactly
 itself, fetches fan out rather than queue, and a fetch that fails — or
@@ -22,7 +22,7 @@ from ._fake_anthropic import MemoryServer, updated, _status_error, fake_anthropi
 
 
 async def _downloaded(tmp_path: Path, initial: dict[str, str]) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial)
     stores = SessionMemoryStores(client, workdir=tmp_path)
     await stores.download(await client.beta.sessions.retrieve("s1"))

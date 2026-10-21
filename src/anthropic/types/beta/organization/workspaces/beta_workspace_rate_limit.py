@@ -1,40 +1,53 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+from typing import List, Union, Optional
+from typing_extensions import Literal, Annotated, TypeAlias
 
-from typing import List, Optional
-from typing_extensions import Literal
-
-from ....._models import BaseModel
+from ....._models import BaseModel, UnionDiscriminator
 from .beta_workspace_rate_limit_value import BetaWorkspaceRateLimitValue
+from ..beta_organization_rate_limit_batch_group import BetaOrganizationRateLimitBatchGroup
+from ..beta_organization_rate_limit_files_group import BetaOrganizationRateLimitFilesGroup
+from ..beta_organization_rate_limit_model_group import BetaOrganizationRateLimitModelGroup
+from ..beta_organization_rate_limit_skills_group import BetaOrganizationRateLimitSkillsGroup
+from ..beta_organization_rate_limit_web_search_group import BetaOrganizationRateLimitWebSearchGroup
+from ..beta_organization_rate_limit_token_count_group import BetaOrganizationRateLimitTokenCountGroup
 
-__all__ = ["BetaWorkspaceRateLimit"]
+__all__ = ["BetaWorkspaceRateLimit", "Group"]
+
+Group: TypeAlias = Annotated[
+    Union[
+        BetaOrganizationRateLimitModelGroup,
+        BetaOrganizationRateLimitBatchGroup,
+        BetaOrganizationRateLimitTokenCountGroup,
+        BetaOrganizationRateLimitFilesGroup,
+        BetaOrganizationRateLimitSkillsGroup,
+        BetaOrganizationRateLimitWebSearchGroup,
+    ],
+    UnionDiscriminator("type"),
+]
 
 
 class BetaWorkspaceRateLimit(BaseModel):
-    group_type: Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]
-    """The kind of rate-limit group this entry represents.
-
-    `model_group` entries apply to a family of models (listed in `models`); other
-    values apply to an API-surface category and have `models` set to `null`.
-    """
+    group: Group
+    """The rate-limit group this entry's limits apply to."""
 
     limits: List[BetaWorkspaceRateLimitValue]
-    """The limiter values overridden for this group in this workspace.
+    """The workspace's limiter values for this group.
 
-    Limiter types without a workspace override are omitted and inherit the
-    organization value.
+    By default only the limiter types with a workspace-level override are listed.
+    With `include_inherited` set to `true`, the limiter types the workspace inherits
+    from the organization are listed too, each marked by `source`.
     """
 
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group_type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`.
     """
 
     rate_limit_id: str
-    """The `id` of the RateLimit group this override applies to."""
+    """The `id` of the organization's RateLimit entry this entry applies to."""
 
     type: Literal["workspace_rate_limit"]
     """Object type. Always `workspace_rate_limit` for workspace rate-limit entries."""
 
     workspace_id: str
-    """ID of the Workspace this override applies to."""
+    """ID of the Workspace this entry applies to."""

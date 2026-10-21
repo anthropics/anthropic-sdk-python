@@ -3,68 +3,91 @@
 Several helpers (the environment poller, the environment worker, the session
 tool runner) need to issue requests authenticated by a per-helper credential
 (a self-hosted environment key, today) rather than the parent client's own
-``X-Api-Key``. They each want to inherit the parent's full configuration —
-``timeout``, ``max_retries``, ``http_client``, custom ``default_headers``,
-``default_query`` — and override only the auth bits, plus tag every request
-with their own ``x-stainless-helper`` value.
+API key. They each want to inherit the parent's full configuration —
+`timeout`, `max_retries`, `http_client`, custom `default_headers`,
+`default_query` — and override only the auth bits, plus tag every request
+with their own `x-stainless-helper` value.
 
-:func:`_copy_client_with_bearer_auth` is the one shared construction.
+`_copy_client_with_bearer_auth` is the one shared construction.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, TypeVar, cast
 
+from .._types import OpenTelemetryClientOption
 from ._stainless_helpers import STAINLESS_HELPER_HEADER, StainlessHelperHeaderValue
 
 if TYPE_CHECKING:
     from .._client import Anthropic, AsyncAnthropic
 
 
-__all__ = ["_copy_client_with_bearer_auth"]
+__all__ = ["_copy_client_with_bearer_auth", "copy_scoped_client"]
 
 
 ClientT = TypeVar("ClientT", "Anthropic", "AsyncAnthropic")
 
 
 def _copy_client_with_bearer_auth(client: ClientT, *, auth_token: str, helper: StainlessHelperHeaderValue) -> ClientT:
-    """Return a copy of ``client`` authenticated with ``auth_token`` as Bearer.
+    """Return a copy of `client` authenticated with `auth_token` as Bearer.
 
     The returned sub-client inherits the parent's full configuration via
-    ``client.copy()`` (``base_url``, ``timeout``, ``max_retries``,
-    ``http_client``, ``default_query``, and any custom ``default_headers``).
+    `client.copy()` (`base_url`, `timeout`, `max_retries`,
+    `http_client`, `default_query`, and any custom `default_headers`).
     Overrides applied:
 
-    - ``auth_token=auth_token`` — the new credential.
-    - ``credentials=None`` — any inherited credentials provider is cleared so
-      the bearer is the unambiguous auth.
-    - ``default_headers`` merges in ``x-stainless-helper: <helper>`` so every
+    - `auth_token=auth_token` — the new credential. It replaces the parent's
+      `api_key`, `auth_token` or `credentials`.
+    - `api_key=None` — also cleared after the copy. A subclass that overrides
+      `copy()`, such as the AWS client, passes its own key back in, and a key
+      wins over a bearer token.
+    - `base_url=client.base_url` and the headers of the parent's credential,
+      such as a profile's `anthropic-workspace-id` — kept. `copy()` drops
+      both with the credential that brought them, but the bearer is for the
+      deployment and workspace the parent talks to.
+    - `default_headers` merges in `x-stainless-helper: <helper>` so every
       request the sub-client issues is tagged for SDK telemetry without
       per-call plumbing.
-    - ``api_key=None`` — the parent's ``X-Api-Key`` is cleared via a post-hoc
-      mutation; today's ``copy()`` treats ``api_key=None`` as "inherit" via
-      truthy-or, so the assignment is the only way to drop the parent's API
-      key from the sub-client.
-    - Any inherited ``Authorization`` / ``X-Api-Key`` entries in the parent's
+    - Any inherited `Authorization` / `X-Api-Key` entries in the parent's
       custom default-headers are stripped from the sub-client. They would
       otherwise win over the bearer we just set, because
-      :meth:`AsyncAnthropic.default_headers` merges ``_custom_headers`` after
-      ``auth_headers`` (and so beats the ``Authorization`` value produced by
-      ``auth_token``).
+      `AsyncAnthropic.default_headers` merges `_custom_headers` after
+      `auth_headers` (and so beats the `Authorization` value produced by
+      `auth_token`).
     """
     if not auth_token:
         raise ValueError(f"Expected a non-empty value for `auth_token` but received {auth_token!r}")
     scoped = client.copy(
         auth_token=auth_token,
-        credentials=None,
+        base_url=client.base_url,
         default_headers={STAINLESS_HELPER_HEADER: helper},
     )
-    scoped.api_key = None
-    # ``_custom_headers`` is typed as ``Mapping[str, str]`` (immutable
-    # interface) but is constructed as a plain ``dict`` at runtime — cast
-    # so we can ``pop()`` keys without re-typing the base client.
-    custom: Dict[str, str] = cast("Dict[str, str]", scoped._custom_headers)
+    scoped._credential_headers = client._credential_headers
+    keep_only_bearer_auth(scoped)
+    return scoped
+
+
+def copy_scoped_client(scoped: ClientT, *, open_telemetry: OpenTelemetryClientOption) -> ClientT:
+    """Return a copy of `scoped`, a client that `_copy_client_with_bearer_auth` made, with `open_telemetry` as its option.
+
+    A new client reads `ANTHROPIC_CUSTOM_HEADERS` again, so the copy drops the
+    credentials that `scoped` dropped, and sends the same Bearer as `scoped`.
+    """
+    copy = scoped.copy(open_telemetry=open_telemetry)
+    keep_only_bearer_auth(copy)
+    return copy
+
+
+def keep_only_bearer_auth(client: Anthropic | AsyncAnthropic) -> None:
+    """Drops the API key of `client` and the `Authorization` / `X-Api-Key` entries of its custom headers.
+
+    What is left is the Bearer of its `auth_token`.
+    """
+    client.api_key = None
+    # `_custom_headers` is typed as `Mapping[str, str]` (immutable
+    # interface) but is constructed as a plain `dict` at runtime — cast
+    # so we can `pop()` keys without re-typing the base client.
+    custom: Dict[str, str] = cast("Dict[str, str]", client._custom_headers)
     for key in list(custom):
         if key.lower() in ("authorization", "x-api-key"):
             custom.pop(key)
-    return scoped

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -11,6 +9,12 @@ __all__ = ["RateLimitListParams"]
 class RateLimitListParams(TypedDict, total=False):
     group_type: Optional[Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]]
     """Filter by group type."""
+
+    include_inherited: bool
+    """
+    Also list the limiter values the workspace inherits from the organization,
+    including groups with no workspace-level override.
+    """
 
     limit: Optional[int]
     """Maximum number of items to return per page. Ranges from `1` to `1000`.

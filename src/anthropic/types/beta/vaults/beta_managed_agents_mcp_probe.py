@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 
 from ...._models import BaseModel
@@ -12,7 +10,11 @@ class BetaManagedAgentsMCPProbe(BaseModel):
     """The failing step of an MCP validation probe."""
 
     http_response: Optional[BetaManagedAgentsRefreshHTTPResponse] = None
-    """An HTTP response captured during a credential validation probe."""
+    """
+    The HTTP error response from the MCP server, or `null` if the MCP server didn't
+    return one for the failing step, for example after a timeout or a DNS or TLS
+    failure.
+    """
 
     method: str
     """The MCP method that failed (for example `initialize` or `tools/list`)."""

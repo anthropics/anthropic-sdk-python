@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import TypedDict
@@ -22,6 +20,9 @@ class WorkspaceListParams(TypedDict, total=False):
 
     include_archived: bool
     """Whether to include Workspaces that have been archived in the response"""
+
+    include_default: bool
+    """Whether to include the organization's default Workspace in the response"""
 
     limit: int
     """Number of items to return per page.

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from .files import (
@@ -52,14 +50,6 @@ from .skills.skills import (
     AsyncSkillsWithRawResponse,
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
-)
-from .user_profiles import (
-    UserProfiles,
-    AsyncUserProfiles,
-    UserProfilesWithRawResponse,
-    AsyncUserProfilesWithRawResponse,
-    UserProfilesWithStreamingResponse,
-    AsyncUserProfilesWithStreamingResponse,
 )
 from .vaults.vaults import (
     Vaults,
@@ -124,6 +114,14 @@ from .memory_stores.memory_stores import (
     AsyncMemoryStoresWithRawResponse,
     MemoryStoresWithStreamingResponse,
     AsyncMemoryStoresWithStreamingResponse,
+)
+from .user_profiles.user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]

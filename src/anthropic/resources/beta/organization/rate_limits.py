@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -8,7 +6,6 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,7 +16,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import rate_limit_list_params
 from ....types.beta.organization.beta_organization_rate_limit import BetaOrganizationRateLimit
 
 __all__ = ["RateLimits", "AsyncRateLimits"]
@@ -64,8 +60,8 @@ class RateLimits(SyncAPIResource):
         List Messages API rate limits for your organization.
 
         Each entry corresponds to one rate-limit group (either a model family or an
-        API-surface category such as the Files API or Message Batches) and contains the
-        set of limiter values that apply to it.
+        API-surface category such as the Message Batches API or the web search tool) and
+        contains the set of limiter values that apply to it.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -100,15 +96,14 @@ class RateLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )
@@ -153,8 +148,8 @@ class AsyncRateLimits(AsyncAPIResource):
         List Messages API rate limits for your organization.
 
         Each entry corresponds to one rate-limit group (either a model family or an
-        API-surface category such as the Files API or Message Batches) and contains the
-        set of limiter values that apply to it.
+        API-surface category such as the Message Batches API or the web search tool) and
+        contains the set of limiter values that apply to it.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -189,15 +184,14 @@ class AsyncRateLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )

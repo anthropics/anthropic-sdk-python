@@ -9,10 +9,12 @@ import httpx2
 
 from ... import _exceptions
 from ._beta import Beta, AsyncBeta
-from ..._types import Timeout, NotGiven, not_given
+from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
+from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
+from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError, APIStatusError
 from ..._middleware import MiddlewareInput
@@ -28,26 +30,24 @@ from ..._base_client import (
 from ._stream_decoder import AWSEventStreamDecoder
 from ...resources.messages import Messages, AsyncMessages
 
-DEFAULT_VERSION = "bedrock-2023-05-31"
-
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
 def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
-    options = model_copy(input_options, deep=True)
+    options = model_copy(_keep_client_header_params(input_options), deep=True)
 
     if is_dict(options.json_data):
-        options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
+        options.json_data.setdefault("anthropic_version", ANTHROPIC_API_VERSION)
 
         if is_given(options.headers):
             betas = build_headers(options.headers)[0].get("anthropic-beta")
             if betas:
                 options.json_data.setdefault("anthropic_beta", betas.split(","))
 
-    if options.url in {"/v1/complete", "/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
+    if options.url in {"/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if not is_dict(options.json_data):
-            raise RuntimeError("Expected dictionary json_data for post /completions endpoint")
+            raise RuntimeError("Expected dictionary json_data for post /v1/messages endpoint")
 
         model = options.json_data.pop("model", None)
         model = urllib.parse.quote(str(model), safe=":")
@@ -92,6 +92,9 @@ def _infer_region(aws_profile: str | None) -> str:
 
 
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
+    _gen_ai_provider_name = "aws.bedrock"
+    _otel_platform = "bedrock"
+
     @override
     def _make_status_error(
         self,
@@ -146,6 +149,9 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
@@ -194,6 +200,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=default_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -247,6 +254,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -285,6 +293,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
@@ -324,6 +333,9 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx client. See the [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
         http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
@@ -372,6 +384,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=default_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -425,6 +438,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -463,6 +477,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
+            open_telemetry=self._copy_open_telemetry(open_telemetry),
             default_headers=headers,
             default_query=params,
             middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,

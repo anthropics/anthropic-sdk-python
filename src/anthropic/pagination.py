@@ -1,6 +1,5 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Generic, TypeVar, Optional
+from datetime import datetime
 from typing_extensions import override
 
 from ._base_client import BasePage, PageInfo, BaseSyncPage, BaseAsyncPage
@@ -14,6 +13,8 @@ __all__ = [
     "AsyncPageCursor",
     "SyncBidirectionalPageCursor",
     "AsyncBidirectionalPageCursor",
+    "SyncReportPageCursor",
+    "AsyncReportPageCursor",
 ]
 
 _T = TypeVar("_T")
@@ -163,6 +164,10 @@ class SyncPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         return data
 
     @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
+
+    @override
     def next_page_info(self) -> Optional[PageInfo]:
         next_page = self.next_page
         if not next_page:
@@ -181,6 +186,10 @@ class AsyncPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
         if not data:
             return []
         return data
+
+    @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:
@@ -204,6 +213,10 @@ class SyncBidirectionalPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
         return data
 
     @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
+
+    @override
     def next_page_info(self) -> Optional[PageInfo]:
         next_page = self.next_page
         if not next_page:
@@ -223,6 +236,70 @@ class AsyncBidirectionalPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T])
         if not data:
             return []
         return data
+
+    @override
+    def has_next_page(self) -> bool:
+        return self.next_page_info() is not None
+
+    @override
+    def next_page_info(self) -> Optional[PageInfo]:
+        next_page = self.next_page
+        if not next_page:
+            return None
+
+        return PageInfo(params={"page": next_page})
+
+
+class SyncReportPageCursor(BaseSyncPage[_T], BasePage[_T], Generic[_T]):
+    data: List[_T]
+    next_page: Optional[str] = None
+    has_more: Optional[bool] = None
+    data_refreshed_at: Optional[datetime] = None
+
+    @override
+    def _get_page_items(self) -> List[_T]:
+        data = self.data
+        if not data:
+            return []
+        return data
+
+    @override
+    def has_next_page(self) -> bool:
+        has_more = self.has_more
+        if has_more is not None and has_more is False:
+            return False
+
+        return self.next_page_info() is not None
+
+    @override
+    def next_page_info(self) -> Optional[PageInfo]:
+        next_page = self.next_page
+        if not next_page:
+            return None
+
+        return PageInfo(params={"page": next_page})
+
+
+class AsyncReportPageCursor(BaseAsyncPage[_T], BasePage[_T], Generic[_T]):
+    data: List[_T]
+    next_page: Optional[str] = None
+    has_more: Optional[bool] = None
+    data_refreshed_at: Optional[datetime] = None
+
+    @override
+    def _get_page_items(self) -> List[_T]:
+        data = self.data
+        if not data:
+            return []
+        return data
+
+    @override
+    def has_next_page(self) -> bool:
+        has_more = self.has_more
+        if has_more is not None and has_more is False:
+            return False
+
+        return self.next_page_info() is not None
 
     @override
     def next_page_info(self) -> Optional[PageInfo]:

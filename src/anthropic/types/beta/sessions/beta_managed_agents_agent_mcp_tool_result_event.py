@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -33,7 +31,7 @@ class BetaManagedAgentsAgentMCPToolResultEvent(BaseModel):
     """The id of the `agent.mcp_tool_use` event this result corresponds to."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this event was processed."""
 
     type: Literal["agent.mcp_tool_result"]
 

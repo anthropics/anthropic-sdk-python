@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -21,7 +19,7 @@ class BetaManagedAgentsSessionThreadStatusRunningEvent(BaseModel):
     """Name of the agent the thread runs."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp of the status transition."""
 
     session_thread_id: str
     """Public sthr\\__ ID of the thread that started running."""

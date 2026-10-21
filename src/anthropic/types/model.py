@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Literal, TypeAlias
 
@@ -7,7 +5,10 @@ __all__ = ["Model"]
 
 Model: TypeAlias = Union[
     Literal[
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5",
         "claude-fable-5-1",
+        "claude-opus-5-5",
         "claude-mythos-5-1",
         "claude-sonnet-5",
         "claude-fable-5",

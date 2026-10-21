@@ -1,26 +1,26 @@
 """Self-hosted environment runner helpers.
 
-- :func:`anthropic.resources.beta.environments.work.AsyncWork.poller`
-  (``client.beta.environments.work.poller(...)``) — control-plane only: claims
+- `anthropic.resources.beta.environments.work.AsyncWork.poller`
+  (`client.beta.environments.work.poller(...)`) — control-plane only: claims
   work items, ack's each one, and hands back the work item. Async only (lives on
-  ``AsyncWork``, not the sync ``Work``). The underlying generators are
-  :func:`iter_work` / :func:`aiter_work`.
-- :class:`SessionToolRunner` (``client.beta.sessions.events.tool_runner(...)``)
-  — the sessions-side counterpart to ``client.beta.messages.tool_runner``:
-  dispatches local tools against a session's ``agent.tool_use`` events.
-- :class:`EnvironmentWorker`
-  (``client.beta.environments.work.worker(...)``) — the full composition: poll →
+  `AsyncWork`, not the sync `Work`). The underlying generators are
+  `iter_work` / `aiter_work`.
+- `SessionToolRunner` (`client.beta.sessions.events.tool_runner(...)`)
+  — the sessions-side counterpart to `client.beta.messages.tool_runner`:
+  dispatches local tools against a session's `agent.tool_use` events.
+- `EnvironmentWorker`
+  (`client.beta.environments.work.worker(...)`) — the full composition: poll →
   set up the workdir + download the session agent's skills → run a
-  :class:`SessionToolRunner` while heartbeating the work-item lease → force-stop
+  `SessionToolRunner` while heartbeating the work-item lease → force-stop
   on exit (unless the lease was lost to another holder) → loop. Build it with
-  ``client.beta.environments.work.worker(...)`` or
-  construct it directly: ``EnvironmentWorker(client, ...)``; use
-  :meth:`EnvironmentWorker.handle_item` for the per-item flow when you already
+  `client.beta.environments.work.worker(...)` or
+  construct it directly: `EnvironmentWorker(client, ...)`; use
+  `EnvironmentWorker.handle_item` for the per-item flow when you already
   hold a claimed work item.
 
-The tool implementations themselves (:func:`beta_agent_toolset` and the per-tool
+The tool implementations themselves (`beta_agent_toolset` and the per-tool
 factories) live next to the other tool helpers — import them from
-``anthropic.lib.tools.agent_toolset``.
+`anthropic.lib.tools.agent_toolset`.
 """
 
 from ._poller import (

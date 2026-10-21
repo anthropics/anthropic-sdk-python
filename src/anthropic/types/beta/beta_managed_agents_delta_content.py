@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -11,7 +9,10 @@ __all__ = ["BetaManagedAgentsDeltaContent"]
 
 class BetaManagedAgentsDeltaContent(BaseModel):
     content: BetaManagedAgentsTextBlock
-    """Regular text content."""
+    """
+    A partial element of the content array at index, typed like the element itself —
+    the same shape the buffered agent.message carries in content.
+    """
 
     type: Literal["content_delta"]
 

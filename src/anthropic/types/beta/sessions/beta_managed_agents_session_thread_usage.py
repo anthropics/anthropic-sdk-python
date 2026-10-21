@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 
 from ...._models import BaseModel
@@ -21,7 +19,7 @@ class BetaManagedAgentsSessionThreadUsage(BaseModel):
     """
 
     cache_creation: Optional[BetaManagedAgentsCacheCreationUsage] = None
-    """Prompt-cache creation token usage broken down by cache lifetime."""
+    """Tokens used to create prompt cache entries, broken down by cache TTL."""
 
     cache_read_input_tokens: Optional[int] = None
     """Total tokens read from prompt cache."""
@@ -30,10 +28,20 @@ class BetaManagedAgentsSessionThreadUsage(BaseModel):
     """Total input tokens consumed across all turns."""
 
     list_cost: Optional[BetaMonetaryAmount] = None
-    """A monetary amount in a specific currency."""
+    """
+    Cumulative list cost of this thread across all turns, priced at public list
+    rates. Absent until cost tracking is available for the thread. Each figure is
+    rounded to the nearest cent independently and the session's aggregate
+    `usage.list_cost` additionally includes session runtime, so per-thread costs do
+    not sum exactly to the session figure; the session figure is authoritative and
+    is what a budget is enforced against.
+    """
 
     output_tokens: Optional[int] = None
     """Total output tokens generated across all turns."""
 
     server_tool_use: Optional[BetaManagedAgentsServerToolUsage] = None
-    """Cumulative count of server-executed tool invocations, broken down by tool."""
+    """Cumulative server-executed tool usage across all turns of this thread.
+
+    Absent until server-tool tracking is available for the thread.
+    """

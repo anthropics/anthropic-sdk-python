@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -16,13 +14,16 @@ Checkout: TypeAlias = Union[BetaManagedAgentsBranchCheckoutParam, BetaManagedAge
 class BetaManagedAgentsGitHubRepositoryResourceParams(TypedDict, total=False):
     """Mount a GitHub repository into the session's container."""
 
-    authorization_token: Required[str]
-    """GitHub authorization token used to clone the repository."""
-
     type: Required[Literal["github_repository"]]
 
     url: Required[str]
     """Github URL of the repository"""
+
+    authorization_token: str
+    """GitHub authorization token used to clone the repository.
+
+    Required for private repositories; optional for public ones.
+    """
 
     checkout: Optional[Checkout]
     """Branch or commit to check out. Defaults to the repository's default branch."""

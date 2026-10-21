@@ -3,11 +3,11 @@ only after a second sync confirms it, at a bounded rate per sync, and only
 when server deletes are enabled at all.
 
 The first sync that sees the file missing records it; a later sync — after
-:data:`DELETE_CORROBORATION_SECONDS` (skipped on the session's final
-``finish()``, the session's last sync) and a re-check that the file is still gone and the
+`DELETE_CORROBORATION_SECONDS` (skipped on the session's final
+`finish()`, the session's last sync) and a re-check that the file is still gone and the
 marker still intact — sends the DELETE. Each sync sends a bounded number
-of deletes; ``sync_deletions="log_only"`` only logs them, and
-``"disabled"`` sends none, ever.
+of deletes; `sync_deletions="log_only"` only logs them, and
+`"disabled"` sends none, ever.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ ELAPSED = memories_mod.DELETE_CORROBORATION_SECONDS + 1
 async def _downloaded(
     tmp_path: Path, initial: dict[str, str], *, sync_deletions: MemoryDeleteMode = "enabled"
 ) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial)
     stores = SessionMemoryStores(client, workdir=tmp_path, sync_deletions=sync_deletions)
     await stores.download(await client.beta.sessions.retrieve("s1"))

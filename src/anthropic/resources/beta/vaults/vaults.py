@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Optional
@@ -8,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from .credentials import (
     Credentials,
@@ -26,7 +24,6 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import vault_list_params, vault_create_params, vault_update_params
 from ...._base_client import AsyncPaginator, make_request_options
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_managed_agents_vault import BetaManagedAgentsVault
@@ -73,7 +70,7 @@ class Vaults(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Create Vault
+        """Create a Vault
 
         Args:
           display_name: Human-readable name for the vault.
@@ -83,7 +80,15 @@ class Vaults(SyncAPIResource):
           metadata: Arbitrary key-value metadata to attach to the vault. Maximum 16 pairs, keys up
               to 64 chars, values up to 512 chars.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -107,15 +112,18 @@ class Vaults(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             "/v1/vaults?beta=true",
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_create_params.VaultCreateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.create",
+                span_route="/v1/vaults",
+                span_created_id="anthropic.vault.id",
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -134,10 +142,20 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Get Vault
+        Retrieve a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to retrieve.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -164,7 +182,13 @@ class Vaults(SyncAPIResource):
         return self._get(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.retrieve",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -184,17 +208,26 @@ class Vaults(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Update Vault
+        """
+        Update a Vault
 
         Args:
-          display_name: Updated human-readable name for the vault.
+          vault_id: Unique identifier of the vault to update.
 
-        1-255 characters.
+          display_name: Updated human-readable name for the vault. 1-255 characters.
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omitted keys are preserved.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -220,15 +253,18 @@ class Vaults(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_update_params.VaultUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.update",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -252,13 +288,23 @@ class Vaults(SyncAPIResource):
         List Vaults
 
         Args:
-          include_archived: Whether to include archived vaults in the results.
+          include_archived: Whether to include archived vaults in the results. Defaults to `false`.
 
           limit: Maximum number of vaults to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_vaults` response.
+          page: The `next_page` value from a previous
+              [List Vaults](https://platform.claude.com/docs/en/api/beta/vaults/list)
+              response, to get the next page. Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -288,14 +334,13 @@ class Vaults(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    vault_list_params.VaultListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.vaults.list",
+                span_route="/v1/vaults",
             ),
             model=BetaManagedAgentsVault,
         )
@@ -314,10 +359,20 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedVault:
         """
-        Delete Vault
+        Delete a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to delete.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -344,7 +399,13 @@ class Vaults(SyncAPIResource):
         return self._delete(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.delete",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -363,10 +424,20 @@ class Vaults(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Archive Vault
+        Archive a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to archive.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -393,7 +464,13 @@ class Vaults(SyncAPIResource):
         return self._post(
             path_template("/v1/vaults/{vault_id}/archive?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.archive",
+                span_route="/v1/vaults/{vault_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -437,7 +514,7 @@ class AsyncVaults(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Create Vault
+        """Create a Vault
 
         Args:
           display_name: Human-readable name for the vault.
@@ -447,7 +524,15 @@ class AsyncVaults(AsyncAPIResource):
           metadata: Arbitrary key-value metadata to attach to the vault. Maximum 16 pairs, keys up
               to 64 chars, values up to 512 chars.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -471,15 +556,18 @@ class AsyncVaults(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             "/v1/vaults?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_create_params.VaultCreateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.create",
+                span_route="/v1/vaults",
+                span_created_id="anthropic.vault.id",
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -498,10 +586,20 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Get Vault
+        Retrieve a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to retrieve.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -528,7 +626,13 @@ class AsyncVaults(AsyncAPIResource):
         return await self._get(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.retrieve",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -548,17 +652,26 @@ class AsyncVaults(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
-        """Update Vault
+        """
+        Update a Vault
 
         Args:
-          display_name: Updated human-readable name for the vault.
+          vault_id: Unique identifier of the vault to update.
 
-        1-255 characters.
+          display_name: Updated human-readable name for the vault. 1-255 characters.
 
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
               Omitted keys are preserved.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -584,15 +697,18 @@ class AsyncVaults(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "metadata": metadata,
-                },
-                vault_update_params.VaultUpdateParams,
-            ),
+            body={
+                "display_name": display_name,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.update",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )
@@ -616,13 +732,23 @@ class AsyncVaults(AsyncAPIResource):
         List Vaults
 
         Args:
-          include_archived: Whether to include archived vaults in the results.
+          include_archived: Whether to include archived vaults in the results. Defaults to `false`.
 
           limit: Maximum number of vaults to return per page. Defaults to 20, maximum 100.
 
-          page: Opaque pagination token from a previous `list_vaults` response.
+          page: The `next_page` value from a previous
+              [List Vaults](https://platform.claude.com/docs/en/api/beta/vaults/list)
+              response, to get the next page. Leave it out to get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -652,14 +778,13 @@ class AsyncVaults(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    vault_list_params.VaultListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.vaults.list",
+                span_route="/v1/vaults",
             ),
             model=BetaManagedAgentsVault,
         )
@@ -678,10 +803,20 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedVault:
         """
-        Delete Vault
+        Delete a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to delete.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -708,7 +843,13 @@ class AsyncVaults(AsyncAPIResource):
         return await self._delete(
             path_template("/v1/vaults/{vault_id}?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.delete",
+                span_route="/v1/vaults/{vault_id}",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsDeletedVault,
         )
@@ -727,10 +868,20 @@ class AsyncVaults(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsVault:
         """
-        Archive Vault
+        Archive a Vault
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          vault_id: Unique identifier of the vault to archive.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -757,7 +908,13 @@ class AsyncVaults(AsyncAPIResource):
         return await self._post(
             path_template("/v1/vaults/{vault_id}/archive?beta=true", vault_id=vault_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                span_name="anthropic.vaults.archive",
+                span_route="/v1/vaults/{vault_id}/archive",
+                span_attributes={"anthropic.vault.id": vault_id},
             ),
             cast_to=BetaManagedAgentsVault,
         )

@@ -1,24 +1,41 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+from typing import List, Union, Optional
+from typing_extensions import Literal, Annotated, TypeAlias
 
-from typing import List, Optional
-from typing_extensions import Literal
-
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_organization_rate_limit_value import BetaOrganizationRateLimitValue
+from .beta_organization_rate_limit_batch_group import BetaOrganizationRateLimitBatchGroup
+from .beta_organization_rate_limit_files_group import BetaOrganizationRateLimitFilesGroup
+from .beta_organization_rate_limit_model_group import BetaOrganizationRateLimitModelGroup
+from .beta_organization_rate_limit_skills_group import BetaOrganizationRateLimitSkillsGroup
+from .beta_organization_rate_limit_web_search_group import BetaOrganizationRateLimitWebSearchGroup
+from .beta_organization_rate_limit_token_count_group import BetaOrganizationRateLimitTokenCountGroup
 
-__all__ = ["BetaOrganizationRateLimit"]
+__all__ = ["BetaOrganizationRateLimit", "Group"]
+
+Group: TypeAlias = Annotated[
+    Union[
+        BetaOrganizationRateLimitModelGroup,
+        BetaOrganizationRateLimitBatchGroup,
+        BetaOrganizationRateLimitTokenCountGroup,
+        BetaOrganizationRateLimitFilesGroup,
+        BetaOrganizationRateLimitSkillsGroup,
+        BetaOrganizationRateLimitWebSearchGroup,
+    ],
+    UnionDiscriminator("type"),
+]
 
 
 class BetaOrganizationRateLimit(BaseModel):
     id: str
-    """Stable identifier for this rate-limit group within the organization."""
+    """Identifier of this rate-limit entry.
 
-    group_type: Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]
-    """The kind of rate-limit group this entry represents.
-
-    `model_group` entries apply to a family of models (listed in `models`); other
-    values apply to an API-surface category and have `models` set to `null`.
+    It is stable within the organization and differs between organizations; the
+    group's own identifier is `group.id`. Pass it as `rate_limit_id` to set a
+    workspace's overrides for this group.
     """
+
+    group: Group
+    """The rate-limit group this entry's limits apply to."""
 
     limits: List[BetaOrganizationRateLimitValue]
     """The limiter values that apply to this group."""
@@ -26,7 +43,7 @@ class BetaOrganizationRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group_type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`.
     """
 
     type: Literal["rate_limit"]

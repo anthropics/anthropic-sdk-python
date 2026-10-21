@@ -8,7 +8,6 @@ from typing_extensions import override
 import httpx2
 
 from ._cache import TokenCache
-from ..._utils import asyncify
 from ._constants import OAUTH_API_BETA_HEADER
 
 __all__ = ["AccessTokenAuth"]
@@ -20,7 +19,7 @@ _warn_once_seen: set[str] = set()
 
 
 def _warn_once(key: str, message: str, *args: object) -> None:
-    """Emit a log warning at most once per ``key`` per process."""
+    """Emit a log warning at most once per `key` per process."""
     with _warn_once_lock:
         if key in _warn_once_seen:
             return
@@ -28,29 +27,13 @@ def _warn_once(key: str, message: str, *args: object) -> None:
     log.warning(message, *args)
 
 
-def warn_explicit_static_shadows_credentials(param: str) -> None:
-    """Warn that an explicit ``api_key=`` / ``auth_token=`` argument shadows
-    an explicit ``credentials=`` provider passed to the same constructor or
-    ``copy()`` call. The static credential wins at the request-header level
-    (``AccessTokenAuth.sync_auth_flow`` short-circuits on the pre-set header),
-    which silently disables the credentials provider.
-    """
-    _warn_once(
-        f"explicit-shadow:{param}",
-        "`%s=` was passed alongside `credentials=`; the static credential "
-        "takes precedence and the credentials provider is silently disabled. "
-        "Pass only one.",
-        param,
-    )
-
-
 def warn_env_static_shadows_auto_discovery(env_var: str) -> None:
-    """Warn that an ``ANTHROPIC_API_KEY`` / ``ANTHROPIC_AUTH_TOKEN`` from the
+    """Warn that an `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from the
     environment is shadowing the SDK's profile / federation auto-discovery.
 
     Per the credential-precedence spec, a static-credential env var silently
     disables the auto-discovered federation and profile paths. Surface a
-    one-shot warning so migrating users can see why their ``ANTHROPIC_PROFILE``
+    one-shot warning so migrating users can see why their `ANTHROPIC_PROFILE`
     or WIF env vars are being ignored.
     """
     _warn_once(
@@ -62,18 +45,23 @@ def warn_env_static_shadows_auto_discovery(env_var: str) -> None:
     )
 
 
+def warn_env_api_key_shadows_env_auth_token() -> None:
+    """Warn that `ANTHROPIC_AUTH_TOKEN` is ignored because `ANTHROPIC_API_KEY` is set as well."""
+    _warn_once(
+        "env-shadow:ANTHROPIC_API_KEY:ANTHROPIC_AUTH_TOKEN",
+        "Anthropic: ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are both set. Using ANTHROPIC_API_KEY.",
+    )
+
+
 class AccessTokenAuth(httpx2.Auth):
-    """Adapts a :class:`TokenCache` to httpx's :class:`~httpx2.Auth` protocol.
+    """Adapts a `TokenCache` to httpx's `httpx2.Auth` protocol.
 
-    Used by :meth:`anthropic.Anthropic.custom_auth` to inject ``Authorization: Bearer``
+    Used by `anthropic.Anthropic.custom_auth` to inject `Authorization: Bearer`
     plus the OAuth beta header on every request, with proactive refresh handled by
-    :class:`TokenCache`.
+    `TokenCache`.
 
-    Static credentials shadow federation: if the outgoing request already carries
-    an ``X-Api-Key`` or ``Authorization`` header (set by the client's api_key /
-    auth_token path), this auth flow is a no-op. That matches the Go SDK's
-    ``authMiddleware`` and the documented precedence in the WIF user guide —
-    a static ``ANTHROPIC_API_KEY`` shadows any credentials provider.
+    If the outgoing request already carries an `Authorization` or `X-Api-Key`
+    header, this auth flow is a no-op.
     """
 
     requires_response_body = False
@@ -99,7 +87,7 @@ class AccessTokenAuth(httpx2.Auth):
         existing_flags = [flag.strip() for flag in existing_beta.split(",") if flag.strip()]
         if OAUTH_API_BETA_HEADER not in existing_flags:
             existing_flags.append(OAUTH_API_BETA_HEADER)
-            request.headers["anthropic-beta"] = ", ".join(existing_flags)
+            request.headers["anthropic-beta"] = ",".join(existing_flags)
 
     @override
     def sync_auth_flow(self, request: httpx2.Request) -> Generator[httpx2.Request, httpx2.Response, None]:
@@ -115,9 +103,6 @@ class AccessTokenAuth(httpx2.Auth):
         if self._has_static_credential(request):
             yield request
             return
-        # TokenCache.get_token is sync (and may make a blocking HTTP call); run it
-        # in a worker thread to avoid blocking the event loop. Uses the same
-        # ``asyncify`` helper as the rest of the SDK (see lib/vertex).
-        token = await asyncify(self._token_cache.get_token)()
+        token = await self._token_cache.async_get_token()
         self._apply(request, token)
         yield request

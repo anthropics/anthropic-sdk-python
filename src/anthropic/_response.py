@@ -30,6 +30,7 @@ from ._models import BaseModel, is_basemodel, add_response_ids
 from ._constants import RAW_RESPONSE_HEADER, OVERRIDE_CAST_TO_HEADER
 from ._streaming import Stream, AsyncStream, is_stream_class_type, extract_stream_chunk_type
 from ._exceptions import AnthropicError, APIResponseValidationError
+from ._utils._typing import is_union_type
 from ._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 
 if TYPE_CHECKING:
@@ -250,7 +251,7 @@ class BaseAPIResponse(Generic[R]):
             cast_to is not object
             and not origin is list
             and not origin is dict
-            and not origin is Union
+            and not is_union_type(cast_to)
             and not issubclass(origin, BaseModel)
         ):
             raise RuntimeError(

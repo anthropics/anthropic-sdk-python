@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -21,7 +19,7 @@ class BetaManagedAgentsDeploymentUserDefineOutcomeEvent(BaseModel):
     """What the agent should produce. This is the task specification."""
 
     rubric: Rubric
-    """Rubric for grading the quality of an outcome."""
+    """How to grade the outcome. Text or file reference."""
 
     type: Literal["user.define_outcome"]
 

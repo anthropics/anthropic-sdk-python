@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -29,6 +27,6 @@ class BetaManagedAgentsBillingError(BaseModel):
     """Human-readable error description."""
 
     retry_status: RetryStatus
-    """What the client should do next in response to this error."""
+    """What the client should do next."""
 
     type: Literal["billing_error"]

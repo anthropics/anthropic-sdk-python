@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -16,8 +14,8 @@ class BetaThinkingConfigAdaptiveParam(TypedDict, total=False):
     block_binding: Optional[BetaThinkingBlockBindingParam]
     """
     Controls for block binding: what happens when a thinking block this request
-    sends back fails the conversation check. Every field is optional; an empty
-    object means every default.
+    sends back fails the conversation check. `null`, absent or an empty object means
+    every default.
     """
 
     display: Optional[Literal["summarized", "omitted", "updates"]]
@@ -25,5 +23,6 @@ class BetaThinkingConfigAdaptiveParam(TypedDict, total=False):
 
     When set to `summarized`, thinking is returned normally. When set to `omitted`,
     thinking content is redacted but a signature is returned for multi-turn
-    continuity. Defaults to `summarized`.
+    continuity. The default depends on the model; see
+    [Controlling thinking display](https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display).
     """

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -14,4 +12,9 @@ class BetaManagedAgentsTokenEndpointAuthBasicUpdateParam(TypedDict, total=False)
     type: Required[Literal["client_secret_basic"]]
 
     client_secret: Optional[str]
-    """Updated OAuth client secret."""
+    """A new OAuth client secret to replace the stored one.
+
+    The credential must already use `client_secret_basic` or `client_secret_post`.
+    It keeps its current `token_endpoint_auth` type, even if the `type` sent with
+    this secret is the other one.
+    """

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -13,10 +11,10 @@ class BetaManagedAgentsVault(BaseModel):
     """A vault that stores credentials for use by agents during sessions."""
 
     id: str
-    """Unique identifier for the vault."""
+    """The unique ID of the vault (`vlt_...`)."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the vault was archived. Null if not archived."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""

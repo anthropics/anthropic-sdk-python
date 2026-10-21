@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -13,7 +11,6 @@ __all__ = ["BetaCodeExecutionToolResultBlockParam"]
 
 class BetaCodeExecutionToolResultBlockParam(TypedDict, total=False):
     content: Required[BetaCodeExecutionToolResultBlockParamContentParam]
-    """Code execution result with encrypted stdout for PFC + web_search results."""
 
     tool_use_id: Required[str]
 

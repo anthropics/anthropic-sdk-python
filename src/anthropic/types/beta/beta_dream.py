@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -18,48 +16,98 @@ __all__ = ["BetaDream"]
 
 class BetaDream(BaseModel):
     """
-    An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into an output memory store — a new store by default, or an existing store chosen via output_behavior. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+    An asynchronous job that reads a memory store and past sessions, then writes a reorganized version of that memory store.
+
+    By default the dream writes its result to a new memory store and doesn't change the input memory store. With `output_behavior` set to `update_existing`, it writes its result into the input memory store instead.
+
+    The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+
+    See the [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#how-it-works) for what a dream reads and produces.
     """
 
     id: str
+    """The unique ID of the dream (`drm_...`)."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the dream was archived, in RFC 3339, or `null` if it hasn't been archived."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the dream was created, in RFC 3339.
+
+    Lists of dreams are sorted by this time, newest first.
+    """
 
     ended_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """
+    When the dream reached `completed`, `failed`, or `canceled`, in RFC 3339, or
+    `null` if it is still `pending` or `running`.
+    """
 
     error: Optional[BetaDreamError] = None
-    """Failure detail for a Dream whose `status` is `failed`."""
+    """Why the dream failed, or `null` if `status` isn't `failed`."""
 
     inputs: List[BetaDreamInput]
+    """The sources that the dream reads, from the request that created it."""
 
     instructions: Optional[str] = None
+    """The guidance given when the dream was created, or `null` if none was given."""
 
     model: BetaDreamModelConfig
-    """Model identifier and configuration applied to every pipeline stage.
+    """The model that runs a dream, from the request that created it.
 
-    Same wire shape as the Agents API ModelConfig.
+    The dream uses this model for all of its work. The response always gives the
+    model as an object, even if the request gave only a model ID.
     """
 
     output_behavior: BetaOutputBehavior
-    """
-    The default destination: the job creates a new output memory store as a clone of
-    the memory_store input and writes the consolidated memories into it. The input
-    store is never mutated.
+    """Where the dream writes its result, as set in the request that created the dream.
+
+    If that request left out `output_behavior`, the dream used the `create_new`
+    behavior.
     """
 
     outputs: List[BetaDreamOutput]
+    """
+    The memory store that holds the dream's result, as a one-item array, or an empty
+    array until the dream records that memory store.
+
+    The array is empty while the dream is `pending` and for a short time after it
+    starts `running`. It can stay empty if the dream fails or is canceled before
+    then. The memory store holds the complete result only once `status` is
+    `completed`.
+
+    See the
+    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#use-the-output)
+    for how to review and use the result.
+    """
 
     session_id: Optional[str] = None
+    """
+    The ID of the session that runs the dream (`sesn_...`), or `null` if that
+    session hasn't started.
+
+    Stream that session's events to follow what the dream reads and writes.
+
+    See the
+    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#watch-the-pipeline-run)
+    for how to watch a running dream.
+    """
 
     status: BetaDreamStatus
-    """Lifecycle status of a Dream."""
+    """Where a dream is in its lifecycle.
+
+    `completed`, `failed`, and `canceled` are final: once a dream has one of these
+    statuses, its status doesn't change again.
+
+    See the
+    [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#lifecycle)
+    for what each status means.
+    """
 
     type: Literal["dream"]
 
     usage: BetaDreamUsage
-    """Cumulative token usage for the dream across every pipeline stage."""
+    """
+    The dream's token counts, which stop changing once its `status` is `completed`
+    or `failed`. After a cancel, they can keep changing.
+    """

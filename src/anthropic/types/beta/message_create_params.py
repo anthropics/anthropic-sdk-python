@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union, Generic, Iterable, Optional
@@ -19,6 +17,7 @@ from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
+from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
 from .beta_context_management_config_param import BetaContextManagementConfigParam
@@ -65,7 +64,10 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     If the final message uses the `assistant` role, the response content will
     continue immediately from the content in that message. This can be used to
-    constrain part of the model's response.
+    constrain part of the model's response. This is called prefill. On models that
+    don't support prefill, creating a message that ends with a partial `assistant`
+    response returns a 400 error. See
+    [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
     Example with a single `user` message:
 
@@ -83,7 +85,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     ]
     ```
 
-    Example with a partially-filled response from Claude:
+    Example with a partially-filled response from Claude, for models that support
+    prefill:
 
     ```json
     [
@@ -113,8 +116,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     Note that if you want to include a
     [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-    you can use the top-level `system` parameter — there is no `"system"` role for
-    input messages in the Messages API.
+    you can use the top-level `system` parameter.
 
     There is a limit of 100,000 messages in a single request.
     """
@@ -132,6 +134,18 @@ class MessageCreateParamsBase(TypedDict, total=False):
     cacheable block in the request.
     """
 
+    compaction: Optional[BetaCompactionConfigParam]
+    """Compaction configuration.
+
+    When set on `POST /v1/messages`, the request is a compaction request: the
+    conversation in `messages` is summarized and the response holds only the
+    resulting `compaction` block (`stop_reason` `"compaction"`), which later
+    requests send first in `messages` in place of the messages it summarizes.
+    `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the
+    count it returns is for the conversation in `messages` as sent. Cannot be
+    combined with `context_management`.
+    """
+
     container: Optional[Container]
     """Container identifier for reuse across requests."""
 
@@ -145,8 +159,9 @@ class MessageCreateParamsBase(TypedDict, total=False):
     diagnostics: Optional[BetaDiagnosticsParam]
     """Request-level diagnostics.
 
-    Currently carries the previous response id for prompt-cache divergence
-    reporting.
+    Supply `previous_message_id` to have the response include
+    `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that
+    prior request.
     """
 
     fallback_credit_token: Optional[FallbackCreditToken]
@@ -175,8 +190,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
     Opt-in server-side retry on one or more substitute models when the requested
     model declines for policy reasons. Tried in order: if the first entry also
-    declines, the second is tried, and so on. The string "default" requests the
-    requested model's server-defined default fallback configuration.
+    declines, the second is tried, and so on. Some models don't support fallbacks;
+    on those models, a list of fallback models returns a 400 error. See
+    [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+    The string "default" requests the requested model's server-defined default
+    fallback configuration. On a model that doesn't support fallbacks, the request
+    runs on the requested model alone, so a declined request stays declined.
     """
 
     inference_geo: Optional[str]
@@ -205,10 +224,14 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
     speed: Optional[Literal["standard", "fast"]]
-    """Inference speed mode.
+    """The inference speed mode for this request.
 
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    `"fast"` enables high output-tokens-per-second inference.
+
+    Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+    value. See
+    [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+    which models.
     """
 
     stop_sequences: SequenceNotStr[str]
@@ -232,15 +255,16 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
     thinking: BetaThinkingConfigParam
-    """Configuration for enabling Claude's extended thinking.
+    """Configuration for Claude's thinking.
 
-    When enabled, responses include `thinking` content blocks showing Claude's
-    thinking process before the final answer. Requires a minimum budget of 1,024
-    tokens and counts towards your `max_tokens` limit.
+    With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+    `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+    at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-    See
-    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-    for details.
+    Which `type` values are accepted, and what happens when you omit `thinking`,
+    depend on the model. See
+    [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+    for each model's behavior.
     """
 
     tool_choice: BetaToolChoiceParam
@@ -336,11 +360,18 @@ class MessageCreateParamsBase(TypedDict, total=False):
     user_profile_id: str
     """The user profile ID to attribute this request to.
 
-    Use when acting on behalf of a party other than your organization. Requires the
-    `user-profiles` beta header.
+    Use when acting on behalf of a party other than your organization.
     """
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Container: TypeAlias = Union[BetaContainerParams, str]
@@ -363,8 +394,13 @@ class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 
@@ -372,8 +408,13 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
     stream: Required[Literal[True]]
     """Whether to incrementally stream the response using server-sent events.
 
-    See [streaming](https://platform.claude.com/docs/en/build-with-claude/streaming)
-    for details.
+    When `true`, SDKs return a raw event stream.
+
+    In the TypeScript, Python and Ruby SDKs, the recommended way to stream is
+    `messages.stream()`. It sets `stream` for you and accumulates the events into
+    the final message. See
+    [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
+    for an example in each language.
     """
 
 

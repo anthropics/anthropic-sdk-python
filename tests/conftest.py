@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -32,6 +30,7 @@ SNAPSHOT_RESPONSE_HEADERS_EXCLUDE = [
 ]
 
 SNAPSHOT_REQUEST_HEADERS_EXCLUDE = [
+    "authorization",
     "x-api-key",
 ]
 

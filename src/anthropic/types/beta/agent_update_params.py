@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
@@ -13,6 +11,7 @@ from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolP
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
 from .beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
+from .beta_managed_agents_execution_identity_params import BetaManagedAgentsExecutionIdentityParams
 from .beta_managed_agents_agent_toolset20260401_params import BetaManagedAgentsAgentToolset20260401Params
 
 __all__ = ["AgentUpdateParams", "Model", "Tool"]
@@ -21,6 +20,13 @@ __all__ = ["AgentUpdateParams", "Model", "Tool"]
 class AgentUpdateParams(TypedDict, total=False):
     description: Optional[str]
     """Description. Omit to preserve; send empty string or null to clear."""
+
+    execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams]
+    """Execution principal for runs of this agent.
+
+    Full replacement. Omit to preserve; send null or `{"type": "service_account"}`
+    to restore the default.
+    """
 
     mcp_servers: Optional[Iterable[BetaManagedAgentsURLMCPServerParams]]
     """MCP servers.
@@ -44,14 +50,14 @@ class AgentUpdateParams(TypedDict, total=False):
 
     Accepts the
     [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-    e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+    e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
     control. Omit to preserve. Cannot be cleared.
     """
 
     multiagent: Optional[BetaManagedAgentsMultiagentParams]
-    """
-    A coordinator topology: the session's primary thread orchestrates work by
-    spawning session threads, each running an agent drawn from the `agents` roster.
+    """Multiagent orchestration configuration.
+
+    Full replacement. Omit to preserve; send null to clear.
     """
 
     name: str
@@ -67,7 +73,7 @@ class AgentUpdateParams(TypedDict, total=False):
     """Tool configurations available to the agent.
 
     Full replacement. Omit to preserve; send empty array or null to clear. Maximum
-    of 128 tools across all toolsets allowed.
+    of 256 tools across all toolsets allowed.
     """
 
     version: int
@@ -79,9 +85,20 @@ class AgentUpdateParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
 
     workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Model: TypeAlias = Union[BetaManagedAgentsModelParam, BetaManagedAgentsModelConfigParams]

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from .beta import (
     Beta,
     AsyncBeta,
@@ -40,6 +38,22 @@ from .messages import (
     MessagesWithStreamingResponse,
     AsyncMessagesWithStreamingResponse,
 )
+from .organization import (
+    Organization,
+    AsyncOrganization,
+    OrganizationWithRawResponse,
+    AsyncOrganizationWithRawResponse,
+    OrganizationWithStreamingResponse,
+    AsyncOrganizationWithStreamingResponse,
+)
+from .user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
+)
 
 __all__ = [
     "Messages",
@@ -66,6 +80,18 @@ __all__ = [
     "AsyncSkillsWithRawResponse",
     "SkillsWithStreamingResponse",
     "AsyncSkillsWithStreamingResponse",
+    "UserProfiles",
+    "AsyncUserProfiles",
+    "UserProfilesWithRawResponse",
+    "AsyncUserProfilesWithRawResponse",
+    "UserProfilesWithStreamingResponse",
+    "AsyncUserProfilesWithStreamingResponse",
+    "Organization",
+    "AsyncOrganization",
+    "OrganizationWithRawResponse",
+    "AsyncOrganizationWithRawResponse",
+    "OrganizationWithStreamingResponse",
+    "AsyncOrganizationWithStreamingResponse",
     "Beta",
     "AsyncBeta",
     "BetaWithRawResponse",

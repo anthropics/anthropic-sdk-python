@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -8,10 +6,15 @@ from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_billing_error import BetaManagedAgentsBillingError
 from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError
 from .beta_managed_agents_model_overloaded_error import BetaManagedAgentsModelOverloadedError
+from .beta_managed_agents_repository_clone_error import BetaManagedAgentsRepositoryCloneError
 from .beta_managed_agents_model_rate_limited_error import BetaManagedAgentsModelRateLimitedError
+from .beta_managed_agents_repository_checkout_error import BetaManagedAgentsRepositoryCheckoutError
 from .beta_managed_agents_model_request_failed_error import BetaManagedAgentsModelRequestFailedError
+from .beta_managed_agents_repository_forbidden_error import BetaManagedAgentsRepositoryForbiddenError
+from .beta_managed_agents_repository_not_found_error import BetaManagedAgentsRepositoryNotFoundError
 from .beta_managed_agents_mcp_connection_failed_error import BetaManagedAgentsMCPConnectionFailedError
 from .beta_managed_agents_mcp_authentication_failed_error import BetaManagedAgentsMCPAuthenticationFailedError
+from .beta_managed_agents_repository_authentication_error import BetaManagedAgentsRepositoryAuthenticationError
 from .beta_managed_agents_credential_host_unreachable_error import BetaManagedAgentsCredentialHostUnreachableError
 
 __all__ = ["BetaManagedAgentsSessionErrorEvent", "Error"]
@@ -26,6 +29,11 @@ Error: TypeAlias = Annotated[
         BetaManagedAgentsMCPAuthenticationFailedError,
         BetaManagedAgentsBillingError,
         BetaManagedAgentsCredentialHostUnreachableError,
+        BetaManagedAgentsRepositoryAuthenticationError,
+        BetaManagedAgentsRepositoryForbiddenError,
+        BetaManagedAgentsRepositoryNotFoundError,
+        BetaManagedAgentsRepositoryCheckoutError,
+        BetaManagedAgentsRepositoryCloneError,
     ],
     UnionDiscriminator("type"),
 ]
@@ -38,13 +46,8 @@ class BetaManagedAgentsSessionErrorEvent(BaseModel):
     """Unique identifier for this event."""
 
     error: Error
-    """An unknown or unexpected error occurred during session execution.
-
-    A fallback variant; clients that don't recognize a new error code can match on
-    `retry_status` and `message` alone.
-    """
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the error occurred."""
 
     type: Literal["session.error"]

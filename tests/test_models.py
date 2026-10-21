@@ -833,10 +833,90 @@ def test_discriminated_unions_invalid_data_uses_cache() -> None:
     assert DISCRIMINATOR_CACHE.get(UnionType) is discriminator
 
 
+def test_discriminated_unions_pep604_uses_cache() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    UnionType = cast(Any, A | B)
+    # `A | B` can't be weakly referenced before Python 3.14, so look up via the equal `Union[A, B]`
+    CacheKey = cast(Any, Union[A, B])
+
+    assert not DISCRIMINATOR_CACHE.get(CacheKey)
+
+    m = construct_type(
+        value={"type": "b", "data": "foo"}, type_=cast(Any, Annotated[UnionType, UnionDiscriminator("type")])
+    )
+    assert isinstance(m, B)
+    assert m.type == "b"
+    assert m.data == "foo"  # type: ignore[comparison-overlap]
+
+    discriminator = DISCRIMINATOR_CACHE.get(CacheKey)
+    assert discriminator is not None
+
+    m = construct_type(
+        value={"type": "a", "data": 0}, type_=cast(Any, Annotated[UnionType, UnionDiscriminator("type")])
+    )
+    assert isinstance(m, A)
+    assert DISCRIMINATOR_CACHE.get(CacheKey) is discriminator
+
+
+def test_pep604_union_field_invalid_data() -> None:
+    class A(BaseModel):
+        kind: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        kind: Literal["b"]
+
+        data: int
+
+    class Model(BaseModel):
+        item: A | B
+
+    # fails strict validation for both variants, so the union fallback in `construct_type` runs
+    m = Model.construct(item={"kind": "b", "data": "foo"})
+    assert isinstance(m, Model)
+    assert isinstance(m.item, (A, B))
+    assert m.item.data == "foo"
+
+    item = construct_type(value={"kind": "b", "data": "foo"}, type_=cast(Any, A | B))
+    assert isinstance(item, (A, B))
+
+
+def test_pep604_discriminated_union_in_optional_invalid_data() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"]
+
+        data: int
+
+    # an enclosing `Optional` swallows errors from building the inner union and returns the raw data,
+    # so a failure here shows up as `m` being a dict rather than as an exception
+    m = construct_type(
+        value={"type": "b", "data": "foo"},
+        type_=cast(Any, Optional[Annotated[cast(Any, A | B), UnionDiscriminator("type")]]),
+    )
+    assert isinstance(m, B)
+    assert m.data == "foo"  # type: ignore[comparison-overlap]
+
+
+Alias = TypeAliasType("Alias", str)
+
+
 @pytest.mark.skipif(PYDANTIC_V1, reason="TypeAliasType is not supported in Pydantic v1")
 def test_type_alias_type() -> None:
-    Alias = TypeAliasType("Alias", str)  # pyright: ignore
-
     class Model(BaseModel):
         alias: Alias
         union: Union[int, Alias]

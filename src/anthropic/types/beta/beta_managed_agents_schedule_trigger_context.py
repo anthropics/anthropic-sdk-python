@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -12,6 +10,10 @@ class BetaManagedAgentsScheduleTriggerContext(BaseModel):
     """The run was fired by the deployment's cron schedule."""
 
     scheduled_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """
+    The UTC instant at which the cron expression matched in the configured timezone,
+    before jitter is applied. At most one run is recorded per (`deployment_id`,
+    `scheduled_at`) pair.
+    """
 
     type: Literal["schedule"]

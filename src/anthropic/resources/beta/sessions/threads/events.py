@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Any, List, cast
@@ -8,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -21,7 +19,6 @@ from ....._streaming import Stream, AsyncStream
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.anthropic_beta_param import AnthropicBetaParam
-from .....types.beta.sessions.threads import event_list_params, event_stream_params
 from .....types.beta.beta_managed_agents_delta_type import BetaManagedAgentsDeltaType
 from .....types.beta.sessions.beta_managed_agents_session_event import BetaManagedAgentsSessionEvent
 from .....types.beta.sessions.beta_managed_agents_stream_session_thread_events import (
@@ -71,11 +68,15 @@ class Events(SyncAPIResource):
         List Session Thread Events
 
         Args:
-          limit: Query parameter for limit
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
-          page: Query parameter for page
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -113,13 +114,13 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.sessions.threads.events.list",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/events",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -156,7 +157,15 @@ class Events(SyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -193,7 +202,10 @@ class Events(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"event_deltas": event_deltas}, event_stream_params.EventStreamParams),
+                query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.threads.events.stream",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/stream",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents
@@ -243,11 +255,15 @@ class AsyncEvents(AsyncAPIResource):
         List Session Thread Events
 
         Args:
-          limit: Query parameter for limit
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
-          page: Query parameter for page
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -285,13 +301,13 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    event_list_params.EventListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                span_name="anthropic.sessions.threads.events.list",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/events",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionEvent
@@ -328,7 +344,15 @@ class AsyncEvents(AsyncAPIResource):
               the `agent.thinking` event itself. Only previews of the requested event types
               are sent.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -365,9 +389,10 @@ class AsyncEvents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"event_deltas": event_deltas}, event_stream_params.EventStreamParams
-                ),
+                query={"event_deltas": event_deltas},
+                span_name="anthropic.sessions.threads.events.stream",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/stream",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=cast(
                 Any, BetaManagedAgentsStreamSessionThreadEvents

@@ -1,7 +1,7 @@
-"""Tests for :class:`FileStore` — the confined-folder filesystem layer.
+"""Tests for `FileStore` — the confined-folder filesystem layer.
 
-The verbs (``put`` / ``get`` / ``ls`` / ``find_symlinks`` / ``hashtree`` /
-``hash_file`` / ``move`` / ``remove``) plus the open and ``async with``
+The verbs (`put` / `get` / `ls` / `find_symlinks` / `hashtree` /
+`hash_file` / `move` / `remove`) plus the open and `async with`
 lifecycle. These tests exercise the filesystem directly; consumers (memory
 sync, the skills downloader, the builtin memory tool) get their own suites.
 """
@@ -45,7 +45,7 @@ def test_localfilestore_is_an_alias_for_the_combined_class() -> None:
 
 @pytest.mark.asyncio()
 async def test_filestore_put_writes_text_and_creates_owner_only_parents(store: FileStore) -> None:
-    """``put`` creates nested parents 0o700 and stores text as UTF-8 (file 0o600)."""
+    """`put` creates nested parents 0o700 and stores text as UTF-8 (file 0o600)."""
     await store.put("projects/foo/notes.md", "héllo")
 
     dest = store.root().path / "projects" / "foo" / "notes.md"
@@ -71,7 +71,7 @@ async def test_filestore_put_is_atomic_and_leaves_no_temp_on_success(store: File
 @pytest.mark.asyncio()
 async def test_filestore_creates_every_parent_owner_only_under_permissive_umask(tmp_path: Path) -> None:
     """Every directory the store creates — including intermediate parents, which
-    ``mkdir(parents=True, mode=...)`` would leave at the umask default — is 0o700."""
+    `mkdir(parents=True, mode=...)` would leave at the umask default — is 0o700."""
     old_umask = os.umask(0)
     try:
         root = tmp_path / "nested" / "store"
@@ -86,7 +86,7 @@ async def test_filestore_creates_every_parent_owner_only_under_permissive_umask(
 @pytest.mark.asyncio()
 @pytest.mark.parametrize("bad", ["../secret.md", "a/../../secret.md"])
 async def test_filestore_every_verb_refuses_an_escaping_path(tmp_path: Path, store: FileStore, bad: str) -> None:
-    """``..`` (and absolute) paths raise FileStoreError on every verb; nothing
+    """`..` (and absolute) paths raise FileStoreError on every verb; nothing
     is read or written outside the root."""
     (tmp_path / "secret.md").write_text("top secret")
     await store.put("ok.md", "ok")
@@ -175,7 +175,7 @@ async def test_filestore_ls_lists_recursively_and_never_descends_symlinks(tmp_pa
 
 @pytest.mark.asyncio()
 async def test_filestore_find_symlinks_reports_every_symlink(tmp_path: Path, store: FileStore) -> None:
-    """Listings skip symlinks silently; ``find_symlinks`` is how a caller sees them."""
+    """Listings skip symlinks silently; `find_symlinks` is how a caller sees them."""
     await store.put("a.md", "alpha")
     await store.put("sub/b.md", "bravo")
     assert await store.find_symlinks() == set()
@@ -381,7 +381,7 @@ async def test_filestore_put_refuses_a_directory_rel(store: FileStore, bad: str)
 
 @pytest.mark.asyncio()
 async def test_filestore_utf8_restriction_refuses_binary_content(tmp_path: Path) -> None:
-    """A store opened with ``utf8_only=True`` refuses binary content on both
+    """A store opened with `utf8_only=True` refuses binary content on both
     verbs that touch it: a put of invalid bytes writes nothing, and a get of a
     file that bypassed the store (written directly to disk) is refused rather
     than returned — so callers that decode get's result can never throw."""
@@ -420,7 +420,7 @@ async def test_filestore_hashtree_rehashes_only_what_changed(store: FileStore, m
     """A file whose stat identity (mtime, ctime, size) is unchanged since the
     last walk is served from the cache; a changed file is re-read. The trust
     margin is disabled here so fresh files cache immediately; a writer that
-    restores mtime and size (``rsync -t`` style) is still re-hashed, because
+    restores mtime and size (`rsync -t` style) is still re-hashed, because
     userspace cannot restore ctime."""
     from anthropic.lib.tools import _file_store as mod
 

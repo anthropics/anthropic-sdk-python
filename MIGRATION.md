@@ -1,3 +1,9 @@
+# Migration guide
+
+To upgrade to version 2 of the SDK, follow the [migration guide](https://platform.claude.com/docs/en/api/migration-2026-10-21#python) in the Claude API docs.
+
+The rest of this file covers the earlier upgrade from `0.x` to v1.
+
 # Migrating to v1
 
 - [Upgrading](#upgrading)
@@ -351,11 +357,10 @@ itself — instead of being sent alongside it, and `omit` removes one the same w
 from anthropic import Anthropic, omit
 
 client = Anthropic(default_headers={"USER-AGENT": "my-app/1.0"})
-client.messages.create(..., extra_headers={"x-api-key": other_key, "X-Stainless-Timeout": omit})
+client.messages.create(..., extra_headers={"X-Stainless-Timeout": omit})
 
-# Before: sent `User-Agent: Anthropic/Python ...` and `USER-AGENT: my-app/1.0`, both API keys,
-#         and still sent `x-stainless-timeout`
-# After:  sends `USER-AGENT: my-app/1.0`, only `x-api-key: <other_key>`, and no `x-stainless-timeout` header
+# Before: sent `User-Agent: Anthropic/Python ...` and `USER-AGENT: my-app/1.0`, and still sent `x-stainless-timeout`
+# After:  sends `USER-AGENT: my-app/1.0` and no `x-stainless-timeout` header
 ```
 
 If you relied on two casings of a name producing two header lines, send one comma-joined value instead.

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -29,7 +27,6 @@ class TestModels:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         model = client.models.retrieve(
             model_id="model_id",
-            betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ModelInfo, model, path=["response"])
@@ -75,8 +72,8 @@ class TestModels:
         model = client.models.list(
             after_id="after_id",
             before_id="before_id",
+            lifecycle=["active"],
             limit=1,
-            betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPage[ModelInfo], model, path=["response"])
@@ -118,7 +115,6 @@ class TestAsyncModels:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         model = await async_client.models.retrieve(
             model_id="model_id",
-            betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(ModelInfo, model, path=["response"])
@@ -164,8 +160,8 @@ class TestAsyncModels:
         model = await async_client.models.list(
             after_id="after_id",
             before_id="before_id",
+            lifecycle=["active"],
             limit=1,
-            betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPage[ModelInfo], model, path=["response"])

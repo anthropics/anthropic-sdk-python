@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -23,7 +21,7 @@ class BetaManagedAgentsUserDefineOutcomeEventParams(TypedDict, total=False):
     """What the agent should produce. This is the task specification."""
 
     rubric: Required[Rubric]
-    """Rubric for grading the quality of an outcome."""
+    """How to grade the outcome. Text or file reference."""
 
     type: Required[Literal["user.define_outcome"]]
 
