@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Type, Union, cast
 from collections.abc import Callable
 from typing_extensions import Literal, get_args
 
+import anyio
 import httpx2
 import pytest
 import pydantic
@@ -17,6 +18,7 @@ from anthropic._types import Omit, omit
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError, BetaFunctionTool, BetaAsyncFunctionTool, BetaFunctionToolResultType
+from anthropic.lib.streaming import BetaAsyncMessageStream
 from anthropic.lib.tools._beta_runner import (
     _STOP_REASON_STEPS,
     BetaToolRunner,
@@ -3521,3 +3523,131 @@ async def test_compact_before_next_turn_when_streaming_async(respx_mock: MockRou
     assert compaction["compaction"] == {"type": "summarize"}
     assert compaction["stream"] is True
     assert after["messages"] == _compaction_block_alone()
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.parametrize("stream", [False, True])
+@pytest.mark.parametrize("error", [False, True])
+@pytest.mark.respx(base_url=base_url)
+async def test_concurrent_tool_response_generation_shares_execution(
+    stream: bool, error: bool, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    calls = 0
+    entered = anyio.Event()
+    release = anyio.Event()
+
+    @beta_async_tool
+    async def counted() -> str:
+        """Count one execution and wait until its result is requested."""
+        nonlocal calls
+        calls += 1
+        entered.set()
+        await release.wait()
+        if error:
+            raise ToolError("test failure")
+        return "one result"
+
+    responses: list[httpx2.Response] = []
+    for tool_id in ("call_first", "call_second"):
+        responses.append(
+            _sse_message({"type": "tool_use", "id": tool_id, "name": "counted", "input": {}}, "tool_use")
+            if stream
+            else _calls_tool("counted", tool_id)
+        )
+    responses.append(_sse_message({"type": "text", "text": "Done."}, "end_turn") if stream else _end_turn_response())
+    respx_mock.post("/v1/messages").mock(side_effect=responses)
+    runner = async_client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[counted],
+        messages=[{"role": "user", "content": "Call the tool twice."}],
+        stream=stream,
+    )
+    turn = 0
+    async for item in runner:
+        message = await item.get_final_message() if isinstance(item, BetaAsyncMessageStream) else item
+        if message.stop_reason != "tool_use":
+            assert await runner.generate_tool_call_response() is None
+            continue
+        turn += 1
+        entered, release = anyio.Event(), anyio.Event()
+        results: list[BetaMessageParam | None] = []
+
+        async def generate(target: list[BetaMessageParam | None]) -> None:
+            target.append(await runner.generate_tool_call_response())
+
+        async with anyio.create_task_group() as group:
+            for _ in range(3):
+                group.start_soon(generate, results)
+            await entered.wait()
+            await anyio.wait_all_tasks_blocked()
+            release.set()
+        assert calls == turn
+        assert len(results) == 3
+        assert results[0] is not None
+        assert all(result is results[0] for result in results)
+        assert await runner.generate_tool_call_response() is results[0]
+    assert calls == 2
+    requests = _sent_request_bodies(respx_mock)
+    assert len(requests) == 3
+    for request, tool_id in zip(requests[1:], ("call_first", "call_second"), strict=True):
+        expected: BetaToolResultBlockParam = {
+            "type": "tool_result",
+            "tool_use_id": tool_id,
+            "content": "test failure" if error else "one result",
+        }
+        if error:
+            expected["is_error"] = True
+        assert request["messages"][-1] == {"role": "user", "content": [expected]}
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.respx(base_url=base_url)
+async def test_cancelling_a_tool_response_waiter_does_not_repeat_the_running_tool(
+    async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    calls = 0
+    started, release = anyio.Event(), anyio.Event()
+    waiter_scope = anyio.CancelScope()
+    results: list[BetaMessageParam | None] = []
+
+    @beta_async_tool
+    async def held() -> str:
+        """Return after the test releases the tool."""
+        nonlocal calls
+        calls += 1
+        started.set()
+        await release.wait()
+        return "completed"
+
+    respx_mock.post("/v1/messages").mock(side_effect=[_calls_tool("held", "call_held"), _end_turn_response()])
+    runner = async_client.beta.messages.tool_runner(
+        max_tokens=1024,
+        model="claude-haiku-4-5",
+        tools=[held],
+        messages=[{"role": "user", "content": "Run the tool."}],
+    )
+    async for message in runner:
+        if message.stop_reason != "tool_use":
+            continue
+
+        async def owner() -> None:
+            results.append(await runner.generate_tool_call_response())
+
+        async def waiter() -> None:
+            with waiter_scope:
+                await runner.generate_tool_call_response()
+
+        async with anyio.create_task_group() as group:
+            group.start_soon(owner)
+            await started.wait()
+            group.start_soon(waiter)
+            await anyio.wait_all_tasks_blocked()
+            waiter_scope.cancel()
+            await anyio.wait_all_tasks_blocked()
+            release.set()
+        assert waiter_scope.cancel_called
+        assert calls == 1
+        assert len(results) == 1
+        assert await runner.generate_tool_call_response() is results[0]
+    assert _sent_request_bodies(respx_mock)[1]["messages"][-1]["content"][0]["content"] == "completed"
