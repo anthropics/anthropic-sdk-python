@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.17.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.17.0...v1.17.1) (2026-10-20)
+## [1.18.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.17.0...v1.18.0) (2026-10-21)
+
+### Features
+
+* **api:** add a workspace_id filter and the usage_tier scope type to list spend limits
+
 
 ### Documentation
 

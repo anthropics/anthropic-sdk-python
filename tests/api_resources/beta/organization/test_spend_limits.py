@@ -68,6 +68,7 @@ class TestSpendLimits:
             limit=1,
             page="page",
             scope_type=["organization"],
+            workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(SyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
@@ -241,6 +242,7 @@ class TestAsyncSpendLimits:
             limit=1,
             page="page",
             scope_type=["organization"],
+            workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
         )
         assert_matches_type(AsyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])

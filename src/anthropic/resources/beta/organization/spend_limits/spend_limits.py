@@ -118,9 +118,14 @@ class SpendLimits(SyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         scope_type: Optional[
-            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+            List[
+                Literal[
+                    "organization", "organization_service", "rbac_group", "seat_tier", "usage_tier", "user", "workspace"
+                ]
+            ]
         ]
         | Omit = omit,
+        workspace_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -132,17 +137,24 @@ class SpendLimits(SyncAPIResource):
         """
         List the organization's spend limits.
 
-        Limits are grouped by scope type, in the order `organization`, `seat_tier`,
+        A Claude Console organization's limits, including any read-only `usage_tier`
+        limit, come newest first. Listing them is in an early access preview. To request
+        access, contact your Anthropic account team. A Claude Enterprise organization's
+        limits are grouped by scope type, in the order `organization`, `seat_tier`,
         `rbac_group`, `organization_service`, `user`; within a type they come in a fixed
-        order that is not creation order. Supported for Claude Enterprise organizations
-        only, not for Claude Console organizations.
+        order that is not creation order.
 
         Args:
           limit: Maximum number of limits per page. Defaults to `20`.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          scope_type: Return only limits with these scope types. Omit for all.
+          scope_type: Return only limits with these scope types. Omit for all. A scope type that
+              doesn't apply to the organization gets a 400 error.
+
+          workspace_id: Return only the limits whose `scope.workspace_id` is this workspace
+              (`wrkspc_...`). Claude Console organizations only; other organizations get a 400
+              error.
 
           betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
               this header.
@@ -178,6 +190,7 @@ class SpendLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                     "scope_type": scope_type,
+                    "workspace_id": workspace_id,
                 },
                 span_name="anthropic.organization.spend_limits.list",
                 span_route="/v1/organizations/spend_limits",
@@ -378,9 +391,14 @@ class AsyncSpendLimits(AsyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         scope_type: Optional[
-            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+            List[
+                Literal[
+                    "organization", "organization_service", "rbac_group", "seat_tier", "usage_tier", "user", "workspace"
+                ]
+            ]
         ]
         | Omit = omit,
+        workspace_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -392,17 +410,24 @@ class AsyncSpendLimits(AsyncAPIResource):
         """
         List the organization's spend limits.
 
-        Limits are grouped by scope type, in the order `organization`, `seat_tier`,
+        A Claude Console organization's limits, including any read-only `usage_tier`
+        limit, come newest first. Listing them is in an early access preview. To request
+        access, contact your Anthropic account team. A Claude Enterprise organization's
+        limits are grouped by scope type, in the order `organization`, `seat_tier`,
         `rbac_group`, `organization_service`, `user`; within a type they come in a fixed
-        order that is not creation order. Supported for Claude Enterprise organizations
-        only, not for Claude Console organizations.
+        order that is not creation order.
 
         Args:
           limit: Maximum number of limits per page. Defaults to `20`.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          scope_type: Return only limits with these scope types. Omit for all.
+          scope_type: Return only limits with these scope types. Omit for all. A scope type that
+              doesn't apply to the organization gets a 400 error.
+
+          workspace_id: Return only the limits whose `scope.workspace_id` is this workspace
+              (`wrkspc_...`). Claude Console organizations only; other organizations get a 400
+              error.
 
           betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
               this header.
@@ -438,6 +463,7 @@ class AsyncSpendLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                     "scope_type": scope_type,
+                    "workspace_id": workspace_id,
                 },
                 span_name="anthropic.organization.spend_limits.list",
                 span_route="/v1/organizations/spend_limits",
