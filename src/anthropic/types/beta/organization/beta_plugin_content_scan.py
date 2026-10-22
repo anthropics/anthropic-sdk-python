@@ -8,7 +8,10 @@ __all__ = ["BetaPluginContentScan"]
 
 class BetaPluginContentScan(BaseModel):
     assessment: Optional[Literal["fail", "pass", "unknown", "warn"]] = None
-    """The scan's verdict; set only when `status` is `completed`."""
+    """The scan's verdict; set only when `status` is `completed`.
+
+    A `warn` can mean a `fail` that was allowed in claude.ai.
+    """
 
     reason: Optional[str] = None
     """
@@ -21,5 +24,7 @@ class BetaPluginContentScan(BaseModel):
     status: Literal["completed", "errored", "processing"]
     """
     `processing` while a scan runs, `completed` when it ran to completion, `errored`
-    when it could not run or its outcome cannot be read.
+    when it could not run. Once a scan of the version has completed, `content_scan`
+    describes the newest completed scan, even while a later scan runs. While the
+    scan outcome cannot be read, `status` is `errored` instead.
     """
