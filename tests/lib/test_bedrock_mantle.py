@@ -18,6 +18,20 @@ MANTLE_MESSAGES_URL = "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/mes
 MODEL = "anthropic.claude-sonnet-4-5"
 
 
+@pytest.fixture(autouse=True)
+def isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep AWS settings from the developer's shell out of these tests."""
+    for name in (
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
+        "AWS_PROFILE",
+        "AWS_BEARER_TOKEN_BEDROCK",
+        "ANTHROPIC_AWS_API_KEY",
+        "ANTHROPIC_BEDROCK_MANTLE_BASE_URL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+
 class GetAuthHeadersRecorder:
     """Stands in for `anthropic.lib.bedrock._mantle.get_auth_headers` and records each call's kwargs."""
 
