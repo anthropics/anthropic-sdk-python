@@ -2,6 +2,11 @@
 
 ## [2.1.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.1.0...v2.1.1) (2026-10-22)
 
+### Bug Fixes
+
+* **client:** stop suggesting math.inf in the max_retries error message
+
+
 ### Chores
 
 * **deps:** bump certifi in the dev lockfile

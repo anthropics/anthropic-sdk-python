@@ -459,7 +459,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
         if max_retries is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise TypeError(
-                "max_retries cannot be None. If you want to disable retries, pass `0`; if you want unlimited retries, pass `math.inf` or a very high number; if you want the default behavior, pass `anthropic.DEFAULT_MAX_RETRIES`"
+                "max_retries cannot be None. If you want to disable retries, pass `0`; if you want unlimited retries, pass a very high number; if you want the default behavior, pass `anthropic.DEFAULT_MAX_RETRIES`"
             )
 
     def _set_open_telemetry(self, open_telemetry: OpenTelemetryClientOption) -> None:
