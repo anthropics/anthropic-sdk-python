@@ -43,7 +43,8 @@ class BetaOrganizationRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group.type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`. The list covers the models your
+    organization has access to, so it can differ between organizations.
     """
 
     type: Literal["rate_limit"]
