@@ -426,6 +426,9 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
     _middleware: tuple[MiddlewareInput, ...]
+    # Whether the API this client talks to holds message threads. `beta.messages.thread()` raises where it does not,
+    # and `beta.messages.tool_runner()` sends the full history every turn.
+    _supports_message_threads: bool = False
     _gen_ai_provider_name: str = "anthropic"
     _otel_platform: str | None = None
 

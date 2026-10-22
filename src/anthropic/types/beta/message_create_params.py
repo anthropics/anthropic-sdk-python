@@ -16,6 +16,7 @@ from .beta_tool_union_param import BetaToolUnionParam
 from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
+from .beta_message_thread_param import BetaMessageThreadParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
@@ -265,6 +266,15 @@ class MessageCreateParamsBase(TypedDict, total=False):
     depend on the model. See
     [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
     for each model's behavior.
+    """
+
+    thread: Optional[BetaMessageThreadParam]
+    """Server-held conversation state (a Thread).
+
+    `{"type": "create"}` asks the server to hold this conversation's state under the
+    response's `id`; `{"type": "continue", "previous_message_id": ...}` resumes from
+    a previous response so only the new turn's messages are sent. The response shape
+    is unchanged.
     """
 
     tool_choice: BetaToolChoiceParam

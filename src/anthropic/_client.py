@@ -151,6 +151,8 @@ def _keep_client_header_params(options: FinalRequestOptions) -> FinalRequestOpti
 
 
 class Anthropic(SyncAPIClient):
+    _supports_message_threads = True
+
     # client options
     api_key: str | None
     auth_token: str | None
@@ -603,6 +605,8 @@ class Anthropic(SyncAPIClient):
 
 
 class AsyncAnthropic(AsyncAPIClient):
+    _supports_message_threads = True
+
     # client options
     api_key: str | None
     auth_token: str | None
