@@ -15,6 +15,22 @@ from anthropic.lib.aws._credentials import (
     validate_credentials,
 )
 
+
+@pytest.fixture(autouse=True)
+def isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep AWS settings from the developer's shell out of these tests."""
+    for name in (
+        "AWS_REGION",
+        "AWS_DEFAULT_REGION",
+        "AWS_PROFILE",
+        "AWS_BEARER_TOKEN_BEDROCK",
+        "ANTHROPIC_AWS_API_KEY",
+        "ANTHROPIC_AWS_BASE_URL",
+        "ANTHROPIC_AWS_WORKSPACE_ID",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+
 # --- validate_credentials ---
 
 
