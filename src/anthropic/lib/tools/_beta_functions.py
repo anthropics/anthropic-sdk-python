@@ -5,6 +5,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
 from inspect import isawaitable, isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
+from functools import partial
 from collections.abc import Awaitable
 from typing_extensions import Literal, TypeAlias, override
 
@@ -166,7 +167,11 @@ class BaseFunctionTool(Generic[CallableT]):
 
         self.func = func
         self._func_with_validate = pydantic.validate_call(func)
-        self.name = name or func.__name__
+        self.name = (
+            name
+            or getattr(func, "__name__", None)
+            or (func.func.__name__ if isinstance(func, partial) else func.__name__)
+        )
         self._defer_loading = defer_loading
         self._cache_control = cache_control
         self._allowed_callers = allowed_callers
@@ -210,7 +215,12 @@ class BaseFunctionTool(Generic[CallableT]):
 
     @cached_property
     def _parsed_docstring(self) -> docstring_parser.Docstring:
-        return docstring_parser.parse(self.func.__doc__ or "")
+        func = self.func
+        docstring = func.__doc__
+        if isinstance(func, partial) and docstring == partial.__doc__:
+            partial_func = cast("partial[Any]", func)
+            docstring = partial_func.func.__doc__
+        return docstring_parser.parse(docstring or "")
 
     def _get_description_from_docstring(self) -> str:
         """Extract description from parsed docstring."""
@@ -266,6 +276,11 @@ class BaseFunctionTool(Generic[CallableT]):
 
     @cached_property
     def _adapter(self) -> TypeAdapter[Any]:
+        # A validated partial's wrapper lacks the wrapped function's annotations.
+        # Let Pydantic inspect the original partial and its bound arguments.
+        func = self.func
+        if isinstance(func, partial):
+            return TypeAdapter(cast("partial[Any]", func))
         return TypeAdapter(self._func_with_validate)
 
 
