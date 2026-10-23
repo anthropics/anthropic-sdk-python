@@ -148,8 +148,9 @@ class Cost(SyncAPIResource):
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
               values. Claude Developer Platform organizations only.
 
-          ending_at: End of range, exclusive. When omitted, defaults to the earlier of now and
-              `starting_at` + 31 days. The range may span at most 31 days.
+          ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
+              `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
+              The range may span at most 31 days.
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment
@@ -408,8 +409,9 @@ class AsyncCost(AsyncAPIResource):
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
               values. Claude Developer Platform organizations only.
 
-          ending_at: End of range, exclusive. When omitted, defaults to the earlier of now and
-              `starting_at` + 31 days. The range may span at most 31 days.
+          ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
+              `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
+              The range may span at most 31 days.
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment

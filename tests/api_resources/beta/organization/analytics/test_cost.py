@@ -22,14 +22,14 @@ class TestCost:
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         cost = client.beta.organization.analytics.cost.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostItem], cost, path=["response"])
 
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         cost = client.beta.organization.analytics.cost.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
             actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
@@ -38,7 +38,7 @@ class TestCost:
             claude_tag_user_ids=["U0123ABCDEF"],
             context_windows=["0-200k"],
             deployment_ids=["depl_01JFC6ihzZHtAuyHsaENdJhY"],
-            ending_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            ending_at=parse_datetime("2026-10-01T00:00:00Z"),
             environment_ids=["env_017oTjuGedHtjhJauVC5xGJD"],
             exclude_deleted_users=True,
             group_by=["actor"],
@@ -64,7 +64,7 @@ class TestCost:
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.analytics.cost.with_raw_response.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         )
 
         assert response.is_closed is True
@@ -75,7 +75,7 @@ class TestCost:
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.analytics.cost.with_streaming_response.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -94,14 +94,14 @@ class TestAsyncCost:
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         cost = await async_client.beta.organization.analytics.cost.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostItem], cost, path=["response"])
 
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         cost = await async_client.beta.organization.analytics.cost.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
             actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
@@ -110,7 +110,7 @@ class TestAsyncCost:
             claude_tag_user_ids=["U0123ABCDEF"],
             context_windows=["0-200k"],
             deployment_ids=["depl_01JFC6ihzZHtAuyHsaENdJhY"],
-            ending_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            ending_at=parse_datetime("2026-10-01T00:00:00Z"),
             environment_ids=["env_017oTjuGedHtjhJauVC5xGJD"],
             exclude_deleted_users=True,
             group_by=["actor"],
@@ -136,7 +136,7 @@ class TestAsyncCost:
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.analytics.cost.with_raw_response.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         )
 
         assert response.is_closed is True
@@ -147,7 +147,7 @@ class TestAsyncCost:
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.analytics.cost.with_streaming_response.list(
-            starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            starting_at=parse_datetime("2026-09-01T00:00:00Z"),
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
