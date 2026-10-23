@@ -2,6 +2,11 @@
 
 ## [2.2.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.2.0...v2.2.1) (2026-10-23)
 
+### Bug Fixes
+
+* **google-cloud:** send user profiles requests to the organization endpoint
+
+
 ### Chores
 
 * **internal:** carry endpoint path query params to the request layer
@@ -24,7 +29,6 @@
 ### Bug Fixes
 
 * **client:** stop suggesting math.inf in the max_retries error message
-* **google-cloud:** send user profiles requests to the organization endpoint
 * **tools:** leave the tool runner's history to the caller after `append_messages()`, and keep the current reply out of the `set_messages_params()` callback
 * **tools:** keep running the tool runner's function tools when `set_messages_params()` gives `tools` as definitions, and stop running one it takes out of `tools`
 * **tools:** give the `set_messages_params()` callback of a tool runner its `tools` as definitions again
