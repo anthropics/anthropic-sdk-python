@@ -10,6 +10,7 @@
 ### Documentation
 
 * **mcp:** remove the stray `await` from the async `tool_runner` examples
+* **google-cloud:** update the product name
 
 ## [2.2.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.1.0...v2.2.0) (2026-10-23)
 

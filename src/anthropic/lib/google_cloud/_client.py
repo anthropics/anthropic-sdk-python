@@ -223,8 +223,8 @@ def _project_from_credentials(credentials: GoogleCredentials) -> str | None:
 
 
 class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], Anthropic):
-    """Synchronous client for the first-party Anthropic API served through Google's
-    gateway (Claude Platform on Google Cloud).
+    """Synchronous client for Claude Models on Google Cloud (Anthropic managed): the
+    first-party Anthropic API served through Google's gateway.
 
     The whole first-party surface is proxied verbatim (no URL or body rewriting), so
     this subclasses the full `Anthropic` client. Authentication is a GCP bearer
@@ -253,7 +253,7 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous Claude Platform on Google Cloud client.
+        """Construct a new synchronous Claude Models on Google Cloud (Anthropic managed) client.
 
         Auth precedence (first match wins, unless `skip_auth=True`):
           1. `token_provider` — a callable returning a GCP access token, invoked per request.
@@ -486,8 +486,9 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
 
 
 class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAnthropic):
-    """Asynchronous client for the first-party Anthropic API served through Google's
-    gateway (Claude Platform on Google Cloud). See `AnthropicGoogleCloud`.
+    """Asynchronous client for Claude Models on Google Cloud (Anthropic managed): the
+    first-party Anthropic API served through Google's gateway. See
+    `AnthropicGoogleCloud`.
     """
 
     workspace_id: str | None
@@ -512,7 +513,7 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new asynchronous Claude Platform on Google Cloud client.
+        """Construct a new asynchronous Claude Models on Google Cloud (Anthropic managed) client.
 
         `token_provider` may be sync or async; sync providers are run off the
         event loop. See `AnthropicGoogleCloud` for the full argument and

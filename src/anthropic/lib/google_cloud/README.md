@@ -1,4 +1,4 @@
-# Claude Platform on Google Cloud
+# Claude Models on Google Cloud (Anthropic managed)
 
 `AnthropicGoogleCloud` is a client for the full Anthropic API — Messages, Models,
 Batches, Files, Admin, and every beta surface — served through Google Cloud. You
