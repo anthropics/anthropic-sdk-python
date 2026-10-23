@@ -36,7 +36,8 @@ DEFAULT_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/workspaces/{workspace_id}/invo
 # Organization-level routes are served from a base with no workspace in it.
 ORGANIZATION_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/claudeOrganization/invoke"
 
-_ORGANIZATION_PATH_PREFIXES = ("/v1/organizations/",)
+USER_PROFILES_PATH = "/v1/user_profiles"
+_ORGANIZATION_PATH_PREFIXES = ("/v1/organizations/", USER_PROFILES_PATH + "/")
 
 _MISSING_PROJECT_MESSAGE = (
     "No `project` was provided and one could not be resolved from Google credentials. "
@@ -126,7 +127,7 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if not merge_url.is_relative_url:
             return merge_url
 
-        if merge_url.path.startswith(_ORGANIZATION_PATH_PREFIXES):
+        if merge_url.path == USER_PROFILES_PATH or merge_url.path.startswith(_ORGANIZATION_PATH_PREFIXES):
             if self._project is None:
                 raise AnthropicError(_MISSING_PROJECT_MESSAGE)
             base = self._enforce_trailing_slash(
@@ -269,8 +270,8 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
                 addressed through.
             workspace_id: The Anthropic workspace ID (or `ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID`).
                 When the URL is derived, required for every route outside
-                `/v1/organizations`; those are sent to the project's
-                organization endpoint instead.
+                `/v1/organizations` and `/v1/user_profiles`; those are sent to the
+                project's organization endpoint instead.
             skip_auth: For pre-authenticated proxies — skips token attachment.
                 Mutually exclusive with the credential arguments.
             base_url: Overrides the derived gateway URL for every route.
