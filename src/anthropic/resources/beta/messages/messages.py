@@ -1391,7 +1391,7 @@ class Messages(SyncAPIResource):
             )
 
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1791,7 +1791,7 @@ class Messages(SyncAPIResource):
 
         make_request = partial(
             self._post,
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3433,7 +3433,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3833,7 +3833,7 @@ class AsyncMessages(AsyncAPIResource):
         merged_output_config = merge_output_config(output_config, transformed_output_format)
 
         request = self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,

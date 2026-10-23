@@ -2420,9 +2420,9 @@ class TestSessionToolRunnerSpans:
         # Learning the thread costs no request: the runner reads the stream and the history, and sends the result.
         requests: list[httpx2.Request] = [call.request for call in cast(Any, respx_mock.calls)]
         assert [(request.method, request.url.path, request.url.query) for request in requests] == [
-            ("GET", "/v1/sessions/sesn_1/events/stream", b"beta=true"),
-            ("GET", "/v1/sessions/sesn_1/events", b"beta=true&limit=1000"),
-            ("POST", "/v1/sessions/sesn_1/events", b"beta=true"),
+            ("GET", "/v1/sessions/sesn_1/events/stream", b""),
+            ("GET", "/v1/sessions/sesn_1/events", b"limit=1000"),
+            ("POST", "/v1/sessions/sesn_1/events", b""),
         ]
 
     @pytest.mark.respx(base_url=base_url)

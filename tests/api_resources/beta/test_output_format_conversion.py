@@ -22,7 +22,7 @@ class TestOutputFormatConversion:
             name: str
             age: int
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -45,6 +45,7 @@ class TestOutputFormatConversion:
         )
 
         request = respx_mock.calls.last.request
+        assert request.url.query == b""
         body = json.loads(request.content)
 
         # Should have output_config with format containing the User schema
@@ -79,7 +80,7 @@ class TestOutputFormatNoDeprecationWarning:
         class SimpleModel(BaseModel):
             value: str
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -106,7 +107,7 @@ class TestOutputFormatNoDeprecationWarning:
     @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="parse with Pydantic models requires Pydantic v2")
     def test_stream_does_not_warn_for_type(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """`.stream(output_format=Model)` is silent."""
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -140,7 +141,7 @@ class TestOutputFormatNoDeprecationWarning:
 
     def test_no_warning_when_output_format_not_provided(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when output_format is not used."""
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -166,7 +167,7 @@ class TestOutputFormatNoDeprecationWarning:
 
     def test_no_warning_when_using_output_config(self, client: Anthropic, respx_mock: MockRouter) -> None:
         """Verify no deprecation warning when using output_config.format directly."""
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -221,7 +222,7 @@ class TestStructuredOutputsBetaHeader:
         class DataModel(BaseModel):
             value: int
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -253,7 +254,7 @@ class TestStructuredOutputsBetaHeader:
         class DataModel(BaseModel):
             value: int
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -286,7 +287,7 @@ class TestStructuredOutputsBetaHeader:
         class DataModel(BaseModel):
             value: int
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -323,7 +324,7 @@ class TestAsyncOutputFormatConversion:
         class User(BaseModel):
             name: str
 
-        respx_mock.post("/v1/messages?beta=true").mock(
+        respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(
                 200,
                 json={
@@ -346,6 +347,7 @@ class TestAsyncOutputFormatConversion:
         )
 
         request = respx_mock.calls.last.request
+        assert request.url.query == b""
         body = json.loads(request.content)
 
         assert "output_config" in body

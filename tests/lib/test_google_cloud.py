@@ -1182,7 +1182,7 @@ class TestOrganizationRouting:
         )
         client.beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
         calls = cast("list[Any]", respx_mock.calls)
         assert calls[0].request.headers["Authorization"] == "Bearer tok"
 
@@ -1204,7 +1204,7 @@ class TestOrganizationRouting:
         client = AnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
         client.beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
 
     @pytest.mark.respx()
     def test_user_profiles_routes_use_organization_base(self, respx_mock: MockRouter) -> None:
@@ -1221,8 +1221,8 @@ class TestOrganizationRouting:
         assert _requested_urls(respx_mock) == [
             f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
             f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles?beta=true",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x?beta=true",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
         ]
 
     @pytest.mark.respx()
@@ -1234,8 +1234,8 @@ class TestOrganizationRouting:
         client.beta.user_profiles.retrieve("uprof_x")
 
         assert _requested_urls(respx_mock) == [
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles?beta=true",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x?beta=true",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
         ]
 
     @pytest.mark.respx()
@@ -1269,8 +1269,8 @@ class TestOrganizationRouting:
         client.beta.user_profiles.list()
 
         assert _requested_urls(respx_mock) == [
-            "https://example.test/v1/organizations/workspaces?beta=true",
-            "https://example.test/v1/user_profiles?beta=true",
+            "https://example.test/v1/organizations/workspaces",
+            "https://example.test/v1/user_profiles",
         ]
 
     @pytest.mark.respx()
@@ -1286,7 +1286,7 @@ class TestOrganizationRouting:
         client.beta.organization.workspaces.list()
         client.copy().beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces?beta=true"] * 2
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"] * 2
 
     @pytest.mark.respx()
     def test_copy_of_workspaceless_client_keeps_assigned_base_url(self, respx_mock: MockRouter) -> None:
@@ -1298,7 +1298,7 @@ class TestOrganizationRouting:
         client.base_url = "https://example.test/"
         client.with_options(timeout=30).beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"]
 
     @pytest.mark.respx()
     def test_project_backfilled_from_adc_for_organization_route(
@@ -1312,7 +1312,7 @@ class TestOrganizationRouting:
         client = AnthropicGoogleCloud(location="us-central1")
         client.beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
 
     @pytest.mark.respx()
     def test_copy_keeps_routing(self, respx_mock: MockRouter) -> None:
@@ -1325,7 +1325,7 @@ class TestOrganizationRouting:
 
         assert _requested_urls(respx_mock) == [
             "https://claude.googleapis.com/v1/projects/my-project/locations/europe-west4"
-            "/claudeOrganization/invoke/v1/organizations/workspaces?beta=true"
+            "/claudeOrganization/invoke/v1/organizations/workspaces"
         ]
 
 
@@ -1339,7 +1339,7 @@ class TestAsyncOrganizationRouting:
         )
         await client.beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
         calls = cast("list[Any]", respx_mock.calls)
         assert calls[0].request.headers["Authorization"] == "Bearer tok"
 
@@ -1363,7 +1363,7 @@ class TestAsyncOrganizationRouting:
         client = AsyncAnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
         await client.beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
 
     @pytest.mark.respx()
     async def test_user_profiles_routes_use_organization_base(self, respx_mock: MockRouter) -> None:
@@ -1380,8 +1380,8 @@ class TestAsyncOrganizationRouting:
         assert _requested_urls(respx_mock) == [
             f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
             f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles?beta=true",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x?beta=true",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
         ]
 
     @pytest.mark.respx()
@@ -1393,8 +1393,8 @@ class TestAsyncOrganizationRouting:
         await client.beta.user_profiles.retrieve("uprof_x")
 
         assert _requested_urls(respx_mock) == [
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles?beta=true",
-            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x?beta=true",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
         ]
 
     @pytest.mark.respx()
@@ -1428,8 +1428,8 @@ class TestAsyncOrganizationRouting:
         await client.beta.user_profiles.list()
 
         assert _requested_urls(respx_mock) == [
-            "https://example.test/v1/organizations/workspaces?beta=true",
-            "https://example.test/v1/user_profiles?beta=true",
+            "https://example.test/v1/organizations/workspaces",
+            "https://example.test/v1/user_profiles",
         ]
 
     @pytest.mark.respx()
@@ -1442,4 +1442,4 @@ class TestAsyncOrganizationRouting:
         client.base_url = "https://example.test/"
         await client.with_options(timeout=30).beta.organization.workspaces.list()
 
-        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces?beta=true"]
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"]
