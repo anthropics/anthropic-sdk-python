@@ -16,7 +16,6 @@ from respx import MockRouter
 from anthropic import APIStatusError, AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import FinalRequestOptions
-from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.bedrock._client import _prepare_options
 from anthropic.lib.bedrock._stream_decoder import _chunk_bytes_to_sse
 
@@ -201,6 +200,22 @@ def test_extra_body_anthropic_version_wins(respx_mock: MockRouter) -> None:
 
     request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
     assert json.loads(request.content)["anthropic_version"] == "2000-01-01"
+
+
+@pytest.mark.respx()
+def test_default_anthropic_version_is_bedrock_compatible(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"}),
+    )
+
+    sync_client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Say ok"}],
+        model="anthropic.claude-sonnet-4-5-20250929-v1:0",
+    )
+
+    request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+    assert json.loads(request.content)["anthropic_version"] == "bedrock-2023-05-31"
 
 
 @pytest.mark.respx()
@@ -582,7 +597,7 @@ def _assert_tool_runner_calls(calls: t.List[MockRequestCall]) -> None:
         assert "anthropic-version" not in call.request.headers
         body = json.loads(call.request.content)
         assert "model" not in body and "stream" not in body and "output_format" not in body
-        assert body["anthropic_version"] == ANTHROPIC_API_VERSION
+        assert body["anthropic_version"] == "bedrock-2023-05-31"
     second = json.loads(calls[1].request.content)
     assert [m["role"] for m in second["messages"]] == ["user", "assistant", "user"]
     assert second["messages"][1]["content"][0]["type"] == "tool_use"

@@ -14,7 +14,6 @@ from ..._utils import is_dict, asyncify, is_given
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
-from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError, APIStatusError
 from ..._middleware import MiddlewareInput
@@ -32,13 +31,14 @@ from ...resources.messages import Messages, AsyncMessages
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
+DEFAULT_VERSION = "bedrock-2023-05-31"
 
 
 def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     options = model_copy(_keep_client_header_params(input_options), deep=True)
 
     if is_dict(options.json_data):
-        options.json_data.setdefault("anthropic_version", ANTHROPIC_API_VERSION)
+        options.json_data.setdefault("anthropic_version", DEFAULT_VERSION)
 
         if is_given(options.headers):
             betas = build_headers(options.headers)[0].get("anthropic-beta")
