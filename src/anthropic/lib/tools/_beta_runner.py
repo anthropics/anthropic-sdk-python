@@ -27,7 +27,7 @@ from contextlib import (
     contextmanager,
     asynccontextmanager,
 )
-from collections.abc import Iterable, Generator, AsyncGenerator
+from collections.abc import Iterable, Sequence, Generator, AsyncGenerator
 from typing_extensions import Literal, TypedDict, override
 
 import httpx2
@@ -45,6 +45,7 @@ from .._tracing import (
 )
 from ..streaming import BetaMessageStream, BetaAsyncMessageStream, ParsedBetaMessageStreamEvent
 from ...types.beta import (
+    BetaMessage,
     BetaMessageParam,
     BetaToolUseBlock,
     BetaToolUnionParam,
@@ -52,6 +53,7 @@ from ...types.beta import (
     BetaRequestToolRemovalBlockParam,
     BetaRequestToolAdditionBlockParam,
 )
+from ._tool_params import to_tool_params
 from ..._base_client import merge_headers
 from ._tool_dispatch import (
     tool_family,
@@ -183,13 +185,29 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         max_iterations: int | None,
     ) -> None:
         self._thread = thread
+        self._messages: Sequence[BetaMessageParam] | None = None
+        """While a reply is handled, the history that `set_messages_params()` and `append_messages()` read and change:
+        what the request sent, without the reply. The thread takes it over once the loop body is done with the reply.
+        At any other time it is `None`, and both methods work on the thread's history."""
+
+        self._sent_messages: Sequence[BetaMessageParam] = ()
+        """The history the last request went out with."""
+
+        self._messages_modified = False
+        """Whether `append_messages()` was called while the reply was handled. The caller then owns the history of the
+        turn, and the runner adds neither the reply nor its tool results."""
+
+        self._appended_to_thread = False
+        """Whether the thread itself was given messages while the last reply was handled."""
+
         _reject_compaction_param(self._params)
         self._options = turn_overrides(**options)
         tools_by_name, self._toolsets = index_runnables(tools)
         self._tool_overrides: dict[str, RunnableToolT | None] = {**tools_by_name}
         """Which tool runs under a name where that differs from the thread's tools: a tool the runner was given apart
-        from them, the tool `add_tools()` put under it, or `None` once the name was removed. The thread's own tools are
-        left alone, so the `tools` param stays as sent."""
+        from them, the tool `add_tools()` put under it, the tool it had when `set_messages_params()` gave its
+        definition, or `None` once the name was removed. The thread's own tools are left alone, so the `tools` param
+        stays as sent."""
 
         self._helper_headers = merge_headers(
             helper_header("BetaToolRunner"),
@@ -222,9 +240,15 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
 
     @property
     def _params(self) -> ParseMessageCreateParamsBase[ResponseFormatT]:
-        """The thread's `params` that a request takes: the request fields and the whole history, `messages` included."""
-        params = {**self._thread.params}
+        """The thread's `params` that a request takes: the request fields, with `tools` as the definitions sent, and
+        the whole history, `messages` included. The reply being handled is not part of it."""
+        thread_params = self._thread.params
+        params = {**thread_params}
         del params["unsupported_request_behavior"]
+        if "tools" in thread_params:
+            params["tools"] = to_tool_params(thread_params["tools"])
+        if self._messages is not None:
+            params["messages"] = list(self._messages)
         return cast(ParseMessageCreateParamsBase[ResponseFormatT], params)
 
     @property
@@ -266,14 +290,20 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         Update the parameters for the next API call. This invalidates any cached tool responses. With
         `run_tools_eagerly`, a tool call of the reply that has run doesn't run again.
 
-        The new params replace the old ones, so a field they leave out is no longer sent. `system` and `tools` cannot
-        change on a message thread: use `add_tools()` and `remove_tools()`, or create the runner with `thread=False`.
+        The new params replace the old ones, so a field they leave out is no longer sent, except `betas`,
+        `user_profile_id` and `workspace_id`, which stay as they are. `system` and the `tools` sent cannot change during
+        a run: use `add_tools()` and `remove_tools()`, or create the runner with `thread=False`. A function tool or
+        toolset taken out of `tools` is no longer run, and a function tool added to them is never run. Params without
+        `tools` send none and leave what is run as it is.
 
         Args:
             params (ParsedMessageCreateParamsBase[ResponseFormatT] | Callable): Either new parameters or a function to mutate existing parameters
         """
+        current_params = self._params
         if callable(params):
-            params = params(self._params)
+            params = params(current_params)
+        kept = {k: v for k, v in current_params.items() if k in ("betas", "user_profile_id", "workspace_id")}
+        params = cast("ParseMessageCreateParamsBase[ResponseFormatT]", {**kept, **params})
         _reject_compaction_param(params)
         reject_thread_param(params.get("thread"))
         if self._messages_being_compacted is not None and list(params["messages"]) != list(self._thread.messages):
@@ -283,22 +313,45 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
             )
         if self._pending_compaction is not None or self._messages_being_compacted is not None:
             self._check_can_compact(params)
+        if self._messages is not None:
+            self._messages = list(params["messages"])
+            params = {**params, "messages": self._thread.messages}
+        if "tools" in params and params["tools"] == self._params.get("tools"):
+            # Given back as handed out, so the thread keeps its own, for whatever uses it after the runner.
+            own_tools = self._thread.params.get("tools")
+            params = cast("ParseMessageCreateParamsBase[ResponseFormatT]", {**params, "tools": own_tools})
+        runnable_tools, toolsets, declared = self._runnable_tools(), self._toolsets_by_family, self._declared_tools()
         self._thread._state.set_params(params)
+        withdrawn = declared - self._declared_tools() if "tools" in self._params else set[str]()
+        # A definition keeps the tool that ran under its name, and a name the new `tools` leave out stops running.
+        self._tool_overrides = {
+            **dict.fromkeys(self._thread._state.runnable_tools),
+            **self._tool_overrides,
+            **runnable_tools,
+            **dict.fromkeys(withdrawn),
+        }
+        self._toolsets = {family: toolset for family, toolset in toolsets.items() if family not in withdrawn}
 
     def append_messages(self, *messages: BetaMessageParam | ParsedBetaMessage[ResponseFormatT]) -> None:
         """Add one or more messages to the conversation history.
 
-        The reply the runner just yielded is already part of the history, so appending it again is a no-op, and the
-        runner still adds the results of its tool calls, right after the reply. This invalidates the cached tool
-        response, i.e. if tools were already called, then they will be called again on the next loop iteration. With
-        `run_tools_eagerly`, a tool call of the reply that has run doesn't run again.
+        This invalidates the cached tool response, i.e. if tools were already called, then they will
+        be called again on the next loop iteration. With `run_tools_eagerly`, a tool call of the reply
+        that has run doesn't run again.
         """
         if self._messages_being_compacted is not None:
             raise ValueError(
                 "Message params can't be changed while the conversation is being compacted, because the compaction "
                 "response replaces them. Make the change on the next iteration."
             )
-        self._thread.append(*messages)
+        if self._messages is None:
+            self._thread.append(*messages)
+        else:
+            self._messages = [
+                *self._messages,
+                *(message.to_param() if isinstance(message, BetaMessage) else message for message in messages),
+            ]
+            self._messages_modified = True
         self._cached_tool_call_response = None
 
     def compact_before_next_turn(self, compaction: BetaCompactionConfigParam | None = None) -> None:
@@ -350,10 +403,10 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         self, message: ParsedBetaMessage[ResponseFormatT]
     ) -> BetaCompactionConfigParam | None:
         compaction = self._pending_compaction
-        # The thread already holds the final turn. Anything staged after it was added during the yield.
         if (
             compaction is not None
-            and not self._thread._state.has_staged_messages
+            and not self._messages_modified
+            and not self._appended_to_thread
             and any(block.type == "tool_use" for block in message.content)
         ):
             # A turn that was cut short can end with tool calls that are never run, and the API
@@ -388,10 +441,24 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         self._thread._state.set_messages([response, *(m for m in appended if not same_message(m, response))])
         return True
 
-    def _append_tool_results(self, reply: ParsedBetaMessage[ResponseFormatT], results: BetaMessageParam) -> None:
-        """Add `results` right after `reply`, where the API takes them, ahead of messages added while it was handled."""
-        # The thread already holds the reply, unless a `set_messages_params()` rewrite dropped it.
-        self._thread.append(reply)
+    def _hand_over_messages(self, reply: ParsedBetaMessage[ResponseFormatT]) -> None:
+        """Give the thread the history as the loop body left it. `reply` follows it unless `append_messages()` was
+        called, which leaves the history to the caller. A history that extends what the server holds continues the
+        thread, and any other starts a new one."""
+        # The thread already holds the reply. Anything staged after it was added during the yield.
+        self._appended_to_thread = self._thread._state.has_staged_messages
+        messages, self._messages = self._messages, None
+        if messages is None or messages is self._sent_messages:
+            return
+        reply_param = reply.to_param()
+        if not self._messages_modified:
+            messages = [*messages, reply_param]
+        added_to_thread = self._thread.messages[len(self._sent_messages) :]
+        self._thread._state.set_messages([*messages, *(m for m in added_to_thread if not same_message(m, reply_param))])
+
+    def _append_tool_results(self, results: BetaMessageParam) -> None:
+        """Add `results` right after the reply, where the API takes them, ahead of messages added to the thread while
+        it was handled."""
         messages = list(self._thread.messages)
         index = max(i for i, message in enumerate(messages) if message["role"] == "assistant") + 1
         self._thread._state.set_messages([*messages[:index], results, *messages[index:]])
@@ -468,6 +535,10 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
                 tools[name] = tool
         return tools
 
+    def _declared_tools(self) -> set[str]:
+        """The names of the tools in the `tools` param, and the families of its toolsets, which have no name."""
+        return {tool.get("name") or tool_family(tool) for tool in self._params.get("tools", ())}
+
     def _send_pending_tool_changes(self, hold: bool) -> None:
         # A turn that stopped on `pause_turn` is sent back to be continued, so it has to stay last.
         if hold or not self._pending_tool_changes:
@@ -497,7 +568,8 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         """
         # Changes made since the last request are not in the history yet.
         pending: BetaMessageParam = {"role": "system", "content": self._pending_tool_changes}
-        return available_tool_names([*self._thread.messages, pending], self._runnable_tools())
+        messages = self._thread.messages if self._messages is None else self._messages
+        return available_tool_names([*messages, pending], self._runnable_tools())
 
     def _toolset_for(self, tool_use: BetaToolUseBlock) -> AnyToolsetT | None:
         assert tool_use.toolset_name is not None
@@ -648,32 +720,38 @@ class BaseSyncToolRunner(
                 yield from self._compact(compaction)
                 continue
 
+            self._sent_messages = self._messages = self._thread.messages
             with self._handle_request(self._thread) as item:
                 yield item
                 message = self._get_last_message()
                 assert message is not None
 
-            self._iteration_count += 1
-
             stop_reason = message.stop_reason
             next_step = _determine_next_step_from_stop_reason(stop_reason)
+            if next_step != "stop":
+                # No tool runs for a turn the thread refuses to send. A history the caller rewrote starts a new thread,
+                # which takes any fields, so this comes first.
+                self._thread._state.check_next_turn(self._options)
+
+            self._hand_over_messages(message)
+            self._iteration_count += 1
+
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 yield from self._compact_after_final_turn(message)
                 break
 
-            # On "resume" there is nothing to append: the thread already holds the unfinished reply.
+            # On "resume" there is nothing to append: the history already holds the unfinished reply, or is the caller's.
             if next_step == "run_tools":
-                # No tool runs for a turn the thread refuses to send.
-                self._thread._state.check_next_turn(self._options)
                 response = self.generate_tool_call_response()
-                if response is not None:
-                    self._append_tool_results(message, response)
-                elif not self._thread._state.has_staged_messages:
+                if response is None and not self._appended_to_thread:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     yield from self._compact_after_final_turn(message)
                     break
+                if response is not None and not self._messages_modified:
+                    self._append_tool_results(response)
 
+            self._messages_modified = False
             self._cached_tool_call_response = None
 
     def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:
@@ -1182,15 +1260,22 @@ class BaseAsyncToolRunner(
                         yield item
                 continue
 
+            self._sent_messages = self._messages = self._thread.messages
             async with self._handle_request(self._thread) as item:
                 yield item
                 message = await self._get_last_message()
                 assert message is not None
 
-            self._iteration_count += 1
-
             stop_reason = message.stop_reason
             next_step = _determine_next_step_from_stop_reason(stop_reason)
+            if next_step != "stop":
+                # No tool runs for a turn the thread refuses to send. A history the caller rewrote starts a new thread,
+                # which takes any fields, so this comes first.
+                self._thread._state.check_next_turn(self._options)
+
+            self._hand_over_messages(message)
+            self._iteration_count += 1
+
             if next_step == "stop":
                 log.debug("Turn ended with stop_reason %r, exiting from tool runner loop.", message.stop_reason)
                 async with aclosing(self._compact_after_final_turn(message)) as items:
@@ -1198,20 +1283,19 @@ class BaseAsyncToolRunner(
                         yield item
                 break
 
-            # On "resume" there is nothing to append: the thread already holds the unfinished reply.
+            # On "resume" there is nothing to append: the history already holds the unfinished reply, or is the caller's.
             if next_step == "run_tools":
-                # No tool runs for a turn the thread refuses to send.
-                self._thread._state.check_next_turn(self._options)
                 response = await self.generate_tool_call_response()
-                if response is not None:
-                    self._append_tool_results(message, response)
-                elif not self._thread._state.has_staged_messages:
+                if response is None and not self._appended_to_thread:
                     log.debug("Tool call was not requested, exiting from tool runner loop.")
                     async with aclosing(self._compact_after_final_turn(message)) as items:
                         async for item in items:
                             yield item
                     break
+                if response is not None and not self._messages_modified:
+                    self._append_tool_results(response)
 
+            self._messages_modified = False
             self._cached_tool_call_response = None
 
     async def until_done(self) -> ParsedBetaMessage[ResponseFormatT]:

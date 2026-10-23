@@ -21,6 +21,8 @@ from .helpers import (
     CREATE,
     COMPACTED,
     FALLBACKS,
+    LOOP_BODIES,
+    RUNNER_MODES,
     THREADS_BETA,
     TURN_METHODS,
     FALLBACK_BETA,
@@ -35,8 +37,10 @@ from .helpers import (
     CHANGES_DURING_THE_TURN,
     FAILURES_BEFORE_A_REPLY,
     ONE_TURN_CREATE_ONLY_FIELDS,
+    NEW_SYSTEM_WITH_ANOTHER_HISTORY,
     CHANGES_OF_ANOTHER_FIELD_DURING_THE_TURN,
     Forecast,
+    LoopBody,
     InPlaceEdit,
     user,
     roles,
@@ -71,6 +75,7 @@ from .helpers import (
     unsupported_response,
     async_stream_response,
     stream_error_response,
+    assert_sends_conversation,
     history_with_nested_blocks,
     async_interrupted_stream_response,
 )
@@ -1262,13 +1267,11 @@ class TestAsyncMessageThread:
         )
         thread = make_async_thread(tools=[beta_async_tool(async_get_weather, name="get_weather")])
         await thread.send(user("Hello"))
-        thread.append(WEATHER_QUESTION)
-        runner = thread.tool_runner(stream=True)
+        runner = thread.tool_runner()
 
-        await anext(runner)
-        runner.set_messages_params(lambda params: {**params, "messages": [user("Start over: Oakland?")]})
-        await thread.fork().send()
-        await runner.until_done()
+        async with thread.stream(WEATHER_QUESTION):
+            runner.set_messages_params(lambda params: {**params, "messages": [user("Start over: Oakland?")]})
+            await thread.fork().send()
 
         forked = request_bodies(respx_mock)[2]
         assert (forked["thread"], forked["messages"]) == (CREATE, [user("Start over: Oakland?")])
@@ -1297,19 +1300,265 @@ class TestAsyncMessageThread:
         assert thread.previous_message_id == "msg_b"
 
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
-    async def test_runner_adds_tool_results_ahead_of_messages_appended_mid_loop(self, respx_mock: MockRouter) -> None:
+    async def test_runner_adds_tool_results_ahead_of_messages_appended_to_the_thread_mid_loop(
+        self, respx_mock: MockRouter
+    ) -> None:
         queue_responses(
             respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b", "Sunny.")
         )
-        runner = make_async_runner()
+        thread = make_async_thread(tools=[beta_async_tool(async_get_weather, name="get_weather")])
+        thread.append(WEATHER_QUESTION)
+        runner = thread.tool_runner()
 
         await anext(runner)
-        runner.append_messages(user("In one word."))
+        thread.append(user("In one word."))
         await runner.until_done()
 
         continued = request_bodies(respx_mock)[1]
         assert continued["thread"] == continue_from("msg_a")
         assert continued["messages"] == [tool_result("toolu_a"), user("In one word.")]
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @LOOP_BODIES
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_sends_the_history_the_loop_body_leaves(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any], body: LoopBody
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
+        locations: list[str] = []
+
+        async def get_weather(location: str) -> str:
+            locations.append(location)
+            return f"Sunny in {location}"
+
+        runner = make_async_runner(stream=stream, tools=[beta_async_tool(get_weather)], **mode)
+
+        item: Any = await anext(runner)
+        reply = None if body.reads == "nothing" else await item.get_final_message() if stream else item
+        tool_response = await runner.generate_tool_call_response() if body.reads == "tool_response" else None
+        body.change(runner, reply, tool_response)
+        final = await runner.until_done()
+
+        requests = request_bodies(respx_mock)
+        assert len(requests) == 2
+        assert_sends_conversation(requests[1], mode, body.conversation)
+        assert len(locations) == body.tool_runs
+        assert final.id == "msg_b"
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_still_runs_a_tool_that_set_messages_params_gives_as_a_definition(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
+        tool = beta_async_tool(async_get_weather, name="get_weather")
+        runner = make_async_runner(stream=stream, tools=[tool], **mode)
+
+        await anext(runner)
+        runner.set_messages_params(lambda params: {**params, "tools": [tool.to_dict()]})
+        await runner.until_done()
+
+        assert_sends_conversation(
+            request_bodies(respx_mock)[1], mode, [WEATHER_QUESTION, tool_use("toolu_a"), tool_result("toolu_a")]
+        )
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    async def test_runner_runs_neither_a_tool_set_messages_params_takes_out_of_tools_nor_one_it_adds(
+        self, respx_mock: MockRouter, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(
+            respx_mock,
+            message_response("msg_a", tool_use_id="toolu_a"),
+            message_response("msg_b", tool_use_id="toolu_b", tool_name="lookup"),
+            message_response("msg_c"),
+        )
+        locations: list[str] = []
+
+        async def get_weather(location: str) -> str:
+            locations.append(location)
+            return f"Sunny in {location}"
+
+        runner = make_async_runner(tools=[beta_async_tool(get_weather)], **mode)
+        added = beta_async_tool(async_lookup, name="lookup").to_dict()
+
+        # With default settings the definitions sent can change only before the first request.
+        runner.set_messages_params(lambda params: {**params, "tools": [added]})
+        with pytest.warns(UserWarning, match="not found in tool runner"):
+            await runner.until_done()
+
+        first, second, third = request_bodies(respx_mock)
+        assert locations == []
+        assert [tool["name"] for tool in first["tools"]] == ["lookup"]
+        for request, tool_use_id, name in ((second, "toolu_a", "get_weather"), (third, "toolu_b", "lookup")):
+            assert request["messages"][-1]["content"] == [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": f"Error: Tool '{name}' not found",
+                    "is_error": True,
+                }
+            ]
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    async def test_set_messages_params_leaves_the_tools_of_the_thread_to_a_later_runner(
+        self, respx_mock: MockRouter
+    ) -> None:
+        queue_responses(
+            respx_mock,
+            message_response("msg_a"),
+            message_response("msg_b", tool_use_id="toolu_b"),
+            message_response("msg_c"),
+        )
+        tool = beta_async_tool(async_get_weather, name="get_weather")
+        thread = make_async_thread(tools=[tool], messages=[WEATHER_QUESTION])
+
+        runner = thread.tool_runner()
+        runner.set_messages_params(lambda params: {**params, "max_tokens": 12})
+        await runner.until_done()
+        thread.append(user("And now?"))
+        await thread.tool_runner().until_done()
+
+        assert thread.params.get("tools") == [tool]
+        assert request_bodies(respx_mock)[2]["messages"] == [tool_result("toolu_b")]
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    async def test_runner_keeps_the_first_turn_after_append_messages_before_the_loop(
+        self, respx_mock: MockRouter, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(
+            respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b", "Sunny.")
+        )
+        locations: list[str] = []
+
+        async def get_weather(location: str) -> str:
+            locations.append(location)
+            return f"Sunny in {location}"
+
+        runner = make_async_runner(tools=[beta_async_tool(get_weather)], **mode)
+
+        runner.append_messages(user("Be concise."))
+        await runner.until_done()
+
+        first, second = request_bodies(respx_mock)
+        turn = [tool_use("toolu_a"), tool_result("toolu_a")]
+        assert first["messages"] == [WEATHER_QUESTION, user("Be concise.")]
+        assert second.get("thread") == (None if mode else continue_from("msg_a"))
+        assert second["messages"] == ([*first["messages"], *turn] if mode else turn[1:])
+        assert locations == ["San Francisco"]
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @NEW_SYSTEM_WITH_ANOTHER_HISTORY
+    @RUNNER_MODES
+    async def test_runner_takes_a_new_system_with_another_history_only_when_it_sends_the_whole_history(
+        self, respx_mock: MockRouter, mode: dict[str, Any], change: Callable[[Any], None]
+    ) -> None:
+        queue_responses(respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b"))
+        locations: list[str] = []
+
+        async def get_weather(location: str) -> str:
+            locations.append(location)
+            return f"Sunny in {location}"
+
+        runner = make_async_runner(system="Be brief.", tools=[beta_async_tool(get_weather)], **mode)
+
+        await anext(runner)
+        change(runner)
+        with nullcontext() if mode else pytest.raises(AnthropicError, match="Cannot change `system`"):
+            await runner.until_done()
+
+        sent = ["Be brief.", "Be very brief."] if mode else ["Be brief."]
+        assert [body["system"] for body in request_bodies(respx_mock)] == sent
+        assert len(locations) == len(sent) - 1
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_gives_set_messages_params_the_tools_as_definitions(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
+        tool = beta_async_tool(async_get_weather, name="get_weather")
+        runner = make_async_runner(stream=stream, tools=[tool], **mode)
+        seen: list[Any] = []
+
+        def copy_tools(params: Any) -> Any:
+            seen.extend(params["tools"])
+            return {**params, "tools": [{**tool} for tool in params["tools"]]}
+
+        await anext(runner)
+        runner.set_messages_params(copy_tools)
+        await runner.until_done()
+
+        assert seen == [tool.to_dict()]
+        assert_sends_conversation(
+            request_bodies(respx_mock)[1], mode, [WEATHER_QUESTION, tool_use("toolu_a"), tool_result("toolu_a")]
+        )
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_keeps_the_header_params_that_set_messages_params_leaves_out(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
+        tool = beta_async_tool(async_get_weather, name="get_weather")
+        runner = make_async_runner(
+            stream=stream,
+            tools=[tool],
+            betas=[INLINE_TOOLS_BETA],
+            user_profile_id="uprof_a",
+            workspace_id="wrkspc_a",
+            **mode,
+        )
+
+        params: Any = {"model": MODEL, "max_tokens": 2048, "tools": [tool.to_dict()], "messages": [WEATHER_QUESTION]}
+
+        await anext(runner)
+        runner.set_messages_params(params)
+        await runner.until_done()
+
+        first, second = sent_requests(respx_mock)
+        assert json.loads(second.content)["max_tokens"] == 2048
+        assert INLINE_TOOLS_BETA in request_betas(respx_mock)[1]
+        for header in ("anthropic-beta", "anthropic-user-profile-id", "anthropic-workspace-id"):
+            assert second.headers[header] == first.headers[header]
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_stops_on_a_tool_use_reply_without_tool_calls_whatever_the_caller_appends(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", "Which city?", stop_reason="tool_use"))
+        runner = make_async_runner(stream=stream, **mode)
+
+        item: Any = await anext(runner)
+        runner.append_messages(await item.get_final_message() if stream else item, user("San Francisco"))
+        final = await runner.until_done()
+
+        assert final.id == "msg_a"
+        assert len(request_bodies(respx_mock)) == 1
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+    @RUNNER_MODES
+    @ASYNC_RESPONSE_KINDS
+    async def test_runner_resumes_a_paused_turn_with_the_history_the_caller_appended_to(
+        self, respx_mock: MockRouter, respond: Any, stream: bool, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", "Searching", stop_reason="pause_turn"), respond("msg_b"))
+        runner = make_async_runner(stream=stream, **mode)
+
+        await anext(runner)
+        runner.append_messages(user("Never mind."))
+        await runner.until_done()
+
+        resumed = request_bodies(respx_mock)[1]
+        assert resumed.get("thread") == (None if mode else CREATE)
+        assert resumed["messages"] == [WEATHER_QUESTION, user("Never mind.")]
 
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
     async def test_runner_refuses_a_changed_system_before_it_runs_a_tool(self, respx_mock: MockRouter) -> None:

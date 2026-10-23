@@ -138,7 +138,7 @@ class TestThreadToolRunner:
         requests = sent_requests(respx_mock)
         assert [(r.headers.get("X-Thread"), r.headers.get("X-Run")) for r in requests] == [sent, sent, ("thread", None)]
 
-    def test_streaming_runner_set_messages_params_appends_after_the_in_flight_turn(
+    def test_streaming_runner_set_messages_params_adds_ahead_of_the_in_flight_reply(
         self, respx_mock: MockRouter
     ) -> None:
         queue_responses(respx_mock, stream_response("msg_a", tool_use_id="toolu_a"), stream_response("msg_b", "Sunny."))
@@ -150,10 +150,15 @@ class TestThreadToolRunner:
         runner.set_messages_params(lambda params: {**params, "messages": [*params["messages"], user("One word.")]})
         runner.until_done()
 
-        continued = request_bodies(respx_mock)[1]
-        assert continued["thread"] == continue_from("msg_a")
-        assert continued["messages"] == [tool_result("toolu_a"), user("One word.")]
-        assert roles(thread.messages) == ["user", "assistant", "user", "user", "assistant"]
+        rewritten = request_bodies(respx_mock)[1]
+        assert rewritten["thread"] == CREATE
+        assert rewritten["messages"] == [
+            WEATHER_QUESTION,
+            user("One word."),
+            tool_use("toolu_a"),
+            tool_result("toolu_a"),
+        ]
+        assert roles(thread.messages) == ["user", "user", "assistant", "user", "assistant"]
         assert thread.previous_message_id == "msg_b"
 
     def test_params_returns_the_runnable_tools_as_given(self) -> None:
@@ -167,6 +172,25 @@ class TestThreadToolRunner:
 
         assert thread.params.get("tools") == [weather, raw_tool]
         assert make_client().beta.messages.thread(**thread.params).params.get("tools") == [weather, raw_tool]
+
+    def test_set_messages_params_leaves_the_tools_of_the_thread_to_a_later_runner(self, respx_mock: MockRouter) -> None:
+        queue_responses(
+            respx_mock,
+            message_response("msg_a"),
+            message_response("msg_b", tool_use_id="toolu_b"),
+            message_response("msg_c"),
+        )
+        tool = beta_tool(get_weather)
+        thread = make_thread(tools=[tool], messages=[WEATHER_QUESTION])
+
+        runner = thread.tool_runner()
+        runner.set_messages_params(lambda params: {**params, "max_tokens": 12})
+        runner.until_done()
+        thread.append(user("And now?"))
+        thread.tool_runner().until_done()
+
+        assert thread.params.get("tools") == [tool]
+        assert request_bodies(respx_mock)[2]["messages"] == [tool_result("toolu_b")]
 
     def test_set_messages_params_hands_out_request_params_only(self) -> None:
         runner = make_thread(tools=[beta_tool(get_weather)]).tool_runner()
@@ -218,13 +242,11 @@ class TestThreadToolRunner:
         )
         thread = make_thread(tools=[beta_tool(get_weather)])
         thread.send(user("Hello"))
-        thread.append(WEATHER_QUESTION)
-        runner = thread.tool_runner(stream=True)
+        runner = thread.tool_runner()
 
-        next(runner)
-        runner.set_messages_params(lambda params: {**params, "messages": [user("Start over: Oakland?")]})
-        thread.fork().send()
-        runner.until_done()
+        with thread.stream(WEATHER_QUESTION):
+            runner.set_messages_params(lambda params: {**params, "messages": [user("Start over: Oakland?")]})
+            thread.fork().send()
 
         forked = request_bodies(respx_mock)[2]
         assert (forked["thread"], forked["messages"]) == (CREATE, [user("Start over: Oakland?")])
@@ -412,7 +434,7 @@ class TestThreadToolRunner:
         assert (later["max_tokens"], later["messages"]) == (12, [COMPACTED, user("In one word.")])
 
     @RESPONSE_KINDS
-    def test_runner_adds_tool_results_ahead_of_messages_appended_mid_loop(
+    def test_runner_adds_tool_results_ahead_of_messages_appended_to_the_thread_mid_loop(
         self, respx_mock: MockRouter, respond: Any, stream: bool
     ) -> None:
         queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
@@ -421,7 +443,7 @@ class TestThreadToolRunner:
         runner = thread.tool_runner(stream=stream)
 
         next(runner)
-        runner.append_messages(user("In one word."))
+        thread.append(user("In one word."))
         runner.until_done()
 
         continued = request_bodies(respx_mock)[1]
@@ -502,24 +524,6 @@ class TestThreadToolRunner:
         assert (resumed["thread"], resumed["messages"]) == (continue_from("msg_a"), [user("In one word.")])
         assert thread.messages[2:] == (user("In one word."),)
 
-    def test_runner_without_a_thread_sends_a_message_appended_while_a_turn_is_paused_with_the_resume(
-        self, respx_mock: MockRouter
-    ) -> None:
-        queue_responses(
-            respx_mock, message_response("msg_a", "Searching", stop_reason="pause_turn"), message_response("msg_b")
-        )
-        runner = make_runner(thread=False)
-
-        next(runner)
-        runner.append_messages(user("Never mind."))
-        runner.until_done()
-
-        assert request_bodies(respx_mock)[1]["messages"] == [
-            WEATHER_QUESTION,
-            assistant("Searching"),
-            user("Never mind."),
-        ]
-
     def test_runner_set_messages_params_trimmed_history_keeps_one_copy_of_the_reply(
         self, respx_mock: MockRouter
     ) -> None:
@@ -552,19 +556,12 @@ class TestThreadToolRunner:
         next(runner)
         runner.set_messages_params(lambda params: {**params, "messages": [user("Start over: Oakland?")]})
         runner.append_messages(user("Also Berkeley."))
-        messages_during_the_turn = thread.messages
         runner.until_done()
 
         rewritten = request_bodies(respx_mock)[1]
-        assert messages_during_the_turn == (user("Start over: Oakland?"), user("Also Berkeley."))
         assert rewritten["thread"] == CREATE
-        assert rewritten["messages"] == [
-            user("Start over: Oakland?"),
-            user("Also Berkeley."),
-            tool_use("toolu_a"),
-            tool_result("toolu_a"),
-        ]
-        assert roles(thread.messages) == ["user", "user", "assistant", "user", "assistant"]
+        assert rewritten["messages"] == [user("Start over: Oakland?"), user("Also Berkeley.")]
+        assert roles(thread.messages) == ["user", "user", "assistant"]
         assert thread.previous_message_id == "msg_b"
 
     def test_runner_over_an_existing_thread_continues_it(self, respx_mock: MockRouter) -> None:

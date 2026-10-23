@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import json
-from typing import Any, Callable, Iterable, Iterator, cast, overload
+from typing import Any, Callable, Iterable, Iterator, NamedTuple, cast, overload
 from typing_extensions import Literal, Protocol
 
 import httpx2
@@ -527,6 +527,150 @@ ASYNC_RESPONSE_KINDS = pytest.mark.parametrize(
     ids=["non_streaming", "streaming"],
 )
 
+RUNNER_MODES = pytest.mark.parametrize("mode", [{}, {"thread": False}], ids=["default", "opt_out"])
+
+FOGGY = tool_result("toolu_a", "Foggy")
+CACHED_RESULT: BetaMessageParam = {
+    "role": "user",
+    "content": [
+        {
+            "type": "tool_result",
+            "tool_use_id": "toolu_a",
+            "content": "Sunny in San Francisco",
+            "cache_control": {"type": "ephemeral"},
+        }
+    ],
+}
+EDITED_TOOL_USE: BetaMessageParam = {
+    "role": "assistant",
+    "content": [{"type": "tool_use", "id": "toolu_a", "name": "get_weather", "input": {"location": "Oakland"}}],
+}
+
+
+Change = Callable[[Any, Any, Any], None]
+"""Called with the runner, the reply and the tool response."""
+
+
+class LoopBody(NamedTuple):
+    """What a loop body does with the `toolu_a` reply to the weather question, and what the runner does next."""
+
+    reads: Literal["nothing", "reply", "tool_response"]
+    """What the body reads first. A streamed reply is still unread when the body reads nothing."""
+
+    change: Change
+
+    conversation: list[BetaMessageParam]
+    """The conversation the model sees with the next request."""
+
+    tool_runs: int
+
+
+def _append(*messages: BetaMessageParam) -> Change:
+    def change(runner: Any, _reply: Any, _tool_response: Any) -> None:
+        runner.append_messages(*messages)
+
+    return change
+
+
+def _append_reply_and_own_result(runner: Any, reply: Any, _tool_response: Any) -> None:
+    runner.append_messages(reply, FOGGY)
+
+
+def _append_reply_tool_response_and_text(runner: Any, reply: Any, tool_response: Any) -> None:
+    runner.append_messages(reply, tool_response, user("Be concise."))
+
+
+def _append_reply_and_changed_tool_response(runner: Any, reply: Any, tool_response: Any) -> None:
+    for block in tool_response["content"]:
+        block["cache_control"] = {"type": "ephemeral"}
+    runner.append_messages(reply, tool_response)
+
+
+def _set_messages(*added: BetaMessageParam) -> Change:
+    def add(params: dict[str, Any]) -> dict[str, Any]:
+        return {**params, "messages": [*params["messages"], *added]}
+
+    def change(runner: Any, _reply: Any, _tool_response: Any) -> None:
+        runner.set_messages_params(add)
+
+    return change
+
+
+def _rewrite_then_append(runner: Any, _reply: Any, _tool_response: Any) -> None:
+    def rewrite(params: dict[str, Any]) -> dict[str, Any]:
+        return {**params, "messages": [user("Start over: Oakland?")]}
+
+    runner.set_messages_params(rewrite)
+    runner.append_messages(user("Also Berkeley."))
+
+
+_loop_bodies = {
+    "reply_tool_response_and_text_appended": LoopBody(
+        "tool_response",
+        _append_reply_tool_response_and_text,
+        [WEATHER_QUESTION, tool_use("toolu_a"), tool_result("toolu_a"), user("Be concise.")],
+        tool_runs=2,
+    ),
+    "reply_and_changed_tool_response_appended": LoopBody(
+        "tool_response",
+        _append_reply_and_changed_tool_response,
+        [WEATHER_QUESTION, tool_use("toolu_a"), CACHED_RESULT],
+        tool_runs=2,
+    ),
+    "reply_and_own_result_appended": LoopBody(
+        "reply", _append_reply_and_own_result, [WEATHER_QUESTION, tool_use("toolu_a"), FOGGY], tool_runs=1
+    ),
+    "own_result_appended": LoopBody("nothing", _append(FOGGY), [WEATHER_QUESTION, FOGGY], tool_runs=1),
+    "text_appended": LoopBody(
+        "nothing", _append(user("In one word.")), [WEATHER_QUESTION, user("In one word.")], tool_runs=1
+    ),
+    "edited_reply_and_own_result_appended": LoopBody(
+        "nothing", _append(EDITED_TOOL_USE, FOGGY), [WEATHER_QUESTION, EDITED_TOOL_USE, FOGGY], tool_runs=1
+    ),
+    "history_rewritten_then_text_appended": LoopBody(
+        "nothing", _rewrite_then_append, [user("Start over: Oakland?"), user("Also Berkeley.")], tool_runs=1
+    ),
+    "text_set": LoopBody(
+        "nothing",
+        _set_messages(user("In one word.")),
+        [WEATHER_QUESTION, user("In one word."), tool_use("toolu_a"), tool_result("toolu_a")],
+        tool_runs=1,
+    ),
+    "reply_and_text_set": LoopBody(
+        "nothing",
+        _set_messages(tool_use("toolu_a"), user("In one word.")),
+        [WEATHER_QUESTION, tool_use("toolu_a"), user("In one word."), tool_use("toolu_a"), tool_result("toolu_a")],
+        tool_runs=1,
+    ),
+    "same_history_set": LoopBody(
+        "nothing", _set_messages(), [WEATHER_QUESTION, tool_use("toolu_a"), tool_result("toolu_a")], tool_runs=1
+    ),
+}
+LOOP_BODIES = pytest.mark.parametrize("body", list(_loop_bodies.values()), ids=list(_loop_bodies))
+
+
+def assert_sends_conversation(
+    request: dict[str, Any], mode: dict[str, Any], conversation: list[BetaMessageParam]
+) -> None:
+    """Assert that `request`, which follows the `toolu_a` reply `msg_a` to the weather question, shows the model
+    `conversation`. With default settings it leaves out the question and the reply when `conversation` starts with
+    them, and sends all of any other."""
+    if mode:
+        assert "thread" not in request
+        assert request["messages"] == conversation
+    elif conversation[:2] == [WEATHER_QUESTION, tool_use("toolu_a")]:
+        assert request["thread"] == continue_from("msg_a")
+        assert request["messages"] == conversation[2:]
+    else:
+        assert request["thread"] == CREATE
+        assert request["messages"] == conversation
+
+
+def two_tool_uses_response(id: str) -> httpx2.Response:
+    reply = message_response(id, tool_use_id="toolu_a").json()
+    reply["content"] += message_response(id, tool_use_id="toolu_b").json()["content"]
+    return httpx2.Response(200, json=reply)
+
 
 def _sse_body(
     id: str,
@@ -717,6 +861,29 @@ CHANGES_OF_ANOTHER_FIELD_DURING_THE_TURN = pytest.mark.parametrize(
         ),
     ],
     ids=["update", "set_messages_params"],
+)
+
+
+def _new_system(params: dict[str, Any]) -> dict[str, Any]:
+    return {**params, "system": "Be very brief."}
+
+
+def _new_system_without_the_reply(runner: Any) -> None:
+    runner.append_messages(user("Never mind."))
+    runner.set_messages_params(_new_system)
+
+
+def _new_system_with_a_rewritten_history(runner: Any) -> None:
+    def rewrite(params: dict[str, Any]) -> dict[str, Any]:
+        return {**_new_system(params), "messages": [user("Start over.")]}
+
+    runner.set_messages_params(rewrite)
+
+
+NEW_SYSTEM_WITH_ANOTHER_HISTORY = pytest.mark.parametrize(
+    "change",
+    [_new_system_without_the_reply, _new_system_with_a_rewritten_history],
+    ids=["without_the_reply", "rewritten_history"],
 )
 
 

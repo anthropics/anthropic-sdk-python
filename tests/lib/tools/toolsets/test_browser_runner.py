@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import json
 from typing import Any, cast
+from contextlib import nullcontext
 
 import httpx2
 import pytest
@@ -157,6 +158,30 @@ async def test_a_toolset_in_set_messages_params_is_sent_as_its_wire_entry(
     if flavour == "async":
         await done
     assert _requests(respx_mock)[0]["tools"] == [mine.to_dict(), raw]
+
+
+@needs_runner
+@pytest.mark.parametrize("flavour", ["sync", "async"])
+@pytest.mark.parametrize("kept", [True, False], ids=["given_as_its_definition", "taken_out"])
+async def test_a_toolset_runs_only_while_set_messages_params_leaves_its_definition_in_tools(
+    respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str, kept: bool
+) -> None:
+    navigate = _member_use("navigate", "toolu_nav", {"url": "https://example.com/"})
+    respx_mock.post("/v1/messages").mock(side_effect=[_message(navigate), DONE])
+    make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
+    mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
+    raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
+
+    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine])
+    runner.set_messages_params(_with_tools(mine.to_dict(), raw) if kept else _with_tools(raw))
+    with nullcontext() if kept else pytest.warns(UserWarning, match="Toolset 'browser' .* not found in tool runner"):
+        done = runner.until_done()
+        if flavour == "async":
+            await done
+
+    result = _requests(respx_mock)[1]["messages"][-1]["content"][0]
+    assert result.get("is_error", False) is not kept
+    assert bool(mine.world.contexts) is kept
 
 
 @needs_runner
