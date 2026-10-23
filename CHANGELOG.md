@@ -10,6 +10,7 @@
 ### Chores
 
 * **client:** stop sending query params hardcoded in endpoint paths
+* **docs:** improve the descriptions of the code execution tool and its encrypted results
 * **docs:** reword work queue, skill and external key descriptions
 * **docs:** update descriptions of the per-user usage and cost reports
 * **internal:** carry endpoint path query params to the request layer
