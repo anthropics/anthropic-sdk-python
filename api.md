@@ -2786,6 +2786,9 @@ Types:
 
 ```python
 from anthropic.types.beta.organization import (
+    BetaAnalyticsActor,
+    BetaAnalyticsActorType,
+    BetaAnalyticsAPIActor,
     BetaAnalyticsArtifactActivity,
     BetaAnalyticsChatCoworkUnifiedChatMetrics,
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
@@ -2808,6 +2811,13 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsCostUsersItem,
     BetaAnalyticsCoworkMetrics,
     BetaAnalyticsDesignMetrics,
+    BetaAnalyticsFederatedActor,
+    BetaAnalyticsFederatedActorAWSProvider,
+    BetaAnalyticsFederatedActorAzureProvider,
+    BetaAnalyticsFederatedActorGCPProvider,
+    BetaAnalyticsFederatedActorOIDCProvider,
+    BetaAnalyticsFederatedActorProvider,
+    BetaAnalyticsGroupedCostType,
     BetaAnalyticsInferenceGeoFilter,
     BetaAnalyticsLinesOfCode,
     BetaAnalyticsOfficeMetrics,
@@ -2817,8 +2827,11 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsPluginCoworkMetrics,
     BetaAnalyticsProductFilter,
     BetaAnalyticsProjectActivity,
+    BetaAnalyticsReportUserActor,
     BetaAnalyticsScienceMetrics,
     BetaAnalyticsServerToolUse,
+    BetaAnalyticsServiceAccountActor,
+    BetaAnalyticsServiceTier,
     BetaAnalyticsSingleDayActivitySummary,
     BetaAnalyticsSkillActivity,
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
@@ -2828,10 +2841,15 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsSkillCoworkMetrics,
     BetaAnalyticsSkillOfficeMetrics,
     BetaAnalyticsSkillOfficeProductMetrics,
+    BetaAnalyticsSpeed,
+    BetaAnalyticsTimeBucketWidth,
     BetaAnalyticsTokenType,
     BetaAnalyticsToolActionCounts,
     BetaAnalyticsToolActions,
     BetaAnalyticsUsageBucketedResult,
+    BetaAnalyticsUsageCostInferenceGeo,
+    BetaAnalyticsUsageCostProductFilter,
+    BetaAnalyticsUsageCostSortOrder,
     BetaAnalyticsUsageReportTimeBucket,
     BetaAnalyticsUsageUsersItem,
     BetaAnalyticsUser,
@@ -2885,6 +2903,42 @@ Methods:
 Methods:
 
 - <code title="get /v1/organizations/analytics/artifacts?beta=true">client.beta.organization.analytics.artifacts.<a href="./src/anthropic/resources/beta/organization/analytics/artifacts.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/artifact_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_analytics_artifact_activity.py">SyncPageCursor[BetaAnalyticsArtifactActivity]</a></code>
+
+#### Usage
+
+Types:
+
+```python
+from anthropic.types.beta.organization.analytics import (
+    BetaAnalyticsUsageGroup,
+    BetaAnalyticsUsageGroupBy,
+    BetaAnalyticsUsageItem,
+    BetaAnalyticsUsageMetrics,
+    BetaAnalyticsUsageOrderBy,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/usage?beta=true">client.beta.organization.analytics.usage.<a href="./src/anthropic/resources/beta/organization/analytics/usage.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/usage_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/analytics/beta_analytics_usage_item.py">SyncReportPageCursor[BetaAnalyticsUsageItem]</a></code>
+
+#### Cost
+
+Types:
+
+```python
+from anthropic.types.beta.organization.analytics import (
+    BetaAnalyticsCostGroup,
+    BetaAnalyticsCostGroupBy,
+    BetaAnalyticsCostItem,
+    BetaAnalyticsCostMetrics,
+    BetaAnalyticsCostOrderBy,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/cost?beta=true">client.beta.organization.analytics.cost.<a href="./src/anthropic/resources/beta/organization/analytics/cost.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/analytics/cost_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/analytics/beta_analytics_cost_item.py">SyncReportPageCursor[BetaAnalyticsCostItem]</a></code>
 
 #### UsageReport
 

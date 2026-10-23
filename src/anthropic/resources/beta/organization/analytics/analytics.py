@@ -1,5 +1,21 @@
 from __future__ import annotations
 
+from .cost import (
+    Cost,
+    AsyncCost,
+    CostWithRawResponse,
+    AsyncCostWithRawResponse,
+    CostWithStreamingResponse,
+    AsyncCostWithStreamingResponse,
+)
+from .usage import (
+    Usage,
+    AsyncUsage,
+    UsageWithRawResponse,
+    AsyncUsageWithRawResponse,
+    UsageWithStreamingResponse,
+    AsyncUsageWithStreamingResponse,
+)
 from .users import (
     Users,
     AsyncUsers,
@@ -124,6 +140,14 @@ class Analytics(SyncAPIResource):
         return Artifacts(self._client)
 
     @cached_property
+    def usage(self) -> Usage:
+        return Usage(self._client)
+
+    @cached_property
+    def cost(self) -> Cost:
+        return Cost(self._client)
+
+    @cached_property
     def usage_report(self) -> UsageReport:
         return UsageReport(self._client)
 
@@ -187,6 +211,14 @@ class AsyncAnalytics(AsyncAPIResource):
     @cached_property
     def artifacts(self) -> AsyncArtifacts:
         return AsyncArtifacts(self._client)
+
+    @cached_property
+    def usage(self) -> AsyncUsage:
+        return AsyncUsage(self._client)
+
+    @cached_property
+    def cost(self) -> AsyncCost:
+        return AsyncCost(self._client)
 
     @cached_property
     def usage_report(self) -> AsyncUsageReport:
@@ -257,6 +289,14 @@ class AnalyticsWithRawResponse:
         return ArtifactsWithRawResponse(self._analytics.artifacts)
 
     @cached_property
+    def usage(self) -> UsageWithRawResponse:
+        return UsageWithRawResponse(self._analytics.usage)
+
+    @cached_property
+    def cost(self) -> CostWithRawResponse:
+        return CostWithRawResponse(self._analytics.cost)
+
+    @cached_property
     def usage_report(self) -> UsageReportWithRawResponse:
         return UsageReportWithRawResponse(self._analytics.usage_report)
 
@@ -304,6 +344,14 @@ class AsyncAnalyticsWithRawResponse:
     @cached_property
     def artifacts(self) -> AsyncArtifactsWithRawResponse:
         return AsyncArtifactsWithRawResponse(self._analytics.artifacts)
+
+    @cached_property
+    def usage(self) -> AsyncUsageWithRawResponse:
+        return AsyncUsageWithRawResponse(self._analytics.usage)
+
+    @cached_property
+    def cost(self) -> AsyncCostWithRawResponse:
+        return AsyncCostWithRawResponse(self._analytics.cost)
 
     @cached_property
     def usage_report(self) -> AsyncUsageReportWithRawResponse:
@@ -355,6 +403,14 @@ class AnalyticsWithStreamingResponse:
         return ArtifactsWithStreamingResponse(self._analytics.artifacts)
 
     @cached_property
+    def usage(self) -> UsageWithStreamingResponse:
+        return UsageWithStreamingResponse(self._analytics.usage)
+
+    @cached_property
+    def cost(self) -> CostWithStreamingResponse:
+        return CostWithStreamingResponse(self._analytics.cost)
+
+    @cached_property
     def usage_report(self) -> UsageReportWithStreamingResponse:
         return UsageReportWithStreamingResponse(self._analytics.usage_report)
 
@@ -402,6 +458,14 @@ class AsyncAnalyticsWithStreamingResponse:
     @cached_property
     def artifacts(self) -> AsyncArtifactsWithStreamingResponse:
         return AsyncArtifactsWithStreamingResponse(self._analytics.artifacts)
+
+    @cached_property
+    def usage(self) -> AsyncUsageWithStreamingResponse:
+        return AsyncUsageWithStreamingResponse(self._analytics.usage)
+
+    @cached_property
+    def cost(self) -> AsyncCostWithStreamingResponse:
+        return AsyncCostWithStreamingResponse(self._analytics.cost)
 
     @cached_property
     def usage_report(self) -> AsyncUsageReportWithStreamingResponse:
