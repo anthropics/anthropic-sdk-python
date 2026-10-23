@@ -9,6 +9,7 @@
 
 ### Chores
 
+* **docs:** reword work queue, skill and external key descriptions
 * **internal:** carry endpoint path query params to the request layer
 * **internal:** read the beta route qualifier instead of the beta=true query
 
