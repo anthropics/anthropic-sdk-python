@@ -5,6 +5,7 @@
 ### Chores
 
 * **internal:** carry endpoint path query params to the request layer
+* **internal:** read the beta route qualifier instead of the beta=true query
 
 
 ### Documentation

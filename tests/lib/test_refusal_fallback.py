@@ -21,7 +21,9 @@ from anthropic import (
     BetaRefusalFallbackMiddleware,
     omit,
 )
+from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta import BetaMessage, BetaFallbackParam, BetaOutputConfigParam
+from anthropic._base_client import make_request_options
 from anthropic.lib.middleware._fallbacks import _fallback_state
 from anthropic.types.anthropic_beta_param import AnthropicBetaParam
 
@@ -591,6 +593,44 @@ class TestRefusalFallback:
         assert len(respx_mock.calls) == 1
         assert beta_headers(respx_mock) == [None]
 
+    @pytest.mark.parametrize(
+        ("path", "qualifiers", "models"),
+        [
+            ("/v1/messages", {"beta": "true"}, ["primary-model", "fallback-model"]),
+            ("/v1/messages?beta=true", None, ["primary-model"]),
+        ],
+        ids=["qualifier", "query"],
+    )
+    @pytest.mark.respx(base_url=base_url)
+    def test_only_the_qualifier_marks_a_request_as_beta(
+        self, respx_mock: MockRouter, path: str, qualifiers: dict[str, str] | None, models: list[str]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.post(
+            path,
+            body={"model": "primary-model", "max_tokens": 1024, "messages": [{"role": "user", "content": "hi"}]},
+            cast_to=BetaMessage,
+            options=make_request_options(qualifiers=qualifiers),
+        )
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == models
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    @pytest.mark.respx(base_url=base_url)
+    def test_parse_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.beta.messages.parse(model="primary-model", max_tokens=1024, messages=[{"role": "user", "content": "hi"}])
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["primary-model", "fallback-model"]
+
 
 class TestBetaHeader:
     @pytest.mark.respx(base_url=base_url)
@@ -773,6 +813,20 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "last-model"
         assert state.index == 1
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    @pytest.mark.respx(base_url=base_url)
+    async def test_parse_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        await client.beta.messages.parse(
+            model="primary-model", max_tokens=1024, messages=[{"role": "user", "content": "hi"}]
+        )
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["primary-model", "fallback-model"]
 
 
 FAILED_HOPS_THAT_ARE_NOT_RESENT = [
