@@ -82,7 +82,7 @@ class AccessTokenAuth(httpx2.Auth):
         #
         # The flag we inject here is the *API* beta (oauth-2025-04-20), which
         # unlocks `Authorization: Bearer` auth on the API. The *federation*
-        # beta (oidc-federation-2026-04-01) is a separate routing switch used
+        # beta (oidc-federation-2026-04-01) is a separate header sent
         # only on jwt-bearer POSTs to /v1/oauth/token — see _workload.py.
         existing_flags = [flag.strip() for flag in existing_beta.split(",") if flag.strip()]
         if OAUTH_API_BETA_HEADER not in existing_flags:
