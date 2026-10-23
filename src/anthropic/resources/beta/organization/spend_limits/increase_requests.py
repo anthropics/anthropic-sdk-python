@@ -89,6 +89,7 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 span_attributes={
@@ -147,6 +148,7 @@ class IncreaseRequests(SyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.list",
                 span_route="/v1/organizations/spend_limit_increase_requests",
             ),
@@ -206,6 +208,7 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.approve",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 span_attributes={
@@ -259,6 +262,7 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.deny",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 span_attributes={
@@ -331,6 +335,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 span_attributes={
@@ -389,6 +394,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.list",
                 span_route="/v1/organizations/spend_limit_increase_requests",
             ),
@@ -448,6 +454,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.approve",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 span_attributes={
@@ -501,6 +508,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.spend_limits.increase_requests.deny",
                 span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 span_attributes={

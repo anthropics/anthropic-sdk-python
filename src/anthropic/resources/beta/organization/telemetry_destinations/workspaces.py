@@ -119,6 +119,7 @@ class Workspaces(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.list",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
@@ -197,6 +198,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.add",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -275,6 +277,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.remove",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -377,6 +380,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.list",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
@@ -455,6 +459,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.add",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -533,6 +538,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.remove",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={

@@ -86,6 +86,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -143,6 +144,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -206,6 +208,7 @@ class Members(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -257,6 +260,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -308,6 +312,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -382,6 +387,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -439,6 +445,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -502,6 +509,7 @@ class AsyncMembers(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -553,6 +561,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -604,6 +613,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={

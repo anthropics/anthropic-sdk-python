@@ -106,6 +106,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={
@@ -181,6 +182,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={
@@ -256,6 +258,7 @@ class ServiceAccounts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -329,6 +332,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -398,6 +402,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={
@@ -490,6 +495,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={
@@ -565,6 +571,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={
@@ -640,6 +647,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -713,6 +721,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -782,6 +791,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.service_accounts.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 span_attributes={

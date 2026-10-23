@@ -166,6 +166,7 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.create",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -254,6 +255,7 @@ class Versions(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions/{version}",
                 span_attributes={
@@ -350,6 +352,7 @@ class Versions(SyncAPIResource):
                     "organization_id": organization_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.list",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -454,6 +457,7 @@ class Versions(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.download",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions/{version}/content",
                 span_attributes={
@@ -589,6 +593,7 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.create",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -677,6 +682,7 @@ class AsyncVersions(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions/{version}",
                 span_attributes={
@@ -773,6 +779,7 @@ class AsyncVersions(AsyncAPIResource):
                     "organization_id": organization_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.list",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -877,6 +884,7 @@ class AsyncVersions(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.versions.download",
                 span_route="/v1/organizations/plugins/{plugin_id}/versions/{version}/content",
                 span_attributes={

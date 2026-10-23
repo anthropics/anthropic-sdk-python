@@ -101,6 +101,7 @@ class RateLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 span_attributes={
@@ -180,6 +181,7 @@ class RateLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -264,6 +266,7 @@ class AsyncRateLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 span_attributes={
@@ -343,6 +346,7 @@ class AsyncRateLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},

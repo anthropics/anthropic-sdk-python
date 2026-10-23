@@ -1456,6 +1456,29 @@ class TestAnthropic:
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
+    @pytest.mark.respx(base_url=base_url)
+    def test_every_attempt_has_the_qualifiers(
+        self,
+        client: Anthropic,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
+        seen: list[object] = []
+
+        def prepare_options(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(options.qualifiers)
+            return options
+
+        client = client.with_options(max_retries=1)
+        monkeypatch.setattr(client, "_prepare_options", prepare_options)
+        respx_mock.get("/foo").mock(side_effect=[httpx2.Response(500), httpx2.Response(200)])
+
+        client.get("/foo", cast_to=httpx2.Response, options=make_request_options(qualifiers={"variant": "b"}))
+
+        assert seen == [{"variant": "b"}, {"variant": "b"}]
+
     def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         # Test that the proxy environment variables are set correctly
         monkeypatch.setenv("HTTPS_PROXY", "https://example.org")
@@ -2879,6 +2902,29 @@ class TestAsyncAnthropic:
         )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_every_attempt_has_the_qualifiers(
+        self,
+        async_client: AsyncAnthropic,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
+        seen: list[object] = []
+
+        async def prepare_options(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(options.qualifiers)
+            return options
+
+        client = async_client.with_options(max_retries=1)
+        monkeypatch.setattr(client, "_prepare_options", prepare_options)
+        respx_mock.get("/foo").mock(side_effect=[httpx2.Response(500), httpx2.Response(200)])
+
+        await client.get("/foo", cast_to=httpx2.Response, options=make_request_options(qualifiers={"variant": "b"}))
+
+        assert seen == [{"variant": "b"}, {"variant": "b"}]
 
     async def test_get_platform(self) -> None:
         platform = await asyncify(get_platform)()

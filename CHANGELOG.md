@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.2.0...v2.2.1) (2026-10-23)
+
+### Chores
+
+* **internal:** carry endpoint path query params to the request layer
+
 ## [2.2.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.1.0...v2.2.0) (2026-10-23)
 
 ### Features

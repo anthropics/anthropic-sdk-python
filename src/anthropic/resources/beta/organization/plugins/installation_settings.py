@@ -140,6 +140,7 @@ class InstallationSettings(SyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.list",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -234,6 +235,7 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.remove",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 span_attributes={
@@ -332,6 +334,7 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.set",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 span_attributes={
@@ -456,6 +459,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.list",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -550,6 +554,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.remove",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 span_attributes={
@@ -648,6 +653,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.installation_settings.set",
                 span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 span_attributes={
