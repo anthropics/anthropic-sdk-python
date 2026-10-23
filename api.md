@@ -3263,3 +3263,103 @@ Methods:
 - <code title="get /v1/organizations/webhooks">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/webhook_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint.py">SyncPage[BetaOrganizationWebhookEndpoint]</a></code>
 - <code title="delete /v1/organizations/webhooks/{webhook_endpoint_id}">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">delete</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_organization_webhook_endpoint.py">BetaDeletedOrganizationWebhookEndpoint</a></code>
 - <code title="post /v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">regenerate_signing_secret</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint_signing_secret.py">BetaOrganizationWebhookEndpointSigningSecret</a></code>
+
+### ClaudeTag
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaClaudeTagDefaultSettingSource,
+    BetaClaudeTagGuestPolicy,
+    BetaClaudeTagGuestPolicyParam,
+    BetaClaudeTagGuestPolicyAllow,
+    BetaClaudeTagGuestPolicyAllowParam,
+    BetaClaudeTagGuestPolicyChannelOnly,
+    BetaClaudeTagGuestPolicyChannelOnlyParam,
+    BetaClaudeTagGuestPolicyRestrict,
+    BetaClaudeTagGuestPolicyRestrictParam,
+    BetaClaudeTagSettingSource,
+    BetaClaudeTagSettingSources,
+    BetaClaudeTagSettings,
+    BetaClaudeTagSettingsCreateParam,
+    BetaClaudeTagSettingsUpdateParam,
+    BetaClaudeTagSlackChannelIdentifiers,
+    BetaClaudeTagSlackChannelIdentifiersParam,
+    BetaClaudeTagSlackChannelSettingSource,
+    BetaClaudeTagSlackDefaultSettingSource,
+    BetaClaudeTagSlackGridChannelSettingSource,
+    BetaClaudeTagSlackParentChannelSettingSource,
+    BetaClaudeTagSlackWorkspaceIdentifiers,
+    BetaClaudeTagSlackWorkspaceSettingSource,
+)
+```
+
+#### SlackChannels
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_tag import (
+    BetaClaudeTagDeletedSlackChannel,
+    BetaClaudeTagSlackChannel,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/claude_tag/slack_channels">client.beta.organization.claude_tag.slack_channels.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_channels.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_channel_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_channel.py">BetaClaudeTagSlackChannel</a></code>
+- <code title="get /v1/organizations/claude_tag/slack_channels/{id}">client.beta.organization.claude_tag.slack_channels.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_channels.py">retrieve</a>(id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_channel_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_channel.py">BetaClaudeTagSlackChannel</a></code>
+- <code title="post /v1/organizations/claude_tag/slack_channels/{id}">client.beta.organization.claude_tag.slack_channels.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_channels.py">update</a>(id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_channel_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_channel.py">BetaClaudeTagSlackChannel</a></code>
+- <code title="get /v1/organizations/claude_tag/slack_channels">client.beta.organization.claude_tag.slack_channels.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_channels.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_channel_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_channel.py">SyncPageCursor[BetaClaudeTagSlackChannel]</a></code>
+- <code title="delete /v1/organizations/claude_tag/slack_channels/{id}">client.beta.organization.claude_tag.slack_channels.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_channels.py">delete</a>(id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_deleted_slack_channel.py">BetaClaudeTagDeletedSlackChannel</a></code>
+
+#### SlackWorkspaces
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_tag import BetaClaudeTagSlackWorkspace
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_tag/slack_workspaces/{id}">client.beta.organization.claude_tag.slack_workspaces.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_workspaces.py">retrieve</a>(id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_workspace_retrieve_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_workspace.py">BetaClaudeTagSlackWorkspace</a></code>
+- <code title="post /v1/organizations/claude_tag/slack_workspaces/{id}">client.beta.organization.claude_tag.slack_workspaces.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_workspaces.py">update</a>(id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_workspace_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_workspace.py">BetaClaudeTagSlackWorkspace</a></code>
+- <code title="get /v1/organizations/claude_tag/slack_workspaces">client.beta.organization.claude_tag.slack_workspaces.<a href="./src/anthropic/resources/beta/organization/claude_tag/slack_workspaces.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/slack_workspace_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_slack_workspace.py">SyncPageCursor[BetaClaudeTagSlackWorkspace]</a></code>
+
+#### Bundles
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_tag import BetaClaudeTagBundle
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">retrieve</a>(bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
+- <code title="get /v1/organizations/claude_tag/bundles">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">SyncPageCursor[BetaClaudeTagBundle]</a></code>
+
+##### Targets
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_tag.bundles import (
+    BetaClaudeTagBundleTarget,
+    BetaClaudeTagBundleTargetCreateParam,
+    BetaClaudeTagDeletedBundleTarget,
+    BetaClaudeTagSlackChannelBundleTarget,
+    BetaClaudeTagSlackChannelBundleTargetCreateParam,
+    BetaClaudeTagSlackWorkspaceBundleTarget,
+    BetaClaudeTagSlackWorkspaceBundleTargetCreateParam,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/claude_tag/bundles/{bundle_id}/targets">client.beta.organization.claude_tag.bundles.targets.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/targets.py">create</a>(bundle_id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundles/target_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/bundles/beta_claude_tag_bundle_target.py">BetaClaudeTagBundleTarget</a></code>
+- <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}/targets/{target_id}">client.beta.organization.claude_tag.bundles.targets.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/targets.py">retrieve</a>(target_id, \*, bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/bundles/beta_claude_tag_bundle_target.py">BetaClaudeTagBundleTarget</a></code>
+- <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}/targets">client.beta.organization.claude_tag.bundles.targets.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/targets.py">list</a>(bundle_id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundles/target_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/bundles/beta_claude_tag_bundle_target.py">SyncPageCursor[BetaClaudeTagBundleTarget]</a></code>
+- <code title="delete /v1/organizations/claude_tag/bundles/{bundle_id}/targets/{target_id}">client.beta.organization.claude_tag.bundles.targets.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/targets.py">delete</a>(target_id, \*, bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/bundles/beta_claude_tag_deleted_bundle_target.py">BetaClaudeTagDeletedBundleTarget</a></code>

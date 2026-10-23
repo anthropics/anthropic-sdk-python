@@ -92,6 +92,14 @@ from .plugin_marketplaces import (
     PluginMarketplacesWithStreamingResponse,
     AsyncPluginMarketplacesWithStreamingResponse,
 )
+from .claude_tag.claude_tag import (
+    ClaudeTag,
+    AsyncClaudeTag,
+    ClaudeTagWithRawResponse,
+    AsyncClaudeTagWithRawResponse,
+    ClaudeTagWithStreamingResponse,
+    AsyncClaudeTagWithStreamingResponse,
+)
 from .federation.federation import (
     Federation,
     AsyncFederation,
@@ -223,6 +231,10 @@ class Organization(SyncAPIResource):
         return Webhooks(self._client)
 
     @cached_property
+    def claude_tag(self) -> ClaudeTag:
+        return ClaudeTag(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -338,6 +350,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def webhooks(self) -> AsyncWebhooks:
         return AsyncWebhooks(self._client)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTag:
+        return AsyncClaudeTag(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
@@ -463,6 +479,10 @@ class OrganizationWithRawResponse:
     def webhooks(self) -> WebhooksWithRawResponse:
         return WebhooksWithRawResponse(self._organization.webhooks)
 
+    @cached_property
+    def claude_tag(self) -> ClaudeTagWithRawResponse:
+        return ClaudeTagWithRawResponse(self._organization.claude_tag)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -539,6 +559,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def webhooks(self) -> AsyncWebhooksWithRawResponse:
         return AsyncWebhooksWithRawResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTagWithRawResponse:
+        return AsyncClaudeTagWithRawResponse(self._organization.claude_tag)
 
 
 class OrganizationWithStreamingResponse:
@@ -617,6 +641,10 @@ class OrganizationWithStreamingResponse:
     def webhooks(self) -> WebhooksWithStreamingResponse:
         return WebhooksWithStreamingResponse(self._organization.webhooks)
 
+    @cached_property
+    def claude_tag(self) -> ClaudeTagWithStreamingResponse:
+        return ClaudeTagWithStreamingResponse(self._organization.claude_tag)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -693,3 +721,7 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def webhooks(self) -> AsyncWebhooksWithStreamingResponse:
         return AsyncWebhooksWithStreamingResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTagWithStreamingResponse:
+        return AsyncClaudeTagWithStreamingResponse(self._organization.claude_tag)
