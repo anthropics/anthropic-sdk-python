@@ -16,6 +16,7 @@
 * **internal:** carry endpoint path query params to the request layer
 * **internal:** check the repository by owner and public name in workflows
 * **internal:** read the beta route qualifier instead of the beta=true query
+* **internal:** remove preview build upload from CI
 * **internal:** stop sending the beta query param from parse and stream
 
 
