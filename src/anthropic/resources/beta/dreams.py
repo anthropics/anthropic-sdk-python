@@ -131,7 +131,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -143,6 +143,7 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.create",
                 span_route="/v1/dreams",
                 span_created_id="anthropic.dream.id",
@@ -208,12 +209,13 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.retrieve",
                 span_route="/v1/dreams/{dream_id}",
                 span_attributes={"anthropic.dream.id": dream_id},
@@ -298,7 +300,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=SyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -313,6 +315,7 @@ class Dreams(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.list",
                 span_route="/v1/dreams",
             ),
@@ -380,12 +383,13 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.archive",
                 span_route="/v1/dreams/{dream_id}/archive",
                 span_attributes={"anthropic.dream.id": dream_id},
@@ -454,12 +458,13 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.cancel",
                 span_route="/v1/dreams/{dream_id}/cancel",
                 span_attributes={"anthropic.dream.id": dream_id},
@@ -571,7 +576,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -583,6 +588,7 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.create",
                 span_route="/v1/dreams",
                 span_created_id="anthropic.dream.id",
@@ -648,12 +654,13 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.retrieve",
                 span_route="/v1/dreams/{dream_id}",
                 span_attributes={"anthropic.dream.id": dream_id},
@@ -738,7 +745,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=AsyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -753,6 +760,7 @@ class AsyncDreams(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.list",
                 span_route="/v1/dreams",
             ),
@@ -820,12 +828,13 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.archive",
                 span_route="/v1/dreams/{dream_id}/archive",
                 span_attributes={"anthropic.dream.id": dream_id},
@@ -894,12 +903,13 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.dreams.cancel",
                 span_route="/v1/dreams/{dream_id}/cancel",
                 span_attributes={"anthropic.dream.id": dream_id},

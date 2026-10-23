@@ -2524,6 +2524,7 @@ def make_request_options(
     extra_body: Body | None = None,
     timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     post_parser: PostParser | NotGiven = not_given,
+    qualifiers: dict[str, str] | None = None,
     span_name: str | None = None,
     span_route: str | None = None,
     span_content_query_params: Tuple[str, ...] = (),
@@ -2550,6 +2551,10 @@ def make_request_options(
     if is_given(post_parser):
         # internal
         options["post_parser"] = post_parser  # type: ignore
+
+    if qualifiers is not None:
+        # internal
+        options["qualifiers"] = qualifiers  # type: ignore
 
     if span_name is not None:
         # internal

@@ -106,8 +106,7 @@ class Workspaces(SyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._get_api_list(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces?beta=true",
-                destination_id=destination_id,
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces", destination_id=destination_id
             ),
             page=SyncPageCursor[BetaTelemetryDestinationWorkspace],
             options=make_request_options(
@@ -119,6 +118,7 @@ class Workspaces(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.list",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
@@ -188,7 +188,7 @@ class Workspaces(SyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 destination_id=destination_id,
                 workspace_id=workspace_id,
             ),
@@ -197,6 +197,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.add",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -266,7 +267,7 @@ class Workspaces(SyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._delete(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 destination_id=destination_id,
                 workspace_id=workspace_id,
             ),
@@ -275,6 +276,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.remove",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -364,8 +366,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._get_api_list(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces?beta=true",
-                destination_id=destination_id,
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces", destination_id=destination_id
             ),
             page=AsyncPageCursor[BetaTelemetryDestinationWorkspace],
             options=make_request_options(
@@ -377,6 +378,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.list",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces",
                 span_attributes={"anthropic.organization.telemetry_destination.id": destination_id},
@@ -446,7 +448,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 destination_id=destination_id,
                 workspace_id=workspace_id,
             ),
@@ -455,6 +457,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.add",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={
@@ -524,7 +527,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._delete(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 destination_id=destination_id,
                 workspace_id=workspace_id,
             ),
@@ -533,6 +536,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.telemetry_destinations.workspaces.remove",
                 span_route="/v1/organizations/telemetry_destinations/{destination_id}/workspaces/{workspace_id}",
                 span_attributes={

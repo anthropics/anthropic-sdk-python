@@ -27,6 +27,7 @@ class TestResources:
         resource = client.beta.sessions.resources.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -37,6 +38,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -45,6 +47,7 @@ class TestResources:
         response = client.beta.sessions.resources.with_raw_response.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -57,6 +60,7 @@ class TestResources:
         with client.beta.sessions.resources.with_streaming_response.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -86,6 +90,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -97,6 +102,7 @@ class TestResources:
             authorization_token="ghp_exampletoken",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -106,6 +112,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -119,6 +126,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -148,6 +156,7 @@ class TestResources:
     def test_method_list(self, client: Anthropic) -> None:
         resource = client.beta.sessions.resources.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -159,6 +168,7 @@ class TestResources:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -166,6 +176,7 @@ class TestResources:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.resources.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -177,6 +188,7 @@ class TestResources:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.resources.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -198,6 +210,7 @@ class TestResources:
         resource = client.beta.sessions.resources.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -208,6 +221,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -216,6 +230,7 @@ class TestResources:
         response = client.beta.sessions.resources.with_raw_response.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -228,6 +243,7 @@ class TestResources:
         with client.beta.sessions.resources.with_streaming_response.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -257,6 +273,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
@@ -269,6 +286,7 @@ class TestResources:
             mount_path="/uploads/receipt.pdf",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
@@ -278,6 +296,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -291,6 +310,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -320,6 +340,7 @@ class TestAsyncResources:
         resource = await async_client.beta.sessions.resources.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -330,6 +351,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceRetrieveResponse, resource, path=["response"])
 
@@ -338,6 +360,7 @@ class TestAsyncResources:
         response = await async_client.beta.sessions.resources.with_raw_response.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -350,6 +373,7 @@ class TestAsyncResources:
         async with async_client.beta.sessions.resources.with_streaming_response.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -379,6 +403,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -390,6 +415,7 @@ class TestAsyncResources:
             authorization_token="ghp_exampletoken",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ResourceUpdateResponse, resource, path=["response"])
 
@@ -399,6 +425,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -412,6 +439,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -441,6 +469,7 @@ class TestAsyncResources:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         resource = await async_client.beta.sessions.resources.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -452,6 +481,7 @@ class TestAsyncResources:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionResource], resource, path=["response"])
 
@@ -459,6 +489,7 @@ class TestAsyncResources:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.resources.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -470,6 +501,7 @@ class TestAsyncResources:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.resources.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -491,6 +523,7 @@ class TestAsyncResources:
         resource = await async_client.beta.sessions.resources.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -501,6 +534,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeleteSessionResource, resource, path=["response"])
 
@@ -509,6 +543,7 @@ class TestAsyncResources:
         response = await async_client.beta.sessions.resources.with_raw_response.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -521,6 +556,7 @@ class TestAsyncResources:
         async with async_client.beta.sessions.resources.with_streaming_response.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -550,6 +586,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
@@ -562,6 +599,7 @@ class TestAsyncResources:
             mount_path="/uploads/receipt.pdf",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsFileResource, resource, path=["response"])
 
@@ -571,6 +609,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -584,6 +623,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

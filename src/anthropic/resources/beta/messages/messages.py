@@ -1264,7 +1264,7 @@ class Messages(SyncAPIResource):
             extra_headers or {},
         )
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1295,6 +1295,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -1390,7 +1391,7 @@ class Messages(SyncAPIResource):
             )
 
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1422,6 +1423,7 @@ class Messages(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -1789,7 +1791,7 @@ class Messages(SyncAPIResource):
 
         make_request = partial(
             self._post,
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1821,6 +1823,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -2107,7 +2110,7 @@ class Messages(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,
@@ -2127,6 +2130,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
                 span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
@@ -3302,7 +3306,7 @@ class AsyncMessages(AsyncAPIResource):
             extra_headers or {},
         )
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3333,6 +3337,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -3428,7 +3433,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3460,6 +3465,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -3827,7 +3833,7 @@ class AsyncMessages(AsyncAPIResource):
         merged_output_config = merge_output_config(output_config, transformed_output_format)
 
         request = self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3859,6 +3865,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -4145,7 +4152,7 @@ class AsyncMessages(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,
@@ -4165,6 +4172,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
                 span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),

@@ -153,7 +153,7 @@ class Agents(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/agents?beta=true",
+            "/v1/agents",
             body={
                 "model": model,
                 "name": name,
@@ -171,6 +171,7 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.create",
                 span_route="/v1/agents",
                 span_created_id="gen_ai.agent.id",
@@ -234,13 +235,14 @@ class Agents(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"version": version},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.retrieve",
                 span_route="/v1/agents/{agent_id}",
                 span_attributes={"gen_ai.agent.id": agent_id},
@@ -349,7 +351,7 @@ class Agents(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             body={
                 "description": description,
                 "execution_identity": execution_identity,
@@ -368,6 +370,7 @@ class Agents(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.update",
                 span_route="/v1/agents/{agent_id}",
                 span_attributes={"gen_ai.agent.id": agent_id},
@@ -437,7 +440,7 @@ class Agents(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/agents?beta=true",
+            "/v1/agents",
             page=SyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -451,6 +454,7 @@ class Agents(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.list",
                 span_route="/v1/agents",
             ),
@@ -509,12 +513,13 @@ class Agents(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/archive", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.archive",
                 span_route="/v1/agents/{agent_id}/archive",
                 span_attributes={"gen_ai.agent.id": agent_id},
@@ -634,7 +639,7 @@ class AsyncAgents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/agents?beta=true",
+            "/v1/agents",
             body={
                 "model": model,
                 "name": name,
@@ -652,6 +657,7 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.create",
                 span_route="/v1/agents",
                 span_created_id="gen_ai.agent.id",
@@ -715,13 +721,14 @@ class AsyncAgents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"version": version},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.retrieve",
                 span_route="/v1/agents/{agent_id}",
                 span_attributes={"gen_ai.agent.id": agent_id},
@@ -830,7 +837,7 @@ class AsyncAgents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/agents/{agent_id}?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             body={
                 "description": description,
                 "execution_identity": execution_identity,
@@ -849,6 +856,7 @@ class AsyncAgents(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.update",
                 span_route="/v1/agents/{agent_id}",
                 span_attributes={"gen_ai.agent.id": agent_id},
@@ -918,7 +926,7 @@ class AsyncAgents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/agents?beta=true",
+            "/v1/agents",
             page=AsyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -932,6 +940,7 @@ class AsyncAgents(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.list",
                 span_route="/v1/agents",
             ),
@@ -990,12 +999,13 @@ class AsyncAgents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/agents/{agent_id}/archive?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/archive", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.agents.archive",
                 span_route="/v1/agents/{agent_id}/archive",
                 span_attributes={"gen_ai.agent.id": agent_id},

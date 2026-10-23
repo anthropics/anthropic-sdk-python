@@ -24,6 +24,7 @@ class TestAgents:
         agent = client.beta.agents.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -76,6 +77,7 @@ class TestAgents:
             ],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -84,6 +86,7 @@ class TestAgents:
         response = client.beta.agents.with_raw_response.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -96,6 +99,7 @@ class TestAgents:
         with client.beta.agents.with_streaming_response.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -109,6 +113,7 @@ class TestAgents:
     def test_method_retrieve(self, client: Anthropic) -> None:
         agent = client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -119,6 +124,7 @@ class TestAgents:
             version=0,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -126,6 +132,7 @@ class TestAgents:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.agents.with_raw_response.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -137,6 +144,7 @@ class TestAgents:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.agents.with_streaming_response.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -157,6 +165,7 @@ class TestAgents:
     def test_method_update(self, client: Anthropic) -> None:
         agent = client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -216,6 +225,7 @@ class TestAgents:
             version=1,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -223,6 +233,7 @@ class TestAgents:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.agents.with_raw_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -234,6 +245,7 @@ class TestAgents:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.agents.with_streaming_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -252,7 +264,9 @@ class TestAgents:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        agent = client.beta.agents.list()
+        agent = client.beta.agents.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
     @parametrize
@@ -265,12 +279,15 @@ class TestAgents:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.agents.with_raw_response.list()
+        response = client.beta.agents.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -279,7 +296,9 @@ class TestAgents:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.agents.with_streaming_response.list() as response:
+        with client.beta.agents.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -292,6 +311,7 @@ class TestAgents:
     def test_method_archive(self, client: Anthropic) -> None:
         agent = client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -301,6 +321,7 @@ class TestAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -308,6 +329,7 @@ class TestAgents:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.agents.with_raw_response.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -319,6 +341,7 @@ class TestAgents:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.agents.with_streaming_response.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -346,6 +369,7 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -398,6 +422,7 @@ class TestAsyncAgents:
             ],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -406,6 +431,7 @@ class TestAsyncAgents:
         response = await async_client.beta.agents.with_raw_response.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -418,6 +444,7 @@ class TestAsyncAgents:
         async with async_client.beta.agents.with_streaming_response.create(
             model="claude-opus-5-5",
             name="My First Agent",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -431,6 +458,7 @@ class TestAsyncAgents:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -441,6 +469,7 @@ class TestAsyncAgents:
             version=0,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -448,6 +477,7 @@ class TestAsyncAgents:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.agents.with_raw_response.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -459,6 +489,7 @@ class TestAsyncAgents:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.agents.with_streaming_response.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -479,6 +510,7 @@ class TestAsyncAgents:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -538,6 +570,7 @@ class TestAsyncAgents:
             version=1,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -545,6 +578,7 @@ class TestAsyncAgents:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.agents.with_raw_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -556,6 +590,7 @@ class TestAsyncAgents:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.agents.with_streaming_response.update(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -574,7 +609,9 @@ class TestAsyncAgents:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        agent = await async_client.beta.agents.list()
+        agent = await async_client.beta.agents.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
     @parametrize
@@ -587,12 +624,15 @@ class TestAsyncAgents:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsAgent], agent, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.agents.with_raw_response.list()
+        response = await async_client.beta.agents.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -601,7 +641,9 @@ class TestAsyncAgents:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.agents.with_streaming_response.list() as response:
+        async with async_client.beta.agents.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -614,6 +656,7 @@ class TestAsyncAgents:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -623,6 +666,7 @@ class TestAsyncAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsAgent, agent, path=["response"])
 
@@ -630,6 +674,7 @@ class TestAsyncAgents:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.agents.with_raw_response.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -641,6 +686,7 @@ class TestAsyncAgents:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.agents.with_streaming_response.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

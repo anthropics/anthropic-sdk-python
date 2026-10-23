@@ -6,7 +6,7 @@ __all__ = ["BetaSkillParams"]
 
 
 class BetaSkillParams(TypedDict, total=False):
-    """Specification for a skill to be loaded in a container (request model)."""
+    """Specification for a skill to be loaded in a container."""
 
     skill_id: Required[str]
     """Skill ID"""

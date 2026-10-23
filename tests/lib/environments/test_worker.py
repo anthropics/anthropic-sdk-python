@@ -805,8 +805,7 @@ async def test_handle_item_missing_required_raises(monkeypatch: pytest.MonkeyPat
 async def test_handle_item_runs_keyless_on_a_token_bearing_secret(monkeypatch: pytest.MonkeyPatch) -> None:
     """With no environment key anywhere — argument, constructor, or env var —
     a work secret whose payload carries a sessions token is credential enough:
-    every per-item call rides that token. (The on-prem Kubernetes sandbox hands
-    the pod only the short-lived secret; the pod never holds the key.)"""
+    every per-item call rides that token."""
     secret = _encode_secret({"sessions_token": "sessions-token-keyless"})
     work = _FakeWorkResource(heartbeat_state="running")
     sessions = _FakeSessions()

@@ -77,7 +77,7 @@ class ExternalKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._post(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             body={
                 "provider_config": provider_config,
                 "display_name": display_name,
@@ -88,6 +88,7 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.create",
                 span_route="/v1/organizations/external_keys",
                 span_created_id="anthropic.organization.external_key.id",
@@ -123,14 +124,13 @@ class ExternalKeys(SyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._get(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.retrieve",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -180,9 +180,7 @@ class ExternalKeys(SyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._post(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             body={
                 "display_name": display_name,
                 "geo": geo,
@@ -193,6 +191,7 @@ class ExternalKeys(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.update",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -232,7 +231,7 @@ class ExternalKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             page=SyncPageCursor[BetaExternalKey],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -243,6 +242,7 @@ class ExternalKeys(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.list",
                 span_route="/v1/organizations/external_keys",
             ),
@@ -279,14 +279,13 @@ class ExternalKeys(SyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._delete(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.delete",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -328,13 +327,14 @@ class ExternalKeys(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._post(
             path_template(
-                "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
+                "/v1/organizations/external_keys/{external_key_id}/validate", external_key_id=external_key_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.validate",
                 span_route="/v1/organizations/external_keys/{external_key_id}/validate",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -395,7 +395,7 @@ class AsyncExternalKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return await self._post(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             body={
                 "provider_config": provider_config,
                 "display_name": display_name,
@@ -406,6 +406,7 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.create",
                 span_route="/v1/organizations/external_keys",
                 span_created_id="anthropic.organization.external_key.id",
@@ -441,14 +442,13 @@ class AsyncExternalKeys(AsyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._get(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.retrieve",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -498,9 +498,7 @@ class AsyncExternalKeys(AsyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._post(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             body={
                 "display_name": display_name,
                 "geo": geo,
@@ -511,6 +509,7 @@ class AsyncExternalKeys(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.update",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -550,7 +549,7 @@ class AsyncExternalKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             page=AsyncPageCursor[BetaExternalKey],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -561,6 +560,7 @@ class AsyncExternalKeys(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.list",
                 span_route="/v1/organizations/external_keys",
             ),
@@ -597,14 +597,13 @@ class AsyncExternalKeys(AsyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._delete(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.delete",
                 span_route="/v1/organizations/external_keys/{external_key_id}",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},
@@ -646,13 +645,14 @@ class AsyncExternalKeys(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._post(
             path_template(
-                "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
+                "/v1/organizations/external_keys/{external_key_id}/validate", external_key_id=external_key_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.external_keys.validate",
                 span_route="/v1/organizations/external_keys/{external_key_id}/validate",
                 span_attributes={"anthropic.organization.external_key.id": external_key_id},

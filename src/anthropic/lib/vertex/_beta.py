@@ -27,7 +27,7 @@ class Beta(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return the
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#accessing-raw-response-data-for-example-headers
         """
         return BetaWithRawResponse(self)
 
@@ -36,7 +36,7 @@ class Beta(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#streaming-response-body
         """
         return BetaWithStreamingResponse(self)
 
@@ -52,7 +52,7 @@ class AsyncBeta(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return the
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#accessing-raw-response-data-for-example-headers
         """
         return AsyncBetaWithRawResponse(self)
 
@@ -61,7 +61,7 @@ class AsyncBeta(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python#streaming-response-body
         """
         return AsyncBetaWithStreamingResponse(self)
 

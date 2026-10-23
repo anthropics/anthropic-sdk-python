@@ -249,7 +249,7 @@ class Usage(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "analytics-usage-cost-2026-08-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/analytics/usage?beta=true",
+            "/v1/organizations/analytics/usage",
             page=SyncReportPageCursor[BetaAnalyticsUsageItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -286,6 +286,7 @@ class Usage(SyncAPIResource):
                     "user_profile_ids": user_profile_ids,
                     "workspace_ids": workspace_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.usage.list",
                 span_route="/v1/organizations/analytics/usage",
             ),
@@ -505,7 +506,7 @@ class AsyncUsage(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "analytics-usage-cost-2026-08-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/analytics/usage?beta=true",
+            "/v1/organizations/analytics/usage",
             page=AsyncReportPageCursor[BetaAnalyticsUsageItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -542,6 +543,7 @@ class AsyncUsage(AsyncAPIResource):
                     "user_profile_ids": user_profile_ids,
                     "workspace_ids": workspace_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.usage.list",
                 span_route="/v1/organizations/analytics/usage",
             ),

@@ -77,7 +77,7 @@ class Members(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._get(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -86,6 +86,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -133,7 +134,7 @@ class Members(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -143,6 +144,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -194,7 +196,7 @@ class Members(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template("/v1/organizations/workspaces/{workspace_id}/members?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/members", workspace_id=workspace_id),
             page=SyncPage[BetaWorkspaceMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -206,6 +208,7 @@ class Members(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -247,7 +250,7 @@ class Members(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/members?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/members", workspace_id=workspace_id),
             body={
                 "user_id": user_id,
                 "workspace_role": workspace_role,
@@ -257,6 +260,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -299,7 +303,7 @@ class Members(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._delete(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -308,6 +312,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -373,7 +378,7 @@ class AsyncMembers(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._get(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -382,6 +387,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -429,7 +435,7 @@ class AsyncMembers(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -439,6 +445,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={
@@ -490,7 +497,7 @@ class AsyncMembers(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template("/v1/organizations/workspaces/{workspace_id}/members?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/members", workspace_id=workspace_id),
             page=AsyncPage[BetaWorkspaceMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -502,6 +509,7 @@ class AsyncMembers(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -543,7 +551,7 @@ class AsyncMembers(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/members?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/members", workspace_id=workspace_id),
             body={
                 "user_id": user_id,
                 "workspace_role": workspace_role,
@@ -553,6 +561,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.add",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -595,7 +604,7 @@ class AsyncMembers(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._delete(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 workspace_id=workspace_id,
                 user_id=user_id,
             ),
@@ -604,6 +613,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.members.remove",
                 span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
                 span_attributes={

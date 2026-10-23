@@ -20,6 +20,7 @@ class TestPermissions:
     def test_method_list(self, client: Anthropic) -> None:
         permission = client.beta.organization.rbac_roles.permissions.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaRBACRolePermission], permission, path=["response"])
 
@@ -29,6 +30,7 @@ class TestPermissions:
             rbac_role_id="rbac_role_id",
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19yb2xlXzAxIn0",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaRBACRolePermission], permission, path=["response"])
 
@@ -36,6 +38,7 @@ class TestPermissions:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_roles.permissions.with_raw_response.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -47,6 +50,7 @@ class TestPermissions:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_roles.permissions.with_streaming_response.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -73,6 +77,7 @@ class TestAsyncPermissions:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         permission = await async_client.beta.organization.rbac_roles.permissions.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaRBACRolePermission], permission, path=["response"])
 
@@ -82,6 +87,7 @@ class TestAsyncPermissions:
             rbac_role_id="rbac_role_id",
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19yb2xlXzAxIn0",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaRBACRolePermission], permission, path=["response"])
 
@@ -89,6 +95,7 @@ class TestAsyncPermissions:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_roles.permissions.with_raw_response.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -100,6 +107,7 @@ class TestAsyncPermissions:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_roles.permissions.with_streaming_response.list(
             rbac_role_id="rbac_role_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

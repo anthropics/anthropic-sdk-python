@@ -98,9 +98,9 @@ class UserCostReport(SyncAPIResource):
         Returns cost per user, ranked by spend; `group_by[]` or `bucket_width` splits a
         user across several rows. Use this to see which users account for the most cost.
         Only cost attributed to a user account is included; cost with no user attributed
-        to it, such as requests attributed only to an API key, is left out. Available to
-        organizations on a Claude Enterprise plan. Requires an API key with the
-        `read:analytics` scope.
+        to it, such as Code Review usage and Claude Tag usage in Slack channels, is left
+        out. Available to organizations on a Claude Enterprise plan. Requires an API key
+        with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use
@@ -192,7 +192,7 @@ class UserCostReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_cost_report?beta=true",
+            "/v1/organizations/analytics/user_cost_report",
             page=SyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -220,6 +220,7 @@ class UserCostReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.user_cost_report.list",
                 span_route="/v1/organizations/analytics/user_cost_report",
             ),
@@ -299,9 +300,9 @@ class AsyncUserCostReport(AsyncAPIResource):
         Returns cost per user, ranked by spend; `group_by[]` or `bucket_width` splits a
         user across several rows. Use this to see which users account for the most cost.
         Only cost attributed to a user account is included; cost with no user attributed
-        to it, such as requests attributed only to an API key, is left out. Available to
-        organizations on a Claude Enterprise plan. Requires an API key with the
-        `read:analytics` scope.
+        to it, such as Code Review usage and Claude Tag usage in Slack channels, is left
+        out. Available to organizations on a Claude Enterprise plan. Requires an API key
+        with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use
@@ -393,7 +394,7 @@ class AsyncUserCostReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_cost_report?beta=true",
+            "/v1/organizations/analytics/user_cost_report",
             page=AsyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -421,6 +422,7 @@ class AsyncUserCostReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.user_cost_report.list",
                 span_route="/v1/organizations/analytics/user_cost_report",
             ),

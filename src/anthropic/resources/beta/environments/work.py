@@ -113,15 +113,14 @@ class Work(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}", environment_id=environment_id, work_id=work_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.retrieve",
                 span_route="/v1/environments/{environment_id}/work/{work_id}",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -191,9 +190,7 @@ class Work(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}", environment_id=environment_id, work_id=work_id
             ),
             body={"metadata": metadata},
             options=make_request_options(
@@ -201,6 +198,7 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.update",
                 span_route="/v1/environments/{environment_id}/work/{work_id}",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -259,7 +257,7 @@ class Work(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/environments/{environment_id}/work?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work", environment_id=environment_id),
             page=SyncPageCursor[BetaSelfHostedWork],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -270,6 +268,7 @@ class Work(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.list",
                 span_route="/v1/environments/{environment_id}/work",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -327,15 +326,14 @@ class Work(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/ack?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}/ack", environment_id=environment_id, work_id=work_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.ack",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -401,7 +399,7 @@ class Work(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/heartbeat?beta=true",
+                "/v1/environments/{environment_id}/work/{work_id}/heartbeat",
                 environment_id=environment_id,
                 work_id=work_id,
             ),
@@ -414,6 +412,7 @@ class Work(SyncAPIResource):
                     "desired_ttl_seconds": desired_ttl_seconds,
                     "expected_last_heartbeat": expected_last_heartbeat,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.heartbeat",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -480,7 +479,7 @@ class Work(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/environments/{environment_id}/work/poll?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work/poll", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -490,6 +489,7 @@ class Work(SyncAPIResource):
                     "block_ms": block_ms,
                     "reclaim_older_than_ms": reclaim_older_than_ms,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.poll",
                 span_route="/v1/environments/{environment_id}/work/poll",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -546,12 +546,13 @@ class Work(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work/stats", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.stats",
                 span_route="/v1/environments/{environment_id}/work/stats",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -620,9 +621,7 @@ class Work(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/stop?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}/stop", environment_id=environment_id, work_id=work_id
             ),
             body={"force": force},
             options=make_request_options(
@@ -630,6 +629,7 @@ class Work(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.stop",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -716,15 +716,14 @@ class AsyncWork(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}", environment_id=environment_id, work_id=work_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.retrieve",
                 span_route="/v1/environments/{environment_id}/work/{work_id}",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -794,9 +793,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}", environment_id=environment_id, work_id=work_id
             ),
             body={"metadata": metadata},
             options=make_request_options(
@@ -804,6 +801,7 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.update",
                 span_route="/v1/environments/{environment_id}/work/{work_id}",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -862,7 +860,7 @@ class AsyncWork(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/environments/{environment_id}/work?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work", environment_id=environment_id),
             page=AsyncPageCursor[BetaSelfHostedWork],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -873,6 +871,7 @@ class AsyncWork(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.list",
                 span_route="/v1/environments/{environment_id}/work",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -930,15 +929,14 @@ class AsyncWork(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/ack?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}/ack", environment_id=environment_id, work_id=work_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.ack",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/ack",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -1004,7 +1002,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/heartbeat?beta=true",
+                "/v1/environments/{environment_id}/work/{work_id}/heartbeat",
                 environment_id=environment_id,
                 work_id=work_id,
             ),
@@ -1017,6 +1015,7 @@ class AsyncWork(AsyncAPIResource):
                     "desired_ttl_seconds": desired_ttl_seconds,
                     "expected_last_heartbeat": expected_last_heartbeat,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.heartbeat",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/heartbeat",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},
@@ -1083,7 +1082,7 @@ class AsyncWork(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/environments/{environment_id}/work/poll?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work/poll", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -1093,6 +1092,7 @@ class AsyncWork(AsyncAPIResource):
                     "block_ms": block_ms,
                     "reclaim_older_than_ms": reclaim_older_than_ms,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.poll",
                 span_route="/v1/environments/{environment_id}/work/poll",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -1149,12 +1149,13 @@ class AsyncWork(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/environments/{environment_id}/work/stats?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/work/stats", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.stats",
                 span_route="/v1/environments/{environment_id}/work/stats",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -1223,9 +1224,7 @@ class AsyncWork(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/environments/{environment_id}/work/{work_id}/stop?beta=true",
-                environment_id=environment_id,
-                work_id=work_id,
+                "/v1/environments/{environment_id}/work/{work_id}/stop", environment_id=environment_id, work_id=work_id
             ),
             body={"force": force},
             options=make_request_options(
@@ -1233,6 +1232,7 @@ class AsyncWork(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.work.stop",
                 span_route="/v1/environments/{environment_id}/work/{work_id}/stop",
                 span_attributes={"anthropic.environment.id": environment_id, "anthropic.environment.work.id": work_id},

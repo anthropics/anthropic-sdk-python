@@ -20,6 +20,7 @@ class TestShares:
     def test_method_list(self, client: Anthropic) -> None:
         share = client.beta.organization.plugins.shares.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginShare], share, path=["response"])
 
@@ -32,6 +33,7 @@ class TestShares:
             page="page",
             target_type="organization",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginShare], share, path=["response"])
 
@@ -39,6 +41,7 @@ class TestShares:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.shares.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -50,6 +53,7 @@ class TestShares:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.shares.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -76,6 +80,7 @@ class TestAsyncShares:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         share = await async_client.beta.organization.plugins.shares.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginShare], share, path=["response"])
 
@@ -88,6 +93,7 @@ class TestAsyncShares:
             page="page",
             target_type="organization",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginShare], share, path=["response"])
 
@@ -95,6 +101,7 @@ class TestAsyncShares:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.shares.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -106,6 +113,7 @@ class TestAsyncShares:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.shares.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

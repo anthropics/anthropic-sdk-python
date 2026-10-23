@@ -169,7 +169,7 @@ class CostReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/cost_report?beta=true",
+            "/v1/organizations/analytics/cost_report",
             page=SyncReportPageCursor[BetaAnalyticsCostReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -194,6 +194,7 @@ class CostReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.cost_report.list",
                 span_route="/v1/organizations/analytics/cost_report",
             ),
@@ -344,7 +345,7 @@ class AsyncCostReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/cost_report?beta=true",
+            "/v1/organizations/analytics/cost_report",
             page=AsyncReportPageCursor[BetaAnalyticsCostReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -369,6 +370,7 @@ class AsyncCostReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.cost_report.list",
                 span_route="/v1/organizations/analytics/cost_report",
             ),

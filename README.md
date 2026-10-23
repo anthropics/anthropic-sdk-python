@@ -36,10 +36,8 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-
     model="claude-opus-5-5",
 )
-
 print(message.content)
 ```
 

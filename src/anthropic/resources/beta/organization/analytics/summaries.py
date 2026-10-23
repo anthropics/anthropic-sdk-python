@@ -108,7 +108,7 @@ class Summaries(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/summaries?beta=true",
+            "/v1/organizations/analytics/summaries",
             page=SyncPageCursor[BetaAnalyticsSingleDayActivitySummary],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -122,6 +122,7 @@ class Summaries(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.summaries.list",
                 span_route="/v1/organizations/analytics/summaries",
             ),
@@ -214,7 +215,7 @@ class AsyncSummaries(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/summaries?beta=true",
+            "/v1/organizations/analytics/summaries",
             page=AsyncPageCursor[BetaAnalyticsSingleDayActivitySummary],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -228,6 +229,7 @@ class AsyncSummaries(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.summaries.list",
                 span_route="/v1/organizations/analytics/summaries",
             ),

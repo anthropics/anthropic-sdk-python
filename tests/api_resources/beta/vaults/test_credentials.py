@@ -30,6 +30,7 @@ class TestCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -46,6 +47,7 @@ class TestCredentials:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -58,6 +60,7 @@ class TestCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -74,6 +77,7 @@ class TestCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -100,6 +104,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -110,6 +115,7 @@ class TestCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -118,6 +124,7 @@ class TestCredentials:
         response = client.beta.vaults.credentials.with_raw_response.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -130,6 +137,7 @@ class TestCredentials:
         with client.beta.vaults.credentials.with_streaming_response.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -158,6 +166,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -183,6 +192,7 @@ class TestCredentials:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -191,6 +201,7 @@ class TestCredentials:
         response = client.beta.vaults.credentials.with_raw_response.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -203,6 +214,7 @@ class TestCredentials:
         with client.beta.vaults.credentials.with_streaming_response.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -230,6 +242,7 @@ class TestCredentials:
     def test_method_list(self, client: Anthropic) -> None:
         credential = client.beta.vaults.credentials.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -242,6 +255,7 @@ class TestCredentials:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -249,6 +263,7 @@ class TestCredentials:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.vaults.credentials.with_raw_response.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -260,6 +275,7 @@ class TestCredentials:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.vaults.credentials.with_streaming_response.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -281,6 +297,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -291,6 +308,7 @@ class TestCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -299,6 +317,7 @@ class TestCredentials:
         response = client.beta.vaults.credentials.with_raw_response.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -311,6 +330,7 @@ class TestCredentials:
         with client.beta.vaults.credentials.with_streaming_response.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -339,6 +359,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -349,6 +370,7 @@ class TestCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -357,6 +379,7 @@ class TestCredentials:
         response = client.beta.vaults.credentials.with_raw_response.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -369,6 +392,7 @@ class TestCredentials:
         with client.beta.vaults.credentials.with_streaming_response.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -397,6 +421,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -407,6 +432,7 @@ class TestCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -415,6 +441,7 @@ class TestCredentials:
         response = client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -427,6 +454,7 @@ class TestCredentials:
         with client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -465,6 +493,7 @@ class TestAsyncCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -481,6 +510,7 @@ class TestAsyncCredentials:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -493,6 +523,7 @@ class TestAsyncCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -509,6 +540,7 @@ class TestAsyncCredentials:
                 "mcp_server_url": "https://example-server.modelcontextprotocol.io/sse",
                 "type": "static_bearer",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -535,6 +567,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -545,6 +578,7 @@ class TestAsyncCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -553,6 +587,7 @@ class TestAsyncCredentials:
         response = await async_client.beta.vaults.credentials.with_raw_response.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -565,6 +600,7 @@ class TestAsyncCredentials:
         async with async_client.beta.vaults.credentials.with_streaming_response.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -593,6 +629,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -618,6 +655,7 @@ class TestAsyncCredentials:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -626,6 +664,7 @@ class TestAsyncCredentials:
         response = await async_client.beta.vaults.credentials.with_raw_response.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -638,6 +677,7 @@ class TestAsyncCredentials:
         async with async_client.beta.vaults.credentials.with_streaming_response.update(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -665,6 +705,7 @@ class TestAsyncCredentials:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         credential = await async_client.beta.vaults.credentials.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -677,6 +718,7 @@ class TestAsyncCredentials:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsCredential], credential, path=["response"])
 
@@ -684,6 +726,7 @@ class TestAsyncCredentials:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.credentials.with_raw_response.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -695,6 +738,7 @@ class TestAsyncCredentials:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.credentials.with_streaming_response.list(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -716,6 +760,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -726,6 +771,7 @@ class TestAsyncCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedCredential, credential, path=["response"])
 
@@ -734,6 +780,7 @@ class TestAsyncCredentials:
         response = await async_client.beta.vaults.credentials.with_raw_response.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -746,6 +793,7 @@ class TestAsyncCredentials:
         async with async_client.beta.vaults.credentials.with_streaming_response.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -774,6 +822,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -784,6 +833,7 @@ class TestAsyncCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredential, credential, path=["response"])
 
@@ -792,6 +842,7 @@ class TestAsyncCredentials:
         response = await async_client.beta.vaults.credentials.with_raw_response.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -804,6 +855,7 @@ class TestAsyncCredentials:
         async with async_client.beta.vaults.credentials.with_streaming_response.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -832,6 +884,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -842,6 +895,7 @@ class TestAsyncCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsCredentialValidation, credential, path=["response"])
 
@@ -850,6 +904,7 @@ class TestAsyncCredentials:
         response = await async_client.beta.vaults.credentials.with_raw_response.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -862,6 +917,7 @@ class TestAsyncCredentials:
         async with async_client.beta.vaults.credentials.with_streaming_response.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

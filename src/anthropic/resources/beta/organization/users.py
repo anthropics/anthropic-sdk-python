@@ -70,12 +70,13 @@ class Users(SyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._get(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.retrieve",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},
@@ -120,13 +121,14 @@ class Users(SyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._post(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             body={"role": role},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.update",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},
@@ -182,7 +184,7 @@ class Users(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/users?beta=true",
+            "/v1/organizations/users",
             page=SyncPage[BetaOrganizationUser],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -196,6 +198,7 @@ class Users(SyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.list",
                 span_route="/v1/organizations/users",
             ),
@@ -230,12 +233,13 @@ class Users(SyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._delete(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.remove",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},
@@ -292,12 +296,13 @@ class AsyncUsers(AsyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._get(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.retrieve",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},
@@ -342,13 +347,14 @@ class AsyncUsers(AsyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._post(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             body={"role": role},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.update",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},
@@ -404,7 +410,7 @@ class AsyncUsers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/users?beta=true",
+            "/v1/organizations/users",
             page=AsyncPage[BetaOrganizationUser],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -418,6 +424,7 @@ class AsyncUsers(AsyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.list",
                 span_route="/v1/organizations/users",
             ),
@@ -452,12 +459,13 @@ class AsyncUsers(AsyncAPIResource):
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._delete(
-            path_template("/v1/organizations/users/{user_id}?beta=true", user_id=user_id),
+            path_template("/v1/organizations/users/{user_id}", user_id=user_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.users.remove",
                 span_route="/v1/organizations/users/{user_id}",
                 span_attributes={"anthropic.organization.user.id": user_id},

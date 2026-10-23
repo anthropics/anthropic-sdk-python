@@ -107,13 +107,14 @@ class Certificates(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.create",
                 span_route="/v1/tunnels/{tunnel_id}/certificates",
                 span_attributes={"anthropic.tunnel.id": tunnel_id},
@@ -186,7 +187,7 @@ class Certificates(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -195,6 +196,7 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.retrieve",
                 span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
@@ -270,7 +272,7 @@ class Certificates(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             page=SyncPageCursor[BetaTunnelCertificate],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -282,6 +284,7 @@ class Certificates(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.list",
                 span_route="/v1/tunnels/{tunnel_id}/certificates",
                 span_attributes={"anthropic.tunnel.id": tunnel_id},
@@ -356,7 +359,7 @@ class Certificates(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -365,6 +368,7 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.archive",
                 span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
@@ -457,13 +461,14 @@ class AsyncCertificates(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.create",
                 span_route="/v1/tunnels/{tunnel_id}/certificates",
                 span_attributes={"anthropic.tunnel.id": tunnel_id},
@@ -536,7 +541,7 @@ class AsyncCertificates(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -545,6 +550,7 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.retrieve",
                 span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
@@ -620,7 +626,7 @@ class AsyncCertificates(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             page=AsyncPageCursor[BetaTunnelCertificate],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -632,6 +638,7 @@ class AsyncCertificates(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.list",
                 span_route="/v1/tunnels/{tunnel_id}/certificates",
                 span_attributes={"anthropic.tunnel.id": tunnel_id},
@@ -706,7 +713,7 @@ class AsyncCertificates(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -715,6 +722,7 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.tunnels.certificates.archive",
                 span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},

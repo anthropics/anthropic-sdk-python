@@ -22,6 +22,7 @@ class TestActionURLs:
         action_url = client.beta.user_profiles.action_urls.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileActionURL, action_url, path=["response"])
 
@@ -32,6 +33,7 @@ class TestActionURLs:
             action={"type": "enroll_end_user"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileActionURL, action_url, path=["response"])
 
@@ -40,6 +42,7 @@ class TestActionURLs:
         response = client.beta.user_profiles.action_urls.with_raw_response.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -52,6 +55,7 @@ class TestActionURLs:
         with client.beta.user_profiles.action_urls.with_streaming_response.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -80,6 +84,7 @@ class TestAsyncActionURLs:
         action_url = await async_client.beta.user_profiles.action_urls.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileActionURL, action_url, path=["response"])
 
@@ -90,6 +95,7 @@ class TestAsyncActionURLs:
             action={"type": "enroll_end_user"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileActionURL, action_url, path=["response"])
 
@@ -98,6 +104,7 @@ class TestAsyncActionURLs:
         response = await async_client.beta.user_profiles.action_urls.with_raw_response.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -110,6 +117,7 @@ class TestAsyncActionURLs:
         async with async_client.beta.user_profiles.action_urls.with_streaming_response.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

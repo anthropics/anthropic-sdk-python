@@ -167,7 +167,7 @@ class UsageReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/usage_report?beta=true",
+            "/v1/organizations/analytics/usage_report",
             page=SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -192,6 +192,7 @@ class UsageReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.usage_report.list",
                 span_route="/v1/organizations/analytics/usage_report",
             ),
@@ -340,7 +341,7 @@ class AsyncUsageReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/usage_report?beta=true",
+            "/v1/organizations/analytics/usage_report",
             page=AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -365,6 +366,7 @@ class AsyncUsageReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.usage_report.list",
                 span_route="/v1/organizations/analytics/usage_report",
             ),

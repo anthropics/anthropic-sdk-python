@@ -96,9 +96,9 @@ class UserUsageReport(SyncAPIResource):
         Returns usage per user, ranked by the chosen token metric; `group_by[]` or
         `bucket_width` splits a user across several rows. Use this to see which users
         consume the most tokens. Only usage attributed to a user account is included;
-        usage with no user attributed to it, such as requests attributed only to an API
-        key, is left out. Available to organizations on a Claude Enterprise plan.
-        Requires an API key with the `read:analytics` scope.
+        usage with no user attributed to it, such as Code Review usage and Claude Tag
+        usage in Slack channels, is left out. Available to organizations on a Claude
+        Enterprise plan. Requires an API key with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use
@@ -185,7 +185,7 @@ class UserUsageReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_usage_report?beta=true",
+            "/v1/organizations/analytics/user_usage_report",
             page=SyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -213,6 +213,7 @@ class UserUsageReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.user_usage_report.list",
                 span_route="/v1/organizations/analytics/user_usage_report",
             ),
@@ -290,9 +291,9 @@ class AsyncUserUsageReport(AsyncAPIResource):
         Returns usage per user, ranked by the chosen token metric; `group_by[]` or
         `bucket_width` splits a user across several rows. Use this to see which users
         consume the most tokens. Only usage attributed to a user account is included;
-        usage with no user attributed to it, such as requests attributed only to an API
-        key, is left out. Available to organizations on a Claude Enterprise plan.
-        Requires an API key with the `read:analytics` scope.
+        usage with no user attributed to it, such as Code Review usage and Claude Tag
+        usage in Slack channels, is left out. Available to organizations on a Claude
+        Enterprise plan. Requires an API key with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use
@@ -379,7 +380,7 @@ class AsyncUserUsageReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_usage_report?beta=true",
+            "/v1/organizations/analytics/user_usage_report",
             page=AsyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -407,6 +408,7 @@ class AsyncUserUsageReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.user_usage_report.list",
                 span_route="/v1/organizations/analytics/user_usage_report",
             ),

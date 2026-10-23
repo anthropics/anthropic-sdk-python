@@ -58,12 +58,13 @@ class ComplianceSettings(SyncAPIResource):
         organization reads the state inherited from the parent's configuration.
         """
         return self._get(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.compliance_settings.retrieve",
                 span_route="/v1/organizations/compliance_settings",
             ),
@@ -109,13 +110,14 @@ class ComplianceSettings(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._post(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.compliance_settings.update",
                 span_route="/v1/organizations/compliance_settings",
             ),
@@ -162,12 +164,13 @@ class AsyncComplianceSettings(AsyncAPIResource):
         organization reads the state inherited from the parent's configuration.
         """
         return await self._get(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.compliance_settings.retrieve",
                 span_route="/v1/organizations/compliance_settings",
             ),
@@ -213,13 +216,14 @@ class AsyncComplianceSettings(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return await self._post(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.compliance_settings.update",
                 span_route="/v1/organizations/compliance_settings",
             ),

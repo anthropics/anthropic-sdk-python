@@ -51,7 +51,7 @@ class BetaExternalKey(BaseModel):
     geo: str
     """Data residency geo.
 
-    Selects which regional validator handles this key's encrypt/decrypt roundtrips.
+    Selects the region that handles this key's encrypt/decrypt roundtrips.
     """
 
     provider_config: ProviderConfig

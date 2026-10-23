@@ -109,15 +109,14 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.retrieve",
                 span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
                 span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
@@ -187,15 +186,14 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.update",
                 span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
                 span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
@@ -285,7 +283,7 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugin_marketplaces?beta=true",
+            "/v1/organizations/plugin_marketplaces",
             page=SyncPageCursor[BetaPluginMarketplace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -299,6 +297,7 @@ class PluginMarketplaces(SyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.list",
                 span_route="/v1/organizations/plugin_marketplaces",
             ),
@@ -386,7 +385,7 @@ class PluginMarketplaces(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            "/v1/organizations/plugin_marketplaces/validate_archive?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_archive",
             body=body,
             files=files,
             options=make_request_options(
@@ -394,6 +393,7 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.validate_archive",
                 span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
@@ -485,7 +485,7 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            "/v1/organizations/plugin_marketplaces/validate_repository?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_repository",
             body={
                 "repository_url": repository_url,
                 "ref": ref,
@@ -495,6 +495,7 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.validate_repository",
                 span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),
@@ -585,15 +586,14 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.retrieve",
                 span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
                 span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
@@ -663,15 +663,14 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.update",
                 span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
                 span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
@@ -761,7 +760,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugin_marketplaces?beta=true",
+            "/v1/organizations/plugin_marketplaces",
             page=AsyncPageCursor[BetaPluginMarketplace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -775,6 +774,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.list",
                 span_route="/v1/organizations/plugin_marketplaces",
             ),
@@ -862,7 +862,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            "/v1/organizations/plugin_marketplaces/validate_archive?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_archive",
             body=body,
             files=files,
             options=make_request_options(
@@ -870,6 +870,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.validate_archive",
                 span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
@@ -961,7 +962,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/organizations/plugin_marketplaces/validate_repository?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_repository",
             body={
                 "repository_url": repository_url,
                 "ref": ref,
@@ -971,6 +972,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugin_marketplaces.validate_repository",
                 span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),

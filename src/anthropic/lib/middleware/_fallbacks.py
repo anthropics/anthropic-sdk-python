@@ -349,11 +349,11 @@ class BetaRefusalFallbackMiddleware(Middleware):
             # an empty chain disables this middleware
             not self._fallbacks
             # this middleware only applies to the beta messages API
-            # (`client.beta.messages`, marked by the `beta=true` query param) —
+            # (`client.beta.messages`, marked by the `beta` qualifier) —
             # only the beta surface mints fallback credit tokens
             or request.method.lower() != "post"
             or url.path != _MESSAGES_PATH
-            or url.params.get("beta") != "true"
+            or (request.options.qualifiers or {}).get("beta") != "true"
             or body is None
         ):
             return None

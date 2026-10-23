@@ -21,6 +21,7 @@ class TestUserCostReport:
     def test_method_list(self, client: Anthropic) -> None:
         user_cost_report = client.beta.organization.analytics.user_cost_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostUsersItem], user_cost_report, path=["response"])
 
@@ -46,6 +47,7 @@ class TestUserCostReport:
             slack_channel_ids=["C0123ABCDEF"],
             speeds=["fast"],
             user_ids=["user_01AbCdEfGhIjKlMnOpQrSt"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostUsersItem], user_cost_report, path=["response"])
 
@@ -53,6 +55,7 @@ class TestUserCostReport:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.analytics.user_cost_report.with_raw_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -64,6 +67,7 @@ class TestUserCostReport:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.analytics.user_cost_report.with_streaming_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -83,6 +87,7 @@ class TestAsyncUserCostReport:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         user_cost_report = await async_client.beta.organization.analytics.user_cost_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostUsersItem], user_cost_report, path=["response"])
 
@@ -108,6 +113,7 @@ class TestAsyncUserCostReport:
             slack_channel_ids=["C0123ABCDEF"],
             speeds=["fast"],
             user_ids=["user_01AbCdEfGhIjKlMnOpQrSt"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostUsersItem], user_cost_report, path=["response"])
 
@@ -115,6 +121,7 @@ class TestAsyncUserCostReport:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.analytics.user_cost_report.with_raw_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -126,6 +133,7 @@ class TestAsyncUserCostReport:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.analytics.user_cost_report.with_streaming_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

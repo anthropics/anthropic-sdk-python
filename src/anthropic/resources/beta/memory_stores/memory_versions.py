@@ -117,7 +117,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -127,6 +127,7 @@ class MemoryVersions(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.retrieve",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 span_attributes={
@@ -230,9 +231,7 @@ class MemoryVersions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=SyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -251,6 +250,7 @@ class MemoryVersions(SyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.list",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -316,7 +316,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -325,6 +325,7 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.redact",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 span_attributes={
@@ -421,7 +422,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -431,6 +432,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.retrieve",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 span_attributes={
@@ -534,9 +536,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=AsyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -555,6 +555,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.list",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -620,7 +621,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -629,6 +630,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.memory_versions.redact",
                 span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 span_attributes={

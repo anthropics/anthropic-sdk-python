@@ -17,12 +17,16 @@ class TestOrganization:
 
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
-        organization = client.beta.organization.retrieve()
+        organization = client.beta.organization.retrieve(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaOrganization, organization, path=["response"])
 
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
-        response = client.beta.organization.with_raw_response.retrieve()
+        response = client.beta.organization.with_raw_response.retrieve(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -31,7 +35,9 @@ class TestOrganization:
 
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
-        with client.beta.organization.with_streaming_response.retrieve() as response:
+        with client.beta.organization.with_streaming_response.retrieve(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -48,12 +54,16 @@ class TestAsyncOrganization:
 
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
-        organization = await async_client.beta.organization.retrieve()
+        organization = await async_client.beta.organization.retrieve(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaOrganization, organization, path=["response"])
 
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.with_raw_response.retrieve()
+        response = await async_client.beta.organization.with_raw_response.retrieve(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -62,7 +72,9 @@ class TestAsyncOrganization:
 
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.with_streaming_response.retrieve() as response:
+        async with async_client.beta.organization.with_streaming_response.retrieve(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

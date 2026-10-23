@@ -153,7 +153,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -167,6 +167,7 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.create",
                 span_route="/v1/user_profiles",
                 span_created_id="anthropic.user_profile.id",
@@ -225,12 +226,13 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.retrieve",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -328,7 +330,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -342,6 +344,7 @@ class UserProfiles(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.update",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -422,7 +425,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             page=SyncPageCursor[BetaUserProfile],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -435,6 +438,7 @@ class UserProfiles(SyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.list",
                 span_route="/v1/user_profiles",
             ),
@@ -492,12 +496,13 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.delete",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -556,14 +561,13 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
-            ),
+            path_template("/v1/user_profiles/{user_profile_id}/enrollment_url", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.create_enrollment_url",
                 span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -686,7 +690,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -700,6 +704,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.create",
                 span_route="/v1/user_profiles",
                 span_created_id="anthropic.user_profile.id",
@@ -758,12 +763,13 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.retrieve",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -861,7 +867,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -875,6 +881,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.update",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -955,7 +962,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             page=AsyncPageCursor[BetaUserProfile],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -968,6 +975,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                     "order_by": order_by,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.list",
                 span_route="/v1/user_profiles",
             ),
@@ -1025,12 +1033,13 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.delete",
                 span_route="/v1/user_profiles/{user_profile_id}",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},
@@ -1089,14 +1098,13 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
-            ),
+            path_template("/v1/user_profiles/{user_profile_id}/enrollment_url", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.user_profiles.create_enrollment_url",
                 span_route="/v1/user_profiles/{user_profile_id}/enrollment_url",
                 span_attributes={"anthropic.user_profile.id": user_profile_id},

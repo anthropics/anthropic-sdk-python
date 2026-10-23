@@ -11,8 +11,7 @@ GRANT_TYPE_JWT_BEARER = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"
 TOKEN_ENDPOINT = "/v1/oauth/token"
 
-# Seconds to wait on the /v1/oauth/token POST before giving up. Tokens are cheap
-# to mint and the handler is fast; a long timeout mostly means a sick backend.
+# Seconds to wait on the /v1/oauth/token POST before giving up.
 TOKEN_EXCHANGE_TIMEOUT = 30.0
 
 # Beta header required on any authenticated API request that uses a Bearer
@@ -20,11 +19,8 @@ TOKEN_EXCHANGE_TIMEOUT = 30.0
 # at all), and on refresh_token grants against /v1/oauth/token.
 OAUTH_API_BETA_HEADER = "oauth-2025-04-20"
 
-# Beta header routing switch for /v1/oauth/token jwt-bearer grants. Presence
-# routes the POST to the api-go userauth handler (jwt-bearer only); absence
-# routes it to the Python oauth_server (authorization_code / refresh_token).
-# MUST only be sent on jwt-bearer exchanges — sending it on refresh_token would
-# misroute the request to userauth and fail with "unsupported grant_type".
+# Beta header for /v1/oauth/token jwt-bearer grants. MUST only be sent on
+# jwt-bearer exchanges, never on refresh_token grants.
 FEDERATION_BETA_HEADER = "oidc-federation-2026-04-01"
 
 # Proactive refresh thresholds (seconds before expiry). Tuned for ≤10min token TTL.
@@ -117,7 +113,7 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
     """Reject non-`https://` token-endpoint URLs.
 
     Localhost is allowed for testing so `base_url="http://localhost:8080"`
-    works against a local `oauth_server` instance; everything else must be
+    works against a local server; everything else must be
     TLS-encrypted because the body of these POSTs carries the assertion JWT
     or a long-lived refresh token.
     """

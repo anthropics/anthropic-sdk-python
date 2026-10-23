@@ -26,6 +26,7 @@ class TestWebhooks:
         webhook = client.beta.organization.webhooks.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -37,6 +38,7 @@ class TestWebhooks:
             description="description",
             name="name",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -45,6 +47,7 @@ class TestWebhooks:
         response = client.beta.organization.webhooks.with_raw_response.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -57,6 +60,7 @@ class TestWebhooks:
         with client.beta.organization.webhooks.with_streaming_response.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -70,6 +74,7 @@ class TestWebhooks:
     def test_method_retrieve(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -78,6 +83,7 @@ class TestWebhooks:
         webhook = client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -85,6 +91,7 @@ class TestWebhooks:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.webhooks.with_raw_response.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -96,6 +103,7 @@ class TestWebhooks:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.webhooks.with_streaming_response.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -116,6 +124,7 @@ class TestWebhooks:
     def test_method_update(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -129,6 +138,7 @@ class TestWebhooks:
             state="disabled",
             url="x",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -136,6 +146,7 @@ class TestWebhooks:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.webhooks.with_raw_response.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -147,6 +158,7 @@ class TestWebhooks:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.webhooks.with_streaming_response.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -165,7 +177,9 @@ class TestWebhooks:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        webhook = client.beta.organization.webhooks.list()
+        webhook = client.beta.organization.webhooks.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
 
     @parametrize
@@ -176,12 +190,15 @@ class TestWebhooks:
             limit=0,
             order="asc",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.webhooks.with_raw_response.list()
+        response = client.beta.organization.webhooks.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -190,7 +207,9 @@ class TestWebhooks:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.webhooks.with_streaming_response.list() as response:
+        with client.beta.organization.webhooks.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -203,6 +222,7 @@ class TestWebhooks:
     def test_method_delete(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -211,6 +231,7 @@ class TestWebhooks:
         webhook = client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -218,6 +239,7 @@ class TestWebhooks:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.webhooks.with_raw_response.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -229,6 +251,7 @@ class TestWebhooks:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.webhooks.with_streaming_response.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -249,6 +272,7 @@ class TestWebhooks:
     def test_method_regenerate_signing_secret(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])
 
@@ -257,6 +281,7 @@ class TestWebhooks:
         webhook = client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])
 
@@ -264,6 +289,7 @@ class TestWebhooks:
     def test_raw_response_regenerate_signing_secret(self, client: Anthropic) -> None:
         response = client.beta.organization.webhooks.with_raw_response.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -275,6 +301,7 @@ class TestWebhooks:
     def test_streaming_response_regenerate_signing_secret(self, client: Anthropic) -> None:
         with client.beta.organization.webhooks.with_streaming_response.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -302,6 +329,7 @@ class TestAsyncWebhooks:
         webhook = await async_client.beta.organization.webhooks.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -313,6 +341,7 @@ class TestAsyncWebhooks:
             description="description",
             name="name",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -321,6 +350,7 @@ class TestAsyncWebhooks:
         response = await async_client.beta.organization.webhooks.with_raw_response.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -333,6 +363,7 @@ class TestAsyncWebhooks:
         async with async_client.beta.organization.webhooks.with_streaming_response.create(
             enabled_events=["user_profile.enforcement_action_opened"],
             url="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -346,6 +377,7 @@ class TestAsyncWebhooks:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -354,6 +386,7 @@ class TestAsyncWebhooks:
         webhook = await async_client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -361,6 +394,7 @@ class TestAsyncWebhooks:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.webhooks.with_raw_response.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -372,6 +406,7 @@ class TestAsyncWebhooks:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.webhooks.with_streaming_response.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -392,6 +427,7 @@ class TestAsyncWebhooks:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -405,6 +441,7 @@ class TestAsyncWebhooks:
             state="disabled",
             url="x",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -412,6 +449,7 @@ class TestAsyncWebhooks:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.webhooks.with_raw_response.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -423,6 +461,7 @@ class TestAsyncWebhooks:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.webhooks.with_streaming_response.update(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -441,7 +480,9 @@ class TestAsyncWebhooks:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        webhook = await async_client.beta.organization.webhooks.list()
+        webhook = await async_client.beta.organization.webhooks.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
 
     @parametrize
@@ -452,12 +493,15 @@ class TestAsyncWebhooks:
             limit=0,
             order="asc",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.webhooks.with_raw_response.list()
+        response = await async_client.beta.organization.webhooks.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -466,7 +510,9 @@ class TestAsyncWebhooks:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.webhooks.with_streaming_response.list() as response:
+        async with async_client.beta.organization.webhooks.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -479,6 +525,7 @@ class TestAsyncWebhooks:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -487,6 +534,7 @@ class TestAsyncWebhooks:
         webhook = await async_client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
 
@@ -494,6 +542,7 @@ class TestAsyncWebhooks:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.webhooks.with_raw_response.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -505,6 +554,7 @@ class TestAsyncWebhooks:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.webhooks.with_streaming_response.delete(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -525,6 +575,7 @@ class TestAsyncWebhooks:
     async def test_method_regenerate_signing_secret(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])
 
@@ -533,6 +584,7 @@ class TestAsyncWebhooks:
         webhook = await async_client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])
 
@@ -540,6 +592,7 @@ class TestAsyncWebhooks:
     async def test_raw_response_regenerate_signing_secret(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.webhooks.with_raw_response.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -551,6 +604,7 @@ class TestAsyncWebhooks:
     async def test_streaming_response_regenerate_signing_secret(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.webhooks.with_streaming_response.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

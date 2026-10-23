@@ -726,10 +726,8 @@ class TestCredentialsFile:
 
     @pytest.mark.respx(base_url=BASE_URL)
     def test_authorized_user_refresh_beta_headers(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """refresh_token POST must carry oauth-2025-04-20 (unlocks the token
-        endpoint family) but NOT oidc-federation-2026-04-01 (that header is a
-        routing switch that would send this POST to the Go userauth handler,
-        which only accepts jwt-bearer grants)."""
+        """refresh_token POST must carry oauth-2025-04-20 but NOT
+        oidc-federation-2026-04-01."""
         _write_profile(
             tmp_path,
             "default",
@@ -805,7 +803,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_config_base_url_localhost_http_allowed(self, tmp_path: pathlib.Path) -> None:
-        """Localhost HTTP is allowed for local oauth_server testing."""
+        """Localhost HTTP is allowed for local testing."""
         _write_profile(
             tmp_path,
             "default",
@@ -1072,9 +1070,6 @@ class TestWorkloadIdentityCredentials:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         req = calls[0].request
-        # jwt-bearer exchange must carry BOTH: oauth-2025-04-20 unlocks the
-        # token endpoint, oidc-federation-2026-04-01 routes to the federation
-        # handler.
         beta_flags = {f.strip() for f in req.headers["anthropic-beta"].split(",")}
         assert OAUTH_API_BETA_HEADER in beta_flags
         assert FEDERATION_BETA_HEADER in beta_flags
@@ -1392,12 +1387,12 @@ class TestWorkloadIdentityCredentials:
 
 
 # --------------------------------------------------------------------------- #
-# Profile env-var fill (PY-01) + identity_token validation (PY-06)
+# Profile env-var fill + identity_token validation
 # --------------------------------------------------------------------------- #
 
 
 class TestProfileEnvFill:
-    """PY-01: profile fields left empty are filled from ANTHROPIC_* env vars,
+    """Profile fields left empty are filled from ANTHROPIC_* env vars,
     matching Go's `fillMissingFromEnv` precedence (file wins, env fills gaps)."""
 
     @pytest.fixture(autouse=True)
@@ -1492,7 +1487,7 @@ class TestProfileEnvFill:
 
 
 class TestIdentityTokenValidation:
-    """PY-06: identity_token.source 'file' with empty path is a config bug,
+    """identity_token.source 'file' with empty path is a config bug,
     not an env-var fallback signal."""
 
     @pytest.fixture(autouse=True)
@@ -1855,7 +1850,7 @@ class TestTokenCache:
         assert len(provider_calls) == 2
 
     def test_invalidate_forces_provider_refresh(self) -> None:
-        """PY-02: after invalidate(), the next provider call receives
+        """After invalidate(), the next provider call receives
         force_refresh=True so providers with on-disk caches bypass their
         freshness short-circuit. Without this, a 401 retry would re-read
         the same expired token from disk and serve it again."""
@@ -1930,7 +1925,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
         """If invalidate() set the force flag and the provider then raises,
         the flag must NOT be consumed — a subsequent retry must still see
         force_refresh=True. Otherwise the retry serves the stale disk token
-        PY-02 was added to bypass."""
+        force_refresh exists to bypass."""
         force_seen: List[bool] = []
         attempts = iter([RuntimeError("transient"), AccessToken("ok", expires_at=None)])
 
@@ -2047,7 +2042,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
         assert force_seen == [False, False, True]
 
     def test_advisory_refresh_backoff_after_failure(self) -> None:
-        """PY-07: after an advisory refresh failure, subsequent advisory
+        """After an advisory refresh failure, subsequent advisory
         callers within ADVISORY_REFRESH_BACKOFF_SECONDS reuse the cached
         token instead of re-attempting the provider — preventing an
         outage during the advisory window from being hammered at request rate."""
@@ -2425,7 +2420,7 @@ class TestAnthropicCredentials:
         req = msg_calls[0].request
         assert req.headers["Authorization"] == "Bearer sk-ant-oat01-test"
         # Authenticated API requests carry oauth-2025-04-20 (API beta) —
-        # NOT the federation routing switch, which is only for jwt-bearer
+        # NOT the federation beta, which is only for jwt-bearer
         # exchanges at /v1/oauth/token.
         msg_flags = {f.strip() for f in req.headers["anthropic-beta"].split(",")}
         assert OAUTH_API_BETA_HEADER in msg_flags

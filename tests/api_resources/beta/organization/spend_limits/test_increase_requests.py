@@ -23,6 +23,7 @@ class TestIncreaseRequests:
     def test_method_retrieve(self, client: Anthropic) -> None:
         increase_request = client.beta.organization.spend_limits.increase_requests.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -30,6 +31,7 @@ class TestIncreaseRequests:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.spend_limits.increase_requests.with_raw_response.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -41,6 +43,7 @@ class TestIncreaseRequests:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.spend_limits.increase_requests.with_streaming_response.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -61,7 +64,9 @@ class TestIncreaseRequests:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        increase_request = client.beta.organization.spend_limits.increase_requests.list()
+        increase_request = client.beta.organization.spend_limits.increase_requests.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaSpendLimitIncreaseRequest], increase_request, path=["response"])
 
     @parametrize
@@ -71,12 +76,15 @@ class TestIncreaseRequests:
             limit=1,
             page="page",
             status=["approved"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSpendLimitIncreaseRequest], increase_request, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.spend_limits.increase_requests.with_raw_response.list()
+        response = client.beta.organization.spend_limits.increase_requests.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -85,7 +93,9 @@ class TestIncreaseRequests:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.spend_limits.increase_requests.with_streaming_response.list() as response:
+        with client.beta.organization.spend_limits.increase_requests.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -99,6 +109,7 @@ class TestIncreaseRequests:
         increase_request = client.beta.organization.spend_limits.increase_requests.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(IncreaseRequestApproveResponse, increase_request, path=["response"])
 
@@ -109,6 +120,7 @@ class TestIncreaseRequests:
             amount="50000",
             period="monthly",
             suppress_notification=True,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(IncreaseRequestApproveResponse, increase_request, path=["response"])
 
@@ -117,6 +129,7 @@ class TestIncreaseRequests:
         response = client.beta.organization.spend_limits.increase_requests.with_raw_response.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -129,6 +142,7 @@ class TestIncreaseRequests:
         with client.beta.organization.spend_limits.increase_requests.with_streaming_response.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -152,6 +166,7 @@ class TestIncreaseRequests:
     def test_method_deny(self, client: Anthropic) -> None:
         increase_request = client.beta.organization.spend_limits.increase_requests.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -160,6 +175,7 @@ class TestIncreaseRequests:
         increase_request = client.beta.organization.spend_limits.increase_requests.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             suppress_notification=True,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -167,6 +183,7 @@ class TestIncreaseRequests:
     def test_raw_response_deny(self, client: Anthropic) -> None:
         response = client.beta.organization.spend_limits.increase_requests.with_raw_response.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -178,6 +195,7 @@ class TestIncreaseRequests:
     def test_streaming_response_deny(self, client: Anthropic) -> None:
         with client.beta.organization.spend_limits.increase_requests.with_streaming_response.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -206,6 +224,7 @@ class TestAsyncIncreaseRequests:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         increase_request = await async_client.beta.organization.spend_limits.increase_requests.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -213,6 +232,7 @@ class TestAsyncIncreaseRequests:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.spend_limits.increase_requests.with_raw_response.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -224,6 +244,7 @@ class TestAsyncIncreaseRequests:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.spend_limits.increase_requests.with_streaming_response.retrieve(
             "spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -244,7 +265,9 @@ class TestAsyncIncreaseRequests:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        increase_request = await async_client.beta.organization.spend_limits.increase_requests.list()
+        increase_request = await async_client.beta.organization.spend_limits.increase_requests.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaSpendLimitIncreaseRequest], increase_request, path=["response"])
 
     @parametrize
@@ -254,12 +277,15 @@ class TestAsyncIncreaseRequests:
             limit=1,
             page="page",
             status=["approved"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSpendLimitIncreaseRequest], increase_request, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.spend_limits.increase_requests.with_raw_response.list()
+        response = await async_client.beta.organization.spend_limits.increase_requests.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -268,9 +294,9 @@ class TestAsyncIncreaseRequests:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with (
-            async_client.beta.organization.spend_limits.increase_requests.with_streaming_response.list() as response
-        ):
+        async with async_client.beta.organization.spend_limits.increase_requests.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -284,6 +310,7 @@ class TestAsyncIncreaseRequests:
         increase_request = await async_client.beta.organization.spend_limits.increase_requests.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(IncreaseRequestApproveResponse, increase_request, path=["response"])
 
@@ -294,6 +321,7 @@ class TestAsyncIncreaseRequests:
             amount="50000",
             period="monthly",
             suppress_notification=True,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(IncreaseRequestApproveResponse, increase_request, path=["response"])
 
@@ -302,6 +330,7 @@ class TestAsyncIncreaseRequests:
         response = await async_client.beta.organization.spend_limits.increase_requests.with_raw_response.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -314,6 +343,7 @@ class TestAsyncIncreaseRequests:
         async with async_client.beta.organization.spend_limits.increase_requests.with_streaming_response.approve(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             amount="50000",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -337,6 +367,7 @@ class TestAsyncIncreaseRequests:
     async def test_method_deny(self, async_client: AsyncAnthropic) -> None:
         increase_request = await async_client.beta.organization.spend_limits.increase_requests.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -345,6 +376,7 @@ class TestAsyncIncreaseRequests:
         increase_request = await async_client.beta.organization.spend_limits.increase_requests.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
             suppress_notification=True,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimitIncreaseRequest, increase_request, path=["response"])
 
@@ -352,6 +384,7 @@ class TestAsyncIncreaseRequests:
     async def test_raw_response_deny(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.spend_limits.increase_requests.with_raw_response.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -363,6 +396,7 @@ class TestAsyncIncreaseRequests:
     async def test_streaming_response_deny(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.spend_limits.increase_requests.with_streaming_response.deny(
             spend_limit_increase_request_id="spend_limit_increase_request_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

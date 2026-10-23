@@ -432,6 +432,8 @@ class TestSyncMessages:
 
             assert_basic_response([event for event in stream], stream.get_final_message())
 
+        assert respx_mock.calls.last.request.url.query == b""
+
     @pytest.mark.parametrize("client", [False], indirect=True)
     @pytest.mark.respx(base_url=base_url)
     def test_unknown_events_are_passed_through(self, client: Anthropic, respx_mock: MockRouter) -> None:
@@ -746,6 +748,8 @@ class TestAsyncMessages:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
+
+        assert respx_mock.calls.last.request.url.query == b""
 
     @pytest.mark.parametrize("async_client", [False], indirect=True)
     @pytest.mark.asyncio

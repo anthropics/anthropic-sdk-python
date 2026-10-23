@@ -21,7 +21,9 @@ class TestTunnels:
 
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
-        tunnel = client.beta.tunnels.create()
+        tunnel = client.beta.tunnels.create(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
@@ -30,12 +32,15 @@ class TestTunnels:
             display_name="x",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
-        response = client.beta.tunnels.with_raw_response.create()
+        response = client.beta.tunnels.with_raw_response.create(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -44,7 +49,9 @@ class TestTunnels:
 
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
-        with client.beta.tunnels.with_streaming_response.create() as response:
+        with client.beta.tunnels.with_streaming_response.create(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -57,6 +64,7 @@ class TestTunnels:
     def test_method_retrieve(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -66,6 +74,7 @@ class TestTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -73,6 +82,7 @@ class TestTunnels:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.tunnels.with_raw_response.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -84,6 +94,7 @@ class TestTunnels:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.tunnels.with_streaming_response.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -102,7 +113,9 @@ class TestTunnels:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        tunnel = client.beta.tunnels.list()
+        tunnel = client.beta.tunnels.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
     @parametrize
@@ -113,12 +126,15 @@ class TestTunnels:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.tunnels.with_raw_response.list()
+        response = client.beta.tunnels.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -127,7 +143,9 @@ class TestTunnels:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.tunnels.with_streaming_response.list() as response:
+        with client.beta.tunnels.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -140,6 +158,7 @@ class TestTunnels:
     def test_method_archive(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -149,6 +168,7 @@ class TestTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -156,6 +176,7 @@ class TestTunnels:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.tunnels.with_raw_response.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -167,6 +188,7 @@ class TestTunnels:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.tunnels.with_streaming_response.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -187,6 +209,7 @@ class TestTunnels:
     def test_method_reveal_token(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -196,6 +219,7 @@ class TestTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -203,6 +227,7 @@ class TestTunnels:
     def test_raw_response_reveal_token(self, client: Anthropic) -> None:
         response = client.beta.tunnels.with_raw_response.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -214,6 +239,7 @@ class TestTunnels:
     def test_streaming_response_reveal_token(self, client: Anthropic) -> None:
         with client.beta.tunnels.with_streaming_response.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -234,6 +260,7 @@ class TestTunnels:
     def test_method_rotate_token(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -244,6 +271,7 @@ class TestTunnels:
             reason="reason",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -251,6 +279,7 @@ class TestTunnels:
     def test_raw_response_rotate_token(self, client: Anthropic) -> None:
         response = client.beta.tunnels.with_raw_response.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -262,6 +291,7 @@ class TestTunnels:
     def test_streaming_response_rotate_token(self, client: Anthropic) -> None:
         with client.beta.tunnels.with_streaming_response.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -286,7 +316,9 @@ class TestAsyncTunnels:
 
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
-        tunnel = await async_client.beta.tunnels.create()
+        tunnel = await async_client.beta.tunnels.create(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
@@ -295,12 +327,15 @@ class TestAsyncTunnels:
             display_name="x",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.tunnels.with_raw_response.create()
+        response = await async_client.beta.tunnels.with_raw_response.create(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -309,7 +344,9 @@ class TestAsyncTunnels:
 
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.tunnels.with_streaming_response.create() as response:
+        async with async_client.beta.tunnels.with_streaming_response.create(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -322,6 +359,7 @@ class TestAsyncTunnels:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -331,6 +369,7 @@ class TestAsyncTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -338,6 +377,7 @@ class TestAsyncTunnels:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.with_raw_response.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -349,6 +389,7 @@ class TestAsyncTunnels:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.with_streaming_response.retrieve(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -367,7 +408,9 @@ class TestAsyncTunnels:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        tunnel = await async_client.beta.tunnels.list()
+        tunnel = await async_client.beta.tunnels.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
     @parametrize
@@ -378,12 +421,15 @@ class TestAsyncTunnels:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTunnel], tunnel, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.tunnels.with_raw_response.list()
+        response = await async_client.beta.tunnels.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -392,7 +438,9 @@ class TestAsyncTunnels:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.tunnels.with_streaming_response.list() as response:
+        async with async_client.beta.tunnels.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -405,6 +453,7 @@ class TestAsyncTunnels:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -414,6 +463,7 @@ class TestAsyncTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnel, tunnel, path=["response"])
 
@@ -421,6 +471,7 @@ class TestAsyncTunnels:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.with_raw_response.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -432,6 +483,7 @@ class TestAsyncTunnels:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.with_streaming_response.archive(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -452,6 +504,7 @@ class TestAsyncTunnels:
     async def test_method_reveal_token(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -461,6 +514,7 @@ class TestAsyncTunnels:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -468,6 +522,7 @@ class TestAsyncTunnels:
     async def test_raw_response_reveal_token(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.with_raw_response.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -479,6 +534,7 @@ class TestAsyncTunnels:
     async def test_streaming_response_reveal_token(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.with_streaming_response.reveal_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -499,6 +555,7 @@ class TestAsyncTunnels:
     async def test_method_rotate_token(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -509,6 +566,7 @@ class TestAsyncTunnels:
             reason="reason",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelToken, tunnel, path=["response"])
 
@@ -516,6 +574,7 @@ class TestAsyncTunnels:
     async def test_raw_response_rotate_token(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.with_raw_response.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -527,6 +586,7 @@ class TestAsyncTunnels:
     async def test_streaming_response_rotate_token(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.with_streaming_response.rotate_token(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

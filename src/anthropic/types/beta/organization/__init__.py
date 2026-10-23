@@ -50,6 +50,7 @@ from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreatePar
 from .workspace_update_params import WorkspaceUpdateParams as WorkspaceUpdateParams
 from .beta_analytics_api_actor import BetaAnalyticsAPIActor as BetaAnalyticsAPIActor
 from .beta_analytics_cost_type import BetaAnalyticsCostType as BetaAnalyticsCostType
+from .beta_claude_tag_settings import BetaClaudeTagSettings as BetaClaudeTagSettings
 from .beta_compliance_settings import BetaComplianceSettings as BetaComplianceSettings
 from .beta_organization_invite import BetaOrganizationInvite as BetaOrganizationInvite
 from .beta_plugin_content_scan import BetaPluginContentScan as BetaPluginContentScan
@@ -75,6 +76,7 @@ from .beta_analytics_lines_of_code import BetaAnalyticsLinesOfCode as BetaAnalyt
 from .beta_analytics_user_activity import BetaAnalyticsUserActivity as BetaAnalyticsUserActivity
 from .beta_api_key_workspace_scope import BetaAPIKeyWorkspaceScope as BetaAPIKeyWorkspaceScope
 from .beta_aws_external_key_config import BetaAWSExternalKeyConfig as BetaAWSExternalKeyConfig
+from .beta_claude_tag_guest_policy import BetaClaudeTagGuestPolicy as BetaClaudeTagGuestPolicy
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig as BetaGCPExternalKeyConfig
 from .beta_organization_rate_limit import BetaOrganizationRateLimit as BetaOrganizationRateLimit
 from .external_key_delete_response import ExternalKeyDeleteResponse as ExternalKeyDeleteResponse
@@ -93,6 +95,7 @@ from .beta_analytics_plugin_activity import BetaAnalyticsPluginActivity as BetaA
 from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics as BetaAnalyticsScienceMetrics
 from .beta_analytics_server_tool_use import BetaAnalyticsServerToolUse as BetaAnalyticsServerToolUse
 from .beta_azure_external_key_config import BetaAzureExternalKeyConfig as BetaAzureExternalKeyConfig
+from .beta_claude_tag_setting_source import BetaClaudeTagSettingSource as BetaClaudeTagSettingSource
 from .beta_compliance_settings_state import BetaComplianceSettingsState as BetaComplianceSettingsState
 from .beta_no_billing_workspace_role import BetaNoBillingWorkspaceRole as BetaNoBillingWorkspaceRole
 from .beta_plugin_owner_organization import BetaPluginOwnerOrganization as BetaPluginOwnerOrganization
@@ -101,6 +104,7 @@ from .plugin_marketplace_list_params import PluginMarketplaceListParams as Plugi
 from .beta_analytics_project_activity import BetaAnalyticsProjectActivity as BetaAnalyticsProjectActivity
 from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as BetaAnalyticsUsageUsersItem
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
+from .beta_claude_tag_setting_sources import BetaClaudeTagSettingSources as BetaClaudeTagSettingSources
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
 from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
@@ -124,6 +128,8 @@ from .beta_analytics_claude_code_metrics import BetaAnalyticsClaudeCodeMetrics a
 from .beta_analytics_claude_tag_category import BetaAnalyticsClaudeTagCategory as BetaAnalyticsClaudeTagCategory
 from .beta_api_key_service_account_actor import BetaAPIKeyServiceAccountActor as BetaAPIKeyServiceAccountActor
 from .beta_aws_external_key_config_param import BetaAWSExternalKeyConfigParam as BetaAWSExternalKeyConfigParam
+from .beta_claude_tag_guest_policy_allow import BetaClaudeTagGuestPolicyAllow as BetaClaudeTagGuestPolicyAllow
+from .beta_claude_tag_guest_policy_param import BetaClaudeTagGuestPolicyParam as BetaClaudeTagGuestPolicyParam
 from .beta_deleted_telemetry_destination import BetaDeletedTelemetryDestination as BetaDeletedTelemetryDestination
 from .beta_gcp_external_key_config_param import BetaGCPExternalKeyConfigParam as BetaGCPExternalKeyConfigParam
 from .beta_organization_rate_limit_value import BetaOrganizationRateLimitValue as BetaOrganizationRateLimitValue
@@ -148,6 +154,9 @@ from .beta_analytics_connector_chat_metrics import (
 from .beta_analytics_office_product_metrics import (
     BetaAnalyticsOfficeProductMetrics as BetaAnalyticsOfficeProductMetrics,
 )
+from .beta_claude_tag_guest_policy_restrict import BetaClaudeTagGuestPolicyRestrict as BetaClaudeTagGuestPolicyRestrict
+from .beta_claude_tag_settings_create_param import BetaClaudeTagSettingsCreateParam as BetaClaudeTagSettingsCreateParam
+from .beta_claude_tag_settings_update_param import BetaClaudeTagSettingsUpdateParam as BetaClaudeTagSettingsUpdateParam
 from .beta_external_key_attached_attachment import (
     BetaExternalKeyAttachedAttachment as BetaExternalKeyAttachedAttachment,
 )
@@ -160,6 +169,9 @@ from .beta_telemetry_destination_workspaces import (
 )
 from .beta_analytics_cost_report_time_bucket import (
     BetaAnalyticsCostReportTimeBucket as BetaAnalyticsCostReportTimeBucket,
+)
+from .beta_claude_tag_default_setting_source import (
+    BetaClaudeTagDefaultSettingSource as BetaClaudeTagDefaultSettingSource,
 )
 from .beta_compliance_settings_state_enabled import (
     BetaComplianceSettingsStateEnabled as BetaComplianceSettingsStateEnabled,
@@ -221,6 +233,9 @@ from .beta_analytics_skill_claude_code_metrics import (
 from .beta_analytics_usage_cost_product_filter import (
     BetaAnalyticsUsageCostProductFilter as BetaAnalyticsUsageCostProductFilter,
 )
+from .beta_claude_tag_guest_policy_allow_param import (
+    BetaClaudeTagGuestPolicyAllowParam as BetaClaudeTagGuestPolicyAllowParam,
+)
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
 )
@@ -244,6 +259,12 @@ from .beta_telemetry_destination_traces_params import (
 )
 from .beta_analytics_plugin_claude_code_metrics import (
     BetaAnalyticsPluginClaudeCodeMetrics as BetaAnalyticsPluginClaudeCodeMetrics,
+)
+from .beta_claude_tag_guest_policy_channel_only import (
+    BetaClaudeTagGuestPolicyChannelOnly as BetaClaudeTagGuestPolicyChannelOnly,
+)
+from .beta_claude_tag_slack_channel_identifiers import (
+    BetaClaudeTagSlackChannelIdentifiers as BetaClaudeTagSlackChannelIdentifiers,
 )
 from .beta_organization_rate_limit_skills_group import (
     BetaOrganizationRateLimitSkillsGroup as BetaOrganizationRateLimitSkillsGroup,
@@ -284,6 +305,12 @@ from .beta_analytics_federated_actor_gcp_provider import (
 from .beta_analytics_skill_office_product_metrics import (
     BetaAnalyticsSkillOfficeProductMetrics as BetaAnalyticsSkillOfficeProductMetrics,
 )
+from .beta_claude_tag_guest_policy_restrict_param import (
+    BetaClaudeTagGuestPolicyRestrictParam as BetaClaudeTagGuestPolicyRestrictParam,
+)
+from .beta_claude_tag_slack_workspace_identifiers import (
+    BetaClaudeTagSlackWorkspaceIdentifiers as BetaClaudeTagSlackWorkspaceIdentifiers,
+)
 from .beta_spend_limit_organization_service_scope import (
     BetaSpendLimitOrganizationServiceScope as BetaSpendLimitOrganizationServiceScope,
 )
@@ -292,6 +319,12 @@ from .beta_analytics_connector_claude_code_metrics import (
 )
 from .beta_analytics_federated_actor_oidc_provider import (
     BetaAnalyticsFederatedActorOIDCProvider as BetaAnalyticsFederatedActorOIDCProvider,
+)
+from .beta_claude_tag_slack_channel_setting_source import (
+    BetaClaudeTagSlackChannelSettingSource as BetaClaudeTagSlackChannelSettingSource,
+)
+from .beta_claude_tag_slack_default_setting_source import (
+    BetaClaudeTagSlackDefaultSettingSource as BetaClaudeTagSlackDefaultSettingSource,
 )
 from .beta_compliance_settings_state_enabled_param import (
     BetaComplianceSettingsStateEnabledParam as BetaComplianceSettingsStateEnabledParam,
@@ -317,6 +350,9 @@ from .beta_telemetry_destination_workspaces_include import (
 from .plugin_marketplace_validate_repository_params import (
     PluginMarketplaceValidateRepositoryParams as PluginMarketplaceValidateRepositoryParams,
 )
+from .beta_claude_tag_slack_workspace_setting_source import (
+    BetaClaudeTagSlackWorkspaceSettingSource as BetaClaudeTagSlackWorkspaceSettingSource,
+)
 from .beta_organization_rate_limit_token_count_group import (
     BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
 )
@@ -325,6 +361,12 @@ from .beta_analytics_chat_cowork_unified_chat_metrics import (
 )
 from .beta_analytics_connector_office_product_metrics import (
     BetaAnalyticsConnectorOfficeProductMetrics as BetaAnalyticsConnectorOfficeProductMetrics,
+)
+from .beta_claude_tag_guest_policy_channel_only_param import (
+    BetaClaudeTagGuestPolicyChannelOnlyParam as BetaClaudeTagGuestPolicyChannelOnlyParam,
+)
+from .beta_claude_tag_slack_channel_identifiers_param import (
+    BetaClaudeTagSlackChannelIdentifiersParam as BetaClaudeTagSlackChannelIdentifiersParam,
 )
 from .beta_plugin_marketplace_validation_plugin_error import (
     BetaPluginMarketplaceValidationPluginError as BetaPluginMarketplaceValidationPluginError,
@@ -337,6 +379,9 @@ from .beta_telemetry_destination_state_disabled_params import (
 )
 from .beta_telemetry_destination_workspaces_all_params import (
     BetaTelemetryDestinationWorkspacesAllParams as BetaTelemetryDestinationWorkspacesAllParams,
+)
+from .beta_claude_tag_slack_grid_channel_setting_source import (
+    BetaClaudeTagSlackGridChannelSettingSource as BetaClaudeTagSlackGridChannelSettingSource,
 )
 from .beta_organization_webhook_endpoint_signing_secret import (
     BetaOrganizationWebhookEndpointSigningSecret as BetaOrganizationWebhookEndpointSigningSecret,
@@ -352,6 +397,9 @@ from .beta_plugin_marketplace_validation_plugin_warnings import (
 )
 from .beta_analytics_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics as BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_claude_tag_slack_parent_channel_setting_source import (
+    BetaClaudeTagSlackParentChannelSettingSource as BetaClaudeTagSlackParentChannelSettingSource,
 )
 from .beta_telemetry_destination_disabled_reason_redirect import (
     BetaTelemetryDestinationDisabledReasonRedirect as BetaTelemetryDestinationDisabledReasonRedirect,

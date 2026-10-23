@@ -198,7 +198,7 @@ class Plugins(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -206,6 +206,7 @@ class Plugins(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.create",
                 span_route="/v1/organizations/plugins",
                 span_created_id="anthropic.organization.plugin.id",
@@ -276,13 +277,14 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -370,13 +372,14 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.update",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -480,7 +483,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=SyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -499,6 +502,7 @@ class Plugins(SyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.list",
                 span_route="/v1/organizations/plugins",
             ),
@@ -568,12 +572,13 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.delete",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -719,7 +724,7 @@ class AsyncPlugins(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -727,6 +732,7 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.create",
                 span_route="/v1/organizations/plugins",
                 span_created_id="anthropic.organization.plugin.id",
@@ -797,13 +803,14 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -891,13 +898,14 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.update",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -1001,7 +1009,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=AsyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1020,6 +1028,7 @@ class AsyncPlugins(AsyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.list",
                 span_route="/v1/organizations/plugins",
             ),
@@ -1089,12 +1098,13 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.delete",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
