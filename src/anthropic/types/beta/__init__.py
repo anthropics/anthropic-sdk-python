@@ -47,6 +47,7 @@ from .beta_text_citation import BetaTextCitation as BetaTextCitation
 from .beta_user_location import BetaUserLocation as BetaUserLocation
 from .beta_webhook_event import BetaWebhookEvent as BetaWebhookEvent
 from .file_upload_params import FileUploadParams as FileUploadParams
+from .thread_send_params import ThreadSendParams as ThreadSendParams
 from .tunnel_list_params import TunnelListParams as TunnelListParams
 from .agent_create_params import AgentCreateParams as AgentCreateParams
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
@@ -76,6 +77,7 @@ from .beta_packages_params import BetaPackagesParams as BetaPackagesParams
 from .beta_signature_delta import BetaSignatureDelta as BetaSignatureDelta
 from .beta_tool_use_caller import BetaToolUseCaller as BetaToolUseCaller
 from .beta_web_fetch_block import BetaWebFetchBlock as BetaWebFetchBlock
+from .thread_create_params import ThreadCreateParams as ThreadCreateParams
 from .tunnel_create_params import TunnelCreateParams as TunnelCreateParams
 from .unwrap_webhook_event import UnwrapWebhookEvent as UnwrapWebhookEvent
 from .agent_retrieve_params import AgentRetrieveParams as AgentRetrieveParams
@@ -167,11 +169,13 @@ from .beta_managed_agents_model import BetaManagedAgentsModel as BetaManagedAgen
 from .beta_managed_agents_vault import BetaManagedAgentsVault as BetaManagedAgentsVault
 from .beta_mcp_tool_param_param import BetaMCPToolParamParam as BetaMCPToolParamParam
 from .beta_memory_tool_20250818 import BetaMemoryTool20250818 as BetaMemoryTool20250818
+from .beta_message_thread_param import BetaMessageThreadParam as BetaMessageThreadParam
 from .beta_message_tokens_count import BetaMessageTokensCount as BetaMessageTokensCount
 from .beta_refusal_stop_details import BetaRefusalStopDetails as BetaRefusalStopDetails
 from .beta_system_message_param import BetaSystemMessageParam as BetaSystemMessageParam
 from .beta_thinking_block_param import BetaThinkingBlockParam as BetaThinkingBlockParam
 from .beta_thinking_turns_param import BetaThinkingTurnsParam as BetaThinkingTurnsParam
+from .beta_thread_create_params import BetaThreadCreateParams as BetaThreadCreateParams
 from .beta_tool_reference_block import BetaToolReferenceBlock as BetaToolReferenceBlock
 from .beta_tool_use_block_param import BetaToolUseBlockParam as BetaToolUseBlockParam
 from .beta_tool_uses_keep_param import BetaToolUsesKeepParam as BetaToolUsesKeepParam
@@ -218,6 +222,7 @@ from .beta_managed_agents_advisor import BetaManagedAgentsAdvisor as BetaManaged
 from .beta_managed_agents_session import BetaManagedAgentsSession as BetaManagedAgentsSession
 from .beta_mcp_tool_listing_block import BetaMCPToolListingBlock as BetaMCPToolListingBlock
 from .beta_raw_message_stop_event import BetaRawMessageStopEvent as BetaRawMessageStopEvent
+from .beta_thread_continue_params import BetaThreadContinueParams as BetaThreadContinueParams
 from .beta_tool_choice_auto_param import BetaToolChoiceAutoParam as BetaToolChoiceAutoParam
 from .beta_tool_choice_none_param import BetaToolChoiceNoneParam as BetaToolChoiceNoneParam
 from .beta_tool_choice_tool_param import BetaToolChoiceToolParam as BetaToolChoiceToolParam

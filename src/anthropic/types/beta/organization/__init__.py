@@ -18,6 +18,8 @@ from .beta_data_residency import BetaDataResidency as BetaDataResidency
 from .beta_deleted_plugin import BetaDeletedPlugin as BetaDeletedPlugin
 from .beta_workspace_role import BetaWorkspaceRole as BetaWorkspaceRole
 from .webhook_list_params import WebhookListParams as WebhookListParams
+from .beta_analytics_actor import BetaAnalyticsActor as BetaAnalyticsActor
+from .beta_analytics_speed import BetaAnalyticsSpeed as BetaAnalyticsSpeed
 from .beta_service_account import BetaServiceAccount as BetaServiceAccount
 from .invite_create_params import InviteCreateParams as InviteCreateParams
 from .plugin_create_params import PluginCreateParams as PluginCreateParams
@@ -46,6 +48,7 @@ from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPerio
 from .spend_limit_list_params import SpendLimitListParams as SpendLimitListParams
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
 from .workspace_update_params import WorkspaceUpdateParams as WorkspaceUpdateParams
+from .beta_analytics_api_actor import BetaAnalyticsAPIActor as BetaAnalyticsAPIActor
 from .beta_analytics_cost_type import BetaAnalyticsCostType as BetaAnalyticsCostType
 from .beta_compliance_settings import BetaComplianceSettings as BetaComplianceSettings
 from .beta_organization_invite import BetaOrganizationInvite as BetaOrganizationInvite
@@ -53,6 +56,7 @@ from .beta_plugin_content_scan import BetaPluginContentScan as BetaPluginContent
 from .external_key_list_params import ExternalKeyListParams as ExternalKeyListParams
 from .rbac_group_create_params import RBACGroupCreateParams as RBACGroupCreateParams
 from .rbac_group_update_params import RBACGroupUpdateParams as RBACGroupUpdateParams
+from .beta_analytics_actor_type import BetaAnalyticsActorType as BetaAnalyticsActorType
 from .beta_analytics_token_type import BetaAnalyticsTokenType as BetaAnalyticsTokenType
 from .beta_analytics_user_actor import BetaAnalyticsUserActor as BetaAnalyticsUserActor
 from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedInferenceGeo
@@ -61,6 +65,7 @@ from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCr
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
 from .rbac_group_delete_response import RBACGroupDeleteResponse as RBACGroupDeleteResponse
 from .beta_analytics_chat_metrics import BetaAnalyticsChatMetrics as BetaAnalyticsChatMetrics
+from .beta_analytics_service_tier import BetaAnalyticsServiceTier as BetaAnalyticsServiceTier
 from .beta_analytics_tool_actions import BetaAnalyticsToolActions as BetaAnalyticsToolActions
 from .beta_spend_limit_user_actor import BetaSpendLimitUserActor as BetaSpendLimitUserActor
 from .beta_spend_limit_user_scope import BetaSpendLimitUserScope as BetaSpendLimitUserScope
@@ -83,6 +88,7 @@ from .beta_plugin_target_rbac_group import BetaPluginTargetRBACGroup as BetaPlug
 from .service_account_create_params import ServiceAccountCreateParams as ServiceAccountCreateParams
 from .service_account_update_params import ServiceAccountUpdateParams as ServiceAccountUpdateParams
 from .beta_analytics_cost_users_item import BetaAnalyticsCostUsersItem as BetaAnalyticsCostUsersItem
+from .beta_analytics_federated_actor import BetaAnalyticsFederatedActor as BetaAnalyticsFederatedActor
 from .beta_analytics_plugin_activity import BetaAnalyticsPluginActivity as BetaAnalyticsPluginActivity
 from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics as BetaAnalyticsScienceMetrics
 from .beta_analytics_server_tool_use import BetaAnalyticsServerToolUse as BetaAnalyticsServerToolUse
@@ -98,6 +104,9 @@ from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as Beta
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
 from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
+from .beta_analytics_grouped_cost_type import BetaAnalyticsGroupedCostType as BetaAnalyticsGroupedCostType
+from .beta_analytics_report_user_actor import BetaAnalyticsReportUserActor as BetaAnalyticsReportUserActor
+from .beta_analytics_time_bucket_width import BetaAnalyticsTimeBucketWidth as BetaAnalyticsTimeBucketWidth
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
 from .beta_telemetry_destination_state import BetaTelemetryDestinationState as BetaTelemetryDestinationState
@@ -128,7 +137,9 @@ from .beta_spend_limit_organization_scope import BetaSpendLimitOrganizationScope
 from .telemetry_destination_create_params import TelemetryDestinationCreateParams as TelemetryDestinationCreateParams
 from .telemetry_destination_update_params import TelemetryDestinationUpdateParams as TelemetryDestinationUpdateParams
 from .beta_analytics_plugin_cowork_metrics import BetaAnalyticsPluginCoworkMetrics as BetaAnalyticsPluginCoworkMetrics
+from .beta_analytics_service_account_actor import BetaAnalyticsServiceAccountActor as BetaAnalyticsServiceAccountActor
 from .beta_analytics_usage_bucketed_result import BetaAnalyticsUsageBucketedResult as BetaAnalyticsUsageBucketedResult
+from .beta_analytics_usage_cost_sort_order import BetaAnalyticsUsageCostSortOrder as BetaAnalyticsUsageCostSortOrder
 from .beta_azure_external_key_config_param import BetaAzureExternalKeyConfigParam as BetaAzureExternalKeyConfigParam
 from .beta_compliance_settings_state_param import BetaComplianceSettingsStateParam as BetaComplianceSettingsStateParam
 from .beta_analytics_connector_chat_metrics import (
@@ -171,6 +182,12 @@ from .beta_analytics_connector_cowork_metrics import (
 from .beta_analytics_connector_office_metrics import (
     BetaAnalyticsConnectorOfficeMetrics as BetaAnalyticsConnectorOfficeMetrics,
 )
+from .beta_analytics_federated_actor_provider import (
+    BetaAnalyticsFederatedActorProvider as BetaAnalyticsFederatedActorProvider,
+)
+from .beta_analytics_usage_cost_inference_geo import (
+    BetaAnalyticsUsageCostInferenceGeo as BetaAnalyticsUsageCostInferenceGeo,
+)
 from .beta_analytics_usage_report_time_bucket import (
     BetaAnalyticsUsageReportTimeBucket as BetaAnalyticsUsageReportTimeBucket,
 )
@@ -200,6 +217,9 @@ from .beta_telemetry_destination_test_success import (
 )
 from .beta_analytics_skill_claude_code_metrics import (
     BetaAnalyticsSkillClaudeCodeMetrics as BetaAnalyticsSkillClaudeCodeMetrics,
+)
+from .beta_analytics_usage_cost_product_filter import (
+    BetaAnalyticsUsageCostProductFilter as BetaAnalyticsUsageCostProductFilter,
 )
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
@@ -255,6 +275,12 @@ from .beta_telemetry_destination_disabled_reason import (
 from .plugin_marketplace_validate_archive_params import (
     PluginMarketplaceValidateArchiveParams as PluginMarketplaceValidateArchiveParams,
 )
+from .beta_analytics_federated_actor_aws_provider import (
+    BetaAnalyticsFederatedActorAWSProvider as BetaAnalyticsFederatedActorAWSProvider,
+)
+from .beta_analytics_federated_actor_gcp_provider import (
+    BetaAnalyticsFederatedActorGCPProvider as BetaAnalyticsFederatedActorGCPProvider,
+)
 from .beta_analytics_skill_office_product_metrics import (
     BetaAnalyticsSkillOfficeProductMetrics as BetaAnalyticsSkillOfficeProductMetrics,
 )
@@ -264,11 +290,17 @@ from .beta_spend_limit_organization_service_scope import (
 from .beta_analytics_connector_claude_code_metrics import (
     BetaAnalyticsConnectorClaudeCodeMetrics as BetaAnalyticsConnectorClaudeCodeMetrics,
 )
+from .beta_analytics_federated_actor_oidc_provider import (
+    BetaAnalyticsFederatedActorOIDCProvider as BetaAnalyticsFederatedActorOIDCProvider,
+)
 from .beta_compliance_settings_state_enabled_param import (
     BetaComplianceSettingsStateEnabledParam as BetaComplianceSettingsStateEnabledParam,
 )
 from .beta_telemetry_destination_workspaces_params import (
     BetaTelemetryDestinationWorkspacesParams as BetaTelemetryDestinationWorkspacesParams,
+)
+from .beta_analytics_federated_actor_azure_provider import (
+    BetaAnalyticsFederatedActorAzureProvider as BetaAnalyticsFederatedActorAzureProvider,
 )
 from .beta_compliance_settings_state_disabled_param import (
     BetaComplianceSettingsStateDisabledParam as BetaComplianceSettingsStateDisabledParam,

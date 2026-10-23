@@ -78,6 +78,8 @@ for message in runner:
 
 Leaving the loop early does not end the runner: `runner.until_done()` resumes it and returns the final message. To stop a runner you will not resume, call `runner.close()` (`await runner.close()` for the async runner), which also ends its OpenTelemetry span.
 
+The tool runner keeps its conversation in a [message thread](helpers.md#message-threads) by default; pass `thread=False` to send the whole history with every request. `system` and `tools` cannot change during a run unless the runner was created with `thread=False`.
+
 ### Running tools while the reply streams
 
 By default, the runner runs a reply's tools after your loop body for that reply ends. With `run_tools_eagerly=True` and `stream=True`, each tool runs as soon as the model finishes writing its call. To hold a call until your loop body ends, pass it to `runner.defer_tool_call()` when you see it. It won't have run yet. `runner.deferred_tool_calls` lists the held calls, so read it after the stream ends.
@@ -181,7 +183,7 @@ A few things to know:
 - After a paused turn (`pause_turn`) the turn is sent back as it came, and the changes go out with the request after that.
 - Changes still waiting when the run ends are never sent.
 - The runner doesn't add the beta for you, so pass `betas=["inline-tools-2026-09-15"]`.
-- Changing `tools` with `set_messages_params()` misses the prompt cache and changes only what is sent, not which function tools the runner runs: one added this way is answered "not found", and one dropped this way still runs if the model calls it.
+- Changing `tools` with `set_messages_params()` misses the prompt cache and gives the runner no new function tool to run: a call to a tool added this way, or taken out of `tools` this way, is answered "not found", and a tool given back as its definition still runs. Unless the runner was created with `thread=False`, the definitions sent cannot change during a run and the runner raises `AnthropicError`, so use `add_tools()` and `remove_tools()`.
 - Use either these methods or `tool_addition` / `tool_removal` blocks you append yourself for a given tool, not both.
 - In the rare case where a compaction response comes back without `tool_changes` even though the messages it summarized added or removed tools, the model goes back to the tools in `tools`, and the tool runner doesn't detect it. Call `add_tools()` / `remove_tools()` again after that compaction if you need the change restored.
 - Runnable toolsets, such as a browser or computer toolset, can't be added or removed this way: a runner keeps the ones it was created with.

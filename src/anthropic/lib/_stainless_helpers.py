@@ -59,6 +59,7 @@ StainlessHelperHeaderValue = Literal[
     "mcp_resource_to_content",
     "mcp_resource_to_file",
     "mcp_tool",
+    "message-thread",
     "messages.parse",
     "session-tool-runner",
 ]

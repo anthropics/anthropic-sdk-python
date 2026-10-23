@@ -40,7 +40,8 @@ class BetaWorkspaceRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group.type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`. The list covers the models this
+    workspace has access to, so it can differ between workspaces.
     """
 
     rate_limit_id: str

@@ -1,12 +1,56 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Literal, Optional, cast
+from typing import Any, Union, Literal, Mapping, TypeVar, Optional, cast
 from typing_extensions import assert_never
 
 import pydantic
 
-from ..._utils import is_list
+from ..._types import Omit
+from ..._utils import is_list, is_given
+from ..._models import TypeAdapter
+from ..._exceptions import AnthropicError
+from ...types.beta.beta_output_config_param import BetaOutputConfigParam
+from ...types.beta.beta_json_output_format_param import BetaJSONOutputFormatParam
+
+_T = TypeVar("_T")
+
+
+def validate_output_config_conflict(output_config: Union[BetaOutputConfigParam, Omit], output_format: object) -> None:
+    """Reject a call that passes both `output_format` and `output_config.format`."""
+    if is_given(output_format) and output_format is not None and is_given(output_config):
+        if "format" in output_config and output_config["format"] is not None:
+            raise AnthropicError(
+                "Both output_format and output_config.format were provided. "
+                "Please use only output_config.format (output_format is deprecated).",
+            )
+
+
+def to_json_output_format(output_format: type[_T]) -> BetaJSONOutputFormatParam:
+    """The `output_config.format` param that asks for replies matching `output_format`'s JSON schema."""
+    if isinstance(output_format, Mapping):
+        raise TypeError("`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead")
+    adapted_type: TypeAdapter[_T] = TypeAdapter(output_format)
+    try:
+        schema = adapted_type.json_schema()
+    except pydantic.errors.PydanticSchemaGenerationError as e:
+        raise TypeError(
+            "Could not generate JSON schema for the given `output_format` type. "
+            "Use a type that works with `pydantic.TypeAdapter`"
+        ) from e
+    return {"type": "json_schema", "schema": transform_schema(schema)}
+
+
+def merge_output_config(
+    output_config: Union[BetaOutputConfigParam, Omit], output_format: Union[BetaJSONOutputFormatParam, Omit]
+) -> Union[BetaOutputConfigParam, Omit]:
+    """`output_config` with `output_format` as its `format`, when given."""
+    if not is_given(output_format):
+        return output_config
+    if is_given(output_config):
+        return {**output_config, "format": output_format}
+    return {"format": output_format}
+
 
 SupportedTypes = Literal[
     "object",

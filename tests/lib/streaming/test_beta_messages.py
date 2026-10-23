@@ -1058,8 +1058,9 @@ def test_tool_runner_method_definition_in_sync(sync: bool) -> None:
     assert_overloads_in_sync(
         client.beta.messages.create,
         client.beta.messages.tool_runner,
+        # `thread` also accepts `False` on the runner to opt out of message threads
         # A tool runner can't take `compaction`: every request of the loop would compact again.
-        exclude_params={"stream", "tools", "max_iterations", "output_format", "compaction"},
+        exclude_params={"stream", "tools", "max_iterations", "output_format", "thread", "compaction"},
     )
 
 

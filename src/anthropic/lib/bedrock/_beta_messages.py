@@ -20,6 +20,7 @@ class Messages(SyncAPIResource):
     parse = FirstPartyMessagesAPI.parse
     stream = FirstPartyMessagesAPI.stream
     tool_runner = FirstPartyMessagesAPI.tool_runner
+    thread = FirstPartyMessagesAPI.thread
 
     @cached_property
     def with_raw_response(self) -> MessagesWithRawResponse:
@@ -46,6 +47,7 @@ class AsyncMessages(AsyncAPIResource):
     parse = FirstPartyAsyncMessagesAPI.parse
     stream = FirstPartyAsyncMessagesAPI.stream
     tool_runner = FirstPartyAsyncMessagesAPI.tool_runner
+    thread = FirstPartyAsyncMessagesAPI.thread
 
     @cached_property
     def with_raw_response(self) -> AsyncMessagesWithRawResponse:
