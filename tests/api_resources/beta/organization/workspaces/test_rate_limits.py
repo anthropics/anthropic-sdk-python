@@ -29,6 +29,7 @@ class TestRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceRateLimit, rate_limit, path=["response"])
 
@@ -43,6 +44,7 @@ class TestRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -61,6 +63,7 @@ class TestRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -100,6 +103,7 @@ class TestRateLimits:
     def test_method_list(self, client: Anthropic) -> None:
         rate_limit = client.beta.organization.workspaces.rate_limits.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaWorkspaceRateLimit], rate_limit, path=["response"])
 
@@ -111,6 +115,7 @@ class TestRateLimits:
             include_inherited=True,
             limit=1,
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaWorkspaceRateLimit], rate_limit, path=["response"])
 
@@ -118,6 +123,7 @@ class TestRateLimits:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.rate_limits.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -129,6 +135,7 @@ class TestRateLimits:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.rate_limits.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -162,6 +169,7 @@ class TestAsyncRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceRateLimit, rate_limit, path=["response"])
 
@@ -176,6 +184,7 @@ class TestAsyncRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -194,6 +203,7 @@ class TestAsyncRateLimits:
                     "value": 0,
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -233,6 +243,7 @@ class TestAsyncRateLimits:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         rate_limit = await async_client.beta.organization.workspaces.rate_limits.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaWorkspaceRateLimit], rate_limit, path=["response"])
 
@@ -244,6 +255,7 @@ class TestAsyncRateLimits:
             include_inherited=True,
             limit=1,
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaWorkspaceRateLimit], rate_limit, path=["response"])
 
@@ -251,6 +263,7 @@ class TestAsyncRateLimits:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.rate_limits.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -262,6 +275,7 @@ class TestAsyncRateLimits:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.rate_limits.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

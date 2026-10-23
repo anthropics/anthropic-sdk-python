@@ -20,6 +20,7 @@ class TestRBACRoles:
     def test_method_retrieve(self, client: Anthropic) -> None:
         rbac_role = client.beta.organization.rbac_roles.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACRole, rbac_role, path=["response"])
 
@@ -27,6 +28,7 @@ class TestRBACRoles:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_roles.with_raw_response.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -38,6 +40,7 @@ class TestRBACRoles:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_roles.with_streaming_response.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -56,7 +59,9 @@ class TestRBACRoles:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        rbac_role = client.beta.organization.rbac_roles.list()
+        rbac_role = client.beta.organization.rbac_roles.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaRBACRole], rbac_role, path=["response"])
 
     @parametrize
@@ -64,12 +69,15 @@ class TestRBACRoles:
         rbac_role = client.beta.organization.rbac_roles.list(
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19yb2xlXzAxIn0",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaRBACRole], rbac_role, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.rbac_roles.with_raw_response.list()
+        response = client.beta.organization.rbac_roles.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -78,7 +86,9 @@ class TestRBACRoles:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.rbac_roles.with_streaming_response.list() as response:
+        with client.beta.organization.rbac_roles.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -97,6 +107,7 @@ class TestAsyncRBACRoles:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         rbac_role = await async_client.beta.organization.rbac_roles.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACRole, rbac_role, path=["response"])
 
@@ -104,6 +115,7 @@ class TestAsyncRBACRoles:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_roles.with_raw_response.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -115,6 +127,7 @@ class TestAsyncRBACRoles:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_roles.with_streaming_response.retrieve(
             "rbac_role_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -133,7 +146,9 @@ class TestAsyncRBACRoles:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        rbac_role = await async_client.beta.organization.rbac_roles.list()
+        rbac_role = await async_client.beta.organization.rbac_roles.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaRBACRole], rbac_role, path=["response"])
 
     @parametrize
@@ -141,12 +156,15 @@ class TestAsyncRBACRoles:
         rbac_role = await async_client.beta.organization.rbac_roles.list(
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19yb2xlXzAxIn0",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaRBACRole], rbac_role, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.rbac_roles.with_raw_response.list()
+        response = await async_client.beta.organization.rbac_roles.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -155,7 +173,9 @@ class TestAsyncRBACRoles:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.rbac_roles.with_streaming_response.list() as response:
+        async with async_client.beta.organization.rbac_roles.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

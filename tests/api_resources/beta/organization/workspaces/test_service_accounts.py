@@ -24,6 +24,7 @@ class TestServiceAccounts:
         service_account = client.beta.organization.workspaces.service_accounts.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -33,6 +34,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -41,6 +43,7 @@ class TestServiceAccounts:
         response = client.beta.organization.workspaces.service_accounts.with_raw_response.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -53,6 +56,7 @@ class TestServiceAccounts:
         with client.beta.organization.workspaces.service_accounts.with_streaming_response.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -82,6 +86,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -92,6 +97,7 @@ class TestServiceAccounts:
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -101,6 +107,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -114,6 +121,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -143,6 +151,7 @@ class TestServiceAccounts:
     def test_method_list(self, client: Anthropic) -> None:
         service_account = client.beta.organization.workspaces.service_accounts.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaServiceAccountWorkspaceMember], service_account, path=["response"])
 
@@ -153,6 +162,7 @@ class TestServiceAccounts:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaServiceAccountWorkspaceMember], service_account, path=["response"])
 
@@ -160,6 +170,7 @@ class TestServiceAccounts:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.service_accounts.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -171,6 +182,7 @@ class TestServiceAccounts:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.service_accounts.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -193,6 +205,7 @@ class TestServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -203,6 +216,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -212,6 +226,7 @@ class TestServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -225,6 +240,7 @@ class TestServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -248,6 +264,7 @@ class TestServiceAccounts:
         service_account = client.beta.organization.workspaces.service_accounts.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ServiceAccountRemoveResponse, service_account, path=["response"])
 
@@ -257,6 +274,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ServiceAccountRemoveResponse, service_account, path=["response"])
 
@@ -265,6 +283,7 @@ class TestServiceAccounts:
         response = client.beta.organization.workspaces.service_accounts.with_raw_response.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -277,6 +296,7 @@ class TestServiceAccounts:
         with client.beta.organization.workspaces.service_accounts.with_streaming_response.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -311,6 +331,7 @@ class TestAsyncServiceAccounts:
         service_account = await async_client.beta.organization.workspaces.service_accounts.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -320,6 +341,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -328,6 +350,7 @@ class TestAsyncServiceAccounts:
         response = await async_client.beta.organization.workspaces.service_accounts.with_raw_response.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -340,6 +363,7 @@ class TestAsyncServiceAccounts:
         async with async_client.beta.organization.workspaces.service_accounts.with_streaming_response.retrieve(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -369,6 +393,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -379,6 +404,7 @@ class TestAsyncServiceAccounts:
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -388,6 +414,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -401,6 +428,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -430,6 +458,7 @@ class TestAsyncServiceAccounts:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.workspaces.service_accounts.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaServiceAccountWorkspaceMember], service_account, path=["response"])
 
@@ -440,6 +469,7 @@ class TestAsyncServiceAccounts:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaServiceAccountWorkspaceMember], service_account, path=["response"])
 
@@ -447,6 +477,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.service_accounts.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -458,6 +489,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.service_accounts.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -480,6 +512,7 @@ class TestAsyncServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -490,6 +523,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, service_account, path=["response"])
 
@@ -499,6 +533,7 @@ class TestAsyncServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -512,6 +547,7 @@ class TestAsyncServiceAccounts:
             workspace_id="workspace_id",
             service_account_id="service_account_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -535,6 +571,7 @@ class TestAsyncServiceAccounts:
         service_account = await async_client.beta.organization.workspaces.service_accounts.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ServiceAccountRemoveResponse, service_account, path=["response"])
 
@@ -544,6 +581,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ServiceAccountRemoveResponse, service_account, path=["response"])
 
@@ -552,6 +590,7 @@ class TestAsyncServiceAccounts:
         response = await async_client.beta.organization.workspaces.service_accounts.with_raw_response.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -564,6 +603,7 @@ class TestAsyncServiceAccounts:
         async with async_client.beta.organization.workspaces.service_accounts.with_streaming_response.remove(
             service_account_id="service_account_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

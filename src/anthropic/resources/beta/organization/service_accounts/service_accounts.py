@@ -107,7 +107,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             body={
                 "name": name,
                 "description": description,
@@ -167,8 +167,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -236,8 +235,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             body={
                 "description": description,
@@ -304,7 +302,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             page=SyncPageCursor[BetaServiceAccount],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -369,8 +367,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/archive?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -462,7 +459,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             body={
                 "name": name,
                 "description": description,
@@ -522,8 +519,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -591,8 +587,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             body={
                 "description": description,
@@ -659,7 +654,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             page=AsyncPageCursor[BetaServiceAccount],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -724,8 +719,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/archive?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,

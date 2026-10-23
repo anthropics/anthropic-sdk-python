@@ -98,7 +98,7 @@ class DeploymentRuns(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/deployment_runs/{deployment_run_id}?beta=true", deployment_run_id=deployment_run_id),
+            path_template("/v1/deployment_runs/{deployment_run_id}", deployment_run_id=deployment_run_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -190,7 +190,7 @@ class DeploymentRuns(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployment_runs?beta=true",
+            "/v1/deployment_runs",
             page=SyncPageCursor[BetaManagedAgentsDeploymentRun],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -288,7 +288,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/deployment_runs/{deployment_run_id}?beta=true", deployment_run_id=deployment_run_id),
+            path_template("/v1/deployment_runs/{deployment_run_id}", deployment_run_id=deployment_run_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -380,7 +380,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployment_runs?beta=true",
+            "/v1/deployment_runs",
             page=AsyncPageCursor[BetaManagedAgentsDeploymentRun],
             options=make_request_options(
                 extra_headers=extra_headers,

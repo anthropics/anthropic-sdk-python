@@ -198,7 +198,7 @@ class Plugins(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -277,7 +277,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -372,7 +372,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -483,7 +483,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=SyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -572,7 +572,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -724,7 +724,7 @@ class AsyncPlugins(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -803,7 +803,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -898,7 +898,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1009,7 +1009,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=AsyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1098,7 +1098,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

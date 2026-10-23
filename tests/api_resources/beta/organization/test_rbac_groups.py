@@ -23,6 +23,7 @@ class TestRBACGroups:
     def test_method_create(self, client: Anthropic) -> None:
         rbac_group = client.beta.organization.rbac_groups.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -30,6 +31,7 @@ class TestRBACGroups:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_groups.with_raw_response.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -41,6 +43,7 @@ class TestRBACGroups:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_groups.with_streaming_response.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -54,6 +57,7 @@ class TestRBACGroups:
     def test_method_retrieve(self, client: Anthropic) -> None:
         rbac_group = client.beta.organization.rbac_groups.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -61,6 +65,7 @@ class TestRBACGroups:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_groups.with_raw_response.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -72,6 +77,7 @@ class TestRBACGroups:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_groups.with_streaming_response.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -92,6 +98,7 @@ class TestRBACGroups:
     def test_method_update(self, client: Anthropic) -> None:
         rbac_group = client.beta.organization.rbac_groups.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -100,6 +107,7 @@ class TestRBACGroups:
         rbac_group = client.beta.organization.rbac_groups.update(
             rbac_group_id="rbac_group_id",
             name="Engineering",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -107,6 +115,7 @@ class TestRBACGroups:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_groups.with_raw_response.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -118,6 +127,7 @@ class TestRBACGroups:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_groups.with_streaming_response.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -136,7 +146,9 @@ class TestRBACGroups:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        rbac_group = client.beta.organization.rbac_groups.list()
+        rbac_group = client.beta.organization.rbac_groups.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaRBACGroup], rbac_group, path=["response"])
 
     @parametrize
@@ -144,12 +156,15 @@ class TestRBACGroups:
         rbac_group = client.beta.organization.rbac_groups.list(
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19ncm91cF8wMSJ9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaRBACGroup], rbac_group, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.rbac_groups.with_raw_response.list()
+        response = client.beta.organization.rbac_groups.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -158,7 +173,9 @@ class TestRBACGroups:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.rbac_groups.with_streaming_response.list() as response:
+        with client.beta.organization.rbac_groups.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -171,6 +188,7 @@ class TestRBACGroups:
     def test_method_delete(self, client: Anthropic) -> None:
         rbac_group = client.beta.organization.rbac_groups.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
 
@@ -178,6 +196,7 @@ class TestRBACGroups:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.rbac_groups.with_raw_response.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -189,6 +208,7 @@ class TestRBACGroups:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.rbac_groups.with_streaming_response.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -215,6 +235,7 @@ class TestAsyncRBACGroups:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         rbac_group = await async_client.beta.organization.rbac_groups.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -222,6 +243,7 @@ class TestAsyncRBACGroups:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_groups.with_raw_response.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -233,6 +255,7 @@ class TestAsyncRBACGroups:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_groups.with_streaming_response.create(
             name="Engineering",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -246,6 +269,7 @@ class TestAsyncRBACGroups:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         rbac_group = await async_client.beta.organization.rbac_groups.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -253,6 +277,7 @@ class TestAsyncRBACGroups:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_groups.with_raw_response.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -264,6 +289,7 @@ class TestAsyncRBACGroups:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_groups.with_streaming_response.retrieve(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -284,6 +310,7 @@ class TestAsyncRBACGroups:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         rbac_group = await async_client.beta.organization.rbac_groups.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -292,6 +319,7 @@ class TestAsyncRBACGroups:
         rbac_group = await async_client.beta.organization.rbac_groups.update(
             rbac_group_id="rbac_group_id",
             name="Engineering",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaRBACGroup, rbac_group, path=["response"])
 
@@ -299,6 +327,7 @@ class TestAsyncRBACGroups:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_groups.with_raw_response.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -310,6 +339,7 @@ class TestAsyncRBACGroups:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_groups.with_streaming_response.update(
             rbac_group_id="rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -328,7 +358,9 @@ class TestAsyncRBACGroups:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        rbac_group = await async_client.beta.organization.rbac_groups.list()
+        rbac_group = await async_client.beta.organization.rbac_groups.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaRBACGroup], rbac_group, path=["response"])
 
     @parametrize
@@ -336,12 +368,15 @@ class TestAsyncRBACGroups:
         rbac_group = await async_client.beta.organization.rbac_groups.list(
             limit=1,
             page="eyJjdXJzb3IiOiAicmJhY19ncm91cF8wMSJ9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaRBACGroup], rbac_group, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.rbac_groups.with_raw_response.list()
+        response = await async_client.beta.organization.rbac_groups.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -350,7 +385,9 @@ class TestAsyncRBACGroups:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.rbac_groups.with_streaming_response.list() as response:
+        async with async_client.beta.organization.rbac_groups.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -363,6 +400,7 @@ class TestAsyncRBACGroups:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         rbac_group = await async_client.beta.organization.rbac_groups.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
 
@@ -370,6 +408,7 @@ class TestAsyncRBACGroups:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.rbac_groups.with_raw_response.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -381,6 +420,7 @@ class TestAsyncRBACGroups:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.rbac_groups.with_streaming_response.delete(
             "rbac_group_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

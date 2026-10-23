@@ -20,6 +20,7 @@ class TestModels:
     def test_method_retrieve(self, client: Anthropic) -> None:
         model = client.beta.models.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaModelInfo, model, path=["response"])
 
@@ -29,6 +30,7 @@ class TestModels:
             model_id="model_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaModelInfo, model, path=["response"])
 
@@ -36,6 +38,7 @@ class TestModels:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.models.with_raw_response.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -47,6 +50,7 @@ class TestModels:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.models.with_streaming_response.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -65,7 +69,9 @@ class TestModels:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        model = client.beta.models.list()
+        model = client.beta.models.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaModelInfo], model, path=["response"])
 
     @parametrize
@@ -77,12 +83,15 @@ class TestModels:
             limit=1,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaModelInfo], model, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.models.with_raw_response.list()
+        response = client.beta.models.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -91,7 +100,9 @@ class TestModels:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.models.with_streaming_response.list() as response:
+        with client.beta.models.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -110,6 +121,7 @@ class TestAsyncModels:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         model = await async_client.beta.models.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaModelInfo, model, path=["response"])
 
@@ -119,6 +131,7 @@ class TestAsyncModels:
             model_id="model_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaModelInfo, model, path=["response"])
 
@@ -126,6 +139,7 @@ class TestAsyncModels:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.models.with_raw_response.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -137,6 +151,7 @@ class TestAsyncModels:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.models.with_streaming_response.retrieve(
             model_id="model_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -155,7 +170,9 @@ class TestAsyncModels:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        model = await async_client.beta.models.list()
+        model = await async_client.beta.models.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaModelInfo], model, path=["response"])
 
     @parametrize
@@ -167,12 +184,15 @@ class TestAsyncModels:
             limit=1,
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaModelInfo], model, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.models.with_raw_response.list()
+        response = await async_client.beta.models.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -181,7 +201,9 @@ class TestAsyncModels:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.models.with_streaming_response.list() as response:
+        async with async_client.beta.models.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

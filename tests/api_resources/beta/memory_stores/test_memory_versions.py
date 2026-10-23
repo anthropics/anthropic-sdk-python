@@ -24,6 +24,7 @@ class TestMemoryVersions:
         memory_version = client.beta.memory_stores.memory_versions.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -35,6 +36,7 @@ class TestMemoryVersions:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -43,6 +45,7 @@ class TestMemoryVersions:
         response = client.beta.memory_stores.memory_versions.with_raw_response.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -55,6 +58,7 @@ class TestMemoryVersions:
         with client.beta.memory_stores.memory_versions.with_streaming_response.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -82,6 +86,7 @@ class TestMemoryVersions:
     def test_method_list(self, client: Anthropic) -> None:
         memory_version = client.beta.memory_stores.memory_versions.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -101,6 +106,7 @@ class TestMemoryVersions:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -108,6 +114,7 @@ class TestMemoryVersions:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.memory_stores.memory_versions.with_raw_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -119,6 +126,7 @@ class TestMemoryVersions:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.memory_stores.memory_versions.with_streaming_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -140,6 +148,7 @@ class TestMemoryVersions:
         memory_version = client.beta.memory_stores.memory_versions.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -150,6 +159,7 @@ class TestMemoryVersions:
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -158,6 +168,7 @@ class TestMemoryVersions:
         response = client.beta.memory_stores.memory_versions.with_raw_response.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -170,6 +181,7 @@ class TestMemoryVersions:
         with client.beta.memory_stores.memory_versions.with_streaming_response.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -204,6 +216,7 @@ class TestAsyncMemoryVersions:
         memory_version = await async_client.beta.memory_stores.memory_versions.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -215,6 +228,7 @@ class TestAsyncMemoryVersions:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -223,6 +237,7 @@ class TestAsyncMemoryVersions:
         response = await async_client.beta.memory_stores.memory_versions.with_raw_response.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -235,6 +250,7 @@ class TestAsyncMemoryVersions:
         async with async_client.beta.memory_stores.memory_versions.with_streaming_response.retrieve(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -262,6 +278,7 @@ class TestAsyncMemoryVersions:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         memory_version = await async_client.beta.memory_stores.memory_versions.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -281,6 +298,7 @@ class TestAsyncMemoryVersions:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryVersion], memory_version, path=["response"])
 
@@ -288,6 +306,7 @@ class TestAsyncMemoryVersions:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.memory_stores.memory_versions.with_raw_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -299,6 +318,7 @@ class TestAsyncMemoryVersions:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.memory_stores.memory_versions.with_streaming_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -320,6 +340,7 @@ class TestAsyncMemoryVersions:
         memory_version = await async_client.beta.memory_stores.memory_versions.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -330,6 +351,7 @@ class TestAsyncMemoryVersions:
             memory_store_id="memory_store_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemoryVersion, memory_version, path=["response"])
 
@@ -338,6 +360,7 @@ class TestAsyncMemoryVersions:
         response = await async_client.beta.memory_stores.memory_versions.with_raw_response.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -350,6 +373,7 @@ class TestAsyncMemoryVersions:
         async with async_client.beta.memory_stores.memory_versions.with_streaming_response.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

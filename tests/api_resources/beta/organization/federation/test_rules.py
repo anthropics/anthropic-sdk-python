@@ -29,6 +29,7 @@ class TestRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -55,6 +56,7 @@ class TestRules:
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -69,6 +71,7 @@ class TestRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -87,6 +90,7 @@ class TestRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -100,6 +104,7 @@ class TestRules:
     def test_method_retrieve(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -108,6 +113,7 @@ class TestRules:
         rule = client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -115,6 +121,7 @@ class TestRules:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.rules.with_raw_response.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -126,6 +133,7 @@ class TestRules:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.federation.rules.with_streaming_response.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -146,6 +154,7 @@ class TestRules:
     def test_method_update(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -172,6 +181,7 @@ class TestRules:
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -179,6 +189,7 @@ class TestRules:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.rules.with_raw_response.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -190,6 +201,7 @@ class TestRules:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.federation.rules.with_streaming_response.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -208,7 +220,9 @@ class TestRules:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        rule = client.beta.organization.federation.rules.list()
+        rule = client.beta.organization.federation.rules.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaFederationRule], rule, path=["response"])
 
     @parametrize
@@ -219,12 +233,15 @@ class TestRules:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaFederationRule], rule, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.federation.rules.with_raw_response.list()
+        response = client.beta.organization.federation.rules.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -233,7 +250,9 @@ class TestRules:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.federation.rules.with_streaming_response.list() as response:
+        with client.beta.organization.federation.rules.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -246,6 +265,7 @@ class TestRules:
     def test_method_archive(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -254,6 +274,7 @@ class TestRules:
         rule = client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -261,6 +282,7 @@ class TestRules:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.rules.with_raw_response.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -272,6 +294,7 @@ class TestRules:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.organization.federation.rules.with_streaming_response.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -305,6 +328,7 @@ class TestAsyncRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -331,6 +355,7 @@ class TestAsyncRules:
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -345,6 +370,7 @@ class TestAsyncRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -363,6 +389,7 @@ class TestAsyncRules:
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -376,6 +403,7 @@ class TestAsyncRules:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -384,6 +412,7 @@ class TestAsyncRules:
         rule = await async_client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -391,6 +420,7 @@ class TestAsyncRules:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.rules.with_raw_response.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -402,6 +432,7 @@ class TestAsyncRules:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.rules.with_streaming_response.retrieve(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -422,6 +453,7 @@ class TestAsyncRules:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -448,6 +480,7 @@ class TestAsyncRules:
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -455,6 +488,7 @@ class TestAsyncRules:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.rules.with_raw_response.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -466,6 +500,7 @@ class TestAsyncRules:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.rules.with_streaming_response.update(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -484,7 +519,9 @@ class TestAsyncRules:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        rule = await async_client.beta.organization.federation.rules.list()
+        rule = await async_client.beta.organization.federation.rules.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaFederationRule], rule, path=["response"])
 
     @parametrize
@@ -495,12 +532,15 @@ class TestAsyncRules:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaFederationRule], rule, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.federation.rules.with_raw_response.list()
+        response = await async_client.beta.organization.federation.rules.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -509,7 +549,9 @@ class TestAsyncRules:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.federation.rules.with_streaming_response.list() as response:
+        async with async_client.beta.organization.federation.rules.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -522,6 +564,7 @@ class TestAsyncRules:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -530,6 +573,7 @@ class TestAsyncRules:
         rule = await async_client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
 
@@ -537,6 +581,7 @@ class TestAsyncRules:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.rules.with_raw_response.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -548,6 +593,7 @@ class TestAsyncRules:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.rules.with_streaming_response.archive(
             federation_rule_id="federation_rule_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

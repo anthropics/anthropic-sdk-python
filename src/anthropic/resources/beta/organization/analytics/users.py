@@ -142,7 +142,7 @@ class Users(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/users?beta=true",
+            "/v1/organizations/analytics/users",
             page=SyncPageCursor[BetaAnalyticsUserActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -289,7 +289,7 @@ class AsyncUsers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/users?beta=true",
+            "/v1/organizations/analytics/users",
             page=AsyncPageCursor[BetaAnalyticsUserActivity],
             options=make_request_options(
                 extra_headers=extra_headers,

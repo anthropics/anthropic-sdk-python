@@ -145,7 +145,7 @@ class Plugins(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/plugins?beta=true",
+            "/v1/organizations/analytics/plugins",
             page=SyncPageCursor[BetaAnalyticsPluginActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -295,7 +295,7 @@ class AsyncPlugins(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/plugins?beta=true",
+            "/v1/organizations/analytics/plugins",
             page=AsyncPageCursor[BetaAnalyticsPluginActivity],
             options=make_request_options(
                 extra_headers=extra_headers,

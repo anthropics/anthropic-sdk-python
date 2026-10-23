@@ -185,7 +185,7 @@ class UserUsageReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_usage_report?beta=true",
+            "/v1/organizations/analytics/user_usage_report",
             page=SyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -380,7 +380,7 @@ class AsyncUserUsageReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_usage_report?beta=true",
+            "/v1/organizations/analytics/user_usage_report",
             page=AsyncReportPageCursor[BetaAnalyticsUsageUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,

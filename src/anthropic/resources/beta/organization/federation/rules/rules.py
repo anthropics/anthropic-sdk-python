@@ -146,7 +146,7 @@ class Rules(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             body={
                 "issuer_id": issuer_id,
                 "match": match,
@@ -213,8 +213,7 @@ class Rules(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -325,8 +324,7 @@ class Rules(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             body={
                 "applies_to_all_workspaces": applies_to_all_workspaces,
@@ -402,7 +400,7 @@ class Rules(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             page=SyncPageCursor[BetaFederationRule],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -470,8 +468,7 @@ class Rules(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/archive?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}/archive", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -601,7 +598,7 @@ class AsyncRules(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             body={
                 "issuer_id": issuer_id,
                 "match": match,
@@ -668,8 +665,7 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -780,8 +776,7 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             body={
                 "applies_to_all_workspaces": applies_to_all_workspaces,
@@ -857,7 +852,7 @@ class AsyncRules(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             page=AsyncPageCursor[BetaFederationRule],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -925,8 +920,7 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/archive?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}/archive", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,

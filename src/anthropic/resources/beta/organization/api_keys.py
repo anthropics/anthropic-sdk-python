@@ -70,7 +70,7 @@ class APIKeys(SyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return self._get(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -118,7 +118,7 @@ class APIKeys(SyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return self._post(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             body={
                 "name": name,
                 "status": status,
@@ -181,7 +181,7 @@ class APIKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/api_keys?beta=true",
+            "/v1/organizations/api_keys",
             page=SyncPage[BetaAPIKey],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -252,7 +252,7 @@ class AsyncAPIKeys(AsyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return await self._get(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -300,7 +300,7 @@ class AsyncAPIKeys(AsyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return await self._post(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             body={
                 "name": name,
                 "status": status,
@@ -363,7 +363,7 @@ class AsyncAPIKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/api_keys?beta=true",
+            "/v1/organizations/api_keys",
             page=AsyncPage[BetaAPIKey],
             options=make_request_options(
                 extra_headers=extra_headers,

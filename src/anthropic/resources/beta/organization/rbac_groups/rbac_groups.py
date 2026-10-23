@@ -84,7 +84,7 @@ class RBACGroups(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._post(
-            "/v1/organizations/rbac_groups?beta=true",
+            "/v1/organizations/rbac_groups",
             body={"name": name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -129,7 +129,7 @@ class RBACGroups(SyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._get(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -179,7 +179,7 @@ class RBACGroups(SyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._post(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             body={"name": name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -227,7 +227,7 @@ class RBACGroups(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rbac_groups?beta=true",
+            "/v1/organizations/rbac_groups",
             page=SyncPageCursor[BetaRBACGroup],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -278,7 +278,7 @@ class RBACGroups(SyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._delete(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -347,7 +347,7 @@ class AsyncRBACGroups(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return await self._post(
-            "/v1/organizations/rbac_groups?beta=true",
+            "/v1/organizations/rbac_groups",
             body={"name": name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -392,7 +392,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return await self._get(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -442,7 +442,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return await self._post(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             body={"name": name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -490,7 +490,7 @@ class AsyncRBACGroups(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rbac_groups?beta=true",
+            "/v1/organizations/rbac_groups",
             page=AsyncPageCursor[BetaRBACGroup],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -541,7 +541,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return await self._delete(
-            path_template("/v1/organizations/rbac_groups/{rbac_group_id}?beta=true", rbac_group_id=rbac_group_id),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}", rbac_group_id=rbac_group_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

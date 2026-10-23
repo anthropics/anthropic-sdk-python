@@ -108,7 +108,7 @@ class Credentials(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
+            path_template("/v1/vaults/{vault_id}/credentials", vault_id=vault_id),
             body={
                 "auth": auth,
                 "display_name": display_name,
@@ -186,9 +186,7 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -272,9 +270,7 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             body={
                 "auth": auth,
@@ -357,7 +353,7 @@ class Credentials(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
+            path_template("/v1/vaults/{vault_id}/credentials", vault_id=vault_id),
             page=SyncPageCursor[BetaManagedAgentsCredential],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -435,9 +431,7 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -510,7 +504,7 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}/archive?beta=true",
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/archive",
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
@@ -585,7 +579,7 @@ class Credentials(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate?beta=true",
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate",
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
@@ -685,7 +679,7 @@ class AsyncCredentials(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
+            path_template("/v1/vaults/{vault_id}/credentials", vault_id=vault_id),
             body={
                 "auth": auth,
                 "display_name": display_name,
@@ -763,9 +757,7 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -849,9 +841,7 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             body={
                 "auth": auth,
@@ -934,7 +924,7 @@ class AsyncCredentials(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/vaults/{vault_id}/credentials?beta=true", vault_id=vault_id),
+            path_template("/v1/vaults/{vault_id}/credentials", vault_id=vault_id),
             page=AsyncPageCursor[BetaManagedAgentsCredential],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1012,9 +1002,7 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}?beta=true",
-                vault_id=vault_id,
-                credential_id=credential_id,
+                "/v1/vaults/{vault_id}/credentials/{credential_id}", vault_id=vault_id, credential_id=credential_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1087,7 +1075,7 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}/archive?beta=true",
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/archive",
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),
@@ -1162,7 +1150,7 @@ class AsyncCredentials(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate?beta=true",
+                "/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate",
                 vault_id=vault_id,
                 credential_id=credential_id,
             ),

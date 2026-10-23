@@ -132,7 +132,7 @@ class Skills(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -198,7 +198,7 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -274,7 +274,7 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             page=SyncPageCursor[BetaSkill],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -343,7 +343,7 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._delete(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -448,7 +448,7 @@ class AsyncSkills(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -514,7 +514,7 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -590,7 +590,7 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             page=AsyncPageCursor[BetaSkill],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -659,7 +659,7 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._delete(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

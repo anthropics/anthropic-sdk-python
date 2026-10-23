@@ -94,7 +94,7 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -173,7 +173,7 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=SyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -265,7 +265,7 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -344,7 +344,7 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=AsyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,

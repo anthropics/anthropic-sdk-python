@@ -1264,7 +1264,7 @@ class Messages(SyncAPIResource):
             extra_headers or {},
         )
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -2110,7 +2110,7 @@ class Messages(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,
@@ -3306,7 +3306,7 @@ class AsyncMessages(AsyncAPIResource):
             extra_headers or {},
         )
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -4152,7 +4152,7 @@ class AsyncMessages(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,

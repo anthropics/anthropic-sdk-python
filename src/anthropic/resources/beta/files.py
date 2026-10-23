@@ -130,7 +130,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/files?beta=true",
+            "/v1/files",
             page=SyncPageCursor[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -198,7 +198,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._delete(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -261,7 +261,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -323,7 +323,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -403,7 +403,7 @@ class Files(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            "/v1/files?beta=true",
+            "/v1/files",
             body=body,
             files=files,
             options=make_request_options(
@@ -503,7 +503,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/files?beta=true",
+            "/v1/files",
             page=AsyncPageCursor[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -571,7 +571,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._delete(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -634,7 +634,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -696,7 +696,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -776,7 +776,7 @@ class AsyncFiles(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            "/v1/files?beta=true",
+            "/v1/files",
             body=body,
             files=files,
             options=make_request_options(

@@ -256,7 +256,7 @@ class Organization(SyncAPIResource):
         API key.
         """
         return self._get(
-            "/v1/organizations/me?beta=true",
+            "/v1/organizations/me",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -373,7 +373,7 @@ class AsyncOrganization(AsyncAPIResource):
         API key.
         """
         return await self._get(
-            "/v1/organizations/me?beta=true",
+            "/v1/organizations/me",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

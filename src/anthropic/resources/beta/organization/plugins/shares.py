@@ -126,7 +126,7 @@ class Shares(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/shares?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/shares", plugin_id=plugin_id),
             page=SyncPageCursor[BetaPluginShare],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -250,7 +250,7 @@ class AsyncShares(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/shares?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/shares", plugin_id=plugin_id),
             page=AsyncPageCursor[BetaPluginShare],
             options=make_request_options(
                 extra_headers=extra_headers,

@@ -104,9 +104,7 @@ class Resources(SyncAPIResource):
             ResourceRetrieveResponse,
             self._get(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 options=make_request_options(
                     extra_headers=extra_headers,
@@ -184,9 +182,7 @@ class Resources(SyncAPIResource):
             ResourceUpdateResponse,
             self._post(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
@@ -262,7 +258,7 @@ class Resources(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             page=SyncPageCursor[BetaManagedAgentsSessionResource],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -337,9 +333,7 @@ class Resources(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
             path_template(
-                "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                session_id=session_id,
-                resource_id=resource_id,
+                "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -411,7 +405,7 @@ class Resources(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             body={
                 "file_id": file_id,
                 "type": type,
@@ -508,9 +502,7 @@ class AsyncResources(AsyncAPIResource):
             ResourceRetrieveResponse,
             await self._get(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 options=make_request_options(
                     extra_headers=extra_headers,
@@ -588,9 +580,7 @@ class AsyncResources(AsyncAPIResource):
             ResourceUpdateResponse,
             await self._post(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
@@ -666,7 +656,7 @@ class AsyncResources(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             page=AsyncPageCursor[BetaManagedAgentsSessionResource],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -741,9 +731,7 @@ class AsyncResources(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
             path_template(
-                "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                session_id=session_id,
-                resource_id=resource_id,
+                "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -815,7 +803,7 @@ class AsyncResources(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             body={
                 "file_id": file_id,
                 "type": type,

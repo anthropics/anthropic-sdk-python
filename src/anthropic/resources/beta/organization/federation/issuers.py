@@ -108,7 +108,7 @@ class Issuers(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             body={
                 "issuer_url": issuer_url,
                 "name": name,
@@ -172,8 +172,7 @@ class Issuers(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -265,8 +264,7 @@ class Issuers(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             body={
                 "check_jti": check_jti,
@@ -335,7 +333,7 @@ class Issuers(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             page=SyncPageCursor[BetaFederationIssuer],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -402,7 +400,7 @@ class Issuers(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive?beta=true",
+                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
@@ -504,7 +502,7 @@ class AsyncIssuers(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             body={
                 "issuer_url": issuer_url,
                 "name": name,
@@ -568,8 +566,7 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -661,8 +658,7 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             body={
                 "check_jti": check_jti,
@@ -731,7 +727,7 @@ class AsyncIssuers(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             page=AsyncPageCursor[BetaFederationIssuer],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -798,7 +794,7 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive?beta=true",
+                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(

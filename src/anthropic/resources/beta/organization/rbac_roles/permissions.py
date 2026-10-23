@@ -79,9 +79,7 @@ class Permissions(SyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_roles/{rbac_role_id}/permissions?beta=true", rbac_role_id=rbac_role_id
-            ),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}/permissions", rbac_role_id=rbac_role_id),
             page=SyncPageCursor[BetaRBACRolePermission],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -159,9 +157,7 @@ class AsyncPermissions(AsyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_roles/{rbac_role_id}/permissions?beta=true", rbac_role_id=rbac_role_id
-            ),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}/permissions", rbac_role_id=rbac_role_id),
             page=AsyncPageCursor[BetaRBACRolePermission],
             options=make_request_options(
                 extra_headers=extra_headers,

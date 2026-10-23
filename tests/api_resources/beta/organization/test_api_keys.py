@@ -20,6 +20,7 @@ class TestAPIKeys:
     def test_method_retrieve(self, client: Anthropic) -> None:
         api_key = client.beta.organization.api_keys.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -27,6 +28,7 @@ class TestAPIKeys:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.api_keys.with_raw_response.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -38,6 +40,7 @@ class TestAPIKeys:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.api_keys.with_streaming_response.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -58,6 +61,7 @@ class TestAPIKeys:
     def test_method_update(self, client: Anthropic) -> None:
         api_key = client.beta.organization.api_keys.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -67,6 +71,7 @@ class TestAPIKeys:
             api_key_id="api_key_id",
             name="x",
             status="active",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -74,6 +79,7 @@ class TestAPIKeys:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.api_keys.with_raw_response.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -85,6 +91,7 @@ class TestAPIKeys:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.api_keys.with_streaming_response.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -103,7 +110,9 @@ class TestAPIKeys:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        api_key = client.beta.organization.api_keys.list()
+        api_key = client.beta.organization.api_keys.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaAPIKey], api_key, path=["response"])
 
     @parametrize
@@ -115,12 +124,15 @@ class TestAPIKeys:
             limit=1,
             status="active",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaAPIKey], api_key, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.api_keys.with_raw_response.list()
+        response = client.beta.organization.api_keys.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -129,7 +141,9 @@ class TestAPIKeys:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.api_keys.with_streaming_response.list() as response:
+        with client.beta.organization.api_keys.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -148,6 +162,7 @@ class TestAsyncAPIKeys:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         api_key = await async_client.beta.organization.api_keys.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -155,6 +170,7 @@ class TestAsyncAPIKeys:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.api_keys.with_raw_response.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -166,6 +182,7 @@ class TestAsyncAPIKeys:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.api_keys.with_streaming_response.retrieve(
             "api_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -186,6 +203,7 @@ class TestAsyncAPIKeys:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         api_key = await async_client.beta.organization.api_keys.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -195,6 +213,7 @@ class TestAsyncAPIKeys:
             api_key_id="api_key_id",
             name="x",
             status="active",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaAPIKey, api_key, path=["response"])
 
@@ -202,6 +221,7 @@ class TestAsyncAPIKeys:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.api_keys.with_raw_response.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -213,6 +233,7 @@ class TestAsyncAPIKeys:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.api_keys.with_streaming_response.update(
             api_key_id="api_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -231,7 +252,9 @@ class TestAsyncAPIKeys:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        api_key = await async_client.beta.organization.api_keys.list()
+        api_key = await async_client.beta.organization.api_keys.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaAPIKey], api_key, path=["response"])
 
     @parametrize
@@ -243,12 +266,15 @@ class TestAsyncAPIKeys:
             limit=1,
             status="active",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaAPIKey], api_key, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.api_keys.with_raw_response.list()
+        response = await async_client.beta.organization.api_keys.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -257,7 +283,9 @@ class TestAsyncAPIKeys:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.api_keys.with_streaming_response.list() as response:
+        async with async_client.beta.organization.api_keys.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

@@ -114,7 +114,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -187,7 +187,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -264,7 +264,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             page=SyncPageCursor[BetaTunnel],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -344,7 +344,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/archive", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -419,7 +419,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/reveal_token", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -496,7 +496,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/rotate_token", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -594,7 +594,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -667,7 +667,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -744,7 +744,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             page=AsyncPageCursor[BetaTunnel],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -824,7 +824,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/archive", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -899,7 +899,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/reveal_token", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -976,7 +976,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/rotate_token", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers,

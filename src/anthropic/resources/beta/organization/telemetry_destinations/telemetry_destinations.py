@@ -149,7 +149,7 @@ class TelemetryDestinations(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._post(
-            "/v1/organizations/telemetry_destinations?beta=true",
+            "/v1/organizations/telemetry_destinations",
             body={
                 "endpoint_url": endpoint_url,
                 "workspaces": workspaces,
@@ -217,9 +217,7 @@ class TelemetryDestinations(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -337,9 +335,7 @@ class TelemetryDestinations(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             body={
                 "display_name": display_name,
                 "endpoint_url": endpoint_url,
@@ -421,7 +417,7 @@ class TelemetryDestinations(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/telemetry_destinations?beta=true",
+            "/v1/organizations/telemetry_destinations",
             page=SyncPageCursor[BetaTelemetryDestination],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -491,9 +487,7 @@ class TelemetryDestinations(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._delete(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -558,8 +552,7 @@ class TelemetryDestinations(SyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/test?beta=true",
-                destination_id=destination_id,
+                "/v1/organizations/telemetry_destinations/{destination_id}/test", destination_id=destination_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -681,7 +674,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._post(
-            "/v1/organizations/telemetry_destinations?beta=true",
+            "/v1/organizations/telemetry_destinations",
             body={
                 "endpoint_url": endpoint_url,
                 "workspaces": workspaces,
@@ -749,9 +742,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -869,9 +860,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             body={
                 "display_name": display_name,
                 "endpoint_url": endpoint_url,
@@ -953,7 +942,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/telemetry_destinations?beta=true",
+            "/v1/organizations/telemetry_destinations",
             page=AsyncPageCursor[BetaTelemetryDestination],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1023,9 +1012,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._delete(
-            path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}?beta=true", destination_id=destination_id
-            ),
+            path_template("/v1/organizations/telemetry_destinations/{destination_id}", destination_id=destination_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -1090,8 +1077,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "telemetry-destinations-2026-08-11", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/organizations/telemetry_destinations/{destination_id}/test?beta=true",
-                destination_id=destination_id,
+                "/v1/organizations/telemetry_destinations/{destination_id}/test", destination_id=destination_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,

@@ -96,7 +96,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._get_api_list(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
                 federation_rule_id=federation_rule_id,
             ),
             page=SyncPageCursor[BetaFederationRuleWorkspace],
@@ -169,7 +169,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
                 federation_rule_id=federation_rule_id,
             ),
             body={"workspace_id": workspace_id},
@@ -237,7 +237,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._delete(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
                 federation_rule_id=federation_rule_id,
                 workspace_id=workspace_id,
             ),
@@ -331,7 +331,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return self._get_api_list(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
                 federation_rule_id=federation_rule_id,
             ),
             page=AsyncPageCursor[BetaFederationRuleWorkspace],
@@ -404,7 +404,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces",
                 federation_rule_id=federation_rule_id,
             ),
             body={"workspace_id": workspace_id},
@@ -472,7 +472,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return await self._delete(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/federation_rules/{federation_rule_id}/workspaces/{workspace_id}",
                 federation_rule_id=federation_rule_id,
                 workspace_id=workspace_id,
             ),

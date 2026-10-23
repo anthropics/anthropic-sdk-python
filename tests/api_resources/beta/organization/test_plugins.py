@@ -24,6 +24,7 @@ class TestPlugins:
     def test_method_create(self, client: Anthropic) -> None:
         plugin = client.beta.organization.plugins.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -34,6 +35,7 @@ class TestPlugins:
             marketplace_id="marketplace_id",
             release_notes="release_notes",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -41,6 +43,7 @@ class TestPlugins:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.with_raw_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -52,6 +55,7 @@ class TestPlugins:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.with_streaming_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -65,6 +69,7 @@ class TestPlugins:
     def test_method_retrieve(self, client: Anthropic) -> None:
         plugin = client.beta.organization.plugins.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -74,6 +79,7 @@ class TestPlugins:
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -81,6 +87,7 @@ class TestPlugins:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.with_raw_response.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -92,6 +99,7 @@ class TestPlugins:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.with_streaming_response.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -113,6 +121,7 @@ class TestPlugins:
         plugin = client.beta.organization.plugins.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -122,6 +131,7 @@ class TestPlugins:
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -130,6 +140,7 @@ class TestPlugins:
         response = client.beta.organization.plugins.with_raw_response.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -142,6 +153,7 @@ class TestPlugins:
         with client.beta.organization.plugins.with_streaming_response.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -161,7 +173,9 @@ class TestPlugins:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        plugin = client.beta.organization.plugins.list()
+        plugin = client.beta.organization.plugins.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaPlugin], plugin, path=["response"])
 
     @parametrize
@@ -178,12 +192,15 @@ class TestPlugins:
             owner_user_id="owner_user_id",
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPlugin], plugin, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.plugins.with_raw_response.list()
+        response = client.beta.organization.plugins.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -192,7 +209,9 @@ class TestPlugins:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.plugins.with_streaming_response.list() as response:
+        with client.beta.organization.plugins.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -205,6 +224,7 @@ class TestPlugins:
     def test_method_delete(self, client: Anthropic) -> None:
         plugin = client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
 
@@ -213,6 +233,7 @@ class TestPlugins:
         plugin = client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
 
@@ -220,6 +241,7 @@ class TestPlugins:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.with_raw_response.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -231,6 +253,7 @@ class TestPlugins:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.with_streaming_response.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -257,6 +280,7 @@ class TestAsyncPlugins:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         plugin = await async_client.beta.organization.plugins.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -267,6 +291,7 @@ class TestAsyncPlugins:
             marketplace_id="marketplace_id",
             release_notes="release_notes",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -274,6 +299,7 @@ class TestAsyncPlugins:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.with_raw_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -285,6 +311,7 @@ class TestAsyncPlugins:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.with_streaming_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -298,6 +325,7 @@ class TestAsyncPlugins:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         plugin = await async_client.beta.organization.plugins.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -307,6 +335,7 @@ class TestAsyncPlugins:
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -314,6 +343,7 @@ class TestAsyncPlugins:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.with_raw_response.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -325,6 +355,7 @@ class TestAsyncPlugins:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.with_streaming_response.retrieve(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -346,6 +377,7 @@ class TestAsyncPlugins:
         plugin = await async_client.beta.organization.plugins.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -355,6 +387,7 @@ class TestAsyncPlugins:
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
 
@@ -363,6 +396,7 @@ class TestAsyncPlugins:
         response = await async_client.beta.organization.plugins.with_raw_response.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -375,6 +409,7 @@ class TestAsyncPlugins:
         async with async_client.beta.organization.plugins.with_streaming_response.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -394,7 +429,9 @@ class TestAsyncPlugins:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        plugin = await async_client.beta.organization.plugins.list()
+        plugin = await async_client.beta.organization.plugins.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaPlugin], plugin, path=["response"])
 
     @parametrize
@@ -411,12 +448,15 @@ class TestAsyncPlugins:
             owner_user_id="owner_user_id",
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPlugin], plugin, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.plugins.with_raw_response.list()
+        response = await async_client.beta.organization.plugins.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -425,7 +465,9 @@ class TestAsyncPlugins:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.plugins.with_streaming_response.list() as response:
+        async with async_client.beta.organization.plugins.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -438,6 +480,7 @@ class TestAsyncPlugins:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         plugin = await async_client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
 
@@ -446,6 +489,7 @@ class TestAsyncPlugins:
         plugin = await async_client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
 
@@ -453,6 +497,7 @@ class TestAsyncPlugins:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.with_raw_response.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -464,6 +509,7 @@ class TestAsyncPlugins:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.with_streaming_response.delete(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

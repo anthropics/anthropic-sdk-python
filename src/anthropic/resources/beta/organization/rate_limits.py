@@ -89,7 +89,7 @@ class RateLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=SyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -178,7 +178,7 @@ class AsyncRateLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=AsyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,

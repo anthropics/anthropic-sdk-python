@@ -99,7 +99,7 @@ class SpendLimits(SyncAPIResource):
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return self._get(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -180,7 +180,7 @@ class SpendLimits(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "spend-limit-reads-2026-09-26", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             page=SyncPageCursor[BetaSpendLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -235,7 +235,7 @@ class SpendLimits(SyncAPIResource):
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return self._delete(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -300,7 +300,7 @@ class SpendLimits(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             body={
                 "amount": amount,
                 "scope": scope,
@@ -376,7 +376,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return await self._get(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -457,7 +457,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "spend-limit-reads-2026-09-26", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             page=AsyncPageCursor[BetaSpendLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -512,7 +512,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return await self._delete(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -577,7 +577,7 @@ class AsyncSpendLimits(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             body={
                 "amount": amount,
                 "scope": scope,

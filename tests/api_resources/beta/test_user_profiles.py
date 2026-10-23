@@ -23,7 +23,9 @@ class TestUserProfiles:
 
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
-        user_profile = client.beta.user_profiles.create()
+        user_profile = client.beta.user_profiles.create(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
@@ -45,12 +47,15 @@ class TestUserProfiles:
             name="Example User",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
-        response = client.beta.user_profiles.with_raw_response.create()
+        response = client.beta.user_profiles.with_raw_response.create(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -59,7 +64,9 @@ class TestUserProfiles:
 
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
-        with client.beta.user_profiles.with_streaming_response.create() as response:
+        with client.beta.user_profiles.with_streaming_response.create(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -72,6 +79,7 @@ class TestUserProfiles:
     def test_method_retrieve(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -81,6 +89,7 @@ class TestUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -88,6 +97,7 @@ class TestUserProfiles:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.user_profiles.with_raw_response.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -99,6 +109,7 @@ class TestUserProfiles:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.user_profiles.with_streaming_response.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -119,6 +130,7 @@ class TestUserProfiles:
     def test_method_update(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -142,6 +154,7 @@ class TestUserProfiles:
             name="x",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -149,6 +162,7 @@ class TestUserProfiles:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.user_profiles.with_raw_response.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -160,6 +174,7 @@ class TestUserProfiles:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.user_profiles.with_streaming_response.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -178,7 +193,9 @@ class TestUserProfiles:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        user_profile = client.beta.user_profiles.list()
+        user_profile = client.beta.user_profiles.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
     @parametrize
@@ -190,12 +207,15 @@ class TestUserProfiles:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.user_profiles.with_raw_response.list()
+        response = client.beta.user_profiles.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -204,7 +224,9 @@ class TestUserProfiles:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.user_profiles.with_streaming_response.list() as response:
+        with client.beta.user_profiles.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -217,6 +239,7 @@ class TestUserProfiles:
     def test_method_delete(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedUserProfile, user_profile, path=["response"])
 
@@ -226,6 +249,7 @@ class TestUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedUserProfile, user_profile, path=["response"])
 
@@ -233,6 +257,7 @@ class TestUserProfiles:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.user_profiles.with_raw_response.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -244,6 +269,7 @@ class TestUserProfiles:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.user_profiles.with_streaming_response.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -264,6 +290,7 @@ class TestUserProfiles:
     def test_method_create_enrollment_url(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -273,6 +300,7 @@ class TestUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -280,6 +308,7 @@ class TestUserProfiles:
     def test_raw_response_create_enrollment_url(self, client: Anthropic) -> None:
         response = client.beta.user_profiles.with_raw_response.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -291,6 +320,7 @@ class TestUserProfiles:
     def test_streaming_response_create_enrollment_url(self, client: Anthropic) -> None:
         with client.beta.user_profiles.with_streaming_response.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -315,7 +345,9 @@ class TestAsyncUserProfiles:
 
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
-        user_profile = await async_client.beta.user_profiles.create()
+        user_profile = await async_client.beta.user_profiles.create(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
@@ -337,12 +369,15 @@ class TestAsyncUserProfiles:
             name="Example User",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.user_profiles.with_raw_response.create()
+        response = await async_client.beta.user_profiles.with_raw_response.create(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -351,7 +386,9 @@ class TestAsyncUserProfiles:
 
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.user_profiles.with_streaming_response.create() as response:
+        async with async_client.beta.user_profiles.with_streaming_response.create(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -364,6 +401,7 @@ class TestAsyncUserProfiles:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -373,6 +411,7 @@ class TestAsyncUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -380,6 +419,7 @@ class TestAsyncUserProfiles:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.user_profiles.with_raw_response.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -391,6 +431,7 @@ class TestAsyncUserProfiles:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.user_profiles.with_streaming_response.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -411,6 +452,7 @@ class TestAsyncUserProfiles:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -434,6 +476,7 @@ class TestAsyncUserProfiles:
             name="x",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfile, user_profile, path=["response"])
 
@@ -441,6 +484,7 @@ class TestAsyncUserProfiles:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.user_profiles.with_raw_response.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -452,6 +496,7 @@ class TestAsyncUserProfiles:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.user_profiles.with_streaming_response.update(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -470,7 +515,9 @@ class TestAsyncUserProfiles:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        user_profile = await async_client.beta.user_profiles.list()
+        user_profile = await async_client.beta.user_profiles.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
     @parametrize
@@ -482,12 +529,15 @@ class TestAsyncUserProfiles:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaUserProfile], user_profile, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.user_profiles.with_raw_response.list()
+        response = await async_client.beta.user_profiles.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -496,7 +546,9 @@ class TestAsyncUserProfiles:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.user_profiles.with_streaming_response.list() as response:
+        async with async_client.beta.user_profiles.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -509,6 +561,7 @@ class TestAsyncUserProfiles:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedUserProfile, user_profile, path=["response"])
 
@@ -518,6 +571,7 @@ class TestAsyncUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedUserProfile, user_profile, path=["response"])
 
@@ -525,6 +579,7 @@ class TestAsyncUserProfiles:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.user_profiles.with_raw_response.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -536,6 +591,7 @@ class TestAsyncUserProfiles:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.user_profiles.with_streaming_response.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -556,6 +612,7 @@ class TestAsyncUserProfiles:
     async def test_method_create_enrollment_url(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -565,6 +622,7 @@ class TestAsyncUserProfiles:
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaUserProfileEnrollmentURL, user_profile, path=["response"])
 
@@ -572,6 +630,7 @@ class TestAsyncUserProfiles:
     async def test_raw_response_create_enrollment_url(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.user_profiles.with_raw_response.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -583,6 +642,7 @@ class TestAsyncUserProfiles:
     async def test_streaming_response_create_enrollment_url(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.user_profiles.with_streaming_response.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

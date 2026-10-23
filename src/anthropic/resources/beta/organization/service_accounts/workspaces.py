@@ -104,7 +104,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._get_api_list(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces",
                 service_account_id=service_account_id,
             ),
             page=SyncPageCursor[BetaServiceAccountWorkspaceMember],
@@ -178,7 +178,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces",
                 service_account_id=service_account_id,
             ),
             body={
@@ -253,7 +253,7 @@ class Workspaces(SyncAPIResource):
         }
         return self._delete(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}",
                 service_account_id=service_account_id,
                 workspace_id=workspace_id,
             ),
@@ -353,7 +353,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return self._get_api_list(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces",
                 service_account_id=service_account_id,
             ),
             page=AsyncPageCursor[BetaServiceAccountWorkspaceMember],
@@ -427,7 +427,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces",
                 service_account_id=service_account_id,
             ),
             body={
@@ -502,7 +502,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         }
         return await self._delete(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}?beta=true",
+                "/v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}",
                 service_account_id=service_account_id,
                 workspace_id=workspace_id,
             ),

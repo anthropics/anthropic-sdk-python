@@ -113,7 +113,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             body={"requests": requests},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -188,7 +188,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -266,7 +266,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             page=SyncPage[BetaMessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -342,7 +342,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -419,9 +419,7 @@ class Batches(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
-            ),
+            path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -601,7 +599,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             body={"requests": requests},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -676,7 +674,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -754,7 +752,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             page=AsyncPage[BetaMessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -830,7 +828,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -907,9 +905,7 @@ class AsyncBatches(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
-            ),
+            path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

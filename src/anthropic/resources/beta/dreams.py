@@ -131,7 +131,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -209,7 +209,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -300,7 +300,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=SyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -383,7 +383,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -458,7 +458,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -576,7 +576,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -654,7 +654,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -745,7 +745,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=AsyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -828,7 +828,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -903,7 +903,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

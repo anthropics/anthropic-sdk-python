@@ -101,7 +101,7 @@ class Versions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/agents/{agent_id}/versions?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/versions", agent_id=agent_id),
             page=SyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -199,7 +199,7 @@ class AsyncVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/agents/{agent_id}/versions?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/versions", agent_id=agent_id),
             page=AsyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,

@@ -81,7 +81,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._get(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             options=make_request_options(
@@ -135,7 +135,7 @@ class IncreaseRequests(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/spend_limit_increase_requests?beta=true",
+            "/v1/organizations/spend_limit_increase_requests",
             page=SyncPageCursor[BetaSpendLimitIncreaseRequest],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -195,7 +195,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={
@@ -253,7 +253,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={"suppress_notification": suppress_notification},
@@ -327,7 +327,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._get(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             options=make_request_options(
@@ -381,7 +381,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/spend_limit_increase_requests?beta=true",
+            "/v1/organizations/spend_limit_increase_requests",
             page=AsyncPageCursor[BetaSpendLimitIncreaseRequest],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -441,7 +441,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={
@@ -499,7 +499,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={"suppress_notification": suppress_notification},

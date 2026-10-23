@@ -23,6 +23,7 @@ class TestIssuers:
         issuer = client.beta.organization.federation.issuers.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -39,6 +40,7 @@ class TestIssuers:
             },
             max_jwt_lifetime_seconds=1,
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -47,6 +49,7 @@ class TestIssuers:
         response = client.beta.organization.federation.issuers.with_raw_response.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -59,6 +62,7 @@ class TestIssuers:
         with client.beta.organization.federation.issuers.with_streaming_response.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -72,6 +76,7 @@ class TestIssuers:
     def test_method_retrieve(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -80,6 +85,7 @@ class TestIssuers:
         issuer = client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -87,6 +93,7 @@ class TestIssuers:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.issuers.with_raw_response.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -98,6 +105,7 @@ class TestIssuers:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.federation.issuers.with_streaming_response.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -118,6 +126,7 @@ class TestIssuers:
     def test_method_update(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -136,6 +145,7 @@ class TestIssuers:
             max_jwt_lifetime_seconds=1,
             name="x",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -143,6 +153,7 @@ class TestIssuers:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.issuers.with_raw_response.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -154,6 +165,7 @@ class TestIssuers:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.federation.issuers.with_streaming_response.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -172,7 +184,9 @@ class TestIssuers:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        issuer = client.beta.organization.federation.issuers.list()
+        issuer = client.beta.organization.federation.issuers.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
 
     @parametrize
@@ -182,12 +196,15 @@ class TestIssuers:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.federation.issuers.with_raw_response.list()
+        response = client.beta.organization.federation.issuers.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -196,7 +213,9 @@ class TestIssuers:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.federation.issuers.with_streaming_response.list() as response:
+        with client.beta.organization.federation.issuers.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -209,6 +228,7 @@ class TestIssuers:
     def test_method_archive(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -217,6 +237,7 @@ class TestIssuers:
         issuer = client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -224,6 +245,7 @@ class TestIssuers:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.issuers.with_raw_response.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -235,6 +257,7 @@ class TestIssuers:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.organization.federation.issuers.with_streaming_response.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -262,6 +285,7 @@ class TestAsyncIssuers:
         issuer = await async_client.beta.organization.federation.issuers.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -278,6 +302,7 @@ class TestAsyncIssuers:
             },
             max_jwt_lifetime_seconds=1,
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -286,6 +311,7 @@ class TestAsyncIssuers:
         response = await async_client.beta.organization.federation.issuers.with_raw_response.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -298,6 +324,7 @@ class TestAsyncIssuers:
         async with async_client.beta.organization.federation.issuers.with_streaming_response.create(
             issuer_url="x",
             name="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -311,6 +338,7 @@ class TestAsyncIssuers:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -319,6 +347,7 @@ class TestAsyncIssuers:
         issuer = await async_client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -326,6 +355,7 @@ class TestAsyncIssuers:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.issuers.with_raw_response.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -337,6 +367,7 @@ class TestAsyncIssuers:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.issuers.with_streaming_response.retrieve(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -357,6 +388,7 @@ class TestAsyncIssuers:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -375,6 +407,7 @@ class TestAsyncIssuers:
             max_jwt_lifetime_seconds=1,
             name="x",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -382,6 +415,7 @@ class TestAsyncIssuers:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.issuers.with_raw_response.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -393,6 +427,7 @@ class TestAsyncIssuers:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.issuers.with_streaming_response.update(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -411,7 +446,9 @@ class TestAsyncIssuers:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        issuer = await async_client.beta.organization.federation.issuers.list()
+        issuer = await async_client.beta.organization.federation.issuers.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
 
     @parametrize
@@ -421,12 +458,15 @@ class TestAsyncIssuers:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.federation.issuers.with_raw_response.list()
+        response = await async_client.beta.organization.federation.issuers.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -435,7 +475,9 @@ class TestAsyncIssuers:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.federation.issuers.with_streaming_response.list() as response:
+        async with async_client.beta.organization.federation.issuers.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -448,6 +490,7 @@ class TestAsyncIssuers:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -456,6 +499,7 @@ class TestAsyncIssuers:
         issuer = await async_client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
 
@@ -463,6 +507,7 @@ class TestAsyncIssuers:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.issuers.with_raw_response.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -474,6 +519,7 @@ class TestAsyncIssuers:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.issuers.with_streaming_response.archive(
             federation_issuer_id="federation_issuer_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

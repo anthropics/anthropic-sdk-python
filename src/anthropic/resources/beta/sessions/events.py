@@ -135,7 +135,7 @@ class Events(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events", session_id=session_id),
             page=SyncPageCursor[BetaManagedAgentsSessionEvent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -215,7 +215,7 @@ class Events(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events", session_id=session_id),
             body={"events": events},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -292,7 +292,7 @@ class Events(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/sessions/{session_id}/events/stream?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events/stream", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -410,7 +410,7 @@ class AsyncEvents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events", session_id=session_id),
             page=AsyncPageCursor[BetaManagedAgentsSessionEvent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -490,7 +490,7 @@ class AsyncEvents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/sessions/{session_id}/events?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events", session_id=session_id),
             body={"events": events},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -567,7 +567,7 @@ class AsyncEvents(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/sessions/{session_id}/events/stream?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/events/stream", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

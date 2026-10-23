@@ -31,6 +31,7 @@ class TestVersions:
         version = client.beta.organization.plugins.versions.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -41,6 +42,7 @@ class TestVersions:
             files=[b"Example data"],
             release_notes="release_notes",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -49,6 +51,7 @@ class TestVersions:
         response = client.beta.organization.plugins.versions.with_raw_response.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -61,6 +64,7 @@ class TestVersions:
         with client.beta.organization.plugins.versions.with_streaming_response.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -83,6 +87,7 @@ class TestVersions:
         version = client.beta.organization.plugins.versions.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -93,6 +98,7 @@ class TestVersions:
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -101,6 +107,7 @@ class TestVersions:
         response = client.beta.organization.plugins.versions.with_raw_response.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -113,6 +120,7 @@ class TestVersions:
         with client.beta.organization.plugins.versions.with_streaming_response.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -140,6 +148,7 @@ class TestVersions:
     def test_method_list(self, client: Anthropic) -> None:
         version = client.beta.organization.plugins.versions.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginVersion], version, path=["response"])
 
@@ -151,6 +160,7 @@ class TestVersions:
             organization_id="organization_id",
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginVersion], version, path=["response"])
 
@@ -158,6 +168,7 @@ class TestVersions:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.versions.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -169,6 +180,7 @@ class TestVersions:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.versions.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -188,12 +200,13 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         version = client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert version.json() == {"foo": "bar"}
@@ -203,14 +216,15 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download_with_all_params(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         version = client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert version.json() == {"foo": "bar"}
@@ -220,13 +234,14 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
 
         version = client.beta.organization.plugins.versions.with_raw_response.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert version.is_closed is True
@@ -237,12 +252,13 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         with client.beta.organization.plugins.versions.with_streaming_response.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as version:
             assert not version.is_closed
             assert version.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -279,6 +295,7 @@ class TestAsyncVersions:
         version = await async_client.beta.organization.plugins.versions.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -289,6 +306,7 @@ class TestAsyncVersions:
             files=[b"Example data"],
             release_notes="release_notes",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -297,6 +315,7 @@ class TestAsyncVersions:
         response = await async_client.beta.organization.plugins.versions.with_raw_response.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -309,6 +328,7 @@ class TestAsyncVersions:
         async with async_client.beta.organization.plugins.versions.with_streaming_response.create(
             plugin_id="plugin_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -331,6 +351,7 @@ class TestAsyncVersions:
         version = await async_client.beta.organization.plugins.versions.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -341,6 +362,7 @@ class TestAsyncVersions:
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
 
@@ -349,6 +371,7 @@ class TestAsyncVersions:
         response = await async_client.beta.organization.plugins.versions.with_raw_response.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -361,6 +384,7 @@ class TestAsyncVersions:
         async with async_client.beta.organization.plugins.versions.with_streaming_response.retrieve(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -388,6 +412,7 @@ class TestAsyncVersions:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         version = await async_client.beta.organization.plugins.versions.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginVersion], version, path=["response"])
 
@@ -399,6 +424,7 @@ class TestAsyncVersions:
             organization_id="organization_id",
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginVersion], version, path=["response"])
 
@@ -406,6 +432,7 @@ class TestAsyncVersions:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.versions.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -417,6 +444,7 @@ class TestAsyncVersions:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.versions.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -436,12 +464,13 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         version = await async_client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert await version.json() == {"foo": "bar"}
@@ -451,14 +480,15 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download_with_all_params(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         version = await async_client.beta.organization.plugins.versions.download(
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert await version.json() == {"foo": "bar"}
@@ -468,13 +498,14 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
 
         version = await async_client.beta.organization.plugins.versions.with_raw_response.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert version.is_closed is True
@@ -485,12 +516,13 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_streaming_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get(
-            "/v1/organizations/plugins/plugin_id/versions/version/content", params__contains={"beta": "true"}
-        ).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get("/v1/organizations/plugins/plugin_id/versions/version/content").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
         async with async_client.beta.organization.plugins.versions.with_streaming_response.download(
             version="version",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as version:
             assert not version.is_closed
             assert version.http_request.headers.get("X-Stainless-Lang") == "python"

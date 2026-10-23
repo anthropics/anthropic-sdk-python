@@ -21,6 +21,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -31,6 +32,7 @@ class TestCertificates:
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -39,6 +41,7 @@ class TestCertificates:
         response = client.beta.tunnels.certificates.with_raw_response.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -51,6 +54,7 @@ class TestCertificates:
         with client.beta.tunnels.certificates.with_streaming_response.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -73,6 +77,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -83,6 +88,7 @@ class TestCertificates:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -91,6 +97,7 @@ class TestCertificates:
         response = client.beta.tunnels.certificates.with_raw_response.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -103,6 +110,7 @@ class TestCertificates:
         with client.beta.tunnels.certificates.with_streaming_response.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -130,6 +138,7 @@ class TestCertificates:
     def test_method_list(self, client: Anthropic) -> None:
         certificate = client.beta.tunnels.certificates.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -142,6 +151,7 @@ class TestCertificates:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -149,6 +159,7 @@ class TestCertificates:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.tunnels.certificates.with_raw_response.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -160,6 +171,7 @@ class TestCertificates:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.tunnels.certificates.with_streaming_response.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -181,6 +193,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -191,6 +204,7 @@ class TestCertificates:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -199,6 +213,7 @@ class TestCertificates:
         response = client.beta.tunnels.certificates.with_raw_response.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -211,6 +226,7 @@ class TestCertificates:
         with client.beta.tunnels.certificates.with_streaming_response.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -245,6 +261,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -255,6 +272,7 @@ class TestAsyncCertificates:
             ca_certificate_pem="ca_certificate_pem",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -263,6 +281,7 @@ class TestAsyncCertificates:
         response = await async_client.beta.tunnels.certificates.with_raw_response.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -275,6 +294,7 @@ class TestAsyncCertificates:
         async with async_client.beta.tunnels.certificates.with_streaming_response.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -297,6 +317,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -307,6 +328,7 @@ class TestAsyncCertificates:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -315,6 +337,7 @@ class TestAsyncCertificates:
         response = await async_client.beta.tunnels.certificates.with_raw_response.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -327,6 +350,7 @@ class TestAsyncCertificates:
         async with async_client.beta.tunnels.certificates.with_streaming_response.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -354,6 +378,7 @@ class TestAsyncCertificates:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         certificate = await async_client.beta.tunnels.certificates.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -366,6 +391,7 @@ class TestAsyncCertificates:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTunnelCertificate], certificate, path=["response"])
 
@@ -373,6 +399,7 @@ class TestAsyncCertificates:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.tunnels.certificates.with_raw_response.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -384,6 +411,7 @@ class TestAsyncCertificates:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.tunnels.certificates.with_streaming_response.list(
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -405,6 +433,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -415,6 +444,7 @@ class TestAsyncCertificates:
             tunnel_id="tunnel_id",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTunnelCertificate, certificate, path=["response"])
 
@@ -423,6 +453,7 @@ class TestAsyncCertificates:
         response = await async_client.beta.tunnels.certificates.with_raw_response.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -435,6 +466,7 @@ class TestAsyncCertificates:
         async with async_client.beta.tunnels.certificates.with_streaming_response.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

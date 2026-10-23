@@ -153,7 +153,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -226,7 +226,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -330,7 +330,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -425,7 +425,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             page=SyncPageCursor[BetaUserProfile],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -496,7 +496,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -561,9 +561,7 @@ class UserProfiles(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
-            ),
+            path_template("/v1/user_profiles/{user_profile_id}/enrollment_url", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -692,7 +690,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -765,7 +763,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -869,7 +867,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             body={
                 "access_type": access_type,
                 "external_id": external_id,
@@ -964,7 +962,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/user_profiles?beta=true",
+            "/v1/user_profiles",
             page=AsyncPageCursor[BetaUserProfile],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1035,7 +1033,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/user_profiles/{user_profile_id}?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -1100,9 +1098,7 @@ class AsyncUserProfiles(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/user_profiles/{user_profile_id}/enrollment_url?beta=true", user_profile_id=user_profile_id
-            ),
+            path_template("/v1/user_profiles/{user_profile_id}/enrollment_url", user_profile_id=user_profile_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

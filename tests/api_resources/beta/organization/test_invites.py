@@ -24,6 +24,7 @@ class TestInvites:
         invite = client.beta.organization.invites.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -33,6 +34,7 @@ class TestInvites:
             email="user@emaildomain.com",
             role="user",
             rbac_group_ids=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -41,6 +43,7 @@ class TestInvites:
         response = client.beta.organization.invites.with_raw_response.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -53,6 +56,7 @@ class TestInvites:
         with client.beta.organization.invites.with_streaming_response.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -66,6 +70,7 @@ class TestInvites:
     def test_method_retrieve(self, client: Anthropic) -> None:
         invite = client.beta.organization.invites.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -73,6 +78,7 @@ class TestInvites:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.invites.with_raw_response.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -84,6 +90,7 @@ class TestInvites:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.invites.with_streaming_response.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -102,7 +109,9 @@ class TestInvites:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        invite = client.beta.organization.invites.list()
+        invite = client.beta.organization.invites.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaOrganizationInvite], invite, path=["response"])
 
     @parametrize
@@ -114,12 +123,15 @@ class TestInvites:
             limit=1,
             roles=["string"],
             statuses=["accepted"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaOrganizationInvite], invite, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.invites.with_raw_response.list()
+        response = client.beta.organization.invites.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -128,7 +140,9 @@ class TestInvites:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.invites.with_streaming_response.list() as response:
+        with client.beta.organization.invites.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -141,6 +155,7 @@ class TestInvites:
     def test_method_delete(self, client: Anthropic) -> None:
         invite = client.beta.organization.invites.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(InviteDeleteResponse, invite, path=["response"])
 
@@ -148,6 +163,7 @@ class TestInvites:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.invites.with_raw_response.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -159,6 +175,7 @@ class TestInvites:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.invites.with_streaming_response.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -186,6 +203,7 @@ class TestAsyncInvites:
         invite = await async_client.beta.organization.invites.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -195,6 +213,7 @@ class TestAsyncInvites:
             email="user@emaildomain.com",
             role="user",
             rbac_group_ids=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -203,6 +222,7 @@ class TestAsyncInvites:
         response = await async_client.beta.organization.invites.with_raw_response.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -215,6 +235,7 @@ class TestAsyncInvites:
         async with async_client.beta.organization.invites.with_streaming_response.create(
             email="user@emaildomain.com",
             role="user",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -228,6 +249,7 @@ class TestAsyncInvites:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         invite = await async_client.beta.organization.invites.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationInvite, invite, path=["response"])
 
@@ -235,6 +257,7 @@ class TestAsyncInvites:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.invites.with_raw_response.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -246,6 +269,7 @@ class TestAsyncInvites:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.invites.with_streaming_response.retrieve(
             "invite_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -264,7 +288,9 @@ class TestAsyncInvites:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        invite = await async_client.beta.organization.invites.list()
+        invite = await async_client.beta.organization.invites.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaOrganizationInvite], invite, path=["response"])
 
     @parametrize
@@ -276,12 +302,15 @@ class TestAsyncInvites:
             limit=1,
             roles=["string"],
             statuses=["accepted"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaOrganizationInvite], invite, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.invites.with_raw_response.list()
+        response = await async_client.beta.organization.invites.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -290,7 +319,9 @@ class TestAsyncInvites:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.invites.with_streaming_response.list() as response:
+        async with async_client.beta.organization.invites.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -303,6 +334,7 @@ class TestAsyncInvites:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         invite = await async_client.beta.organization.invites.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(InviteDeleteResponse, invite, path=["response"])
 
@@ -310,6 +342,7 @@ class TestAsyncInvites:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.invites.with_raw_response.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -321,6 +354,7 @@ class TestAsyncInvites:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.invites.with_streaming_response.delete(
             "invite_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

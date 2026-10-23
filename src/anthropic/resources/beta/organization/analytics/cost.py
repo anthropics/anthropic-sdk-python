@@ -254,7 +254,7 @@ class Cost(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "analytics-usage-cost-2026-08-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/analytics/cost?beta=true",
+            "/v1/organizations/analytics/cost",
             page=SyncReportPageCursor[BetaAnalyticsCostItem],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -516,7 +516,7 @@ class AsyncCost(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "analytics-usage-cost-2026-08-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/analytics/cost?beta=true",
+            "/v1/organizations/analytics/cost",
             page=AsyncReportPageCursor[BetaAnalyticsCostItem],
             options=make_request_options(
                 extra_headers=extra_headers,

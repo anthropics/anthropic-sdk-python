@@ -19,7 +19,9 @@ class TestUsers:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        user = client.beta.organization.analytics.users.list()
+        user = client.beta.organization.analytics.users.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaAnalyticsUserActivity], user, path=["response"])
 
     @parametrize
@@ -34,12 +36,15 @@ class TestUsers:
             order_by="order_by",
             page="page",
             starting_date=parse_date("2019-12-27"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaAnalyticsUserActivity], user, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.analytics.users.with_raw_response.list()
+        response = client.beta.organization.analytics.users.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -48,7 +53,9 @@ class TestUsers:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.analytics.users.with_streaming_response.list() as response:
+        with client.beta.organization.analytics.users.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -65,7 +72,9 @@ class TestAsyncUsers:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        user = await async_client.beta.organization.analytics.users.list()
+        user = await async_client.beta.organization.analytics.users.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaAnalyticsUserActivity], user, path=["response"])
 
     @parametrize
@@ -80,12 +89,15 @@ class TestAsyncUsers:
             order_by="order_by",
             page="page",
             starting_date=parse_date("2019-12-27"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaAnalyticsUserActivity], user, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.analytics.users.with_raw_response.list()
+        response = await async_client.beta.organization.analytics.users.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -94,7 +106,9 @@ class TestAsyncUsers:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.analytics.users.with_streaming_response.list() as response:
+        async with async_client.beta.organization.analytics.users.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

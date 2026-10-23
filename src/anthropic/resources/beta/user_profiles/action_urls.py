@@ -99,7 +99,7 @@ class ActionURLs(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/user_profiles/{user_profile_id}/action_urls?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}/action_urls", user_profile_id=user_profile_id),
             body={"action": action},
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -189,7 +189,7 @@ class AsyncActionURLs(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "user-profiles-2026-08-18", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/user_profiles/{user_profile_id}/action_urls?beta=true", user_profile_id=user_profile_id),
+            path_template("/v1/user_profiles/{user_profile_id}/action_urls", user_profile_id=user_profile_id),
             body={"action": action},
             options=make_request_options(
                 extra_headers=extra_headers,

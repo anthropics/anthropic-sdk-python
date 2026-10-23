@@ -166,7 +166,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/sessions?beta=true",
+            "/v1/sessions",
             body={
                 "agent": agent,
                 "environment_id": environment_id,
@@ -241,7 +241,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -332,7 +332,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             body={
                 "agent": agent,
                 "budget": budget,
@@ -442,7 +442,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/sessions?beta=true",
+            "/v1/sessions",
             page=SyncBidirectionalPageCursor[BetaManagedAgentsSession],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -521,7 +521,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -585,7 +585,7 @@ class Sessions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/sessions/{session_id}/archive?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/archive", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -710,7 +710,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/sessions?beta=true",
+            "/v1/sessions",
             body={
                 "agent": agent,
                 "environment_id": environment_id,
@@ -785,7 +785,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -876,7 +876,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             body={
                 "agent": agent,
                 "budget": budget,
@@ -986,7 +986,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/sessions?beta=true",
+            "/v1/sessions",
             page=AsyncBidirectionalPageCursor[BetaManagedAgentsSession],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1065,7 +1065,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/sessions/{session_id}?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -1129,7 +1129,7 @@ class AsyncSessions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/sessions/{session_id}/archive?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/archive", session_id=session_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
