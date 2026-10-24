@@ -120,6 +120,12 @@ def model_copy(model: _ModelT, *, deep: bool = False) -> _ModelT:
     return model.model_copy(deep=deep)
 
 
+def model_fields_set(model: pydantic.BaseModel) -> set[str]:
+    if PYDANTIC_V1:
+        return model.__fields_set__  # type: ignore
+    return model.model_fields_set
+
+
 def model_json(model: pydantic.BaseModel, *, indent: int | None = None) -> str:
     if PYDANTIC_V1:
         return model.json(indent=indent)  # type: ignore
