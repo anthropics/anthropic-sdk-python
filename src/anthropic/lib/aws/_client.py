@@ -9,6 +9,7 @@ from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_gi
 from ..._utils import asyncify
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
+    AuthMode,
     resolve_region,
     resolve_api_key,
     resolve_base_url,
@@ -36,6 +37,7 @@ class AnthropicAWS(Anthropic):
         self,
         *,
         api_key: str | None = None,
+        auth_mode: AuthMode = "auto",
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
@@ -59,6 +61,7 @@ class AnthropicAWS(Anthropic):
         webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
+        self.auth_mode = auth_mode
 
         validate_credentials(aws_access_key=aws_access_key, aws_secret_key=aws_secret_key)
 
@@ -67,6 +70,7 @@ class AnthropicAWS(Anthropic):
             resolved_api_key = None
         else:
             self._use_sigv4 = resolve_auth_mode(
+                auth_mode=auth_mode,
                 api_key=api_key,
                 aws_access_key=aws_access_key,
                 aws_secret_key=aws_secret_key,
@@ -182,6 +186,7 @@ class AnthropicAWS(Anthropic):
         self,
         *,
         api_key: str | None = None,
+        auth_mode: AuthMode = "auto",
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
@@ -261,6 +266,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         self,
         *,
         api_key: str | None = None,
+        auth_mode: AuthMode = "auto",
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
@@ -284,6 +290,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         webhook_key: str | None = None,
     ) -> None:
         self._skip_auth = skip_auth
+        self.auth_mode = auth_mode
 
         validate_credentials(aws_access_key=aws_access_key, aws_secret_key=aws_secret_key)
 
@@ -292,6 +299,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             resolved_api_key = None
         else:
             self._use_sigv4 = resolve_auth_mode(
+                auth_mode=auth_mode,
                 api_key=api_key,
                 aws_access_key=aws_access_key,
                 aws_secret_key=aws_secret_key,
@@ -407,6 +415,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         self,
         *,
         api_key: str | None = None,
+        auth_mode: AuthMode = "auto",
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
