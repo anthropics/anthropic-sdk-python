@@ -40,6 +40,46 @@ def test_ref_schema_with_defs():
     )
 
 
+def test_draft07_definitions_are_kept_and_transformed():
+    schema = {
+        "type": "object",
+        "properties": {"home": {"$ref": "#/definitions/Address"}},
+        "required": ["home"],
+        "definitions": {
+            "Address": {
+                "type": "object",
+                "properties": {"city": {"type": "string"}},
+                "required": ["city"],
+            }
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "definitions": {
+                "Address": {
+                    "type": "object",
+                    "properties": {"city": {"type": "string"}},
+                    "additionalProperties": False,
+                    "required": ["city"],
+                }
+            },
+            "type": "object",
+            "properties": {"home": {"$ref": "#/definitions/Address"}},
+            "additionalProperties": False,
+            "required": ["home"],
+        }
+    )
+
+
+def test_ref_schema_with_draft07_definitions():
+    schema = {"$ref": "#/definitions/Tier", "definitions": {"Tier": {"type": "string", "enum": ["free", "pro"]}}}
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {"definitions": {"Tier": {"type": "string", "enum": ["free", "pro"]}}, "$ref": "#/definitions/Tier"}
+    )
+
+
 def test_anyof_schema():
     schema = {
         "anyOf": [

@@ -126,14 +126,16 @@ def transform_schema(
 
     # $defs must be processed before the $ref early-return below, so that a
     # root-level `{"$ref": "#/$defs/X", "$defs": {...}}` (valid JSON Schema,
-    # and what pydantic RootModel emits) keeps its definitions.
-    defs = json_schema.pop("$defs", None)
-    if defs is not None:
-        strict_defs: dict[str, Any] = {}
-        strict_schema["$defs"] = strict_defs
+    # and what pydantic RootModel emits) keeps its definitions. Draft-07
+    # `definitions` is the same keyword under its older name.
+    for defs_key in ("$defs", "definitions"):
+        defs = json_schema.pop(defs_key, None)
+        if defs is not None:
+            strict_defs: dict[str, Any] = {}
+            strict_schema[defs_key] = strict_defs
 
-        for name, schema in defs.items():
-            strict_defs[name] = transform_schema(schema)
+            for name, schema in defs.items():
+                strict_defs[name] = transform_schema(schema)
 
     ref = json_schema.pop("$ref", None)
     if ref is not None:
