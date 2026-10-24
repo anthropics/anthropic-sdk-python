@@ -57,6 +57,8 @@ def accumulate_managed_agents_event(
     """
     if event.type == "event_start":
         if event.event.type == "agent.message":
+            if accumulated is not None and accumulated.id == event.event.id:
+                return accumulated
             return build(
                 BetaManagedAgentsAgentMessageEvent,
                 id=event.event.id,
