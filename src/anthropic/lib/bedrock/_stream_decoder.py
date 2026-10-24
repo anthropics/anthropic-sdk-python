@@ -65,7 +65,11 @@ class AWSEventStreamDecoder:
         if not chunk:
             return None
 
-        return _chunk_bytes_to_sse(chunk.get("bytes"))
+        raw = chunk.get("bytes")
+        if not raw:
+            return None
+
+        return _chunk_bytes_to_sse(raw)
 
 
 def _chunk_bytes_to_sse(raw: bytes) -> ServerSentEvent | None:

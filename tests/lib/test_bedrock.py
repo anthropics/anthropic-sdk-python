@@ -463,6 +463,33 @@ async def test_stream_skips_typeless_chunk_async(respx_mock: MockRouter) -> None
     assert events[1].to_dict()["amazon-bedrock-invocationMetrics"] == _INVOCATION_METRICS
 
 
+@pytest.mark.respx()
+def test_stream_skips_empty_and_null_bytes_chunk(respx_mock: MockRouter) -> None:
+    body = (
+        _eventstream_chunk_frame(_TYPELESS_CHUNK_STREAM[0])
+        + _eventstream_frame(
+            {":message-type": "event", ":event-type": "chunk", ":content-type": "application/json"},
+            b'{"bytes": ""}',
+        )
+        + _eventstream_frame(
+            {":message-type": "event", ":event-type": "chunk", ":content-type": "application/json"},
+            b'{"bytes": null}',
+        )
+        + _eventstream_chunk_frame(_TYPELESS_CHUNK_STREAM[2])
+    )
+    respx_mock.post(_STREAM_URL).mock(
+        return_value=httpx2.Response(
+            200, content=body, headers={"content-type": "application/vnd.amazon.eventstream"}
+        )
+    )
+    stream = sync_client.messages.create(
+        max_tokens=8, messages=[{"role": "user", "content": "hi"}], model="anthropic.claude-x", stream=True
+    )
+    events = list(stream)
+
+    assert [e.type for e in events] == ["message_start", "message_stop"]
+
+
 _THROTTLING_MESSAGE = "Too many requests, please wait before trying again."
 _EXCEPTION_FRAME = _eventstream_frame(
     {":message-type": "exception", ":exception-type": "throttlingException", ":content-type": "application/json"},
