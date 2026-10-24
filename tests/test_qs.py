@@ -85,6 +85,18 @@ def test_array_brackets(method: str) -> None:
     assert unquote(serialise({"in": ["", "foo"]})) == "in[]=&in[]=foo"
 
 
+@pytest.mark.parametrize("method", ["class", "function"])
+def test_array_indices(method: str) -> None:
+    if method == "class":
+        serialise = Querystring(array_format="indices").stringify
+    else:
+        serialise = partial(stringify, array_format="indices")
+
+    assert unquote(serialise({"in": ["foo", "bar"]})) == "in[0]=foo&in[1]=bar"
+    assert unquote(serialise({"a": {"b": [True, False]}})) == "a[b][0]=true&a[b][1]=false"
+    assert unquote(serialise({"a": {"b": [True, False, None, True]}})) == "a[b][0]=true&a[b][1]=false&a[b][3]=true"
+
+
 def test_unknown_array_format() -> None:
     with pytest.raises(NotImplementedError, match="Unknown array_format value: foo, choose from comma, repeat"):
         stringify({"a": ["foo", "bar"]}, array_format=cast(Any, "foo"))
