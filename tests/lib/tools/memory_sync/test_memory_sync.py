@@ -25,6 +25,8 @@ from anthropic.lib.tools._memories import SessionMemoryError, SessionMemoryStore
 from .conftest import Clock, run_sync
 from ._fake_anthropic import MemoryServer, created, deleted, updated, _status_error, fake_anthropic
 
+pytestmark = pytest.mark.skipif(os.name != "posix", reason="FileStore refuses non-POSIX platforms")
+
 LOGGER = "anthropic.lib.tools.agent_toolset"
 
 
@@ -370,6 +372,8 @@ async def test_an_unwritable_mount_path_fails_the_download(tmp_path: Path) -> No
     """A mount the host cannot provide is an environment failure: the download
     raises loudly (failing the work item) instead of degrading to a session
     with silently-empty memory."""
+    if os.name != "posix":
+        pytest.skip("chmod semantics only apply on POSIX")
     if os.geteuid() == 0:
         pytest.skip("directory modes do not bind root")
     parent = tmp_path / "mnt"

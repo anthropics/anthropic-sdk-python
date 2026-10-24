@@ -132,7 +132,7 @@ async def test_filestore_get_does_not_follow_a_symlink_leaf(store: FileStore) ->
 async def test_filestore_get_refuses_a_non_regular_file(store: FileStore) -> None:
     """A present-but-non-regular leaf (fifo, symlink, ...) raises FileStoreError
     instead of hanging or being read."""
-    os.mkfifo(store.root().path / "pipe.md")
+    os.mkfifo(store.root().path / "pipe.md")  # pyright: ignore[reportAttributeAccessIssue,reportUnknownMemberType]
     os.symlink(store.root().path / "pipe.md", store.root().path / "link.md")
 
     with pytest.raises(FileStoreError, match="not a regular file"):
@@ -204,7 +204,10 @@ async def test_filestore_hashtree_hashes_regular_files_and_skips_symlinks(tmp_pa
     assert await store.hashtree("sub/") == {"sub/b.md": _sha("bravo")}
 
 
-@pytest.mark.skipif(os.geteuid() == 0, reason="permission checks do not bind root")
+@pytest.mark.skipif(
+    os.name != "posix" or getattr(os, "geteuid", lambda: -1)() == 0,
+    reason="permission checks only apply on POSIX non-root",
+)
 @pytest.mark.asyncio()
 async def test_filestore_listings_raise_on_an_unreadable_subdirectory(store: FileStore) -> None:
     """An unreadable subdirectory fails the listing rather than dropping out of it."""
@@ -314,7 +317,10 @@ async def test_filestore_remove_unlinks_a_dangling_symlink(store: FileStore) -> 
     assert not (store.root().path / "dangling.md").is_symlink()
 
 
-@pytest.mark.skipif(os.geteuid() == 0, reason="permission checks do not bind root")
+@pytest.mark.skipif(
+    os.name != "posix" or getattr(os, "geteuid", lambda: -1)() == 0,
+    reason="permission checks only apply on POSIX non-root",
+)
 @pytest.mark.asyncio()
 async def test_filestore_open_raises_on_an_unreadable_mount_path(tmp_path: Path) -> None:
     """A mount path the process cannot stat raises at open — it is never read
