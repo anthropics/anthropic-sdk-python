@@ -41,9 +41,10 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         options.json_data.setdefault("anthropic_version", ANTHROPIC_API_VERSION)
 
         if is_given(options.headers):
-            betas = build_headers(options.headers)[0].get("anthropic-beta")
+            beta_header = build_headers(options.headers)[0].get("anthropic-beta") or ""
+            betas = [beta.strip() for beta in beta_header.split(",") if beta.strip()]
             if betas:
-                options.json_data.setdefault("anthropic_beta", betas.split(","))
+                options.json_data.setdefault("anthropic_beta", betas)
 
     if options.url in {"/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if not is_dict(options.json_data):

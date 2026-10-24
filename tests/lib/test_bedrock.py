@@ -689,6 +689,22 @@ def test_prepare_options_lifts_anthropic_beta_header_case_insensitively() -> Non
     ]
 
 
+def test_prepare_options_strips_whitespace_from_anthropic_beta_header() -> None:
+    options = _prepare_options(
+        FinalRequestOptions(
+            method="post",
+            url="/v1/messages",
+            json_data={"model": "anthropic.claude-sonnet-4-5"},
+            headers={"anthropic-beta": "context-1m-2025-08-07, other-beta,"},
+        )
+    )
+
+    assert cast("dict[str, object]", options.json_data).get("anthropic_beta") == [
+        "context-1m-2025-08-07",
+        "other-beta",
+    ]
+
+
 @pytest.mark.respx()
 def test_text_completions_path_is_not_rewritten(respx_mock: MockRouter) -> None:
     route = respx_mock.post("https://bedrock-runtime.us-east-1.amazonaws.com/v1/complete").mock(
