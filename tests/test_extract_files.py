@@ -41,6 +41,21 @@ def test_top_level_file_array() -> None:
     assert query == {"title": "hello"}
 
 
+def test_top_level_file_tuple_array() -> None:
+    query = {"files": (b"file one", b"file two"), "title": "hello"}
+    assert extract_files(query, paths=[["files", "<array>"]]) == [("files[]", b"file one"), ("files[]", b"file two")]
+    assert query == {"title": "hello"}
+
+
+def test_nested_file_tuple_array() -> None:
+    query = {"documents": ({"file": b"My first file"}, {"file": b"My second file"})}
+    assert extract_files(query, paths=[["documents", "<array>", "file"]]) == [
+        ("documents[][file]", b"My first file"),
+        ("documents[][file]", b"My second file"),
+    ]
+    assert query == {"documents": ({}, {})}
+
+
 @pytest.mark.parametrize(
     "query,paths,expected",
     [
