@@ -804,6 +804,11 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
 
     mapping: dict[str, type] = {}
     discriminator_alias: str | None = None
+    # A variant whose schema has not finished building yet cannot contribute to
+    # the mapping. Caching the resulting incomplete mapping would leave the union
+    # decoding to the wrong variant for the rest of the process, so an incomplete
+    # mapping is returned to the caller but never cached.
+    complete = True
 
     for variant in get_args(union):
         variant = strip_annotated_type(variant)
@@ -811,6 +816,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
             if PYDANTIC_V1:
                 field_info = cast("dict[str, FieldInfo]", variant.__fields__).get(discriminator_field_name)  # pyright: ignore[reportDeprecated, reportUnnecessaryCast]
                 if not field_info:
+                    complete = False
                     continue
 
                 # Note: if one variant defines an alias then they all should
@@ -821,8 +827,14 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
                         if isinstance(entry, str):
                             mapping[entry] = variant
             else:
+                if not _has_built_model_schema(variant):
+                    # Another thread is still running this model's deferred build.
+                    complete = False
+                    continue
+
                 field = _extract_field_schema_pv2(variant, discriminator_field_name)
                 if not field:
+                    # This variant genuinely does not declare the discriminator.
                     continue
 
                 # Note: if one variant defines an alias then they all should
@@ -843,8 +855,25 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         discriminator_field=discriminator_field_name,
         discriminator_alias=discriminator_alias,
     )
-    DISCRIMINATOR_CACHE.setdefault(key, details)
+    if complete:
+        DISCRIMINATOR_CACHE.setdefault(key, details)
     return details
+
+
+def _has_built_model_schema(model: type[BaseModel]) -> bool:
+    """Whether `model` has finished its deferred Pydantic build.
+
+    The SDK defers Pydantic builds, so a model that another thread is still
+    building exposes a schema that is not yet a `model`/`model-fields` schema.
+    Reading the discriminator field from it is meaningless, and skipping such a
+    variant would produce an incomplete mapping.
+    """
+    schema = model.__pydantic_core_schema__
+    if schema["type"] == "definitions":
+        schema = schema["schema"]
+    if schema["type"] != "model":
+        return False
+    return schema["schema"]["type"] == "model-fields"
 
 
 def _extract_field_schema_pv2(model: type[BaseModel], field_name: str) -> ModelField | None:
