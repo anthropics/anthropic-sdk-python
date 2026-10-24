@@ -5,12 +5,15 @@ import re
 import sys
 import time
 import base64
+from uuid import UUID
+from types import SimpleNamespace
 from typing import Any, cast
 from pathlib import Path
 from typing_extensions import Required, get_args, get_origin, get_type_hints
 
 import anyio
 import pytest
+from anyio.abc import Process
 
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
@@ -707,6 +710,43 @@ async def test_bash_session_persistence(tmp_path: Path) -> None:
         assert (out, code) == ("bar", 0)
     finally:
         await s.close()
+
+
+@pytest.mark.parametrize(
+    ("exit_code", "split_after"),
+    [(code, split) for code in (0, 7, 42, 255) for split in (-1, *range(len(str(code)) + 1))],
+)
+async def test_bash_waits_for_complete_sentinel(
+    monkeypatch: pytest.MonkeyPatch, exit_code: int, split_after: int
+) -> None:
+    nonce = "a" * 32
+    monkeypatch.setattr("anthropic.lib.tools.agent_toolset.uuid.uuid4", lambda: UUID(hex=nonce))
+    marker = f"__ANT_CMD_{nonce}_DONE__".encode()
+    frame = marker + str(exit_code).encode()
+    split = len(marker) + split_after
+    chunks = [b"first\n" + frame[:split]]
+    if frame[split:]:
+        chunks.append(frame[split:])
+    chunks.extend([b"\n", b"second\n" + marker + b"0\n"])
+
+    responses = iter(chunks)
+
+    async def send(data: bytes) -> None:
+        assert marker[:8] + b"''" + marker[8:] in data
+
+    async def receive(max_bytes: int) -> bytes:
+        chunk = next(responses)
+        assert len(chunk) <= max_bytes
+        return chunk
+
+    process = cast(
+        Process,
+        SimpleNamespace(returncode=None, stdin=SimpleNamespace(send=send), stdout=SimpleNamespace(receive=receive)),
+    )
+    session = BashSession(process)
+
+    assert await session.exec("first") == ("first", exit_code)
+    assert await session.exec("second") == ("second", 0)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
