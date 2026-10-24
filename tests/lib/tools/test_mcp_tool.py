@@ -109,6 +109,11 @@ class TestMCPContent:
         result = mcp_content(ImageContent(type="image", data="abc", mimeType="image/webp"))
         assert result["type"] == "image"
 
+    def test_image_content_case_insensitive_and_parameters(self) -> None:
+        result = mcp_content(ImageContent(type="image", data="abc", mimeType="IMAGE/PNG; charset=binary"))
+        assert result["type"] == "image"
+        assert result["source"]["media_type"] == "image/png"
+
     def test_image_unsupported_mime_type(self) -> None:
         with pytest.raises(UnsupportedMCPValueError, match="image/bmp"):
             mcp_content(ImageContent(type="image", data="abc", mimeType="image/bmp"))
@@ -230,6 +235,25 @@ class TestMCPResourceToContent:
     def test_image_resource(self) -> None:
         result = mcp_resource_to_content(_read_result([_blob_resource(blob="aW1n", mime="image/png").model_dump()]))
         assert result["type"] == "image"
+
+    def test_case_insensitive_and_parameterized_resource(self) -> None:
+        result_text = mcp_resource_to_content(
+            _read_result([_text_resource(text="hello", mime="TEXT/PLAIN; charset=utf-8").model_dump()])
+        )
+        assert result_text["type"] == "document"
+
+        pdf_data = base64.b64encode(b"pdf").decode()
+        result_pdf = mcp_resource_to_content(
+            _read_result([_blob_resource(blob=pdf_data, mime="APPLICATION/PDF; version=1.7").model_dump()])
+        )
+        assert result_pdf["type"] == "document"
+        assert result_pdf["source"]["media_type"] == "application/pdf"
+
+        result_img = mcp_resource_to_content(
+            _read_result([_blob_resource(blob="aW1n", mime="IMAGE/PNG; foo=bar").model_dump()])
+        )
+        assert result_img["type"] == "image"
+        assert result_img["source"]["media_type"] == "image/png"
 
     def test_empty_contents_raises(self) -> None:
         with pytest.raises(UnsupportedMCPValueError, match="at least one item"):
