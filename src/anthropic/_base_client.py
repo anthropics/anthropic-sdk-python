@@ -132,6 +132,16 @@ from ._utils._httpx import get_environment_proxies
 
 log: logging.Logger = logging.getLogger(__name__)
 
+
+def _is_celery_cancellation(err: BaseException) -> bool:
+    cls = type(err)
+    return cls.__module__ == "billiard.exceptions" and cls.__name__ in {
+        "SoftTimeLimitExceeded",
+        "Terminated",
+        "TimeLimitExceeded",
+    }
+
+
 # TODO: make base page type vars covariant
 SyncPageT = TypeVar("SyncPageT", bound="BaseSyncPage[Any]")
 AsyncPageT = TypeVar("AsyncPageT", bound="BaseAsyncPage[Any]")
@@ -1445,6 +1455,8 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
             log.debug("Encountered httpx2.TimeoutException", exc_info=True)
             raise APITimeoutError(request=request) from err
         except Exception as err:
+            if _is_celery_cancellation(err):
+                raise
             if isinstance(err, AnthropicError):
                 # SDK-originated errors already carry their own type; don't wrap.
                 raise
@@ -2225,6 +2237,8 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
             log.debug("Encountered httpx2.TimeoutException", exc_info=True)
             raise APITimeoutError(request=request) from err
         except Exception as err:
+            if _is_celery_cancellation(err):
+                raise
             if isinstance(err, AnthropicError):
                 # SDK-originated errors already carry their own type; don't wrap.
                 raise

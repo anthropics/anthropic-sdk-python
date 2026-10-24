@@ -91,6 +91,10 @@ class Counter:
     value: int = 0
 
 
+class SoftTimeLimitExceeded(Exception):
+    __module__ = "billiard.exceptions"
+
+
 def _make_sync_iterator(iterable: Iterable[T], counter: Optional[Counter] = None) -> Iterator[T]:
     for item in iterable:
         if counter:
@@ -1316,6 +1320,15 @@ class TestAnthropic:
             ).__enter__()
 
         assert _get_open_connections(client) == 0
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_celery_cancellation_is_not_retried(self, respx_mock: MockRouter, client: Anthropic) -> None:
+        respx_mock.post("/foo").mock(side_effect=SoftTimeLimitExceeded())
+
+        with pytest.raises(SoftTimeLimitExceeded):
+            client.post("/foo", cast_to=httpx2.Response)
+
+        assert len(respx_mock.calls) == 1
 
     @pytest.mark.respx(base_url=base_url)
     def test_retrying_status_errors_doesnt_leak(
@@ -2763,6 +2776,17 @@ class TestAsyncAnthropic:
             ).__aenter__()
 
         assert _get_open_connections(async_client) == 0
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_celery_cancellation_is_not_retried(
+        self, respx_mock: MockRouter, async_client: AsyncAnthropic
+    ) -> None:
+        respx_mock.post("/foo").mock(side_effect=SoftTimeLimitExceeded())
+
+        with pytest.raises(SoftTimeLimitExceeded):
+            await async_client.post("/foo", cast_to=httpx2.Response)
+
+        assert len(respx_mock.calls) == 1
 
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(
