@@ -47,6 +47,8 @@ LINE_NUMBER_WIDTH = len(str(MAX_LINES))
 # umask (e.g. Docker where umask is often 0o000), would make memory files
 # world-readable or even world-writable.
 _FILE_CREATE_MODE = 0o600
+# Binary mode prevents Windows from translating newlines in UTF-8 bytes.
+FILE_CREATE_FLAGS = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_BINARY", 0)
 # The default mkdir mode is 0o777, but we want to be more restrictive for memory
 # directories to avoid them being world-accessible in environments with permissive umasks
 # (eg Docker)
@@ -285,7 +287,7 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
     data = content.encode("utf-8")
 
     try:
-        fd = os.open(temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
+        fd = os.open(temp_path, FILE_CREATE_FLAGS, _FILE_CREATE_MODE)
         try:
             offset = 0
             while offset < len(data):
@@ -486,7 +488,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
         _secure_mkdir(full_path.parent)
 
         try:
-            fd = os.open(full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
+            fd = os.open(full_path, FILE_CREATE_FLAGS, _FILE_CREATE_MODE)
             try:
                 os.write(fd, command.file_text.encode("utf-8"))
                 os.fsync(fd)
@@ -625,7 +627,7 @@ async def _async_atomic_write_file(target_path: AsyncPath, content: str) -> None
     try:
 
         def write_replace_and_sync() -> None:
-            fd = os.open(sync_temp_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
+            fd = os.open(sync_temp_path, FILE_CREATE_FLAGS, _FILE_CREATE_MODE)
             try:
                 offset = 0
                 while offset < len(data):
@@ -783,7 +785,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             sync_full_path = Path(str(full_path))
 
             def create_exclusive() -> None:
-                fd = os.open(sync_full_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, _FILE_CREATE_MODE)
+                fd = os.open(sync_full_path, FILE_CREATE_FLAGS, _FILE_CREATE_MODE)
                 try:
                     os.write(fd, command.file_text.encode("utf-8"))
                     os.fsync(fd)
