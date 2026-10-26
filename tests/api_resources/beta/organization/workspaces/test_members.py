@@ -182,7 +182,7 @@ class TestMembers:
     def test_method_add(self, client: Anthropic) -> None:
         member = client.beta.organization.workspaces.members.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -192,7 +192,7 @@ class TestMembers:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.members.with_raw_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -206,7 +206,7 @@ class TestMembers:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.members.with_streaming_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         ) as response:
@@ -223,7 +223,7 @@ class TestMembers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.beta.organization.workspaces.members.with_raw_response.add(
                 workspace_id="",
-                user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+                user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
                 workspace_role="workspace_admin",
             )
 
@@ -447,7 +447,7 @@ class TestAsyncMembers:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         member = await async_client.beta.organization.workspaces.members.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -457,7 +457,7 @@ class TestAsyncMembers:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.members.with_raw_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -471,7 +471,7 @@ class TestAsyncMembers:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.members.with_streaming_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         ) as response:
@@ -488,7 +488,7 @@ class TestAsyncMembers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.beta.organization.workspaces.members.with_raw_response.add(
                 workspace_id="",
-                user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+                user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
                 workspace_role="workspace_admin",
             )
 
