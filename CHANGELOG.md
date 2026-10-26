@@ -1,6 +1,11 @@
 # Changelog
 
-## [2.3.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.3.1) (2026-10-24)
+## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-10-26)
+
+### Features
+
+* **api:** add user_profile_id to External Keys and Workspaces
+
 
 ### Chores
 

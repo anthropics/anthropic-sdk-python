@@ -87,6 +87,7 @@ class Workspaces(SyncAPIResource):
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -110,16 +111,21 @@ class Workspaces(SyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. The user profile can't be replaced or removed
+              later; only deleting the user profile clears it.
 
           extra_headers: Send extra headers
 
@@ -137,6 +143,7 @@ class Workspaces(SyncAPIResource):
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -200,6 +207,7 @@ class Workspaces(SyncAPIResource):
         external_key_id: str | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -219,18 +227,24 @@ class Workspaces(SyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. Once set, it can't be replaced or removed
+              (sending the same ID again changes nothing); only deleting the user profile
+              clears it. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 
@@ -250,6 +264,7 @@ class Workspaces(SyncAPIResource):
                 "external_key_id": external_key_id,
                 "name": name,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -405,6 +420,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -428,16 +444,21 @@ class AsyncWorkspaces(AsyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. The user profile can't be replaced or removed
+              later; only deleting the user profile clears it.
 
           extra_headers: Send extra headers
 
@@ -455,6 +476,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -518,6 +540,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         external_key_id: str | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -537,18 +560,24 @@ class AsyncWorkspaces(AsyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. Once set, it can't be replaced or removed
+              (sending the same ID again changes nothing); only deleting the user profile
+              clears it. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 
@@ -568,6 +597,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "external_key_id": external_key_id,
                 "name": name,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,

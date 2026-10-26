@@ -51,6 +51,7 @@ class ExternalKeys(SyncAPIResource):
         provider_config: external_key_create_params.ProviderConfig,
         display_name: Optional[str] | Omit = omit,
         geo: Literal["us"] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -68,6 +69,11 @@ class ExternalKeys(SyncAPIResource):
 
           geo: Data residency geo. Only `us` is supported.
 
+          user_profile_id: ID of a user profile to bind the key to. Omit this field for a key that isn't
+              bound to a user profile. Such a key can be attached to a Workspace whatever its
+              user profile. The binding cannot be changed later. A key bound to a user profile
+              can only be attached to a Workspace that has the same user profile.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -82,6 +88,7 @@ class ExternalKeys(SyncAPIResource):
                 "provider_config": provider_config,
                 "display_name": display_name,
                 "geo": geo,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -363,6 +370,7 @@ class AsyncExternalKeys(AsyncAPIResource):
         provider_config: external_key_create_params.ProviderConfig,
         display_name: Optional[str] | Omit = omit,
         geo: Literal["us"] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -380,6 +388,11 @@ class AsyncExternalKeys(AsyncAPIResource):
 
           geo: Data residency geo. Only `us` is supported.
 
+          user_profile_id: ID of a user profile to bind the key to. Omit this field for a key that isn't
+              bound to a user profile. Such a key can be attached to a Workspace whatever its
+              user profile. The binding cannot be changed later. A key bound to a user profile
+              can only be attached to a Workspace that has the same user profile.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -394,6 +407,7 @@ class AsyncExternalKeys(AsyncAPIResource):
                 "provider_config": provider_config,
                 "display_name": display_name,
                 "geo": geo,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
