@@ -142,7 +142,7 @@ A message thread (beta) keeps the conversation on the server, so each request se
 
 ```py
 thread = client.beta.messages.thread(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system="You are a support agent for Acme.",
 )
