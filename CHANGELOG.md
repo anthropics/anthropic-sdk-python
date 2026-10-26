@@ -14,6 +14,7 @@
 
 ### Documentation
 
+* **client:** add missing await to the async parse() docstring example
 * **examples:** use current model IDs
 * link to the SDK documentation instead of removed README sections
 
