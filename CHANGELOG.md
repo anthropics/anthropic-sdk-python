@@ -1,10 +1,15 @@
 # Changelog
 
-## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-10-26)
+## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-10-27)
 
 ### Features
 
 * **api:** add user_profile_id to External Keys and Workspaces
+
+
+### Bug Fixes
+
+* **client:** let pydantic validate params types that accept omit
 
 
 ### Chores
