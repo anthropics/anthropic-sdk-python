@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-10-27)
+## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-10-28)
 
 ### Features
 
@@ -16,6 +16,7 @@
 
 * **ci:** remove unused build upload steps
 * **docs:** clarify what disabling the Compliance API stops
+* **docs:** clarify what the capability_access_all role action grants
 * **docs:** update example user ID in Admin API examples
 
 ### Documentation
