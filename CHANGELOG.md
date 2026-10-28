@@ -22,6 +22,7 @@
 
 * **client:** add missing await to the async parse() docstring example
 * **examples:** use current model IDs
+* **readme:** point to the docs site for documentation
 * link to the SDK documentation instead of removed README sections
 
 ## [2.3.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.2.0...v2.3.0) (2026-10-23)
