@@ -125,14 +125,7 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
             if base_url is None:
-                if region == "global":
-                    base_url = "https://aiplatform.googleapis.com/v1"
-                elif region == "us":
-                    base_url = "https://aiplatform.us.rep.googleapis.com/v1"
-                elif region == "eu":
-                    base_url = "https://aiplatform.eu.rep.googleapis.com/v1"
-                else:
-                    base_url = f"https://{region}-aiplatform.googleapis.com/v1"
+                base_url = region_base_url(region)
 
         super().__init__(
             version=__version__,
@@ -229,6 +222,14 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
 
         http_client = http_client or self._client
 
+        # A region-derived host must follow the region; a custom base_url is kept.
+        if (
+            base_url is None
+            and is_given(region)
+            and self.base_url == self._enforce_trailing_slash(httpx2.URL(region_base_url(self.region)))
+        ):
+            base_url = region_base_url(region)
+
         return self.__class__(
             region=region if is_given(region) else self.region,
             project_id=project_id if is_given(project_id) else self.project_id or not_given,
@@ -295,14 +296,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
             if base_url is None:
-                if region == "global":
-                    base_url = "https://aiplatform.googleapis.com/v1"
-                elif region == "us":
-                    base_url = "https://aiplatform.us.rep.googleapis.com/v1"
-                elif region == "eu":
-                    base_url = "https://aiplatform.eu.rep.googleapis.com/v1"
-                else:
-                    base_url = f"https://{region}-aiplatform.googleapis.com/v1"
+                base_url = region_base_url(region)
 
         super().__init__(
             version=__version__,
@@ -399,6 +393,14 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
 
         http_client = http_client or self._client
 
+        # A region-derived host must follow the region; a custom base_url is kept.
+        if (
+            base_url is None
+            and is_given(region)
+            and self.base_url == self._enforce_trailing_slash(httpx2.URL(region_base_url(self.region)))
+        ):
+            base_url = region_base_url(region)
+
         return self.__class__(
             region=region if is_given(region) else self.region,
             project_id=project_id if is_given(project_id) else self.project_id or not_given,
@@ -464,3 +466,13 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
         raise AnthropicError("The Batch API is not supported in the Vertex client yet")
 
     return options
+
+
+def region_base_url(region: str) -> str:
+    if region == "global":
+        return "https://aiplatform.googleapis.com/v1"
+    if region == "us":
+        return "https://aiplatform.us.rep.googleapis.com/v1"
+    if region == "eu":
+        return "https://aiplatform.eu.rep.googleapis.com/v1"
+    return f"https://{region}-aiplatform.googleapis.com/v1"

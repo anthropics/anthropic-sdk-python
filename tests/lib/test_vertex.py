@@ -284,6 +284,44 @@ class TestAnthropicVertex:
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
 
+    @pytest.mark.respx()
+    @pytest.mark.parametrize(
+        ("new_region", "expected_host"),
+        [("europe-west1", "europe-west1-aiplatform.googleapis.com"), ("global", "aiplatform.googleapis.com")],
+    )
+    def test_copy_with_region_moves_derived_base_url(
+        self, respx_mock: MockRouter, new_region: str, expected_host: str
+    ) -> None:
+        client = AnthropicVertex(region="us-east5", project_id="project", access_token="my-access-token")
+        request_url = f"https://{expected_host}/v1/projects/project/locations/{new_region}/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client.with_options(region=new_region).messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert str(calls[0].request.url) == request_url
+        assert str(client.base_url).rstrip("/") == "https://us-east5-aiplatform.googleapis.com/v1"
+
+    def test_copy_with_region_keeps_custom_base_url(self) -> None:
+        client = AnthropicVertex(
+            region="us-east5",
+            project_id="project",
+            access_token="my-access-token",
+            base_url="https://proxy.example.com/v1",
+        )
+
+        copied = client.copy(region="europe-west1")
+
+        assert str(copied.base_url).rstrip("/") == "https://proxy.example.com/v1"
+        assert (
+            str(client.copy(region="europe-west1", base_url="https://other.example.com/v1").base_url).rstrip("/")
+            == "https://other.example.com/v1"
+        )
+
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
     @pytest.mark.respx()
     def test_beta_tool_runner_routes_through_raw_predict(self, respx_mock: MockRouter) -> None:
@@ -541,6 +579,45 @@ class TestAsyncAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize(
+        ("new_region", "expected_host"),
+        [("europe-west1", "europe-west1-aiplatform.googleapis.com"), ("global", "aiplatform.googleapis.com")],
+    )
+    async def test_copy_with_region_moves_derived_base_url(
+        self, respx_mock: MockRouter, new_region: str, expected_host: str
+    ) -> None:
+        client = AsyncAnthropicVertex(region="us-east5", project_id="project", access_token="my-access-token")
+        request_url = f"https://{expected_host}/v1/projects/project/locations/{new_region}/publishers/anthropic/models/claude-3-sonnet@20240229:rawPredict"
+        respx_mock.post(request_url).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        await client.with_options(region=new_region).messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-sonnet@20240229",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert str(calls[0].request.url) == request_url
+        assert str(client.base_url).rstrip("/") == "https://us-east5-aiplatform.googleapis.com/v1"
+
+    def test_copy_with_region_keeps_custom_base_url(self) -> None:
+        client = AsyncAnthropicVertex(
+            region="us-east5",
+            project_id="project",
+            access_token="my-access-token",
+            base_url="https://proxy.example.com/v1",
+        )
+
+        copied = client.copy(region="europe-west1")
+
+        assert str(copied.base_url).rstrip("/") == "https://proxy.example.com/v1"
+        assert (
+            str(client.copy(region="europe-west1", base_url="https://other.example.com/v1").base_url).rstrip("/")
+            == "https://other.example.com/v1"
+        )
 
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
     @pytest.mark.respx()
