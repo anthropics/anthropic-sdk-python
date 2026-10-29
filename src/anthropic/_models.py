@@ -85,14 +85,15 @@ from ._constants import RAW_RESPONSE_HEADER
 
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler, ValidatorFunctionWrapHandler
-    from pydantic_core import CoreSchema, core_schema
+    from pydantic_core import CoreSchema, SchemaValidator, core_schema
     from opentelemetry.util.types import AttributeValue
     from pydantic_core.core_schema import ModelField, ModelSchema, LiteralSchema, ModelFieldsSchema
 else:
     try:
-        from pydantic_core import CoreSchema, core_schema
+        from pydantic_core import CoreSchema, SchemaValidator, core_schema
     except ImportError:
         CoreSchema = None
+        SchemaValidator = None
         core_schema = None
 
     # pydantic can't resolve the forward reference that this alias can hold, and request options are never validated.
@@ -620,6 +621,14 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
     args = get_args(type_)
 
     if is_union(origin):
+        if not PYDANTIC_V1 and original_type is None and len(meta) == 1 and isinstance(meta[0], UnionDiscriminator):
+            try:
+                validator = discriminated_union_validator(type_, meta[0].field_name)
+                if validator is not None and is_json_value(value):
+                    return validator.validate_python(value)
+            except Exception:
+                pass
+
         try:
             return validate_type(type_=cast("type[object]", original_type or type_), value=value)
         except Exception:
@@ -727,6 +736,134 @@ class UnionDiscriminator:
     @override
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.field_name!r})"
+
+
+@lru_cache(maxsize=256)
+def discriminated_union_validator(union: type, field_name: str) -> SchemaValidator | None:
+    # Only replace union selection when every branch has a distinct literal tag.
+    # Keep the loose-construction discriminator cache and its fallback unchanged.
+    if any(not inspect.isclass(variant) or not issubclass(variant, BaseModel) for variant in get_args(union)):
+        return None
+
+    schema = cast("dict[str, Any]", dict(TypeAdapter(union).core_schema))
+    if not schema_has_no_validation_callbacks(schema):
+        return None
+
+    definitions: list[CoreSchema] = schema.get("definitions", [])
+    by_ref: dict[str, Any] = {definition["ref"]: definition for definition in definitions if "ref" in definition}
+    if schema["type"] == "definitions":
+        schema = schema["schema"]
+    if schema["type"] != "union":
+        return None
+
+    choices: dict[str, CoreSchema] = {}
+    input_name: str | None = None
+    for raw_choice in schema["choices"]:
+        if not isinstance(raw_choice, dict):
+            return None
+        choice = cast("dict[str, Any]", raw_choice)
+        model = by_ref.get(choice["schema_ref"]) if choice["type"] == "definition-ref" else choice
+        if model is None or model["type"] != "model" or model.get("config", {}).get("validate_by_alias") is False:
+            return None
+        fields = model["schema"]
+        if fields["type"] != "model-fields":
+            return None
+        field = fields["fields"].get(field_name)
+        if field is None:
+            return None
+        alias = field.get("validation_alias", field_name)
+        if not isinstance(alias, str) or (input_name is not None and input_name != alias):
+            return None
+        input_name = alias
+
+        tag = field["schema"]
+        if tag["type"] == "default":
+            tag = tag["schema"]
+        if tag["type"] != "literal":
+            return None
+        for literal in tag["expected"]:
+            if not isinstance(literal, str) or literal in choices:
+                return None
+            choices[literal] = cast("CoreSchema", choice)
+
+    if not choices or input_name is None:
+        return None
+
+    tagged = core_schema.tagged_union_schema(choices, discriminator=input_name)
+    return SchemaValidator(core_schema.definitions_schema(tagged, definitions))
+
+
+def schema_has_no_validation_callbacks(schema: object) -> bool:
+    # A failed fast validation must not run user callbacks twice before fallback.
+    if isinstance(schema, dict):
+        schema = cast("dict[str, object]", schema)
+        kind = schema.get("type")
+        if isinstance(kind, str) and kind not in {
+            "any",
+            "none",
+            "bool",
+            "int",
+            "float",
+            "str",
+            "bytes",
+            "date",
+            "time",
+            "datetime",
+            "timedelta",
+            "literal",
+            "union",
+            "model",
+            "model-fields",
+            "model-field",
+            "dict",
+            "list",
+            "nullable",
+            "default",
+            "definition-ref",
+            "definitions",
+        }:
+            return False
+        if kind == "model" and type(schema.get("cls")) is not type(BaseModel):
+            return False
+        if kind == "literal" and any(
+            type(value) not in (type(None), str, int, float, bool, bytes)
+            for value in cast("list[object]", schema["expected"])
+        ):
+            return False
+        if (
+            schema.get("default_factory") is not None
+            or schema.get("custom_init")
+            or schema.get("post_init")
+            or (kind == "default" and type(schema.get("default")) not in (type(None), str, int, float, bool, bytes))
+        ):
+            return False
+        return all(schema_has_no_validation_callbacks(value) for key, value in schema.items() if key != "metadata")
+    if isinstance(schema, (list, tuple)):
+        return all(schema_has_no_validation_callbacks(value) for value in cast("Iterable[object]", schema))
+    return True
+
+
+def is_json_value(value: object) -> bool:
+    # Iterators and custom objects can be consumed by unsuccessful union branches.
+    # Only shortcut validation for the built-in values produced by JSON decoding.
+    pending = [value]
+    remaining = 64
+    while pending and remaining:
+        item = pending.pop()
+        remaining -= 1
+        if type(item) is dict:
+            mapping = cast("dict[object, object]", item)
+            if len(mapping) > remaining - len(pending) or any(type(key) is not str for key in mapping):
+                return False
+            pending.extend(mapping.values())
+        elif type(item) is list:
+            items = cast("list[object]", item)
+            if len(items) > remaining - len(pending):
+                return False
+            pending.extend(items)
+        elif item is not None and type(item) not in (str, int, float, bool):
+            return False
+    return not pending
 
 
 @runtime_checkable

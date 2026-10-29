@@ -412,13 +412,14 @@ def assert_input_transformations_response(message: BetaMessage, expected: List[D
 
 
 class TestSyncMessages:
+    @pytest.mark.parametrize("client", [True, False], indirect=True)
     @pytest.mark.respx(base_url=base_url)
-    def test_basic_response(self, respx_mock: MockRouter) -> None:
+    def test_basic_response(self, client: Anthropic, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
-        with sync_client.beta.messages.stream(
+        with client.beta.messages.stream(
             max_tokens=1024,
             messages=[
                 {
@@ -728,9 +729,10 @@ class TestAsyncMessages:
         sent = json.loads(route.calls.last.request.content)
         assert sent["messages"][0]["content"][0]["source"]["data"] == base64.b64encode(b"image").decode()
 
+    @pytest.mark.parametrize("async_client", [True, False], indirect=True)
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
-    async def test_basic_response(self, respx_mock: MockRouter) -> None:
+    async def test_basic_response(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )

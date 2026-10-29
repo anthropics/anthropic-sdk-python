@@ -1,8 +1,9 @@
 import json
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Iterable, Optional, cast
 from datetime import datetime, timezone
 from collections import deque
-from typing_extensions import Literal, Annotated, TypedDict, TypeAliasType
+from typing_extensions import Literal, Annotated, TypedDict, TypeAliasType, override
 
 import pytest
 import pydantic
@@ -685,6 +686,237 @@ def test_discriminated_unions_invalid_data() -> None:
         assert m.data == "100"
     else:
         assert m.data == 100  # type: ignore[comparison-overlap]
+
+
+@pytest.mark.parametrize("use_alias", [False, True])
+def test_discriminated_unions_valid_data_is_validated(use_alias: bool) -> None:
+    class A(BaseModel):
+        kind: Literal["a"] = Field(alias="type" if use_alias else "kind")
+        data: str
+
+    class B(BaseModel):
+        kind: Literal["b"] = Field(alias="type" if use_alias else "kind")
+        data: int
+
+    value = {"type" if use_alias else "kind": "b", "data": "42", "extra": "kept"}
+    m = construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("kind")])
+    assert isinstance(m, B)
+    assert m.data == 42
+    assert m.to_dict()["extra"] == "kept"
+
+
+def test_discriminated_unions_overlapping_valid_data() -> None:
+    class A(BaseModel):
+        type: Literal["shared"]
+        data: int
+
+    class B(BaseModel):
+        type: Literal["shared"]
+        data: int
+
+    m = construct_type(value={"type": "shared", "data": 42}, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert isinstance(m, A)
+
+
+def test_discriminated_unions_untagged_branch() -> None:
+    class Untagged(BaseModel):
+        data: int
+
+    class Tagged(BaseModel):
+        type: Literal["b"]
+        data: int
+
+    m = construct_type(
+        value={"type": "b", "data": 42},
+        type_=Annotated[Union[Untagged, Tagged], UnionDiscriminator("type")],
+    )
+    assert isinstance(m, Untagged if PYDANTIC_V1 else Tagged)
+
+
+def test_discriminated_unions_missing_default_tag() -> None:
+    class A(BaseModel):
+        type: Literal["a"] = "a"
+        data: str
+
+    class B(BaseModel):
+        type: Literal["b"] = "b"
+        data: int
+
+    m = construct_type(value={"data": 42}, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert isinstance(m, A if PYDANTIC_V1 else B)
+    assert m.type == ("a" if PYDANTIC_V1 else "b")
+
+
+def test_discriminated_unions_do_not_change_plain_union_after_cache_warmup() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+        data: int
+
+    class B(BaseModel):
+        type: Literal["b"]
+        data: int
+
+    annotated = Annotated[Union[A, B], UnionDiscriminator("type")]
+    assert isinstance(construct_type(value={"type": "b", "data": 42}, type_=annotated), B)
+    m = construct_type(value={"type": "b", "data": "invalid"}, type_=Union[A, B])
+    assert isinstance(m, A)
+    assert m.data == "invalid"  # type: ignore[comparison-overlap]
+
+
+def test_discriminated_union_metadata_is_not_reused_for_other_fields() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+        other: Literal["b"]
+        data: int
+
+    class B(BaseModel):
+        type: Literal["b"]
+        other: Literal["a"]
+        data: int
+
+    value = {"type": "b", "other": "a", "data": 42}
+    assert isinstance(construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("type")]), B)
+    assert isinstance(construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("other")]), B)
+
+
+@pytest.mark.parametrize("valid", [False, True])
+def test_discriminated_unions_preserve_default_factory_calls(valid: bool) -> None:
+    calls: List[int] = []
+
+    def make_default() -> int:
+        calls.append(1)
+        return len(calls)
+
+    class Inner(BaseModel):
+        sequence: int = Field(default_factory=make_default)
+        data: int
+
+    class A(BaseModel):
+        type: Literal["a"]
+        nested: Inner
+
+    class B(BaseModel):
+        type: Literal["b"]
+        nested: Inner
+
+    value = {"type": "b", "nested": {"data": 42 if valid else "invalid"}}
+    # The original whole-union path supplies the oracle for stateful defaults.
+    expected = construct_type(value=value, type_=Union[A, B])
+    expected_calls = len(calls)
+    calls.clear()
+    actual = construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert len(calls) == expected_calls
+    assert isinstance(expected, (A, B))
+    assert isinstance(actual, B)
+    assert actual.nested.sequence == expected.nested.sequence
+    assert actual.nested.data == expected.nested.data
+
+
+def test_discriminated_unions_preserve_iterator_consumption() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+        values: List[int]
+
+    class B(BaseModel):
+        type: Literal["b"]
+        values: List[int]
+
+    expected = construct_type(value={"type": "b", "values": iter([1, 2])}, type_=Union[A, B])
+    actual = construct_type(
+        value={"type": "b", "values": iter([1, 2])}, type_=Annotated[Union[A, B], UnionDiscriminator("type")]
+    )
+    assert isinstance(expected, A if PYDANTIC_V1 else B)
+    assert isinstance(actual, B)
+    assert list(actual.values) == list(expected.values)
+
+
+def test_discriminated_unions_preserve_enum_missing_calls() -> None:
+    calls: List[object] = []
+
+    class State(Enum):
+        READY = "ready"
+
+        @classmethod
+        @override
+        def _missing_(cls, value: object) -> None:
+            calls.append(value)
+
+    class A(BaseModel):
+        type: Literal["a"]
+        state: State
+
+    class B(BaseModel):
+        type: Literal["b"]
+        state: State
+
+    value = {"type": "b", "state": "future"}
+    construct_type(value=value, type_=Union[A, B])
+    expected_calls = calls.copy()
+    calls.clear()
+    actual = construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert isinstance(actual, B)
+    assert calls == expected_calls
+    assert actual.state == "future"  # type: ignore[comparison-overlap]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="Pydantic v2 model validators")
+def test_discriminated_unions_preserve_model_validator_selection() -> None:
+    class A(BaseModel):
+        type: Literal["a"]
+        data: int
+
+        @pydantic.model_validator(mode="before")
+        @classmethod
+        def rewrite_tag(cls, value: Any) -> Any:
+            return {**value, "type": "a"}
+
+    class B(BaseModel):
+        type: Literal["b"]
+        data: int
+
+    m = construct_type(value={"type": "b", "data": 42}, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert isinstance(m, A)
+
+
+@pytest.mark.skipif(not hasattr(pydantic, "Discriminator"), reason="Pydantic callable discriminators")
+def test_discriminated_unions_preserve_nested_discriminator_calls() -> None:
+    calls: List[object] = []
+
+    def discriminate(value: Any) -> str:
+        calls.append(value)
+        return value["kind"]
+
+    class X(BaseModel):
+        kind: Literal["x"]
+        value: int
+
+    class Y(BaseModel):
+        kind: Literal["y"]
+        value: int
+
+    class A(BaseModel):
+        type: Literal["a"]
+        nested: Annotated[
+            Union[Annotated[X, pydantic.Tag("x")], Annotated[Y, pydantic.Tag("y")]],
+            pydantic.Discriminator(discriminate),
+        ]
+
+    class B(BaseModel):
+        type: Literal["b"]
+        nested: Annotated[
+            Union[Annotated[X, pydantic.Tag("x")], Annotated[Y, pydantic.Tag("y")]],
+            pydantic.Discriminator(discriminate),
+        ]
+
+    value = {"type": "b", "nested": {"kind": "x", "value": 42}}
+    expected = construct_type(value=value, type_=Union[A, B])
+    expected_calls = calls.copy()
+    calls.clear()
+    actual = construct_type(value=value, type_=Annotated[Union[A, B], UnionDiscriminator("type")])
+    assert calls == expected_calls
+    assert isinstance(expected, B)
+    assert isinstance(actual, B)
+    assert actual.nested == expected.nested
 
 
 def test_discriminated_unions_unknown_variant() -> None:
