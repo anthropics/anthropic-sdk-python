@@ -22,6 +22,7 @@
 ### Documentation
 
 * **client:** add missing await to the async parse() docstring example
+* **examples:** keep the message threads example valid on Sonnet 5.5
 * **examples:** use current model IDs
 * **readme:** point to the docs site for documentation
 * link to the SDK documentation instead of removed README sections
