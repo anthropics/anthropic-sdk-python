@@ -6,6 +6,7 @@
 
 * **api:** add GA methods for analytics, spend limits and RBAC
 * **api:** add shared analytics order and increase request actor types
+* **api:** add tool_use_limit_reached_error and compaction_limit_reached_error session error types
 * **api:** add types for analytics group_by and spend limit period filters
 * **api:** add user_profile_id to External Keys and Workspaces
 
