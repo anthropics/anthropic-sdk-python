@@ -22,6 +22,7 @@
 * **docs:** clarify what disabling the Compliance API stops
 * **docs:** clarify what the capability_access_all role action grants
 * **docs:** update example user ID in Admin API examples
+* **internal:** add a section for each repository's own review rules
 
 ### Documentation
 
