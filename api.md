@@ -2824,6 +2824,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsLinesOfCode,
     BetaAnalyticsOfficeMetrics,
     BetaAnalyticsOfficeProductMetrics,
+    BetaAnalyticsOrder,
     BetaAnalyticsPluginActivity,
     BetaAnalyticsPluginClaudeCodeMetrics,
     BetaAnalyticsPluginCoworkMetrics,
@@ -3015,6 +3016,8 @@ Types:
 ```python
 from anthropic.types.beta.organization.spend_limits import (
     BetaSpendLimitIncreaseRequest,
+    BetaSpendLimitIncreaseRequestActor,
+    BetaSpendLimitIncreaseRequestResolvedBy,
     BetaSpendLimitIncreaseRequestStatus,
     IncreaseRequestApproveResponse,
 )

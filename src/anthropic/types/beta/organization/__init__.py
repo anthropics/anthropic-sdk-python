@@ -19,6 +19,7 @@ from .beta_deleted_plugin import BetaDeletedPlugin as BetaDeletedPlugin
 from .beta_workspace_role import BetaWorkspaceRole as BetaWorkspaceRole
 from .webhook_list_params import WebhookListParams as WebhookListParams
 from .beta_analytics_actor import BetaAnalyticsActor as BetaAnalyticsActor
+from .beta_analytics_order import BetaAnalyticsOrder as BetaAnalyticsOrder
 from .beta_analytics_speed import BetaAnalyticsSpeed as BetaAnalyticsSpeed
 from .beta_service_account import BetaServiceAccount as BetaServiceAccount
 from .invite_create_params import InviteCreateParams as InviteCreateParams

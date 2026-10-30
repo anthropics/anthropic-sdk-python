@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_order import BetaAnalyticsOrder
 from ..beta_analytics_skill_group_by import BetaAnalyticsSkillGroupBy
 
 __all__ = ["SkillListParams"]
@@ -62,7 +63,7 @@ class SkillListParams(TypedDict, total=False):
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,6 +16,8 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
+from .....types.beta.organization import BetaAnalyticsOrder
+from .....types.beta.organization.beta_analytics_order import BetaAnalyticsOrder
 from .....types.beta.organization.beta_analytics_plugin_activity import BetaAnalyticsPluginActivity
 from .....types.beta.organization.beta_analytics_plugin_group_by import BetaAnalyticsPluginGroupBy
 
@@ -51,7 +52,7 @@ class Plugins(SyncAPIResource):
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
         group_by: Optional[List[BetaAnalyticsPluginGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -201,7 +202,7 @@ class AsyncPlugins(AsyncAPIResource):
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
         group_by: Optional[List[BetaAnalyticsPluginGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
