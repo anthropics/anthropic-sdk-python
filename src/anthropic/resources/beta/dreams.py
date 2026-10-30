@@ -87,7 +87,7 @@ class Dreams(SyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
@@ -532,7 +532,7 @@ class AsyncDreams(AsyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
