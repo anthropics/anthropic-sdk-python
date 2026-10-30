@@ -35,36 +35,6 @@ class ChatCoworkUnifiedMetrics(BaseModel):
 class BetaAnalyticsSkillActivity(BaseModel):
     """Per-skill activity data for a given day."""
 
-    chat_metrics: BetaAnalyticsSkillChatMetrics
-    """Claude.ai activity metrics for a single skill on a given day."""
-
-    claude_code_metrics: BetaAnalyticsSkillClaudeCodeMetrics
-    """Claude Code activity metrics for a single skill on a given day."""
-
-    cowork_metrics: BetaAnalyticsSkillCoworkMetrics
-    """Cowork activity metrics for a single skill on a given day."""
-
-    distinct_user_count: int
-    """
-    Number of distinct users who used the skill on the requested day, or, in
-    date-range mode, over the requested window — recomputed as an exact distinct
-    count over the window's per-member daily rows, never a sum of per-day values. A
-    skill counts as used only when it is explicitly activated — the model (or the
-    user, via the skill's slash command) invokes it, reading its instructions into
-    context as part of that activation. Skills that are merely installed or listed
-    as available, or whose content reaches the context without an activation
-    (preloaded, hook-injected, or read as a plain file), are not counted.
-    """
-
-    office_metrics: BetaAnalyticsSkillOfficeMetrics
-    """
-    Office Agent activity metrics for a single skill on a given day, broken out by
-    Office product.
-    """
-
-    skill_name: str
-    """Name of the skill"""
-
     attributed_list_price: Optional[str] = None
     """
     List-price (rate-card) value of the member requests attributed to this skill, as
@@ -88,20 +58,32 @@ class BetaAnalyticsSkillActivity(BaseModel):
     from those cuts.
     """
 
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
-    """
-    Skill use recorded while members had Chat and Cowork unified (Cowork's features
-    inside claude.ai chat) turned on, split into chat conversations and Cowork
-    sessions. A count is null in date-range mode where it cannot be computed.
-    Omitted from the response on deployments that do not offer Chat and Cowork
-    unified.
-    """
+    chat_metrics: BetaAnalyticsSkillChatMetrics
+    """Claude.ai activity metrics for a single skill on a given day."""
+
+    claude_code_metrics: BetaAnalyticsSkillClaudeCodeMetrics
+    """Claude Code activity metrics for a single skill on a given day."""
+
+    cowork_metrics: BetaAnalyticsSkillCoworkMetrics
+    """Cowork activity metrics for a single skill on a given day."""
 
     currency: Optional[str] = None
     """
     Currency for this row's monetary fields (`estimated_overage_spend` and
     `attributed_list_price`), as an uppercase ISO-4217 code. Always "USD" when
     either amount is populated; null whenever both amounts are null.
+    """
+
+    distinct_user_count: int
+    """
+    Number of distinct users who used the skill on the requested day, or, in
+    date-range mode, over the requested window — recomputed as an exact distinct
+    count over the window's per-member daily rows, never a sum of per-day values. A
+    skill counts as used only when it is explicitly activated — the model (or the
+    user, via the skill's slash command) invokes it, reading its instructions into
+    context as part of that activation. Skills that are merely installed or listed
+    as available, or whose content reaches the context without an activation
+    (preloaded, hook-injected, or read as a plain file), are not counted.
     """
 
     enable_count: Optional[int] = None
@@ -158,31 +140,10 @@ class BetaAnalyticsSkillActivity(BaseModel):
     directly.
     """
 
-    product: Optional[str] = None
+    office_metrics: BetaAnalyticsSkillOfficeMetrics
     """
-    Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
-    These are the canonical Cost & Usage product names; an `office_agent` row's
-    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
-    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
-    `chat_cowork_unified` occur (the surfaces that create artifacts);
-    `/apps/chat/projects` does not support the product dimension (a `product` entry
-    in `group_by[]` or `filter[]` there is rejected). Present only when the request
-    grouped by `product`.
-    """
-
-    rbac_group_id: Optional[str] = None
-    """
-    Tagged RBAC group identifier (`rbac_group_...`), matching the spend-limits API
-    spelling. Present only when the request grouped by `rbac_group_id`.
-    """
-
-    rbac_group_name: Optional[str] = None
-    """
-    Resolved RBAC group display name, alongside `rbac_group_id` when name resolution
-    is available. Null if the group has been deleted or its name could not be
-    resolved; `rbac_group_id` remains the stable key.
+    Office Agent activity metrics for a single skill on a given day, broken out by
+    Office product.
     """
 
     share_status: Optional[Literal["organization", "private", "public"]] = None
@@ -209,6 +170,45 @@ class BetaAnalyticsSkillActivity(BaseModel):
     plugin whose name can no longer be found (for example, one since deleted), when
     `skill_name` is already a display name, or when display-name resolution is not
     enabled for this organization.
+    """
+
+    skill_name: str
+    """Name of the skill"""
+
+    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    """
+    Skill use recorded while members had Chat and Cowork unified (Cowork's features
+    inside claude.ai chat) turned on, split into chat conversations and Cowork
+    sessions. A count is null in date-range mode where it cannot be computed.
+    Omitted from the response on deployments that do not offer Chat and Cowork
+    unified.
+    """
+
+    product: Optional[str] = None
+    """
+    Product that produced this row's activity: one of `chat`, `claude_code`,
+    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
+    These are the canonical Cost & Usage product names; an `office_agent` row's
+    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
+    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
+    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
+    `chat_cowork_unified` occur (the surfaces that create artifacts);
+    `/apps/chat/projects` does not support the product dimension (a `product` entry
+    in `group_by[]` or `filter[]` there is rejected). Present only when the request
+    grouped by `product`.
+    """
+
+    rbac_group_id: Optional[str] = None
+    """
+    Tagged RBAC group identifier (`rbac_group_...`), matching the spend-limits API
+    spelling. Present only when the request grouped by `rbac_group_id`.
+    """
+
+    rbac_group_name: Optional[str] = None
+    """
+    Resolved RBAC group display name, alongside `rbac_group_id` when name resolution
+    is available. Null if the group has been deleted or its name could not be
+    resolved; `rbac_group_id` remains the stable key.
     """
 
     user_id: Optional[str] = None

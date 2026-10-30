@@ -54,6 +54,13 @@ class BetaAnalyticsPluginActivity(BaseModel):
     invocation_count: int
     """Number of plugin invocations on the requested day"""
 
+    plugin_id: Optional[str] = None
+    """Stable plugin identifier when available (e.g.
+
+    `serena@claude-plugins-official`). Null for third-party Claude Code plugins
+    (redacted at the source) and Cowork slash commands that carry only a hashed id.
+    """
+
     plugin_name: str
     """Name of the plugin"""
 
@@ -63,13 +70,6 @@ class BetaAnalyticsPluginActivity(BaseModel):
     inside claude.ai chat) turned on. A count is null in date-range mode where it
     cannot be computed. Omitted from the response on deployments that do not offer
     Chat and Cowork unified.
-    """
-
-    plugin_id: Optional[str] = None
-    """Stable plugin identifier when available (e.g.
-
-    `serena@claude-plugins-official`). Null for third-party Claude Code plugins
-    (redacted at the source) and Cowork slash commands that carry only a hashed id.
     """
 
     product: Optional[str] = None

@@ -45,6 +45,14 @@ class BetaAnalyticsUserActivity(BaseModel):
     design_metrics: BetaAnalyticsDesignMetrics
     """Claude Design activity metrics for a single user on a given day."""
 
+    distinct_user_count: Optional[int] = None
+    """Number of distinct active users represented by this row.
+
+    Only set for grouped rollups (`group_by[]`); null for per-user rows. In
+    date-range mode, recomputed as an exact distinct count of the group's active
+    members over the requested window, never a sum of per-day values.
+    """
+
     office_metrics: BetaAnalyticsOfficeMetrics
     """
     Office Agent activity metrics for a single user on a given day, broken out by
@@ -53,6 +61,9 @@ class BetaAnalyticsUserActivity(BaseModel):
 
     science_metrics: BetaAnalyticsScienceMetrics
     """Claude Science activity metrics for a single user on a given day."""
+
+    user: Optional[BetaAnalyticsUser] = None
+    """The user this row describes. Null on rows aggregated across users."""
 
     web_search_count: int
     """Number of web searches performed"""
@@ -63,14 +74,6 @@ class BetaAnalyticsUserActivity(BaseModel):
     features inside claude.ai chat) turned on, split into `chat` (chat activity) and
     `sessions` (Cowork activity). Omitted from the response on deployments that do
     not offer Chat and Cowork unified.
-    """
-
-    distinct_user_count: Optional[int] = None
-    """Number of distinct active users represented by this row.
-
-    Only set for grouped rollups (`group_by[]`); null for per-user rows. In
-    date-range mode, recomputed as an exact distinct count of the group's active
-    members over the requested window, never a sum of per-day values.
     """
 
     last_activity_date: Optional[date] = None
@@ -99,6 +102,3 @@ class BetaAnalyticsUserActivity(BaseModel):
     is available. Null if the group has been deleted or its name could not be
     resolved; `rbac_group_id` remains the stable key.
     """
-
-    user: Optional[BetaAnalyticsUser] = None
-    """The user this row describes. Null on rows aggregated across users."""

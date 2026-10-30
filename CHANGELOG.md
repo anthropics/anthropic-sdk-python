@@ -10,6 +10,7 @@
 
 ### Bug Fixes
 
+* **api:** require always-sent analytics fields and drop the unused project product field
 * **client:** let pydantic validate params types that accept omit
 
 
