@@ -5,6 +5,7 @@ from typing import List, Union, Optional
 from typing_extensions import Literal, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_plugin_group_by import BetaAnalyticsPluginGroupBy
 
 __all__ = ["PluginListParams"]
 
@@ -46,7 +47,7 @@ class PluginListParams(TypedDict, total=False):
     `product` value only on deployments that offer Chat and Cowork unified.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsPluginGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=user_id`). Supported on this endpoint: `product`, `rbac_group_id`,

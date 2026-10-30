@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -18,6 +17,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity
+from .....types.beta.organization.beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy
 
 __all__ = ["Artifacts", "AsyncArtifacts"]
 
@@ -47,7 +47,7 @@ class Artifacts(SyncAPIResource):
         *,
         date: Union[str, date],
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsArtifactGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -156,7 +156,7 @@ class AsyncArtifacts(AsyncAPIResource):
         *,
         date: Union[str, date],
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsArtifactGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.

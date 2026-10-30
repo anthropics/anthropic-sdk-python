@@ -5,6 +5,7 @@ from typing import List, Union, Optional
 from typing_extensions import Literal, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_connector_group_by import BetaAnalyticsConnectorGroupBy
 
 __all__ = ["ConnectorListParams"]
 
@@ -50,7 +51,7 @@ class ConnectorListParams(TypedDict, total=False):
     unified.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsConnectorGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=user_id`). Supported on this endpoint: `product`, `rbac_group_id`,

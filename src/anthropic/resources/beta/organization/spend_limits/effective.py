@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,6 +16,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_spend_summary import BetaSpendSummary
+from .....types.beta.organization.beta_spend_limit_period import BetaSpendLimitPeriod
 
 __all__ = ["Effective", "AsyncEffective"]
 
@@ -46,7 +46,7 @@ class Effective(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
-        period: Optional[List[Literal["daily", "monthly", "weekly"]]] | Omit = omit,
+        period: Optional[List[BetaSpendLimitPeriod]] | Omit = omit,
         user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -130,7 +130,7 @@ class AsyncEffective(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
-        period: Optional[List[Literal["daily", "monthly", "weekly"]]] | Omit = omit,
+        period: Optional[List[BetaSpendLimitPeriod]] | Omit = omit,
         user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.

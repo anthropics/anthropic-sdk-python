@@ -5,6 +5,7 @@ from typing import List, Union, Optional
 from typing_extensions import Literal, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_user_group_by import BetaAnalyticsUserGroupBy
 
 __all__ = ["UserListParams"]
 
@@ -50,7 +51,7 @@ class UserListParams(TypedDict, total=False):
     `chat_metrics`.
     """
 
-    group_by: Optional[List[Literal["rbac_group_id"]]]
+    group_by: Optional[List[BetaAnalyticsUserGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=rbac_group_id`). Supported on this endpoint: `rbac_group_id`. Rows

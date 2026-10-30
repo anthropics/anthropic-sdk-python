@@ -2790,6 +2790,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsActorType,
     BetaAnalyticsAPIActor,
     BetaAnalyticsArtifactActivity,
+    BetaAnalyticsArtifactGroupBy,
     BetaAnalyticsChatCoworkUnifiedChatMetrics,
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsChatMetrics,
@@ -2801,6 +2802,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsConnectorChatMetrics,
     BetaAnalyticsConnectorClaudeCodeMetrics,
     BetaAnalyticsConnectorCoworkMetrics,
+    BetaAnalyticsConnectorGroupBy,
     BetaAnalyticsConnectorOfficeMetrics,
     BetaAnalyticsConnectorOfficeProductMetrics,
     BetaAnalyticsContextWindow,
@@ -2825,8 +2827,10 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsPluginActivity,
     BetaAnalyticsPluginClaudeCodeMetrics,
     BetaAnalyticsPluginCoworkMetrics,
+    BetaAnalyticsPluginGroupBy,
     BetaAnalyticsProductFilter,
     BetaAnalyticsProjectActivity,
+    BetaAnalyticsProjectGroupBy,
     BetaAnalyticsReportUserActor,
     BetaAnalyticsScienceMetrics,
     BetaAnalyticsServerToolUse,
@@ -2839,6 +2843,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsSkillChatMetrics,
     BetaAnalyticsSkillClaudeCodeMetrics,
     BetaAnalyticsSkillCoworkMetrics,
+    BetaAnalyticsSkillGroupBy,
     BetaAnalyticsSkillOfficeMetrics,
     BetaAnalyticsSkillOfficeProductMetrics,
     BetaAnalyticsSpeed,
@@ -2855,6 +2860,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsUser,
     BetaAnalyticsUserActivity,
     BetaAnalyticsUserActor,
+    BetaAnalyticsUserGroupBy,
 )
 ```
 

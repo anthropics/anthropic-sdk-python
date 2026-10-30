@@ -18,6 +18,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_user_activity import BetaAnalyticsUserActivity
+from .....types.beta.organization.beta_analytics_user_group_by import BetaAnalyticsUserGroupBy
 
 __all__ = ["Users", "AsyncUsers"]
 
@@ -48,7 +49,7 @@ class Users(SyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["rbac_group_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsUserGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         order: Optional[Literal["asc", "desc"]] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
@@ -195,7 +196,7 @@ class AsyncUsers(AsyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["rbac_group_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsUserGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         order: Optional[Literal["asc", "desc"]] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
