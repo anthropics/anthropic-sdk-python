@@ -28,7 +28,7 @@ class IncreaseRequestApproveResponse(BaseModel):
     resolved_by: Optional[BetaSpendLimitIncreaseRequestResolvedBy] = None
     """Who approved or denied the increase request."""
 
-    spend_limit: BetaSpendLimit
+    spend_limit: Optional[BetaSpendLimit] = None
     """A configured spend limit: a cap on metered spend for one scope and period."""
 
     spend_summary: Optional[BetaSpendSummary] = None

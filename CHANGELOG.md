@@ -12,6 +12,7 @@
 
 ### Bug Fixes
 
+* **api:** make spend_limit nullable in the spend limit increase request approve response
 * **api:** require always-sent analytics fields and drop the unused project product field
 * **client:** let pydantic validate params types that accept omit
 
