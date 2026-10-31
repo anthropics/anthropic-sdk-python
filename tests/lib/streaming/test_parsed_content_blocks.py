@@ -119,3 +119,55 @@ def test_parsed_output_is_readable_but_not_dumped(block_type: Any) -> None:
         assert "parsed_output" not in copied.model_dump()
         assert "parsed_output" not in copied.to_dict()
         assert "parsed_output" not in json.loads(copied.to_json())
+
+
+def _accumulate_beta(*events: Any) -> Any:
+    snapshot = None
+    for event in events:
+        snapshot = accumulate_event(
+            event=event,
+            current_snapshot=snapshot,
+            json_bufs={},
+            request_headers=httpx2.Headers(),
+        )
+    return snapshot
+
+
+@pytest.mark.parametrize(
+    ("delta", "expected"),
+    [
+        ({"type": "compaction_delta", "content": "Updated summary."}, "opaque"),
+        ({"type": "compaction_delta", "content": "Updated summary.", "encrypted_content": None}, None),
+        ({"type": "compaction_delta", "content": "Updated summary.", "encrypted_content": ""}, ""),
+        ({"type": "compaction_delta", "content": "Updated summary.", "encrypted_content": "new"}, "new"),
+    ],
+    ids=["omitted", "null", "empty", "non-empty"],
+)
+def test_compaction_delta_only_updates_encrypted_content_when_present(delta: Any, expected: Any) -> None:
+    """An omitted `encrypted_content` decodes to None; a content-only delta must not erase metadata."""
+    snapshot = _accumulate_beta(
+        {
+            "type": "message_start",
+            "message": {
+                "id": "msg_1",
+                "type": "message",
+                "role": "assistant",
+                "model": "claude-sonnet-4-5",
+                "content": [],
+                "stop_reason": None,
+                "stop_sequence": None,
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            },
+        },
+        {
+            "type": "content_block_start",
+            "index": 0,
+            "content_block": {"type": "compaction", "content": "Summary.", "encrypted_content": "opaque"},
+        },
+        {"type": "content_block_delta", "index": 0, "delta": delta},
+    )
+
+    block = snapshot.content[0]
+    assert block.type == "compaction"
+    assert block.content == "Updated summary."
+    assert block.encrypted_content == expected
