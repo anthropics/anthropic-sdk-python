@@ -31,6 +31,7 @@ import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
 from ..._types import Headers, OpenTelemetryOptions
+from ..._utils import is_dict
 from .._tracing import tool_use_span
 from ._tool_dispatch import tool_registry, run_runnable_tool, tool_error_content, tool_result_content
 from .._scoped_client import copy_scoped_client, _copy_client_with_bearer_auth
@@ -922,7 +923,11 @@ class SessionToolRunner:
             is_error = False
             sent = False
         else:
-            input_ = dict(ev.input)
+            # Copy an object input so a tool that mutates its arguments cannot alter the
+            # event. Any other JSON the model sent is passed through as-is — a custom
+            # tool's schema need not be an object — and the tool call reports it as an
+            # error result instead of the runner reinterpreting (or crashing on) it.
+            input_: object = dict(ev.input) if is_dict(ev.input) else ev.input
             # An event of the primary thread names no thread.
             conversation_id = ev.session_thread_id or self._primary_thread_id
             with tool_use_span(
@@ -956,7 +961,7 @@ class SessionToolRunner:
         )
 
     async def _call_tool(
-        self, tool: BetaAnyRunnableTool, ev: DispatchedToolUseEvent, input_: dict[str, object]
+        self, tool: BetaAnyRunnableTool, ev: DispatchedToolUseEvent, input_: object
     ) -> tuple[DispatchedToolResultParams, Sequence[_SessionContent | BetaContent]]:
         """Runs `tool` for `ev` and builds the result event, turning a timeout or an error into an error result.
 
