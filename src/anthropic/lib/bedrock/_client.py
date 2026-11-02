@@ -57,6 +57,9 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
         else:
             options.url = f"/model/{model}/invoke"
 
+        if model in (".", ".."):
+            raise ValueError(f"Constructed path {options.url!r} contains dot-segment {model!r} which is not allowed")
+
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
 
