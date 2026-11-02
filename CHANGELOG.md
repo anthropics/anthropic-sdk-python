@@ -5,6 +5,7 @@
 ### Bug Fixes
 
 * **client:** make the first parse of each response model thread-safe
+* **client:** validate unions correctly across threads on pydantic v1
 
 
 ### Chores

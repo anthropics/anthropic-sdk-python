@@ -22,6 +22,7 @@ from anthropic._models import (
     BaseModel,
     EagerIterable,
     UnionDiscriminator,
+    validate_type,
     construct_type,
 )
 
@@ -1231,3 +1232,55 @@ def test_fork_during_build_does_not_block_child() -> None:
     builder.join(10)
     _, status = os.waitpid(pid, 0)
     assert os.waitstatus_to_exitcode(status) == 0
+
+
+@pytest.mark.skipif(not PYDANTIC_V1, reason="this race only happens with pydantic v1")
+def test_concurrent_first_validation_validates_on_every_thread() -> None:
+    entered, release = threading.Event(), threading.Event()
+
+    class Slow(str):
+        @classmethod
+        def __get_validators__(cls) -> Any:
+            # Pydantic calls this while it sets up a class. RootModel[Slow] would already be in pydantic's cache by now.
+            entered.set()
+            release.wait(10)
+            yield cls.check
+
+        @classmethod
+        def check(cls, value: str) -> "Slow":
+            return cls(value)
+
+    results: dict[str, object] = {}
+
+    def validate(key: str) -> None:
+        try:
+            results[key] = validate_type(type_=Slow, value="x")
+        except Exception as e:
+            results[key] = e
+
+    threads = {key: threading.Thread(target=validate, args=(key,), daemon=True) for key in ("first", "second")}
+    try:
+        threads["first"].start()
+        assert entered.wait(10)
+        threads["second"].start()
+        time.sleep(0.2)
+    finally:
+        release.set()
+    for thread in threads.values():
+        thread.join(10)
+        assert not thread.is_alive()
+
+    for value in results.values():
+        assert type(value) is Slow, value
+
+
+@pytest.mark.skipif(not PYDANTIC_V1, reason="the RootModel cache is only used with pydantic v1")
+def test_validate_type_tries_union_members_in_order() -> None:
+    class A(BaseModel):
+        a: int
+
+    class B(BaseModel):
+        a: int
+
+    assert type(validate_type(type_=cast(Any, Union[A, B]), value={"a": 1})) is A
+    assert type(validate_type(type_=cast(Any, Union[B, A]), value={"a": 1})) is B

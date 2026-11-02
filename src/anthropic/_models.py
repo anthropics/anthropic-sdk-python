@@ -995,6 +995,7 @@ if not PYDANTIC_V1:
         return TypeAdapter(type_).validate_python(value)
 
 elif not TYPE_CHECKING:  # TODO: condition is weird
+    from pydantic.typing import display_as_type
 
     class RootModel(GenericModel, Generic[_T]):
         """Used as a placeholder to easily convert runtime types to a Pydantic format
@@ -1009,12 +1010,21 @@ elif not TYPE_CHECKING:  # TODO: condition is weird
 
         __root__: _T
 
+    # Pydantic v1 lets other threads use RootModel[X] before it has set the class up. create_model() shares nothing.
+    # The key includes the arguments because Union[A, B] == Union[B, A], but v1 tries members in written order.
+    _root_models: dict[Any, Any] = {}
+
     def _validate_non_model_type(*, type_: type[_T], value: object) -> _T:
         model = _create_pydantic_model(type_).validate(value)
         return cast(_T, model.__root__)
 
     def _create_pydantic_model(type_: _T) -> Type[RootModel[_T]]:
-        return RootModel[type_]  # type: ignore
+        key = (type_, getattr(type_, "__args__", None))
+        model = _root_models.get(key)
+        if model is None:
+            name = f"RootModel[{display_as_type(type_)}]"
+            model = _root_models.setdefault(key, pydantic.create_model(name, __base__=RootModel, __root__=(type_, ...)))
+        return model
 
     def TypeAdapter(*_args: Any, **_kwargs: Any) -> Any:
         raise RuntimeError("attempted to use TypeAdapter in pydantic v1")
