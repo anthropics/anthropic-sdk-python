@@ -29,8 +29,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Optional, TypeVar
-
+from typing import TYPE_CHECKING, Any, TypeVar, Iterator, Optional, AsyncIterator
 from typing_extensions import override
 
 import httpx2

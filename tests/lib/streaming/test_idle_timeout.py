@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import time
-from typing import Any, AsyncIterator, Iterator
+from typing import Iterator, AsyncIterator
+from typing_extensions import override
 
 import httpx2
 import pytest
-from typing_extensions import override
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._exceptions import APITimeoutError
-from anthropic.lib.streaming._idle_timeout import _GuardedByteStream, guard_stream, idle_timeout_of
+from anthropic.lib.streaming._idle_timeout import guard_stream, idle_timeout_of, _GuardedByteStream
 
 PING_EVENT = b'event: ping\ndata: {"type": "ping"}\n\n'
 COMMENT = b": ping\n\n"
@@ -169,11 +169,11 @@ def test_guard_rejects_a_non_positive_window() -> None:
         guard_stream(stream, seconds=0)
 
 
-def _handler(request: httpx2.Request) -> httpx2.Response:
+def _handler(_request: httpx2.Request) -> httpx2.Response:
     return httpx2.Response(200, headers={"content-type": "text/event-stream"}, stream=_Paced([COMMENT] * 40))
 
 
-def _async_handler(request: httpx2.Request) -> httpx2.Response:
+def _async_handler(_request: httpx2.Request) -> httpx2.Response:
     return httpx2.Response(200, headers={"content-type": "text/event-stream"}, stream=_AsyncPaced([COMMENT] * 40))
 
 
