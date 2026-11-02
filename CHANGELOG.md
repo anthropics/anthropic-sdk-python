@@ -14,6 +14,7 @@
 
 * **api:** update example values for pattern-constrained string fields
 * **ci:** also run the tests with deferred pydantic model builds
+* **docs:** clarify some API field descriptions
 * **internal:** remove stale TODO comments and a test that could not pass
 
 
