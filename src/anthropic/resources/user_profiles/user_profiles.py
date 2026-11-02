@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import httpx2
 
@@ -35,6 +35,7 @@ from ...types.deleted_user_profile import DeletedUserProfile
 from ...types.user_profile_list_order import UserProfileListOrder
 from ...types.user_profile_access_type import UserProfileAccessType
 from ...types.user_profile_list_order_by import UserProfileListOrderBy
+from ...types.user_profile_enforcement_status import UserProfileEnforcementStatus
 from ...types.user_profile_external_user_details_params import UserProfileExternalUserDetailsParams
 
 __all__ = ["UserProfiles", "AsyncUserProfiles"]
@@ -268,6 +269,7 @@ class UserProfiles(SyncAPIResource):
     def list(
         self,
         *,
+        enforcement_status: List[UserProfileEnforcementStatus] | Omit = omit,
         limit: int | Omit = omit,
         order: UserProfileListOrder | Omit = omit,
         order_by: UserProfileListOrderBy | Omit = omit,
@@ -284,6 +286,16 @@ class UserProfiles(SyncAPIResource):
         List User Profiles
 
         Args:
+          enforcement_status:
+              Return only the user profiles whose `enforcement_status` is one of these values:
+              `unrestricted`, `pending`, `restricted` or `banned`. Repeat the parameter to
+              match any of several. With it set, a page may hold fewer than `limit` profiles,
+              or none, and still carry a `next_page`: the service examines a bounded number of
+              profiles per request, and only a null `next_page` means the listing is complete.
+              Rejected with `invalid_request_error` under the `user-profiles-2026-09-04` and
+              earlier beta headers. Fails with `overloaded_error` when a profile's enforcement
+              actions cannot be read for the moment.
+
           limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
           order: The sort direction, applied to the field that `order_by` selects. Defaults to
@@ -322,6 +334,7 @@ class UserProfiles(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={
+                    "enforcement_status": enforcement_status,
                     "limit": limit,
                     "order": order,
                     "order_by": order_by,
@@ -612,6 +625,7 @@ class AsyncUserProfiles(AsyncAPIResource):
     def list(
         self,
         *,
+        enforcement_status: List[UserProfileEnforcementStatus] | Omit = omit,
         limit: int | Omit = omit,
         order: UserProfileListOrder | Omit = omit,
         order_by: UserProfileListOrderBy | Omit = omit,
@@ -628,6 +642,16 @@ class AsyncUserProfiles(AsyncAPIResource):
         List User Profiles
 
         Args:
+          enforcement_status:
+              Return only the user profiles whose `enforcement_status` is one of these values:
+              `unrestricted`, `pending`, `restricted` or `banned`. Repeat the parameter to
+              match any of several. With it set, a page may hold fewer than `limit` profiles,
+              or none, and still carry a `next_page`: the service examines a bounded number of
+              profiles per request, and only a null `next_page` means the listing is complete.
+              Rejected with `invalid_request_error` under the `user-profiles-2026-09-04` and
+              earlier beta headers. Fails with `overloaded_error` when a profile's enforcement
+              actions cannot be read for the moment.
+
           limit: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
 
           order: The sort direction, applied to the field that `order_by` selects. Defaults to
@@ -666,6 +690,7 @@ class AsyncUserProfiles(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={
+                    "enforcement_status": enforcement_status,
                     "limit": limit,
                     "order": order,
                     "order_by": order_by,

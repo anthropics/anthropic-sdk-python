@@ -109,14 +109,13 @@ class Threads(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
-            ),
+            path_template("/v1/sessions/{session_id}/threads/{thread_id}", session_id=session_id, thread_id=thread_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.retrieve",
                 span_route="/v1/sessions/{session_id}/threads/{thread_id}",
                 span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
@@ -187,7 +186,7 @@ class Threads(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/threads?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/threads", session_id=session_id),
             page=SyncPageCursor[BetaManagedAgentsSessionThread],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -199,6 +198,7 @@ class Threads(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.list",
                 span_route="/v1/sessions/{session_id}/threads",
                 span_attributes={"anthropic.session.id": session_id},
@@ -260,15 +260,14 @@ class Threads(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}/archive?beta=true",
-                session_id=session_id,
-                thread_id=thread_id,
+                "/v1/sessions/{session_id}/threads/{thread_id}/archive", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.archive",
                 span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
                 span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
@@ -354,14 +353,13 @@ class AsyncThreads(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
-            ),
+            path_template("/v1/sessions/{session_id}/threads/{thread_id}", session_id=session_id, thread_id=thread_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.retrieve",
                 span_route="/v1/sessions/{session_id}/threads/{thread_id}",
                 span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
@@ -432,7 +430,7 @@ class AsyncThreads(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/threads?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/threads", session_id=session_id),
             page=AsyncPageCursor[BetaManagedAgentsSessionThread],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -444,6 +442,7 @@ class AsyncThreads(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.list",
                 span_route="/v1/sessions/{session_id}/threads",
                 span_attributes={"anthropic.session.id": session_id},
@@ -505,15 +504,14 @@ class AsyncThreads(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}/archive?beta=true",
-                session_id=session_id,
-                thread_id=thread_id,
+                "/v1/sessions/{session_id}/threads/{thread_id}/archive", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.sessions.threads.archive",
                 span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
                 span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},

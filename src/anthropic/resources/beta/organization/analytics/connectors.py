@@ -143,7 +143,7 @@ class Connectors(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/connectors?beta=true",
+            "/v1/organizations/analytics/connectors",
             page=SyncPageCursor[BetaAnalyticsConnectorActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -161,6 +161,7 @@ class Connectors(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.connectors.list",
                 span_route="/v1/organizations/analytics/connectors",
                 span_content_query_params=("filter",),
@@ -290,7 +291,7 @@ class AsyncConnectors(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/connectors?beta=true",
+            "/v1/organizations/analytics/connectors",
             page=AsyncPageCursor[BetaAnalyticsConnectorActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -308,6 +309,7 @@ class AsyncConnectors(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.connectors.list",
                 span_route="/v1/organizations/analytics/connectors",
                 span_content_query_params=("filter",),

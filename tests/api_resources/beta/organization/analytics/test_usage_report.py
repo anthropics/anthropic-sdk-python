@@ -21,6 +21,7 @@ class TestUsageReport:
     def test_method_list(self, client: Anthropic) -> None:
         usage_report = client.beta.organization.analytics.usage_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket], usage_report, path=["response"])
 
@@ -43,6 +44,7 @@ class TestUsageReport:
             slack_channel_ids=["C0123ABCDEF"],
             speeds=["fast"],
             user_ids=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket], usage_report, path=["response"])
 
@@ -50,6 +52,7 @@ class TestUsageReport:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.analytics.usage_report.with_raw_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -61,6 +64,7 @@ class TestUsageReport:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.analytics.usage_report.with_streaming_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -82,6 +86,7 @@ class TestAsyncUsageReport:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         usage_report = await async_client.beta.organization.analytics.usage_report.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket], usage_report, path=["response"])
 
@@ -104,6 +109,7 @@ class TestAsyncUsageReport:
             slack_channel_ids=["C0123ABCDEF"],
             speeds=["fast"],
             user_ids=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket], usage_report, path=["response"])
 
@@ -111,6 +117,7 @@ class TestAsyncUsageReport:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.analytics.usage_report.with_raw_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -122,6 +129,7 @@ class TestAsyncUsageReport:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.analytics.usage_report.with_streaming_response.list(
             starting_at=parse_datetime("2019-12-27T18:11:19.117Z"),
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

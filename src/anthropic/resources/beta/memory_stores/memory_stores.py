@@ -141,7 +141,7 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             body={
                 "name": name,
                 "description": description,
@@ -152,6 +152,7 @@ class MemoryStores(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.create",
                 span_route="/v1/memory_stores",
                 span_created_id="gen_ai.memory.store.id",
@@ -211,12 +212,13 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.retrieve",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -297,7 +299,7 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             body={
                 "description": description,
                 "metadata": metadata,
@@ -308,6 +310,7 @@ class MemoryStores(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.update",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -380,7 +383,7 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             page=SyncPageCursor[BetaManagedAgentsMemoryStore],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -394,6 +397,7 @@ class MemoryStores(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.list",
                 span_route="/v1/memory_stores",
             ),
@@ -455,12 +459,13 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.delete",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -523,12 +528,13 @@ class MemoryStores(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}/archive", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.archive",
                 span_route="/v1/memory_stores/{memory_store_id}/archive",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -637,7 +643,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             body={
                 "name": name,
                 "description": description,
@@ -648,6 +654,7 @@ class AsyncMemoryStores(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.create",
                 span_route="/v1/memory_stores",
                 span_created_id="gen_ai.memory.store.id",
@@ -707,12 +714,13 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.retrieve",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -793,7 +801,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             body={
                 "description": description,
                 "metadata": metadata,
@@ -804,6 +812,7 @@ class AsyncMemoryStores(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.update",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -876,7 +885,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             page=AsyncPageCursor[BetaManagedAgentsMemoryStore],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -890,6 +899,7 @@ class AsyncMemoryStores(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.list",
                 span_route="/v1/memory_stores",
             ),
@@ -951,12 +961,13 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.delete",
                 span_route="/v1/memory_stores/{memory_store_id}",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},
@@ -1019,12 +1030,13 @@ class AsyncMemoryStores(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}/archive", memory_store_id=memory_store_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.memory_stores.archive",
                 span_route="/v1/memory_stores/{memory_store_id}/archive",
                 span_attributes={"gen_ai.memory.store.id": memory_store_id},

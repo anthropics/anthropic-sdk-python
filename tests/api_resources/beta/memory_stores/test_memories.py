@@ -26,6 +26,7 @@ class TestMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -38,6 +39,7 @@ class TestMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -47,6 +49,7 @@ class TestMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -60,6 +63,7 @@ class TestMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -83,6 +87,7 @@ class TestMemories:
         memory = client.beta.memory_stores.memories.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -94,6 +99,7 @@ class TestMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -102,6 +108,7 @@ class TestMemories:
         response = client.beta.memory_stores.memories.with_raw_response.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -114,6 +121,7 @@ class TestMemories:
         with client.beta.memory_stores.memories.with_streaming_response.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -142,6 +150,7 @@ class TestMemories:
         memory = client.beta.memory_stores.memories.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -159,6 +168,7 @@ class TestMemories:
             },
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -167,6 +177,7 @@ class TestMemories:
         response = client.beta.memory_stores.memories.with_raw_response.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -179,6 +190,7 @@ class TestMemories:
         with client.beta.memory_stores.memories.with_streaming_response.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -206,6 +218,7 @@ class TestMemories:
     def test_method_list(self, client: Anthropic) -> None:
         memory = client.beta.memory_stores.memories.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -220,6 +233,7 @@ class TestMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -227,6 +241,7 @@ class TestMemories:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.memory_stores.memories.with_raw_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -238,6 +253,7 @@ class TestMemories:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.memory_stores.memories.with_streaming_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -259,6 +275,7 @@ class TestMemories:
         memory = client.beta.memory_stores.memories.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
@@ -270,6 +287,7 @@ class TestMemories:
             expected_content_sha256="expected_content_sha256",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
@@ -278,6 +296,7 @@ class TestMemories:
         response = client.beta.memory_stores.memories.with_raw_response.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -290,6 +309,7 @@ class TestMemories:
         with client.beta.memory_stores.memories.with_streaming_response.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -325,6 +345,7 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -337,6 +358,7 @@ class TestAsyncMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -346,6 +368,7 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -359,6 +382,7 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             content="content",
             path="xx",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -382,6 +406,7 @@ class TestAsyncMemories:
         memory = await async_client.beta.memory_stores.memories.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -393,6 +418,7 @@ class TestAsyncMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -401,6 +427,7 @@ class TestAsyncMemories:
         response = await async_client.beta.memory_stores.memories.with_raw_response.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -413,6 +440,7 @@ class TestAsyncMemories:
         async with async_client.beta.memory_stores.memories.with_streaming_response.retrieve(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -441,6 +469,7 @@ class TestAsyncMemories:
         memory = await async_client.beta.memory_stores.memories.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -458,6 +487,7 @@ class TestAsyncMemories:
             },
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
 
@@ -466,6 +496,7 @@ class TestAsyncMemories:
         response = await async_client.beta.memory_stores.memories.with_raw_response.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -478,6 +509,7 @@ class TestAsyncMemories:
         async with async_client.beta.memory_stores.memories.with_streaming_response.update(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -505,6 +537,7 @@ class TestAsyncMemories:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         memory = await async_client.beta.memory_stores.memories.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -519,6 +552,7 @@ class TestAsyncMemories:
             view="basic",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsMemoryListItem], memory, path=["response"])
 
@@ -526,6 +560,7 @@ class TestAsyncMemories:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.memory_stores.memories.with_raw_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -537,6 +572,7 @@ class TestAsyncMemories:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.memory_stores.memories.with_streaming_response.list(
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -558,6 +594,7 @@ class TestAsyncMemories:
         memory = await async_client.beta.memory_stores.memories.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
@@ -569,6 +606,7 @@ class TestAsyncMemories:
             expected_content_sha256="expected_content_sha256",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedMemory, memory, path=["response"])
 
@@ -577,6 +615,7 @@ class TestAsyncMemories:
         response = await async_client.beta.memory_stores.memories.with_raw_response.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -589,6 +628,7 @@ class TestAsyncMemories:
         async with async_client.beta.memory_stores.memories.with_streaming_response.delete(
             memory_id="memory_id",
             memory_store_id="memory_store_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

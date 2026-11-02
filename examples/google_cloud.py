@@ -8,9 +8,10 @@
 # anthropic = { path = "../", editable = true }
 # ///
 
-# Claude Platform on Google Cloud — the first-party Anthropic API served through Google's
-# gateway. Authentication uses your Google credentials (Application Default
-# Credentials by default), so run `gcloud auth application-default login` first.
+# Claude Models on Google Cloud (Anthropic managed) — the first-party Anthropic API
+# served through Google's gateway. Authentication uses your Google credentials
+# (Application Default Credentials by default), so run
+# `gcloud auth application-default login` first.
 #
 # Configure via arguments or environment variables:
 #   ANTHROPIC_GOOGLE_CLOUD_PROJECT   GCP consumer project id

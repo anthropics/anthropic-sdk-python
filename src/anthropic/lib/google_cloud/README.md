@@ -1,4 +1,4 @@
-# Claude Platform on Google Cloud
+# Claude Models on Google Cloud (Anthropic managed)
 
 `AnthropicGoogleCloud` is a client for the full Anthropic API — Messages, Models,
 Batches, Files, Admin, and every beta surface — served through Google Cloud. You
@@ -34,9 +34,9 @@ Precedence (first match wins, unless `skip_auth=True`):
    workload identity on GKE/Cloud Run, and the GCE/Cloud Functions metadata server.
 
 When the URL is derived, a `workspace_id` is required for every route outside
-`/v1/organizations`; those organization-level routes are sent to the project's
-organization endpoint and need none. `skip_auth` is mutually exclusive
-with the credential arguments.
+`/v1/organizations` and `/v1/user_profiles`; those organization-level routes are
+sent to the project's organization endpoint and need none. `skip_auth` is
+mutually exclusive with the credential arguments.
 
 ## Usage
 

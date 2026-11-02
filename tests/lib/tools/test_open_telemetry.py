@@ -1288,7 +1288,7 @@ class TestToolRunnerSpans:
         client = Anthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
         runner = run(client, stream=stream)
         # What the runner does between two items, other than send requests and run tools.
-        instrument(monkeypatch, spans, runner, "append_messages")
+        instrument(monkeypatch, spans, runner, "_append_tool_results")
         instrument(monkeypatch, spans, runner, "_register_compaction_response")
         tracer = spans.provider.get_tracer("app")
 
@@ -1310,7 +1310,7 @@ class TestToolRunnerSpans:
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.status.status_code == StatusCode.OK
         assert parent_id(tool_runner_span) == span_id(spans.one("app.step_0"))
-        for name in ("other.append_messages", "other._register_compaction_response"):
+        for name in ("other._append_tool_results", "other._register_compaction_response"):
             assert parent_id(spans.one(name)) == span_id(tool_runner_span)
         assert [parent_id(call) for call in spans.named("anthropic.messages.create")] == [span_id(tool_runner_span)] * 3
         assert parent_id(spans.one("anthropic.custom_tool_use get_weather")) == span_id(tool_runner_span)
@@ -1326,7 +1326,7 @@ class TestToolRunnerSpans:
         )
         client = AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option())
         runner = async_run(client, stream=stream)
-        instrument(monkeypatch, spans, runner, "append_messages")
+        instrument(monkeypatch, spans, runner, "_append_tool_results")
         instrument(monkeypatch, spans, runner, "_register_compaction_response")
         tracer = spans.provider.get_tracer("app")
 
@@ -1351,7 +1351,7 @@ class TestToolRunnerSpans:
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.status.status_code == StatusCode.OK
         assert parent_id(tool_runner_span) == span_id(spans.one("app.step_0"))
-        for name in ("other.append_messages", "other._register_compaction_response"):
+        for name in ("other._append_tool_results", "other._register_compaction_response"):
             assert parent_id(spans.one(name)) == span_id(tool_runner_span)
         assert [parent_id(call) for call in spans.named("anthropic.messages.create")] == [span_id(tool_runner_span)] * 3
         assert parent_id(spans.one("anthropic.custom_tool_use get_weather")) == span_id(tool_runner_span)
@@ -2420,9 +2420,9 @@ class TestSessionToolRunnerSpans:
         # Learning the thread costs no request: the runner reads the stream and the history, and sends the result.
         requests: list[httpx2.Request] = [call.request for call in cast(Any, respx_mock.calls)]
         assert [(request.method, request.url.path, request.url.query) for request in requests] == [
-            ("GET", "/v1/sessions/sesn_1/events/stream", b"beta=true"),
-            ("GET", "/v1/sessions/sesn_1/events", b"beta=true&limit=1000"),
-            ("POST", "/v1/sessions/sesn_1/events", b"beta=true"),
+            ("GET", "/v1/sessions/sesn_1/events/stream", b""),
+            ("GET", "/v1/sessions/sesn_1/events", b"limit=1000"),
+            ("POST", "/v1/sessions/sesn_1/events", b""),
         ]
 
     @pytest.mark.respx(base_url=base_url)

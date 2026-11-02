@@ -109,7 +109,7 @@ class Artifacts(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/artifacts?beta=true",
+            "/v1/organizations/analytics/artifacts",
             page=SyncPageCursor[BetaAnalyticsArtifactActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -123,6 +123,7 @@ class Artifacts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.artifacts.list",
                 span_route="/v1/organizations/analytics/artifacts",
             ),
@@ -217,7 +218,7 @@ class AsyncArtifacts(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/artifacts?beta=true",
+            "/v1/organizations/analytics/artifacts",
             page=AsyncPageCursor[BetaAnalyticsArtifactActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -231,6 +232,7 @@ class AsyncArtifacts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.artifacts.list",
                 span_route="/v1/organizations/analytics/artifacts",
             ),

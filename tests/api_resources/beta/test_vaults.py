@@ -23,6 +23,7 @@ class TestVaults:
     def test_method_create(self, client: Anthropic) -> None:
         vault = client.beta.vaults.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -33,6 +34,7 @@ class TestVaults:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -40,6 +42,7 @@ class TestVaults:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -51,6 +54,7 @@ class TestVaults:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -64,6 +68,7 @@ class TestVaults:
     def test_method_retrieve(self, client: Anthropic) -> None:
         vault = client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -73,6 +78,7 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -80,6 +86,7 @@ class TestVaults:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -91,6 +98,7 @@ class TestVaults:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -111,6 +119,7 @@ class TestVaults:
     def test_method_update(self, client: Anthropic) -> None:
         vault = client.beta.vaults.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -122,6 +131,7 @@ class TestVaults:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -129,6 +139,7 @@ class TestVaults:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -140,6 +151,7 @@ class TestVaults:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -158,7 +170,9 @@ class TestVaults:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        vault = client.beta.vaults.list()
+        vault = client.beta.vaults.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
     @parametrize
@@ -169,12 +183,15 @@ class TestVaults:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.vaults.with_raw_response.list()
+        response = client.beta.vaults.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -183,7 +200,9 @@ class TestVaults:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.vaults.with_streaming_response.list() as response:
+        with client.beta.vaults.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -196,6 +215,7 @@ class TestVaults:
     def test_method_delete(self, client: Anthropic) -> None:
         vault = client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -205,6 +225,7 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -212,6 +233,7 @@ class TestVaults:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -223,6 +245,7 @@ class TestVaults:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -243,6 +266,7 @@ class TestVaults:
     def test_method_archive(self, client: Anthropic) -> None:
         vault = client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -252,6 +276,7 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -259,6 +284,7 @@ class TestVaults:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.vaults.with_raw_response.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -270,6 +296,7 @@ class TestVaults:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.vaults.with_streaming_response.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -296,6 +323,7 @@ class TestAsyncVaults:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -306,6 +334,7 @@ class TestAsyncVaults:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -313,6 +342,7 @@ class TestAsyncVaults:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -324,6 +354,7 @@ class TestAsyncVaults:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.create(
             display_name="Example vault",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -337,6 +368,7 @@ class TestAsyncVaults:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -346,6 +378,7 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -353,6 +386,7 @@ class TestAsyncVaults:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -364,6 +398,7 @@ class TestAsyncVaults:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -384,6 +419,7 @@ class TestAsyncVaults:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -395,6 +431,7 @@ class TestAsyncVaults:
             metadata={"environment": "production"},
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -402,6 +439,7 @@ class TestAsyncVaults:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -413,6 +451,7 @@ class TestAsyncVaults:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.update(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -431,7 +470,9 @@ class TestAsyncVaults:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        vault = await async_client.beta.vaults.list()
+        vault = await async_client.beta.vaults.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
     @parametrize
@@ -442,12 +483,15 @@ class TestAsyncVaults:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsVault], vault, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.vaults.with_raw_response.list()
+        response = await async_client.beta.vaults.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -456,7 +500,9 @@ class TestAsyncVaults:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.vaults.with_streaming_response.list() as response:
+        async with async_client.beta.vaults.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -469,6 +515,7 @@ class TestAsyncVaults:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -478,6 +525,7 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeletedVault, vault, path=["response"])
 
@@ -485,6 +533,7 @@ class TestAsyncVaults:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -496,6 +545,7 @@ class TestAsyncVaults:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -516,6 +566,7 @@ class TestAsyncVaults:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -525,6 +576,7 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsVault, vault, path=["response"])
 
@@ -532,6 +584,7 @@ class TestAsyncVaults:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.vaults.with_raw_response.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -543,6 +596,7 @@ class TestAsyncVaults:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.vaults.with_streaming_response.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

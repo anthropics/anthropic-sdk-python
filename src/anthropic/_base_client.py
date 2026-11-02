@@ -426,6 +426,9 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
     _idempotency_header: str | None
     _default_stream_cls: type[_DefaultStreamT] | None = None
     _middleware: tuple[MiddlewareInput, ...]
+    # Whether the API this client talks to holds message threads. `beta.messages.thread()` raises where it does not,
+    # and `beta.messages.tool_runner()` sends the full history every turn.
+    _supports_message_threads: bool = False
     _gen_ai_provider_name: str = "anthropic"
     _otel_platform: str | None = None
 
@@ -459,7 +462,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
         if max_retries is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise TypeError(
-                "max_retries cannot be None. If you want to disable retries, pass `0`; if you want unlimited retries, pass `math.inf` or a very high number; if you want the default behavior, pass `anthropic.DEFAULT_MAX_RETRIES`"
+                "max_retries cannot be None. If you want to disable retries, pass `0`; if you want unlimited retries, pass a very high number; if you want the default behavior, pass `anthropic.DEFAULT_MAX_RETRIES`"
             )
 
     def _set_open_telemetry(self, open_telemetry: OpenTelemetryClientOption) -> None:
@@ -2521,6 +2524,7 @@ def make_request_options(
     extra_body: Body | None = None,
     timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     post_parser: PostParser | NotGiven = not_given,
+    qualifiers: dict[str, str] | None = None,
     span_name: str | None = None,
     span_route: str | None = None,
     span_content_query_params: Tuple[str, ...] = (),
@@ -2547,6 +2551,10 @@ def make_request_options(
     if is_given(post_parser):
         # internal
         options["post_parser"] = post_parser  # type: ignore
+
+    if qualifiers is not None:
+        # internal
+        options["qualifiers"] = qualifiers  # type: ignore
 
     if span_name is not None:
         # internal

@@ -147,7 +147,7 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             body={
                 "agent": agent,
                 "environment_id": environment_id,
@@ -165,6 +165,7 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.create",
                 span_route="/v1/deployments",
                 span_created_id="anthropic.deployment.id",
@@ -224,12 +225,13 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.retrieve",
                 span_route="/v1/deployments/{deployment_id}",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -331,7 +333,7 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             body={
                 "agent": agent,
                 "budget": budget,
@@ -349,6 +351,7 @@ class Deployments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.update",
                 span_route="/v1/deployments/{deployment_id}",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -425,7 +428,7 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             page=SyncPageCursor[BetaManagedAgentsDeployment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -441,6 +444,7 @@ class Deployments(SyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.list",
                 span_route="/v1/deployments",
             ),
@@ -499,12 +503,13 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/archive", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.archive",
                 span_route="/v1/deployments/{deployment_id}/archive",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -564,12 +569,13 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/pause", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.pause",
                 span_route="/v1/deployments/{deployment_id}/pause",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -629,12 +635,13 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/run", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.run",
                 span_route="/v1/deployments/{deployment_id}/run",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -694,12 +701,13 @@ class Deployments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/unpause", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.unpause",
                 span_route="/v1/deployments/{deployment_id}/unpause",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -818,7 +826,7 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             body={
                 "agent": agent,
                 "environment_id": environment_id,
@@ -836,6 +844,7 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.create",
                 span_route="/v1/deployments",
                 span_created_id="anthropic.deployment.id",
@@ -895,12 +904,13 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.retrieve",
                 span_route="/v1/deployments/{deployment_id}",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -1002,7 +1012,7 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             body={
                 "agent": agent,
                 "budget": budget,
@@ -1020,6 +1030,7 @@ class AsyncDeployments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.update",
                 span_route="/v1/deployments/{deployment_id}",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -1096,7 +1107,7 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             page=AsyncPageCursor[BetaManagedAgentsDeployment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1112,6 +1123,7 @@ class AsyncDeployments(AsyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.list",
                 span_route="/v1/deployments",
             ),
@@ -1170,12 +1182,13 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/archive", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.archive",
                 span_route="/v1/deployments/{deployment_id}/archive",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -1235,12 +1248,13 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/pause", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.pause",
                 span_route="/v1/deployments/{deployment_id}/pause",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -1300,12 +1314,13 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/run", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.run",
                 span_route="/v1/deployments/{deployment_id}/run",
                 span_attributes={"anthropic.deployment.id": deployment_id},
@@ -1365,12 +1380,13 @@ class AsyncDeployments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/unpause", deployment_id=deployment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.deployments.unpause",
                 span_route="/v1/deployments/{deployment_id}/unpause",
                 span_attributes={"anthropic.deployment.id": deployment_id},

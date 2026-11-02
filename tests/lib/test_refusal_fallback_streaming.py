@@ -275,6 +275,16 @@ class TestShapeBContinuation:
         assert "input_transformations" not in delta.to_dict()
 
     @pytest.mark.respx(base_url=base_url)
+    def test_the_stream_helper_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        with client.beta.messages.stream(**PARAMS) as stream:
+            stream.until_done()
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["claude-fable-5", FALLBACK_MODEL]
+
+    @pytest.mark.respx(base_url=base_url)
     def test_usage_iterations_is_the_two_entry_server_shape(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
         client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
@@ -892,6 +902,7 @@ class TestFallbackChain:
         options = FinalRequestOptions.construct(
             method="post", url="/v1/messages?beta=true", json_data=dict(PARAMS), headers={}
         )
+        options.qualifiers = {"beta": "true"}
         request = APIRequest(
             options=options,
             cast_to=BetaMessage,
@@ -1811,6 +1822,16 @@ class TestAsyncSplicing:
         appended = bodies[1]["messages"][1]
         assert appended["role"] == "assistant"
         assert [block["type"] for block in appended["content"]] == ["thinking", "text"]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_stream_helper_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        async with client.beta.messages.stream(**PARAMS) as stream:
+            await stream.until_done()
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["claude-fable-5", FALLBACK_MODEL]
 
     @pytest.mark.respx(base_url=base_url)
     async def test_the_suppressed_starts_input_transformations_are_forwarded_on_the_terminal(

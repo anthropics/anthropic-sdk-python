@@ -138,7 +138,7 @@ class Workspaces(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             body={
                 "name": name,
                 "data_residency": data_residency,
@@ -151,6 +151,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.create",
                 span_route="/v1/organizations/workspaces",
                 span_created_id="anthropic.organization.workspace.id",
@@ -186,12 +187,13 @@ class Workspaces(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -251,7 +253,7 @@ class Workspaces(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
@@ -264,6 +266,7 @@ class Workspaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -313,7 +316,7 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             page=SyncPage[BetaWorkspace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -327,6 +330,7 @@ class Workspaces(SyncAPIResource):
                     "include_default": include_default,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.list",
                 span_route="/v1/organizations/workspaces",
             ),
@@ -359,12 +363,13 @@ class Workspaces(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.archive",
                 span_route="/v1/organizations/workspaces/{workspace_id}/archive",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -463,7 +468,7 @@ class AsyncWorkspaces(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             body={
                 "name": name,
                 "data_residency": data_residency,
@@ -476,6 +481,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.create",
                 span_route="/v1/organizations/workspaces",
                 span_created_id="anthropic.organization.workspace.id",
@@ -511,12 +517,13 @@ class AsyncWorkspaces(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._get(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.retrieve",
                 span_route="/v1/organizations/workspaces/{workspace_id}",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -576,7 +583,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
@@ -589,6 +596,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -638,7 +646,7 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             page=AsyncPage[BetaWorkspace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -652,6 +660,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                     "include_default": include_default,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.list",
                 span_route="/v1/organizations/workspaces",
             ),
@@ -684,12 +693,13 @@ class AsyncWorkspaces(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.archive",
                 span_route="/v1/organizations/workspaces/{workspace_id}/archive",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},

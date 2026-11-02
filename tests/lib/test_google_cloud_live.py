@@ -14,6 +14,7 @@ import httpx2
 import pytest
 
 from anthropic import APIStatusError
+from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.lib.google_cloud import AnthropicGoogleCloud, AsyncAnthropicGoogleCloud
 
 pytestmark = [
@@ -97,6 +98,9 @@ class TestSyncLive:
         workspace = sync_client.organization.workspaces.retrieve(sync_client.workspace_id)
         assert workspace.id == sync_client.workspace_id
 
+    def test_user_profiles_route(self, sync_client: AnthropicGoogleCloud) -> None:
+        assert isinstance(sync_client.user_profiles.list(limit=1), SyncPageCursor)
+
     def test_managed_agents_routes(self, sync_client: AnthropicGoogleCloud) -> None:
         agent = sync_client.beta.agents.create(model=MODEL, name="sdk-live-test")
         try:
@@ -148,6 +152,9 @@ class TestAsyncLive:
 
         workspace = await async_client.organization.workspaces.retrieve(async_client.workspace_id)
         assert workspace.id == async_client.workspace_id
+
+    async def test_user_profiles_route(self, async_client: AsyncAnthropicGoogleCloud) -> None:
+        assert isinstance(await async_client.user_profiles.list(limit=1), AsyncPageCursor)
 
     async def test_managed_agents_routes(self, async_client: AsyncAnthropicGoogleCloud) -> None:
         agent = await async_client.beta.agents.create(model=MODEL, name="sdk-live-test")

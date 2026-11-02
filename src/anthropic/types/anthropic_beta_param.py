@@ -60,5 +60,8 @@ AnthropicBetaParam: TypeAlias = Union[
         "spend-limit-reads-2026-09-26",
         "telemetry-destinations-2026-08-11",
         "webhooks-2026-10-07",
+        "message-threads-2026-08-12",
+        "analytics-usage-cost-2026-08-24",
+        "experimental-claude-tag-2026-10-21",
     ],
 ]

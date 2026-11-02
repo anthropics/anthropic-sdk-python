@@ -21,6 +21,7 @@ class TestEvents:
         event = client.beta.sessions.threads.events.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -33,6 +34,7 @@ class TestEvents:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -41,6 +43,7 @@ class TestEvents:
         response = client.beta.sessions.threads.events.with_raw_response.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -53,6 +56,7 @@ class TestEvents:
         with client.beta.sessions.threads.events.with_streaming_response.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -81,6 +85,7 @@ class TestEvents:
         event_stream = client.beta.sessions.threads.events.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         event_stream.response.close()
 
@@ -92,6 +97,7 @@ class TestEvents:
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         event_stream.response.close()
 
@@ -100,6 +106,7 @@ class TestEvents:
         response = client.beta.sessions.threads.events.with_raw_response.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -111,6 +118,7 @@ class TestEvents:
         with client.beta.sessions.threads.events.with_streaming_response.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -145,6 +153,7 @@ class TestAsyncEvents:
         event = await async_client.beta.sessions.threads.events.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -157,6 +166,7 @@ class TestAsyncEvents:
             page="page",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -165,6 +175,7 @@ class TestAsyncEvents:
         response = await async_client.beta.sessions.threads.events.with_raw_response.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -177,6 +188,7 @@ class TestAsyncEvents:
         async with async_client.beta.sessions.threads.events.with_streaming_response.list(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -205,6 +217,7 @@ class TestAsyncEvents:
         event_stream = await async_client.beta.sessions.threads.events.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         await event_stream.response.aclose()
 
@@ -216,6 +229,7 @@ class TestAsyncEvents:
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         await event_stream.response.aclose()
 
@@ -224,6 +238,7 @@ class TestAsyncEvents:
         response = await async_client.beta.sessions.threads.events.with_raw_response.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -235,6 +250,7 @@ class TestAsyncEvents:
         async with async_client.beta.sessions.threads.events.with_streaming_response.stream(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

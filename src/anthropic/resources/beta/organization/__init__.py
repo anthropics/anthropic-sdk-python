@@ -46,6 +46,14 @@ from .analytics import (
     AnalyticsWithStreamingResponse,
     AsyncAnalyticsWithStreamingResponse,
 )
+from .claude_tag import (
+    ClaudeTag,
+    AsyncClaudeTag,
+    ClaudeTagWithRawResponse,
+    AsyncClaudeTagWithRawResponse,
+    ClaudeTagWithStreamingResponse,
+    AsyncClaudeTagWithStreamingResponse,
+)
 from .federation import (
     Federation,
     AsyncFederation,
@@ -246,6 +254,12 @@ __all__ = [
     "AsyncWebhooksWithRawResponse",
     "WebhooksWithStreamingResponse",
     "AsyncWebhooksWithStreamingResponse",
+    "ClaudeTag",
+    "AsyncClaudeTag",
+    "ClaudeTagWithRawResponse",
+    "AsyncClaudeTagWithRawResponse",
+    "ClaudeTagWithStreamingResponse",
+    "AsyncClaudeTagWithStreamingResponse",
     "Organization",
     "AsyncOrganization",
     "OrganizationWithRawResponse",

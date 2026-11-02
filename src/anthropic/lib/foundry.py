@@ -302,7 +302,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         # Auth is attached per-request in `_prepare_options` (`x-api-key`/`api-key`
         # headers for API-key auth, or a bearer `Authorization` header for the Azure AD
         # token provider). Emitting nothing here stops the base client from sending an
-        # `X-Api-Key` derived from `self.api_key`: when only an Azure AD token
+        # `Authorization` derived from `self.api_key`: when only an Azure AD token
         # provider is configured, `self.api_key` can be populated from an
         # `ANTHROPIC_API_KEY` in the environment, which must not be sent to the
         # Foundry endpoint.
@@ -311,7 +311,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         # Foundry attaches its own auth header in `_prepare_options`, so the base
-        # requirement that `X-Api-Key`/`Authorization` already be present does not apply.
+        # requirement that `Authorization` already be present does not apply.
         return
 
 
@@ -524,7 +524,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
     @override
     def auth_headers(self) -> dict[str, str]:
         # See AnthropicFoundry.auth_headers: prevents leaking an environment
-        # ANTHROPIC_API_KEY as X-Api-Key to the Foundry endpoint.
+        # ANTHROPIC_API_KEY to the Foundry endpoint.
         return {}
 
     @override

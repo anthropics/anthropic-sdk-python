@@ -23,6 +23,7 @@ class TestWorkspaces:
     def test_method_list(self, client: Anthropic) -> None:
         workspace = client.beta.organization.telemetry_destinations.workspaces.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
 
@@ -33,6 +34,7 @@ class TestWorkspaces:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
 
@@ -40,6 +42,7 @@ class TestWorkspaces:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.telemetry_destinations.workspaces.with_raw_response.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -51,6 +54,7 @@ class TestWorkspaces:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -72,6 +76,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.telemetry_destinations.workspaces.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -81,6 +86,7 @@ class TestWorkspaces:
             workspace_id="workspace_id",
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -89,6 +95,7 @@ class TestWorkspaces:
         response = client.beta.organization.telemetry_destinations.workspaces.with_raw_response.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -101,6 +108,7 @@ class TestWorkspaces:
         with client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -129,6 +137,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.telemetry_destinations.workspaces.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -138,6 +147,7 @@ class TestWorkspaces:
             workspace_id="workspace_id",
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -146,6 +156,7 @@ class TestWorkspaces:
         response = client.beta.organization.telemetry_destinations.workspaces.with_raw_response.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -158,6 +169,7 @@ class TestWorkspaces:
         with client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -191,6 +203,7 @@ class TestAsyncWorkspaces:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.telemetry_destinations.workspaces.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
 
@@ -201,6 +214,7 @@ class TestAsyncWorkspaces:
             limit=0,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
 
@@ -208,6 +222,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.telemetry_destinations.workspaces.with_raw_response.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -219,6 +234,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.list(
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -240,6 +256,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.telemetry_destinations.workspaces.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -249,6 +266,7 @@ class TestAsyncWorkspaces:
             workspace_id="workspace_id",
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -257,6 +275,7 @@ class TestAsyncWorkspaces:
         response = await async_client.beta.organization.telemetry_destinations.workspaces.with_raw_response.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -269,6 +288,7 @@ class TestAsyncWorkspaces:
         async with async_client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -297,6 +317,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.telemetry_destinations.workspaces.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -306,6 +327,7 @@ class TestAsyncWorkspaces:
             workspace_id="workspace_id",
             destination_id="destination_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
 
@@ -314,6 +336,7 @@ class TestAsyncWorkspaces:
         response = await async_client.beta.organization.telemetry_destinations.workspaces.with_raw_response.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -326,6 +349,7 @@ class TestAsyncWorkspaces:
         async with async_client.beta.organization.telemetry_destinations.workspaces.with_streaming_response.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

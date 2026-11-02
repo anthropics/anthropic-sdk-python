@@ -124,7 +124,7 @@ class Versions(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -132,6 +132,7 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.create",
                 span_route="/v1/skills/{skill_id}/versions",
                 span_attributes={"anthropic.skill.id": skill_id},
@@ -199,12 +200,13 @@ class Versions(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.retrieve",
                 span_route="/v1/skills/{skill_id}/versions/{version}",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
@@ -270,7 +272,7 @@ class Versions(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             page=SyncPageCursor[BetaSkillVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -281,6 +283,7 @@ class Versions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.list",
                 span_route="/v1/skills/{skill_id}/versions",
                 span_attributes={"anthropic.skill.id": skill_id},
@@ -346,12 +349,13 @@ class Versions(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._delete(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.delete",
                 span_route="/v1/skills/{skill_id}/versions/{version}",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
@@ -418,14 +422,13 @@ class Versions(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template(
-                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
-            ),
+            path_template("/v1/skills/{skill_id}/versions/{version}/content", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.download",
                 span_route="/v1/skills/{skill_id}/versions/{version}/content",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
@@ -516,7 +519,7 @@ class AsyncVersions(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -524,6 +527,7 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.create",
                 span_route="/v1/skills/{skill_id}/versions",
                 span_attributes={"anthropic.skill.id": skill_id},
@@ -591,12 +595,13 @@ class AsyncVersions(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.retrieve",
                 span_route="/v1/skills/{skill_id}/versions/{version}",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
@@ -662,7 +667,7 @@ class AsyncVersions(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
             page=AsyncPageCursor[BetaSkillVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -673,6 +678,7 @@ class AsyncVersions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.list",
                 span_route="/v1/skills/{skill_id}/versions",
                 span_attributes={"anthropic.skill.id": skill_id},
@@ -738,12 +744,13 @@ class AsyncVersions(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._delete(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.delete",
                 span_route="/v1/skills/{skill_id}/versions/{version}",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
@@ -810,14 +817,13 @@ class AsyncVersions(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template(
-                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
-            ),
+            path_template("/v1/skills/{skill_id}/versions/{version}/content", skill_id=skill_id, version=version),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.skills.versions.download",
                 span_route="/v1/skills/{skill_id}/versions/{version}/content",
                 span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},

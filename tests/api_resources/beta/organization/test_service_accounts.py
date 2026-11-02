@@ -22,6 +22,7 @@ class TestServiceAccounts:
     def test_method_create(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -32,6 +33,7 @@ class TestServiceAccounts:
             description="description",
             organization_role="admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -39,6 +41,7 @@ class TestServiceAccounts:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.service_accounts.with_raw_response.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -50,6 +53,7 @@ class TestServiceAccounts:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.service_accounts.with_streaming_response.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -63,6 +67,7 @@ class TestServiceAccounts:
     def test_method_retrieve(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -71,6 +76,7 @@ class TestServiceAccounts:
         service_account = client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -78,6 +84,7 @@ class TestServiceAccounts:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.service_accounts.with_raw_response.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -89,6 +96,7 @@ class TestServiceAccounts:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.service_accounts.with_streaming_response.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -109,6 +117,7 @@ class TestServiceAccounts:
     def test_method_update(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -119,6 +128,7 @@ class TestServiceAccounts:
             description="description",
             organization_role="admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -126,6 +136,7 @@ class TestServiceAccounts:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.service_accounts.with_raw_response.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -137,6 +148,7 @@ class TestServiceAccounts:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.service_accounts.with_streaming_response.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -155,7 +167,9 @@ class TestServiceAccounts:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        service_account = client.beta.organization.service_accounts.list()
+        service_account = client.beta.organization.service_accounts.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaServiceAccount], service_account, path=["response"])
 
     @parametrize
@@ -165,12 +179,15 @@ class TestServiceAccounts:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaServiceAccount], service_account, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.service_accounts.with_raw_response.list()
+        response = client.beta.organization.service_accounts.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -179,7 +196,9 @@ class TestServiceAccounts:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.service_accounts.with_streaming_response.list() as response:
+        with client.beta.organization.service_accounts.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -192,6 +211,7 @@ class TestServiceAccounts:
     def test_method_archive(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -200,6 +220,7 @@ class TestServiceAccounts:
         service_account = client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -207,6 +228,7 @@ class TestServiceAccounts:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.service_accounts.with_raw_response.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -218,6 +240,7 @@ class TestServiceAccounts:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.organization.service_accounts.with_streaming_response.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -244,6 +267,7 @@ class TestAsyncServiceAccounts:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -254,6 +278,7 @@ class TestAsyncServiceAccounts:
             description="description",
             organization_role="admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -261,6 +286,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.service_accounts.with_raw_response.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -272,6 +298,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.service_accounts.with_streaming_response.create(
             name="ci-deploy-bot",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -285,6 +312,7 @@ class TestAsyncServiceAccounts:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -293,6 +321,7 @@ class TestAsyncServiceAccounts:
         service_account = await async_client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -300,6 +329,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.service_accounts.with_raw_response.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -311,6 +341,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.service_accounts.with_streaming_response.retrieve(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -331,6 +362,7 @@ class TestAsyncServiceAccounts:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -341,6 +373,7 @@ class TestAsyncServiceAccounts:
             description="description",
             organization_role="admin",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -348,6 +381,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.service_accounts.with_raw_response.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -359,6 +393,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.service_accounts.with_streaming_response.update(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -377,7 +412,9 @@ class TestAsyncServiceAccounts:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        service_account = await async_client.beta.organization.service_accounts.list()
+        service_account = await async_client.beta.organization.service_accounts.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaServiceAccount], service_account, path=["response"])
 
     @parametrize
@@ -387,12 +424,15 @@ class TestAsyncServiceAccounts:
             limit=1,
             page="page",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaServiceAccount], service_account, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.service_accounts.with_raw_response.list()
+        response = await async_client.beta.organization.service_accounts.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -401,7 +441,9 @@ class TestAsyncServiceAccounts:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.service_accounts.with_streaming_response.list() as response:
+        async with async_client.beta.organization.service_accounts.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -414,6 +456,7 @@ class TestAsyncServiceAccounts:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -422,6 +465,7 @@ class TestAsyncServiceAccounts:
         service_account = await async_client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
 
@@ -429,6 +473,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.service_accounts.with_raw_response.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -440,6 +485,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.service_accounts.with_streaming_response.archive(
             service_account_id="service_account_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

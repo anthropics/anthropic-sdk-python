@@ -408,8 +408,8 @@ class SessionToolRunner:
     later calls and the exit-time cleanup.
 
     Pass `environment_key` to authenticate the event stream / list / send
-    calls with the self-hosted environment key (bearered, with the client's
-    default `x-api-key` dropped); leave it unset to use the client's own
+    calls with the self-hosted environment key (bearered, in place of the
+    client's own API key); leave it unset to use the client's own
     credentials. `anthropic.lib.environments.EnvironmentWorker` may
     pass a per-item sessions token here instead when the claimed work item
     carried one — any Bearer credential the session endpoints accept works.

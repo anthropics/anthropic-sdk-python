@@ -91,7 +91,7 @@ class RateLimits(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `rate_limit_id` but received {rate_limit_id!r}")
         return self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 workspace_id=workspace_id,
                 rate_limit_id=rate_limit_id,
             ),
@@ -101,6 +101,7 @@ class RateLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 span_attributes={
@@ -165,9 +166,7 @@ class RateLimits(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/rate_limits", workspace_id=workspace_id),
             page=SyncPageCursor[BetaWorkspaceRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -180,6 +179,7 @@ class RateLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},
@@ -254,7 +254,7 @@ class AsyncRateLimits(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `rate_limit_id` but received {rate_limit_id!r}")
         return await self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 workspace_id=workspace_id,
                 rate_limit_id=rate_limit_id,
             ),
@@ -264,6 +264,7 @@ class AsyncRateLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.update",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
                 span_attributes={
@@ -328,9 +329,7 @@ class AsyncRateLimits(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/rate_limits", workspace_id=workspace_id),
             page=AsyncPageCursor[BetaWorkspaceRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -343,6 +342,7 @@ class AsyncRateLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.workspaces.rate_limits.list",
                 span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
                 span_attributes={"anthropic.organization.workspace.id": workspace_id},

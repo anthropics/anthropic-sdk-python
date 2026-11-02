@@ -871,7 +871,7 @@ def first_reply(timeline: list[str]) -> list[str]:
 
 
 def tool_results(message: BetaMessageParam | None) -> list[Any]:
-    if message is None or isinstance(message["content"], str):
+    if message is None or message["role"] != "user" or isinstance(message["content"], str):
         return []
     return [block for block in message["content"] if isinstance(block, dict) and block["type"] == "tool_result"]
 

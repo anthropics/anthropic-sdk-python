@@ -12,6 +12,7 @@ from respx import MockRouter
 
 from anthropic import AnthropicVertex, AsyncAnthropicVertex, beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
+from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.vertex._auth import refresh_auth
 from anthropic.lib._extras._common import MissingDependencyError
 
@@ -59,9 +60,10 @@ def _assert_tool_runner_calls(calls: List[MockRequestCall]) -> None:
     for call in calls:
         assert call.request.url == TOOL_RUNNER_URL
         assert call.request.headers["Authorization"] == "Bearer my-access-token"
+        assert "anthropic-version" not in call.request.headers
         body = json.loads(call.request.content)
         assert "model" not in body and "stream" not in body and "output_format" not in body
-        assert body["anthropic_version"] == "vertex-2023-10-16"
+        assert body["anthropic_version"] == ANTHROPIC_API_VERSION
     second = json.loads(calls[1].request.content)
     assert [m["role"] for m in second["messages"]] == ["user", "assistant", "user"]
     assert second["messages"][1]["content"][0]["type"] == "tool_use"
@@ -102,6 +104,20 @@ class TestAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(return_value=_vertex_message([], "end_turn"))
+
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-haiku-4-5@20251001",
+            extra_body={"anthropic_version": "vertex-2023-10-16"},
+        )
+
+        request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+        assert json.loads(request.content)["anthropic_version"] == "vertex-2023-10-16"
 
     @pytest.mark.respx()
     def test_user_profile_id_is_sent_in_the_header(self, respx_mock: MockRouter) -> None:
@@ -342,6 +358,20 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    async def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(return_value=_vertex_message([], "end_turn"))
+
+        await self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude-haiku-4-5@20251001",
+            extra_body={"anthropic_version": "vertex-2023-10-16"},
+        )
+
+        request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+        assert json.loads(request.content)["anthropic_version"] == "vertex-2023-10-16"
 
     @pytest.mark.respx()
     @pytest.mark.asyncio()

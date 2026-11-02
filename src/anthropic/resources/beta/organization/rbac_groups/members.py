@@ -80,9 +80,7 @@ class Members(SyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true", rbac_group_id=rbac_group_id
-            ),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}/members", rbac_group_id=rbac_group_id),
             page=SyncPageCursor[BetaRBACGroupMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -93,6 +91,7 @@ class Members(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.list",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
@@ -136,15 +135,14 @@ class Members(SyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._post(
-            path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true", rbac_group_id=rbac_group_id
-            ),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}/members", rbac_group_id=rbac_group_id),
             body={"user_id": user_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.add",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
@@ -192,7 +190,7 @@ class Members(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return self._delete(
             path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}?beta=true",
+                "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
                 rbac_group_id=rbac_group_id,
                 user_id=user_id,
             ),
@@ -201,6 +199,7 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.remove",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
                 span_attributes={
@@ -270,9 +269,7 @@ class AsyncMembers(AsyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true", rbac_group_id=rbac_group_id
-            ),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}/members", rbac_group_id=rbac_group_id),
             page=AsyncPageCursor[BetaRBACGroupMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -283,6 +280,7 @@ class AsyncMembers(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.list",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
@@ -326,15 +324,14 @@ class AsyncMembers(AsyncAPIResource):
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
         return await self._post(
-            path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members?beta=true", rbac_group_id=rbac_group_id
-            ),
+            path_template("/v1/organizations/rbac_groups/{rbac_group_id}/members", rbac_group_id=rbac_group_id),
             body={"user_id": user_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.add",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
@@ -382,7 +379,7 @@ class AsyncMembers(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
         return await self._delete(
             path_template(
-                "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}?beta=true",
+                "/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
                 rbac_group_id=rbac_group_id,
                 user_id=user_id,
             ),
@@ -391,6 +388,7 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_groups.members.remove",
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}",
                 span_attributes={

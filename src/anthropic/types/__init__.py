@@ -88,6 +88,7 @@ from .file_upload_params import FileUploadParams as FileUploadParams
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .model_capabilities import ModelCapabilities as ModelCapabilities
 from .server_tool_caller import ServerToolCaller as ServerToolCaller
+from .user_message_param import UserMessageParam as UserMessageParam
 from .beta_error_response import BetaErrorResponse as BetaErrorResponse
 from .browser_hover_input import BrowserHoverInput as BrowserHoverInput
 from .browser_member_name import (
@@ -122,6 +123,7 @@ from .document_block_param import DocumentBlockParam as DocumentBlockParam
 from .message_stream_event import MessageStreamEvent as MessageStreamEvent
 from .message_tokens_count import MessageTokensCount as MessageTokensCount
 from .refusal_stop_details import RefusalStopDetails as RefusalStopDetails
+from .system_message_param import SystemMessageParam as SystemMessageParam
 from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_reference_block import ToolReferenceBlock as ToolReferenceBlock
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
@@ -132,6 +134,7 @@ from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
 from .browser_new_tab_input import BrowserNewTabInput as BrowserNewTabInput
 from .computer_member_input import ComputerMemberInput as ComputerMemberInput
 from .computer_scroll_input import ComputerScrollInput as ComputerScrollInput
+from .message_content_param import MessageContentParam as MessageContentParam
 from .message_create_params import MessageCreateParams as MessageCreateParams
 from .output_tokens_details import OutputTokensDetails as OutputTokensDetails
 from .server_tool_use_block import ServerToolUseBlock as ServerToolUseBlock
@@ -153,6 +156,7 @@ from .tool_choice_none_param import ToolChoiceNoneParam as ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
 from .toolset_tool_use_block import ToolsetToolUseBlock as ToolsetToolUseBlock
 from .url_image_source_param import URLImageSourceParam as URLImageSourceParam
+from .assistant_message_param import AssistantMessageParam as AssistantMessageParam
 from .base64_pdf_source_param import Base64PDFSourceParam as Base64PDFSourceParam
 from .browser_close_tab_input import BrowserCloseTabInput as BrowserCloseTabInput
 from .browser_list_tabs_input import BrowserListTabsInput as BrowserListTabsInput
@@ -322,6 +326,8 @@ from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as Tool
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param as ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as ToolTextEditor20250728Param
 from .user_profile_cyber_requirements import UserProfileCyberRequirements as UserProfileCyberRequirements
+from .user_profile_enforcement_action import UserProfileEnforcementAction as UserProfileEnforcementAction
+from .user_profile_enforcement_status import UserProfileEnforcementStatus as UserProfileEnforcementStatus
 from .web_fetch_url_source_none_param import WebFetchURLSourceNoneParam as WebFetchURLSourceNoneParam
 from .web_fetch_url_source_only_param import WebFetchURLSourceOnlyParam as WebFetchURLSourceOnlyParam
 from .bash_code_execution_output_block import BashCodeExecutionOutputBlock as BashCodeExecutionOutputBlock
@@ -388,6 +394,7 @@ from .response_browser_key_tool_use_block import ResponseBrowserKeyToolUseBlock 
 from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam as ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
+from .user_profile_enforcement_action_ban import UserProfileEnforcementActionBan as UserProfileEnforcementActionBan
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
 from .browser_get_page_text_tool_use_block import BrowserGetPageTextToolUseBlock as BrowserGetPageTextToolUseBlock
 from .browser_javascript_exec_config_param import BrowserJavascriptExecConfigParam as BrowserJavascriptExecConfigParam
@@ -454,6 +461,9 @@ from .code_execution_tool_result_error_param import (
 from .response_browser_scroll_tool_use_block import (
     ResponseBrowserScrollToolUseBlock as ResponseBrowserScrollToolUseBlock,
 )
+from .user_profile_enforcement_action_reason import (
+    UserProfileEnforcementActionReason as UserProfileEnforcementActionReason,
+)
 from .user_profile_external_user_entity_type import (
     UserProfileExternalUserEntityType as UserProfileExternalUserEntityType,
 )
@@ -501,6 +511,9 @@ from .response_browser_scroll_to_tool_use_block import (
 )
 from .response_computer_hold_key_tool_use_block import (
     ResponseComputerHoldKeyToolUseBlock as ResponseComputerHoldKeyToolUseBlock,
+)
+from .user_profile_enforcement_action_next_step import (
+    UserProfileEnforcementActionNextStep as UserProfileEnforcementActionNextStep,
 )
 from .user_profile_external_user_account_status import (
     UserProfileExternalUserAccountStatus as UserProfileExternalUserAccountStatus,
@@ -561,6 +574,9 @@ from .response_computer_mouse_move_tool_use_block import (
 )
 from .response_computer_screenshot_tool_use_block import (
     ResponseComputerScreenshotToolUseBlock as ResponseComputerScreenshotToolUseBlock,
+)
+from .user_profile_enforcement_action_restriction import (
+    UserProfileEnforcementActionRestriction as UserProfileEnforcementActionRestriction,
 )
 from .response_browser_double_click_tool_use_block import (
     ResponseBrowserDoubleClickToolUseBlock as ResponseBrowserDoubleClickToolUseBlock,

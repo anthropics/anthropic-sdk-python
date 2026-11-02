@@ -30,6 +30,7 @@ SNAPSHOT_RESPONSE_HEADERS_EXCLUDE = [
 ]
 
 SNAPSHOT_REQUEST_HEADERS_EXCLUDE = [
+    "authorization",
     "x-api-key",
 ]
 

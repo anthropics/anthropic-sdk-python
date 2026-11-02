@@ -117,7 +117,7 @@ class Webhooks(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._post(
-            "/v1/organizations/webhooks?beta=true",
+            "/v1/organizations/webhooks",
             body={
                 "enabled_events": enabled_events,
                 "url": url,
@@ -129,6 +129,7 @@ class Webhooks(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.create",
                 span_route="/v1/organizations/webhooks",
                 span_created_id="anthropic.organization.webhook.id",
@@ -188,14 +189,13 @@ class Webhooks(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.retrieve",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -277,9 +277,7 @@ class Webhooks(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             body={
                 "description": description,
                 "enabled_events": enabled_events,
@@ -292,6 +290,7 @@ class Webhooks(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.update",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -362,7 +361,7 @@ class Webhooks(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/webhooks?beta=true",
+            "/v1/organizations/webhooks",
             page=SyncPage[BetaOrganizationWebhookEndpoint],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -375,6 +374,7 @@ class Webhooks(SyncAPIResource):
                     "limit": limit,
                     "order": order,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.list",
                 span_route="/v1/organizations/webhooks",
             ),
@@ -433,14 +433,13 @@ class Webhooks(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._delete(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.delete",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -503,7 +502,7 @@ class Webhooks(SyncAPIResource):
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret?beta=true",
+                "/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret",
                 webhook_endpoint_id=webhook_endpoint_id,
             ),
             options=make_request_options(
@@ -511,6 +510,7 @@ class Webhooks(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.regenerate_signing_secret",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -605,7 +605,7 @@ class AsyncWebhooks(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return await self._post(
-            "/v1/organizations/webhooks?beta=true",
+            "/v1/organizations/webhooks",
             body={
                 "enabled_events": enabled_events,
                 "url": url,
@@ -617,6 +617,7 @@ class AsyncWebhooks(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.create",
                 span_route="/v1/organizations/webhooks",
                 span_created_id="anthropic.organization.webhook.id",
@@ -676,14 +677,13 @@ class AsyncWebhooks(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.retrieve",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -765,9 +765,7 @@ class AsyncWebhooks(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             body={
                 "description": description,
                 "enabled_events": enabled_events,
@@ -780,6 +778,7 @@ class AsyncWebhooks(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.update",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -850,7 +849,7 @@ class AsyncWebhooks(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/webhooks?beta=true",
+            "/v1/organizations/webhooks",
             page=AsyncPage[BetaOrganizationWebhookEndpoint],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -863,6 +862,7 @@ class AsyncWebhooks(AsyncAPIResource):
                     "limit": limit,
                     "order": order,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.list",
                 span_route="/v1/organizations/webhooks",
             ),
@@ -921,14 +921,13 @@ class AsyncWebhooks(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return await self._delete(
-            path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}?beta=true", webhook_endpoint_id=webhook_endpoint_id
-            ),
+            path_template("/v1/organizations/webhooks/{webhook_endpoint_id}", webhook_endpoint_id=webhook_endpoint_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.delete",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},
@@ -991,7 +990,7 @@ class AsyncWebhooks(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "webhooks-2026-10-07", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret?beta=true",
+                "/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret",
                 webhook_endpoint_id=webhook_endpoint_id,
             ),
             options=make_request_options(
@@ -999,6 +998,7 @@ class AsyncWebhooks(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.webhooks.regenerate_signing_secret",
                 span_route="/v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret",
                 span_attributes={"anthropic.organization.webhook.id": webhook_endpoint_id},

@@ -23,6 +23,7 @@ class TestSpendLimits:
     def test_method_retrieve(self, client: Anthropic) -> None:
         spend_limit = client.beta.organization.spend_limits.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -30,6 +31,7 @@ class TestSpendLimits:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.spend_limits.with_raw_response.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -41,6 +43,7 @@ class TestSpendLimits:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.spend_limits.with_streaming_response.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -59,7 +62,9 @@ class TestSpendLimits:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        spend_limit = client.beta.organization.spend_limits.list()
+        spend_limit = client.beta.organization.spend_limits.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
 
     @parametrize
@@ -68,13 +73,17 @@ class TestSpendLimits:
             limit=1,
             page="page",
             scope_type=["organization"],
+            workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.spend_limits.with_raw_response.list()
+        response = client.beta.organization.spend_limits.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -83,7 +92,9 @@ class TestSpendLimits:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.spend_limits.with_streaming_response.list() as response:
+        with client.beta.organization.spend_limits.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -96,6 +107,7 @@ class TestSpendLimits:
     def test_method_delete(self, client: Anthropic) -> None:
         spend_limit = client.beta.organization.spend_limits.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SpendLimitDeleteResponse, spend_limit, path=["response"])
 
@@ -103,6 +115,7 @@ class TestSpendLimits:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.spend_limits.with_raw_response.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -114,6 +127,7 @@ class TestSpendLimits:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.spend_limits.with_streaming_response.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -138,6 +152,7 @@ class TestSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -151,6 +166,7 @@ class TestSpendLimits:
             },
             period="monthly",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -162,6 +178,7 @@ class TestSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -177,6 +194,7 @@ class TestSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -196,6 +214,7 @@ class TestAsyncSpendLimits:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         spend_limit = await async_client.beta.organization.spend_limits.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -203,6 +222,7 @@ class TestAsyncSpendLimits:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.spend_limits.with_raw_response.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -214,6 +234,7 @@ class TestAsyncSpendLimits:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.spend_limits.with_streaming_response.retrieve(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -232,7 +253,9 @@ class TestAsyncSpendLimits:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        spend_limit = await async_client.beta.organization.spend_limits.list()
+        spend_limit = await async_client.beta.organization.spend_limits.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
 
     @parametrize
@@ -241,13 +264,17 @@ class TestAsyncSpendLimits:
             limit=1,
             page="page",
             scope_type=["organization"],
+            workspace_id="workspace_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.spend_limits.with_raw_response.list()
+        response = await async_client.beta.organization.spend_limits.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -256,7 +283,9 @@ class TestAsyncSpendLimits:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.spend_limits.with_streaming_response.list() as response:
+        async with async_client.beta.organization.spend_limits.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -269,6 +298,7 @@ class TestAsyncSpendLimits:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         spend_limit = await async_client.beta.organization.spend_limits.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SpendLimitDeleteResponse, spend_limit, path=["response"])
 
@@ -276,6 +306,7 @@ class TestAsyncSpendLimits:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.spend_limits.with_raw_response.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -287,6 +318,7 @@ class TestAsyncSpendLimits:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.spend_limits.with_streaming_response.delete(
             "spend_limit_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -311,6 +343,7 @@ class TestAsyncSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -324,6 +357,7 @@ class TestAsyncSpendLimits:
             },
             period="monthly",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
 
@@ -335,6 +369,7 @@ class TestAsyncSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -350,6 +385,7 @@ class TestAsyncSpendLimits:
                 "type": "user",
                 "user_id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

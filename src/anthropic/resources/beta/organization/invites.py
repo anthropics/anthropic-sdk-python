@@ -88,7 +88,7 @@ class Invites(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._post(
-            "/v1/organizations/invites?beta=true",
+            "/v1/organizations/invites",
             body={
                 "email": email,
                 "role": role,
@@ -99,6 +99,7 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.create",
                 span_route="/v1/organizations/invites",
                 span_created_id="anthropic.organization.invite.id",
@@ -134,12 +135,13 @@ class Invites(SyncAPIResource):
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")
         return self._get(
-            path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
+            path_template("/v1/organizations/invites/{invite_id}", invite_id=invite_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.retrieve",
                 span_route="/v1/organizations/invites/{invite_id}",
                 span_attributes={"anthropic.organization.invite.id": invite_id},
@@ -200,7 +202,7 @@ class Invites(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/invites?beta=true",
+            "/v1/organizations/invites",
             page=SyncPage[BetaOrganizationInvite],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -215,6 +217,7 @@ class Invites(SyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.list",
                 span_route="/v1/organizations/invites",
             ),
@@ -249,12 +252,13 @@ class Invites(SyncAPIResource):
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")
         return self._delete(
-            path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
+            path_template("/v1/organizations/invites/{invite_id}", invite_id=invite_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.delete",
                 span_route="/v1/organizations/invites/{invite_id}",
                 span_attributes={"anthropic.organization.invite.id": invite_id},
@@ -328,7 +332,7 @@ class AsyncInvites(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return await self._post(
-            "/v1/organizations/invites?beta=true",
+            "/v1/organizations/invites",
             body={
                 "email": email,
                 "role": role,
@@ -339,6 +343,7 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.create",
                 span_route="/v1/organizations/invites",
                 span_created_id="anthropic.organization.invite.id",
@@ -374,12 +379,13 @@ class AsyncInvites(AsyncAPIResource):
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")
         return await self._get(
-            path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
+            path_template("/v1/organizations/invites/{invite_id}", invite_id=invite_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.retrieve",
                 span_route="/v1/organizations/invites/{invite_id}",
                 span_attributes={"anthropic.organization.invite.id": invite_id},
@@ -440,7 +446,7 @@ class AsyncInvites(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/invites?beta=true",
+            "/v1/organizations/invites",
             page=AsyncPage[BetaOrganizationInvite],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -455,6 +461,7 @@ class AsyncInvites(AsyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.list",
                 span_route="/v1/organizations/invites",
             ),
@@ -489,12 +496,13 @@ class AsyncInvites(AsyncAPIResource):
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")
         return await self._delete(
-            path_template("/v1/organizations/invites/{invite_id}?beta=true", invite_id=invite_id),
+            path_template("/v1/organizations/invites/{invite_id}", invite_id=invite_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.invites.delete",
                 span_route="/v1/organizations/invites/{invite_id}",
                 span_attributes={"anthropic.organization.invite.id": invite_id},

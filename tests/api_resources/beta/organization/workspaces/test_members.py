@@ -24,6 +24,7 @@ class TestMembers:
         member = client.beta.organization.workspaces.members.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -32,6 +33,7 @@ class TestMembers:
         response = client.beta.organization.workspaces.members.with_raw_response.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -44,6 +46,7 @@ class TestMembers:
         with client.beta.organization.workspaces.members.with_streaming_response.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -73,6 +76,7 @@ class TestMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -82,6 +86,7 @@ class TestMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -95,6 +100,7 @@ class TestMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -124,6 +130,7 @@ class TestMembers:
     def test_method_list(self, client: Anthropic) -> None:
         member = client.beta.organization.workspaces.members.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaWorkspaceMember], member, path=["response"])
 
@@ -134,6 +141,7 @@ class TestMembers:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaWorkspaceMember], member, path=["response"])
 
@@ -141,6 +149,7 @@ class TestMembers:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.members.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -152,6 +161,7 @@ class TestMembers:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.members.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -174,6 +184,7 @@ class TestMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -183,6 +194,7 @@ class TestMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -196,6 +208,7 @@ class TestMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -219,6 +232,7 @@ class TestMembers:
         member = client.beta.organization.workspaces.members.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(MemberRemoveResponse, member, path=["response"])
 
@@ -227,6 +241,7 @@ class TestMembers:
         response = client.beta.organization.workspaces.members.with_raw_response.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -239,6 +254,7 @@ class TestMembers:
         with client.beta.organization.workspaces.members.with_streaming_response.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -273,6 +289,7 @@ class TestAsyncMembers:
         member = await async_client.beta.organization.workspaces.members.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -281,6 +298,7 @@ class TestAsyncMembers:
         response = await async_client.beta.organization.workspaces.members.with_raw_response.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -293,6 +311,7 @@ class TestAsyncMembers:
         async with async_client.beta.organization.workspaces.members.with_streaming_response.retrieve(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -322,6 +341,7 @@ class TestAsyncMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -331,6 +351,7 @@ class TestAsyncMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -344,6 +365,7 @@ class TestAsyncMembers:
             user_id="user_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -373,6 +395,7 @@ class TestAsyncMembers:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         member = await async_client.beta.organization.workspaces.members.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaWorkspaceMember], member, path=["response"])
 
@@ -383,6 +406,7 @@ class TestAsyncMembers:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaWorkspaceMember], member, path=["response"])
 
@@ -390,6 +414,7 @@ class TestAsyncMembers:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.members.with_raw_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -401,6 +426,7 @@ class TestAsyncMembers:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.members.with_streaming_response.list(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -423,6 +449,7 @@ class TestAsyncMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspaceMember, member, path=["response"])
 
@@ -432,6 +459,7 @@ class TestAsyncMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -445,6 +473,7 @@ class TestAsyncMembers:
             workspace_id="workspace_id",
             user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
             workspace_role="workspace_admin",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -468,6 +497,7 @@ class TestAsyncMembers:
         member = await async_client.beta.organization.workspaces.members.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(MemberRemoveResponse, member, path=["response"])
 
@@ -476,6 +506,7 @@ class TestAsyncMembers:
         response = await async_client.beta.organization.workspaces.members.with_raw_response.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -488,6 +519,7 @@ class TestAsyncMembers:
         async with async_client.beta.organization.workspaces.members.with_streaming_response.remove(
             user_id="user_id",
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

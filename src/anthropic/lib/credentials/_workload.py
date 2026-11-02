@@ -30,9 +30,6 @@ from ._constants import (
 )
 from ..._exceptions import AnthropicError
 
-# jwt-bearer POSTs require BOTH beta headers — oauth-2025-04-20 unlocks the
-# token endpoint family, and oidc-federation-2026-04-01 routes the POST to the
-# Go userauth handler rather than the Python oauth_server.
 _JWT_BEARER_BETA_HEADER = f"{OAUTH_API_BETA_HEADER},{FEDERATION_BETA_HEADER}"
 
 # Max characters of response body kept on WorkloadIdentityError.body and in
@@ -176,9 +173,8 @@ class WorkloadIdentityCredentials:
         self._service_account_id = service_account_id
         self._workspace_id = workspace_id
         # Scope is informational only for federation: the server derives the
-        # effective scope from the matching federation rule and the gateway
-        # transform drops unknown body fields, so it is intentionally NOT sent
-        # on the jwt-bearer request.
+        # effective scope from the matching federation rule, so it is
+        # intentionally NOT sent on the jwt-bearer request.
         self._scope = scope
         # The client passing this object as `credentials=` calls
         # `for_base_url` to set its own endpoint, so the token exchange

@@ -94,12 +94,13 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.models.retrieve",
                 span_route="/v1/models/{model_id}",
                 span_attributes={"anthropic.model.id": model_id},
@@ -172,7 +173,7 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=SyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -185,6 +186,7 @@ class Models(SyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.models.list",
                 span_route="/v1/models",
             ),
@@ -263,12 +265,13 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.models.retrieve",
                 span_route="/v1/models/{model_id}",
                 span_attributes={"anthropic.model.id": model_id},
@@ -341,7 +344,7 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=AsyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -354,6 +357,7 @@ class AsyncModels(AsyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.models.list",
                 span_route="/v1/models",
             ),

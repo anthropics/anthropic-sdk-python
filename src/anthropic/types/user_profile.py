@@ -1,10 +1,12 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from datetime import datetime
 from typing_extensions import Literal
 
 from .._models import BaseModel
 from .user_profile_programs import UserProfilePrograms
 from .user_profile_access_type import UserProfileAccessType
+from .user_profile_enforcement_action import UserProfileEnforcementAction
+from .user_profile_enforcement_status import UserProfileEnforcementStatus
 from .user_profile_external_user_details import UserProfileExternalUserDetails
 
 __all__ = ["UserProfile"]
@@ -28,6 +30,24 @@ class UserProfile(BaseModel):
 
     created_at: datetime
     """When this user profile was created, in RFC 3339 format."""
+
+    enforcement_actions: List[UserProfileEnforcementAction]
+    """The enforcement actions open on this profile; empty when none is open.
+
+    Absent under the `user-profiles-2026-09-04` and earlier beta headers.
+    """
+
+    enforcement_status: UserProfileEnforcementStatus
+    """
+    Anthropic's enforcement status of this profile, from its open enforcement
+    actions and any identity check under review, by the first rule that applies:
+    `banned` while any open action is a `ban`; `pending` while a restriction that an
+    identity check can clear is open, the end user has submitted that check,
+    Anthropic's review of it has not ended, and no open action's `reason` is
+    `account_compromise`; `restricted` while any action is open; `unrestricted`
+    while none is. Absent under the `user-profiles-2026-09-04` and earlier beta
+    headers.
+    """
 
     external_user_details: UserProfileExternalUserDetails
     """

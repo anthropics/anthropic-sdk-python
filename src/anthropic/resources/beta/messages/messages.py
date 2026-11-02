@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, List, Type, Union, Mapping, Iterable, Optional, cast
+from typing import TYPE_CHECKING, List, Type, Union, Iterable, Optional, cast
 from functools import partial
 from itertools import chain
-from typing_extensions import Literal, overload
+from typing_extensions import Unpack, Literal, overload
 
 import httpx2
-import pydantic
 
 from .batches import (
     Batches,
@@ -20,7 +19,6 @@ from .batches import (
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, required_args, strip_not_given
 from ...._compat import cached_property
-from ...._models import TypeAdapter
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
     to_raw_response_wrapper,
@@ -38,11 +36,13 @@ from ...._constants import DEFAULT_TIMEOUT, MODEL_NONSTREAMING_TOKENS
 from ...._streaming import Stream, AsyncStream
 from ....types.beta import (
     BetaFallbacksParam,
+    ThreadCreateParams,
     BetaDiagnosticsParam,
+    BetaMessageThreadParam,
     BetaThinkingConfigParam,
     message_create_params,
 )
-from ...._exceptions import AnthropicError
+from ....lib.threads import BetaMessageThread, BetaAsyncMessageThread, UnsupportedRequestBehavior
 from ...._base_client import (
     merge_headers,
     make_request_options,
@@ -51,9 +51,14 @@ from ....lib._tracing import messages_create_request_attributes, messages_count_
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
+from ....lib.threads._params import given, turn_overrides
 from ....lib.tools._toolsets import BetaRunnableToolset, BetaAsyncRunnableToolset
 from ....lib._parse._response import ResponseFormatT, parse_beta_response
-from ....lib._parse._transform import transform_schema
+from ....lib._parse._transform import (
+    merge_output_config,
+    to_json_output_format,
+    validate_output_config_conflict as _validate_output_config_conflict,
+)
 from ....lib._stainless_helpers import (
     HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
     STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
@@ -64,10 +69,7 @@ from ....lib._stainless_helpers import (
 from ....lib.tools._tool_params import BetaToolLike, to_tool_params as _to_tool_params
 from ....types.beta.beta_message import BetaMessage
 from ....lib.tools._tool_dispatch import partition_sync_tools, partition_async_tools
-from ....lib.tools._beta_functions import (
-    BetaRunnableTool,
-    BetaAsyncRunnableTool,
-)
+from ....lib.tools._beta_functions import BetaRunnableTool, BetaAsyncRunnableTool
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_message_param import BetaMessageParam
 from ....types.beta.beta_metadata_param import BetaMetadataParam
@@ -78,6 +80,7 @@ from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
+from ....types.beta.beta_message_thread_param import BetaMessageThreadParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
 from ....types.beta.beta_compaction_config_param import BetaCompactionConfigParam
@@ -142,6 +145,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -244,8 +248,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -366,6 +369,12 @@ class Messages(SyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -494,6 +503,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -596,8 +606,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -718,6 +727,12 @@ class Messages(SyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -846,6 +861,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -948,8 +964,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -1070,6 +1085,12 @@ class Messages(SyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -1198,6 +1219,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -1242,7 +1264,7 @@ class Messages(SyncAPIResource):
             extra_headers or {},
         )
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1264,6 +1286,7 @@ class Messages(SyncAPIResource):
                 "stream": stream,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tool_choice": tool_choice,
                 "tools": tools,
             },
@@ -1272,6 +1295,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -1304,6 +1328,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -1352,26 +1377,7 @@ class Messages(SyncAPIResource):
         )
 
         if is_given(output_format) and output_format is not None:
-            if isinstance(output_format, Mapping):
-                raise TypeError(
-                    "`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead"
-                )
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
-
-            try:
-                schema = adapted_type.json_schema()
-                transformed_output_format = BetaJSONOutputFormatParam(
-                    schema=transform_schema(schema), type="json_schema"
-                )
-            except pydantic.errors.PydanticSchemaGenerationError as e:
-                raise TypeError(
-                    (
-                        "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydantic.TypeAdapter`"
-                    )
-                ) from e
-
-            merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+            merged_output_config = merge_output_config(output_config, to_json_output_format(output_format))
         else:
             merged_output_config = output_config
 
@@ -1385,7 +1391,7 @@ class Messages(SyncAPIResource):
             )
 
         return self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1407,6 +1413,7 @@ class Messages(SyncAPIResource):
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tool_choice": tool_choice,
                 "tools": tools,
             },
@@ -1416,6 +1423,7 @@ class Messages(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -1450,6 +1458,7 @@ class Messages(SyncAPIResource):
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -1489,6 +1498,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -1528,6 +1538,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -1563,9 +1574,10 @@ class Messages(SyncAPIResource):
         service_tier: Literal["auto", "standard_only"] | Omit = omit,
         speed: Optional[Literal["standard", "fast"]] | Omit = omit,
         stop_sequences: SequenceNotStr[str] | Omit = omit,
-        stream: bool | Omit = omit,
+        stream: Literal[True] | Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -1577,7 +1589,10 @@ class Messages(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaStreamingToolRunner[ResponseFormatT] | BetaToolRunner[ResponseFormatT]:
-        """Create a Message stream
+        """Run the tools the model calls until it stops asking for them, yielding each assistant message.
+
+        The loop runs over a message thread by default, so each turn sends only new messages. Pass `thread=False` to
+        send the full history every turn.
 
         Args:
           run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
@@ -1608,79 +1623,95 @@ class Messages(SyncAPIResource):
                 stacklevel=3,
             )
 
-        if model in MODELS_TO_WARN_WITH_THINKING_ENABLED and thinking and thinking["type"] == "enabled":
-            warnings.warn(
-                f"Using Claude with {model} and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking",
-                UserWarning,
-                stacklevel=3,
-            )
-
-        extra_headers = merge_headers(
-            _helper_header("BetaToolRunner"),
-            strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-user-profile-id": user_profile_id,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            extra_headers or {},
-        )
-
-        runnable_tools, raw_tools = partition_sync_tools(tools)
+        # An async tool or toolset is refused here, before anything is sent. The thread keeps the tools in the order
+        # given and sends each toolset as its `tools[]` entry.
+        tools = list(tools)
+        partition_sync_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
-            {
-                "max_tokens": max_tokens,
-                "messages": messages,
-                "model": model,
-                "cache_control": cache_control,
-                "container": container,
-                "context_management": context_management,
-                "diagnostics": diagnostics,
-                "fallback_credit_token": fallback_credit_token,
-                "fallbacks": fallbacks,
-                "inference_geo": inference_geo,
-                "mcp_servers": mcp_servers,
-                "metadata": metadata,
-                "output_config": output_config,
-                "output_format": output_format,
-                "service_tier": service_tier,
-                "speed": speed,
-                "stop_sequences": stop_sequences,
-                "system": system,
-                "thinking": thinking,
-                "tool_choice": tool_choice,
-                "tools": [*[tool.to_dict() for tool in runnable_tools], *raw_tools],
-            },
+            given(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "cache_control": cache_control,
+                    "container": container,
+                    "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
+                    "inference_geo": inference_geo,
+                    "mcp_servers": mcp_servers,
+                    "metadata": metadata,
+                    "output_config": output_config,
+                    "output_format": output_format,
+                    "service_tier": service_tier,
+                    "speed": speed,
+                    "stop_sequences": stop_sequences,
+                    "system": system,
+                    "thinking": thinking,
+                    "thread": thread,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "betas": betas,
+                    "user_profile_id": user_profile_id,
+                    "workspace_id": workspace_id,
+                }
+            ),
+        )
+        message_thread = BetaMessageThread[ResponseFormatT]._for_tool_runner(cast("Anthropic", self._client), params)
+        if run_tools_eagerly:
+            # `thread.tool_runner()` has no `run_tools_eagerly` parameter, so the eager runner is made here.
+            return BetaStreamingToolRunner[ResponseFormatT](
+                thread=message_thread,
+                options=turn_overrides(
+                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                ),
+                max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=True,
+            )
+        return message_thread.tool_runner(
+            max_iterations=max_iterations,
+            stream=stream,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
         )
 
-        if stream:
-            return BetaStreamingToolRunner[ResponseFormatT](
-                tools=runnable_tools,
-                params=params,
-                options={
-                    "extra_headers": extra_headers,
-                    "extra_query": extra_query,
-                    "extra_body": extra_body,
-                    "timeout": timeout,
-                },
-                client=cast("Anthropic", self._client),
-                max_iterations=max_iterations if is_given(max_iterations) else None,
-                run_tools_eagerly=run_tools_eagerly,
-            )
-        return BetaToolRunner[ResponseFormatT](
-            tools=runnable_tools,
-            params=params,
-            options={
-                "extra_headers": extra_headers,
-                "extra_query": extra_query,
-                "extra_body": extra_body,
-                "timeout": timeout,
-            },
-            client=cast("Anthropic", self._client),
-            max_iterations=max_iterations if is_given(max_iterations) else None,
+    def thread(
+        self,
+        *,
+        max_tokens: int,
+        model: ModelParam,
+        messages: Iterable[BetaMessageParam] | Omit = omit,
+        tools: Iterable[BetaRunnableTool | BetaToolUnionParam] | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        unsupported_request_behavior: UnsupportedRequestBehavior = "error",
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+        **params: Unpack[ThreadCreateParams],
+    ) -> BetaMessageThread[ResponseFormatT]:
+        """Start a message thread: a conversation the server holds between turns, so each request sends only the new
+        messages. Takes the arguments of `create()` except `thread`, with `messages` optional, and sends nothing."""
+        return BetaMessageThread(
+            cast("Anthropic", self._client),
+            max_tokens=max_tokens,
+            model=model,
+            messages=messages,
+            tools=tools,
+            output_format=output_format,
+            unsupported_request_behavior=unsupported_request_behavior,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+            **params,
         )
 
     def stream(
@@ -1706,6 +1737,7 @@ class Messages(SyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -1753,32 +1785,13 @@ class Messages(SyncAPIResource):
         )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
-
         if is_given(output_format) and output_format is not None:
-            if isinstance(output_format, Mapping):
-                raise TypeError(
-                    "`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead"
-                )
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
-
-            try:
-                schema = adapted_type.json_schema()
-                transformed_output_format = BetaJSONOutputFormatParam(
-                    schema=transform_schema(schema), type="json_schema"
-                )
-            except pydantic.errors.PydanticSchemaGenerationError as e:
-                raise TypeError(
-                    (
-                        "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydantic.TypeAdapter`"
-                    )
-                ) from e
-
-        merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+            transformed_output_format = to_json_output_format(output_format)
+        merged_output_config = merge_output_config(output_config, transformed_output_format)
 
         make_request = partial(
             self._post,
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -1800,6 +1813,7 @@ class Messages(SyncAPIResource):
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tools": tools,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -1809,6 +1823,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -1923,8 +1938,7 @@ class Messages(SyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2096,7 +2110,7 @@ class Messages(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,
@@ -2116,6 +2130,7 @@ class Messages(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
                 span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
@@ -2172,6 +2187,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -2274,8 +2290,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2396,6 +2411,12 @@ class AsyncMessages(AsyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2524,6 +2545,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -2626,8 +2648,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -2748,6 +2769,12 @@ class AsyncMessages(AsyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -2876,6 +2903,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -2978,8 +3006,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -3100,6 +3127,12 @@ class AsyncMessages(AsyncAPIResource):
               depend on the model. See
               [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
               for each model's behavior.
+
+          thread: Server-held conversation state (a Thread). `{"type": "create"}` asks the server
+              to hold this conversation's state under the response's `id`;
+              `{"type": "continue", "previous_message_id": ...}` resumes from a previous
+              response so only the new turn's messages are sent. The response shape is
+              unchanged.
 
           tool_choice: How the model should use the provided tools. The model can use a specific tool,
               any available tool, decide by itself, or not use tools at all.
@@ -3228,6 +3261,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Literal[True] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -3272,7 +3306,7 @@ class AsyncMessages(AsyncAPIResource):
             extra_headers or {},
         )
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3294,6 +3328,7 @@ class AsyncMessages(AsyncAPIResource):
                 "stream": stream,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tool_choice": tool_choice,
                 "tools": tools,
             },
@@ -3302,6 +3337,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -3334,6 +3370,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -3382,26 +3419,7 @@ class AsyncMessages(AsyncAPIResource):
         )
 
         if is_given(output_format) and output_format is not None:
-            if isinstance(output_format, Mapping):
-                raise TypeError(
-                    "`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead"
-                )
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
-
-            try:
-                schema = adapted_type.json_schema()
-                transformed_output_format = BetaJSONOutputFormatParam(
-                    schema=transform_schema(schema), type="json_schema"
-                )
-            except pydantic.errors.PydanticSchemaGenerationError as e:
-                raise TypeError(
-                    (
-                        "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydantic.TypeAdapter`"
-                    )
-                ) from e
-
-            merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+            merged_output_config = merge_output_config(output_config, to_json_output_format(output_format))
         else:
             merged_output_config = output_config
 
@@ -3415,7 +3433,7 @@ class AsyncMessages(AsyncAPIResource):
             )
 
         return await self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3437,6 +3455,7 @@ class AsyncMessages(AsyncAPIResource):
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tool_choice": tool_choice,
                 "tools": tools,
             },
@@ -3446,6 +3465,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 post_parser=parser,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -3480,6 +3500,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -3519,6 +3540,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -3558,6 +3580,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -3596,6 +3619,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True] | Literal[False] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[Literal[False]] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
@@ -3607,7 +3631,10 @@ class AsyncMessages(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaAsyncToolRunner[ResponseFormatT] | BetaAsyncStreamingToolRunner[ResponseFormatT]:
-        """Create a Message stream
+        """Run the tools the model calls until it stops asking for them, yielding each assistant message.
+
+        The loop runs over a message thread by default, so each turn sends only new messages. Pass `thread=False` to
+        send the full history every turn.
 
         Args:
           run_tools_eagerly: Run each tool as soon as its call is complete, before the reply finishes, instead of
@@ -3638,72 +3665,97 @@ class AsyncMessages(AsyncAPIResource):
                 stacklevel=3,
             )
 
-        extra_headers = merge_headers(
-            _helper_header("BetaToolRunner"),
-            strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-user-profile-id": user_profile_id,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            extra_headers or {},
-        )
-
-        runnable_tools, raw_tools = partition_async_tools(tools)
+        # A synchronous tool or toolset is refused here, before anything is sent. The thread keeps the tools in the
+        # order given and sends each toolset as its `tools[]` entry.
+        tools = list(tools)
+        partition_async_tools(tools)
 
         params = cast(
             message_create_params.ParseMessageCreateParamsBase[ResponseFormatT],
-            {
-                "max_tokens": max_tokens,
-                "messages": messages,
-                "model": model,
-                "cache_control": cache_control,
-                "container": container,
-                "context_management": context_management,
-                "diagnostics": diagnostics,
-                "fallback_credit_token": fallback_credit_token,
-                "fallbacks": fallbacks,
-                "inference_geo": inference_geo,
-                "mcp_servers": mcp_servers,
-                "metadata": metadata,
-                "output_config": output_config,
-                "output_format": output_format,
-                "service_tier": service_tier,
-                "speed": speed,
-                "stop_sequences": stop_sequences,
-                "system": system,
-                "thinking": thinking,
-                "tool_choice": tool_choice,
-                "tools": [*[tool.to_dict() for tool in runnable_tools], *raw_tools],
-            },
+            given(
+                {
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                    "model": model,
+                    "cache_control": cache_control,
+                    "container": container,
+                    "context_management": context_management,
+                    "diagnostics": diagnostics,
+                    "fallback_credit_token": fallback_credit_token,
+                    "fallbacks": fallbacks,
+                    "inference_geo": inference_geo,
+                    "mcp_servers": mcp_servers,
+                    "metadata": metadata,
+                    "output_config": output_config,
+                    "output_format": output_format,
+                    "service_tier": service_tier,
+                    "speed": speed,
+                    "stop_sequences": stop_sequences,
+                    "system": system,
+                    "thinking": thinking,
+                    "thread": thread,
+                    "tool_choice": tool_choice,
+                    "tools": tools,
+                    "betas": betas,
+                    "user_profile_id": user_profile_id,
+                    "workspace_id": workspace_id,
+                }
+            ),
+        )
+        message_thread = BetaAsyncMessageThread[ResponseFormatT]._for_tool_runner(
+            cast("AsyncAnthropic", self._client), params
+        )
+        if run_tools_eagerly:
+            # `thread.tool_runner()` has no `run_tools_eagerly` parameter, so the eager runner is made here.
+            return BetaAsyncStreamingToolRunner[ResponseFormatT](
+                thread=message_thread,
+                options=turn_overrides(
+                    extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                ),
+                max_iterations=max_iterations if is_given(max_iterations) else None,
+                run_tools_eagerly=True,
+            )
+        return message_thread.tool_runner(
+            max_iterations=max_iterations,
+            stream=stream,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
         )
 
-        if stream:
-            return BetaAsyncStreamingToolRunner[ResponseFormatT](
-                tools=runnable_tools,
-                params=params,
-                options={
-                    "extra_headers": extra_headers,
-                    "extra_query": extra_query,
-                    "extra_body": extra_body,
-                    "timeout": timeout,
-                },
-                client=cast("AsyncAnthropic", self._client),
-                max_iterations=max_iterations if is_given(max_iterations) else None,
-                run_tools_eagerly=run_tools_eagerly,
-            )
-        return BetaAsyncToolRunner[ResponseFormatT](
-            tools=runnable_tools,
-            params=params,
-            options={
-                "extra_headers": extra_headers,
-                "extra_query": extra_query,
-                "extra_body": extra_body,
-                "timeout": timeout,
-            },
-            client=cast("AsyncAnthropic", self._client),
-            max_iterations=max_iterations if is_given(max_iterations) else None,
+    def thread(
+        self,
+        *,
+        max_tokens: int,
+        model: ModelParam,
+        messages: Iterable[BetaMessageParam] | Omit = omit,
+        tools: Iterable[BetaAsyncRunnableTool | BetaToolUnionParam] | Omit = omit,
+        output_format: Optional[type[ResponseFormatT]] | Omit = omit,
+        unsupported_request_behavior: UnsupportedRequestBehavior = "error",
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+        **params: Unpack[ThreadCreateParams],
+    ) -> BetaAsyncMessageThread[ResponseFormatT]:
+        """Start a message thread: a conversation the server holds between turns, so each request sends only the new
+        messages. Takes the arguments of `create()` except `thread`, with `messages` optional, and sends nothing."""
+        return BetaAsyncMessageThread(
+            cast("AsyncAnthropic", self._client),
+            max_tokens=max_tokens,
+            model=model,
+            messages=messages,
+            tools=tools,
+            output_format=output_format,
+            unsupported_request_behavior=unsupported_request_behavior,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+            **params,
         )
 
     def stream(
@@ -3729,6 +3781,7 @@ class AsyncMessages(AsyncAPIResource):
         stop_sequences: SequenceNotStr[str] | Omit = omit,
         system: Union[str, Iterable[BetaTextBlockParam]] | Omit = omit,
         thinking: BetaThinkingConfigParam | Omit = omit,
+        thread: Optional[BetaMessageThreadParam] | Omit = omit,
         tool_choice: BetaToolChoiceParam | Omit = omit,
         tools: Iterable[BetaToolLike] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -3775,31 +3828,12 @@ class AsyncMessages(AsyncAPIResource):
         )
 
         transformed_output_format: BetaJSONOutputFormatParam | Omit = omit
-
         if is_given(output_format) and output_format is not None:
-            if isinstance(output_format, Mapping):
-                raise TypeError(
-                    "`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead"
-                )
-            adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
-
-            try:
-                schema = adapted_type.json_schema()
-                transformed_output_format = BetaJSONOutputFormatParam(
-                    schema=transform_schema(schema), type="json_schema"
-                )
-            except pydantic.errors.PydanticSchemaGenerationError as e:
-                raise TypeError(
-                    (
-                        "Could not generate JSON schema for the given `output_format` type. "
-                        "Use a type that works with `pydantic.TypeAdapter`"
-                    )
-                ) from e
-
-        merged_output_config = _merge_output_configs(output_config, transformed_output_format)
+            transformed_output_format = to_json_output_format(output_format)
+        merged_output_config = merge_output_config(output_config, transformed_output_format)
 
         request = self._post(
-            "/v1/messages?beta=true",
+            "/v1/messages",
             body={
                 "max_tokens": max_tokens,
                 "messages": messages,
@@ -3821,6 +3855,7 @@ class AsyncMessages(AsyncAPIResource):
                 "stop_sequences": stop_sequences,
                 "system": system,
                 "thinking": thinking,
+                "thread": thread,
                 "tools": tools,
                 "tool_choice": tool_choice,
                 "stream": True,
@@ -3830,6 +3865,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
                 span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
@@ -3944,8 +3980,7 @@ class AsyncMessages(AsyncAPIResource):
 
               Note that if you want to include a
               [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-              you can use the top-level `system` parameter — there is no `"system"` role for
-              input messages in the Messages API.
+              you can use the top-level `system` parameter.
 
               There is a limit of 100,000 messages in a single request.
 
@@ -4117,7 +4152,7 @@ class AsyncMessages(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "token-counting-2024-11-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/count_tokens?beta=true",
+            "/v1/messages/count_tokens",
             body={
                 "messages": messages,
                 "model": model,
@@ -4137,6 +4172,7 @@ class AsyncMessages(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
                 span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
@@ -4213,27 +4249,3 @@ class AsyncMessagesWithStreamingResponse:
     @cached_property
     def batches(self) -> AsyncBatchesWithStreamingResponse:
         return AsyncBatchesWithStreamingResponse(self._messages.batches)
-
-
-def _validate_output_config_conflict(
-    output_config: BetaOutputConfigParam | Omit,
-    output_format: object,
-) -> None:
-    if is_given(output_format) and output_format is not None and is_given(output_config):
-        if "format" in output_config and output_config["format"] is not None:
-            raise AnthropicError(
-                "Both output_format and output_config.format were provided. "
-                "Please use only output_config.format (output_format is deprecated).",
-            )
-
-
-def _merge_output_configs(
-    output_config: BetaOutputConfigParam | Omit,
-    output_format: Optional[BetaJSONOutputFormatParam] | Omit,
-) -> BetaOutputConfigParam | Omit:
-    if is_given(output_format):
-        if is_given(output_config):
-            return {**output_config, "format": output_format}
-        else:
-            return {"format": output_format}
-    return output_config

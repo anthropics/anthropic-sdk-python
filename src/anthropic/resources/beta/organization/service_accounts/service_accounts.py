@@ -107,7 +107,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             body={
                 "name": name,
                 "description": description,
@@ -118,6 +118,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.create",
                 span_route="/v1/organizations/service_accounts",
                 span_created_id="anthropic.organization.service_account.id",
@@ -166,14 +167,14 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.retrieve",
                 span_route="/v1/organizations/service_accounts/{service_account_id}",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},
@@ -234,8 +235,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             body={
                 "description": description,
@@ -246,6 +246,7 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.update",
                 span_route="/v1/organizations/service_accounts/{service_account_id}",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},
@@ -301,7 +302,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             page=SyncPageCursor[BetaServiceAccount],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -313,6 +314,7 @@ class ServiceAccounts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.list",
                 span_route="/v1/organizations/service_accounts",
             ),
@@ -365,14 +367,14 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/archive?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.archive",
                 span_route="/v1/organizations/service_accounts/{service_account_id}/archive",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},
@@ -457,7 +459,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             body={
                 "name": name,
                 "description": description,
@@ -468,6 +470,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.create",
                 span_route="/v1/organizations/service_accounts",
                 span_created_id="anthropic.organization.service_account.id",
@@ -516,14 +519,14 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.retrieve",
                 span_route="/v1/organizations/service_accounts/{service_account_id}",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},
@@ -584,8 +587,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}", service_account_id=service_account_id
             ),
             body={
                 "description": description,
@@ -596,6 +598,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.update",
                 span_route="/v1/organizations/service_accounts/{service_account_id}",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},
@@ -651,7 +654,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/service_accounts?beta=true",
+            "/v1/organizations/service_accounts",
             page=AsyncPageCursor[BetaServiceAccount],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -663,6 +666,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.list",
                 span_route="/v1/organizations/service_accounts",
             ),
@@ -715,14 +719,14 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/service_accounts/{service_account_id}/archive?beta=true",
-                service_account_id=service_account_id,
+                "/v1/organizations/service_accounts/{service_account_id}/archive", service_account_id=service_account_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.service_accounts.archive",
                 span_route="/v1/organizations/service_accounts/{service_account_id}/archive",
                 span_attributes={"anthropic.organization.service_account.id": service_account_id},

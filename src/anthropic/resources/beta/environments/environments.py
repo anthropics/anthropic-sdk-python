@@ -122,7 +122,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             body={
                 "name": name,
                 "config": config,
@@ -135,6 +135,7 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.create",
                 span_route="/v1/environments",
                 span_created_id="anthropic.environment.id",
@@ -191,12 +192,13 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.retrieve",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -272,7 +274,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             body={
                 "config": config,
                 "description": description,
@@ -285,6 +287,7 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.update",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -348,7 +351,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             page=SyncPageCursor[BetaEnvironment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -360,6 +363,7 @@ class Environments(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.list",
                 span_route="/v1/environments",
             ),
@@ -416,12 +420,13 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.delete",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -480,12 +485,13 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/environments/{environment_id}/archive?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/archive", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.archive",
                 span_route="/v1/environments/{environment_id}/archive",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -582,7 +588,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             body={
                 "name": name,
                 "config": config,
@@ -595,6 +601,7 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.create",
                 span_route="/v1/environments",
                 span_created_id="anthropic.environment.id",
@@ -651,12 +658,13 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.retrieve",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -732,7 +740,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             body={
                 "config": config,
                 "description": description,
@@ -745,6 +753,7 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.update",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -808,7 +817,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             page=AsyncPageCursor[BetaEnvironment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -820,6 +829,7 @@ class AsyncEnvironments(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.list",
                 span_route="/v1/environments",
             ),
@@ -876,12 +886,13 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.delete",
                 span_route="/v1/environments/{environment_id}",
                 span_attributes={"anthropic.environment.id": environment_id},
@@ -940,12 +951,13 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/environments/{environment_id}/archive?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/archive", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.environments.archive",
                 span_route="/v1/environments/{environment_id}/archive",
                 span_attributes={"anthropic.environment.id": environment_id},

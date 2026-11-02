@@ -139,7 +139,7 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/skills?beta=true",
+            "/v1/organizations/analytics/skills",
             page=SyncPageCursor[BetaAnalyticsSkillActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -157,6 +157,7 @@ class Skills(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.skills.list",
                 span_route="/v1/organizations/analytics/skills",
                 span_content_query_params=("filter",),
@@ -282,7 +283,7 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/skills?beta=true",
+            "/v1/organizations/analytics/skills",
             page=AsyncPageCursor[BetaAnalyticsSkillActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -300,6 +301,7 @@ class AsyncSkills(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.skills.list",
                 span_route="/v1/organizations/analytics/skills",
                 span_content_query_params=("filter",),

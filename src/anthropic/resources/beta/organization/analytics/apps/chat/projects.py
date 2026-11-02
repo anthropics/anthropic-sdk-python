@@ -135,7 +135,7 @@ class Projects(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/apps/chat/projects?beta=true",
+            "/v1/organizations/analytics/apps/chat/projects",
             page=SyncPageCursor[BetaAnalyticsProjectActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -153,6 +153,7 @@ class Projects(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.apps.chat.projects.list",
                 span_route="/v1/organizations/analytics/apps/chat/projects",
             ),
@@ -273,7 +274,7 @@ class AsyncProjects(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/apps/chat/projects?beta=true",
+            "/v1/organizations/analytics/apps/chat/projects",
             page=AsyncPageCursor[BetaAnalyticsProjectActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -291,6 +292,7 @@ class AsyncProjects(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.analytics.apps.chat.projects.list",
                 span_route="/v1/organizations/analytics/apps/chat/projects",
             ),

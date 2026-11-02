@@ -198,7 +198,7 @@ class Plugins(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -206,6 +206,7 @@ class Plugins(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.create",
                 span_route="/v1/organizations/plugins",
                 span_created_id="anthropic.organization.plugin.id",
@@ -276,13 +277,14 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -314,15 +316,18 @@ class Plugins(SyncAPIResource):
         already served to pin it without changing what is served. No new version is
         created.
 
-        When the organization has content scanning enabled, a version whose scan is
-        still running is refused with a 409 (`error_code` `scan_pending`; retry once the
-        scan finishes) and one whose scan failed, errored or reached no verdict with a
-        400 (`scan_failed`; a `warn` is accepted). When the Plugin is in the
-        organization's library marketplace, a version other than the one served is also
-        refused with a 409 when one of its skills has a name that an organization skill
-        (one an administrator uploaded for the whole organization in claude.ai) has
-        since taken: `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
+        When the organization has content scanning enabled, a version whose
+        `content_scan.status` is `processing` is refused with a 409 (`error_code`
+        `scan_pending`; retry once the scan finishes). A version whose
+        `content_scan.status` is `errored`, or whose `content_scan.assessment` is `fail`
+        or `unknown`, is refused with a 400 (`error_code` `scan_failed`); a `warn` is
+        accepted. If the scan outcome cannot be read at that moment, the request fails
+        with a retryable 503 instead. When the Plugin is in the organization's library
+        marketplace, a version other than the one served is also refused with a 409 when
+        one of its skills has a name that an organization skill (one an administrator
+        uploaded for the whole organization in claude.ai) has since taken: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
+        Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -367,13 +372,14 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.update",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -477,7 +483,7 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=SyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -496,6 +502,7 @@ class Plugins(SyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.list",
                 span_route="/v1/organizations/plugins",
             ),
@@ -565,12 +572,13 @@ class Plugins(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.delete",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -716,7 +724,7 @@ class AsyncPlugins(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -724,6 +732,7 @@ class AsyncPlugins(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.create",
                 span_route="/v1/organizations/plugins",
                 span_created_id="anthropic.organization.plugin.id",
@@ -794,13 +803,14 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.retrieve",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -832,15 +842,18 @@ class AsyncPlugins(AsyncAPIResource):
         already served to pin it without changing what is served. No new version is
         created.
 
-        When the organization has content scanning enabled, a version whose scan is
-        still running is refused with a 409 (`error_code` `scan_pending`; retry once the
-        scan finishes) and one whose scan failed, errored or reached no verdict with a
-        400 (`scan_failed`; a `warn` is accepted). When the Plugin is in the
-        organization's library marketplace, a version other than the one served is also
-        refused with a 409 when one of its skills has a name that an organization skill
-        (one an administrator uploaded for the whole organization in claude.ai) has
-        since taken: `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
+        When the organization has content scanning enabled, a version whose
+        `content_scan.status` is `processing` is refused with a 409 (`error_code`
+        `scan_pending`; retry once the scan finishes). A version whose
+        `content_scan.status` is `errored`, or whose `content_scan.assessment` is `fail`
+        or `unknown`, is refused with a 400 (`error_code` `scan_failed`); a `warn` is
+        accepted. If the scan outcome cannot be read at that moment, the request fails
+        with a retryable 503 instead. When the Plugin is in the organization's library
+        marketplace, a version other than the one served is also refused with a 409 when
+        one of its skills has a name that an organization skill (one an administrator
+        uploaded for the whole organization in claude.ai) has since taken: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
+        Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -885,13 +898,14 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             body={"served_version_id": served_version_id},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.update",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},
@@ -995,7 +1009,7 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugins?beta=true",
+            "/v1/organizations/plugins",
             page=AsyncPageCursor[BetaPlugin],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -1014,6 +1028,7 @@ class AsyncPlugins(AsyncAPIResource):
                     "owner_user_id": owner_user_id,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.list",
                 span_route="/v1/organizations/plugins",
             ),
@@ -1083,12 +1098,13 @@ class AsyncPlugins(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/organizations/plugins/{plugin_id}?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}", plugin_id=plugin_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.plugins.delete",
                 span_route="/v1/organizations/plugins/{plugin_id}",
                 span_attributes={"anthropic.organization.plugin.id": plugin_id},

@@ -6,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from .._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from .._utils import is_given, path_template, strip_not_given
+from .._utils import path_template, strip_not_given
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -18,7 +18,6 @@ from .._response import (
 from ..pagination import SyncPage, AsyncPage
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.model_info import ModelInfo
-from ..types.anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["Models", "AsyncModels"]
 
@@ -47,7 +46,6 @@ class Models(SyncAPIResource):
         self,
         model_id: str,
         *,
-        betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -64,8 +62,6 @@ class Models(SyncAPIResource):
 
         Args:
           model_id: Model identifier or alias.
-
-          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -84,15 +80,7 @@ class Models(SyncAPIResource):
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            **(extra_headers or {}),
-        }
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get(
             path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
@@ -114,7 +102,6 @@ class Models(SyncAPIResource):
         before_id: str | Omit = omit,
         lifecycle: List[Literal["active", "deprecated", "retired"]] | Omit = omit,
         limit: int | Omit = omit,
-        betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -145,8 +132,6 @@ class Models(SyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
 
@@ -162,15 +147,7 @@ class Models(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            **(extra_headers or {}),
-        }
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/models",
             page=SyncPage[ModelInfo],
@@ -216,7 +193,6 @@ class AsyncModels(AsyncAPIResource):
         self,
         model_id: str,
         *,
-        betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -233,8 +209,6 @@ class AsyncModels(AsyncAPIResource):
 
         Args:
           model_id: Model identifier or alias.
-
-          betas: Optional header to specify the beta version(s) you want to use.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -253,15 +227,7 @@ class AsyncModels(AsyncAPIResource):
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            **(extra_headers or {}),
-        }
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return await self._get(
             path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
@@ -283,7 +249,6 @@ class AsyncModels(AsyncAPIResource):
         before_id: str | Omit = omit,
         lifecycle: List[Literal["active", "deprecated", "retired"]] | Omit = omit,
         limit: int | Omit = omit,
-        betas: List[AnthropicBetaParam] | Omit = omit,
         workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -314,8 +279,6 @@ class AsyncModels(AsyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
-
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
 
@@ -331,15 +294,7 @@ class AsyncModels(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {
-            **strip_not_given(
-                {
-                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
-                    "anthropic-workspace-id": workspace_id,
-                }
-            ),
-            **(extra_headers or {}),
-        }
+        extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
             "/v1/models",
             page=AsyncPage[ModelInfo],

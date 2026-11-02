@@ -176,6 +176,7 @@ class TestUserProfiles:
     @parametrize
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.user_profiles.list(
+            enforcement_status=["unrestricted"],
             limit=0,
             order="asc",
             order_by="created_at",
@@ -412,6 +413,7 @@ class TestAsyncUserProfiles:
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.user_profiles.list(
+            enforcement_status=["unrestricted"],
             limit=0,
             order="asc",
             order_by="created_at",

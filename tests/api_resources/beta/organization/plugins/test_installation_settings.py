@@ -23,6 +23,7 @@ class TestInstallationSettings:
     def test_method_list(self, client: Anthropic) -> None:
         installation_setting = client.beta.organization.plugins.installation_settings.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
 
@@ -35,6 +36,7 @@ class TestInstallationSettings:
             page="page",
             target_type="organization",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
 
@@ -42,6 +44,7 @@ class TestInstallationSettings:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.organization.plugins.installation_settings.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -53,6 +56,7 @@ class TestInstallationSettings:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.organization.plugins.installation_settings.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -74,6 +78,7 @@ class TestInstallationSettings:
         installation_setting = client.beta.organization.plugins.installation_settings.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -83,6 +88,7 @@ class TestInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -91,6 +97,7 @@ class TestInstallationSettings:
         response = client.beta.organization.plugins.installation_settings.with_raw_response.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -103,6 +110,7 @@ class TestInstallationSettings:
         with client.beta.organization.plugins.installation_settings.with_streaming_response.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -132,6 +140,7 @@ class TestInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -142,6 +151,7 @@ class TestInstallationSettings:
             plugin_id="plugin_id",
             installation_preference="required",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -151,6 +161,7 @@ class TestInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -164,6 +175,7 @@ class TestInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -199,6 +211,7 @@ class TestAsyncInstallationSettings:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         installation_setting = await async_client.beta.organization.plugins.installation_settings.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
 
@@ -211,6 +224,7 @@ class TestAsyncInstallationSettings:
             page="page",
             target_type="organization",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
 
@@ -218,6 +232,7 @@ class TestAsyncInstallationSettings:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugins.installation_settings.with_raw_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -229,6 +244,7 @@ class TestAsyncInstallationSettings:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugins.installation_settings.with_streaming_response.list(
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -250,6 +266,7 @@ class TestAsyncInstallationSettings:
         installation_setting = await async_client.beta.organization.plugins.installation_settings.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -259,6 +276,7 @@ class TestAsyncInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -267,6 +285,7 @@ class TestAsyncInstallationSettings:
         response = await async_client.beta.organization.plugins.installation_settings.with_raw_response.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -279,6 +298,7 @@ class TestAsyncInstallationSettings:
         async with async_client.beta.organization.plugins.installation_settings.with_streaming_response.remove(
             target="target",
             plugin_id="plugin_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -308,6 +328,7 @@ class TestAsyncInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -318,6 +339,7 @@ class TestAsyncInstallationSettings:
             plugin_id="plugin_id",
             installation_preference="required",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])
 
@@ -327,6 +349,7 @@ class TestAsyncInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -340,6 +363,7 @@ class TestAsyncInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

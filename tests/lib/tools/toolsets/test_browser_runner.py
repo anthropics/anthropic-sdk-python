@@ -5,12 +5,13 @@ from __future__ import annotations
 import os
 import json
 from typing import Any, cast
+from contextlib import nullcontext
 
 import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
+from anthropic import Anthropic, AnthropicError, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic.tools import ToolsetContractError
 from anthropic._compat import PYDANTIC_V1
 
@@ -157,6 +158,30 @@ async def test_a_toolset_in_set_messages_params_is_sent_as_its_wire_entry(
     if flavour == "async":
         await done
     assert _requests(respx_mock)[0]["tools"] == [mine.to_dict(), raw]
+
+
+@needs_runner
+@pytest.mark.parametrize("flavour", ["sync", "async"])
+@pytest.mark.parametrize("kept", [True, False], ids=["given_as_its_definition", "taken_out"])
+async def test_a_toolset_runs_only_while_set_messages_params_leaves_its_definition_in_tools(
+    respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str, kept: bool
+) -> None:
+    navigate = _member_use("navigate", "toolu_nav", {"url": "https://example.com/"})
+    respx_mock.post("/v1/messages").mock(side_effect=[_message(navigate), DONE])
+    make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
+    mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
+    raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
+
+    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine])
+    runner.set_messages_params(_with_tools(mine.to_dict(), raw) if kept else _with_tools(raw))
+    with nullcontext() if kept else pytest.warns(UserWarning, match="Toolset 'browser' .* not found in tool runner"):
+        done = runner.until_done()
+        if flavour == "async":
+            await done
+
+    result = _requests(respx_mock)[1]["messages"][-1]["content"][0]
+    assert result.get("is_error", False) is not kept
+    assert bool(mine.world.contexts) is kept
 
 
 @needs_runner
@@ -387,7 +412,9 @@ async def test_a_tools_list_is_kept_so_editing_it_in_place_reaches_the_next_requ
     make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
     mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
     toolsets: list[Any] = [mine] if with_toolset else []
-    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=toolsets)
+    runner = make(
+        model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=toolsets, thread=False
+    )
     raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
     added: dict[str, Any] = {"type": "custom", "name": "added", "input_schema": {"type": "object"}}
     tools: list[Any] = [*toolsets, raw]
@@ -410,7 +437,9 @@ async def test_a_function_tool_appended_to_the_list_in_place_is_sent_with_the_ne
 ) -> None:
     respx_mock.post("/v1/messages").mock(return_value=DONE)
     make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
-    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[])
+    runner = make(
+        model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[], thread=False
+    )
 
     def search(query: str) -> str:
         """Search for something."""
@@ -444,7 +473,9 @@ async def test_a_toolset_taken_out_of_the_list_in_place_is_not_sent_with_the_nex
     respx_mock.post("/v1/messages").mock(side_effect=[paused, DONE])
     make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
     mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
-    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine])
+    runner = make(
+        model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine], thread=False
+    )
     raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
     tools: list[Any] = [mine, raw]
 
@@ -465,14 +496,44 @@ async def test_a_toolset_taken_out_of_the_list_in_place_is_not_sent_with_the_nex
 
 @needs_runner
 @pytest.mark.parametrize("flavour", ["sync", "async"])
-async def test_tools_passed_as_a_one_shot_iterable_reach_every_request(
+async def test_a_tools_list_edited_in_place_is_sent_when_the_message_thread_is_created_and_refused_after_that(
     respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str
+) -> None:
+    respx_mock.post("/v1/messages").mock(return_value=_message({"type": "text", "text": "Working."}, stop="pause_turn"))
+    make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
+    mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
+    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine])
+    raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
+    tools: list[Any] = [mine]
+
+    def update(params: Any) -> Any:
+        return {**params, "tools": tools}
+
+    runner.set_messages_params(update)
+    tools.append(raw)
+    with pytest.raises(AnthropicError, match="Cannot change `tools` on a thread"):
+        if flavour == "sync":
+            for _ in runner:
+                tools.remove(mine)
+        else:
+            async for _ in runner:
+                tools.remove(mine)
+    assert [request["tools"] for request in _requests(respx_mock)] == [[mine.to_dict(), raw]]
+
+
+@needs_runner
+@pytest.mark.parametrize("flavour", ["sync", "async"])
+@pytest.mark.parametrize("thread", [False, None], ids=["unthreaded", "threaded"])
+async def test_tools_passed_as_a_one_shot_iterable_reach_every_request(
+    respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str, thread: bool | None
 ) -> None:
     paused = _message({"type": "text", "text": "Working."}, stop="pause_turn")
     respx_mock.post("/v1/messages").mock(side_effect=[paused, DONE])
     make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
     mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
-    runner = make(model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine])
+    runner = make(
+        model="claude-test", max_tokens=64, messages=[{"role": "user", "content": "hi"}], tools=[mine], thread=thread
+    )
     raw: dict[str, Any] = {"type": "custom", "name": "raw", "input_schema": {"type": "object"}}
 
     def update(params: Any) -> Any:
@@ -482,20 +543,23 @@ async def test_tools_passed_as_a_one_shot_iterable_reach_every_request(
     done = runner.until_done()
     if flavour == "async":
         await done
-    assert [request["tools"] for request in _requests(respx_mock)] == [[mine.to_dict(), raw]] * 2
+    sent = [mine.to_dict(), raw]
+    # The server holds the `tools` of a message thread, so the request that continues it leaves them out.
+    assert [request.get("tools") for request in _requests(respx_mock)] == [sent, sent if thread is False else None]
 
 
 @needs_runner
 @pytest.mark.parametrize("flavour", ["sync", "async"])
+@pytest.mark.parametrize("thread", [False, None], ids=["unthreaded", "threaded"])
 async def test_messages_passed_as_a_one_shot_iterable_reach_every_request(
-    respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str
+    respx_mock: MockRouter, client: Anthropic, async_client: AsyncAnthropic, flavour: str, thread: bool | None
 ) -> None:
     paused = _message({"type": "text", "text": "Working."}, stop="pause_turn")
     respx_mock.post("/v1/messages").mock(side_effect=[paused, DONE])
     make: Any = (client if flavour == "sync" else async_client).beta.messages.tool_runner
     mine = FakeBrowser() if flavour == "sync" else AsyncFakeBrowser()
     first = {"role": "user", "content": "hi"}
-    runner = make(model="claude-test", max_tokens=64, messages=[first], tools=[mine])
+    runner = make(model="claude-test", max_tokens=64, messages=[first], tools=[mine], thread=thread)
 
     def update(params: Any) -> Any:
         return {**params, "messages": (message for message in params["messages"])}
@@ -504,7 +568,9 @@ async def test_messages_passed_as_a_one_shot_iterable_reach_every_request(
     done = runner.until_done()
     if flavour == "async":
         await done
-    assert [request["messages"][:1] for request in _requests(respx_mock)] == [[first]] * 2
+    # The server holds the messages of a message thread, so the request that resumes the paused turn sends none.
+    later = [first] if thread is False else []
+    assert [request["messages"][:1] for request in _requests(respx_mock)] == [[first], later]
 
 
 def _with_tools(*tools: Any) -> Any:

@@ -83,12 +83,13 @@ class RBACRoles(SyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return self._get(
-            path_template("/v1/organizations/rbac_roles/{rbac_role_id}?beta=true", rbac_role_id=rbac_role_id),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}", rbac_role_id=rbac_role_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_roles.retrieve",
                 span_route="/v1/organizations/rbac_roles/{rbac_role_id}",
                 span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
@@ -129,7 +130,7 @@ class RBACRoles(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rbac_roles?beta=true",
+            "/v1/organizations/rbac_roles",
             page=SyncPageCursor[BetaRBACRole],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -140,6 +141,7 @@ class RBACRoles(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_roles.list",
                 span_route="/v1/organizations/rbac_roles",
             ),
@@ -201,12 +203,13 @@ class AsyncRBACRoles(AsyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return await self._get(
-            path_template("/v1/organizations/rbac_roles/{rbac_role_id}?beta=true", rbac_role_id=rbac_role_id),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}", rbac_role_id=rbac_role_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_roles.retrieve",
                 span_route="/v1/organizations/rbac_roles/{rbac_role_id}",
                 span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
@@ -247,7 +250,7 @@ class AsyncRBACRoles(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rbac_roles?beta=true",
+            "/v1/organizations/rbac_roles",
             page=AsyncPageCursor[BetaRBACRole],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -258,6 +261,7 @@ class AsyncRBACRoles(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
                 span_name="anthropic.organization.rbac_roles.list",
                 span_route="/v1/organizations/rbac_roles",
             ),

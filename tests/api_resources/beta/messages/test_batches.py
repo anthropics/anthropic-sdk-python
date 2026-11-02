@@ -22,7 +22,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 def mock_results(respx_mock: MockRouter) -> None:
     # the mock server's example results_url points at the production API
-    respx_mock.get("/v1/messages/batches/message_batch_id?beta=true").mock(
+    respx_mock.get("/v1/messages/batches/message_batch_id").mock(
         return_value=httpx2.Response(
             200, json={"results_url": "/v1/messages/batches/message_batch_id/results?beta=true"}
         )
@@ -55,6 +55,7 @@ class TestBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -70,8 +71,6 @@ class TestBatches:
                             {
                                 "content": "Hello, world",
                                 "role": "user",
-                                "clear_at": "next_user_message",
-                                "output_config": {"effort": "low"},
                             }
                         ],
                         "model": "claude-opus-5-5",
@@ -172,6 +171,7 @@ class TestBatches:
                             "block_binding": {"prefix_mismatch_behavior": "error"},
                             "display": "summarized",
                         },
+                        "thread": {"type": "create"},
                         "tool_choice": {
                             "type": "auto",
                             "disable_parallel_tool_use": True,
@@ -206,6 +206,7 @@ class TestBatches:
             betas=["string"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -227,6 +228,7 @@ class TestBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -252,6 +254,7 @@ class TestBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -265,6 +268,7 @@ class TestBatches:
     def test_method_retrieve(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -273,6 +277,7 @@ class TestBatches:
         batch = client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -280,6 +285,7 @@ class TestBatches:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -291,6 +297,7 @@ class TestBatches:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -309,7 +316,9 @@ class TestBatches:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        batch = client.beta.messages.batches.list()
+        batch = client.beta.messages.batches.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaMessageBatch], batch, path=["response"])
 
     @parametrize
@@ -319,12 +328,15 @@ class TestBatches:
             before_id="before_id",
             limit=1,
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaMessageBatch], batch, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.messages.batches.with_raw_response.list()
+        response = client.beta.messages.batches.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -333,7 +345,9 @@ class TestBatches:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.messages.batches.with_streaming_response.list() as response:
+        with client.beta.messages.batches.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -346,6 +360,7 @@ class TestBatches:
     def test_method_delete(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -354,6 +369,7 @@ class TestBatches:
         batch = client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -361,6 +377,7 @@ class TestBatches:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -372,6 +389,7 @@ class TestBatches:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -392,6 +410,7 @@ class TestBatches:
     def test_method_cancel(self, client: Anthropic) -> None:
         batch = client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -400,6 +419,7 @@ class TestBatches:
         batch = client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -407,6 +427,7 @@ class TestBatches:
     def test_raw_response_cancel(self, client: Anthropic) -> None:
         response = client.beta.messages.batches.with_raw_response.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -418,6 +439,7 @@ class TestBatches:
     def test_streaming_response_cancel(self, client: Anthropic) -> None:
         with client.beta.messages.batches.with_streaming_response.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -437,7 +459,7 @@ class TestBatches:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("client", [False], indirect=True)
     def test_method_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id?beta=true").mock(
+        respx_mock.get("/v1/messages/batches/message_batch_id").mock(
             return_value=httpx2.Response(
                 200, json={"results_url": "/v1/messages/batches/message_batch_id/results?beta=true"}
             )
@@ -449,6 +471,7 @@ class TestBatches:
         )
         results = client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert results.http_response is not None
         assert not results.http_response.is_stream_consumed
@@ -478,6 +501,7 @@ class TestBatches:
         mock_results(respx_mock)
         response = client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -491,6 +515,7 @@ class TestBatches:
         mock_results(respx_mock)
         with client.beta.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -525,6 +550,7 @@ class TestAsyncBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -540,8 +566,6 @@ class TestAsyncBatches:
                             {
                                 "content": "Hello, world",
                                 "role": "user",
-                                "clear_at": "next_user_message",
-                                "output_config": {"effort": "low"},
                             }
                         ],
                         "model": "claude-opus-5-5",
@@ -642,6 +666,7 @@ class TestAsyncBatches:
                             "block_binding": {"prefix_mismatch_behavior": "error"},
                             "display": "summarized",
                         },
+                        "thread": {"type": "create"},
                         "tool_choice": {
                             "type": "auto",
                             "disable_parallel_tool_use": True,
@@ -676,6 +701,7 @@ class TestAsyncBatches:
             betas=["string"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -697,6 +723,7 @@ class TestAsyncBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -722,6 +749,7 @@ class TestAsyncBatches:
                     },
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -735,6 +763,7 @@ class TestAsyncBatches:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -743,6 +772,7 @@ class TestAsyncBatches:
         batch = await async_client.beta.messages.batches.retrieve(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -750,6 +780,7 @@ class TestAsyncBatches:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -761,6 +792,7 @@ class TestAsyncBatches:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.batches.with_streaming_response.retrieve(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -779,7 +811,9 @@ class TestAsyncBatches:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        batch = await async_client.beta.messages.batches.list()
+        batch = await async_client.beta.messages.batches.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaMessageBatch], batch, path=["response"])
 
     @parametrize
@@ -789,12 +823,15 @@ class TestAsyncBatches:
             before_id="before_id",
             limit=1,
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaMessageBatch], batch, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.messages.batches.with_raw_response.list()
+        response = await async_client.beta.messages.batches.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -803,7 +840,9 @@ class TestAsyncBatches:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.messages.batches.with_streaming_response.list() as response:
+        async with async_client.beta.messages.batches.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -816,6 +855,7 @@ class TestAsyncBatches:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -824,6 +864,7 @@ class TestAsyncBatches:
         batch = await async_client.beta.messages.batches.delete(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedMessageBatch, batch, path=["response"])
 
@@ -831,6 +872,7 @@ class TestAsyncBatches:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -842,6 +884,7 @@ class TestAsyncBatches:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.batches.with_streaming_response.delete(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -862,6 +905,7 @@ class TestAsyncBatches:
     async def test_method_cancel(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -870,6 +914,7 @@ class TestAsyncBatches:
         batch = await async_client.beta.messages.batches.cancel(
             message_batch_id="message_batch_id",
             betas=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaMessageBatch, batch, path=["response"])
 
@@ -877,6 +922,7 @@ class TestAsyncBatches:
     async def test_raw_response_cancel(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.messages.batches.with_raw_response.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -888,6 +934,7 @@ class TestAsyncBatches:
     async def test_streaming_response_cancel(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.messages.batches.with_streaming_response.cancel(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -907,7 +954,7 @@ class TestAsyncBatches:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("async_client", [False], indirect=True)
     async def test_method_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/messages/batches/message_batch_id?beta=true").mock(
+        respx_mock.get("/v1/messages/batches/message_batch_id").mock(
             return_value=httpx2.Response(
                 200, json={"results_url": "/v1/messages/batches/message_batch_id/results?beta=true"}
             )
@@ -919,6 +966,7 @@ class TestAsyncBatches:
         )
         results = await async_client.beta.messages.batches.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
         assert results.http_response is not None
         assert not results.http_response.is_stream_consumed
@@ -949,6 +997,7 @@ class TestAsyncBatches:
         mock_results(respx_mock)
         response = await async_client.beta.messages.batches.with_raw_response.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -962,6 +1011,7 @@ class TestAsyncBatches:
         mock_results(respx_mock)
         async with async_client.beta.messages.batches.with_streaming_response.results(
             message_batch_id="message_batch_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

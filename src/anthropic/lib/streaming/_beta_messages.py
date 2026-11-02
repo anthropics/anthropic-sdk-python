@@ -53,6 +53,8 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         self._raw_stream = raw_stream
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
+        self._message_complete = False
+        self._completed_blocks = 0
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
         self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
@@ -154,6 +156,10 @@ class BetaMessageStream(Generic[ResponseFormatT]):
             except Exception:
                 withhold_message_snapshot(self._raw_stream)
                 raise
+            if sse_event.type == "content_block_stop":
+                self._completed_blocks += 1
+            elif sse_event.type == "message_stop":
+                self._message_complete = True
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -219,6 +225,8 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         self._raw_stream = raw_stream
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
+        self._message_complete = False
+        self._completed_blocks = 0
         self.__final_message_snapshot: ParsedBetaMessage[ResponseFormatT] | None = None
         self.__json_bufs: dict[int, bytes] = {}
         self.__output_format = output_format
@@ -320,6 +328,10 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
             except Exception:
                 withhold_message_snapshot(self._raw_stream)
                 raise
+            if sse_event.type == "content_block_stop":
+                self._completed_blocks += 1
+            elif sse_event.type == "message_stop":
+                self._message_complete = True
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:

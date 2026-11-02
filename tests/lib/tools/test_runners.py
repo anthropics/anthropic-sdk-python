@@ -12,17 +12,36 @@ import pydantic
 from respx import MockRouter
 from inline_snapshot import external, snapshot
 
-from anthropic import Anthropic, AsyncAnthropic, InternalServerError, beta_tool, beta_async_tool
-from anthropic._types import Omit, omit
+from anthropic import (
+    Anthropic,
+    AnthropicError,
+    AsyncAnthropic,
+    AnthropicVertex,
+    InternalServerError,
+    AsyncAnthropicVertex,
+    beta_tool,
+    beta_async_tool,
+)
+from anthropic._types import Omit, omit, not_given
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib.tools import ToolError, BetaFunctionTool, BetaAsyncFunctionTool, BetaFunctionToolResultType
-from anthropic.lib.tools._beta_runner import (
-    _STOP_REASON_STEPS,
+from anthropic.lib.tools import (
+    ToolError,
     BetaToolRunner,
+    BetaFunctionTool,
     BetaAsyncToolRunner,
-    _determine_next_step_from_stop_reason,
+    BetaAsyncFunctionTool,
+    BetaStreamingToolRunner,
+    BetaFunctionToolResultType,
+    BetaAsyncStreamingToolRunner,
 )
+from anthropic.types.beta import (
+    BetaUserMessageParam,
+    BetaRequestToolRemovalBlockParam,
+    BetaRequestToolAdditionBlockParam,
+)
+from anthropic.lib._stainless_helpers import tag_helper
+from anthropic.lib.tools._beta_runner import _STOP_REASON_STEPS, _determine_next_step_from_stop_reason
 from anthropic.types.anthropic_beta_param import AnthropicBetaParam
 from anthropic.types.beta.beta_tool_param import BetaToolParam
 from anthropic.types.beta.beta_stop_reason import BetaStopReason
@@ -38,6 +57,7 @@ from anthropic.types.beta.beta_context_management_config_param import BetaContex
 from anthropic.types.beta.beta_tool_change_tool_reference_param import BetaToolChangeToolReferenceParam
 
 from ..utils import print_obj
+from .toolsets._stubs import EchoBrowserToolset, AsyncEchoBrowserToolset
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -298,7 +318,7 @@ class TestSyncRunTools:
         for message_iter in runner:
             if message_iter.content[0].type == "tool_use":
                 runner.append_messages(
-                    BetaMessageParam(
+                    BetaUserMessageParam(
                         role="user",
                         content=[
                             BetaToolResultBlockParam(
@@ -738,6 +758,7 @@ def test_pause_turn_resumes_runner_sync(respx_mock: MockRouter) -> None:
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         message = client.beta.messages.tool_runner(
+            thread=False,
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather, {"type": "web_search_20250305", "name": "web_search"}],
@@ -768,6 +789,7 @@ async def test_pause_turn_resumes_runner_async(respx_mock: MockRouter) -> None:
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         message = await client.beta.messages.tool_runner(
+            thread=False,
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather, {"type": "web_search_20250305", "name": "web_search"}],
@@ -861,6 +883,7 @@ def test_compaction_resumes_runner_sync(respx_mock: MockRouter) -> None:
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         message = client.beta.messages.tool_runner(
+            thread=False,
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather],
@@ -891,6 +914,7 @@ async def test_compaction_resumes_runner_async(respx_mock: MockRouter) -> None:
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
         message = await client.beta.messages.tool_runner(
+            thread=False,
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather],
@@ -1032,7 +1056,9 @@ def _end_turn_response() -> httpx2.Response:
     )
 
 
-def _tool_reference_block(kind: Literal["tool_removal", "tool_addition"], name: str) -> BetaContentBlockParam:
+def _tool_reference_block(
+    kind: Literal["tool_removal", "tool_addition"], name: str
+) -> BetaRequestToolRemovalBlockParam | BetaRequestToolAdditionBlockParam:
     tool: BetaToolChangeToolReferenceParam = {"type": "tool_reference", "name": name}
     if kind == "tool_removal":
         return {"type": "tool_removal", "tool": tool}
@@ -1052,6 +1078,8 @@ def _run_sync_tool_use(
         model="claude-haiku-4-5",
         tools=tools,
         messages=messages,
+        # The tests assert on whole request bodies; on a message thread a request carries only the new messages.
+        thread=False,
     )
     responses: List[BetaMessageParam] = []
     for _ in runner:
@@ -1681,6 +1709,8 @@ async def _run_with_tool_changes(
         messages=messages or [{"role": "user", "content": "What time is it, and what is the weather in SF?"}],
         max_iterations=max_iterations,
         stream=stream,
+        # The tests assert on whole request bodies; on a message thread a request carries only the new messages.
+        thread=False,
     )
     if before_first_request is not None:
         before_first_request(runner)
@@ -1758,6 +1788,34 @@ async def test_tool_changes_made_before_the_first_request_follow_a_trailing_assi
         _COMPACTION_ASSISTANT_TURN,
         _tool_changes_message(_addition(get_weather.to_dict())),
     ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_tool_removal_applies_when_the_history_has_a_system_message_without_content(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[_calls_tool("get_weather", "toolu_weather"), _end_turn_response()]
+    )
+    calls: list[str] = []
+    messages: list[BetaMessageParam] = [
+        {"role": "user", "content": "What is the weather in SF?"},
+        {"role": "system", "output_config": {"effort": "low"}},
+        {"role": "system", "content": [_tool_reference_block("tool_removal", "get_weather")]},
+    ]
+
+    with pytest.warns(UserWarning, match="Tool 'get_weather' not found in tool runner"):
+        await _run_with_tool_changes(
+            client if sync else async_client,
+            tools=[_recording_tool(sync, "get_weather", calls)],
+            script={},
+            messages=messages,
+        )
+
+    assert calls == []
+    assert _sent_request_bodies(respx_mock)[1]["messages"][:3] == messages
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -2237,12 +2295,12 @@ def _weather_tool(sync: bool, run: Callable[[str, Literal["c", "f"]], BetaFuncti
 
 async def _run_tool_use(
     client: Anthropic | AsyncAnthropic, *, tools: List[Any], messages: List[BetaMessageParam]
-) -> List[BetaMessageParam]:
+) -> List[BetaUserMessageParam]:
     """`_run_sync_tool_use` for either client."""
     runner: Any = client.beta.messages.tool_runner(
         max_tokens=1024, model="claude-haiku-4-5", tools=tools, messages=messages
     )
-    responses: List[BetaMessageParam] = []
+    responses: List[BetaUserMessageParam] = []
     if isinstance(client, Anthropic):
         for _ in runner:
             response = runner.generate_tool_call_response()
@@ -2448,6 +2506,8 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
             "output_format",
             # TODO
             "stream",
+            # the runner sets it itself, and takes only `False`, to opt out of message threads
+            "thread",
             # a tool runner can't take it: every request of the loop would compact again
             "compaction",
         },
@@ -2524,8 +2584,12 @@ def _sync_compact_runner(
     betas: Union[List[AnthropicBetaParam], Omit] = omit,
     context_management: Union[BetaContextManagementConfigParam, Omit] = omit,
     max_iterations: Union[int, Omit] = omit,
+    thread: Union[Literal[False], Omit] = omit,
 ) -> BetaToolRunner[None]:
     return client.beta.messages.tool_runner(
+        # `thread=False` is for the tests that pin the full history of a request the loop sends between compactions:
+        # on a message thread those requests carry only the messages the server does not hold yet.
+        thread=thread,
         max_tokens=1024,
         model="claude-haiku-4-5",
         tools=[_sync_weather_tool()],
@@ -2541,8 +2605,10 @@ def _async_compact_runner(
     *,
     context_management: Union[BetaContextManagementConfigParam, Omit] = omit,
     max_iterations: Union[int, Omit] = omit,
+    thread: Union[Literal[False], Omit] = omit,
 ) -> BetaAsyncToolRunner[None]:
     return client.beta.messages.tool_runner(
+        thread=thread,
         max_tokens=1024,
         model="claude-haiku-4-5",
         tools=[_async_weather_tool()],
@@ -2589,6 +2655,8 @@ def test_compact_before_next_turn_is_sent_after_the_tools_run_sync(respx_mock: M
             context_management={"edits": [{"type": "clear_tool_uses_20250919"}]},
             # The compaction request is not a model turn, so both real turns still fit.
             max_iterations=2,
+            # A message thread adds its own beta to the header pinned below.
+            thread=False,
         )
         yielded: List[Any] = []
         for message in runner:
@@ -2746,7 +2814,11 @@ def test_pending_compaction_is_skipped_on_a_final_turn_with_unrun_tool_calls_syn
 
     assert stop_reasons == ["max_tokens"]
     assert len(respx_mock.calls) == 1
-    assert _current_messages(runner) == [{"role": "user", "content": "What is the weather in SF?"}]
+    # Nothing was compacted: the history is the prompt and the final turn, which a thread-based runner always holds.
+    assert _current_messages(runner) == [
+        {"role": "user", "content": "What is the weather in SF?"},
+        {"role": "assistant", "content": _max_tokens_with_tool_use().json()["content"]},
+    ]
     assert "pending compaction was skipped" in caplog.text
 
 
@@ -2769,7 +2841,11 @@ async def test_pending_compaction_is_skipped_on_a_final_turn_with_unrun_tool_cal
 
     assert stop_reasons == ["max_tokens"]
     assert len(respx_mock.calls) == 1
-    assert _current_messages(runner) == [{"role": "user", "content": "What is the weather in SF?"}]
+    # Nothing was compacted: the history is the prompt and the final turn, which a thread-based runner always holds.
+    assert _current_messages(runner) == [
+        {"role": "user", "content": "What is the weather in SF?"},
+        {"role": "assistant", "content": _max_tokens_with_tool_use().json()["content"]},
+    ]
     assert "pending compaction was skipped" in caplog.text
 
 
@@ -2788,7 +2864,7 @@ def test_compact_before_next_turn_waits_out_a_paused_turn_sync(respx_mock: MockR
     with Anthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
-        runner = _sync_compact_runner(client)
+        runner = _sync_compact_runner(client, thread=False)
         for message in runner:
             if message.stop_reason == "pause_turn":
                 runner.compact_before_next_turn()
@@ -2816,7 +2892,7 @@ async def test_compact_before_next_turn_waits_out_a_paused_turn_async(respx_mock
     async with AsyncAnthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
-        runner = _async_compact_runner(client)
+        runner = _async_compact_runner(client, thread=False)
         async for message in runner:
             if message.stop_reason == "pause_turn":
                 runner.compact_before_next_turn()
@@ -3044,7 +3120,7 @@ def test_compaction_without_a_summary_keeps_the_history_and_warns_sync(
     with Anthropic(
         base_url=base_url, api_key="my-anthropic-api-key", _strict_response_validation=True, max_retries=0
     ) as client:
-        runner = _sync_compact_runner(client)
+        runner = _sync_compact_runner(client, thread=False)
         runner.append_messages({"role": "user", "content": "And in NYC?"})
         runner.compact_before_next_turn()
         yielded = 0
@@ -3192,7 +3268,18 @@ def test_compaction_param_is_refused_on_a_tool_runner() -> None:
         runner = _sync_compact_runner(client)
         with pytest.raises(ValueError) as from_setter:
             runner.set_messages_params(lambda params: {**params, "compaction": {"type": "summarize"}})
-        with pytest.raises(ValueError) as from_constructor:
+        with pytest.raises(ValueError) as from_thread:
+            BetaToolRunner(
+                thread=client.beta.messages.thread(
+                    max_tokens=1024,
+                    model="claude-haiku-4-5",
+                    messages=[{"role": "user", "content": "What is the weather in SF?"}],
+                    tools=[_sync_weather_tool()],
+                    compaction={"type": "summarize"},
+                ),
+                options={},
+            )
+        with pytest.raises(ValueError) as from_params:
             BetaToolRunner(
                 params={
                     "max_tokens": 1024,
@@ -3206,7 +3293,7 @@ def test_compaction_param_is_refused_on_a_tool_runner() -> None:
                 client=client,
             )
 
-    assert str(from_setter.value) == str(from_constructor.value) == refusal
+    assert str(from_setter.value) == str(from_thread.value) == str(from_params.value) == refusal
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
@@ -3319,8 +3406,9 @@ def _assert_reply_params_are_left_off_the_compaction_request_only(
     assert after["tool_choice"] == tool_choice
     assert after["output_config"]["effort"] == "low"
     assert after["output_config"]["format"]["type"] == "json_schema"
+    # Every request on a message thread carries the threads beta.
     assert [call.request.headers.get("anthropic-beta") for call in cast("List[Any]", respx_mock.calls)] == [
-        "compact-2026-09-04"
+        "compact-2026-09-04,message-threads-2026-08-12"
     ] * 2
 
 
@@ -3415,6 +3503,7 @@ async def test_runner_sends_no_beta_header_when_given_no_betas(
         tools=tools,
         messages=[{"role": "user", "content": "What is the weather in SF?"}],
         output_config={"format": _FORECAST_FORMAT},
+        thread=False,
     )
     if sync:
         runner.until_done()
@@ -3521,3 +3610,234 @@ async def test_compact_before_next_turn_when_streaming_async(respx_mock: MockRou
     assert compaction["compaction"] == {"type": "summarize"}
     assert compaction["stream"] is True
     assert after["messages"] == _compaction_block_alone()
+
+
+_plain_and_streaming = pytest.mark.parametrize("stream", [False, True], ids=["plain", "streaming"])
+
+_WEATHER_FIELDS: Dict[str, Any] = {
+    "max_tokens": 1024,
+    "model": "claude-haiku-4-5",
+    "messages": [{"role": "user", "content": "What is the weather in SF?"}],
+}
+
+
+def _runner_class(*, sync: bool, stream: bool) -> Any:
+    if sync:
+        return BetaStreamingToolRunner if stream else BetaToolRunner
+    return BetaAsyncStreamingToolRunner if stream else BetaAsyncToolRunner
+
+
+def _weather_then_browser_replies(stream: bool) -> List[httpx2.Response]:
+    calls: List[Dict[str, Any]] = [
+        {"type": "tool_use", "id": "toolu_weather", "name": "get_weather", "input": {"location": "SF", "units": "f"}},
+        {"type": "tool_use", "id": "toolu_open", "name": "open", "toolset_name": "browser", "input": {"url": "a.test"}},
+    ]
+    if stream:
+        return [
+            *(
+                _sse_message(
+                    {**call, "input": {}},
+                    "tool_use",
+                    {"type": "input_json_delta", "partial_json": json.dumps(call["input"])},
+                )
+                for call in calls
+            ),
+            _sse_message({"type": "text", "text": ""}, "end_turn", {"type": "text_delta", "text": "Done."}),
+        ]
+    reply = _end_turn_response().json()
+    return [
+        *(
+            httpx2.Response(
+                200, json={**reply, "id": f"msg_{call['id']}", "content": [call], "stop_reason": "tool_use"}
+            )
+            for call in calls
+        ),
+        _end_turn_response(),
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.parametrize("threading", ["message_thread", "thread_false", "client_without_message_threads"])
+@pytest.mark.parametrize(
+    ("stream", "streaming_options"),
+    [(False, {}), (True, {}), (True, {"run_tools_eagerly": True})],
+    ids=["plain", "streaming", "streaming_eagerly"],
+)
+@_sync_and_async
+@pytest.mark.respx()
+async def test_a_runner_made_from_params_sends_the_requests_of_tool_runner(
+    sync: bool,
+    stream: bool,
+    streaming_options: Dict[str, Any],
+    threading: str,
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+    respx_mock: MockRouter,
+) -> None:
+    route = respx_mock.route(method="POST")
+    api_client: Any = client if sync else async_client
+    if threading == "client_without_message_threads":
+        api_client = (AnthropicVertex if sync else AsyncAnthropicVertex)(
+            region="us-east5", project_id="example-project", access_token="example-token"
+        )
+    fields = {**_WEATHER_FIELDS, "system": "Be brief.", "betas": ["inline-tools-2026-09-15"]}
+    if threading == "thread_false":
+        fields["thread"] = False
+
+    async def requests_of(make_runner: Callable[[Any, Any], Any]) -> List[Any]:
+        sent_before = len(respx_mock.calls)
+        route.mock(side_effect=_weather_then_browser_replies(stream))
+        browser: Any = EchoBrowserToolset() if sync else AsyncEchoBrowserToolset()
+        tag_helper(browser, "browser-toolset")
+        done = make_runner(_sync_weather_tool() if sync else _async_weather_tool(), browser).until_done()
+        if not sync:
+            await done
+        assert browser.calls == [("open", {"url": "a.test"})]
+        return [
+            (
+                str(call.request.url),
+                # The helper tags are a set: their order depends on which layer finds a tag first.
+                {
+                    **call.request.headers,
+                    "x-stainless-helper": set(call.request.headers["x-stainless-helper"].split(", ")),
+                },
+                json.loads(call.request.content),
+            )
+            for call in cast("List[Any]", respx_mock.calls)[sent_before:]
+        ]
+
+    from_tool_runner = await requests_of(
+        lambda weather, browser: api_client.beta.messages.tool_runner(
+            **fields,
+            tools=[weather, browser, _WEB_SEARCH],
+            stream=stream,
+            max_iterations=5,
+            extra_headers={"x-example": "yes"},
+            **streaming_options,
+        )
+    )
+    from_params = await requests_of(
+        lambda weather, browser: _runner_class(sync=sync, stream=stream)(
+            params={**fields, "tools": [weather.to_dict(), browser.to_dict(), _WEB_SEARCH], "metadata": omit},
+            options={
+                "extra_headers": {"x-example": "yes"},
+                "extra_query": None,
+                "extra_body": None,
+                "timeout": not_given,
+            },
+            tools=[weather, browser],
+            client=api_client,
+            max_iterations=5,
+            **streaming_options,
+        )
+    )
+
+    assert from_params == from_tool_runner
+    assert [body.get("thread", {}).get("type") for _, _, body in from_params] == (
+        ["create", "continue", "continue"] if threading == "message_thread" else [None] * 3
+    )
+    assert [headers["x-stainless-helper"] for _, headers, _ in from_params] == [
+        {"BetaToolRunner", "browser-toolset", *(["message-thread"] if threading == "message_thread" else [])}
+    ] * 3
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_plain_and_streaming
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_a_runner_made_from_params_sends_their_tool_definitions_and_runs_its_tools(
+    sync: bool, stream: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    weather, _, done = _weather_then_browser_replies(stream)
+    respx_mock.post("/v1/messages").mock(side_effect=[weather, done])
+    tool: Any = _sync_weather_tool() if sync else _async_weather_tool()
+    definition = {**tool.to_dict(), "cache_control": {"type": "ephemeral"}}
+
+    until_done = _runner_class(sync=sync, stream=stream)(
+        params={**_WEATHER_FIELDS, "tools": [definition]},
+        options={},
+        tools=[tool],
+        client=client if sync else async_client,
+    ).until_done()
+    if not sync:
+        await until_done
+
+    first, second = _sent_request_bodies(respx_mock)
+    assert first["tools"] == [definition]
+    assert second["messages"] == [
+        {
+            "role": "user",
+            "content": [
+                {"type": "tool_result", "tool_use_id": "toolu_weather", "content": json.dumps(_get_weather("SF", "f"))}
+            ],
+        }
+    ]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.parametrize(
+    ("bad_fields", "wrong_flavour", "error"),
+    [
+        ({"thread": {"type": "create"}}, False, TypeError),
+        ({"output_format": _Forecast, "output_config": {"format": _FORECAST_FORMAT}}, False, AnthropicError),
+        ({}, True, TypeError),
+    ],
+    ids=["thread", "two_output_formats", "tool_of_the_other_flavour"],
+)
+@_plain_and_streaming
+@_sync_and_async
+async def test_a_runner_made_from_params_raises_the_errors_of_tool_runner(
+    sync: bool,
+    stream: bool,
+    bad_fields: Dict[str, Any],
+    wrong_flavour: bool,
+    error: Type[Exception],
+    client: Anthropic,
+    async_client: AsyncAnthropic,
+) -> None:
+    api_client: Any = client if sync else async_client
+    tool: Any = _sync_weather_tool() if sync != wrong_flavour else _async_weather_tool()
+
+    with pytest.raises(error) as from_tool_runner:
+        api_client.beta.messages.tool_runner(**_WEATHER_FIELDS, **bad_fields, tools=[tool], stream=stream)
+    with pytest.raises(error) as from_params:
+        _runner_class(sync=sync, stream=stream)(
+            params={**_WEATHER_FIELDS, **bad_fields, "tools": [tool.to_dict()]},
+            options={},
+            tools=[tool],
+            client=api_client,
+        )
+
+    assert str(from_params.value) == str(from_tool_runner.value)
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@pytest.mark.parametrize(
+    ("given", "got"),
+    [
+        ([], "none of them"),
+        (["params", "tools"], "`params`, `tools`"),
+        (["thread", "client"], "`thread`, `client`"),
+        (["thread", "params", "tools", "client"], "`thread`, `params`, `tools`, `client`"),
+    ],
+    ids=["neither", "no_client", "thread_and_client", "both"],
+)
+@_plain_and_streaming
+@_sync_and_async
+async def test_a_runner_takes_either_a_thread_or_params_tools_and_client(
+    sync: bool, stream: bool, given: List[str], got: str, client: Anthropic, async_client: AsyncAnthropic
+) -> None:
+    api_client: Any = client if sync else async_client
+    arguments: Dict[str, Any] = {
+        "thread": api_client.beta.messages.thread(max_tokens=1024, model="claude-haiku-4-5"),
+        "params": _WEATHER_FIELDS,
+        "tools": [],
+        "client": api_client,
+    }
+
+    with pytest.raises(TypeError) as error:
+        _runner_class(sync=sync, stream=stream)(options={}, **{name: arguments[name] for name in given})
+
+    assert str(error.value) == (
+        f"A tool runner takes either `thread`, or `params`, `tools` and `client`, but got {got}."
+    )

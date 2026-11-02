@@ -16,9 +16,24 @@ class SpendLimitListParams(TypedDict, total=False):
     """Opaque cursor from a previous response's `next_page` field."""
 
     scope_type: Optional[
-        List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+        List[
+            Literal[
+                "organization", "organization_service", "rbac_group", "seat_tier", "usage_tier", "user", "workspace"
+            ]
+        ]
     ]
-    """Return only limits with these scope types. Omit for all."""
+    """Return only limits with these scope types.
+
+    Omit for all. A scope type that doesn't apply to the organization gets a 400
+    error.
+    """
+
+    workspace_id: Optional[str]
+    """
+    Return only the limits whose `scope.workspace_id` is this workspace
+    (`wrkspc_...`). Claude Console organizations only; other organizations get a 400
+    error.
+    """
 
     betas: List[AnthropicBetaParam]
     """

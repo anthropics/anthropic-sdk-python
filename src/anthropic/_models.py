@@ -989,6 +989,9 @@ class FinalRequestOptions(pydantic.BaseModel):
     idempotency_key: Union[str, None] = None
     post_parser: Union[Callable[[Any], Any], NotGiven] = NotGiven()
     follow_redirects: Union[bool, None] = None
+    # The query pairs that tell the operation apart from the others with its path in the OpenAPI
+    # document. Set by the SDK method that makes the API call. Not a public option.
+    qualifiers: Optional[dict[str, str]] = None
     # Set by the SDK method that makes the API call, for the call's span. Not public options.
     span_name: Optional[str] = None
     span_route: Optional[str] = None

@@ -13,7 +13,7 @@ jobs:
     name: changelog
     runs-on: 'ubuntu-latest'
     if: |-
-      github.repository == 'anthropics/anthropic-sdk-python-private' &&
+      github.repository_owner == 'anthropics' && github.repository != 'anthropics/anthropic-sdk-python' &&
       !github.event.pull_request.draft &&
       !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
 

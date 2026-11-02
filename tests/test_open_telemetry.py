@@ -3125,7 +3125,6 @@ class TestHttpAttributes:
         assert attributes(span)["http.route"] == "/v1/files/{file_id}"
         assert attributes(span)["server.address"] == "api.example.com"
         assert attributes(span)["server.port"] == 8443
-        # `?beta=true` is not a parameter that the endpoint defines, so there is no `url.query`.
         assert url_attributes(span) == {
             "url.scheme": "https",
             "url.path": "/proxy/v1/files/a%2Fb",
@@ -3363,7 +3362,7 @@ class TestHttpAttributes:
         [request] = requests(route)
         assert (
             request.url.query
-            == b"beta=true&tenant=t1&ids%5B%5D=file+1&ids%5B%5D=file_2&limit=5&trace=on&scope_id=a%26b&limit%5Bx%5D=1"
+            == b"tenant=t1&ids%5B%5D=file+1&ids%5B%5D=file_2&limit=5&trace=on&scope_id=a%26b&limit%5Bx%5D=1"
         )
         span = spans.one("anthropic.files.list")
         # What is left is as it was sent, in the order it was sent. A defined parameter stays however the caller set it.
@@ -8141,6 +8140,7 @@ class TestTracingFailures:
     ) -> None:
         route = respx_mock.post().mock(return_value=httpx2.Response(200, json=MESSAGE))
         called_names: list[str] = []
+        await close_what_earlier_tests_left_suspended()
 
         def refuse(name: str) -> Callable[..., Any]:
             def function(*_args: object, **_kwargs: object) -> Any:
@@ -8167,6 +8167,22 @@ class TestTracingFailures:
 
         assert route.call_count == 3 * len(clients)
         assert called_names == []
+
+
+async def close_what_earlier_tests_left_suspended() -> None:
+    """Closes the generators that earlier tests of this process walked away from, such as a tool runner's.
+
+    Python closes one when it frees it, which can be during a later test, and a tool runner that closes calls
+    OpenTelemetry.
+    """
+    while True:
+        gc.collect()
+        # The event loop closes an asynchronous generator in a task, which it starts on its next turn.
+        await asyncio.sleep(0)
+        closing = asyncio.all_tasks() - {asyncio.current_task()}
+        if not closing:
+            return
+        await asyncio.wait(closing)
 
 
 def ask_for_global_tracer_provider_again() -> None:
