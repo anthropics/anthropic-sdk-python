@@ -28,7 +28,7 @@ guard_stream(stream, seconds=30.0)
 
 try:
     for event in stream:
-        if event.type == "content_block_delta":
+        if event.type == "content_block_delta" and event.delta.type == "text_delta":
             print(event.delta.text, end="", flush=True)
 except APITimeoutError:
     # Distinguishable from a short answer: this means the server went quiet, not that it finished.
