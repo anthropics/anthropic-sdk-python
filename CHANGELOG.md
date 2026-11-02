@@ -33,6 +33,7 @@
 
 ### Documentation
 
+* **api:** show each field's own description for `speed`
 * **client:** add missing await to the async parse() docstring example
 * **examples:** keep the message threads example valid on Sonnet 5.5
 * **examples:** use current model IDs
