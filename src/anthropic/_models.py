@@ -5,6 +5,7 @@ import sys
 import types
 import inspect
 import weakref
+import threading
 from typing import (
     IO,
     TYPE_CHECKING,
@@ -111,6 +112,41 @@ class _ConfigProtocol(Protocol):
     allow_population_by_field_name: bool
 
 
+# Deferred models build on first use, possibly on several threads at once, and pydantic's model_rebuild() isn't
+# thread-safe before 2.14. The lock is reentrant because building one model can start building another on the
+# same thread, and one lock serves every class because per-class locks taken in opposite orders would deadlock.
+_model_build_lock = threading.RLock()
+
+
+def _reset_model_build_lock() -> None:
+    # Another thread may hold the lock at fork time, and the child would wait for it forever.
+    global _model_build_lock
+    _model_build_lock = threading.RLock()
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_reset_model_build_lock)
+
+
+def _pydantic_locks_model_rebuild() -> bool:
+    import pydantic.main
+
+    if hasattr(pydantic.main, "_rebuild_lock"):
+        return True
+    parts = pydantic.VERSION.split("+")[0].split(".")
+    try:
+        release = (int(parts[0]), int(parts[1]))
+    except (IndexError, ValueError):
+        return False
+    patch = ".".join(parts[2:])
+    return release > (2, 14) or (release == (2, 14) and "a" not in patch and "dev" not in patch)
+
+
+# Pydantic 2.14.0b1 added its own lock around model_rebuild(), so BaseModel overrides it only before that:
+# taking both locks could deadlock, and the override repeats pydantic's private keywords.
+_PYDANTIC_LOCKS_MODEL_REBUILD = _pydantic_locks_model_rebuild()
+
+
 class BaseModel(pydantic.BaseModel):
     if PYDANTIC_V1:
 
@@ -123,6 +159,32 @@ class BaseModel(pydantic.BaseModel):
         class Config(pydantic.BaseConfig):  # pyright: ignore[reportDeprecated]
             extra: Any = pydantic.Extra.allow  # type: ignore
     else:
+        if not _PYDANTIC_LOCKS_MODEL_REBUILD:
+
+            @classmethod
+            @override
+            def model_rebuild(
+                cls,
+                *,
+                force: bool = False,
+                raise_errors: bool = True,
+                _parent_namespace_depth: int = 2,
+                _types_namespace: Any = None,
+            ) -> bool | None:
+                if cls.__pydantic_complete__ and not force:
+                    return None
+                with _model_build_lock:
+                    if cls.__pydantic_complete__ and not force:
+                        # Another thread built cls while this one waited. Return True, not None:
+                        # before 2.5, pydantic's own first-use build call treats None as a failed build.
+                        return True
+                    return super().model_rebuild(
+                        force=force,
+                        raise_errors=raise_errors,
+                        _parent_namespace_depth=_parent_namespace_depth + 1 if _parent_namespace_depth > 0 else 0,
+                        _types_namespace=_types_namespace,
+                    )
+
         model_config: ClassVar[ConfigDict] = ConfigDict(
             extra="allow", defer_build=coerce_boolean(os.environ.get("DEFER_PYDANTIC_BUILD", "true"))
         )
@@ -525,7 +587,7 @@ def _get_extra_fields_type(cls: type[pydantic.BaseModel]) -> type | None:
         # TODO
         return None
 
-    schema = cls.__pydantic_core_schema__
+    schema = _get_own_core_schema(cls)
     if schema["type"] == "model":
         fields = schema["schema"]
         if fields["type"] == "model-fields":
@@ -535,6 +597,14 @@ def _get_extra_fields_type(cls: type[pydantic.BaseModel]) -> type | None:
                 return extras["cls"]  # type: ignore[no-any-return]
 
     return None
+
+
+def _get_own_core_schema(cls: type[pydantic.BaseModel]) -> CoreSchema:
+    # Before pydantic 2.14, while another thread builds cls, pydantic has deleted cls.__pydantic_core_schema__,
+    # so reading it would return a parent class's schema. model_rebuild() waits for that build.
+    if not cls.__pydantic_complete__:
+        cls.model_rebuild(raise_errors=False, _parent_namespace_depth=0)
+    return cls.__pydantic_core_schema__
 
 
 def is_basemodel(type_: type) -> bool:
@@ -848,7 +918,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
 
 
 def _extract_field_schema_pv2(model: type[BaseModel], field_name: str) -> ModelField | None:
-    schema = model.__pydantic_core_schema__
+    schema = _get_own_core_schema(model)
     if schema["type"] == "definitions":
         schema = schema["schema"]
 

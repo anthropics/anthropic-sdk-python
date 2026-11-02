@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.4.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.4.1) (2026-11-02)
+
+### Bug Fixes
+
+* **client:** make the first parse of each response model thread-safe
+
+
+### Chores
+
+* **ci:** also run the tests with deferred pydantic model builds
+
+
+### Documentation
+
+* **api:** show each field's own description for `speed`
+
 ## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-11-02)
 
 ### Features
@@ -21,7 +37,6 @@
 
 ### Chores
 
-* **ci:** also run the tests with deferred pydantic model builds
 * **ci:** remove unused build upload steps
 * **docs:** clarify the Slack channel id description
 * **docs:** clarify what disabling the Compliance API stops
@@ -33,7 +48,6 @@
 
 ### Documentation
 
-* **api:** show each field's own description for `speed`
 * **client:** add missing await to the async parse() docstring example
 * **examples:** keep the message threads example valid on Sonnet 5.5
 * **examples:** use current model IDs

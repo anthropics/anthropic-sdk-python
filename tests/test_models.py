@@ -1,4 +1,10 @@
+import os
+import sys
 import json
+import time
+import signal
+import threading
+import subprocess
 from typing import TYPE_CHECKING, Any, Dict, List, Union, Iterable, Optional, cast
 from datetime import datetime, timezone
 from collections import deque
@@ -10,7 +16,14 @@ from pydantic import Field
 
 from anthropic._types import Omit, omit
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
-from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, EagerIterable, UnionDiscriminator, construct_type
+from anthropic._models import (
+    DISCRIMINATOR_CACHE,
+    _PYDANTIC_LOCKS_MODEL_REBUILD,
+    BaseModel,
+    EagerIterable,
+    UnionDiscriminator,
+    construct_type,
+)
 
 
 class BasicModel(BaseModel):
@@ -1108,3 +1121,113 @@ def test_typeddict_with_omit_field() -> None:
     assert adapter.validate_python({"tier": omit}) == {"tier": omit}
     with pytest.raises(pydantic.ValidationError):
         adapter.validate_python({"tier": "other"})
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="model_rebuild only exists in pydantic v2")
+def test_no_model_rebuild_override_when_pydantic_locks_it() -> None:
+    code = (
+        "import threading, pydantic.main\n"
+        "pydantic.main._rebuild_lock = threading.RLock()\n"
+        "from anthropic._models import BaseModel\n"
+        "assert 'model_rebuild' not in BaseModel.__dict__\n"
+    )
+
+    subprocess.run([sys.executable, "-c", code], check=True)
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="model_rebuild only exists in pydantic v2")
+def test_model_rebuild_of_built_model_returns_none() -> None:
+    BasicModel(foo="bar")
+
+    assert BasicModel.model_rebuild() is None
+
+
+def _model_with_slow_build(entered: threading.Event, release: threading.Event, builds: List[str]) -> Any:
+    from pydantic_core import core_schema
+
+    owner = os.getpid()
+
+    class Slow(str):
+        @classmethod
+        def __get_pydantic_core_schema__(cls, source: Any, handler: Any) -> Any:
+            # A forked child must not touch these events: another thread may have held their locks at the fork.
+            if os.getpid() == owner:
+                builds.append(threading.current_thread().name)
+                entered.set()
+                release.wait(10)
+            return core_schema.str_schema()
+
+    class Model(BaseModel):
+        # scripts/test sets DEFER_PYDANTIC_BUILD=false, so defer this model's build explicitly
+        model_config = {"defer_build": True}
+        name: Slow
+
+    return Model
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="defer_build is only supported in pydantic v2")
+def test_concurrent_first_construct_waits_for_build() -> None:
+    entered, release = threading.Event(), threading.Event()
+    builds: List[str] = []
+    Model = _model_with_slow_build(entered, release, builds)
+    results: dict[str, object] = {}
+
+    def parse(key: str) -> None:
+        try:
+            if key == "validate":
+                results[key] = Model.model_validate({"name": "x"})
+            else:
+                results[key] = construct_type(type_=Model, value={"name": "x"})
+        except Exception as e:
+            results[key] = e
+
+    threads = {
+        key: threading.Thread(target=parse, args=(key,), daemon=True) for key in ("first", "construct", "validate")
+    }
+    try:
+        threads["first"].start()
+        assert entered.wait(10)
+        threads["construct"].start()
+        threads["validate"].start()
+        time.sleep(0.2)
+        finished_during_build = list(results)
+    finally:
+        release.set()
+    for thread in threads.values():
+        thread.join(10)
+        assert not thread.is_alive()
+
+    assert finished_during_build == []
+    assert len(builds) == 1
+    assert set(results) == set(threads)
+    for value in results.values():
+        assert isinstance(value, Model), value
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="defer_build is only supported in pydantic v2")
+@pytest.mark.skipif(not hasattr(os, "fork"), reason="needs os.fork")
+@pytest.mark.skipif(
+    _PYDANTIC_LOCKS_MODEL_REBUILD, reason="pydantic's own model_rebuild lock isn't reset in a forked child"
+)
+def test_fork_during_build_does_not_block_child() -> None:
+    entered, release = threading.Event(), threading.Event()
+    Model = _model_with_slow_build(entered, release, [])
+
+    builder = threading.Thread(target=lambda: construct_type(type_=Model, value={"name": "x"}), daemon=True)
+    try:
+        builder.start()
+        assert entered.wait(10)
+
+        pid = os.fork()
+        if pid == 0:
+            signal.alarm(5)
+            try:
+                code = 0 if isinstance(construct_type(type_=Model, value={"name": "x"}), Model) else 1
+            except BaseException:
+                code = 2
+            os._exit(code)
+    finally:
+        release.set()
+    builder.join(10)
+    _, status = os.waitpid(pid, 0)
+    assert os.waitstatus_to_exitcode(status) == 0
