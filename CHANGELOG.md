@@ -45,6 +45,7 @@
 * **docs:** update example user ID in Admin API examples
 * **internal:** add a section for each repository's own review rules
 * **internal:** plainer wording in worker comments
+* **internal:** remove stale TODO comments and a test that could not pass
 
 ### Documentation
 
