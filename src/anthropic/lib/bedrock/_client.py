@@ -50,6 +50,9 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             raise RuntimeError("Expected dictionary json_data for post /v1/messages endpoint")
 
         model = options.json_data.pop("model", None)
+        if not model:
+            raise ValueError(f"Expected a non-empty value for `model` but received {model!r}")
+
         model = urllib.parse.quote(str(model), safe=":")
         stream = options.json_data.pop("stream", False)
         if stream:

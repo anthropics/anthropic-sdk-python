@@ -5,6 +5,7 @@
 ### Bug Fixes
 
 * **bedrock:** raise a ValueError when model is "." or ".." instead of sending the request to a different path
+* **bedrock:** raise a ValueError when model is empty instead of sending the request to `/model//invoke`
 * **client:** make the first parse of each response model thread-safe
 * **client:** validate unions correctly across threads on pydantic v1
 
