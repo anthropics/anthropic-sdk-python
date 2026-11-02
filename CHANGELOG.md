@@ -21,6 +21,7 @@
 
 ### Chores
 
+* **ci:** also run the tests with deferred pydantic model builds
 * **ci:** remove unused build upload steps
 * **docs:** clarify the Slack channel id description
 * **docs:** clarify what disabling the Compliance API stops
