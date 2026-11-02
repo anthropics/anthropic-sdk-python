@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 from typing import Any, cast
 from contextlib import contextmanager, asynccontextmanager
 from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
@@ -84,6 +85,35 @@ class TestFunctionTool:
         result = function_tool.call({"a": 5, "b": 3})
 
         assert result == "8"
+
+    def test_callable_instance_preserves_annotations_for_validation(self) -> None:
+        class Adder:
+            def __call__(self, value: int) -> str:
+                return str(value + 1)
+
+        function_tool = beta_tool(Adder(), name="adder", description="Add one.")
+
+        assert function_tool.input_schema["properties"] == {"value": {"title": "Value", "type": "integer"}}
+        assert function_tool.call({"value": 2}) == "3"
+        with pytest.raises(ValueError, match="value: Input should be a valid integer"):
+            function_tool.call({"value": "invalid"})
+
+    def test_partial_preserves_remaining_signature_for_validation(self) -> None:
+        def add(left: int, right: int) -> str:
+            """Add two numbers."""
+            return str(left + right)
+
+        function_tool = beta_tool(functools.partial(add, right=2))
+
+        assert function_tool.name == "add"
+        assert function_tool.description == "Add two numbers."
+        assert function_tool.input_schema["properties"] == {
+            "left": {"title": "Left", "type": "integer"},
+            "right": {"title": "Right", "type": "integer", "default": 2},
+        }
+        assert function_tool.call({"left": 3}) == "5"
+        with pytest.raises(ValueError, match="left: Input should be a valid integer"):
+            function_tool.call({"left": "invalid"})
 
     @pytest.mark.parametrize(
         "input_data, expected_error_type, expected_error_msg",
