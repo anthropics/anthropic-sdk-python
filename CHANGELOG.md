@@ -26,6 +26,7 @@
 * **docs:** link Dreams model fields to the supported models section
 * **docs:** update example user ID in Admin API examples
 * **internal:** add a section for each repository's own review rules
+* **internal:** plainer wording in worker comments
 
 ### Documentation
 

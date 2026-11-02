@@ -1394,7 +1394,7 @@ class AsyncWork(AsyncAPIResource):
             by `EnvironmentWorker.run`; not used by
             `EnvironmentWorker.handle_item`.
           environment_key: The environment key — the worker's single credential,
-            used as Bearer auth on the control-plane and session-level calls.
+            used as Bearer auth on the polling and session-level calls.
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
             `AgentToolContext`. Defaults to `beta_agent_toolset_20260401(env)`.

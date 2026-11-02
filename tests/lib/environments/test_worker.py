@@ -1,6 +1,6 @@
 """Tests for `EnvironmentWorker`.
 
-The worker composes the control-plane poller, the per-session
+The worker composes the work poller, the per-session
 `AgentToolContext` / skill download, the lease heartbeat, and the session tool
 runner. We stub `aiter_work`, the session tool runner, and the worker's
 `_copy_client_with_bearer_auth` helper so each test can drive a single
@@ -55,7 +55,7 @@ from ..tools.test_session_runner import _SyncTool
 
 
 def _encode_secret(payload: dict[str, Any]) -> str:
-    """Build a work-item `secret` the way the control plane does: URL-safe
+    """Build a work-item `secret` the way the API does: URL-safe
     base64 of a JSON payload, without padding."""
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
 
@@ -67,7 +67,7 @@ def _api_status_error(code: int, body: object = None) -> APIStatusError:
 
 
 def _lease_lost_error() -> APIStatusError:
-    """The 412 the control plane answers a heartbeat with once the item's lease
+    """The 412 the API answers a heartbeat with once the item's lease
     was cleared (re-queued) or is held by another worker."""
     return _api_status_error(
         412,
@@ -524,7 +524,7 @@ async def test_heartbeat_412_releases_item_without_stopping_it(
 
 
 @pytest.mark.asyncio()
-async def test_control_plane_stop_still_force_stops(
+async def test_heartbeat_stop_still_force_stops(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     """A heartbeat reporting `state == "stopped"` ends the run and the item
@@ -590,7 +590,7 @@ async def test_lease_lost_classification() -> None:
     for reason, lost in [
         (_LeaseEndReason.LEASE_LOST, True),
         (_LeaseEndReason.ASSUMED_LOST, True),
-        (_LeaseEndReason.CONTROL_PLANE_STOP, False),
+        (_LeaseEndReason.HEARTBEAT_STOP, False),
         (_LeaseEndReason.HEARTBEAT_REJECTED, False),
         (_LeaseEndReason.RUNNER_DONE, False),
     ]:
