@@ -9,6 +9,7 @@
 
 ### Chores
 
+* **api:** update example values for pattern-constrained string fields
 * **ci:** also run the tests with deferred pydantic model builds
 * **internal:** remove stale TODO comments and a test that could not pass
 
