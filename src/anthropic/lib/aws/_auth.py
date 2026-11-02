@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 import httpx2
 
-from ..._exceptions import CredentialsError
 from ..._utils import lru_cache
+from ..._exceptions import CredentialsError
 
 if TYPE_CHECKING:
     import boto3

@@ -17,7 +17,7 @@ from ..._models import FinalRequestOptions
 from ..._version import __version__
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import CredentialsError, AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError, APIStatusError, CredentialsError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
