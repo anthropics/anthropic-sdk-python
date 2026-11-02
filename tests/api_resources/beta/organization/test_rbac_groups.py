@@ -10,7 +10,7 @@ from tests.utils import assert_matches_type
 from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.types.beta.organization import (
     BetaRBACGroup,
-    RBACGroupDeleteResponse,
+    BetaDeletedRBACGroup,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -190,7 +190,7 @@ class TestRBACGroups:
             "rbac_group_id",
             extra_query={"beta": "true"},
         )
-        assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+        assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
     @parametrize
     def test_raw_response_delete(self, client: Anthropic) -> None:
@@ -202,7 +202,7 @@ class TestRBACGroups:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         rbac_group = response.parse()
-        assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+        assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
     @parametrize
     def test_streaming_response_delete(self, client: Anthropic) -> None:
@@ -214,7 +214,7 @@ class TestRBACGroups:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             rbac_group = response.parse()
-            assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+            assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -402,7 +402,7 @@ class TestAsyncRBACGroups:
             "rbac_group_id",
             extra_query={"beta": "true"},
         )
-        assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+        assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
@@ -414,7 +414,7 @@ class TestAsyncRBACGroups:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         rbac_group = await response.parse()
-        assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+        assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
@@ -426,7 +426,7 @@ class TestAsyncRBACGroups:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             rbac_group = await response.parse()
-            assert_matches_type(RBACGroupDeleteResponse, rbac_group, path=["response"])
+            assert_matches_type(BetaDeletedRBACGroup, rbac_group, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

@@ -13,6 +13,8 @@ from .beta_managed_agents_model_request_failed_error import BetaManagedAgentsMod
 from .beta_managed_agents_repository_forbidden_error import BetaManagedAgentsRepositoryForbiddenError
 from .beta_managed_agents_repository_not_found_error import BetaManagedAgentsRepositoryNotFoundError
 from .beta_managed_agents_mcp_connection_failed_error import BetaManagedAgentsMCPConnectionFailedError
+from .beta_managed_agents_tool_use_limit_reached_error import BetaManagedAgentsToolUseLimitReachedError
+from .beta_managed_agents_compaction_limit_reached_error import BetaManagedAgentsCompactionLimitReachedError
 from .beta_managed_agents_mcp_authentication_failed_error import BetaManagedAgentsMCPAuthenticationFailedError
 from .beta_managed_agents_repository_authentication_error import BetaManagedAgentsRepositoryAuthenticationError
 from .beta_managed_agents_credential_host_unreachable_error import BetaManagedAgentsCredentialHostUnreachableError
@@ -29,6 +31,8 @@ Error: TypeAlias = Annotated[
         BetaManagedAgentsMCPAuthenticationFailedError,
         BetaManagedAgentsBillingError,
         BetaManagedAgentsCredentialHostUnreachableError,
+        BetaManagedAgentsToolUseLimitReachedError,
+        BetaManagedAgentsCompactionLimitReachedError,
         BetaManagedAgentsRepositoryAuthenticationError,
         BetaManagedAgentsRepositoryForbiddenError,
         BetaManagedAgentsRepositoryNotFoundError,

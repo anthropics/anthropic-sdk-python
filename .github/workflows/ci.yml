@@ -44,7 +44,6 @@ jobs:
     name: build
     permissions:
       contents: read
-      id-token: write
     runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

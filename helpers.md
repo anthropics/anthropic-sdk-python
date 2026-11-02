@@ -142,7 +142,7 @@ A message thread (beta) keeps the conversation on the server, so each request se
 
 ```py
 thread = client.beta.messages.thread(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system="You are a support agent for Acme.",
 )
@@ -264,7 +264,7 @@ For running a managed agent's tools locally against a self-hosted environment, t
   answered with `user.custom_tool_result` — posts the result back, and yields one
   `DispatchedToolCall` per completed call. Use it directly when you want to observe each dispatch
   (the worker drives one internally). Async only.
-- `client.beta.environments.work.poller(...)` — the control-plane only piece: claims work items,
+- `client.beta.environments.work.poller(...)` — the polling-only piece: claims work items,
   ack's each one, and yields each claimed work item. Async only — available on `AsyncAnthropic`
   (its `worker(...)` companion is async too, so the sync client does not expose either).
 
