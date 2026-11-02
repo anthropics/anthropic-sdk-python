@@ -6,30 +6,9 @@ from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics
 from .beta_analytics_skill_cowork_metrics import BetaAnalyticsSkillCoworkMetrics
 from .beta_analytics_skill_office_metrics import BetaAnalyticsSkillOfficeMetrics
 from .beta_analytics_skill_claude_code_metrics import BetaAnalyticsSkillClaudeCodeMetrics
-from .beta_analytics_skill_chat_cowork_unified_chat_metrics import BetaAnalyticsSkillChatCoworkUnifiedChatMetrics
-from .beta_analytics_skill_chat_cowork_unified_sessions_metrics import (
-    BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
-)
+from .beta_analytics_skill_chat_cowork_unified_metrics import BetaAnalyticsSkillChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsSkillActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Skill use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into chat conversations and Cowork sessions. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    chat: BetaAnalyticsSkillChatCoworkUnifiedChatMetrics
-    """
-    A skill's use in chat conversations recorded while members had Chat and Cowork
-    unified turned on.
-    """
-
-    sessions: BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics
-    """
-    A skill's use in Cowork sessions recorded while members had Chat and Cowork
-    unified turned on.
-    """
+__all__ = ["BetaAnalyticsSkillActivity"]
 
 
 class BetaAnalyticsSkillActivity(BaseModel):
@@ -175,7 +154,7 @@ class BetaAnalyticsSkillActivity(BaseModel):
     skill_name: str
     """Name of the skill"""
 
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsSkillChatCoworkUnifiedMetrics] = None
     """
     Skill use recorded while members had Chat and Cowork unified (Cowork's features
     inside claude.ai chat) turned on, split into chat conversations and Cowork

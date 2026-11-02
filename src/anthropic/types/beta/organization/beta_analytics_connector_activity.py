@@ -5,32 +5,9 @@ from .beta_analytics_connector_chat_metrics import BetaAnalyticsConnectorChatMet
 from .beta_analytics_connector_cowork_metrics import BetaAnalyticsConnectorCoworkMetrics
 from .beta_analytics_connector_office_metrics import BetaAnalyticsConnectorOfficeMetrics
 from .beta_analytics_connector_claude_code_metrics import BetaAnalyticsConnectorClaudeCodeMetrics
-from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
-    BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
-)
-from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
-    BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
-)
+from .beta_analytics_connector_chat_cowork_unified_metrics import BetaAnalyticsConnectorChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsConnectorActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Connector use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into chat conversations and Cowork sessions. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    chat: BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics
-    """
-    A connector's use in chat conversations recorded while members had Chat and
-    Cowork unified turned on.
-    """
-
-    sessions: BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics
-    """
-    A connector's use in Cowork sessions recorded while members had Chat and Cowork
-    unified turned on.
-    """
+__all__ = ["BetaAnalyticsConnectorActivity"]
 
 
 class BetaAnalyticsConnectorActivity(BaseModel):
@@ -149,7 +126,7 @@ class BetaAnalyticsConnectorActivity(BaseModel):
     data-start dates, null conditions, and date-range guidance.
     """
 
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsConnectorChatCoworkUnifiedMetrics] = None
     """
     Connector use recorded while members had Chat and Cowork unified (Cowork's
     features inside claude.ai chat) turned on, split into chat conversations and

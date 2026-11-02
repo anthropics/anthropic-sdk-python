@@ -44,6 +44,7 @@ from .rbac_group_list_params import RBACGroupListParams as RBACGroupListParams
 from .spend_limit_set_params import SpendLimitSetParams as SpendLimitSetParams
 from .beta_api_key_created_by import BetaAPIKeyCreatedBy as BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor as BetaAPIKeyUserActor
+from .beta_deleted_rbac_group import BetaDeletedRBACGroup as BetaDeletedRBACGroup
 from .beta_plugin_marketplace import BetaPluginMarketplace as BetaPluginMarketplace
 from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPeriod
 from .spend_limit_list_params import SpendLimitListParams as SpendLimitListParams
@@ -65,7 +66,6 @@ from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedIn
 from .beta_telemetry_destination import BetaTelemetryDestination as BetaTelemetryDestination
 from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCreateParams
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
-from .rbac_group_delete_response import RBACGroupDeleteResponse as RBACGroupDeleteResponse
 from .beta_analytics_chat_metrics import BetaAnalyticsChatMetrics as BetaAnalyticsChatMetrics
 from .beta_analytics_service_tier import BetaAnalyticsServiceTier as BetaAnalyticsServiceTier
 from .beta_analytics_tool_actions import BetaAnalyticsToolActions as BetaAnalyticsToolActions
@@ -288,6 +288,9 @@ from .beta_telemetry_destination_state_disabled import (
 from .beta_telemetry_destination_workspaces_all import (
     BetaTelemetryDestinationWorkspacesAll as BetaTelemetryDestinationWorkspacesAll,
 )
+from .beta_analytics_chat_cowork_unified_metrics import (
+    BetaAnalyticsChatCoworkUnifiedMetrics as BetaAnalyticsChatCoworkUnifiedMetrics,
+)
 from .beta_analytics_single_day_activity_summary import (
     BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
 )
@@ -381,11 +384,17 @@ from .beta_plugin_marketplace_validation_plugin_error import (
 from .beta_telemetry_destination_state_enabled_params import (
     BetaTelemetryDestinationStateEnabledParams as BetaTelemetryDestinationStateEnabledParams,
 )
+from .beta_analytics_skill_chat_cowork_unified_metrics import (
+    BetaAnalyticsSkillChatCoworkUnifiedMetrics as BetaAnalyticsSkillChatCoworkUnifiedMetrics,
+)
 from .beta_telemetry_destination_state_disabled_params import (
     BetaTelemetryDestinationStateDisabledParams as BetaTelemetryDestinationStateDisabledParams,
 )
 from .beta_telemetry_destination_workspaces_all_params import (
     BetaTelemetryDestinationWorkspacesAllParams as BetaTelemetryDestinationWorkspacesAllParams,
+)
+from .beta_analytics_plugin_chat_cowork_unified_metrics import (
+    BetaAnalyticsPluginChatCoworkUnifiedMetrics as BetaAnalyticsPluginChatCoworkUnifiedMetrics,
 )
 from .beta_claude_tag_slack_grid_channel_setting_source import (
     BetaClaudeTagSlackGridChannelSettingSource as BetaClaudeTagSlackGridChannelSettingSource,
@@ -410,6 +419,9 @@ from .beta_claude_tag_slack_parent_channel_setting_source import (
 )
 from .beta_telemetry_destination_disabled_reason_redirect import (
     BetaTelemetryDestinationDisabledReasonRedirect as BetaTelemetryDestinationDisabledReasonRedirect,
+)
+from .beta_analytics_connector_chat_cowork_unified_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedMetrics as BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
 )
 from .beta_telemetry_destination_workspaces_exclude_params import (
     BetaTelemetryDestinationWorkspacesExcludeParams as BetaTelemetryDestinationWorkspacesExcludeParams,

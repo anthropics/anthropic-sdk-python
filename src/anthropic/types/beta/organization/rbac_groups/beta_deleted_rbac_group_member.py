@@ -2,10 +2,10 @@ from typing_extensions import Literal
 
 from ....._models import BaseModel
 
-__all__ = ["MemberRemoveResponse"]
+__all__ = ["BetaDeletedRBACGroupMember"]
 
 
-class MemberRemoveResponse(BaseModel):
+class BetaDeletedRBACGroupMember(BaseModel):
     rbac_group_id: str
     """ID of the RBAC Group."""
 

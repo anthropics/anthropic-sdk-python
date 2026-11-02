@@ -9,25 +9,9 @@ from .beta_analytics_design_metrics import BetaAnalyticsDesignMetrics
 from .beta_analytics_office_metrics import BetaAnalyticsOfficeMetrics
 from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics
 from .beta_analytics_claude_code_metrics import BetaAnalyticsClaudeCodeMetrics
-from .beta_analytics_chat_cowork_unified_chat_metrics import BetaAnalyticsChatCoworkUnifiedChatMetrics
-from .beta_analytics_chat_cowork_unified_sessions_metrics import BetaAnalyticsChatCoworkUnifiedSessionsMetrics
+from .beta_analytics_chat_cowork_unified_metrics import BetaAnalyticsChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsUserActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Activity recorded while the member had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into `chat` (chat activity) and `sessions` (Cowork activity). Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    chat: BetaAnalyticsChatCoworkUnifiedChatMetrics
-    """Chat activity recorded while members had Chat and Cowork unified turned on."""
-
-    sessions: BetaAnalyticsChatCoworkUnifiedSessionsMetrics
-    """
-    Cowork session activity recorded while members had Chat and Cowork unified
-    turned on.
-    """
+__all__ = ["BetaAnalyticsUserActivity"]
 
 
 class BetaAnalyticsUserActivity(BaseModel):
@@ -68,7 +52,7 @@ class BetaAnalyticsUserActivity(BaseModel):
     web_search_count: int
     """Number of web searches performed"""
 
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsChatCoworkUnifiedMetrics] = None
     """
     Activity recorded while the member had Chat and Cowork unified (Cowork's
     features inside claude.ai chat) turned on, split into `chat` (chat activity) and

@@ -5,6 +5,7 @@
 ### Features
 
 * **api:** add GA methods for analytics, spend limits and RBAC
+* **api:** add named beta types for unified metrics and RBAC delete responses
 * **api:** add shared analytics order and increase request actor types
 * **api:** add tool_use_limit_reached_error and compaction_limit_reached_error session error types
 * **api:** add types for analytics group_by and spend limit period filters

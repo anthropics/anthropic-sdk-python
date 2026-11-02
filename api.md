@@ -3007,12 +3007,14 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsArtifactActivity,
     BetaAnalyticsArtifactGroupBy,
     BetaAnalyticsChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsChatCoworkUnifiedMetrics,
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsChatMetrics,
     BetaAnalyticsClaudeCodeMetrics,
     BetaAnalyticsClaudeTagCategory,
     BetaAnalyticsConnectorActivity,
     BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
     BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsConnectorChatMetrics,
     BetaAnalyticsConnectorClaudeCodeMetrics,
@@ -3041,6 +3043,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsOfficeProductMetrics,
     BetaAnalyticsOrder,
     BetaAnalyticsPluginActivity,
+    BetaAnalyticsPluginChatCoworkUnifiedMetrics,
     BetaAnalyticsPluginClaudeCodeMetrics,
     BetaAnalyticsPluginCoworkMetrics,
     BetaAnalyticsPluginGroupBy,
@@ -3055,6 +3058,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsSingleDayActivitySummary,
     BetaAnalyticsSkillActivity,
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsSkillChatCoworkUnifiedMetrics,
     BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsSkillChatMetrics,
     BetaAnalyticsSkillClaudeCodeMetrics,
@@ -3250,7 +3254,7 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaRBACGroup, RBACGroupDeleteResponse
+from anthropic.types.beta.organization import BetaDeletedRBACGroup, BetaRBACGroup
 ```
 
 Methods:
@@ -3259,21 +3263,24 @@ Methods:
 - <code title="get /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
 - <code title="post /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">update</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_group_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
 - <code title="get /v1/organizations/rbac_groups">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">SyncPageCursor[BetaRBACGroup]</a></code>
-- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_group_delete_response.py">RBACGroupDeleteResponse</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_rbac_group.py">BetaDeletedRBACGroup</a></code>
 
 #### Members
 
 Types:
 
 ```python
-from anthropic.types.beta.organization.rbac_groups import BetaRBACGroupMember, MemberRemoveResponse
+from anthropic.types.beta.organization.rbac_groups import (
+    BetaDeletedRBACGroupMember,
+    BetaRBACGroupMember,
+)
 ```
 
 Methods:
 
 - <code title="get /v1/organizations/rbac_groups/{rbac_group_id}/members">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">list</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">SyncPageCursor[BetaRBACGroupMember]</a></code>
 - <code title="post /v1/organizations/rbac_groups/{rbac_group_id}/members">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">add</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">BetaRBACGroupMember</a></code>
-- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/member_remove_response.py">MemberRemoveResponse</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_deleted_rbac_group_member.py">BetaDeletedRBACGroupMember</a></code>
 
 ### RBACRoles
 

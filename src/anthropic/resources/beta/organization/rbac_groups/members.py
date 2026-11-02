@@ -17,7 +17,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.rbac_groups.beta_rbac_group_member import BetaRBACGroupMember
-from .....types.beta.organization.rbac_groups.member_remove_response import MemberRemoveResponse
+from .....types.beta.organization.rbac_groups.beta_deleted_rbac_group_member import BetaDeletedRBACGroupMember
 
 __all__ = ["Members", "AsyncMembers"]
 
@@ -162,7 +162,7 @@ class Members(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> MemberRemoveResponse:
+    ) -> BetaDeletedRBACGroupMember:
         """Remove a User from an RBAC Group.
 
         Membership of groups provisioned by an
@@ -207,7 +207,7 @@ class Members(SyncAPIResource):
                     "anthropic.organization.rbac_group.member.id": user_id,
                 },
             ),
-            cast_to=MemberRemoveResponse,
+            cast_to=BetaDeletedRBACGroupMember,
         )
 
 
@@ -351,7 +351,7 @@ class AsyncMembers(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> MemberRemoveResponse:
+    ) -> BetaDeletedRBACGroupMember:
         """Remove a User from an RBAC Group.
 
         Membership of groups provisioned by an
@@ -396,7 +396,7 @@ class AsyncMembers(AsyncAPIResource):
                     "anthropic.organization.rbac_group.member.id": user_id,
                 },
             ),
-            cast_to=MemberRemoveResponse,
+            cast_to=BetaDeletedRBACGroupMember,
         )
 
 
