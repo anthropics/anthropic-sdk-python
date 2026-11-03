@@ -657,9 +657,6 @@ from .beta_thinking_prefix_mismatch_behavior import (
 from .beta_tool_change_tool_definition_param import (
     BetaToolChangeToolDefinitionParam as BetaToolChangeToolDefinitionParam,
 )
-from .beta_unsupported_charset_error_details import (
-    BetaUnsupportedCharsetErrorDetails as BetaUnsupportedCharsetErrorDetails,
-)
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_fetch_url_source_except_param import BetaWebFetchURLSourceExceptParam as BetaWebFetchURLSourceExceptParam
@@ -792,6 +789,9 @@ from .beta_computer_left_mouse_up_config_param import (
 )
 from .beta_computer_right_click_tool_use_block import (
     BetaComputerRightClickToolUseBlock as BetaComputerRightClickToolUseBlock,
+)
+from .beta_environment_not_found_error_details import (
+    BetaEnvironmentNotFoundErrorDetails as BetaEnvironmentNotFoundErrorDetails,
 )
 from .beta_managed_agents_cache_creation_usage import (
     BetaManagedAgentsCacheCreationUsage as BetaManagedAgentsCacheCreationUsage,

@@ -20,11 +20,17 @@ from .cmek_context_unavailable_error_details import (
 from .cmek_key_network_blocked_error_details import (
     CmekKeyNetworkBlockedErrorDetails as CmekKeyNetworkBlockedErrorDetails,
 )
+from .claude_code_version_too_old_error_details import (
+    ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
+)
 from .enforced_spend_limit_reached_error_details import (
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
 )
 from .request_body_encoding_invalid_error_details import (
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
+)
+from .organization_type_not_supported_error_details import (
+    OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
 )
 from .request_body_encoding_unsupported_error_details import (
     RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,

@@ -6,6 +6,7 @@ from anthropic.types import (
     AuthenticationError,
     BillingError,
     ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    ClaudeCodeVersionTooOldErrorDetails,
     CmekContextUnavailableErrorDetails,
     CmekKeyDisabledErrorDetails,
     CmekKeyNetworkBlockedErrorDetails,
@@ -19,6 +20,7 @@ from anthropic.types import (
     InvalidRequestError,
     NotFoundError,
     OrganizationOnHoldErrorDetails,
+    OrganizationTypeNotSupportedErrorDetails,
     OverloadedError,
     PermissionError,
     RateLimitError,
@@ -181,7 +183,6 @@ from anthropic.types import (
     CitationsDelta,
     CitationsSearchResultLocation,
     CitationsWebSearchResultLocation,
-    ClaudeCodeVersionTooOldErrorDetails,
     CodeExecutionOutputBlock,
     CodeExecutionOutputBlockParam,
     CodeExecutionResultBlock,
@@ -322,7 +323,6 @@ from anthropic.types import (
     ServerToolUseBlockParam,
     SignatureDelta,
     SkillParams,
-    SkillReadBlockedUndecryptableErrorDetails,
     StopReason,
     SystemMessageParam,
     TextBlock,
@@ -562,7 +562,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedSkill, Skill, SkillSource
+from anthropic.types import (
+    DeletedSkill,
+    Skill,
+    SkillReadBlockedUndecryptableErrorDetails,
+    SkillSource,
+)
 ```
 
 Methods:
@@ -613,6 +618,7 @@ from anthropic.types import (
     UserProfileExternalUserEntityType,
     UserProfileListOrder,
     UserProfileListOrderBy,
+    UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
 )
@@ -645,12 +651,9 @@ Types:
 ```python
 from anthropic.types import (
     ConcurrentMembershipChangeErrorDetails,
+    OrgMemberLimitExceededErrorDetails,
     OrganizationInfo,
     OrganizationRole,
-    OrganizationTypeNotSupportedErrorDetails,
-    RBACGroupGrantsOwnerAccessErrorDetails,
-    RBACGroupOwnerAccessUnconfirmedErrorDetails,
-    UserProfileNotFoundErrorDetails,
 )
 ```
 
@@ -693,6 +696,7 @@ from anthropic.types.organization import (
     AzureExternalKeyConfigParam,
     ExternalKey,
     ExternalKeyAttachedAttachment,
+    ExternalKeyChangedErrorDetails,
     ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
     GCPExternalKeyConfig,
@@ -785,7 +789,6 @@ from anthropic.types.organization import (
     CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
     EmailDomainNotAllowedErrorDetails,
     InviteAlreadyExistsErrorDetails,
-    OrgMemberLimitExceededErrorDetails,
     OrganizationInvite,
     InviteDeleteResponse,
 )
@@ -857,7 +860,6 @@ from anthropic.types.organization import (
     DataResidency,
     DataResidencyCreateConfigParam,
     DataResidencyUpdateConfigParam,
-    ExternalKeyChangedErrorDetails,
     KeyProfileMismatchErrorDetails,
     NoBillingWorkspaceRole,
     Workspace,
@@ -1127,7 +1129,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import DeletedRBACGroup, RBACGroup
+from anthropic.types.organization import (
+    DeletedRBACGroup,
+    RBACGroup,
+    RBACGroupGrantsOwnerAccessErrorDetails,
+    RBACGroupOwnerAccessUnconfirmedErrorDetails,
+)
 ```
 
 Methods:
@@ -1205,6 +1212,7 @@ from anthropic.types import (
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
+    BetaUnsupportedCharsetErrorDetails,
 )
 ```
 
@@ -2024,6 +2032,7 @@ from anthropic.types.beta import (
     BetaEnvironmentArchivedErrorDetails,
     BetaEnvironmentCreateDisabledErrorDetails,
     BetaEnvironmentDeleteResponse,
+    BetaEnvironmentNotFoundErrorDetails,
     BetaEnvironmentUpdateDisabledErrorDetails,
     BetaInvalidConfigTypeChangeErrorDetails,
     BetaInvalidMetadataErrorDetails,
@@ -2771,7 +2780,6 @@ from anthropic.types.beta import (
     BetaBillingFrozenErrorDetails,
     BetaOrganization,
     BetaOrganizationRole,
-    BetaUnsupportedCharsetErrorDetails,
 )
 ```
 
@@ -3609,7 +3617,6 @@ from anthropic.types.beta.organization import (
     BetaClaudeTagSlackWorkspaceSettingSource,
     BetaClaudeTagWritesNotEnabledErrorDetails,
     BetaComplianceConfigurationRestrictedErrorDetails,
-    BetaEnvironmentNotFoundErrorDetails,
     BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails,
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
     BetaSlackChannelSetUpSettingsConflictErrorDetails,

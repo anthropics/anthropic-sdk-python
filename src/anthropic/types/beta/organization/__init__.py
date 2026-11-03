@@ -253,9 +253,6 @@ from .beta_api_key_scope_missing_error_details import (
 from .beta_claude_tag_guest_policy_allow_param import (
     BetaClaudeTagGuestPolicyAllowParam as BetaClaudeTagGuestPolicyAllowParam,
 )
-from .beta_environment_not_found_error_details import (
-    BetaEnvironmentNotFoundErrorDetails as BetaEnvironmentNotFoundErrorDetails,
-)
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
 )
