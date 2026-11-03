@@ -42,6 +42,7 @@ class TestExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
@@ -326,6 +327,7 @@ class TestAsyncExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])

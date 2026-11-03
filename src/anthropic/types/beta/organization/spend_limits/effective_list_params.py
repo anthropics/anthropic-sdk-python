@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_spend_limit_period import BetaSpendLimitPeriod
 
 __all__ = ["EffectiveListParams"]
 
@@ -19,7 +20,7 @@ class EffectiveListParams(TypedDict, total=False):
     page: Optional[str]
     """Opaque cursor from a previous response's `next_page` field."""
 
-    period: Optional[List[Literal["daily", "monthly", "weekly"]]]
+    period: Optional[List[BetaSpendLimitPeriod]]
     """Restrict the report to these limit periods.
 
     Omit to return one row per period each member resolves a spend limit for.

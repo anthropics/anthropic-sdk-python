@@ -52,6 +52,14 @@ from .external_keys import (
     AsyncExternalKeysWithStreamingResponse,
 )
 from ..._base_client import make_request_options
+from .analytics.analytics import (
+    Analytics,
+    AsyncAnalytics,
+    AnalyticsWithRawResponse,
+    AsyncAnalyticsWithRawResponse,
+    AnalyticsWithStreamingResponse,
+    AsyncAnalyticsWithStreamingResponse,
+)
 from .compliance_settings import (
     ComplianceSettings,
     AsyncComplianceSettings,
@@ -68,6 +76,14 @@ from .federation.federation import (
     FederationWithStreamingResponse,
     AsyncFederationWithStreamingResponse,
 )
+from .rbac_roles.rbac_roles import (
+    RBACRoles,
+    AsyncRBACRoles,
+    RBACRolesWithRawResponse,
+    AsyncRBACRolesWithRawResponse,
+    RBACRolesWithStreamingResponse,
+    AsyncRBACRolesWithStreamingResponse,
+)
 from .workspaces.workspaces import (
     Workspaces,
     AsyncWorkspaces,
@@ -76,7 +92,23 @@ from .workspaces.workspaces import (
     WorkspacesWithStreamingResponse,
     AsyncWorkspacesWithStreamingResponse,
 )
+from .rbac_groups.rbac_groups import (
+    RBACGroups,
+    AsyncRBACGroups,
+    RBACGroupsWithRawResponse,
+    AsyncRBACGroupsWithRawResponse,
+    RBACGroupsWithStreamingResponse,
+    AsyncRBACGroupsWithStreamingResponse,
+)
 from ...types.organization_info import OrganizationInfo
+from .spend_limits.spend_limits import (
+    SpendLimits,
+    AsyncSpendLimits,
+    SpendLimitsWithRawResponse,
+    AsyncSpendLimitsWithRawResponse,
+    SpendLimitsWithStreamingResponse,
+    AsyncSpendLimitsWithStreamingResponse,
+)
 from .service_accounts.service_accounts import (
     ServiceAccounts,
     AsyncServiceAccounts,
@@ -127,12 +159,28 @@ class Organization(SyncAPIResource):
         return ComplianceSettings(self._client)
 
     @cached_property
+    def analytics(self) -> Analytics:
+        return Analytics(self._client)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimits:
+        return SpendLimits(self._client)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroups:
+        return RBACGroups(self._client)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRoles:
+        return RBACRoles(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return OrganizationWithRawResponse(self)
 
@@ -141,7 +189,7 @@ class Organization(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return OrganizationWithStreamingResponse(self)
 
@@ -211,12 +259,28 @@ class AsyncOrganization(AsyncAPIResource):
         return AsyncComplianceSettings(self._client)
 
     @cached_property
+    def analytics(self) -> AsyncAnalytics:
+        return AsyncAnalytics(self._client)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimits:
+        return AsyncSpendLimits(self._client)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroups:
+        return AsyncRBACGroups(self._client)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRoles:
+        return AsyncRBACRoles(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncOrganizationWithRawResponse(self)
 
@@ -225,7 +289,7 @@ class AsyncOrganization(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncOrganizationWithStreamingResponse(self)
 
@@ -301,6 +365,22 @@ class OrganizationWithRawResponse:
     def compliance_settings(self) -> ComplianceSettingsWithRawResponse:
         return ComplianceSettingsWithRawResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def analytics(self) -> AnalyticsWithRawResponse:
+        return AnalyticsWithRawResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimitsWithRawResponse:
+        return SpendLimitsWithRawResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroupsWithRawResponse:
+        return RBACGroupsWithRawResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRolesWithRawResponse:
+        return RBACRolesWithRawResponse(self._organization.rbac_roles)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -345,6 +425,22 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithRawResponse:
         return AsyncComplianceSettingsWithRawResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def analytics(self) -> AsyncAnalyticsWithRawResponse:
+        return AsyncAnalyticsWithRawResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimitsWithRawResponse:
+        return AsyncSpendLimitsWithRawResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroupsWithRawResponse:
+        return AsyncRBACGroupsWithRawResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRolesWithRawResponse:
+        return AsyncRBACRolesWithRawResponse(self._organization.rbac_roles)
 
 
 class OrganizationWithStreamingResponse:
@@ -391,6 +487,22 @@ class OrganizationWithStreamingResponse:
     def compliance_settings(self) -> ComplianceSettingsWithStreamingResponse:
         return ComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
 
+    @cached_property
+    def analytics(self) -> AnalyticsWithStreamingResponse:
+        return AnalyticsWithStreamingResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> SpendLimitsWithStreamingResponse:
+        return SpendLimitsWithStreamingResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> RBACGroupsWithStreamingResponse:
+        return RBACGroupsWithStreamingResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> RBACRolesWithStreamingResponse:
+        return RBACRolesWithStreamingResponse(self._organization.rbac_roles)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -435,3 +547,19 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def compliance_settings(self) -> AsyncComplianceSettingsWithStreamingResponse:
         return AsyncComplianceSettingsWithStreamingResponse(self._organization.compliance_settings)
+
+    @cached_property
+    def analytics(self) -> AsyncAnalyticsWithStreamingResponse:
+        return AsyncAnalyticsWithStreamingResponse(self._organization.analytics)
+
+    @cached_property
+    def spend_limits(self) -> AsyncSpendLimitsWithStreamingResponse:
+        return AsyncSpendLimitsWithStreamingResponse(self._organization.spend_limits)
+
+    @cached_property
+    def rbac_groups(self) -> AsyncRBACGroupsWithStreamingResponse:
+        return AsyncRBACGroupsWithStreamingResponse(self._organization.rbac_groups)
+
+    @cached_property
+    def rbac_roles(self) -> AsyncRBACRolesWithStreamingResponse:
+        return AsyncRBACRolesWithStreamingResponse(self._organization.rbac_roles)

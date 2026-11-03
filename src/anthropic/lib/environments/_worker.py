@@ -1,5 +1,5 @@
 """The self-hosted environment worker — the full composition of the
-control-plane poller and the per-session tool runner.
+work poller and the per-session tool runner.
 
 `EnvironmentWorker` claims work items from a self-hosted environment, and
 for each claimed `session` work item: builds the per-session
@@ -120,7 +120,7 @@ class _LeaseEndReason(enum.Enum):
     """Why heartbeating of a work item ended, as recorded on its `_Lease`."""
 
     RUNNER_DONE = "runner_done"  # the session run ended first; the lease was held throughout
-    CONTROL_PLANE_STOP = "control_plane_stop"  # state stopping / stopped, or lease_extended false
+    HEARTBEAT_STOP = "heartbeat_stop"  # state stopping / stopped, or lease_extended false
     LEASE_LOST = "lease_lost"  # a heartbeat met 412: the item was re-queued or another worker holds it
     HEARTBEAT_REJECTED = "heartbeat_rejected"  # a heartbeat met another 4xx that retrying will not fix
     ASSUMED_LOST = "assumed_lost"  # no heartbeat succeeded for a full lease TTL
@@ -186,7 +186,7 @@ async def _heartbeat_loop(
 
     `work` must be bound to a sub-client authenticated for the environment;
     this loop adds no auth of its own. Returns once `lease` has ended, and
-    ends it itself when the control plane reports the work is `stopping` /
+    ends it itself when the API reports the work is `stopping` /
     `stopped` or no longer extends the lease, when a heartbeat is rejected
     (a 412 means the lease already belongs to someone else), or when
     transient failures have run long enough that the lease must be assumed
@@ -247,7 +247,7 @@ async def _heartbeat_loop(
                     on_lease_ttl(ttl)
             if resp.state in ("stopping", "stopped") or not resp.lease_extended:
                 log.info("heartbeat signals shutdown state=%s lease_extended=%s", resp.state, resp.lease_extended)
-                lease.finish(_LeaseEndReason.CONTROL_PLANE_STOP)
+                lease.finish(_LeaseEndReason.HEARTBEAT_STOP)
                 return
         with anyio.move_on_after(interval):
             await lease.wait_ended()
@@ -314,7 +314,7 @@ def _require(value: str | None, *, name: str, env_var: str) -> str:
 class EnvironmentWorker:
     """Run a self-hosted environment worker.
 
-    Composed from the control-plane poller (`client.beta.environments.work.poller`)
+    Composed from the work poller (`client.beta.environments.work.poller`)
     and the per-session `SessionToolRunner`. For each claimed `session`
     work item it builds the per-session `AgentToolContext` and downloads
     the session agent's skills, then runs a session tool runner for the session
@@ -370,7 +370,7 @@ class EnvironmentWorker:
         `run`; not used by `handle_item`.
       environment_key: The environment key — the worker's standing credential.
         Used as the Bearer credential on the scoped sub-clients the worker
-        constructs for the control-plane (poll / ack / stop) and session-level
+        constructs for the polling (poll / ack / stop) and session-level
         (events stream / list / send + heartbeat / force-stop) calls, except
         where a claimed item's own `secret` takes precedence (see the class
         docstring). Required by `run`; `handle_item` falls back to
@@ -581,7 +581,7 @@ class EnvironmentWorker:
         worker's options) and downloads the session agent's skills, then runs a
         `SessionToolRunner` for the session *while* heartbeating the
         work-item lease in parallel, and force-stops the work item on exit
-        (whether the runner finishes normally, raises, or the control plane
+        (whether the runner finishes normally, raises, or the API
         signals shutdown). The one exception is a lost lease: the item then
         belongs to the queue or another worker and is left alone.
 
@@ -654,10 +654,9 @@ class EnvironmentWorker:
 
         Runs a `SessionToolRunner` for the work item's session while
         heartbeating its lease, force-stopping the work item on exit unless the
-        lease was lost. All control-plane traffic for this work item —
-        heartbeat + force-stop — flows through a Bearer-only sub-client built
-        here; the session tool runner builds its own
-        `session-tool-runner`-tagged sub-client internally.
+        lease was lost. The heartbeat and force-stop calls for this work item
+        flow through a Bearer-only sub-client built here; the session tool
+        runner builds its own `session-tool-runner`-tagged sub-client internally.
 
         When the poll response carried a per-item `secret` (a short-lived
         payload scoped to this work item), the sessions token extracted from

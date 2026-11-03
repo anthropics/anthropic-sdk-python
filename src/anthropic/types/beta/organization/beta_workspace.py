@@ -21,16 +21,16 @@ class BetaWorkspace(BaseModel):
     compartment_id: str
     """Identifier for this Workspace's encryption compartment.
 
-    When you configure a customer-managed encryption key (CMEK) on AWS, reference
-    this value in your KMS key-policy condition so the key is scoped to this
-    compartment. On GCP and Azure, Anthropic enforces the compartment binding
-    automatically; you do not need to reference this value in your key
-    configuration. See the CMEK integration guide for the required key
+    When you configure an AWS KMS customer-managed encryption key (CMEK) that isn't
+    bound to a user profile, reference this value in your KMS key-policy condition
+    so the key is scoped to this compartment. On GCP and Azure, Anthropic enforces
+    the compartment binding automatically; you do not need to reference this value
+    in your key configuration. See the CMEK integration guide for the required key
     configuration; unless your organization is on Claude Platform on AWS, it
     includes a separate value used during key validation. On Claude Platform on AWS
-    there is no separate validation value: the key is validated against this
-    Workspace's own value when it is attached, so if your key policy uses the
-    compartment condition, add this value to it before attaching the key.
+    there is no separate validation value: your organization's own key is validated
+    against this Workspace's own value when it is attached, so if its key policy
+    uses the compartment condition, add this value to it before attaching the key.
     """
 
     created_at: datetime
@@ -48,13 +48,13 @@ class BetaWorkspace(BaseModel):
     Workspace. Setting this field requires CMEK to be enabled for your organization.
     When set, data stored for this Workspace is encrypted with the referenced key.
     Create key configurations with the External Keys API. On Claude Platform on AWS
-    the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-    same AWS account and Region as the Workspace. On that platform the key is
-    validated against this Workspace when it is attached, so a key-policy problem is
-    reported as an error on this request. This field is write-once: once a key is
-    attached to a Workspace it cannot be detached or replaced. To rotate key
-    material, rotate the underlying key on your cloud KMS; the `external_key_id`
-    stays the same.
+    the value for an AWS KMS key is the key's ARN, and your organization's own key
+    must be a single-Region key in the same AWS account and Region as the Workspace.
+    On that platform the key is validated against this Workspace when it is
+    attached, so a key-policy problem is reported as an error on this request. This
+    field is write-once: once a key is attached to a Workspace it cannot be detached
+    or replaced. To rotate key material, rotate the underlying key on your cloud
+    KMS; the `external_key_id` stays the same.
     """
 
     name: str
@@ -70,4 +70,11 @@ class BetaWorkspace(BaseModel):
     """Object type.
 
     For Workspaces, this is always `"workspace"`.
+    """
+
+    user_profile_id: Optional[str] = None
+    """ID of the user profile attached to the Workspace, or null if it has none.
+
+    Every inference request through a Workspace that has a user profile must name
+    that profile.
     """

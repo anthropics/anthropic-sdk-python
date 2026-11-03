@@ -25,7 +25,7 @@ def delete_file(path: str) -> str:
 
 def main() -> None:
     runner = client.beta.messages.tool_runner(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         max_iterations=10,
         tools=[list_files, delete_file],
