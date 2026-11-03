@@ -65,13 +65,11 @@ def start_tool_runner_span(
 
 
 def set_tool_runner_status(span: trace.Span | None, error: BaseException | None = None) -> None:
-    """Sets the status of a tool runner's span, if it has one: `OK`, or what `error` makes it. Never raises."""
+    """Sets the error status of a tool runner's span, if it has one. Never raises."""
     if span is None:
         return
     try:
-        if error is None:
-            span.set_status(Status(StatusCode.OK))
-        else:
+        if error is not None:
             set_error_status(span, error)
     except Exception:
         log.debug("Could not set the status of the span of a tool runner", exc_info=True)
@@ -206,8 +204,6 @@ def end_tool_use_span(client: BaseClient[Any, Any], span: trace.Span, input: obj
         if result is not None and result.get("is_error") is True:
             span.set_status(Status(StatusCode.ERROR))
             span.set_attribute(ERROR_TYPE, "tool_error")
-        elif result is not None:
-            span.set_status(Status(StatusCode.OK))
         span.end()
     except Exception:
         log.debug("Could not end the span of a tool run", exc_info=True)
