@@ -607,7 +607,7 @@ def stream_response(events: Sequence[dict[str, Any]] | None = None) -> httpx2.Re
 
 
 STREAM_ENDS = [
-    pytest.param(stream_events(), StatusCode.OK, None, id="read to the end"),
+    pytest.param(stream_events(), StatusCode.UNSET, None, id="read to the end"),
     pytest.param(stream_events()[:3], StatusCode.ERROR, "api_error", id="ends before message_stop"),
     pytest.param([], StatusCode.ERROR, "api_error", id="ends before the first event"),
     pytest.param(
@@ -892,7 +892,7 @@ class TestCallSpans:
 
         span = spans.one("anthropic.messages.create")
         assert span.kind == SpanKind.CLIENT
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert parent_id(span) == span_id(app)
         assert span.instrumentation_scope is not None
         assert span.instrumentation_scope.name == "com.anthropic.sdk.python"
@@ -929,6 +929,7 @@ class TestCallSpans:
             "anthropic.usage.cache_creation.ephemeral_1h_input_tokens": 2,
             "anthropic.response.service_tier": "standard",
             "anthropic.message.stop_reason": "end_turn",
+            "gen_ai.response.finish_reasons": ("end_turn",),
         }
         assert "gen_ai.input.messages" not in attributes(span)
 
@@ -1042,7 +1043,7 @@ class TestCallSpans:
         # The SDK emits no span for an attempt, so the call span, with the final attempt's status, is the only one.
         [call] = spans.finished
         assert call.name == "anthropic.messages.create"
-        assert call.status.status_code == StatusCode.OK
+        assert call.status.status_code == StatusCode.UNSET
         assert attributes(call)["http.response.status_code"] == 200
         context = "00-{:032x}-{:016x}-".format(trace_id(call), span_id(call))
         assert [request.headers["traceparent"][: len(context)] for request in requests(route)] == [context] * 3
@@ -1074,7 +1075,7 @@ class TestCallSpans:
         assert spans.named("anthropic.messages.batches.results") == []
         assert [result.custom_id for result in results] == ["0", "1", "2"]
         span = spans.one("anthropic.messages.batches.results")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["anthropic.message.batch.id"] == "msgbatch_1"
         assert attributes(span)["anthropic.request.id"] == "req_1"
 
@@ -1123,7 +1124,7 @@ class TestCallSpans:
         results = await client.messages.batches.results("msgbatch_1")
         assert spans.named("anthropic.messages.batches.results") == []
         assert [result.custom_id async for result in results] == ["0", "1", "2"]
-        assert spans.one("anthropic.messages.batches.results").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.batches.results").status.status_code == StatusCode.UNSET
 
         results = await client.messages.batches.results("msgbatch_1")
         await results.close()
@@ -1148,7 +1149,7 @@ class TestCallSpans:
 
         assert message.id == "msg_1"
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["http.response.status_code"] == 200
         assert attributes(span)["gen_ai.provider.name"] == "anthropic"
 
@@ -1169,7 +1170,7 @@ class TestCallSpans:
         assert [record.message for record in caplog.records if record.name.startswith("opentelemetry")] == []
         streamed, raw = spans.named("anthropic.messages.create")
         for span in (streamed, raw):
-            assert span.status.status_code == StatusCode.OK
+            assert span.status.status_code == StatusCode.UNSET
             assert attributes(span)["http.response.status_code"] == 200
             assert attributes(span)["anthropic.request.id"] == "req_1"
             assert attributes(span)["gen_ai.request.model"] == "claude-test"
@@ -1194,7 +1195,7 @@ class TestCallSpans:
             assert (await raw.parse()).id == "msg_1"
 
         assert [record.message for record in caplog.records if record.name.startswith("opentelemetry")] == []
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["anthropic.request.id"] == "req_1"
         assert "gen_ai.usage.output_tokens" not in attributes(span)
         assert attributes(spans.named("anthropic.messages.create")[1])["gen_ai.usage.output_tokens"] == 5
@@ -1372,7 +1373,7 @@ class TestCallSpans:
 
         assert closed.status.status_code == StatusCode.UNSET
         _, read = spans.named("anthropic.messages.create")
-        assert read.status.status_code == StatusCode.OK
+        assert read.status.status_code == StatusCode.UNSET
         assert attributes(read)["gen_ai.usage.output_tokens"] == 5
 
     async def test_async_stream_over_a_body_that_was_read_is_closed_or_read_with_the_helper(self, spans: Spans) -> None:
@@ -1389,7 +1390,7 @@ class TestCallSpans:
 
         assert closed.status.status_code == StatusCode.UNSET
         _, read = spans.named("anthropic.messages.create")
-        assert read.status.status_code == StatusCode.OK
+        assert read.status.status_code == StatusCode.UNSET
         assert attributes(read)["gen_ai.usage.output_tokens"] == 5
 
     def test_stream_over_a_response_that_a_middleware_made_from_bytes(self, spans: Spans) -> None:
@@ -1417,7 +1418,7 @@ class TestCallSpans:
         stream.close()
 
         read, closed = spans.named("anthropic.messages.create")
-        assert read.status.status_code == StatusCode.OK
+        assert read.status.status_code == StatusCode.UNSET
         assert attributes(read)["gen_ai.usage.output_tokens"] == 5
         assert closed.status.status_code == StatusCode.UNSET
 
@@ -1445,7 +1446,7 @@ class TestCallSpans:
         await stream.close()
 
         read, closed = spans.named("anthropic.messages.create")
-        assert read.status.status_code == StatusCode.OK
+        assert read.status.status_code == StatusCode.UNSET
         assert attributes(read)["gen_ai.usage.output_tokens"] == 5
         assert closed.status.status_code == StatusCode.UNSET
 
@@ -1502,7 +1503,7 @@ class TestCallSpans:
                 async_wrong()
         assert len([event async for event in async_stream]) == len(stream_events())
 
-        assert [span.status.status_code for span in spans.finished] == [StatusCode.OK, StatusCode.OK]
+        assert [span.status.status_code for span in spans.finished] == [StatusCode.UNSET, StatusCode.UNSET]
 
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_whose_events_the_application_reads_itself(self, spans: Spans, respx_mock: MockRouter) -> None:
@@ -1514,7 +1515,7 @@ class TestCallSpans:
 
         # The SDK has not parsed the events, so it cannot tell that `message_stop` is missing.
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "gen_ai.response.id" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -1528,7 +1529,7 @@ class TestCallSpans:
             assert len([line async for line in response.iter_lines()]) > 0
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "gen_ai.response.id" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -1540,7 +1541,7 @@ class TestCallSpans:
         assert len(list(stream.response.iter_bytes())) > 0
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "error.type" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -1554,7 +1555,7 @@ class TestCallSpans:
         assert len([chunk async for chunk in stream.response.aiter_bytes()]) > 0
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "error.type" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -1690,7 +1691,7 @@ class TestCallSpans:
         assert message.content[0].type == "text"
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["gen_ai.request.stream"] is True
         assert attributes(span)["gen_ai.response.id"] == "msg_1"
         assert attributes(span)["gen_ai.usage.output_tokens"] == 5
@@ -1736,7 +1737,7 @@ class TestCallSpans:
                 if event.type == "message_stop":
                     break
 
-        # The application closed both before the API did, so neither is `OK`, with every attribute of a whole Message.
+        # The application closed both before the API did, so neither has a status, with every attribute of a whole Message.
         read, read_by_the_helper = spans.named("anthropic.messages.create")
         for span in (read, read_by_the_helper):
             assert span.status.status_code == StatusCode.UNSET
@@ -1825,7 +1826,7 @@ class TestCallSpans:
         calls = spans.named("anthropic.messages.create")
         assert len(calls) == 2
         for span in calls:
-            assert span.status.status_code == StatusCode.OK
+            assert span.status.status_code == StatusCode.UNSET
             assert attributes(span)["gen_ai.usage.output_tokens"] == 5
             assert "gen_ai.response.time_to_first_chunk" not in attributes(span)
 
@@ -1839,7 +1840,7 @@ class TestCallSpans:
             pass
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "gen_ai.response.time_to_first_chunk" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -2031,7 +2032,7 @@ class TestCallSpans:
         create(make_client(spans))
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["gen_ai.usage.output_tokens"] == 5
         assert "anthropic.usage.compaction.input_tokens" not in attributes(span)
 
@@ -2189,7 +2190,7 @@ class TestCallSpans:
         assert len(calls) == 3
         for span in calls:
             assert attributes(span)["anthropic.message.stop_reason"] == stop_reason
-            assert "gen_ai.response.finish_reasons" not in attributes(span)
+            assert attributes(span)["gen_ai.response.finish_reasons"] == (stop_reason,)
 
     @pytest.mark.respx(base_url=base_url)
     async def test_async_stream_ended_by_the_server_before_message_stop(
@@ -2223,7 +2224,7 @@ class TestCallSpans:
         assert message.model == "claude-fallback"
         raw_stream, helper_stream = spans.named("anthropic.messages.create")
         for span in (raw_stream, helper_stream):
-            assert span.status.status_code == StatusCode.OK
+            assert span.status.status_code == StatusCode.UNSET
             assert attributes(span)["gen_ai.request.model"] == "claude-test"
             assert attributes(span)["gen_ai.response.model"] == "claude-fallback"
 
@@ -2244,7 +2245,7 @@ class TestCallSpans:
         assert message.model == "claude-fallback"
         raw_stream, helper_stream = spans.named("anthropic.messages.create")
         for span in (raw_stream, helper_stream):
-            assert span.status.status_code == StatusCode.OK
+            assert span.status.status_code == StatusCode.UNSET
             assert attributes(span)["gen_ai.response.model"] == "claude-fallback"
 
     @pytest.mark.respx(base_url=base_url)
@@ -2355,7 +2356,7 @@ class TestCallSpans:
         assert len(calls) == 8
         assert len({span_id(span) for span in calls}) == 8
         assert len({trace_id(span) for span in calls}) == 8
-        assert all(span.status.status_code == StatusCode.OK for span in calls)
+        assert all(span.status.status_code == StatusCode.UNSET for span in calls)
 
     @pytest.mark.respx(base_url=base_url)
     async def test_concurrent_async_calls_get_their_own_spans(self, spans: Spans, respx_mock: MockRouter) -> None:
@@ -2513,7 +2514,7 @@ class TestCallSpans:
         assert attributes(spans.one("anthropic.messages.batches.create"))["anthropic.message.batch.id"] == "msgbatch_1"
         assert attributes(spans.one("anthropic.messages.batches.cancel"))["anthropic.message.batch.id"] == "msgbatch_1"
         # The `beta` namespace is not part of the name.
-        assert spans.one("anthropic.models.list").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.models.list").status.status_code == StatusCode.UNSET
 
     @pytest.mark.respx(base_url=base_url)
     def test_output_type_is_json_when_the_request_sets_a_json_output_format(
@@ -2587,7 +2588,7 @@ class TestCallSpans:
                 pass
 
         call = spans.one("anthropic.messages.create")
-        assert call.status.status_code == StatusCode.OK
+        assert call.status.status_code == StatusCode.UNSET
         assert all(span.parent is None for span in spans.named("app.work"))
 
     @pytest.mark.respx(base_url=base_url)
@@ -4163,7 +4164,7 @@ class TestPropagationOption:
         assert client.open_telemetry["propagation"] is False
         if provider == "recording":
             call_span = spans.one("anthropic.messages.create")
-            assert call_span.status.status_code == StatusCode.OK
+            assert call_span.status.status_code == StatusCode.UNSET
             assert call_span.end_time is not None
             assert trace_id(call_span) == 0x1234
             assert attributes(call_span)["http.request.resend_count"] == 1
@@ -4322,7 +4323,7 @@ class TestPropagationOption:
         authorization = request.headers["Authorization"]
         assert "traceparent" in authorization.split("SignedHeaders=")[1].split(",")[0].split(";")
         assert authorization.endswith("Signature=" + sigv4_signature(request, secret_key="secret"))
-        assert spans.one("anthropic.messages.create").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.create").status.status_code == StatusCode.UNSET
 
 
 async def call_messages(client: Any, messages: list[dict[str, Any]]) -> Any:
@@ -5623,7 +5624,7 @@ class TestContent:
             span = spans.one("anthropic.messages.create")
             assert [block.type for block in stream.current_message_snapshot.content] == ["text", "tool_use"]
 
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert json.loads(attributes(span)["gen_ai.output.messages"]) == TOOL_STREAM_OUTPUT
         # Only the helper accumulated the events.
         assert len(accumulated) == len(tool_stream_events())
@@ -5642,7 +5643,7 @@ class TestContent:
             span = spans.one("anthropic.messages.create")
             assert [block.type for block in stream.current_message_snapshot.content] == ["text", "tool_use"]
 
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert json.loads(attributes(span)["gen_ai.output.messages"]) == TOOL_STREAM_OUTPUT
         assert len(accumulated) == len(tool_stream_events())
 
@@ -5890,7 +5891,7 @@ class TestContent:
             pass
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["gen_ai.response.id"] == "msg_1"
         assert attributes(span)["gen_ai.usage.output_tokens"] == 5
         assert attributes(span)["anthropic.message.stop_reason"] == "end_turn"
@@ -5911,7 +5912,7 @@ class TestContent:
             pass
 
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert attributes(span)["gen_ai.usage.output_tokens"] == 5
         assert "gen_ai.input.messages" in attributes(span)
         assert "gen_ai.output.messages" not in attributes(span)
@@ -7425,7 +7426,7 @@ class TestResourceIds:
         client.beta.sessions.create(agent="agent_1", environment_id="env_1")
 
         span = spans.one("anthropic.sessions.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert "anthropic.session.id" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
@@ -7698,7 +7699,7 @@ class TestResourceIds:
 
         # The user's ID in the request's body is not in its path, so only the response gives it.
         span = spans.one("anthropic.organization.workspaces.members.add")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert resource_ids(span) == {"anthropic.organization.workspace.id": "wrkspc_1"}
 
 
@@ -7999,7 +8000,7 @@ class TestTracingFailures:
         assert message.id == "msg_1"
         assert route.call_count == 1
         span = spans.one("anthropic.messages.create")
-        assert span.status.status_code == StatusCode.OK
+        assert span.status.status_code == StatusCode.UNSET
         assert url_attributes(span) == {}
 
     @SYNC_AND_ASYNC
@@ -8019,7 +8020,7 @@ class TestTracingFailures:
         assert message.id == "msg_1"
         [request] = requests(route)
         assert "traceparent" not in request.headers
-        assert spans.one("anthropic.messages.create").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.create").status.status_code == StatusCode.UNSET
 
     def test_a_propagator_that_is_not_installed_fails_neither_the_import_nor_a_call(self) -> None:
         """In a subprocess, because `opentelemetry.propagate` reads `OTEL_PROPAGATORS` once, when it is imported."""

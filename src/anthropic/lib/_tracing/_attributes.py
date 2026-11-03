@@ -26,6 +26,7 @@ AttributeName = Literal[
     "gen_ai.request.temperature",
     "gen_ai.request.top_k",
     "gen_ai.request.top_p",
+    "gen_ai.response.finish_reasons",
     "gen_ai.response.id",
     "gen_ai.response.model",
     "gen_ai.response.time_to_first_chunk",

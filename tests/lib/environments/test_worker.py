@@ -1255,7 +1255,7 @@ async def test_environment_worker_handles_an_item_in_its_span(monkeypatch: pytes
     for work_span, work_id in ((first, "w_1"), (second, "w_2")):
         assert parent_id(work_span) == span_id(app_span)
         assert work_span.kind == SpanKind.INTERNAL
-        assert work_span.status.status_code == StatusCode.OK
+        assert work_span.status.status_code == StatusCode.UNSET
         assert attributes(work_span) == {
             "gen_ai.provider.name": "anthropic",
             "anthropic.environment.id": "e_1",
@@ -1264,7 +1264,7 @@ async def test_environment_worker_handles_an_item_in_its_span(monkeypatch: pytes
         }
 
 
-async def test_environment_worker_ends_the_span_ok_when_the_item_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_environment_worker_leaves_the_span_unset_when_the_item_is_stopped(monkeypatch: pytest.MonkeyPatch) -> None:
     spans = Spans()
     # The first heartbeat says that the item is stopping, which ends its handling without an error.
     work = _PolledWorkResource(spans, [_work_item()], heartbeat_state="stopping")
@@ -1274,7 +1274,7 @@ async def test_environment_worker_ends_the_span_ok_when_the_item_is_stopped(monk
         await asyncio.wait_for(worker.run(), timeout=5)
 
     work_span = spans.one("anthropic.environment.work")
-    assert work_span.status.status_code == StatusCode.OK
+    assert work_span.status.status_code == StatusCode.UNSET
     # No span was current when the worker started, so the item's span is a root span.
     assert work_span.parent is None
 
