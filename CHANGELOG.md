@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.4.1) (2026-11-02)
+## [2.4.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.4.1) (2026-11-03)
 
 ### Bug Fixes
 
@@ -17,6 +17,7 @@
 * **docs:** clarify some API field descriptions
 * **docs:** update the telemetry destination headers description
 * **internal:** remove stale TODO comments and a test that could not pass
+* **tests:** check that a None path param is rejected
 
 
 ### Documentation
