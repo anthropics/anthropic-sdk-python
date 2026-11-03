@@ -25,7 +25,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_rbac_group import BetaRBACGroup
-from .....types.beta.organization.rbac_group_delete_response import RBACGroupDeleteResponse
+from .....types.beta.organization.beta_deleted_rbac_group import BetaDeletedRBACGroup
 
 __all__ = ["RBACGroups", "AsyncRBACGroups"]
 
@@ -41,7 +41,7 @@ class RBACGroups(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RBACGroupsWithRawResponse(self)
 
@@ -50,7 +50,7 @@ class RBACGroups(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RBACGroupsWithStreamingResponse(self)
 
@@ -255,7 +255,7 @@ class RBACGroups(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> RBACGroupDeleteResponse:
+    ) -> BetaDeletedRBACGroup:
         """Delete an RBAC Group.
 
         Groups provisioned by an identity provider (source type
@@ -289,7 +289,7 @@ class RBACGroups(SyncAPIResource):
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
-            cast_to=RBACGroupDeleteResponse,
+            cast_to=BetaDeletedRBACGroup,
         )
 
 
@@ -304,7 +304,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRBACGroupsWithRawResponse(self)
 
@@ -313,7 +313,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRBACGroupsWithStreamingResponse(self)
 
@@ -518,7 +518,7 @@ class AsyncRBACGroups(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> RBACGroupDeleteResponse:
+    ) -> BetaDeletedRBACGroup:
         """Delete an RBAC Group.
 
         Groups provisioned by an identity provider (source type
@@ -552,7 +552,7 @@ class AsyncRBACGroups(AsyncAPIResource):
                 span_route="/v1/organizations/rbac_groups/{rbac_group_id}",
                 span_attributes={"anthropic.organization.rbac_group.id": rbac_group_id},
             ),
-            cast_to=RBACGroupDeleteResponse,
+            cast_to=BetaDeletedRBACGroup,
         )
 
 

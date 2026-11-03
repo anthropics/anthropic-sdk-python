@@ -8,6 +8,7 @@ import pytest
 import pydantic
 from pydantic import Field
 
+from anthropic._types import Omit, omit
 from anthropic._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
 from anthropic._models import DISCRIMINATOR_CACHE, BaseModel, EagerIterable, UnionDiscriminator, construct_type
 
@@ -1094,3 +1095,16 @@ def test_iterable_construction_str_falls_back_to_list() -> None:
     # falls back to list of chars rather than calling str(["h", "e", "l", "l", "o"])
     assert m.data["items"] == ["h", "e", "l", "l", "o"]
     assert m.model_dump()["data"]["items"] == ["h", "e", "l", "l", "o"]
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="this is only supported in pydantic v2")
+def test_typeddict_with_omit_field() -> None:
+    class Params(TypedDict, total=False):
+        tier: Literal["auto", "standard"] | Omit
+
+    adapter = pydantic.TypeAdapter(Params)
+
+    assert adapter.validate_python({"tier": "auto"}) == {"tier": "auto"}
+    assert adapter.validate_python({"tier": omit}) == {"tier": omit}
+    with pytest.raises(pydantic.ValidationError):
+        adapter.validate_python({"tier": "other"})

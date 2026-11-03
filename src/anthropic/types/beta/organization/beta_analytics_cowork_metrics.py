@@ -33,6 +33,14 @@ class BetaAnalyticsCoworkMetrics(BaseModel):
     where a distinct count cannot be computed.
     """
 
+    distinct_plugins_used_count: Optional[int] = None
+    """Number of distinct plugins used in Cowork sessions.
+
+    Null while Cowork plugin-use metrics are not enabled for this organization.
+    Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
+    where a distinct count cannot be computed.
+    """
+
     distinct_session_count: Optional[int] = None
     """Number of distinct Cowork sessions.
 
@@ -43,20 +51,6 @@ class BetaAnalyticsCoworkMetrics(BaseModel):
     distinct_skills_used_count: Optional[int] = None
     """Number of distinct skills used in Cowork sessions.
 
-    Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
-    where a distinct count cannot be computed.
-    """
-
-    message_count: int
-    """Number of messages sent in Cowork sessions"""
-
-    skills_used_count: int
-    """Total number of skill invocations in Cowork sessions"""
-
-    distinct_plugins_used_count: Optional[int] = None
-    """Number of distinct plugins used in Cowork sessions.
-
-    Null while Cowork plugin-use metrics are not enabled for this organization.
     Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
     where a distinct count cannot be computed.
     """
@@ -73,6 +67,9 @@ class BetaAnalyticsCoworkMetrics(BaseModel):
     in Cowork sessions. Null, never 0, while the file-edit metrics are not enabled
     for this organization.
     """
+
+    message_count: int
+    """Number of messages sent in Cowork sessions"""
 
     multi_edit_tool_count: Optional[int] = None
     """Number of successful MultiEdit tool calls in Cowork sessions.
@@ -99,6 +96,9 @@ class BetaAnalyticsCoworkMetrics(BaseModel):
     Approximate (HLL, typical error <2%) in date-range mode. Null on aggregated rows
     where a distinct count cannot be computed.
     """
+
+    skills_used_count: int
+    """Total number of skill invocations in Cowork sessions"""
 
     write_tool_count: Optional[int] = None
     """Number of successful Write tool calls in Cowork sessions.

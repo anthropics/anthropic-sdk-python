@@ -12,7 +12,7 @@ from my_browser import MyBrowser, example_policy  # your driver and your URL pol
 
 with MyBrowser(backend, url_policy=example_policy(["example.com", "iana.org"])) as browser:
     runner = Anthropic().beta.messages.tool_runner(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         tools=[browser],
         messages=[{"role": "user", "content": "Open example.com and tell me the page heading."}],

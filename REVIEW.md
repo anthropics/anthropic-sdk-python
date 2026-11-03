@@ -22,3 +22,9 @@
 
 - A missing runtime check of an API response, or missing client-side validation
 - What an application can do to its own process, credentials or telemetry
+
+## This repository's own rules
+
+The generator writes the rest of this file. Rules for reviewing this
+repository's hand-written code go in this section, and a change anywhere else in
+the file belongs in the generator.

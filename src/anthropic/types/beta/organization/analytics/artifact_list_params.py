@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Required, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy
 
 __all__ = ["ArtifactListParams"]
 
@@ -37,7 +38,7 @@ class ArtifactListParams(TypedDict, total=False):
     offer Chat and Cowork unified.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsArtifactGroupBy]]
     """Dimensions to break results out by: `product`, `user_id` and/or `rbac_group_id`.
 
     The ungrouped artifact-type cube is finite and returned in full; grouped queries

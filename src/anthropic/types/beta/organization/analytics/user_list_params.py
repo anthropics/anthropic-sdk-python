@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_order import BetaAnalyticsOrder
+from ..beta_analytics_user_group_by import BetaAnalyticsUserGroupBy
 
 __all__ = ["UserListParams"]
 
@@ -50,7 +52,7 @@ class UserListParams(TypedDict, total=False):
     `chat_metrics`.
     """
 
-    group_by: Optional[List[Literal["rbac_group_id"]]]
+    group_by: Optional[List[BetaAnalyticsUserGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=rbac_group_id`). Supported on this endpoint: `rbac_group_id`. Rows
@@ -65,7 +67,7 @@ class UserListParams(TypedDict, total=False):
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`

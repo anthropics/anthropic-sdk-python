@@ -1,0 +1,223 @@
+from __future__ import annotations
+
+from typing import List, Optional
+
+import httpx2
+
+from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
+from ...._compat import cached_property
+from ...._resource import SyncAPIResource, AsyncAPIResource
+from ...._response import (
+    to_raw_response_wrapper,
+    to_streamed_response_wrapper,
+    async_to_raw_response_wrapper,
+    async_to_streamed_response_wrapper,
+)
+from ....pagination import SyncPageCursor, AsyncPageCursor
+from ...._base_client import AsyncPaginator, make_request_options
+from ....types.organization.spend_summary import SpendSummary
+from ....types.organization.spend_limit_period import SpendLimitPeriod
+
+__all__ = ["Effective", "AsyncEffective"]
+
+
+class Effective(SyncAPIResource):
+    @cached_property
+    def with_raw_response(self) -> EffectiveWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
+        """
+        return EffectiveWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> EffectiveWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
+        """
+        return EffectiveWithStreamingResponse(self)
+
+    def list(
+        self,
+        *,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        period: Optional[List[SpendLimitPeriod]] | Omit = omit,
+        user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> SyncPageCursor[SpendSummary]:
+        """
+        List each member's effective spend limit and period-to-date spend.
+
+        Returns one row per (member, period) the member resolves a spend limit for, with
+        the `source` scope the spend limit was inherited from. Paginates by member, so a
+        member's periods never split across pages. Supported for Claude Enterprise
+        organizations only, not for Claude Console organizations.
+
+        Args:
+          limit: Maximum number of members per page. A member's period rows never split across
+              pages, so a page may carry more rows than this. Defaults to `20`.
+
+          page: Opaque cursor from a previous response's `next_page` field.
+
+          period: Restrict the report to these limit periods. Omit to return one row per period
+              each member resolves a spend limit for.
+
+          user_ids: Restrict the report to these members, by tagged user ID (`user_...`). At most
+              100 entries.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/spend_limits/effective",
+            page=SyncPageCursor[SpendSummary],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "period": period,
+                    "user_ids": user_ids,
+                },
+                span_name="anthropic.organization.spend_limits.effective.list",
+                span_route="/v1/organizations/spend_limits/effective",
+            ),
+            model=SpendSummary,
+        )
+
+
+class AsyncEffective(AsyncAPIResource):
+    @cached_property
+    def with_raw_response(self) -> AsyncEffectiveWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
+        """
+        return AsyncEffectiveWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncEffectiveWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
+        """
+        return AsyncEffectiveWithStreamingResponse(self)
+
+    def list(
+        self,
+        *,
+        limit: int | Omit = omit,
+        page: Optional[str] | Omit = omit,
+        period: Optional[List[SpendLimitPeriod]] | Omit = omit,
+        user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> AsyncPaginator[SpendSummary, AsyncPageCursor[SpendSummary]]:
+        """
+        List each member's effective spend limit and period-to-date spend.
+
+        Returns one row per (member, period) the member resolves a spend limit for, with
+        the `source` scope the spend limit was inherited from. Paginates by member, so a
+        member's periods never split across pages. Supported for Claude Enterprise
+        organizations only, not for Claude Console organizations.
+
+        Args:
+          limit: Maximum number of members per page. A member's period rows never split across
+              pages, so a page may carry more rows than this. Defaults to `20`.
+
+          page: Opaque cursor from a previous response's `next_page` field.
+
+          period: Restrict the report to these limit periods. Omit to return one row per period
+              each member resolves a spend limit for.
+
+          user_ids: Restrict the report to these members, by tagged user ID (`user_...`). At most
+              100 entries.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/organizations/spend_limits/effective",
+            page=AsyncPageCursor[SpendSummary],
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "period": period,
+                    "user_ids": user_ids,
+                },
+                span_name="anthropic.organization.spend_limits.effective.list",
+                span_route="/v1/organizations/spend_limits/effective",
+            ),
+            model=SpendSummary,
+        )
+
+
+class EffectiveWithRawResponse:
+    def __init__(self, effective: Effective) -> None:
+        self._effective = effective
+
+        self.list = to_raw_response_wrapper(
+            effective.list,
+        )
+
+
+class AsyncEffectiveWithRawResponse:
+    def __init__(self, effective: AsyncEffective) -> None:
+        self._effective = effective
+
+        self.list = async_to_raw_response_wrapper(
+            effective.list,
+        )
+
+
+class EffectiveWithStreamingResponse:
+    def __init__(self, effective: Effective) -> None:
+        self._effective = effective
+
+        self.list = to_streamed_response_wrapper(
+            effective.list,
+        )
+
+
+class AsyncEffectiveWithStreamingResponse:
+    def __init__(self, effective: AsyncEffective) -> None:
+        self._effective = effective
+
+        self.list = async_to_streamed_response_wrapper(
+            effective.list,
+        )

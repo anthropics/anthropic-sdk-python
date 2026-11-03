@@ -35,7 +35,7 @@ class Dreams(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DreamsWithRawResponse(self)
 
@@ -44,7 +44,7 @@ class Dreams(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DreamsWithStreamingResponse(self)
 
@@ -87,7 +87,7 @@ class Dreams(SyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
@@ -480,7 +480,7 @@ class AsyncDreams(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDreamsWithRawResponse(self)
 
@@ -489,7 +489,7 @@ class AsyncDreams(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDreamsWithStreamingResponse(self)
 
@@ -532,7 +532,7 @@ class AsyncDreams(AsyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
