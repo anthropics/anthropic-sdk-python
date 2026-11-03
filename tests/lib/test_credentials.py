@@ -831,6 +831,49 @@ class TestCredentialsFile:
         with pytest.raises(AnthropicError, match="must use https"):
             CredentialsFile()()
 
+    @pytest.mark.parametrize(
+        "base_url",
+        [
+            "http://127.0.0.1:8080",
+            "http://[::1]:8080",
+            "http://localhost",
+        ],
+    )
+    def test_config_base_url_loopback_http_variants_allowed(self, tmp_path: pathlib.Path, base_url: str) -> None:
+        """The cleartext exemption covers HTTP on each loopback spelling."""
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external", "base_url": base_url},
+            {"access_token": "x", "expires_at": int(time.time()) + 3600},
+        )
+        assert CredentialsFile()().token == "x"
+
+    @pytest.mark.parametrize(
+        "base_url",
+        [
+            # The exemption is for a local oauth_server speaking cleartext
+            # HTTP; it must not widen to another scheme or to a
+            # scheme-relative URL that has no scheme at all.
+            "ftp://localhost:8080",
+            "ftp://127.0.0.1:8080",
+            "ws://localhost:8080",
+            "file://localhost/etc/passwd",
+            "//localhost:8080",
+            "//127.0.0.1:8080",
+        ],
+    )
+    def test_config_base_url_non_http_loopback_rejected(self, tmp_path: pathlib.Path, base_url: str) -> None:
+        """Only HTTP URLs get the loopback cleartext exemption."""
+        _write_profile(
+            tmp_path,
+            "default",
+            {"type": "external", "base_url": base_url},
+            {"access_token": "x"},
+        )
+        with pytest.raises(AnthropicError, match="must use https"):
+            CredentialsFile()()
+
     def test_workload_identity_http_rejected(self) -> None:
         from anthropic.lib.credentials import WorkloadIdentityCredentials
 

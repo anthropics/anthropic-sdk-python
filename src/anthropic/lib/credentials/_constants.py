@@ -132,7 +132,12 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
     # also matched `http://localhost.evil.example` and
     # `http://localhost:8080@evil.example`, whose request actually goes to
     # evil.example — handing it the assertion in cleartext.
-    if urlsplit(lowered).hostname in _LOOPBACK_HOSTS:
+    #
+    # The exemption is only for a local oauth_server speaking cleartext HTTP.
+    # A non-HTTP scheme (`ftp://`, `ws://`, `file://`) or a scheme-relative
+    # URL (`//localhost:8080`) must not inherit the cleartext exemption.
+    parsed = urlsplit(lowered)
+    if parsed.scheme == "http" and parsed.hostname in _LOOPBACK_HOSTS:
         return
     raise CredentialsError(
         f"{field} must use https (got {url!r}); the token-exchange endpoint "
