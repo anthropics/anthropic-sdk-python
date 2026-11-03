@@ -31,7 +31,7 @@ class TestCost:
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         cost = client.beta.organization.analytics.cost.list(
             starting_at=parse_datetime("2026-09-01T00:00:00Z"),
-            actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
+            actor_ids=["user_01WxYzAbCdEfGhJkMnPqRsTu"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
             api_key_ids=["apikey_01Rj2N8SVvo6BePZj99NhmiT"],
@@ -107,7 +107,7 @@ class TestAsyncCost:
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         cost = await async_client.beta.organization.analytics.cost.list(
             starting_at=parse_datetime("2026-09-01T00:00:00Z"),
-            actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
+            actor_ids=["user_01WxYzAbCdEfGhJkMnPqRsTu"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
             api_key_ids=["apikey_01Rj2N8SVvo6BePZj99NhmiT"],

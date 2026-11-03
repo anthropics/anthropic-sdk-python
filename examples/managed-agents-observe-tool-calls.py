@@ -39,7 +39,7 @@ from anthropic import AsyncAnthropic
 from anthropic.lib.environments import MANAGED_AGENTS_BETA
 from anthropic.lib.tools.agent_toolset import AgentToolContext, beta_agent_toolset_20260401
 
-MODEL_ID = "claude-haiku-4-5"
+MODEL_ID = "claude-haiku-5-5"
 
 
 def _require_env(name: str) -> str:

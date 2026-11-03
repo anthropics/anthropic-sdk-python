@@ -40,6 +40,7 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(Workspace, workspace, path=["response"])
 
@@ -127,6 +128,7 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(Workspace, workspace, path=["response"])
 
@@ -263,6 +265,7 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(Workspace, workspace, path=["response"])
 
@@ -350,6 +353,7 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(Workspace, workspace, path=["response"])
 

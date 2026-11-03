@@ -41,6 +41,7 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             betas=["message-batches-2024-09-24"],
             extra_query={"beta": "true"},
         )
@@ -136,6 +137,7 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -286,6 +288,7 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             betas=["message-batches-2024-09-24"],
             extra_query={"beta": "true"},
         )
@@ -381,6 +384,7 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])

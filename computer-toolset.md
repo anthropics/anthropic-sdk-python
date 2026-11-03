@@ -10,7 +10,7 @@ from my_desktop import MyDesktop, confirm  # both shown below
 
 with MyDesktop(backend, confirm=confirm) as desktop:
     runner = Anthropic().beta.messages.tool_runner(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         tools=[desktop],
         messages=[{"role": "user", "content": "Open the calculator and compute 17 * 23."}],

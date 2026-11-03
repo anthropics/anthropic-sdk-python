@@ -1,6 +1,6 @@
 """Shared backoff / jitter / retry-classification helpers for the runner helpers.
 
-Extracted so the control-plane poller, the session tool runner, and the worker
+Extracted so the work poller, the session tool runner, and the worker
 heartbeat all compute backoff and classify retryable failures the same way.
 Consumed by the runner helpers only.
 """

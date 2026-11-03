@@ -10,22 +10,6 @@ __all__ = ["BetaAnalyticsProjectActivity"]
 class BetaAnalyticsProjectActivity(BaseModel):
     """Per-project activity data for a given day."""
 
-    distinct_user_count: int
-    """
-    Number of distinct users who used the project on the requested day, or, in
-    date-range mode, over the requested window — recomputed as an exact distinct
-    count over the window's per-member daily rows, never a sum of per-day values.
-    """
-
-    message_count: int
-    """Number of messages sent in the project on the requested day"""
-
-    project_id: str
-    """Tagged project identifier (e.g. `claude_proj_...`)"""
-
-    project_name: str
-    """Name of the project"""
-
     created_at: Optional[datetime] = None
     """Project creation timestamp in RFC 3339 format.
 
@@ -45,19 +29,21 @@ class BetaAnalyticsProjectActivity(BaseModel):
     Null on aggregated rows where a distinct count cannot be computed.
     """
 
-    product: Optional[str] = None
+    distinct_user_count: int
     """
-    Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
-    These are the canonical Cost & Usage product names; an `office_agent` row's
-    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
-    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
-    `chat_cowork_unified` occur (the surfaces that create artifacts);
-    `/apps/chat/projects` does not support the product dimension (a `product` entry
-    in `group_by[]` or `filter[]` there is rejected). Present only when the request
-    grouped by `product`.
+    Number of distinct users who used the project on the requested day, or, in
+    date-range mode, over the requested window — recomputed as an exact distinct
+    count over the window's per-member daily rows, never a sum of per-day values.
     """
+
+    message_count: int
+    """Number of messages sent in the project on the requested day"""
+
+    project_id: str
+    """Tagged project identifier (e.g. `claude_proj_...`)"""
+
+    project_name: str
+    """Name of the project"""
 
     rbac_group_id: Optional[str] = None
     """

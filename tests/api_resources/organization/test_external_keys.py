@@ -40,6 +40,7 @@ class TestExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(ExternalKey, external_key, path=["response"])
 
@@ -298,6 +299,7 @@ class TestAsyncExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
         )
         assert_matches_type(ExternalKey, external_key, path=["response"])
 

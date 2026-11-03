@@ -42,7 +42,7 @@ class Work(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkWithRawResponse(self)
 
@@ -51,7 +51,7 @@ class Work(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkWithStreamingResponse(self)
 
@@ -645,7 +645,7 @@ class AsyncWork(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkWithRawResponse(self)
 
@@ -654,7 +654,7 @@ class AsyncWork(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkWithStreamingResponse(self)
 
@@ -1394,7 +1394,7 @@ class AsyncWork(AsyncAPIResource):
             by `EnvironmentWorker.run`; not used by
             `EnvironmentWorker.handle_item`.
           environment_key: The environment key — the worker's single credential,
-            used as Bearer auth on the control-plane and session-level calls.
+            used as Bearer auth on the polling and session-level calls.
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
             `AgentToolContext`. Defaults to `beta_agent_toolset_20260401(env)`.

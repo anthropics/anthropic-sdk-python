@@ -264,6 +264,9 @@ from .beta_managed_agents_span_model_request_end_event import (
 from .beta_managed_agents_stream_session_thread_events import (
     BetaManagedAgentsStreamSessionThreadEvents as BetaManagedAgentsStreamSessionThreadEvents,
 )
+from .beta_managed_agents_tool_use_limit_reached_error import (
+    BetaManagedAgentsToolUseLimitReachedError as BetaManagedAgentsToolUseLimitReachedError,
+)
 from .beta_managed_agents_user_tool_confirmation_event import (
     BetaManagedAgentsUserToolConfirmationEvent as BetaManagedAgentsUserToolConfirmationEvent,
 )
@@ -278,6 +281,9 @@ from .beta_managed_agents_user_tool_result_event_params import (
 )
 from .beta_managed_agents_workflow_run_result_completed import (
     BetaManagedAgentsWorkflowRunResultCompleted as BetaManagedAgentsWorkflowRunResultCompleted,
+)
+from .beta_managed_agents_compaction_limit_reached_error import (
+    BetaManagedAgentsCompactionLimitReachedError as BetaManagedAgentsCompactionLimitReachedError,
 )
 from .beta_managed_agents_span_model_request_start_event import (
     BetaManagedAgentsSpanModelRequestStartEvent as BetaManagedAgentsSpanModelRequestStartEvent,

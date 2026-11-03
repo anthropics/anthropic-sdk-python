@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ......._types import SequenceNotStr
+from ....beta_analytics_order import BetaAnalyticsOrder
+from ....beta_analytics_project_group_by import BetaAnalyticsProjectGroupBy
 
 __all__ = ["ProjectListParams"]
 
@@ -43,7 +45,7 @@ class ProjectListParams(TypedDict, total=False):
     emitted in responses. An unsupported dimension returns 400. At most 100 entries.
     """
 
-    group_by: Optional[List[Literal["rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsProjectGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=user_id`). Supported on this endpoint: `rbac_group_id`, `user_id`.
@@ -57,7 +59,7 @@ class ProjectListParams(TypedDict, total=False):
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`
