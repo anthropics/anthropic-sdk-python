@@ -85,18 +85,14 @@ class _KeepaliveTracker:
 
     def has_content(self, chunk: bytes) -> bool:
         pending = self._tail + chunk
-        self._tail = b""
 
-        # A trailing bare CR may be the first half of a CRLF, and the next chunk may carry the LF.
-        # Holding it back costs one byte; consuming it now would invent an empty line, and in SSE
-        # an empty line ends an event, so the guard would be reading a different stream from the
-        # decoder it is supposed to agree with.
-        cut = len(pending) - 1 if pending.endswith(b"\r") else len(pending)
-        complete, carry = pending[:cut], pending[cut:]
-
-        lines = _LINE_END.split(complete)
+        # No trailing CR is held back for a CRLF that a chunk boundary may split: lines are
+        # classified one at a time and _frame_is_keepalive treats an empty line as a keepalive,
+        # so the extra empty line that a split CRLF produces cannot change the answer - while
+        # holding the CR would delay counting a CR-terminated content line until the next chunk.
+        lines = _LINE_END.split(pending)
         unfinished = lines.pop()  # bytes after the last terminator are still arriving
-        self._tail = unfinished + carry
+        self._tail = unfinished
 
         if len(self._tail) > _MAX_PENDING:
             # A line this long is not a keepalive (see _MAX_PENDING). It has been classified as

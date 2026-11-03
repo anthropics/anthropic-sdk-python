@@ -279,18 +279,17 @@ def test_cr_only_keepalive_stream_keeps_the_buffer_bounded() -> None:
 
     for _ in range(1000):
         assert not tracker.has_content(CR_COMMENT)
-        assert len(tracker._tail) <= 1, "at most one CR is held, in case the next chunk opens with LF"
+        assert len(tracker._tail) == 0, "a CR ends its line on arrival; nothing is held back"
 
 
-def test_crlf_split_across_two_chunks_is_one_line_ending() -> None:
-    """Chunk 1 ends on CR and chunk 2 starts with LF: one terminator, not two."""
+def test_crlf_split_across_two_chunks_stays_a_keepalive() -> None:
+    """Chunk 1 ends on CR, chunk 2 starts with LF: the stray LF is just another blank line."""
     tracker = _KeepaliveTracker()
 
-    # The CR could be the first half of a CRLF, so the line waits for the next chunk rather than
-    # ending here; ending it now would make the LF look like an extra blank line, and in SSE a
-    # blank line ends an event.
+    # The CR ends its line on arrival. The LF in the next chunk then reads as an empty line, and
+    # an empty line is classified as a keepalive, so splitting a CRLF changes nothing.
     assert not tracker.has_content(b'data: {"type": "ping"}\r')
-    assert tracker._tail == b'data: {"type": "ping"}\r'
+    assert tracker._tail == b""
 
     assert not tracker.has_content(b"\n\r\n")
     assert tracker._tail == b""
@@ -299,8 +298,10 @@ def test_crlf_split_across_two_chunks_is_one_line_ending() -> None:
 def test_crlf_split_across_two_chunks_keeps_a_content_line_as_content() -> None:
     tracker = _KeepaliveTracker()
 
-    tracker.has_content(b'data: {"type": "content_block_delta"}\r')
-    assert tracker.has_content(b"\n\r\n")
+    # Counted as the CR arrives, not one chunk later.
+    assert tracker.has_content(b'data: {"type": "content_block_delta"}\r')
+    assert tracker._tail == b""
+    assert not tracker.has_content(b"\n\r\n")
 
 
 def test_a_content_line_split_across_three_chunks_is_content() -> None:
