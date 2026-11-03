@@ -30,7 +30,11 @@ class BetaPluginVersion(BaseModel):
     """Who uploaded this version; null when not recorded."""
 
     description: Optional[str] = None
-    """The manifest's description; null when it declares none."""
+    """The manifest's description; null when it declares none.
+
+    If that description is the first 500 characters of exactly one distinct skill
+    `description` in `components`, that skill `description` is returned instead.
+    """
 
     display_name: Optional[str] = None
     """The manifest's display name; null when it declares none."""
