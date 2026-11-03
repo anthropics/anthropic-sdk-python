@@ -411,6 +411,7 @@ from .beta_user_profile_enrollment_url import BetaUserProfileEnrollmentURL as Be
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock as BetaWebFetchToolResultBlock
 from .beta_web_fetch_url_source_except import BetaWebFetchURLSourceExcept as BetaWebFetchURLSourceExcept
 from .beta_web_fetch_url_sources_param import BetaWebFetchURLSourcesParam as BetaWebFetchURLSourcesParam
+from .beta_billing_frozen_error_details import BetaBillingFrozenErrorDetails as BetaBillingFrozenErrorDetails
 from .beta_browser_get_page_text_config import BetaBrowserGetPageTextConfig as BetaBrowserGetPageTextConfig
 from .beta_browser_hover_tool_use_block import BetaBrowserHoverToolUseBlock as BetaBrowserHoverToolUseBlock
 from .beta_browser_left_mouse_up_config import BetaBrowserLeftMouseUpConfig as BetaBrowserLeftMouseUpConfig
@@ -490,6 +491,7 @@ from .beta_computer_left_mouse_down_input import BetaComputerLeftMouseDownInput 
 from .beta_computer_scroll_tool_use_block import BetaComputerScrollToolUseBlock as BetaComputerScrollToolUseBlock
 from .beta_computer_toolset_configs_param import BetaComputerToolsetConfigsParam as BetaComputerToolsetConfigsParam
 from .beta_dream_memory_store_input_param import BetaDreamMemoryStoreInputParam as BetaDreamMemoryStoreInputParam
+from .beta_invalid_metadata_error_details import BetaInvalidMetadataErrorDetails as BetaInvalidMetadataErrorDetails
 from .beta_managed_agents_agent_reference import BetaManagedAgentsAgentReference as BetaManagedAgentsAgentReference
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill as BetaManagedAgentsAnthropicSkill
 from .beta_managed_agents_branch_checkout import BetaManagedAgentsBranchCheckout as BetaManagedAgentsBranchCheckout
@@ -655,6 +657,9 @@ from .beta_thinking_prefix_mismatch_behavior import (
 from .beta_tool_change_tool_definition_param import (
     BetaToolChangeToolDefinitionParam as BetaToolChangeToolDefinitionParam,
 )
+from .beta_unsupported_charset_error_details import (
+    BetaUnsupportedCharsetErrorDetails as BetaUnsupportedCharsetErrorDetails,
+)
 from .beta_web_fetch_tool_result_block_param import BetaWebFetchToolResultBlockParam as BetaWebFetchToolResultBlockParam
 from .beta_web_fetch_tool_result_error_block import BetaWebFetchToolResultErrorBlock as BetaWebFetchToolResultErrorBlock
 from .beta_web_fetch_url_source_except_param import BetaWebFetchURLSourceExceptParam as BetaWebFetchURLSourceExceptParam
@@ -712,6 +717,9 @@ from .beta_computer_triple_click_config_param import (
 )
 from .beta_content_block_source_content_param import (
     BetaContentBlockSourceContentParam as BetaContentBlockSourceContentParam,
+)
+from .beta_environment_archived_error_details import (
+    BetaEnvironmentArchivedErrorDetails as BetaEnvironmentArchivedErrorDetails,
 )
 from .beta_managed_agents_always_allow_policy import (
     BetaManagedAgentsAlwaysAllowPolicy as BetaManagedAgentsAlwaysAllowPolicy,
@@ -1169,6 +1177,9 @@ from .beta_code_execution_tool_result_block_content import (
 from .beta_count_tokens_context_management_response import (
     BetaCountTokensContextManagementResponse as BetaCountTokensContextManagementResponse,
 )
+from .beta_invalid_config_type_change_error_details import (
+    BetaInvalidConfigTypeChangeErrorDetails as BetaInvalidConfigTypeChangeErrorDetails,
+)
 from .beta_managed_agents_always_allow_policy_param import (
     BetaManagedAgentsAlwaysAllowPolicyParam as BetaManagedAgentsAlwaysAllowPolicyParam,
 )
@@ -1213,6 +1224,12 @@ from .beta_webhook_memory_store_archived_event_data import (
 )
 from .beta_citation_web_search_result_location_param import (
     BetaCitationWebSearchResultLocationParam as BetaCitationWebSearchResultLocationParam,
+)
+from .beta_environment_create_disabled_error_details import (
+    BetaEnvironmentCreateDisabledErrorDetails as BetaEnvironmentCreateDisabledErrorDetails,
+)
+from .beta_environment_update_disabled_error_details import (
+    BetaEnvironmentUpdateDisabledErrorDetails as BetaEnvironmentUpdateDisabledErrorDetails,
 )
 from .beta_managed_agents_mcp_toolset_default_config import (
     BetaManagedAgentsMCPToolsetDefaultConfig as BetaManagedAgentsMCPToolsetDefaultConfig,

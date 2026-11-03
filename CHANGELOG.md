@@ -1,6 +1,11 @@
 # Changelog
 
-## [2.4.1](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.4.1) (2026-11-03)
+## [2.5.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.5.0) (2026-11-03)
+
+### Features
+
+* **api:** add error details types and new error type values
+
 
 ### Bug Fixes
 

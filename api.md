@@ -5,15 +5,26 @@ from anthropic.types import (
     APIErrorObject,
     AuthenticationError,
     BillingError,
+    ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    CmekContextUnavailableErrorDetails,
+    CmekKeyDisabledErrorDetails,
+    CmekKeyNetworkBlockedErrorDetails,
+    CmekKeyUnreachableErrorDetails,
+    EnforcedSpendLimitReachedErrorDetails,
+    ErrorDetails,
     ErrorObject,
     ErrorResponse,
     ErrorType,
     GatewayTimeoutError,
     InvalidRequestError,
     NotFoundError,
+    OrganizationOnHoldErrorDetails,
     OverloadedError,
     PermissionError,
     RateLimitError,
+    RequestBodyEncodingInvalidErrorDetails,
+    RequestBodyEncodingUnsupportedErrorDetails,
+    RequestBodyTooLargeAfterDecodingErrorDetails,
 )
 ```
 
@@ -24,6 +35,7 @@ Types:
 ```python
 from anthropic.types import (
     AssistantMessageParam,
+    AvailableToolsLimitExceededErrorDetails,
     Base64ImageSourceParam,
     Base64PDFSource,
     Base64PDFSourceParam,
@@ -169,6 +181,7 @@ from anthropic.types import (
     CitationsDelta,
     CitationsSearchResultLocation,
     CitationsWebSearchResultLocation,
+    ClaudeCodeVersionTooOldErrorDetails,
     CodeExecutionOutputBlock,
     CodeExecutionOutputBlockParam,
     CodeExecutionResultBlock,
@@ -184,6 +197,15 @@ from anthropic.types import (
     CodeExecutionToolResultError,
     CodeExecutionToolResultErrorCode,
     CodeExecutionToolResultErrorParam,
+    CompactionBlockAmbiguousErrorDetails,
+    CompactionBlockMisplacedErrorDetails,
+    CompactionContentMismatchErrorDetails,
+    CompactionIncompleteTurnErrorDetails,
+    CompactionNothingToSummarizeErrorDetails,
+    CompactionSignatureInvalidErrorDetails,
+    CompactionTooManyToolReferencesErrorDetails,
+    CompactionToolChangesMismatchErrorDetails,
+    CompactionUnavailableErrorDetails,
     ComputerCursorPositionConfigParam,
     ComputerCursorPositionInput,
     ComputerCursorPositionToolUseBlock,
@@ -300,6 +322,7 @@ from anthropic.types import (
     ServerToolUseBlockParam,
     SignatureDelta,
     SkillParams,
+    SkillReadBlockedUndecryptableErrorDetails,
     StopReason,
     SystemMessageParam,
     TextBlock,
@@ -326,6 +349,12 @@ from anthropic.types import (
     ThinkingConfigEnabledParam,
     ThinkingConfigParam,
     ThinkingDelta,
+    ThreadAlreadyContinuedErrorDetails,
+    ThreadContinueInFlightErrorDetails,
+    ThreadFingerprintMismatchErrorDetails,
+    ThreadNotFoundErrorDetails,
+    ThreadUnsupportedFeatureName,
+    ThreadUnsupportedRequestErrorDetails,
     ToolParam,
     ToolBash20250124Param,
     ToolChoiceParam,
@@ -333,8 +362,10 @@ from anthropic.types import (
     ToolChoiceAutoParam,
     ToolChoiceNoneParam,
     ToolChoiceToolParam,
+    ToolNameConflictErrorDetails,
     ToolReferenceBlock,
     ToolReferenceBlockParam,
+    ToolReferenceUnresolvedErrorDetails,
     ToolResultBlockParam,
     ToolSearchToolBm25_20251119Param,
     ToolSearchToolRegex20251119Param,
@@ -509,7 +540,13 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedFile, FileMetadata
+from anthropic.types import (
+    DeletedFile,
+    FileExpiredErrorDetails,
+    FileMetadata,
+    FileNotDownloadableErrorDetails,
+    StorageQuotaExceededErrorDetails,
+)
 ```
 
 Methods:
@@ -606,7 +643,15 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import OrganizationInfo, OrganizationRole
+from anthropic.types import (
+    ConcurrentMembershipChangeErrorDetails,
+    OrganizationInfo,
+    OrganizationRole,
+    OrganizationTypeNotSupportedErrorDetails,
+    RBACGroupGrantsOwnerAccessErrorDetails,
+    RBACGroupOwnerAccessUnconfirmedErrorDetails,
+    UserProfileNotFoundErrorDetails,
+)
 ```
 
 Methods:
@@ -625,6 +670,8 @@ from anthropic.types.organization import (
     APIKeyServiceAccountActor,
     APIKeyUserActor,
     APIKeyWorkspaceScope,
+    OrgAPIKeyLimitExceededErrorDetails,
+    WorkspaceAPIKeyLimitExceededErrorDetails,
 )
 ```
 
@@ -646,6 +693,7 @@ from anthropic.types.organization import (
     AzureExternalKeyConfigParam,
     ExternalKey,
     ExternalKeyAttachedAttachment,
+    ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
     GCPExternalKeyConfig,
     GCPExternalKeyConfigParam,
@@ -732,7 +780,15 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationInvite, InviteDeleteResponse
+from anthropic.types.organization import (
+    AlreadyMemberErrorDetails,
+    CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
+    EmailDomainNotAllowedErrorDetails,
+    InviteAlreadyExistsErrorDetails,
+    OrgMemberLimitExceededErrorDetails,
+    OrganizationInvite,
+    InviteDeleteResponse,
+)
 ```
 
 Methods:
@@ -777,7 +833,11 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationUser, UserRemoveResponse
+from anthropic.types.organization import (
+    CannotRemoveLastMemberErrorDetails,
+    OrganizationUser,
+    UserRemoveResponse,
+)
 ```
 
 Methods:
@@ -797,9 +857,14 @@ from anthropic.types.organization import (
     DataResidency,
     DataResidencyCreateConfigParam,
     DataResidencyUpdateConfigParam,
+    ExternalKeyChangedErrorDetails,
+    KeyProfileMismatchErrorDetails,
     NoBillingWorkspaceRole,
     Workspace,
     WorkspaceMember,
+    WorkspaceMemberLimitExceededErrorDetails,
+    WorkspacePolicyField,
+    WorkspacePolicyViolationErrorDetails,
     WorkspaceRole,
 )
 ```
@@ -1956,7 +2021,12 @@ from anthropic.types.beta import (
     BetaCloudConfig,
     BetaCloudConfigParams,
     BetaEnvironment,
+    BetaEnvironmentArchivedErrorDetails,
+    BetaEnvironmentCreateDisabledErrorDetails,
     BetaEnvironmentDeleteResponse,
+    BetaEnvironmentUpdateDisabledErrorDetails,
+    BetaInvalidConfigTypeChangeErrorDetails,
+    BetaInvalidMetadataErrorDetails,
     BetaLimitedNetwork,
     BetaLimitedNetworkParams,
     BetaPackages,
@@ -1983,11 +2053,13 @@ Types:
 
 ```python
 from anthropic.types.beta.environments import (
+    BetaHeartbeatPreconditionFailedErrorDetails,
     BetaSelfHostedWork,
     BetaSelfHostedWorkHeartbeatResponse,
     BetaSelfHostedWorkListResponse,
     BetaSelfHostedWorkQueueStats,
     BetaSessionWorkData,
+    BetaWorkLeaseState,
 )
 ```
 
@@ -2695,7 +2767,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
+from anthropic.types.beta import (
+    BetaBillingFrozenErrorDetails,
+    BetaOrganization,
+    BetaOrganizationRole,
+    BetaUnsupportedCharsetErrorDetails,
+)
 ```
 
 Methods:
@@ -3210,6 +3287,7 @@ from anthropic.types.beta.organization import (
     BetaSpendLimitUserScopeParam,
     BetaSpendLimitWorkspaceScope,
     BetaSpendLimitWorkspaceScopeParam,
+    BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
     BetaSpendSummary,
     SpendLimitDeleteResponse,
 )
@@ -3325,12 +3403,17 @@ from anthropic.types.beta.organization import (
     BetaPluginAPIActor,
     BetaPluginComponent,
     BetaPluginContentScan,
+    BetaPluginNameTakenErrorDetails,
     BetaPluginOwnerOrganization,
     BetaPluginOwnerUser,
     BetaPluginTargetOrganization,
     BetaPluginTargetOrganizationMember,
     BetaPluginTargetRBACGroup,
     BetaPluginUserActor,
+    BetaRegistrationPendingErrorDetails,
+    BetaScanFailedErrorDetails,
+    BetaScanPendingErrorDetails,
+    BetaSkillNameTakenErrorDetails,
 )
 ```
 
@@ -3501,6 +3584,7 @@ Types:
 
 ```python
 from anthropic.types.beta.organization import (
+    BetaAPIKeyScopeMissingErrorDetails,
     BetaClaudeTagDefaultSettingSource,
     BetaClaudeTagGuestPolicy,
     BetaClaudeTagGuestPolicyParam,
@@ -3523,6 +3607,13 @@ from anthropic.types.beta.organization import (
     BetaClaudeTagSlackParentChannelSettingSource,
     BetaClaudeTagSlackWorkspaceIdentifiers,
     BetaClaudeTagSlackWorkspaceSettingSource,
+    BetaClaudeTagWritesNotEnabledErrorDetails,
+    BetaComplianceConfigurationRestrictedErrorDetails,
+    BetaEnvironmentNotFoundErrorDetails,
+    BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails,
+    BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
+    BetaSlackChannelSetUpSettingsConflictErrorDetails,
+    BetaSlackChannelSetUpSettingsRefusedErrorDetails,
 )
 ```
 

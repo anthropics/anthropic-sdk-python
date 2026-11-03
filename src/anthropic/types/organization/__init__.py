@@ -36,6 +36,7 @@ from .rate_limit_list_params import RateLimitListParams as RateLimitListParams
 from .rbac_group_list_params import RBACGroupListParams as RBACGroupListParams
 from .spend_limit_user_actor import SpendLimitUserActor as SpendLimitUserActor
 from .spend_limit_user_scope import SpendLimitUserScope as SpendLimitUserScope
+from .workspace_policy_field import WorkspacePolicyField as WorkspacePolicyField
 from .analytics_lines_of_code import AnalyticsLinesOfCode as AnalyticsLinesOfCode
 from .analytics_user_activity import AnalyticsUserActivity as AnalyticsUserActivity
 from .analytics_user_group_by import AnalyticsUserGroupBy as AnalyticsUserGroupBy
@@ -70,6 +71,7 @@ from .analytics_core_code_metrics import AnalyticsCoreCodeMetrics as AnalyticsCo
 from .service_account_list_params import ServiceAccountListParams as ServiceAccountListParams
 from .spend_limit_seat_tier_scope import SpendLimitSeatTierScope as SpendLimitSeatTierScope
 from .spend_limit_workspace_scope import SpendLimitWorkspaceScope as SpendLimitWorkspaceScope
+from .already_member_error_details import AlreadyMemberErrorDetails as AlreadyMemberErrorDetails
 from .analytics_connector_activity import AnalyticsConnectorActivity as AnalyticsConnectorActivity
 from .analytics_connector_group_by import AnalyticsConnectorGroupBy as AnalyticsConnectorGroupBy
 from .analytics_skill_chat_metrics import AnalyticsSkillChatMetrics as AnalyticsSkillChatMetrics
@@ -104,8 +106,11 @@ from .analytics_connector_office_metrics import AnalyticsConnectorOfficeMetrics 
 from .compliance_settings_state_disabled import ComplianceSettingsStateDisabled as ComplianceSettingsStateDisabled
 from .data_residency_create_config_param import DataResidencyCreateConfigParam as DataResidencyCreateConfigParam
 from .data_residency_update_config_param import DataResidencyUpdateConfigParam as DataResidencyUpdateConfigParam
+from .external_key_changed_error_details import ExternalKeyChangedErrorDetails as ExternalKeyChangedErrorDetails
 from .external_key_unattached_attachment import ExternalKeyUnattachedAttachment as ExternalKeyUnattachedAttachment
+from .key_profile_mismatch_error_details import KeyProfileMismatchErrorDetails as KeyProfileMismatchErrorDetails
 from .analytics_skill_claude_code_metrics import AnalyticsSkillClaudeCodeMetrics as AnalyticsSkillClaudeCodeMetrics
+from .invite_already_exists_error_details import InviteAlreadyExistsErrorDetails as InviteAlreadyExistsErrorDetails
 from .organization_rate_limit_batch_group import OrganizationRateLimitBatchGroup as OrganizationRateLimitBatchGroup
 from .organization_rate_limit_files_group import OrganizationRateLimitFilesGroup as OrganizationRateLimitFilesGroup
 from .organization_rate_limit_model_group import OrganizationRateLimitModelGroup as OrganizationRateLimitModelGroup
@@ -120,20 +125,35 @@ from .analytics_single_day_activity_summary import (
 from .analytics_skill_office_product_metrics import (
     AnalyticsSkillOfficeProductMetrics as AnalyticsSkillOfficeProductMetrics,
 )
+from .email_domain_not_allowed_error_details import (
+    EmailDomainNotAllowedErrorDetails as EmailDomainNotAllowedErrorDetails,
+)
 from .spend_limit_organization_service_scope import (
     SpendLimitOrganizationServiceScope as SpendLimitOrganizationServiceScope,
 )
 from .analytics_connector_claude_code_metrics import (
     AnalyticsConnectorClaudeCodeMetrics as AnalyticsConnectorClaudeCodeMetrics,
 )
+from .cannot_remove_last_member_error_details import (
+    CannotRemoveLastMemberErrorDetails as CannotRemoveLastMemberErrorDetails,
+)
 from .compliance_settings_state_enabled_param import (
     ComplianceSettingsStateEnabledParam as ComplianceSettingsStateEnabledParam,
+)
+from .org_member_limit_exceeded_error_details import (
+    OrgMemberLimitExceededErrorDetails as OrgMemberLimitExceededErrorDetails,
 )
 from .compliance_settings_state_disabled_param import (
     ComplianceSettingsStateDisabledParam as ComplianceSettingsStateDisabledParam,
 )
+from .org_api_key_limit_exceeded_error_details import (
+    OrgAPIKeyLimitExceededErrorDetails as OrgAPIKeyLimitExceededErrorDetails,
+)
 from .organization_rate_limit_web_search_group import (
     OrganizationRateLimitWebSearchGroup as OrganizationRateLimitWebSearchGroup,
+)
+from .workspace_policy_violation_error_details import (
+    WorkspacePolicyViolationErrorDetails as WorkspacePolicyViolationErrorDetails,
 )
 from .organization_rate_limit_token_count_group import (
     OrganizationRateLimitTokenCountGroup as OrganizationRateLimitTokenCountGroup,
@@ -150,8 +170,17 @@ from .analytics_skill_chat_cowork_unified_metrics import (
 from .analytics_plugin_chat_cowork_unified_metrics import (
     AnalyticsPluginChatCoworkUnifiedMetrics as AnalyticsPluginChatCoworkUnifiedMetrics,
 )
+from .workspace_member_limit_exceeded_error_details import (
+    WorkspaceMemberLimitExceededErrorDetails as WorkspaceMemberLimitExceededErrorDetails,
+)
 from .analytics_chat_cowork_unified_sessions_metrics import (
     AnalyticsChatCoworkUnifiedSessionsMetrics as AnalyticsChatCoworkUnifiedSessionsMetrics,
+)
+from .external_key_in_workspace_policy_error_details import (
+    ExternalKeyInWorkspacePolicyErrorDetails as ExternalKeyInWorkspacePolicyErrorDetails,
+)
+from .workspace_api_key_limit_exceeded_error_details import (
+    WorkspaceAPIKeyLimitExceededErrorDetails as WorkspaceAPIKeyLimitExceededErrorDetails,
 )
 from .analytics_connector_chat_cowork_unified_metrics import (
     AnalyticsConnectorChatCoworkUnifiedMetrics as AnalyticsConnectorChatCoworkUnifiedMetrics,
@@ -167,4 +196,7 @@ from .analytics_skill_chat_cowork_unified_sessions_metrics import (
 )
 from .analytics_connector_chat_cowork_unified_sessions_metrics import (
     AnalyticsConnectorChatCoworkUnifiedSessionsMetrics as AnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
+)
+from .cannot_invite_emails_with_unverified_domains_error_details import (
+    CannotInviteEmailsWithUnverifiedDomainsErrorDetails as CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
 )
