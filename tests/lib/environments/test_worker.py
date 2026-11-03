@@ -420,6 +420,10 @@ def test_sessions_token_from_secret() -> None:
     assert _sessions_token_from_secret("!!! not base64 !!!") is None
     # Valid base64 but not JSON / not an object / missing or empty token.
     assert _sessions_token_from_secret(base64.urlsafe_b64encode(b"plain text").decode()) is None
+    assert _sessions_token_from_secret(base64.urlsafe_b64encode(b'["sessions-token-abc"]').decode()) is None
+    assert _sessions_token_from_secret(base64.urlsafe_b64encode(b'"sessions-token-abc"').decode()) is None
+    assert _sessions_token_from_secret(base64.urlsafe_b64encode(b"12345").decode()) is None
+    assert _sessions_token_from_secret(base64.urlsafe_b64encode(b"true").decode()) is None
     assert _sessions_token_from_secret(_encode_secret({"session_ingress_token": "ingress-token-1"})) is None
     assert _sessions_token_from_secret(_encode_secret({"sessions_token": ""})) is None
 
