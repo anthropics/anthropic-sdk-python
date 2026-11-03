@@ -11,7 +11,13 @@ import pytest
 
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._exceptions import APITimeoutError
-from anthropic.lib.streaming._idle_timeout import guard_stream, idle_timeout_of, _GuardedByteStream
+from anthropic.lib.streaming._idle_timeout import (
+    _MAX_PENDING,
+    guard_stream,
+    idle_timeout_of,
+    _KeepaliveTracker,
+    _GuardedByteStream,
+)
 
 PING_EVENT = b'event: ping\ndata: {"type": "ping"}\n\n'
 COMMENT = b": ping\n\n"
@@ -207,3 +213,113 @@ async def test_through_the_async_client() -> None:
     with pytest.raises(APITimeoutError):
         async for _ in stream:
             pass
+
+
+# CR is a line terminator too. SSEDecoder splits the reassembled event buffer with
+# `bytes.splitlines()`, which breaks on CR, LF and CRLF; a guard that only knows LF holds a CR-only
+# stream's frames in _tail forever, and never sees the content inside them.
+CR_COMMENT = COMMENT.replace(b"\n", b"\r")
+CR_PING = PING_EVENT.replace(b"\n", b"\r")
+CR_CONTENT = CONTENT.replace(b"\n", b"\r")
+
+
+def test_cr_only_keepalives_do_not_reset_the_idle_clock() -> None:
+    stream = _Paced([CR_COMMENT] * 12)
+    guard = _GuardedByteStream(stream, _response(stream), 0.2)
+
+    with pytest.raises(APITimeoutError):
+        _drain(guard)
+
+    assert guard.idle_timeouts == 1
+
+
+def test_cr_only_ping_events_are_keepalives() -> None:
+    tracker = _KeepaliveTracker()
+
+    assert not tracker.has_content(CR_PING)
+
+
+def test_cr_only_content_resets_the_clock() -> None:
+    """The false positive in the review: healthy CR-terminated frames must not read as silence."""
+    stream = _Paced([CR_CONTENT] * 12)
+    guard = _GuardedByteStream(stream, _response(stream), 0.2)
+
+    assert len(_drain(guard)) == 12
+    assert guard.idle_timeouts == 0
+
+
+async def test_async_cr_only_keepalives_do_not_reset_the_idle_clock() -> None:
+    from anthropic.lib.streaming._idle_timeout import _GuardedAsyncByteStream
+
+    stream = _AsyncPaced([CR_COMMENT] * 12)
+    guard = _GuardedAsyncByteStream(stream, _response(stream), 0.2)
+
+    with pytest.raises(APITimeoutError):
+        async for _ in guard:
+            pass
+
+
+async def test_async_cr_only_content_resets_the_clock() -> None:
+    from anthropic.lib.streaming._idle_timeout import _GuardedAsyncByteStream
+
+    stream = _AsyncPaced([CR_CONTENT] * 12)
+    guard = _GuardedAsyncByteStream(stream, _response(stream), 0.2)
+
+    seen = 0
+    async for _ in guard:
+        seen += 1
+
+    assert seen == 12
+    assert guard.idle_timeouts == 0
+
+
+def test_cr_only_keepalive_stream_keeps_the_buffer_bounded() -> None:
+    """The leak in the review: a CR-only keepalive stream must not grow _tail without bound."""
+    tracker = _KeepaliveTracker()
+
+    for _ in range(1000):
+        assert not tracker.has_content(CR_COMMENT)
+        assert len(tracker._tail) <= 1, "at most one CR is held, in case the next chunk opens with LF"
+
+
+def test_crlf_split_across_two_chunks_is_one_line_ending() -> None:
+    """Chunk 1 ends on CR and chunk 2 starts with LF: one terminator, not two."""
+    tracker = _KeepaliveTracker()
+
+    # The CR could be the first half of a CRLF, so the line waits for the next chunk rather than
+    # ending here; ending it now would make the LF look like an extra blank line, and in SSE a
+    # blank line ends an event.
+    assert not tracker.has_content(b'data: {"type": "ping"}\r')
+    assert tracker._tail == b'data: {"type": "ping"}\r'
+
+    assert not tracker.has_content(b"\n\r\n")
+    assert tracker._tail == b""
+
+
+def test_crlf_split_across_two_chunks_keeps_a_content_line_as_content() -> None:
+    tracker = _KeepaliveTracker()
+
+    tracker.has_content(b'data: {"type": "content_block_delta"}\r')
+    assert tracker.has_content(b"\n\r\n")
+
+
+def test_a_content_line_split_across_three_chunks_is_content() -> None:
+    tracker = _KeepaliveTracker()
+
+    assert not tracker.has_content(b'data: {"type": "content_bl')
+    assert not tracker.has_content(b'ock_delta", "index": 0, "delta": {"type": "text_del')
+    assert tracker.has_content(b'ta", "text": "x"}}\r\n')
+    assert not tracker.has_content(b"\r\n")
+    assert tracker._tail == b""
+
+
+def test_an_unterminated_line_is_capped_and_counts_as_content() -> None:
+    """A line that never ends cannot be a keepalive, so it must not be buffered without limit."""
+    tracker = _KeepaliveTracker()
+
+    assert tracker.has_content(b'data: {"type": "content_block_delta", "partial": "' + b"x" * 70_000)
+    assert tracker._tail == b"", "an over-long line is content; keeping it would be the leak again"
+
+    for _ in range(64):
+        tracker.has_content(b"y" * 4096)
+        assert len(tracker._tail) <= _MAX_PENDING

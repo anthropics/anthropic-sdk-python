@@ -17,16 +17,19 @@ What counts as content: anything except an SSE comment line and a `ping` event (
 `event: ping`, or a `data:` payload whose type is `"ping"`). Everything else — including `error`
 frames — resets the timer, because it is something the caller can act on.
 
-Two properties worth stating, because they are the limits of this approach rather than bugs:
+Three properties worth stating, because they are the limits of this approach rather than bugs:
 
 - The check runs when a chunk arrives. If the server stops sending bytes entirely, this guard never
   runs; that case belongs to the transport read timeout, which does fire when nothing arrives.
-- A chunk that ends mid-frame is held in a small buffer so a keepalive split across two chunks is
+- A chunk that ends mid-frame is held in a bounded buffer so a keepalive split across two chunks is
   still recognised as a keepalive.
+- Lines end where the SDK's SSE decoder says they end — at CR, LF or CRLF — and the held-back buffer
+  has a hard ceiling, so a pathological stream cannot grow it without bound.
 """
 
 from __future__ import annotations
 
+import re
 import json
 import time
 from typing import TYPE_CHECKING, Any, TypeVar, Iterator, Optional, AsyncIterator
@@ -40,6 +43,20 @@ if TYPE_CHECKING:
     from ..._streaming import Stream
 
 _T = TypeVar("_T")
+
+
+# Line terminators exactly as the SDK's own SSE decoder sees them: `SSEDecoder` accumulates a whole
+# event and then calls `bytes.splitlines()`, which breaks on CR, LF and CRLF and nothing else (see
+# the comment above `SSEDecoder.iter_bytes`). There is no reusable per-line splitter to import, so
+# the same rule is spelled out here, with CRLF as one terminator and not two.
+_LINE_END = re.compile(rb"\r\n|\r|\n")
+
+# The whole line is needed only because a `data:` payload has to be parsed to tell a
+# `{"type": "ping"}` frame from a content frame. Keepalive frames are a few dozen bytes, so a line
+# that grows past this is content: counting it as content costs at most one missed check on a
+# pathological stream, while holding it would let the buffer grow without bound, and unbounded
+# growth is what this guard exists to stop. The ceiling wins over the classification.
+_MAX_PENDING = 64 * 1024
 
 
 def _frame_is_keepalive(line: bytes) -> bool:
@@ -67,10 +84,27 @@ class _KeepaliveTracker:
         self._tail = b""
 
     def has_content(self, chunk: bytes) -> bool:
-        combined = self._tail + chunk
-        lines = combined.split(b"\n")
-        self._tail = lines.pop() if not combined.endswith(b"\n") else b""
-        return any(not _frame_is_keepalive(line.rstrip(b"\r")) for line in lines)
+        pending = self._tail + chunk
+        self._tail = b""
+
+        # A trailing bare CR may be the first half of a CRLF, and the next chunk may carry the LF.
+        # Holding it back costs one byte; consuming it now would invent an empty line, and in SSE
+        # an empty line ends an event, so the guard would be reading a different stream from the
+        # decoder it is supposed to agree with.
+        cut = len(pending) - 1 if pending.endswith(b"\r") else len(pending)
+        complete, carry = pending[:cut], pending[cut:]
+
+        lines = _LINE_END.split(complete)
+        unfinished = lines.pop()  # bytes after the last terminator are still arriving
+        self._tail = unfinished + carry
+
+        if len(self._tail) > _MAX_PENDING:
+            # A line this long is not a keepalive (see _MAX_PENDING). It has been classified as
+            # content, so drop it rather than wait for a terminator that may never come.
+            self._tail = b""
+            return True
+
+        return any(not _frame_is_keepalive(line) for line in lines)
 
 
 class _GuardedByteStream(httpx2.SyncByteStream):
