@@ -93,7 +93,7 @@ def path_template(template: str, /, **kwargs: Any) -> str:
 
     Raises:
         KeyError: If a placeholder is not found in `kwargs`.
-        ValueError: If resulting path contains /./ or /../ segments (including percent-encoded dot-segments).
+        ValueError: If a path segment is `.` or `..` (also percent-encoded or followed by ';') or starts with ';'.
     """
     # Split the template into path, query, and fragment portions.
     fragment_template: str | None = None
@@ -112,11 +112,15 @@ def path_template(template: str, /, **kwargs: Any) -> str:
     # Reject dot-segments (. and ..) in the final assembled path.  The check
     # runs after interpolation so that adjacent placeholders or a mix of static
     # text and placeholders that together form a dot-segment are caught.
-    # Also reject percent-encoded dot-segments to protect against incorrectly
-    # implemented normalization in servers/proxies.
+    # Percent-encoded dots count. Some servers and proxies also drop ';' and the rest of
+    # its segment, so '..;x' counts as '..', and ';x' is refused since it would end up empty.
     for segment in path_result.split("/"):
-        if _DOT_SEGMENT_RE.match(segment):
+        if _DOT_SEGMENT_RE.match(segment.partition(";")[0]):
             raise ValueError(f"Constructed path {path_result!r} contains dot-segment {segment!r} which is not allowed")
+        if segment.startswith(";"):
+            raise ValueError(
+                f"Constructed path {path_result!r} contains segment {segment!r} starting with ';' which is not allowed"
+            )
 
     result = path_result
     if query_template is not None:
