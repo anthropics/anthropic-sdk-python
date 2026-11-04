@@ -122,14 +122,14 @@ class Usage(SyncAPIResource):
               `group_by[]=actor_type` to break out per-kind values.
 
           agent_ids: Filter to usage incurred by sessions of specific Claude Managed Agents agents.
-              Use `group_by[]=agent_id` to break out per-agent values. Claude Developer
-              Platform organizations only.
+              Use `group_by[]=agent_id` to break out per-agent values. Claude Platform
+              organizations only.
 
           api_key_ids: Filter to usage authenticated by specific API keys, by tagged API key ID
               (`apikey_...`), whichever identity the usage is attributed to. Include an empty
               entry (`api_key_ids[]=`) to also match usage that no API key authenticated. Use
               `group_by[]=api_key_id` to break out per-key values; usage without a key has a
-              null `api_key_id`. Claude Developer Platform organizations only.
+              null `api_key_id`. Claude Platform organizations only.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
               with no category never matches. `dm` usage is reported under the user's product
@@ -147,7 +147,7 @@ class Usage(SyncAPIResource):
 
           deployment_ids: Filter to usage incurred by Claude Managed Agents sessions that specific
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
               `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
@@ -155,7 +155,7 @@ class Usage(SyncAPIResource):
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           exclude_deleted_users: If true, omit rows whose `actor` is a `user_actor` with `deleted: true`.
               Requires `group_by[]=actor`. Rows for other actor types, and rows whose `actor`
@@ -196,12 +196,12 @@ class Usage(SyncAPIResource):
               group attribution never matches.
 
           service_tiers: Filter to specific service tiers. Use `group_by[]=service_tier` to break out
-              per-tier values. Claude Developer Platform organizations only; matches nothing
-              for a Claude Enterprise organization.
+              per-tier values. Claude Platform organizations only; matches nothing for a
+              Claude Enterprise organization.
 
           session_ids: Filter to usage incurred by specific Claude Managed Agents sessions, by tagged
               session ID (`sesn_...`). Use `group_by[]=session_id` to break out per-session
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           slack_channel_ids: Filter to usage originating from specific Slack channels. Use
               `group_by[]=slack_channel_id` to break out per-channel values.
@@ -219,12 +219,11 @@ class Usage(SyncAPIResource):
 
           user_profile_ids: Filter to usage attributed to specific user profiles, by tagged user profile ID
               (`uprof_...`). Use `group_by[]=user_profile_id` to break out per-profile values.
-              Claude Developer Platform organizations only.
+              Claude Platform organizations only.
 
           workspace_ids: Filter to usage in specific workspaces, by tagged workspace ID (`wrkspc_...`).
-              Use `group_by[]=workspace_id` to break out per-workspace values. Claude
-              Developer Platform organizations only; matches nothing for a Claude Enterprise
-              organization.
+              Use `group_by[]=workspace_id` to break out per-workspace values. Claude Platform
+              organizations only; matches nothing for a Claude Enterprise organization.
 
           betas: This endpoint is in beta: requests must send `analytics-usage-cost-2026-08-24`
               in this header.
@@ -379,14 +378,14 @@ class AsyncUsage(AsyncAPIResource):
               `group_by[]=actor_type` to break out per-kind values.
 
           agent_ids: Filter to usage incurred by sessions of specific Claude Managed Agents agents.
-              Use `group_by[]=agent_id` to break out per-agent values. Claude Developer
-              Platform organizations only.
+              Use `group_by[]=agent_id` to break out per-agent values. Claude Platform
+              organizations only.
 
           api_key_ids: Filter to usage authenticated by specific API keys, by tagged API key ID
               (`apikey_...`), whichever identity the usage is attributed to. Include an empty
               entry (`api_key_ids[]=`) to also match usage that no API key authenticated. Use
               `group_by[]=api_key_id` to break out per-key values; usage without a key has a
-              null `api_key_id`. Claude Developer Platform organizations only.
+              null `api_key_id`. Claude Platform organizations only.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
               with no category never matches. `dm` usage is reported under the user's product
@@ -404,7 +403,7 @@ class AsyncUsage(AsyncAPIResource):
 
           deployment_ids: Filter to usage incurred by Claude Managed Agents sessions that specific
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
               `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
@@ -412,7 +411,7 @@ class AsyncUsage(AsyncAPIResource):
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           exclude_deleted_users: If true, omit rows whose `actor` is a `user_actor` with `deleted: true`.
               Requires `group_by[]=actor`. Rows for other actor types, and rows whose `actor`
@@ -453,12 +452,12 @@ class AsyncUsage(AsyncAPIResource):
               group attribution never matches.
 
           service_tiers: Filter to specific service tiers. Use `group_by[]=service_tier` to break out
-              per-tier values. Claude Developer Platform organizations only; matches nothing
-              for a Claude Enterprise organization.
+              per-tier values. Claude Platform organizations only; matches nothing for a
+              Claude Enterprise organization.
 
           session_ids: Filter to usage incurred by specific Claude Managed Agents sessions, by tagged
               session ID (`sesn_...`). Use `group_by[]=session_id` to break out per-session
-              values. Claude Developer Platform organizations only.
+              values. Claude Platform organizations only.
 
           slack_channel_ids: Filter to usage originating from specific Slack channels. Use
               `group_by[]=slack_channel_id` to break out per-channel values.
@@ -476,12 +475,11 @@ class AsyncUsage(AsyncAPIResource):
 
           user_profile_ids: Filter to usage attributed to specific user profiles, by tagged user profile ID
               (`uprof_...`). Use `group_by[]=user_profile_id` to break out per-profile values.
-              Claude Developer Platform organizations only.
+              Claude Platform organizations only.
 
           workspace_ids: Filter to usage in specific workspaces, by tagged workspace ID (`wrkspc_...`).
-              Use `group_by[]=workspace_id` to break out per-workspace values. Claude
-              Developer Platform organizations only; matches nothing for a Claude Enterprise
-              organization.
+              Use `group_by[]=workspace_id` to break out per-workspace values. Claude Platform
+              organizations only; matches nothing for a Claude Enterprise organization.
 
           betas: This endpoint is in beta: requests must send `analytics-usage-cost-2026-08-24`
               in this header.
