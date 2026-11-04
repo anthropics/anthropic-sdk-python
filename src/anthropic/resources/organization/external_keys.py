@@ -81,6 +81,11 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
+              is no longer active. The request either names this user profile by ID, or names
+              a resource, such as an External Key, that is bound to it.
         """
         return self._post(
             "/v1/organizations/external_keys",
@@ -181,6 +186,10 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError: The External Key can't be deleted or reconfigured while the organization's
+              Workspace Policy lists it as an allowed key.
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -278,6 +287,10 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError: The External Key can't be deleted or reconfigured while the organization's
+              Workspace Policy lists it as an allowed key.
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -400,6 +413,11 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
+              is no longer active. The request either names this user profile by ID, or names
+              a resource, such as an External Key, that is bound to it.
         """
         return await self._post(
             "/v1/organizations/external_keys",
@@ -500,6 +518,10 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError: The External Key can't be deleted or reconfigured while the organization's
+              Workspace Policy lists it as an allowed key.
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -597,6 +619,10 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError: The External Key can't be deleted or reconfigured while the organization's
+              Workspace Policy lists it as an allowed key.
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")

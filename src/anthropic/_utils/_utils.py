@@ -423,6 +423,15 @@ def get_required_header(headers: HeadersLike, header: str) -> str:
     raise ValueError(f"Could not find {header} header")
 
 
+def extract_property(obj: object, *path: str) -> Any:
+    """Follows `path` through nested mappings. Returns `None` once a value is not a mapping or lacks the next key."""
+    for key in path:
+        if not is_mapping(obj):
+            return None
+        obj = obj.get(key)
+    return obj
+
+
 def get_async_library() -> str:
     try:
         return sniffio.current_async_library()

@@ -1226,6 +1226,10 @@ class TestAnthropic:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
             Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
 
+    def test_none_path_param_is_rejected(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
+
     @pytest.mark.respx(base_url=base_url)
     def test_default_stream_cls(self, respx_mock: MockRouter, client: Anthropic) -> None:
         class Model(BaseModel):
@@ -2672,6 +2676,10 @@ class TestAsyncAnthropic:
             AsyncAnthropic(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None)
             )
+
+    async def test_none_path_param_is_rejected(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            await async_client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     async def test_default_stream_cls(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:

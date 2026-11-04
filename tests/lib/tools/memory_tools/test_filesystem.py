@@ -443,11 +443,14 @@ class TestBetaLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
     def test_delete_not_allow_deleting_memories_directory(
-        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
-            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories"))
+            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert sync_local_filesystem_tool.memory_root.is_dir()
 
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
@@ -508,6 +511,17 @@ class TestBetaLocalFilesystemMemoryTool:
                     command="rename", old_path="/memories/file1.txt", new_path="/memories/file2.txt"
                 )
             )
+
+    @pytest.mark.parametrize("old_path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
+    def test_rename_not_allow_renaming_memories_directory(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, old_path: str
+    ) -> None:
+        with pytest.raises(ToolError, match="Cannot rename the /memories directory itself") as exc_info:
+            sync_local_filesystem_tool.rename(
+                BetaMemoryTool20250818RenameCommand(command="rename", old_path=old_path, new_path="/memories/moved")
+            )
+
+        assert str(sync_local_filesystem_tool.base_path) not in str(exc_info.value)
 
     def test_path_validation_reject_paths_not_starting_with_memories(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
@@ -980,13 +994,14 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
     async def test_delete_not_allow_deleting_memories_directory(
-        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
-            await async_local_filesystem_tool.delete(
-                BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories")
-            )
+            await async_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert await async_local_filesystem_tool.memory_root.is_dir()
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
@@ -1047,6 +1062,17 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                     command="rename", old_path="/memories/file1.txt", new_path="/memories/file2.txt"
                 )
             )
+
+    @pytest.mark.parametrize("old_path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
+    async def test_rename_not_allow_renaming_memories_directory(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, old_path: str
+    ) -> None:
+        with pytest.raises(ToolError, match="Cannot rename the /memories directory itself") as exc_info:
+            await async_local_filesystem_tool.rename(
+                BetaMemoryTool20250818RenameCommand(command="rename", old_path=old_path, new_path="/memories/moved")
+            )
+
+        assert str(async_local_filesystem_tool.base_path) not in str(exc_info.value)
 
     async def test_path_validation_reject_paths_not_starting_with_memories(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool

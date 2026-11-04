@@ -313,7 +313,7 @@ New code uses modern syntax and names.
 - **Non-obvious attributes get a docstring.** An attribute whose use isn't obvious, such as a lock or a completion flag, gets a short `"""` docstring under it saying what it is for.
 - **Document constructor arguments in `__init__`.** Put them in the `__init__` docstring, even when that repeats the class docstring, so that IDEs show them.
 - **Link, don't name a file.** A docstring points users at a docs page or a file's GitHub URL, not at a bare repository file name such as `tools.md`.
-- **Keep docs accurate.** Keep docstrings, `helpers.md`, and `tools.md` accurate when the API changes. Public docs are for users: call the package "Claude SDK for Python" and leave out internal layout.
+- **Keep docs accurate.** Keep docstrings, `helpers.md`, and `tools.md` accurate when the API changes. Public docs are for users: call the package "Anthropic SDK for Python" and leave out internal layout.
 - **Keep documentation out of `README.md`.** Don't add documentation there, or links to individual docs pages or to Markdown guides in this repository. The only documentation link is the one to the docs site. Documentation goes on [platform.claude.com/docs](https://platform.claude.com/docs).
 
 ### Markdown, not reStructuredText

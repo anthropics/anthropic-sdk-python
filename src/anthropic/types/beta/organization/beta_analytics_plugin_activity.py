@@ -56,8 +56,8 @@ class BetaAnalyticsPluginActivity(BaseModel):
     """
     Plugin use recorded while members had Chat and Cowork unified (Cowork's features
     inside claude.ai chat) turned on. A count is null in date-range mode where it
-    cannot be computed. Omitted from the response on deployments that do not offer
-    Chat and Cowork unified.
+    cannot be computed. Omitted from the response where Chat and Cowork unified is
+    not available.
     """
 
     product: Optional[str] = None

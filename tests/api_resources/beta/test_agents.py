@@ -35,7 +35,7 @@ class TestAgents:
             name="My First Agent",
             description="A general-purpose starter agent.",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -175,7 +175,7 @@ class TestAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -380,7 +380,7 @@ class TestAsyncAgents:
             name="My First Agent",
             description="A general-purpose starter agent.",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -520,7 +520,7 @@ class TestAsyncAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[

@@ -173,6 +173,7 @@ class TestWorkspaces:
         workspace = client.organization.workspaces.list(
             after_id="after_id",
             before_id="before_id",
+            ids=["string"],
             include_archived=True,
             include_default=True,
             limit=1,
@@ -398,6 +399,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.organization.workspaces.list(
             after_id="after_id",
             before_id="before_id",
+            ids=["string"],
             include_archived=True,
             include_default=True,
             limit=1,

@@ -48,10 +48,7 @@ class ExternalKey(BaseModel):
     """Human-friendly display name. Null if none was set."""
 
     geo: str
-    """Data residency geo.
-
-    Selects the region that handles this key's encrypt/decrypt roundtrips.
-    """
+    """Data residency geo. Selects the region this key is used in."""
 
     provider_config: ProviderConfig
     """KMS provider identity and auth coordinates."""

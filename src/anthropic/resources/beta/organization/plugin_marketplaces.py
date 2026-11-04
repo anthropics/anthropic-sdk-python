@@ -366,6 +366,10 @@ class PluginMarketplaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
+              or US-ASCII. Send the request with no charset, or with one of these.
         """
         extra_headers = {
             **strip_not_given(
@@ -843,6 +847,10 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
+              or US-ASCII. Send the request with no charset, or with one of these.
         """
         extra_headers = {
             **strip_not_given(

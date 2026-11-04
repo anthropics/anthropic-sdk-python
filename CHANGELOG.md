@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.5.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.5.0) (2026-11-03)
+
+### Features
+
+* **api:** add error details types and new error type values
+
+
+### Bug Fixes
+
+* **bedrock:** raise a ValueError when model is "." or ".." instead of sending the request to a different path
+* **bedrock:** raise a ValueError when model is empty instead of sending the request to `/model//invoke`
+* **client:** make the first parse of each response model thread-safe
+* **client:** validate unions correctly across threads on pydantic v1
+
+
+### Chores
+
+* **api:** update example values for pattern-constrained string fields
+* **ci:** also run the tests with deferred pydantic model builds
+* **docs:** clarify some API field descriptions
+* **docs:** update the telemetry destination headers description
+* **internal:** remove stale TODO comments and a test that could not pass
+* **tests:** check that a None path param is rejected
+
+
+### Documentation
+
+* **api:** show each field's own description for `speed`
+
 ## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-11-02)
 
 ### Features
