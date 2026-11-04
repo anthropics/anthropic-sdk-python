@@ -107,21 +107,15 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
 
-          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
-              refused. Retry in a few minutes.
+          CMEKContextUnavailableError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths(
@@ -188,12 +182,9 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -262,12 +253,9 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -325,12 +313,9 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -416,21 +401,15 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
 
-          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
-              refused. Retry in a few minutes.
+          CMEKContextUnavailableError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         body = deepcopy_with_paths(
@@ -497,12 +476,9 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -571,12 +547,9 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -634,12 +607,9 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")

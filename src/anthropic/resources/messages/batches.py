@@ -95,17 +95,13 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
 
-          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -174,12 +170,9 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -247,12 +240,9 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -314,12 +304,9 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -384,12 +371,9 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -449,15 +433,11 @@ class Batches(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -554,17 +534,13 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
 
-          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -633,12 +609,9 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -706,12 +679,9 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -773,12 +743,9 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -843,12 +810,9 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -908,15 +872,11 @@ class AsyncBatches(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")

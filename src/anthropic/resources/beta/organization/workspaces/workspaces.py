@@ -140,20 +140,13 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          KeyProfileMismatchError: The External Key is bound to a user profile, and the Workspace does not have
-              that user profile. A Workspace can use only a key bound to its own user profile
-              or a key that isn't bound to one.
+          KeyProfileMismatchError:
 
-          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
-              is no longer active. The request either names this user profile by ID, or names
-              a resource, such as an External Key, that is bound to it.
+          UserProfileNotFoundError:
 
-          WorkspacePolicyViolationError: The request breaks the organization's Workspace Policy. The message says which
-              rule it broke; an organization admin can see and change the policy in the
-              Console.
+          WorkspacePolicyViolationError:
 
-          ExternalKeyChangedError: The external key changed while the request was validating it. Send the request
-              again.
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -281,20 +274,13 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          KeyProfileMismatchError: The External Key is bound to a user profile, and the Workspace does not have
-              that user profile. A Workspace can use only a key bound to its own user profile
-              or a key that isn't bound to one.
+          KeyProfileMismatchError:
 
-          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
-              is no longer active. The request either names this user profile by ID, or names
-              a resource, such as an External Key, that is bound to it.
+          UserProfileNotFoundError:
 
-          WorkspacePolicyViolationError: The request breaks the organization's Workspace Policy. The message says which
-              rule it broke; an organization admin can see and change the policy in the
-              Console.
+          WorkspacePolicyViolationError:
 
-          ExternalKeyChangedError: The external key changed while the request was validating it. Send the request
-              again.
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -523,20 +509,13 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          KeyProfileMismatchError: The External Key is bound to a user profile, and the Workspace does not have
-              that user profile. A Workspace can use only a key bound to its own user profile
-              or a key that isn't bound to one.
+          KeyProfileMismatchError:
 
-          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
-              is no longer active. The request either names this user profile by ID, or names
-              a resource, such as an External Key, that is bound to it.
+          UserProfileNotFoundError:
 
-          WorkspacePolicyViolationError: The request breaks the organization's Workspace Policy. The message says which
-              rule it broke; an organization admin can see and change the policy in the
-              Console.
+          WorkspacePolicyViolationError:
 
-          ExternalKeyChangedError: The external key changed while the request was validating it. Send the request
-              again.
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -664,20 +643,13 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          KeyProfileMismatchError: The External Key is bound to a user profile, and the Workspace does not have
-              that user profile. A Workspace can use only a key bound to its own user profile
-              or a key that isn't bound to one.
+          KeyProfileMismatchError:
 
-          UserProfileNotFoundError: The request depends on a user profile that does not exist in the organization or
-              is no longer active. The request either names this user profile by ID, or names
-              a resource, such as an External Key, that is bound to it.
+          UserProfileNotFoundError:
 
-          WorkspacePolicyViolationError: The request breaks the organization's Workspace Policy. The message says which
-              rule it broke; an organization admin can see and change the policy in the
-              Console.
+          WorkspacePolicyViolationError:
 
-          ExternalKeyChangedError: The external key changed while the request was validating it. Send the request
-              again.
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")

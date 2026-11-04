@@ -231,11 +231,9 @@ class Users(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CannotRemoveLastMemberError: The user is the organization's only member. Add another member before removing
-              this one.
+          CannotRemoveLastMemberError:
 
-          ConcurrentMembershipChangeError: Another change to the organization's members is in progress. Retry the request
-              once it completes.
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -464,11 +462,9 @@ class AsyncUsers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CannotRemoveLastMemberError: The user is the organization's only member. Add another member before removing
-              this one.
+          CannotRemoveLastMemberError:
 
-          ConcurrentMembershipChangeError: Another change to the organization's members is in progress. Retry the request
-              once it completes.
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
