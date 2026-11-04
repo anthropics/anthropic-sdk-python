@@ -2,10 +2,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["CmekKeyDisabledErrorDetails"]
+__all__ = ["CMEKKeyDisabledErrorDetails"]
 
 
-class CmekKeyDisabledErrorDetails(BaseModel):
+class CMEKKeyDisabledErrorDetails(BaseModel):
     """The workspace's customer-managed encryption key is disabled or revoked.
 
     Re-enable the key, then retry.

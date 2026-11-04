@@ -4,16 +4,16 @@ from typing_extensions import Annotated, TypeAlias
 from ..._models import UnionDiscriminator
 from ..file_expired_error_details import FileExpiredErrorDetails
 from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
-from .cmek_key_disabled_error_details import CmekKeyDisabledErrorDetails
+from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
-from .cmek_key_unreachable_error_details import CmekKeyUnreachableErrorDetails
+from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
 from ..compaction_unavailable_error_details import CompactionUnavailableErrorDetails
 from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails
 from ..user_profile_not_found_error_details import UserProfileNotFoundErrorDetails
-from .cmek_context_unavailable_error_details import CmekContextUnavailableErrorDetails
-from .cmek_key_network_blocked_error_details import CmekKeyNetworkBlockedErrorDetails
+from .cmek_context_unavailable_error_details import CMEKContextUnavailableErrorDetails
+from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDetails
 from ..beta.beta_billing_frozen_error_details import BetaBillingFrozenErrorDetails
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
@@ -100,8 +100,8 @@ ErrorDetails: TypeAlias = Annotated[
         AvailableToolsLimitExceededErrorDetails,
         ClaudeCodeKeyCreatorNotMemberErrorDetails,
         ClaudeCodeVersionTooOldErrorDetails,
-        CmekKeyDisabledErrorDetails,
-        CmekKeyNetworkBlockedErrorDetails,
+        CMEKKeyDisabledErrorDetails,
+        CMEKKeyNetworkBlockedErrorDetails,
         CompactionBlockAmbiguousErrorDetails,
         CompactionBlockMisplacedErrorDetails,
         CompactionContentMismatchErrorDetails,
@@ -123,12 +123,12 @@ ErrorDetails: TypeAlias = Annotated[
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
-        CmekKeyUnreachableErrorDetails,
+        CMEKKeyUnreachableErrorDetails,
         CompactionUnavailableErrorDetails,
         StorageQuotaExceededErrorDetails,
         FileNotDownloadableErrorDetails,
         FileExpiredErrorDetails,
-        CmekContextUnavailableErrorDetails,
+        CMEKContextUnavailableErrorDetails,
         OrgAPIKeyLimitExceededErrorDetails,
         WorkspaceAPIKeyLimitExceededErrorDetails,
         UserProfileNotFoundErrorDetails,

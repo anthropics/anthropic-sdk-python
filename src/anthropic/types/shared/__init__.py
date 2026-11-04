@@ -11,14 +11,14 @@ from .rate_limit_error import RateLimitError as RateLimitError
 from .authentication_error import AuthenticationError as AuthenticationError
 from .gateway_timeout_error import GatewayTimeoutError as GatewayTimeoutError
 from .invalid_request_error import InvalidRequestError as InvalidRequestError
-from .cmek_key_disabled_error_details import CmekKeyDisabledErrorDetails as CmekKeyDisabledErrorDetails
-from .cmek_key_unreachable_error_details import CmekKeyUnreachableErrorDetails as CmekKeyUnreachableErrorDetails
+from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails
+from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails
 from .cmek_context_unavailable_error_details import (
-    CmekContextUnavailableErrorDetails as CmekContextUnavailableErrorDetails,
+    CMEKContextUnavailableErrorDetails as CMEKContextUnavailableErrorDetails,
 )
 from .cmek_key_network_blocked_error_details import (
-    CmekKeyNetworkBlockedErrorDetails as CmekKeyNetworkBlockedErrorDetails,
+    CMEKKeyNetworkBlockedErrorDetails as CMEKKeyNetworkBlockedErrorDetails,
 )
 from .claude_code_version_too_old_error_details import (
     ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
