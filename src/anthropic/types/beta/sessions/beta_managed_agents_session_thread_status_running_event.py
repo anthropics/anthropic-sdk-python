@@ -22,6 +22,6 @@ class BetaManagedAgentsSessionThreadStatusRunningEvent(BaseModel):
     """Timestamp of the status transition."""
 
     session_thread_id: str
-    """Public sthr\\__ ID of the thread that started running."""
+    """Public sthr_ ID of the thread that started running."""
 
     type: Literal["session.thread_status_running"]
