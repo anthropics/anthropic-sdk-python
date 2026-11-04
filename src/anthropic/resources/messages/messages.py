@@ -37,7 +37,7 @@ from ..._base_client import (
     merge_headers,
     make_request_options,
 )
-from ...lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
+from ...lib._tracing import messages_create_request_attributes
 from ...lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ...types.message import Message
 from ...types.model_param import ModelParam
@@ -1350,7 +1350,7 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=stream or False,
@@ -1472,7 +1472,7 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=True,
@@ -1595,7 +1595,7 @@ class Messages(SyncAPIResource):
                 post_parser=parser,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -1942,7 +1942,6 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )
@@ -3204,7 +3203,7 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=stream or False,
@@ -3325,7 +3324,7 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=True,
@@ -3448,7 +3447,7 @@ class AsyncMessages(AsyncAPIResource):
                 post_parser=parser,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -3795,7 +3794,6 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )

@@ -47,7 +47,7 @@ from ...._base_client import (
     merge_headers,
     make_request_options,
 )
-from ....lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
+from ....lib._tracing import messages_create_request_attributes
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
@@ -1553,7 +1553,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -1681,7 +1681,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -2081,7 +2081,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -2432,7 +2432,6 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )
@@ -3894,7 +3893,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -4022,7 +4021,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -4422,7 +4421,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -4773,7 +4772,6 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )

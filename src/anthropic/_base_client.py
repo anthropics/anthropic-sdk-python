@@ -1224,7 +1224,13 @@ class SyncAPIClient(BaseClient[httpx2.Client, Stream[Any]]):
         start_time = time.time_ns()
         propagation = self._open_telemetry["propagation"]
         span = start_api_call_span(
-            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+            self._tracer,
+            self.base_url,
+            options,
+            self._otel.api_call_start_attributes(),
+            propagation=propagation,
+            stream=stream,
+            default_headers=lambda: self.default_headers,
         )
         if span is None:
             return self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
@@ -2000,7 +2006,13 @@ class AsyncAPIClient(BaseClient[httpx2.AsyncClient, AsyncStream[Any]]):
         start_time = time.time_ns()
         propagation = self._open_telemetry["propagation"]
         span = start_api_call_span(
-            self._tracer, self.base_url, options, self._otel.api_call_start_attributes(), propagation=propagation
+            self._tracer,
+            self.base_url,
+            options,
+            self._otel.api_call_start_attributes(),
+            propagation=propagation,
+            stream=stream,
+            default_headers=lambda: self.default_headers,
         )
         if span is None:
             return await self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
