@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from typing_extensions import Literal
 
 import httpx2
 
-from ._utils import is_mapping
-from ._models import construct_type_unchecked
+from ._utils import extract_property
+from ._models import construct_type_or_none
 
 if TYPE_CHECKING:
     from .types.shared.error_type import ErrorType
@@ -65,26 +65,6 @@ class APIError(AnthropicError):
         self.body = body
 
 
-def extract_body_property(body: object, *path: str) -> Any:
-    for key in path:
-        if not is_mapping(body):
-            return None
-        body = body.get(key)
-    return body
-
-
-def construct_body_property(type_: Any, body: object, *path: str) -> Any:
-    try:
-        return construct_type_unchecked(type_=type_, value=extract_body_property(body, *path))
-    except Exception:
-        return None
-
-
-def extract_error_code(body: object) -> str | None:
-    error_code = extract_body_property(body, "error", "details", "error_code")
-    return error_code if isinstance(error_code, str) else None
-
-
 class APIResponseValidationError(APIError):
     response: httpx2.Response
     status_code: int
@@ -131,10 +111,12 @@ class APIStatusError(APIError):
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
         self.workspace_id = response.headers.get("anthropic-workspace-id")
-        self.api_message = extract_body_property(body, "error", "message")
-        self.type = extract_body_property(body, "error", "type")
+        self.api_message = extract_property(body, "error", "message")
+        self.type = extract_property(body, "error", "type")
         self.error_code = extract_error_code(body)
-        self.details = construct_body_property(ErrorDetails, body, "error", "details")
+        self.details = construct_type_or_none(
+            value=extract_property(body, "error", "details"), type_=cast(Any, ErrorDetails)
+        )
 
 
 class APIConnectionError(APIError):
@@ -251,3 +233,8 @@ DeadlineExceededError = GatewayTimeoutError
 
 class OverloadedError(InternalServerError):
     status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+def extract_error_code(body: object) -> str | None:
+    error_code = extract_property(body, "error", "details", "error_code")
+    return error_code if isinstance(error_code, str) else None

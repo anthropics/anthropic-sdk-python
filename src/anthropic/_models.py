@@ -658,6 +658,14 @@ def construct_type_unchecked(*, value: object, type_: type[_T]) -> _T:
     return cast(_T, construct_type(value=value, type_=type_))
 
 
+def construct_type_or_none(*, value: object, type_: type[_T]) -> _T | None:
+    """Like `construct_type_unchecked()`, but returns `None` instead of raising."""
+    try:
+        return construct_type_unchecked(value=value, type_=type_)
+    except Exception:
+        return None
+
+
 def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]] = None) -> object:
     """Loose coercion to the expected type with construction of nested values.
 
