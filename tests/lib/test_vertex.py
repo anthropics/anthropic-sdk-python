@@ -10,7 +10,18 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicVertex, AsyncAnthropicVertex, beta_tool, beta_async_tool
+from anthropic import (
+    APIStatusError,
+    AnthropicVertex,
+    BadRequestError,
+    OverloadedError,
+    InternalServerError,
+    AsyncAnthropicVertex,
+    PreconditionFailedError,
+    beta_tool,
+    beta_async_tool,
+)
+from anthropic.types import ToolNameConflictError
 from anthropic._compat import PYDANTIC_V1
 from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.vertex._auth import refresh_auth
@@ -36,6 +47,34 @@ PROJECT_ID_AND_REGION_PATHS = [
     ("a/../b?c#d", "region", "/v1/projects/a%2F..%2Fb%3Fc%23d/locations/region"),
 ]
 DOT_SEGMENT_PROJECT_IDS_AND_REGIONS = [(".", "region"), ("..", "region"), ("project", "."), ("project", "..")]
+
+STATUS_ERRORS = [
+    pytest.param(
+        400,
+        {
+            "type": "invalid_request_error",
+            "message": "Tool name is already in use",
+            "details": {"error_code": "tool_name_conflict"},
+        },
+        ToolNameConflictError,
+        BadRequestError,
+        id="error-code",
+    ),
+    pytest.param(
+        412,
+        {"type": "invalid_request_error", "message": "Precondition failed"},
+        PreconditionFailedError,
+        APIStatusError,
+        id="status",
+    ),
+    pytest.param(
+        529,
+        {"type": "overloaded_error", "message": "Overloaded"},
+        OverloadedError,
+        InternalServerError,
+        id="narrowed-status",
+    ),
+]
 
 
 def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx2.Response:
@@ -113,6 +152,29 @@ class TestAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+    def test_status_error_class(
+        self,
+        status: int,
+        error: dict[str, object],
+        error_class: type[APIStatusError],
+        parent_class: type[APIStatusError],
+        respx_mock: MockRouter,
+    ) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(
+            return_value=httpx2.Response(status, json={"type": "error", "error": error})
+        )
+
+        with pytest.raises(parent_class) as exc_info:
+            self.client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-haiku-4-5@20251001",
+            )
+
+        assert type(exc_info.value) is error_class
 
     @pytest.mark.respx()
     def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:
@@ -443,6 +505,30 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+    async def test_status_error_class(
+        self,
+        status: int,
+        error: dict[str, object],
+        error_class: type[APIStatusError],
+        parent_class: type[APIStatusError],
+        respx_mock: MockRouter,
+    ) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(
+            return_value=httpx2.Response(status, json={"type": "error", "error": error})
+        )
+
+        with pytest.raises(parent_class) as exc_info:
+            await self.client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-haiku-4-5@20251001",
+            )
+
+        assert type(exc_info.value) is error_class
 
     @pytest.mark.respx()
     async def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:

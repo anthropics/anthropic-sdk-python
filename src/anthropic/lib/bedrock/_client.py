@@ -7,7 +7,6 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from ... import _exceptions
 from ._beta import Beta, AsyncBeta
 from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
@@ -28,6 +27,7 @@ from ..._base_client import (
     merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
+from ..._error_classes import make_status_error
 from ...resources.messages import Messages, AsyncMessages
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
@@ -109,33 +109,7 @@ class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         body: object,
         response: httpx2.Response,
     ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
-
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
-
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
-
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 503:
-            return _exceptions.ServiceUnavailableError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
+        return make_status_error(err_msg, body=body, response=response)
 
 
 class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPIClient):

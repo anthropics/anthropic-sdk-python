@@ -6,7 +6,6 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from ... import _exceptions
 from ..._qs import Querystring
 from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
 from ..._utils import is_dict, asyncify, is_given
@@ -28,6 +27,7 @@ from ..._base_client import (
     build_headers,
     merge_headers,
 )
+from ..._error_classes import make_status_error
 from ..aws._credentials import (
     resolve_region,
     resolve_api_key,
@@ -81,36 +81,7 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         body: object,
         response: httpx2.Response,
     ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
-
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
-
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
-
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 413:
-            return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 529:
-            return _exceptions.OverloadedError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
+        return make_status_error(err_msg, body=body, response=response)
 
     def _move_user_profile_id_to_body(self, options: FinalRequestOptions) -> FinalRequestOptions:
         """Mantle reads the user profile ID from the body of these requests, and from the header on other routes."""
