@@ -126,6 +126,9 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -243,6 +246,9 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -422,6 +428,9 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -539,6 +548,9 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")

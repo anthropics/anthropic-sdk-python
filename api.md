@@ -27,6 +27,18 @@ from anthropic.types import (
     RequestBodyEncodingInvalidErrorDetails,
     RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails,
+    ClaudeCodeKeyCreatorNotMemberError,
+    ClaudeCodeVersionTooOldError,
+    CMEKKeyDisabledError,
+    CMEKKeyNetworkBlockedError,
+    OrganizationOnHoldError,
+    OrganizationTypeNotSupportedError,
+    RequestBodyEncodingInvalidError,
+    RequestBodyEncodingUnsupportedError,
+    RequestBodyTooLargeAfterDecodingError,
+    EnforcedSpendLimitReachedError,
+    CMEKContextUnavailableError,
+    CMEKKeyUnreachableError,
 )
 ```
 
@@ -476,6 +488,23 @@ from anthropic.types import (
     ResponseComputerTypeToolUseBlock,
     ResponseComputerWaitToolUseBlock,
     ResponseComputerZoomToolUseBlock,
+    AvailableToolsLimitExceededError,
+    CompactionBlockAmbiguousError,
+    CompactionBlockMisplacedError,
+    CompactionContentMismatchError,
+    CompactionIncompleteTurnError,
+    CompactionNothingToSummarizeError,
+    CompactionSignatureInvalidError,
+    CompactionTooManyToolReferencesError,
+    CompactionToolChangesMismatchError,
+    ThreadAlreadyContinuedError,
+    ThreadContinueInFlightError,
+    ThreadFingerprintMismatchError,
+    ThreadUnsupportedRequestError,
+    ToolNameConflictError,
+    ToolReferenceUnresolvedError,
+    ThreadNotFoundError,
+    CompactionUnavailableError,
 )
 ```
 
@@ -546,6 +575,9 @@ from anthropic.types import (
     FileMetadata,
     FileNotDownloadableErrorDetails,
     StorageQuotaExceededErrorDetails,
+    FileNotDownloadableError,
+    StorageQuotaExceededError,
+    FileExpiredError,
 )
 ```
 
@@ -567,6 +599,7 @@ from anthropic.types import (
     Skill,
     SkillReadBlockedUndecryptableErrorDetails,
     SkillSource,
+    SkillReadBlockedUndecryptableError,
 )
 ```
 
@@ -621,6 +654,7 @@ from anthropic.types import (
     UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
+    UserProfileNotFoundError,
 )
 ```
 
@@ -654,6 +688,8 @@ from anthropic.types import (
     OrgMemberLimitExceededErrorDetails,
     OrganizationInfo,
     OrganizationRole,
+    OrgMemberLimitExceededError,
+    ConcurrentMembershipChangeError,
 )
 ```
 
@@ -675,6 +711,8 @@ from anthropic.types.organization import (
     APIKeyWorkspaceScope,
     OrgAPIKeyLimitExceededErrorDetails,
     WorkspaceAPIKeyLimitExceededErrorDetails,
+    OrgAPIKeyLimitExceededError,
+    WorkspaceAPIKeyLimitExceededError,
 )
 ```
 
@@ -703,6 +741,8 @@ from anthropic.types.organization import (
     GCPExternalKeyConfigParam,
     ExternalKeyDeleteResponse,
     ExternalKeyValidateResponse,
+    ExternalKeyInWorkspacePolicyError,
+    ExternalKeyChangedError,
 )
 ```
 
@@ -791,6 +831,10 @@ from anthropic.types.organization import (
     InviteAlreadyExistsErrorDetails,
     OrganizationInvite,
     InviteDeleteResponse,
+    AlreadyMemberError,
+    CannotInviteEmailsWithUnverifiedDomainsError,
+    EmailDomainNotAllowedError,
+    InviteAlreadyExistsError,
 )
 ```
 
@@ -840,6 +884,7 @@ from anthropic.types.organization import (
     CannotRemoveLastMemberErrorDetails,
     OrganizationUser,
     UserRemoveResponse,
+    CannotRemoveLastMemberError,
 )
 ```
 
@@ -868,6 +913,9 @@ from anthropic.types.organization import (
     WorkspacePolicyField,
     WorkspacePolicyViolationErrorDetails,
     WorkspaceRole,
+    KeyProfileMismatchError,
+    WorkspaceMemberLimitExceededError,
+    WorkspacePolicyViolationError,
 )
 ```
 
@@ -1134,6 +1182,8 @@ from anthropic.types.organization import (
     RBACGroup,
     RBACGroupGrantsOwnerAccessErrorDetails,
     RBACGroupOwnerAccessUnconfirmedErrorDetails,
+    RBACGroupGrantsOwnerAccessError,
+    RBACGroupOwnerAccessUnconfirmedError,
 )
 ```
 
@@ -1213,6 +1263,7 @@ from anthropic.types import (
     BetaPermissionError,
     BetaRateLimitError,
     BetaUnsupportedCharsetErrorDetails,
+    BetaUnsupportedCharsetError,
 )
 ```
 
@@ -2044,6 +2095,12 @@ from anthropic.types.beta import (
     BetaSelfHostedConfigParams,
     BetaUnrestrictedNetwork,
     BetaUnrestrictedNetworkParam,
+    BetaEnvironmentArchivedError,
+    BetaInvalidConfigTypeChangeError,
+    BetaInvalidMetadataError,
+    BetaEnvironmentCreateDisabledError,
+    BetaEnvironmentUpdateDisabledError,
+    BetaEnvironmentNotFoundError,
 )
 ```
 
@@ -2069,6 +2126,7 @@ from anthropic.types.beta.environments import (
     BetaSelfHostedWorkQueueStats,
     BetaSessionWorkData,
     BetaWorkLeaseState,
+    BetaHeartbeatPreconditionFailedError,
 )
 ```
 
@@ -2780,6 +2838,7 @@ from anthropic.types.beta import (
     BetaBillingFrozenErrorDetails,
     BetaOrganization,
     BetaOrganizationRole,
+    BetaBillingFrozenError,
 )
 ```
 
@@ -3298,6 +3357,7 @@ from anthropic.types.beta.organization import (
     BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
     BetaSpendSummary,
     SpendLimitDeleteResponse,
+    BetaSpendLimitsAdminAPIWritesNotEnabledError,
 )
 ```
 
@@ -3422,6 +3482,11 @@ from anthropic.types.beta.organization import (
     BetaScanFailedErrorDetails,
     BetaScanPendingErrorDetails,
     BetaSkillNameTakenErrorDetails,
+    BetaScanFailedError,
+    BetaPluginNameTakenError,
+    BetaScanPendingError,
+    BetaSkillNameTakenError,
+    BetaRegistrationPendingError,
 )
 ```
 
@@ -3621,6 +3686,13 @@ from anthropic.types.beta.organization import (
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
     BetaSlackChannelSetUpSettingsConflictErrorDetails,
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+    BetaSlackChannelSetUpSettingsRefusedError,
+    BetaAPIKeyScopeMissingError,
+    BetaClaudeTagWritesNotEnabledError,
+    BetaComplianceConfigurationRestrictedError,
+    BetaOrganizationLevelScopedAPIKeyRequiredError,
+    BetaSlackChannelSetUpEnvironmentNotFoundError,
+    BetaSlackChannelSetUpSettingsConflictError,
 )
 ```
 

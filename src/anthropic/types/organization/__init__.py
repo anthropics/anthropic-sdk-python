@@ -23,6 +23,7 @@ from .spend_limit_period import SpendLimitPeriod as SpendLimitPeriod
 from .user_update_params import UserUpdateParams as UserUpdateParams
 from .api_key_list_params import APIKeyListParams as APIKeyListParams
 from .organization_invite import OrganizationInvite as OrganizationInvite
+from .already_member_error import AlreadyMemberError as AlreadyMemberError
 from .invite_create_params import InviteCreateParams as InviteCreateParams
 from .user_remove_response import UserRemoveResponse as UserRemoveResponse
 from .allowed_inference_geo import AllowedInferenceGeo as AllowedInferenceGeo
@@ -63,11 +64,14 @@ from .no_billing_workspace_role import NoBillingWorkspaceRole as NoBillingWorksp
 from .analytics_project_activity import AnalyticsProjectActivity as AnalyticsProjectActivity
 from .analytics_project_group_by import AnalyticsProjectGroupBy as AnalyticsProjectGroupBy
 from .api_key_organization_scope import APIKeyOrganizationScope as APIKeyOrganizationScope
+from .external_key_changed_error import ExternalKeyChangedError as ExternalKeyChangedError
 from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCreateParams
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
+from .key_profile_mismatch_error import KeyProfileMismatchError as KeyProfileMismatchError
 from .analytics_artifact_activity import AnalyticsArtifactActivity as AnalyticsArtifactActivity
 from .analytics_artifact_group_by import AnalyticsArtifactGroupBy as AnalyticsArtifactGroupBy
 from .analytics_core_code_metrics import AnalyticsCoreCodeMetrics as AnalyticsCoreCodeMetrics
+from .invite_already_exists_error import InviteAlreadyExistsError as InviteAlreadyExistsError
 from .service_account_list_params import ServiceAccountListParams as ServiceAccountListParams
 from .spend_limit_seat_tier_scope import SpendLimitSeatTierScope as SpendLimitSeatTierScope
 from .spend_limit_workspace_scope import SpendLimitWorkspaceScope as SpendLimitWorkspaceScope
@@ -88,18 +92,22 @@ from .service_account_create_params import ServiceAccountCreateParams as Service
 from .service_account_update_params import ServiceAccountUpdateParams as ServiceAccountUpdateParams
 from .analytics_skill_cowork_metrics import AnalyticsSkillCoworkMetrics as AnalyticsSkillCoworkMetrics
 from .analytics_skill_office_metrics import AnalyticsSkillOfficeMetrics as AnalyticsSkillOfficeMetrics
+from .email_domain_not_allowed_error import EmailDomainNotAllowedError as EmailDomainNotAllowedError
 from .external_key_validate_response import ExternalKeyValidateResponse as ExternalKeyValidateResponse
 from .spend_limit_organization_scope import SpendLimitOrganizationScope as SpendLimitOrganizationScope
 from .analytics_plugin_cowork_metrics import AnalyticsPluginCoworkMetrics as AnalyticsPluginCoworkMetrics
 from .azure_external_key_config_param import AzureExternalKeyConfigParam as AzureExternalKeyConfigParam
+from .cannot_remove_last_member_error import CannotRemoveLastMemberError as CannotRemoveLastMemberError
 from .compliance_settings_state_param import ComplianceSettingsStateParam as ComplianceSettingsStateParam
 from .analytics_connector_chat_metrics import AnalyticsConnectorChatMetrics as AnalyticsConnectorChatMetrics
 from .analytics_office_product_metrics import AnalyticsOfficeProductMetrics as AnalyticsOfficeProductMetrics
 from .compliance_setting_update_params import ComplianceSettingUpdateParams as ComplianceSettingUpdateParams
 from .external_key_attached_attachment import ExternalKeyAttachedAttachment as ExternalKeyAttachedAttachment
+from .org_api_key_limit_exceeded_error import OrgAPIKeyLimitExceededError as OrgAPIKeyLimitExceededError
 from .organization_compliance_settings import OrganizationComplianceSettings as OrganizationComplianceSettings
 from .service_account_workspace_member import ServiceAccountWorkspaceMember as ServiceAccountWorkspaceMember
 from .spend_limit_scoped_api_key_actor import SpendLimitScopedAPIKeyActor as SpendLimitScopedAPIKeyActor
+from .workspace_policy_violation_error import WorkspacePolicyViolationError as WorkspacePolicyViolationError
 from .compliance_settings_state_enabled import ComplianceSettingsStateEnabled as ComplianceSettingsStateEnabled
 from .analytics_connector_cowork_metrics import AnalyticsConnectorCoworkMetrics as AnalyticsConnectorCoworkMetrics
 from .analytics_connector_office_metrics import AnalyticsConnectorOfficeMetrics as AnalyticsConnectorOfficeMetrics
@@ -116,11 +124,15 @@ from .organization_rate_limit_files_group import OrganizationRateLimitFilesGroup
 from .organization_rate_limit_model_group import OrganizationRateLimitModelGroup as OrganizationRateLimitModelGroup
 from .analytics_plugin_claude_code_metrics import AnalyticsPluginClaudeCodeMetrics as AnalyticsPluginClaudeCodeMetrics
 from .organization_rate_limit_skills_group import OrganizationRateLimitSkillsGroup as OrganizationRateLimitSkillsGroup
+from .rbac_group_grants_owner_access_error import RBACGroupGrantsOwnerAccessError as RBACGroupGrantsOwnerAccessError
 from .analytics_chat_cowork_unified_metrics import (
     AnalyticsChatCoworkUnifiedMetrics as AnalyticsChatCoworkUnifiedMetrics,
 )
 from .analytics_single_day_activity_summary import (
     AnalyticsSingleDayActivitySummary as AnalyticsSingleDayActivitySummary,
+)
+from .workspace_member_limit_exceeded_error import (
+    WorkspaceMemberLimitExceededError as WorkspaceMemberLimitExceededError,
 )
 from .analytics_skill_office_product_metrics import (
     AnalyticsSkillOfficeProductMetrics as AnalyticsSkillOfficeProductMetrics,
@@ -128,8 +140,14 @@ from .analytics_skill_office_product_metrics import (
 from .email_domain_not_allowed_error_details import (
     EmailDomainNotAllowedErrorDetails as EmailDomainNotAllowedErrorDetails,
 )
+from .external_key_in_workspace_policy_error import (
+    ExternalKeyInWorkspacePolicyError as ExternalKeyInWorkspacePolicyError,
+)
 from .spend_limit_organization_service_scope import (
     SpendLimitOrganizationServiceScope as SpendLimitOrganizationServiceScope,
+)
+from .workspace_api_key_limit_exceeded_error import (
+    WorkspaceAPIKeyLimitExceededError as WorkspaceAPIKeyLimitExceededError,
 )
 from .analytics_connector_claude_code_metrics import (
     AnalyticsConnectorClaudeCodeMetrics as AnalyticsConnectorClaudeCodeMetrics,
@@ -154,6 +172,9 @@ from .workspace_policy_violation_error_details import (
 )
 from .organization_rate_limit_token_count_group import (
     OrganizationRateLimitTokenCountGroup as OrganizationRateLimitTokenCountGroup,
+)
+from .rbac_group_owner_access_unconfirmed_error import (
+    RBACGroupOwnerAccessUnconfirmedError as RBACGroupOwnerAccessUnconfirmedError,
 )
 from .analytics_chat_cowork_unified_chat_metrics import (
     AnalyticsChatCoworkUnifiedChatMetrics as AnalyticsChatCoworkUnifiedChatMetrics,
@@ -190,6 +211,9 @@ from .analytics_skill_chat_cowork_unified_chat_metrics import (
 )
 from .rbac_group_owner_access_unconfirmed_error_details import (
     RBACGroupOwnerAccessUnconfirmedErrorDetails as RBACGroupOwnerAccessUnconfirmedErrorDetails,
+)
+from .cannot_invite_emails_with_unverified_domains_error import (
+    CannotInviteEmailsWithUnverifiedDomainsError as CannotInviteEmailsWithUnverifiedDomainsError,
 )
 from .analytics_connector_chat_cowork_unified_chat_metrics import (
     AnalyticsConnectorChatCoworkUnifiedChatMetrics as AnalyticsConnectorChatCoworkUnifiedChatMetrics,

@@ -37,6 +37,7 @@ from .workspace_list_params import WorkspaceListParams as WorkspaceListParams
 from .beta_organization_user import BetaOrganizationUser as BetaOrganizationUser
 from .beta_plugin_owner_user import BetaPluginOwnerUser as BetaPluginOwnerUser
 from .beta_plugin_user_actor import BetaPluginUserActor as BetaPluginUserActor
+from .beta_scan_failed_error import BetaScanFailedError as BetaScanFailedError
 from .invite_delete_response import InviteDeleteResponse as InviteDeleteResponse
 from .plugin_retrieve_params import PluginRetrieveParams as PluginRetrieveParams
 from .rate_limit_list_params import RateLimitListParams as RateLimitListParams
@@ -46,6 +47,7 @@ from .beta_api_key_created_by import BetaAPIKeyCreatedBy as BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor as BetaAPIKeyUserActor
 from .beta_deleted_rbac_group import BetaDeletedRBACGroup as BetaDeletedRBACGroup
 from .beta_plugin_marketplace import BetaPluginMarketplace as BetaPluginMarketplace
+from .beta_scan_pending_error import BetaScanPendingError as BetaScanPendingError
 from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPeriod
 from .spend_limit_list_params import SpendLimitListParams as SpendLimitListParams
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
@@ -69,6 +71,7 @@ from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUp
 from .beta_analytics_chat_metrics import BetaAnalyticsChatMetrics as BetaAnalyticsChatMetrics
 from .beta_analytics_service_tier import BetaAnalyticsServiceTier as BetaAnalyticsServiceTier
 from .beta_analytics_tool_actions import BetaAnalyticsToolActions as BetaAnalyticsToolActions
+from .beta_skill_name_taken_error import BetaSkillNameTakenError as BetaSkillNameTakenError
 from .beta_spend_limit_user_actor import BetaSpendLimitUserActor as BetaSpendLimitUserActor
 from .beta_spend_limit_user_scope import BetaSpendLimitUserScope as BetaSpendLimitUserScope
 from .service_account_list_params import ServiceAccountListParams as ServiceAccountListParams
@@ -81,6 +84,7 @@ from .beta_aws_external_key_config import BetaAWSExternalKeyConfig as BetaAWSExt
 from .beta_claude_tag_guest_policy import BetaClaudeTagGuestPolicy as BetaClaudeTagGuestPolicy
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig as BetaGCPExternalKeyConfig
 from .beta_organization_rate_limit import BetaOrganizationRateLimit as BetaOrganizationRateLimit
+from .beta_plugin_name_taken_error import BetaPluginNameTakenError as BetaPluginNameTakenError
 from .external_key_delete_response import ExternalKeyDeleteResponse as ExternalKeyDeleteResponse
 from .beta_analytics_context_window import BetaAnalyticsContextWindow as BetaAnalyticsContextWindow
 from .beta_analytics_cowork_metrics import BetaAnalyticsCoworkMetrics as BetaAnalyticsCoworkMetrics
@@ -112,6 +116,7 @@ from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as Beta
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
 from .beta_claude_tag_setting_sources import BetaClaudeTagSettingSources as BetaClaudeTagSettingSources
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
+from .beta_registration_pending_error import BetaRegistrationPendingError as BetaRegistrationPendingError
 from .beta_scan_pending_error_details import BetaScanPendingErrorDetails as BetaScanPendingErrorDetails
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
 from .beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy as BetaAnalyticsArtifactGroupBy
@@ -119,6 +124,7 @@ from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as Be
 from .beta_analytics_grouped_cost_type import BetaAnalyticsGroupedCostType as BetaAnalyticsGroupedCostType
 from .beta_analytics_report_user_actor import BetaAnalyticsReportUserActor as BetaAnalyticsReportUserActor
 from .beta_analytics_time_bucket_width import BetaAnalyticsTimeBucketWidth as BetaAnalyticsTimeBucketWidth
+from .beta_api_key_scope_missing_error import BetaAPIKeyScopeMissingError as BetaAPIKeyScopeMissingError
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
 from .beta_telemetry_destination_state import BetaTelemetryDestinationState as BetaTelemetryDestinationState
@@ -253,6 +259,9 @@ from .beta_api_key_scope_missing_error_details import (
 from .beta_claude_tag_guest_policy_allow_param import (
     BetaClaudeTagGuestPolicyAllowParam as BetaClaudeTagGuestPolicyAllowParam,
 )
+from .beta_claude_tag_writes_not_enabled_error import (
+    BetaClaudeTagWritesNotEnabledError as BetaClaudeTagWritesNotEnabledError,
+)
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
 )
@@ -373,6 +382,9 @@ from .plugin_marketplace_validate_repository_params import (
 from .beta_claude_tag_slack_workspace_setting_source import (
     BetaClaudeTagSlackWorkspaceSettingSource as BetaClaudeTagSlackWorkspaceSettingSource,
 )
+from .beta_compliance_configuration_restricted_error import (
+    BetaComplianceConfigurationRestrictedError as BetaComplianceConfigurationRestrictedError,
+)
 from .beta_organization_rate_limit_token_count_group import (
     BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
 )
@@ -400,6 +412,9 @@ from .beta_analytics_skill_chat_cowork_unified_metrics import (
 from .beta_claude_tag_writes_not_enabled_error_details import (
     BetaClaudeTagWritesNotEnabledErrorDetails as BetaClaudeTagWritesNotEnabledErrorDetails,
 )
+from .beta_slack_channel_set_up_settings_refused_error import (
+    BetaSlackChannelSetUpSettingsRefusedError as BetaSlackChannelSetUpSettingsRefusedError,
+)
 from .beta_telemetry_destination_state_disabled_params import (
     BetaTelemetryDestinationStateDisabledParams as BetaTelemetryDestinationStateDisabledParams,
 )
@@ -417,6 +432,9 @@ from .beta_organization_webhook_endpoint_signing_secret import (
 )
 from .beta_plugin_marketplace_validation_plugin_warning import (
     BetaPluginMarketplaceValidationPluginWarning as BetaPluginMarketplaceValidationPluginWarning,
+)
+from .beta_slack_channel_set_up_settings_conflict_error import (
+    BetaSlackChannelSetUpSettingsConflictError as BetaSlackChannelSetUpSettingsConflictError,
 )
 from .beta_telemetry_destination_disabled_reason_caller import (
     BetaTelemetryDestinationDisabledReasonCaller as BetaTelemetryDestinationDisabledReasonCaller,
@@ -436,6 +454,9 @@ from .beta_telemetry_destination_disabled_reason_redirect import (
 from .beta_analytics_connector_chat_cowork_unified_metrics import (
     BetaAnalyticsConnectorChatCoworkUnifiedMetrics as BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
 )
+from .beta_spend_limits_admin_api_writes_not_enabled_error import (
+    BetaSpendLimitsAdminAPIWritesNotEnabledError as BetaSpendLimitsAdminAPIWritesNotEnabledError,
+)
 from .beta_telemetry_destination_workspaces_exclude_params import (
     BetaTelemetryDestinationWorkspacesExcludeParams as BetaTelemetryDestinationWorkspacesExcludeParams,
 )
@@ -444,6 +465,12 @@ from .beta_telemetry_destination_workspaces_include_params import (
 )
 from .beta_analytics_skill_chat_cowork_unified_chat_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics as BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
+)
+from .beta_organization_level_scoped_api_key_required_error import (
+    BetaOrganizationLevelScopedAPIKeyRequiredError as BetaOrganizationLevelScopedAPIKeyRequiredError,
+)
+from .beta_slack_channel_set_up_environment_not_found_error import (
+    BetaSlackChannelSetUpEnvironmentNotFoundError as BetaSlackChannelSetUpEnvironmentNotFoundError,
 )
 from .beta_compliance_configuration_restricted_error_details import (
     BetaComplianceConfigurationRestrictedErrorDetails as BetaComplianceConfigurationRestrictedErrorDetails,

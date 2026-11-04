@@ -149,6 +149,7 @@ from .deployment_update_params import DeploymentUpdateParams as DeploymentUpdate
 from .memory_store_list_params import MemoryStoreListParams as MemoryStoreListParams
 from .user_profile_list_params import UserProfileListParams as UserProfileListParams
 from .beta_advisor_result_block import BetaAdvisorResultBlock as BetaAdvisorResultBlock
+from .beta_billing_frozen_error import BetaBillingFrozenError as BetaBillingFrozenError
 from .beta_browser_click_target import BetaBrowserClickTarget as BetaBrowserClickTarget
 from .beta_browser_hover_config import BetaBrowserHoverConfig as BetaBrowserHoverConfig
 from .beta_browser_member_input import BetaBrowserMemberInput as BetaBrowserMemberInput
@@ -217,6 +218,7 @@ from .beta_citations_config_param import BetaCitationsConfigParam as BetaCitatio
 from .beta_compaction_block_param import BetaCompactionBlockParam as BetaCompactionBlockParam
 from .beta_computer_scroll_config import BetaComputerScrollConfig as BetaComputerScrollConfig
 from .beta_container_upload_block import BetaContainerUploadBlock as BetaContainerUploadBlock
+from .beta_invalid_metadata_error import BetaInvalidMetadataError as BetaInvalidMetadataError
 from .beta_limited_network_params import BetaLimitedNetworkParams as BetaLimitedNetworkParams
 from .beta_managed_agents_advisor import BetaManagedAgentsAdvisor as BetaManagedAgentsAdvisor
 from .beta_managed_agents_session import BetaManagedAgentsSession as BetaManagedAgentsSession
@@ -351,6 +353,7 @@ from .beta_computer_wait_config_param import BetaComputerWaitConfigParam as Beta
 from .beta_computer_zoom_config_param import BetaComputerZoomConfigParam as BetaComputerZoomConfigParam
 from .beta_content_block_source_param import BetaContentBlockSourceParam as BetaContentBlockSourceParam
 from .beta_dream_sessions_input_param import BetaDreamSessionsInputParam as BetaDreamSessionsInputParam
+from .beta_environment_archived_error import BetaEnvironmentArchivedError as BetaEnvironmentArchivedError
 from .beta_file_document_source_param import BetaFileDocumentSourceParam as BetaFileDocumentSourceParam
 from .beta_input_tokens_trigger_param import BetaInputTokensTriggerParam as BetaInputTokensTriggerParam
 from .beta_managed_agents_auto_policy import BetaManagedAgentsAutoPolicy as BetaManagedAgentsAutoPolicy
@@ -392,6 +395,7 @@ from .beta_computer_right_click_config import BetaComputerRightClickConfig as Be
 from .beta_computer_triple_click_input import BetaComputerTripleClickInput as BetaComputerTripleClickInput
 from .beta_context_management_response import BetaContextManagementResponse as BetaContextManagementResponse
 from .beta_environment_delete_response import BetaEnvironmentDeleteResponse as BetaEnvironmentDeleteResponse
+from .beta_environment_not_found_error import BetaEnvironmentNotFoundError as BetaEnvironmentNotFoundError
 from .beta_fallback_credit_not_applied import BetaFallbackCreditNotApplied as BetaFallbackCreditNotApplied
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam as BetaFallbackCreditTokenParam
 from .beta_image_transformations_param import BetaImageTransformationsParam as BetaImageTransformationsParam
@@ -559,6 +563,7 @@ from .beta_computer_screenshot_config_param import (
 from .beta_fallback_message_iteration_usage import (
     BetaFallbackMessageIterationUsage as BetaFallbackMessageIterationUsage,
 )
+from .beta_invalid_config_type_change_error import BetaInvalidConfigTypeChangeError as BetaInvalidConfigTypeChangeError
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
 from .beta_managed_agents_auto_policy_param import BetaManagedAgentsAutoPolicyParam as BetaManagedAgentsAutoPolicyParam
@@ -616,6 +621,12 @@ from .beta_code_execution_result_block_param import (
 )
 from .beta_computer_right_click_config_param import (
     BetaComputerRightClickConfigParam as BetaComputerRightClickConfigParam,
+)
+from .beta_environment_create_disabled_error import (
+    BetaEnvironmentCreateDisabledError as BetaEnvironmentCreateDisabledError,
+)
+from .beta_environment_update_disabled_error import (
+    BetaEnvironmentUpdateDisabledError as BetaEnvironmentUpdateDisabledError,
 )
 from .beta_input_tokens_clear_at_least_param import BetaInputTokensClearAtLeastParam as BetaInputTokensClearAtLeastParam
 from .beta_managed_agents_budget_limit_param import (

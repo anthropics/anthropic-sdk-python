@@ -1,27 +1,38 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Union, cast
+from typing import TYPE_CHECKING, Any
 from typing_extensions import Literal
 
 import httpx2
 
-from ._utils import is_dict
-from .types.shared.error_type import ErrorType
+from ._utils import is_mapping
+from ._models import construct_type_unchecked
+
+if TYPE_CHECKING:
+    from .types.shared.error_type import ErrorType
+    from .types.shared.error_details import ErrorDetails
 
 __all__ = [
     "BadRequestError",
     "AuthenticationError",
     "PermissionDeniedError",
     "NotFoundError",
+    "RequestTimeoutError",
     "ConflictError",
+    "PreconditionFailedError",
+    "ContentTooLargeError",
     "UnprocessableEntityError",
     "RateLimitError",
+    "RequestHeaderFieldsTooLargeError",
+    "ClientClosedRequestError",
     "InternalServerError",
+    "HTTPNotImplementedError",
+    "ServiceUnavailableError",
+    "GatewayTimeoutError",
+    "OverloadedError",
     "RetryableError",
     "RequestTooLargeError",
-    "ServiceUnavailableError",
-    "OverloadedError",
     "DeadlineExceededError",
     "CredentialsError",
     "IdentityTokenFileError",
@@ -54,6 +65,26 @@ class APIError(AnthropicError):
         self.body = body
 
 
+def extract_body_property(body: object, *path: str) -> Any:
+    for key in path:
+        if not is_mapping(body):
+            return None
+        body = body.get(key)
+    return body
+
+
+def construct_body_property(type_: Any, body: object, *path: str) -> Any:
+    try:
+        return construct_type_unchecked(type_=type_, value=extract_body_property(body, *path))
+    except Exception:
+        return None
+
+
+def extract_error_code(body: object) -> str | None:
+    error_code = extract_body_property(body, "error", "details", "error_code")
+    return error_code if isinstance(error_code, str) else None
+
+
 class APIResponseValidationError(APIError):
     response: httpx2.Response
     status_code: int
@@ -72,24 +103,38 @@ class APIStatusError(APIError):
     """Raised when an API response has a status code of 4xx or 5xx."""
 
     response: httpx2.Response
+
     status_code: int
+
     request_id: str | None
-    type: ErrorType | None
 
     workspace_id: str | None
 
+    api_message: str | None
+    """`error.message` from the response body, if present."""
+
+    type: ErrorType | None
+    """`error.type` from the response body, if present."""
+
+    error_code: str | None
+    """`error.details.error_code` from the response body, if present and a string."""
+
+    details: ErrorDetails | None
+    """`error.details` from the response body, if present."""
+
     def __init__(self, message: str, *, response: httpx2.Response, body: object | None) -> None:
+        # imported here so that modules in `types` can import this one
+        from .types.shared.error_details import ErrorDetails
+
         super().__init__(message, response.request, body=body)
         self.response = response
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
         self.workspace_id = response.headers.get("anthropic-workspace-id")
-
-        self.type = None
-        if is_dict(body):
-            error = body.get("error")
-            if is_dict(error):
-                self.type = cast(Union[ErrorType, None], error.get("type"))
+        self.api_message = extract_body_property(body, "error", "message")
+        self.type = extract_body_property(body, "error", "type")
+        self.error_code = extract_error_code(body)
+        self.details = construct_body_property(ErrorDetails, body, "error", "details")
 
 
 class APIConnectionError(APIError):
@@ -148,12 +193,24 @@ class NotFoundError(APIStatusError):
     status_code: Literal[404] = 404  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
+class RequestTimeoutError(APIStatusError):
+    status_code: Literal[408] = 408  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
 class ConflictError(APIStatusError):
     status_code: Literal[409] = 409  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class RequestTooLargeError(APIStatusError):
+class PreconditionFailedError(APIStatusError):
+    status_code: Literal[412] = 412  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class ContentTooLargeError(APIStatusError):
     status_code: Literal[413] = 413  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+RequestTooLargeError = ContentTooLargeError
+"""Deprecated: use `ContentTooLargeError`."""
 
 
 class UnprocessableEntityError(APIStatusError):
@@ -164,17 +221,33 @@ class RateLimitError(APIStatusError):
     status_code: Literal[429] = 429  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class ServiceUnavailableError(APIStatusError):
-    status_code: Literal[503] = 503  # pyright: ignore[reportIncompatibleVariableOverride]
+class RequestHeaderFieldsTooLargeError(APIStatusError):
+    status_code: Literal[431] = 431  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class OverloadedError(APIStatusError):
-    status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]
-
-
-class DeadlineExceededError(APIStatusError):
-    status_code: Literal[504] = 504  # pyright: ignore[reportIncompatibleVariableOverride]
+class ClientClosedRequestError(APIStatusError):
+    status_code: Literal[499] = 499  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class InternalServerError(APIStatusError):
     pass
+
+
+class HTTPNotImplementedError(InternalServerError):
+    status_code: Literal[501] = 501  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class ServiceUnavailableError(InternalServerError):
+    status_code: Literal[503] = 503  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class GatewayTimeoutError(InternalServerError):
+    status_code: Literal[504] = 504  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+DeadlineExceededError = GatewayTimeoutError
+"""Deprecated: use `GatewayTimeoutError`."""
+
+
+class OverloadedError(InternalServerError):
+    status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]

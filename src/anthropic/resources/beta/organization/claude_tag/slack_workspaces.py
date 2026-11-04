@@ -85,6 +85,17 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -149,6 +160,26 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+
+          BetaEnvironmentNotFoundError: `settings.environment_id` names no Environment within the organization's reach.
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError: `settings.environment_id` names no Environment within the organization's reach,
+              and the request had set the channel up by then. The channel stays set up with
+              every setting unset.
+
+          BetaSlackChannelSetUpSettingsConflictError: The request set the channel up, and something else then changed the channel or
+              removed it. Nothing of `settings` was stored.
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -228,6 +259,17 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
         """
         extra_headers = {
             **strip_not_given(
@@ -323,6 +365,17 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -387,6 +440,26 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+
+          BetaEnvironmentNotFoundError: `settings.environment_id` names no Environment within the organization's reach.
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError: `settings.environment_id` names no Environment within the organization's reach,
+              and the request had set the channel up by then. The channel stays set up with
+              every setting unset.
+
+          BetaSlackChannelSetUpSettingsConflictError: The request set the channel up, and something else then changed the channel or
+              removed it. Nothing of `settings` was stored.
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -466,6 +539,17 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
+              `write:claude_tag` for a change.
+
+          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+
+          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
+              anything new.
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
         """
         extra_headers = {
             **strip_not_given(

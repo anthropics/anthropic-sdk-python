@@ -10,6 +10,9 @@ from .work_heartbeat_params import WorkHeartbeatParams as WorkHeartbeatParams
 from .beta_session_work_data import BetaSessionWorkData as BetaSessionWorkData
 from .beta_self_hosted_work_queue_stats import BetaSelfHostedWorkQueueStats as BetaSelfHostedWorkQueueStats
 from .beta_self_hosted_work_list_response import BetaSelfHostedWorkListResponse as BetaSelfHostedWorkListResponse
+from .beta_heartbeat_precondition_failed_error import (
+    BetaHeartbeatPreconditionFailedError as BetaHeartbeatPreconditionFailedError,
+)
 from .beta_self_hosted_work_heartbeat_response import (
     BetaSelfHostedWorkHeartbeatResponse as BetaSelfHostedWorkHeartbeatResponse,
 )
