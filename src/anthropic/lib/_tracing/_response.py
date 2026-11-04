@@ -80,6 +80,7 @@ def set_message_attributes(span: AnthropicSpan, message: Message | BetaMessage, 
     span.set_attribute("gen_ai.response.model", message.model)
     if complete and message.stop_reason is not None:
         span.set_attribute("anthropic.message.stop_reason", message.stop_reason)
+        span.set_attribute("gen_ai.response.finish_reasons", [message.stop_reason])
 
     usage = message.usage
     cached = (usage.cache_read_input_tokens or 0) + (usage.cache_creation_input_tokens or 0)

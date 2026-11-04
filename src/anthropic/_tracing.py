@@ -328,8 +328,6 @@ def end_api_call_span(span: Span, result: ApiCallResult) -> None:
     set_resend_count(span, result)
     if result.error is not None:
         set_error_status(span, result.error)
-    else:
-        span.set_status(Status(StatusCode.OK))
     span.end()
 
 
@@ -377,20 +375,17 @@ class StreamedBodyObserver:
 
     def __init__(self, span: Span) -> None:
         self._span = span
-        self._events = False
 
     def begin(self) -> None:
-        self._events = True
+        pass
 
     def item(self, item: object) -> None:
         pass
 
     def end(self, how: StreamEnd, error: BaseException | None = None) -> None:
+        del how
         if error is not None:
             set_error_status(self._span, error)
-        # Server-sent events without an end event are never read to the end, so only other bodies get `OK`.
-        elif how == "read" and not self._events:
-            self._span.set_status(Status(StatusCode.OK))
         self._span.end()
 
 
