@@ -109,9 +109,8 @@ class Invites(SyncAPIResource):
               Claude.
 
           RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access (the check reached a fixed limit), so it made no change. Retrying
-              the same request will not help. Make the change in the organization's admin
-              settings in Claude.
+              owner access, so it made no change. Retrying the same request will not help.
+              Make the change in the organization's admin settings in Claude.
         """
         return self._post(
             "/v1/organizations/invites",
@@ -375,9 +374,8 @@ class AsyncInvites(AsyncAPIResource):
               Claude.
 
           RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access (the check reached a fixed limit), so it made no change. Retrying
-              the same request will not help. Make the change in the organization's admin
-              settings in Claude.
+              owner access, so it made no change. Retrying the same request will not help.
+              Make the change in the organization's admin settings in Claude.
         """
         return await self._post(
             "/v1/organizations/invites",

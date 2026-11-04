@@ -120,8 +120,8 @@ class Versions(SyncAPIResource):
               organization disabled for any other reason, such as billing, does not get this
               code. `appeal_url`, when present, is where the organization can appeal.
 
-          CMEKContextUnavailableError: The request's workspace encryption context could not be resolved, so the request
-              was refused. Retry in a few minutes.
+          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
+              refused. Retry in a few minutes.
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -556,8 +556,8 @@ class AsyncVersions(AsyncAPIResource):
               organization disabled for any other reason, such as billing, does not get this
               code. `appeal_url`, when present, is where the organization can appeal.
 
-          CMEKContextUnavailableError: The request's workspace encryption context could not be resolved, so the request
-              was refused. Retry in a few minutes.
+          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
+              refused. Retry in a few minutes.
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")

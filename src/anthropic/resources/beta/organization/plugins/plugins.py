@@ -384,8 +384,8 @@ class Plugins(SyncAPIResource):
           CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
               workspace's customer-managed encryption key. The key itself may be healthy.
 
-          BetaScanFailedError: The content scan of the version in `plugin_version_id` failed, errored or
-              reached no verdict, so the version cannot be served.
+          BetaScanFailedError: The version in `plugin_version_id` did not pass its content scan, so it cannot
+              be served.
 
           BetaScanPendingError: The content scan of the version in `plugin_version_id` is still running. Retry
               once the scan finishes.
@@ -949,8 +949,8 @@ class AsyncPlugins(AsyncAPIResource):
           CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
               workspace's customer-managed encryption key. The key itself may be healthy.
 
-          BetaScanFailedError: The content scan of the version in `plugin_version_id` failed, errored or
-              reached no verdict, so the version cannot be served.
+          BetaScanFailedError: The version in `plugin_version_id` did not pass its content scan, so it cannot
+              be served.
 
           BetaScanPendingError: The content scan of the version in `plugin_version_id` is still running. Retry
               once the scan finishes.

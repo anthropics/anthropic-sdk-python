@@ -124,8 +124,8 @@ class Skills(SyncAPIResource):
               organization disabled for any other reason, such as billing, does not get this
               code. `appeal_url`, when present, is where the organization can appeal.
 
-          CMEKContextUnavailableError: The request's workspace encryption context could not be resolved, so the request
-              was refused. Retry in a few minutes.
+          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
+              refused. Retry in a few minutes.
         """
         extra_headers = {
             **strip_not_given(
@@ -481,8 +481,8 @@ class AsyncSkills(AsyncAPIResource):
               organization disabled for any other reason, such as billing, does not get this
               code. `appeal_url`, when present, is where the organization can appeal.
 
-          CMEKContextUnavailableError: The request's workspace encryption context could not be resolved, so the request
-              was refused. Retry in a few minutes.
+          CMEKContextUnavailableError: The workspace's encryption settings could not be read, so the request was
+              refused. Retry in a few minutes.
         """
         extra_headers = {
             **strip_not_given(

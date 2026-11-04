@@ -278,9 +278,8 @@ class RBACGroups(SyncAPIResource):
               Claude.
 
           RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access (the check reached a fixed limit), so it made no change. Retrying
-              the same request will not help. Make the change in the organization's admin
-              settings in Claude.
+              owner access, so it made no change. Retrying the same request will not help.
+              Make the change in the organization's admin settings in Claude.
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -547,9 +546,8 @@ class AsyncRBACGroups(AsyncAPIResource):
               Claude.
 
           RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access (the check reached a fixed limit), so it made no change. Retrying
-              the same request will not help. Make the change in the organization's admin
-              settings in Claude.
+              owner access, so it made no change. Retrying the same request will not help.
+              Make the change in the organization's admin settings in Claude.
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")

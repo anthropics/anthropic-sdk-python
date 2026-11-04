@@ -8,7 +8,7 @@ __all__ = ["CMEKContextUnavailableError"]
 
 class CMEKContextUnavailableError(ServiceUnavailableError):
     """
-    The request's workspace encryption context could not be resolved, so the request was refused. Retry in a few minutes.
+    The workspace's encryption settings could not be read, so the request was refused. Retry in a few minutes.
     """
 
     error_code: Literal["cmek_context_unavailable"]  # pyright: ignore[reportIncompatibleVariableOverride]
