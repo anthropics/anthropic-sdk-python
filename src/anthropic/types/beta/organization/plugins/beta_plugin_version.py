@@ -32,8 +32,11 @@ class BetaPluginVersion(BaseModel):
     description: Optional[str] = None
     """The manifest's description; null when it declares none.
 
-    If that description is the first 500 characters of exactly one distinct skill
-    `description` in `components`, that skill `description` is returned instead.
+    The value can be longer than 500 characters, the limit on `description` in an
+    uploaded manifest. A description that the manifest takes from a `SKILL.md` is
+    cut to its first 500 characters. So if the manifest's description is the first
+    500 characters of exactly one distinct skill `description` in `components`, that
+    skill `description` is returned instead.
     """
 
     display_name: Optional[str] = None
