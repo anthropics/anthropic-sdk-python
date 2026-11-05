@@ -16,7 +16,7 @@ from ..._models import FinalRequestOptions
 from ..._version import __version__
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -25,7 +25,6 @@ from ..._base_client import (
     AsyncAPIClient,
     merge_headers,
 )
-from ..._error_classes import make_status_error
 from ...resources.messages import Messages, AsyncMessages
 
 if TYPE_CHECKING:
@@ -50,16 +49,6 @@ class BaseVertexClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
             return project_id
 
         return None
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        return make_status_error(err_msg, body=body, response=response)
 
 
 class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClient):

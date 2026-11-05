@@ -34,7 +34,7 @@ from typing import (
     cast,
     overload,
 )
-from typing_extensions import Literal, override, get_origin
+from typing_extensions import Literal, final, override, get_origin
 
 import anyio
 import httpx2
@@ -129,6 +129,7 @@ from ._middleware import (
 from ._utils._json import openapi_dumps
 from .lib._tracing import OpenTelemetryConfig, finish_api_call_span
 from ._utils._httpx import get_environment_proxies
+from ._error_classes import make_status_error
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -539,6 +540,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
         return self._make_status_error(err_msg, body=body, response=response)
 
+    @final
     def _make_status_error(
         self,
         err_msg: str,
@@ -546,7 +548,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         body: object,
         response: httpx2.Response,
     ) -> _exceptions.APIStatusError:
-        raise NotImplementedError()
+        return make_status_error(err_msg, body=body, response=response)
 
     def _build_headers(self, options: FinalRequestOptions, *, retries_taken: int = 0) -> httpx2.Headers:
         timeout = self.timeout if isinstance(options.timeout, NotGiven) else options.timeout

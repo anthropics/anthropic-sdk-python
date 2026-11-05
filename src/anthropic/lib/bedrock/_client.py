@@ -15,7 +15,7 @@ from ..._compat import model_copy
 from ..._version import __version__
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -27,7 +27,6 @@ from ..._base_client import (
     merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
-from ..._error_classes import make_status_error
 from ...resources.messages import Messages, AsyncMessages
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
@@ -100,16 +99,6 @@ def _infer_region(aws_profile: str | None) -> str:
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     _gen_ai_provider_name = "aws.bedrock"
     _otel_platform = "bedrock"
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        return make_status_error(err_msg, body=body, response=response)
 
 
 class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPIClient):

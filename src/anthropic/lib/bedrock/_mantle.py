@@ -16,7 +16,7 @@ from ..aws._auth import get_auth_headers
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -27,7 +27,6 @@ from ..._base_client import (
     build_headers,
     merge_headers,
 )
-from ..._error_classes import make_status_error
 from ..aws._credentials import (
     resolve_region,
     resolve_api_key,
@@ -72,16 +71,6 @@ class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     # Mantle is an Amazon Bedrock endpoint.
     _gen_ai_provider_name = "aws.bedrock"
     _otel_platform = "bedrock"
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        return make_status_error(err_msg, body=body, response=response)
 
     def _move_user_profile_id_to_body(self, options: FinalRequestOptions) -> FinalRequestOptions:
         """Mantle reads the user profile ID from the body of these requests, and from the header on other routes."""
