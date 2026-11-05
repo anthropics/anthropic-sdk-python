@@ -25,7 +25,6 @@ jobs:
       - name: Check that the pull request has a changelog entry for each package it changes
         run: |
           export LC_ALL=C
-          git rev-parse --quiet --verify HEAD^1 > /dev/null
           title='^(feat|fix|perf|revert|chore|docs|style|refactor|build)(\([^()]+\))?!?: +'
           number='(0|[1-9][0-9]*)'
           word="($number|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
@@ -33,15 +32,18 @@ jobs:
           control=$'[[:cntrl:]]|\xc2[\x80-\x9f]|\xe2\x80[\xa8\xa9]'
           space=$'\xc2\xa0|\xe1\x9a\x80|\xe2\x80[\x80-\x8a\xaf]|\xe2\x81\x9f|\xe3\x80\x80|\xef\xbb\xbf'
           version="^$number\.$number\.$number(-$word(\.$word)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?( |$space)*\$"
+          first_line_has() {
+            head -n 1 "$1" | grep -aEq "$2"
+          }
           readable() {
             case "$2" in '' | */* | *:* | *\\*) return 1 ;; esac
-            if [ -L "$1" ] || [ ! -f "$1" ] || [ "$(grep -ac '' "$1")" != 1 ] || grep -aEq "$control" "$1"; then
+            if [ -L "$1" ] || [ ! -f "$1" ] || first_line_has "$1" "$control"; then
               return 1
             fi
             if [ "$2" = version ]; then
-              grep -aEq "$version" "$1"
+              [ "$(grep -ac '' "$1")" = 1 ] && first_line_has "$1" "$version"
             else
-              grep -aEq "$title[^ ]" "$1" && ! grep -aEq "$title($space)" "$1"
+              [ -z "$(sed -n 2p "$1")" ] && first_line_has "$1" "$title[^ ]" && ! first_line_has "$1" "$title($space)"
             fi
           }
           refused=""
@@ -58,9 +60,6 @@ jobs:
                 entry=yes
               fi
             done < <(git diff --name-status --no-renames --diff-filter=d -z HEAD^1 HEAD -- "$dir")
-            if ! git diff --quiet HEAD^1 HEAD -- "$1/CHANGELOG.md"; then
-              entry=yes
-            fi
             if [ -z "$entry" ] &&
               ! git diff --quiet HEAD^1 HEAD -- "$@" ":(exclude)$dir" ":(exclude)$1/CHANGELOG.md" ':(exclude).version-manifest.json' ':(exclude)scripts/mock-spec.json.gz'; then
               missing="$missing $dir"
@@ -68,9 +67,9 @@ jobs:
           }
           check '.'
           if [ -n "$refused" ]; then
-            echo "::error::A release cannot read:$refused. A changelog entry is a file directly in .changelog/, with no colon or backslash in its name, that holds one line such as 'fix(client): close the socket on timeout'. Its type is one of feat, fix, perf, revert, chore, docs, style, refactor, build. The file .changelog/version holds one line, the version of the next release, such as 1.2.0."
+            echo "::error::A release cannot read:$refused. A changelog entry is a file directly in .changelog/, with no colon or backslash in its name, that holds a first line such as 'fix(client): close the socket on timeout' and, after a blank line, optional notes in Markdown. Its type is one of feat, fix, perf, revert, chore, docs, style, refactor, build. The file .changelog/version holds one line, the version of the next release, such as 1.2.0."
           fi
           if [ -n "$missing" ]; then
-            echo "::error::Add a changelog entry to:$missing. An entry is a new file, under any name such as close-socket.md, that holds one line such as 'fix(client): close the socket on timeout'. Each package this pull request changes needs its own: without one, a release can leave the package out. The skip-changelog label turns this check off for the whole pull request."
+            echo "::error::Add a changelog entry to:$missing. An entry is a new file, under any name such as close-socket.md, that holds a first line such as 'fix(client): close the socket on timeout' and, after a blank line, optional notes in Markdown. Each package this pull request changes needs its own: without one, a release can leave the package out. The skip-changelog label turns this check off for the whole pull request."
           fi
           [ -z "$refused$missing" ]

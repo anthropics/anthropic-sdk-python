@@ -84,8 +84,7 @@ class Effective(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          OrganizationTypeNotSupportedError: The endpoint does not support the organization's type. Each endpoint's
-              description says which organization types it supports.
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",
@@ -171,8 +170,7 @@ class AsyncEffective(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          OrganizationTypeNotSupportedError: The endpoint does not support the organization's type. Each endpoint's
-              description says which organization types it supports.
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",

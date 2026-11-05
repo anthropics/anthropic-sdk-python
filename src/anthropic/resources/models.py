@@ -79,12 +79,9 @@ class Models(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
@@ -156,12 +153,9 @@ class Models(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -242,12 +236,9 @@ class AsyncModels(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
@@ -319,12 +310,9 @@ class AsyncModels(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
-              no longer a member of the organization or of that workspace.
+          ClaudeCodeKeyCreatorNotMemberError:
 
-          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
-              organization disabled for any other reason, such as billing, does not get this
-              code. `appeal_url`, when present, is where the organization can appeal.
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(

@@ -23,6 +23,7 @@ from anthropic.types import (
     OrganizationTypeNotSupportedErrorDetails,
     OverloadedError,
     PermissionError,
+    RampLimitExceededErrorDetails,
     RateLimitError,
     RequestBodyEncodingInvalidErrorDetails,
     RequestBodyEncodingUnsupportedErrorDetails,
@@ -37,6 +38,7 @@ from anthropic.types import (
     RequestBodyEncodingUnsupportedError,
     RequestBodyTooLargeAfterDecodingError,
     EnforcedSpendLimitReachedError,
+    RampLimitExceededError,
     CMEKContextUnavailableError,
     CMEKKeyUnreachableError,
 )
@@ -737,11 +739,15 @@ from anthropic.types.organization import (
     ExternalKeyChangedErrorDetails,
     ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
+    ExternalKeyValidationFailedErrorDetails,
+    ExternalKeyValidationTimedOutErrorDetails,
     GCPExternalKeyConfig,
     GCPExternalKeyConfigParam,
     ExternalKeyDeleteResponse,
     ExternalKeyValidateResponse,
     ExternalKeyInWorkspacePolicyError,
+    ExternalKeyValidationFailedError,
+    ExternalKeyValidationTimedOutError,
     ExternalKeyChangedError,
 )
 ```
@@ -1259,10 +1265,12 @@ from anthropic.types import (
     BetaMonetaryAmount,
     BetaMonetaryAmountParam,
     BetaNotFoundError,
+    BetaOrganizationNotEnrolledInBetaErrorDetails,
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
     BetaUnsupportedCharsetErrorDetails,
+    BetaOrganizationNotEnrolledInBetaError,
     BetaUnsupportedCharsetError,
 )
 ```
@@ -3010,7 +3018,22 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaOrganizationUser, UserRemoveResponse
+from anthropic.types.beta.organization import (
+    BetaCannotSignOutManagedMemberErrorDetails,
+    BetaCannotSignOutMembershipAdminErrorDetails,
+    BetaCannotSignOutOwnerErrorDetails,
+    BetaCannotSignOutPrimaryOwnerErrorDetails,
+    BetaCannotSignOutPrivilegedMemberErrorDetails,
+    BetaCannotSignOutSelfErrorDetails,
+    BetaOrganizationUser,
+    UserRemoveResponse,
+    BetaCannotSignOutPrimaryOwnerError,
+    BetaCannotSignOutSelfError,
+    BetaCannotSignOutManagedMemberError,
+    BetaCannotSignOutMembershipAdminError,
+    BetaCannotSignOutOwnerError,
+    BetaCannotSignOutPrivilegedMemberError,
+)
 ```
 
 Methods:
@@ -3019,6 +3042,7 @@ Methods:
 - <code title="post /v1/organizations/users/{user_id}">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">update</a>(user_id, \*\*<a href="src/anthropic/types/beta/organization/user_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
 - <code title="get /v1/organizations/users">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">SyncPage[BetaOrganizationUser]</a></code>
 - <code title="delete /v1/organizations/users/{user_id}">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">remove</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/user_remove_response.py">UserRemoveResponse</a></code>
+- <code title="post /v1/organizations/users/{user_id}/sign_out">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">sign_out</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
 
 ### Workspaces
 

@@ -16,7 +16,8 @@ from ..._models import FinalRequestOptions
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
-from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, merge_headers
+from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient
+from .._platform_client import copy_platform_client
 from .._extras._google_auth import refresh_credentials, load_default_credentials
 
 # Bind the install-hint extra so a missing google-auth dep points users at
@@ -422,24 +423,6 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         `workspace_id=None` clears the workspace ID; `project` /
         `location` overrides re-derive a template-derived base URL.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
         resolved_skip_auth = skip_auth if skip_auth is not None else self._skip_auth
         credential_overridden = is_given(token_provider) or is_given(credentials)
         new_token_provider: TokenProvider | None = None
@@ -458,7 +441,8 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 
-        client = self.__class__(
+        client = copy_platform_client(
+            self,
             project=project if project is not None else self._project,
             location=location if location is not None else self._location,
             workspace_id=workspace_id if is_given(workspace_id) else self.workspace_id,
@@ -466,13 +450,15 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
             credentials=new_credentials,
             skip_auth=resolved_skip_auth,
             base_url=new_base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             _strict_response_validation=self._strict_response_validation,
             **_extra_kwargs,
         )
@@ -651,24 +637,6 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
 
         See `AnthropicGoogleCloud.copy` for the override semantics.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
         resolved_skip_auth = skip_auth if skip_auth is not None else self._skip_auth
         credential_overridden = is_given(token_provider) or is_given(credentials)
         new_token_provider: AsyncTokenProvider | None = None
@@ -687,7 +655,8 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 
-        client = self.__class__(
+        client = copy_platform_client(
+            self,
             project=project if project is not None else self._project,
             location=location if location is not None else self._location,
             workspace_id=workspace_id if is_given(workspace_id) else self.workspace_id,
@@ -695,13 +664,15 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
             credentials=new_credentials,
             skip_auth=resolved_skip_auth,
             base_url=new_base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             _strict_response_validation=self._strict_response_validation,
             **_extra_kwargs,
         )

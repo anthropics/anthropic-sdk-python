@@ -132,14 +132,9 @@ class Members(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          RBACGroupGrantsOwnerAccessError: A role attached to an RBAC Group in the request grants owner access, so this API
-              does not add members to that group (directly or through an invite), remove its
-              members, or delete it. Make the change in the organization's admin settings in
-              Claude.
+          RBACGroupGrantsOwnerAccessError:
 
-          RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access, so it made no change. Retrying the same request will not help.
-              Make the change in the organization's admin settings in Claude.
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -193,14 +188,9 @@ class Members(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          RBACGroupGrantsOwnerAccessError: A role attached to an RBAC Group in the request grants owner access, so this API
-              does not add members to that group (directly or through an invite), remove its
-              members, or delete it. Make the change in the organization's admin settings in
-              Claude.
+          RBACGroupGrantsOwnerAccessError:
 
-          RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access, so it made no change. Retrying the same request will not help.
-              Make the change in the organization's admin settings in Claude.
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -338,14 +328,9 @@ class AsyncMembers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          RBACGroupGrantsOwnerAccessError: A role attached to an RBAC Group in the request grants owner access, so this API
-              does not add members to that group (directly or through an invite), remove its
-              members, or delete it. Make the change in the organization's admin settings in
-              Claude.
+          RBACGroupGrantsOwnerAccessError:
 
-          RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access, so it made no change. Retrying the same request will not help.
-              Make the change in the organization's admin settings in Claude.
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -399,14 +384,9 @@ class AsyncMembers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          RBACGroupGrantsOwnerAccessError: A role attached to an RBAC Group in the request grants owner access, so this API
-              does not add members to that group (directly or through an invite), remove its
-              members, or delete it. Make the change in the organization's admin settings in
-              Claude.
+          RBACGroupGrantsOwnerAccessError:
 
-          RBACGroupOwnerAccessUnconfirmedError: The API could not finish checking whether an RBAC Group in the request grants
-              owner access, so it made no change. Retrying the same request will not help.
-              Make the change in the organization's admin settings in Claude.
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
