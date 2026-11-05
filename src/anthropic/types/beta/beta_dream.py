@@ -20,7 +20,7 @@ class BetaDream(BaseModel):
 
     By default the dream writes its result to a new memory store and doesn't change the input memory store. With `output_behavior` set to `update_existing`, it writes its result into the input memory store instead.
 
-    The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.
+    The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to stable endpoints.
 
     See the [Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#how-it-works) for what a dream reads and produces.
     """

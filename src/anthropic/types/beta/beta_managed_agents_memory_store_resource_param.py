@@ -10,7 +10,7 @@ class BetaManagedAgentsMemoryStoreResourceParam(TypedDict, total=False):
     """Parameters for attaching a memory store to an agent session."""
 
     memory_store_id: Required[str]
-    """The memory store ID (memstore\\__...).
+    """The memory store ID (memstore_...).
 
     Must belong to the caller's organization and workspace.
     """

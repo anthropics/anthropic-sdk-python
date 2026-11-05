@@ -40,7 +40,7 @@ class BetaManagedAgentsSessionThreadStatusIdleEvent(BaseModel):
     """Timestamp of the status transition."""
 
     session_thread_id: str
-    """Public sthr\\__ ID of the thread that went idle."""
+    """Public sthr_ ID of the thread that went idle."""
 
     stop_details: Optional[BetaManagedAgentsSessionRefusalStopDetails] = None
     """Structured information about why the thread stopped.

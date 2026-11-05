@@ -30,7 +30,7 @@ class BetaManagedAgentsOutcomeEvaluationResource(BaseModel):
     """0-indexed revision cycle the outcome is currently on."""
 
     outcome_id: str
-    """Server-generated outc\\__ ID for this outcome."""
+    """Server-generated outc_ ID for this outcome."""
 
     result: str
     """Current evaluation state.

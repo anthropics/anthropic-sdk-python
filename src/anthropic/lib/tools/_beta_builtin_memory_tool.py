@@ -575,7 +575,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def delete(self, command: BetaMemoryTool20250818DeleteCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if full_path == self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -594,6 +594,9 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def rename(self, command: BetaMemoryTool20250818RenameCommand) -> str:
         old_full_path = self._validate_path(command.old_path)
         new_full_path = self._validate_path(command.new_path)
+
+        if old_full_path == self.memory_root.resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
 
         if new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
@@ -877,7 +880,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if full_path == await self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -897,6 +900,9 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         old_full_path = await self._validate_path(command.old_path)
         new_full_path = await self._validate_path(command.new_path)
+
+        if old_full_path == await self.memory_root.resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
 
         if await new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")

@@ -10,7 +10,7 @@ from ... import _exceptions
 from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
 from ..._types import NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import is_dict, asyncify, is_given
+from ..._utils import is_dict, asyncify, is_given, path_template
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
@@ -450,7 +450,8 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
         stream = options.json_data.get("stream", False)
         specifier = "streamRawPredict" if stream else "rawPredict"
 
-        options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
+        path = "/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
+        options.url = path_template(path, project_id=project_id, region=region, model=model, specifier=specifier)
 
     if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"} and options.method == "post":
         if project_id is None:
@@ -458,7 +459,8 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
                 "No project_id was given and it could not be resolved from credentials. The client should be instantiated with the `project_id` argument or the `ANTHROPIC_VERTEX_PROJECT_ID` environment variable should be set."
             )
 
-        options.url = f"/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
+        path = "/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
+        options.url = path_template(path, project_id=project_id, region=region)
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in the Vertex client yet")

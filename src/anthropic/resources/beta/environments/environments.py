@@ -108,6 +108,17 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          BetaEnvironmentCreateDisabledError: Anthropic has turned off creating environments for this organization. Existing
+              environments still work.
         """
         extra_headers = {
             **strip_not_given(
@@ -176,6 +187,14 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -258,6 +277,22 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          BetaEnvironmentArchivedError: The environment is archived, so it cannot be updated.
+
+          BetaInvalidConfigTypeChangeError: `config.type` differs from the environment's stored type, which cannot change
+              after creation.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          BetaEnvironmentUpdateDisabledError: Anthropic has turned off updating environments for this organization. Existing
+              environments still work as they are.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -337,6 +372,14 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         extra_headers = {
             **strip_not_given(
@@ -404,6 +447,14 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -469,6 +520,14 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -574,6 +633,17 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          BetaEnvironmentCreateDisabledError: Anthropic has turned off creating environments for this organization. Existing
+              environments still work.
         """
         extra_headers = {
             **strip_not_given(
@@ -642,6 +712,14 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -724,6 +802,22 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          BetaEnvironmentArchivedError: The environment is archived, so it cannot be updated.
+
+          BetaInvalidConfigTypeChangeError: `config.type` differs from the environment's stored type, which cannot change
+              after creation.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          BetaEnvironmentUpdateDisabledError: Anthropic has turned off updating environments for this organization. Existing
+              environments still work as they are.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -803,6 +897,14 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         extra_headers = {
             **strip_not_given(
@@ -870,6 +972,14 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -935,6 +1045,14 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")

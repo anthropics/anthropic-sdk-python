@@ -10,7 +10,7 @@ class BetaManagedAgentsMemoryStoreResourceConfig(BaseModel):
     """A memory store attached to each session created from this deployment."""
 
     memory_store_id: str
-    """The memory store ID (memstore\\__...).
+    """The memory store ID (memstore_...).
 
     Must belong to the caller's organization and workspace.
     """

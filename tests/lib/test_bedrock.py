@@ -232,6 +232,77 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
     )
 
 
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+@pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
+@pytest.mark.parametrize("model", [".", ".."])
+async def test_dot_segment_model_is_rejected(
+    model: str, stream: bool, beta: bool, sync: bool, respx_mock: MockRouter
+) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    with pytest.raises(ValueError, match="dot-segment"):
+        if sync:
+            messages = sync_client.beta.messages if beta else sync_client.messages
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+        else:
+            async_messages = async_client.beta.messages if beta else async_client.messages
+            await async_messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+
+    assert route.call_count == 0
+
+
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+@pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
+async def test_empty_model_is_rejected(stream: bool, beta: bool, sync: bool, respx_mock: MockRouter) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received ''"):
+        if sync:
+            messages = sync_client.beta.messages if beta else sync_client.messages
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+        else:
+            async_messages = async_client.beta.messages if beta else async_client.messages
+            await async_messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+
+    assert route.call_count == 0
+
+
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_missing_model_is_rejected(sync: bool, respx_mock: MockRouter) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    body = {"max_tokens": 1024, "messages": [{"role": "user", "content": "Say hello there!"}]}
+
+    with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received None"):
+        if sync:
+            sync_client.post("/v1/messages", body=body, cast_to=httpx2.Response)
+        else:
+            await async_client.post("/v1/messages", body=body, cast_to=httpx2.Response)
+
+    assert route.call_count == 0
+
+
 sync_api_key_client = AnthropicBedrock(
     aws_region="us-east-1",
     api_key="test-api-key",
