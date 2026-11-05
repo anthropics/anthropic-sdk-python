@@ -9,8 +9,8 @@ import httpx2
 from .._env import with_environment_headers
 from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
-from ..._types import NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import is_dict, asyncify, is_given, path_template
+from ..._types import Omit, NotGiven, OpenTelemetryClientOption, not_given
+from ..._utils import is_dict, asyncify, is_given, path_template, get_async_library
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy, typed_cached_property
 from ..._models import FinalRequestOptions
@@ -115,8 +115,19 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
         self.access_token = access_token
         self.credentials = credentials
 
+        self._default_stream_cls = Stream
+
         self.messages = Messages(self)
         self.beta = Beta(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": "false",
+            **self._custom_headers,
+        }
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
@@ -268,8 +279,19 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         self.access_token = access_token
         self.credentials = credentials
 
+        self._default_stream_cls = AsyncStream
+
         self.messages = AsyncMessages(self)
         self.beta = AsyncBeta(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": f"async:{get_async_library()}",
+            **self._custom_headers,
+        }
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:

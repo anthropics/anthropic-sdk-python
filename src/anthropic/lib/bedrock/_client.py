@@ -9,8 +9,8 @@ import httpx2
 
 from .._env import with_environment_headers
 from ._beta import Beta, AsyncBeta
-from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import is_dict, asyncify, is_given
+from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
+from ..._utils import is_dict, asyncify, is_given, get_async_library
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
@@ -179,8 +179,19 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             _strict_response_validation=_strict_response_validation,
         )
 
+        self._default_stream_cls = Stream
+
         self.beta = Beta(self)
         self.messages = Messages(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": "false",
+            **self._custom_headers,
+        }
 
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
@@ -349,8 +360,19 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             _strict_response_validation=_strict_response_validation,
         )
 
+        self._default_stream_cls = AsyncStream
+
         self.messages = AsyncMessages(self)
         self.beta = AsyncBeta(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": f"async:{get_async_library()}",
+            **self._custom_headers,
+        }
 
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
