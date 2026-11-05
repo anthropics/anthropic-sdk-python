@@ -135,6 +135,44 @@ async def assert_empty_iter(decoder: JSONLDecoder[Any] | AsyncJSONLDecoder[Any])
         await iter_next(decoder)
 
 
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_closes_the_response_when_decoding_fails(sync: bool) -> None:
+    def body() -> Iterator[bytes]:
+        yield b"not json\n"
+
+    response = httpx2.Response(200, stream=httpx2.ByteStream(b""))
+    iterator = (
+        JSONLDecoder(line_type=object, raw_iterator=body(), http_response=response)
+        if sync
+        else AsyncJSONLDecoder(line_type=object, raw_iterator=to_aiter(body()), http_response=response)
+    )
+
+    with pytest.raises(ValueError):
+        await iter_next(iterator)
+
+    assert response.is_closed is True
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_closes_the_response_when_the_transport_fails(sync: bool) -> None:
+    def body() -> Iterator[bytes]:
+        yield b'{"foo":true}\n'
+        raise RuntimeError("transport read failed")
+
+    response = httpx2.Response(200, stream=httpx2.ByteStream(b""))
+    iterator = (
+        JSONLDecoder(line_type=object, raw_iterator=body(), http_response=response)
+        if sync
+        else AsyncJSONLDecoder(line_type=object, raw_iterator=to_aiter(body()), http_response=response)
+    )
+
+    assert await iter_next(iterator) == {"foo": True}
+    with pytest.raises(RuntimeError, match="transport read failed"):
+        await iter_next(iterator)
+
+    assert response.is_closed is True
+
+
 def make_jsonl_iterator(
     content: Iterator[bytes],
     *,
