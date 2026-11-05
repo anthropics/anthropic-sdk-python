@@ -114,6 +114,7 @@ from .beta_analytics_project_activity import BetaAnalyticsProjectActivity as Bet
 from .beta_analytics_project_group_by import BetaAnalyticsProjectGroupBy as BetaAnalyticsProjectGroupBy
 from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as BetaAnalyticsUsageUsersItem
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
+from .beta_cannot_sign_out_self_error import BetaCannotSignOutSelfError as BetaCannotSignOutSelfError
 from .beta_claude_tag_setting_sources import BetaClaudeTagSettingSources as BetaClaudeTagSettingSources
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
 from .beta_registration_pending_error import BetaRegistrationPendingError as BetaRegistrationPendingError
@@ -125,6 +126,7 @@ from .beta_analytics_grouped_cost_type import BetaAnalyticsGroupedCostType as Be
 from .beta_analytics_report_user_actor import BetaAnalyticsReportUserActor as BetaAnalyticsReportUserActor
 from .beta_analytics_time_bucket_width import BetaAnalyticsTimeBucketWidth as BetaAnalyticsTimeBucketWidth
 from .beta_api_key_scope_missing_error import BetaAPIKeyScopeMissingError as BetaAPIKeyScopeMissingError
+from .beta_cannot_sign_out_owner_error import BetaCannotSignOutOwnerError as BetaCannotSignOutOwnerError
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
 from .beta_telemetry_destination_state import BetaTelemetryDestinationState as BetaTelemetryDestinationState
@@ -220,6 +222,9 @@ from .beta_analytics_usage_cost_inference_geo import (
 from .beta_analytics_usage_report_time_bucket import (
     BetaAnalyticsUsageReportTimeBucket as BetaAnalyticsUsageReportTimeBucket,
 )
+from .beta_cannot_sign_out_self_error_details import (
+    BetaCannotSignOutSelfErrorDetails as BetaCannotSignOutSelfErrorDetails,
+)
 from .beta_compliance_settings_state_disabled import (
     BetaComplianceSettingsStateDisabled as BetaComplianceSettingsStateDisabled,
 )
@@ -256,6 +261,12 @@ from .beta_analytics_usage_cost_product_filter import (
 from .beta_api_key_scope_missing_error_details import (
     BetaAPIKeyScopeMissingErrorDetails as BetaAPIKeyScopeMissingErrorDetails,
 )
+from .beta_cannot_sign_out_owner_error_details import (
+    BetaCannotSignOutOwnerErrorDetails as BetaCannotSignOutOwnerErrorDetails,
+)
+from .beta_cannot_sign_out_primary_owner_error import (
+    BetaCannotSignOutPrimaryOwnerError as BetaCannotSignOutPrimaryOwnerError,
+)
 from .beta_claude_tag_guest_policy_allow_param import (
     BetaClaudeTagGuestPolicyAllowParam as BetaClaudeTagGuestPolicyAllowParam,
 )
@@ -285,6 +296,9 @@ from .beta_telemetry_destination_traces_params import (
 )
 from .beta_analytics_plugin_claude_code_metrics import (
     BetaAnalyticsPluginClaudeCodeMetrics as BetaAnalyticsPluginClaudeCodeMetrics,
+)
+from .beta_cannot_sign_out_managed_member_error import (
+    BetaCannotSignOutManagedMemberError as BetaCannotSignOutManagedMemberError,
 )
 from .beta_claude_tag_guest_policy_channel_only import (
     BetaClaudeTagGuestPolicyChannelOnly as BetaClaudeTagGuestPolicyChannelOnly,
@@ -334,6 +348,9 @@ from .beta_analytics_federated_actor_gcp_provider import (
 from .beta_analytics_skill_office_product_metrics import (
     BetaAnalyticsSkillOfficeProductMetrics as BetaAnalyticsSkillOfficeProductMetrics,
 )
+from .beta_cannot_sign_out_membership_admin_error import (
+    BetaCannotSignOutMembershipAdminError as BetaCannotSignOutMembershipAdminError,
+)
 from .beta_claude_tag_guest_policy_restrict_param import (
     BetaClaudeTagGuestPolicyRestrictParam as BetaClaudeTagGuestPolicyRestrictParam,
 )
@@ -348,6 +365,9 @@ from .beta_analytics_connector_claude_code_metrics import (
 )
 from .beta_analytics_federated_actor_oidc_provider import (
     BetaAnalyticsFederatedActorOIDCProvider as BetaAnalyticsFederatedActorOIDCProvider,
+)
+from .beta_cannot_sign_out_privileged_member_error import (
+    BetaCannotSignOutPrivilegedMemberError as BetaCannotSignOutPrivilegedMemberError,
 )
 from .beta_claude_tag_slack_channel_setting_source import (
     BetaClaudeTagSlackChannelSettingSource as BetaClaudeTagSlackChannelSettingSource,
@@ -409,6 +429,9 @@ from .beta_telemetry_destination_state_enabled_params import (
 from .beta_analytics_skill_chat_cowork_unified_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedMetrics as BetaAnalyticsSkillChatCoworkUnifiedMetrics,
 )
+from .beta_cannot_sign_out_primary_owner_error_details import (
+    BetaCannotSignOutPrimaryOwnerErrorDetails as BetaCannotSignOutPrimaryOwnerErrorDetails,
+)
 from .beta_claude_tag_writes_not_enabled_error_details import (
     BetaClaudeTagWritesNotEnabledErrorDetails as BetaClaudeTagWritesNotEnabledErrorDetails,
 )
@@ -423,6 +446,9 @@ from .beta_telemetry_destination_workspaces_all_params import (
 )
 from .beta_analytics_plugin_chat_cowork_unified_metrics import (
     BetaAnalyticsPluginChatCoworkUnifiedMetrics as BetaAnalyticsPluginChatCoworkUnifiedMetrics,
+)
+from .beta_cannot_sign_out_managed_member_error_details import (
+    BetaCannotSignOutManagedMemberErrorDetails as BetaCannotSignOutManagedMemberErrorDetails,
 )
 from .beta_claude_tag_slack_grid_channel_setting_source import (
     BetaClaudeTagSlackGridChannelSettingSource as BetaClaudeTagSlackGridChannelSettingSource,
@@ -445,6 +471,9 @@ from .beta_plugin_marketplace_validation_plugin_warnings import (
 from .beta_analytics_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics as BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
 )
+from .beta_cannot_sign_out_membership_admin_error_details import (
+    BetaCannotSignOutMembershipAdminErrorDetails as BetaCannotSignOutMembershipAdminErrorDetails,
+)
 from .beta_claude_tag_slack_parent_channel_setting_source import (
     BetaClaudeTagSlackParentChannelSettingSource as BetaClaudeTagSlackParentChannelSettingSource,
 )
@@ -453,6 +482,9 @@ from .beta_telemetry_destination_disabled_reason_redirect import (
 )
 from .beta_analytics_connector_chat_cowork_unified_metrics import (
     BetaAnalyticsConnectorChatCoworkUnifiedMetrics as BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
+)
+from .beta_cannot_sign_out_privileged_member_error_details import (
+    BetaCannotSignOutPrivilegedMemberErrorDetails as BetaCannotSignOutPrivilegedMemberErrorDetails,
 )
 from .beta_spend_limits_admin_api_writes_not_enabled_error import (
     BetaSpendLimitsAdminAPIWritesNotEnabledError as BetaSpendLimitsAdminAPIWritesNotEnabledError,
