@@ -530,6 +530,8 @@ class Messages(SyncAPIResource):
 
           EnforcedSpendLimitReachedError:
 
+          RampLimitExceededError:
+
           CMEKKeyUnreachableError:
 
           CompactionUnavailableError:
@@ -945,6 +947,8 @@ class Messages(SyncAPIResource):
 
           EnforcedSpendLimitReachedError:
 
+          RampLimitExceededError:
+
           CMEKKeyUnreachableError:
 
           CompactionUnavailableError:
@@ -1359,6 +1363,8 @@ class Messages(SyncAPIResource):
           RequestBodyTooLargeAfterDecodingError:
 
           EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
 
           CMEKKeyUnreachableError:
 
@@ -2775,6 +2781,8 @@ class AsyncMessages(AsyncAPIResource):
 
           EnforcedSpendLimitReachedError:
 
+          RampLimitExceededError:
+
           CMEKKeyUnreachableError:
 
           CompactionUnavailableError:
@@ -3190,6 +3198,8 @@ class AsyncMessages(AsyncAPIResource):
 
           EnforcedSpendLimitReachedError:
 
+          RampLimitExceededError:
+
           CMEKKeyUnreachableError:
 
           CompactionUnavailableError:
@@ -3604,6 +3614,8 @@ class AsyncMessages(AsyncAPIResource):
           RequestBodyTooLargeAfterDecodingError:
 
           EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
 
           CMEKKeyUnreachableError:
 

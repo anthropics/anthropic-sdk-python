@@ -23,6 +23,7 @@ from anthropic.types import (
     OrganizationTypeNotSupportedErrorDetails,
     OverloadedError,
     PermissionError,
+    RampLimitExceededErrorDetails,
     RateLimitError,
     RequestBodyEncodingInvalidErrorDetails,
     RequestBodyEncodingUnsupportedErrorDetails,
@@ -37,6 +38,7 @@ from anthropic.types import (
     RequestBodyEncodingUnsupportedError,
     RequestBodyTooLargeAfterDecodingError,
     EnforcedSpendLimitReachedError,
+    RampLimitExceededError,
     CMEKContextUnavailableError,
     CMEKKeyUnreachableError,
 )

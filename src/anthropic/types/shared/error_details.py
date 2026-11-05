@@ -6,6 +6,7 @@ from ..file_expired_error_details import FileExpiredErrorDetails
 from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
+from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
@@ -123,6 +124,7 @@ ErrorDetails: TypeAlias = Annotated[
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
+        RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,
         CompactionUnavailableErrorDetails,
         StorageQuotaExceededErrorDetails,

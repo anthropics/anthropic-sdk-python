@@ -64,6 +64,7 @@ from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsync
 from ._utils._logs import setup_logging as _setup_logging
 from .types.shared import (
     CMEKKeyDisabledError,
+    RampLimitExceededError,
     CMEKKeyUnreachableError,
     OrganizationOnHoldError,
     CMEKKeyNetworkBlockedError,
@@ -124,6 +125,7 @@ __all__ = [
     "RequestBodyEncodingUnsupportedError",
     "RequestBodyTooLargeAfterDecodingError",
     "EnforcedSpendLimitReachedError",
+    "RampLimitExceededError",
     "CMEKContextUnavailableError",
     "CMEKKeyUnreachableError",
     "DeadlineExceededError",

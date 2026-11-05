@@ -41,6 +41,7 @@ from .types.beta.beta_invalid_metadata_error import BetaInvalidMetadataError
 from .types.compaction_block_ambiguous_error import CompactionBlockAmbiguousError
 from .types.compaction_block_misplaced_error import CompactionBlockMisplacedError
 from .types.compaction_incomplete_turn_error import CompactionIncompleteTurnError
+from .types.shared.ramp_limit_exceeded_error import RampLimitExceededError
 from .types.thread_unsupported_request_error import ThreadUnsupportedRequestError
 from .types.compaction_content_mismatch_error import CompactionContentMismatchError
 from .types.organization.already_member_error import AlreadyMemberError
@@ -195,6 +196,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (412, "heartbeat_precondition_failed"): BetaHeartbeatPreconditionFailedError,
     (413, "request_body_too_large_after_decoding"): RequestBodyTooLargeAfterDecodingError,
     (429, "enforced_spend_limit_reached"): EnforcedSpendLimitReachedError,
+    (429, "ramp_limit_exceeded"): RampLimitExceededError,
     (503, "cmek_context_unavailable"): CMEKContextUnavailableError,
     (503, "cmek_key_unreachable"): CMEKKeyUnreachableError,
     (503, "registration_pending"): BetaRegistrationPendingError,
