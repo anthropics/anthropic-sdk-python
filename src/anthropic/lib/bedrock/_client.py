@@ -14,6 +14,7 @@ from ..._utils import is_dict, asyncify, is_given
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
+from ..aws._auth import get_auth_headers
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError
@@ -195,8 +196,6 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             request.headers["Authorization"] = f"Bearer {self.api_key}"
             return
 
-        from ._auth import get_auth_headers
-
         data = request.read()
 
         headers = get_auth_headers(
@@ -209,6 +208,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             region=self.aws_region,
             profile=self.aws_profile,
             data=data,
+            service_name="bedrock",
         )
         request.headers.update(headers)
 
@@ -366,8 +366,6 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             request.headers["Authorization"] = f"Bearer {self.api_key}"
             return
 
-        from ._auth import get_auth_headers
-
         data = request.read()
 
         headers = await asyncify(get_auth_headers)(
@@ -380,6 +378,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             region=self.aws_region,
             profile=self.aws_profile,
             data=data,
+            service_name="bedrock",
         )
         request.headers.update(headers)
 

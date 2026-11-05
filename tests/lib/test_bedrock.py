@@ -11,7 +11,11 @@ from typing_extensions import Protocol
 
 import httpx2
 import pytest
+import time_machine
 from respx import MockRouter
+from botocore.auth import SigV4Auth
+from botocore.awsrequest import AWSRequest
+from botocore.credentials import Credentials
 
 from anthropic import (
     APIStatusError,
@@ -810,7 +814,7 @@ async def test_sigv4_signing_runs_off_event_loop_async(monkeypatch: pytest.Monke
         signing_threads.append(threading.get_ident())
         return {"Authorization": "AWS4-HMAC-SHA256 stub"}
 
-    monkeypatch.setattr("anthropic.lib.bedrock._auth.get_auth_headers", fake_get_auth_headers)
+    monkeypatch.setattr("anthropic.lib.bedrock._client.get_auth_headers", fake_get_auth_headers)
 
     request = httpx2.Request("POST", "https://bedrock-runtime.us-east-1.amazonaws.com/model/x/invoke", content=b"{}")
     await async_client._prepare_request(request)
@@ -818,6 +822,49 @@ async def test_sigv4_signing_runs_off_event_loop_async(monkeypatch: pytest.Monke
     assert len(signing_threads) == 1
     assert signing_threads[0] != threading.get_ident()
     assert request.headers["Authorization"] == "AWS4-HMAC-SHA256 stub"
+
+
+@pytest.mark.parametrize("connection_header", [True, False], ids=["connection-header", "no-connection-header"])
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_sigv4_signature(sync: bool, connection_header: bool) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"foo": "bar"})
+
+    http_client = (httpx2.Client if sync else httpx2.AsyncClient)(transport=httpx2.MockTransport(respond))
+    if not connection_header:
+        del http_client.headers["connection"]
+
+    with time_machine.travel("2026-01-02T03:04:05Z", tick=False):
+        message = (AnthropicBedrock if sync else AsyncAnthropicBedrock)(
+            aws_region="us-east-1",
+            aws_access_key="example-access-key",
+            aws_secret_key="example-secret-key",
+            aws_session_token="example-session-token",
+            http_client=cast(t.Any, http_client),
+        ).messages.create(
+            max_tokens=16,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        )
+        if not sync:
+            await cast("t.Awaitable[object]", message)
+
+        [request] = requests
+        added = {"authorization", "x-amz-date", "x-amz-security-token"}
+        expected = AWSRequest(
+            method=request.method,
+            url=str(request.url),
+            headers={name: value for name, value in request.headers.items() if name not in {*added, "connection"}},
+            data=request.content,
+        )
+        credentials = Credentials("example-access-key", "example-secret-key", "example-session-token")
+        SigV4Auth(credentials, "bedrock", "us-east-1").add_auth(expected)
+
+    assert ("connection" in request.headers) == connection_header
+    assert {name: request.headers[name] for name in added} == {name: expected.headers[name] for name in added}
 
 
 def test_prepare_options_lifts_anthropic_beta_header_case_insensitively() -> None:
