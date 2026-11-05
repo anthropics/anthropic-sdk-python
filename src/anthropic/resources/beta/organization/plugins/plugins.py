@@ -172,6 +172,25 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
+              or US-ASCII. Send the request with no charset, or with one of these.
+
+          BetaPluginNameTakenError: The marketplace already holds this name. `plugin_id` is the Plugin that holds
+              it, and can be absent.
+
+          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
+              is that name.
+
+          BetaRegistrationPendingError: The Plugin version was stored but is not yet usable in claude.ai. `plugin_id`
+              and `plugin_version_id` identify what was stored.
         """
         extra_headers = {
             **strip_not_given(
@@ -357,6 +376,22 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          BetaScanFailedError: The version in `plugin_version_id` did not pass its content scan, so it cannot
+              be served.
+
+          BetaScanPendingError: The content scan of the version in `plugin_version_id` is still running. Retry
+              once the scan finishes.
+
+          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
+              is that name.
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -557,6 +592,10 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -698,6 +737,25 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
+              or US-ASCII. Send the request with no charset, or with one of these.
+
+          BetaPluginNameTakenError: The marketplace already holds this name. `plugin_id` is the Plugin that holds
+              it, and can be absent.
+
+          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
+              is that name.
+
+          BetaRegistrationPendingError: The Plugin version was stored but is not yet usable in claude.ai. `plugin_id`
+              and `plugin_version_id` identify what was stored.
         """
         extra_headers = {
             **strip_not_given(
@@ -883,6 +941,22 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          BetaScanFailedError: The version in `plugin_version_id` did not pass its content scan, so it cannot
+              be served.
+
+          BetaScanPendingError: The content scan of the version in `plugin_version_id` is still running. Retry
+              once the scan finishes.
+
+          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
+              is that name.
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -1083,6 +1157,10 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

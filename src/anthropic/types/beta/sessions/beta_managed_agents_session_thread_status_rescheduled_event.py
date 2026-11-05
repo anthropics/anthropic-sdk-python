@@ -22,6 +22,6 @@ class BetaManagedAgentsSessionThreadStatusRescheduledEvent(BaseModel):
     """Timestamp of the status transition."""
 
     session_thread_id: str
-    """Public sthr\\__ ID of the thread that is retrying."""
+    """Public sthr_ ID of the thread that is retrying."""
 
     type: Literal["session.thread_status_rescheduled"]

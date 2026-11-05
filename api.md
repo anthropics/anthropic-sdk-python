@@ -5,15 +5,40 @@ from anthropic.types import (
     APIErrorObject,
     AuthenticationError,
     BillingError,
+    ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    ClaudeCodeVersionTooOldErrorDetails,
+    CMEKContextUnavailableErrorDetails,
+    CMEKKeyDisabledErrorDetails,
+    CMEKKeyNetworkBlockedErrorDetails,
+    CMEKKeyUnreachableErrorDetails,
+    EnforcedSpendLimitReachedErrorDetails,
+    ErrorDetails,
     ErrorObject,
     ErrorResponse,
     ErrorType,
     GatewayTimeoutError,
     InvalidRequestError,
     NotFoundError,
+    OrganizationOnHoldErrorDetails,
+    OrganizationTypeNotSupportedErrorDetails,
     OverloadedError,
     PermissionError,
     RateLimitError,
+    RequestBodyEncodingInvalidErrorDetails,
+    RequestBodyEncodingUnsupportedErrorDetails,
+    RequestBodyTooLargeAfterDecodingErrorDetails,
+    ClaudeCodeKeyCreatorNotMemberError,
+    ClaudeCodeVersionTooOldError,
+    CMEKKeyDisabledError,
+    CMEKKeyNetworkBlockedError,
+    OrganizationOnHoldError,
+    OrganizationTypeNotSupportedError,
+    RequestBodyEncodingInvalidError,
+    RequestBodyEncodingUnsupportedError,
+    RequestBodyTooLargeAfterDecodingError,
+    EnforcedSpendLimitReachedError,
+    CMEKContextUnavailableError,
+    CMEKKeyUnreachableError,
 )
 ```
 
@@ -24,6 +49,7 @@ Types:
 ```python
 from anthropic.types import (
     AssistantMessageParam,
+    AvailableToolsLimitExceededErrorDetails,
     Base64ImageSourceParam,
     Base64PDFSource,
     Base64PDFSourceParam,
@@ -184,6 +210,15 @@ from anthropic.types import (
     CodeExecutionToolResultError,
     CodeExecutionToolResultErrorCode,
     CodeExecutionToolResultErrorParam,
+    CompactionBlockAmbiguousErrorDetails,
+    CompactionBlockMisplacedErrorDetails,
+    CompactionContentMismatchErrorDetails,
+    CompactionIncompleteTurnErrorDetails,
+    CompactionNothingToSummarizeErrorDetails,
+    CompactionSignatureInvalidErrorDetails,
+    CompactionTooManyToolReferencesErrorDetails,
+    CompactionToolChangesMismatchErrorDetails,
+    CompactionUnavailableErrorDetails,
     ComputerCursorPositionConfigParam,
     ComputerCursorPositionInput,
     ComputerCursorPositionToolUseBlock,
@@ -326,6 +361,12 @@ from anthropic.types import (
     ThinkingConfigEnabledParam,
     ThinkingConfigParam,
     ThinkingDelta,
+    ThreadAlreadyContinuedErrorDetails,
+    ThreadContinueInFlightErrorDetails,
+    ThreadFingerprintMismatchErrorDetails,
+    ThreadNotFoundErrorDetails,
+    ThreadUnsupportedFeatureName,
+    ThreadUnsupportedRequestErrorDetails,
     ToolParam,
     ToolBash20250124Param,
     ToolChoiceParam,
@@ -333,8 +374,10 @@ from anthropic.types import (
     ToolChoiceAutoParam,
     ToolChoiceNoneParam,
     ToolChoiceToolParam,
+    ToolNameConflictErrorDetails,
     ToolReferenceBlock,
     ToolReferenceBlockParam,
+    ToolReferenceUnresolvedErrorDetails,
     ToolResultBlockParam,
     ToolSearchToolBm25_20251119Param,
     ToolSearchToolRegex20251119Param,
@@ -445,6 +488,23 @@ from anthropic.types import (
     ResponseComputerTypeToolUseBlock,
     ResponseComputerWaitToolUseBlock,
     ResponseComputerZoomToolUseBlock,
+    AvailableToolsLimitExceededError,
+    CompactionBlockAmbiguousError,
+    CompactionBlockMisplacedError,
+    CompactionContentMismatchError,
+    CompactionIncompleteTurnError,
+    CompactionNothingToSummarizeError,
+    CompactionSignatureInvalidError,
+    CompactionTooManyToolReferencesError,
+    CompactionToolChangesMismatchError,
+    ThreadAlreadyContinuedError,
+    ThreadContinueInFlightError,
+    ThreadFingerprintMismatchError,
+    ThreadUnsupportedRequestError,
+    ToolNameConflictError,
+    ToolReferenceUnresolvedError,
+    ThreadNotFoundError,
+    CompactionUnavailableError,
 )
 ```
 
@@ -509,7 +569,16 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedFile, FileMetadata
+from anthropic.types import (
+    DeletedFile,
+    FileExpiredErrorDetails,
+    FileMetadata,
+    FileNotDownloadableErrorDetails,
+    StorageQuotaExceededErrorDetails,
+    FileNotDownloadableError,
+    StorageQuotaExceededError,
+    FileExpiredError,
+)
 ```
 
 Methods:
@@ -525,7 +594,13 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedSkill, Skill, SkillSource
+from anthropic.types import (
+    DeletedSkill,
+    Skill,
+    SkillReadBlockedUndecryptableErrorDetails,
+    SkillSource,
+    SkillReadBlockedUndecryptableError,
+)
 ```
 
 Methods:
@@ -576,8 +651,10 @@ from anthropic.types import (
     UserProfileExternalUserEntityType,
     UserProfileListOrder,
     UserProfileListOrderBy,
+    UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
+    UserProfileNotFoundError,
 )
 ```
 
@@ -606,7 +683,14 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import OrganizationInfo, OrganizationRole
+from anthropic.types import (
+    ConcurrentMembershipChangeErrorDetails,
+    OrgMemberLimitExceededErrorDetails,
+    OrganizationInfo,
+    OrganizationRole,
+    OrgMemberLimitExceededError,
+    ConcurrentMembershipChangeError,
+)
 ```
 
 Methods:
@@ -625,6 +709,10 @@ from anthropic.types.organization import (
     APIKeyServiceAccountActor,
     APIKeyUserActor,
     APIKeyWorkspaceScope,
+    OrgAPIKeyLimitExceededErrorDetails,
+    WorkspaceAPIKeyLimitExceededErrorDetails,
+    OrgAPIKeyLimitExceededError,
+    WorkspaceAPIKeyLimitExceededError,
 )
 ```
 
@@ -646,11 +734,15 @@ from anthropic.types.organization import (
     AzureExternalKeyConfigParam,
     ExternalKey,
     ExternalKeyAttachedAttachment,
+    ExternalKeyChangedErrorDetails,
+    ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
     GCPExternalKeyConfig,
     GCPExternalKeyConfigParam,
     ExternalKeyDeleteResponse,
     ExternalKeyValidateResponse,
+    ExternalKeyInWorkspacePolicyError,
+    ExternalKeyChangedError,
 )
 ```
 
@@ -732,7 +824,18 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationInvite, InviteDeleteResponse
+from anthropic.types.organization import (
+    AlreadyMemberErrorDetails,
+    CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
+    EmailDomainNotAllowedErrorDetails,
+    InviteAlreadyExistsErrorDetails,
+    OrganizationInvite,
+    InviteDeleteResponse,
+    AlreadyMemberError,
+    CannotInviteEmailsWithUnverifiedDomainsError,
+    EmailDomainNotAllowedError,
+    InviteAlreadyExistsError,
+)
 ```
 
 Methods:
@@ -777,7 +880,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationUser, UserRemoveResponse
+from anthropic.types.organization import (
+    CannotRemoveLastMemberErrorDetails,
+    OrganizationUser,
+    UserRemoveResponse,
+    CannotRemoveLastMemberError,
+)
 ```
 
 Methods:
@@ -797,10 +905,17 @@ from anthropic.types.organization import (
     DataResidency,
     DataResidencyCreateConfigParam,
     DataResidencyUpdateConfigParam,
+    KeyProfileMismatchErrorDetails,
     NoBillingWorkspaceRole,
     Workspace,
     WorkspaceMember,
+    WorkspaceMemberLimitExceededErrorDetails,
+    WorkspacePolicyField,
+    WorkspacePolicyViolationErrorDetails,
     WorkspaceRole,
+    KeyProfileMismatchError,
+    WorkspaceMemberLimitExceededError,
+    WorkspacePolicyViolationError,
 )
 ```
 
@@ -1062,7 +1177,14 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import DeletedRBACGroup, RBACGroup
+from anthropic.types.organization import (
+    DeletedRBACGroup,
+    RBACGroup,
+    RBACGroupGrantsOwnerAccessErrorDetails,
+    RBACGroupOwnerAccessUnconfirmedErrorDetails,
+    RBACGroupGrantsOwnerAccessError,
+    RBACGroupOwnerAccessUnconfirmedError,
+)
 ```
 
 Methods:
@@ -1140,6 +1262,8 @@ from anthropic.types import (
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
+    BetaUnsupportedCharsetErrorDetails,
+    BetaUnsupportedCharsetError,
 )
 ```
 
@@ -1956,7 +2080,13 @@ from anthropic.types.beta import (
     BetaCloudConfig,
     BetaCloudConfigParams,
     BetaEnvironment,
+    BetaEnvironmentArchivedErrorDetails,
+    BetaEnvironmentCreateDisabledErrorDetails,
     BetaEnvironmentDeleteResponse,
+    BetaEnvironmentNotFoundErrorDetails,
+    BetaEnvironmentUpdateDisabledErrorDetails,
+    BetaInvalidConfigTypeChangeErrorDetails,
+    BetaInvalidMetadataErrorDetails,
     BetaLimitedNetwork,
     BetaLimitedNetworkParams,
     BetaPackages,
@@ -1965,6 +2095,12 @@ from anthropic.types.beta import (
     BetaSelfHostedConfigParams,
     BetaUnrestrictedNetwork,
     BetaUnrestrictedNetworkParam,
+    BetaEnvironmentArchivedError,
+    BetaInvalidConfigTypeChangeError,
+    BetaInvalidMetadataError,
+    BetaEnvironmentCreateDisabledError,
+    BetaEnvironmentUpdateDisabledError,
+    BetaEnvironmentNotFoundError,
 )
 ```
 
@@ -1983,11 +2119,14 @@ Types:
 
 ```python
 from anthropic.types.beta.environments import (
+    BetaHeartbeatPreconditionFailedErrorDetails,
     BetaSelfHostedWork,
     BetaSelfHostedWorkHeartbeatResponse,
     BetaSelfHostedWorkListResponse,
     BetaSelfHostedWorkQueueStats,
     BetaSessionWorkData,
+    BetaWorkLeaseState,
+    BetaHeartbeatPreconditionFailedError,
 )
 ```
 
@@ -2695,7 +2834,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
+from anthropic.types.beta import (
+    BetaBillingFrozenErrorDetails,
+    BetaOrganization,
+    BetaOrganizationRole,
+    BetaBillingFrozenError,
+)
 ```
 
 Methods:
@@ -3210,8 +3354,10 @@ from anthropic.types.beta.organization import (
     BetaSpendLimitUserScopeParam,
     BetaSpendLimitWorkspaceScope,
     BetaSpendLimitWorkspaceScopeParam,
+    BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
     BetaSpendSummary,
     SpendLimitDeleteResponse,
+    BetaSpendLimitsAdminAPIWritesNotEnabledError,
 )
 ```
 
@@ -3325,12 +3471,22 @@ from anthropic.types.beta.organization import (
     BetaPluginAPIActor,
     BetaPluginComponent,
     BetaPluginContentScan,
+    BetaPluginNameTakenErrorDetails,
     BetaPluginOwnerOrganization,
     BetaPluginOwnerUser,
     BetaPluginTargetOrganization,
     BetaPluginTargetOrganizationMember,
     BetaPluginTargetRBACGroup,
     BetaPluginUserActor,
+    BetaRegistrationPendingErrorDetails,
+    BetaScanFailedErrorDetails,
+    BetaScanPendingErrorDetails,
+    BetaSkillNameTakenErrorDetails,
+    BetaScanFailedError,
+    BetaPluginNameTakenError,
+    BetaScanPendingError,
+    BetaSkillNameTakenError,
+    BetaRegistrationPendingError,
 )
 ```
 
@@ -3501,6 +3657,7 @@ Types:
 
 ```python
 from anthropic.types.beta.organization import (
+    BetaAPIKeyScopeMissingErrorDetails,
     BetaClaudeTagDefaultSettingSource,
     BetaClaudeTagGuestPolicy,
     BetaClaudeTagGuestPolicyParam,
@@ -3523,6 +3680,19 @@ from anthropic.types.beta.organization import (
     BetaClaudeTagSlackParentChannelSettingSource,
     BetaClaudeTagSlackWorkspaceIdentifiers,
     BetaClaudeTagSlackWorkspaceSettingSource,
+    BetaClaudeTagWritesNotEnabledErrorDetails,
+    BetaComplianceConfigurationRestrictedErrorDetails,
+    BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails,
+    BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
+    BetaSlackChannelSetUpSettingsConflictErrorDetails,
+    BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+    BetaSlackChannelSetUpSettingsRefusedError,
+    BetaAPIKeyScopeMissingError,
+    BetaClaudeTagWritesNotEnabledError,
+    BetaComplianceConfigurationRestrictedError,
+    BetaOrganizationLevelScopedAPIKeyRequiredError,
+    BetaSlackChannelSetUpEnvironmentNotFoundError,
+    BetaSlackChannelSetUpSettingsConflictError,
 )
 ```
 

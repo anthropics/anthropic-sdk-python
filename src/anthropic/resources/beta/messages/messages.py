@@ -476,6 +476,91 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -834,6 +919,91 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -1192,6 +1362,91 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -2094,6 +2349,50 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         tools = _to_tool_params(tools)
         extra_headers = {
@@ -2518,6 +2817,91 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -2876,6 +3260,91 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -3234,6 +3703,91 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          ClaudeCodeVersionTooOldError: The request comes from a Claude Code version older than the minimum that the
+              requested model or the organization requires. Update Claude Code, then retry.
+
+          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
+              Re-enable the key, then retry.
+
+          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
+              workspace's customer-managed encryption key. The key itself may be healthy.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionIncompleteTurnError: The compaction request ends on an `assistant` turn that is not finished.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionTooManyToolReferencesError: The conversation references more distinct tools than a `compaction` block can
+              record.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ThreadAlreadyContinuedError: The response that `previous_message_id` names has already been continued, and
+              each response can be continued only once. Continue from the Thread's most recent
+              response `id`.
+
+          ThreadContinueInFlightError: Another request is still continuing from the same `previous_message_id`. Wait
+              for it to complete and continue from its response `id`, or replay the full
+              conversation with `thread: {"type": "create"}`.
+
+          ThreadFingerprintMismatchError: A field that must stay the same across a Thread's turns differs from the value
+              stored with the Thread; the message names each such field. Send the stored
+              values, or replay the full conversation with `thread: {"type": "create"}` to
+              change them.
+
+          ThreadUnsupportedRequestError: The request combines `thread` with a request field or an organization setting
+              that Threads do not support; `unsupported`, when present, names it. Send the
+              full conversation without `thread`, or change that field.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          ThreadNotFoundError: No usable Thread state was found for `previous_message_id`. Replay the full
+              conversation with `thread: {"type": "create"}` to start a new Thread.
+
+          SkillReadBlockedUndecryptableError: A custom skill the request names is stored under an encryption key state the
+              workspace cannot currently decrypt.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CMEKKeyUnreachableError: The workspace's customer-managed encryption key could not be reached. Retry the
+              request; if this continues, check that the key is available in your key
+              management service, or contact Anthropic support.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         ...
 
@@ -4136,6 +4690,50 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError: The tools available after a message exceed a limit on their number or their
+              size.
+
+          ClaudeCodeKeyCreatorNotMemberError: The API key belongs to the Claude Code workspace, and the user who created it is
+              no longer a member of the organization or of that workspace.
+
+          CompactionBlockAmbiguousError: `messages` holds more than one `compaction` block with content. Send only the
+              block the conversation returned last.
+
+          CompactionBlockMisplacedError: The `compaction` block is not the first block of the conversation, or is in a
+              `system` message.
+
+          CompactionContentMismatchError: The `compaction` block's `content` differs from the text its `signature`
+              recorded.
+
+          CompactionNothingToSummarizeError: `messages` holds no `user` or `assistant` content to summarize or adopt.
+
+          CompactionSignatureInvalidError: The `compaction` block's `signature` does not verify.
+
+          CompactionToolChangesMismatchError: The `compaction` block's `tool_changes` differs from what was returned with the
+              block.
+
+          OrganizationOnHoldError: Anthropic has disabled the organization for trust and safety reasons. An
+              organization disabled for any other reason, such as billing, does not get this
+              code. `appeal_url`, when present, is where the organization can appeal.
+
+          RequestBodyEncodingInvalidError: The request body is not valid for its `Content-Encoding`.
+
+          RequestBodyEncodingUnsupportedError: The request's `Content-Encoding` is not supported.
+
+          ToolNameConflictError: A tool made available in `messages` takes a name that an available tool of
+              another kind, or of another MCP server, already holds.
+
+          ToolReferenceUnresolvedError: A tool change or MCP tool listing references a tool or MCP server that is not
+              defined at that position in the conversation.
+
+          RequestBodyTooLargeAfterDecodingError: The compressed request body exceeds the request size limit once decoded.
+
+          EnforcedSpendLimitReachedError: The organization has crossed the monthly API usage threshold of its API tier.
+
+          CompactionUnavailableError: The compaction could not be completed for a transient server reason. Retry the
+              request.
         """
         tools = _to_tool_params(tools)
         extra_headers = {

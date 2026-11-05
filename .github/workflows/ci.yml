@@ -72,6 +72,9 @@ jobs:
             python: '>=3.10.0'
           - name: newest python
             python: '>=3.14.0'
+          - name: newest python with deferred pydantic builds
+            python: '>=3.14.0'
+            defer_pydantic_build: 'true'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -86,6 +89,7 @@ jobs:
       - name: Run tests
         env:
           UV_PYTHON: ${{ matrix.python }}
+          DEFER_PYDANTIC_BUILD: ${{ matrix.defer_pydantic_build }}
         run: ./scripts/test
 
   detect_breaking_changes:

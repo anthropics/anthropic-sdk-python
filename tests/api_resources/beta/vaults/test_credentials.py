@@ -177,7 +177,7 @@ class TestCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             auth={
                 "type": "mcp_oauth",
-                "access_token": "x",
+                "access_token": "access_token",
                 "expires_at": parse_datetime("2019-12-27T18:11:19.117Z"),
                 "refresh": {
                     "refresh_token": "x",
@@ -640,7 +640,7 @@ class TestAsyncCredentials:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             auth={
                 "type": "mcp_oauth",
-                "access_token": "x",
+                "access_token": "access_token",
                 "expires_at": parse_datetime("2019-12-27T18:11:19.117Z"),
                 "refresh": {
                     "refresh_token": "x",

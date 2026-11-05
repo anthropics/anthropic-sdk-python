@@ -16,7 +16,7 @@ class BetaSelfHostedWork(BaseModel):
     """
 
     id: str
-    """Work identifier (e.g., 'work\\__...')"""
+    """Work identifier (e.g., 'work_...')"""
 
     acknowledged_at: Optional[str] = None
     """
