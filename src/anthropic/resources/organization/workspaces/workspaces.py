@@ -136,6 +136,10 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
           KeyProfileMismatchError:
 
           UserProfileNotFoundError:
@@ -264,6 +268,10 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
           KeyProfileMismatchError:
 
           UserProfileNotFoundError:
@@ -493,6 +501,10 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
           KeyProfileMismatchError:
 
           UserProfileNotFoundError:
@@ -621,6 +633,10 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
           KeyProfileMismatchError:
 
           UserProfileNotFoundError:

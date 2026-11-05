@@ -739,11 +739,15 @@ from anthropic.types.organization import (
     ExternalKeyChangedErrorDetails,
     ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
+    ExternalKeyValidationFailedErrorDetails,
+    ExternalKeyValidationTimedOutErrorDetails,
     GCPExternalKeyConfig,
     GCPExternalKeyConfigParam,
     ExternalKeyDeleteResponse,
     ExternalKeyValidateResponse,
     ExternalKeyInWorkspacePolicyError,
+    ExternalKeyValidationFailedError,
+    ExternalKeyValidationTimedOutError,
     ExternalKeyChangedError,
 )
 ```

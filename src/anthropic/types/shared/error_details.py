@@ -60,11 +60,13 @@ from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLim
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
 from ..beta.organization.beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails
 from ..beta.organization.beta_registration_pending_error_details import BetaRegistrationPendingErrorDetails
+from ..organization.external_key_validation_failed_error_details import ExternalKeyValidationFailedErrorDetails
 from ..organization.rbac_group_grants_owner_access_error_details import RBACGroupGrantsOwnerAccessErrorDetails
 from ..beta.organization.beta_api_key_scope_missing_error_details import BetaAPIKeyScopeMissingErrorDetails
 from ..organization.workspace_member_limit_exceeded_error_details import WorkspaceMemberLimitExceededErrorDetails
 from ..organization.external_key_in_workspace_policy_error_details import ExternalKeyInWorkspacePolicyErrorDetails
 from ..organization.workspace_api_key_limit_exceeded_error_details import WorkspaceAPIKeyLimitExceededErrorDetails
+from ..organization.external_key_validation_timed_out_error_details import ExternalKeyValidationTimedOutErrorDetails
 from ..organization.rbac_group_owner_access_unconfirmed_error_details import RBACGroupOwnerAccessUnconfirmedErrorDetails
 from ..beta.environments.beta_heartbeat_precondition_failed_error_details import (
     BetaHeartbeatPreconditionFailedErrorDetails,
@@ -144,6 +146,8 @@ ErrorDetails: TypeAlias = Annotated[
         RBACGroupOwnerAccessUnconfirmedErrorDetails,
         CannotRemoveLastMemberErrorDetails,
         ConcurrentMembershipChangeErrorDetails,
+        ExternalKeyValidationFailedErrorDetails,
+        ExternalKeyValidationTimedOutErrorDetails,
         KeyProfileMismatchErrorDetails,
         WorkspacePolicyViolationErrorDetails,
         ExternalKeyChangedErrorDetails,

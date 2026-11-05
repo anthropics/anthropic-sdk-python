@@ -80,12 +80,14 @@ from .types.beta.organization.beta_plugin_name_taken_error import BetaPluginName
 from .types.shared.request_body_encoding_unsupported_error import RequestBodyEncodingUnsupportedError
 from .types.shared.claude_code_key_creator_not_member_error import ClaudeCodeKeyCreatorNotMemberError
 from .types.beta.organization.beta_registration_pending_error import BetaRegistrationPendingError
+from .types.organization.external_key_validation_failed_error import ExternalKeyValidationFailedError
 from .types.organization.rbac_group_grants_owner_access_error import RBACGroupGrantsOwnerAccessError
 from .types.beta.organization.beta_api_key_scope_missing_error import BetaAPIKeyScopeMissingError
 from .types.organization.workspace_member_limit_exceeded_error import WorkspaceMemberLimitExceededError
 from .types.shared.request_body_too_large_after_decoding_error import RequestBodyTooLargeAfterDecodingError
 from .types.organization.external_key_in_workspace_policy_error import ExternalKeyInWorkspacePolicyError
 from .types.organization.workspace_api_key_limit_exceeded_error import WorkspaceAPIKeyLimitExceededError
+from .types.organization.external_key_validation_timed_out_error import ExternalKeyValidationTimedOutError
 from .types.organization.rbac_group_owner_access_unconfirmed_error import RBACGroupOwnerAccessUnconfirmedError
 from .types.beta.environments.beta_heartbeat_precondition_failed_error import BetaHeartbeatPreconditionFailedError
 from .types.beta.organization.beta_claude_tag_writes_not_enabled_error import BetaClaudeTagWritesNotEnabledError
@@ -147,6 +149,8 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "email_domain_not_allowed"): EmailDomainNotAllowedError,
     (400, "environment_archived"): BetaEnvironmentArchivedError,
     (400, "external_key_in_workspace_policy"): ExternalKeyInWorkspacePolicyError,
+    (400, "external_key_validation_failed"): ExternalKeyValidationFailedError,
+    (400, "external_key_validation_timed_out"): ExternalKeyValidationTimedOutError,
     (400, "file_not_downloadable"): FileNotDownloadableError,
     (400, "invalid_config_type_change"): BetaInvalidConfigTypeChangeError,
     (400, "invalid_metadata"): BetaInvalidMetadataError,
