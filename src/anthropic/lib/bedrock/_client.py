@@ -24,9 +24,9 @@ from ..._base_client import (
     AsyncAPIClient,
     FinalRequestOptions,
     build_headers,
-    merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
+from .._platform_client import copy_platform_client
 from ...resources.messages import Messages, AsyncMessages
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
@@ -217,6 +217,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         aws_secret_key: str | None = None,
         aws_access_key: str | None = None,
         aws_region: str | None = None,
+        aws_profile: str | None = None,
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx2.URL | None = None,
@@ -234,38 +235,24 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
+            aws_profile=aws_profile or self.aws_profile,
             aws_session_token=aws_session_token or self.aws_session_token,
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -401,6 +388,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         aws_secret_key: str | None = None,
         aws_access_key: str | None = None,
         aws_region: str | None = None,
+        aws_profile: str | None = None,
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx2.URL | None = None,
@@ -418,38 +406,24 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
+            aws_profile=aws_profile or self.aws_profile,
             aws_session_token=aws_session_token or self.aws_session_token,
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

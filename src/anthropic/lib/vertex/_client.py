@@ -23,8 +23,8 @@ from ..._base_client import (
     BaseClient,
     SyncAPIClient,
     AsyncAPIClient,
-    merge_headers,
 )
+from .._platform_client import copy_platform_client
 from ...resources.messages import Messages, AsyncMessages
 
 if TYPE_CHECKING:
@@ -169,39 +169,22 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        http_client = http_client or self._client
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             region=region if is_given(region) else self.region,
             project_id=project_id if is_given(project_id) else self.project_id or not_given,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -339,39 +322,22 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        http_client = http_client or self._client
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             region=region if is_given(region) else self.region,
             project_id=project_id if is_given(project_id) else self.project_id or not_given,
             access_token=access_token or self.access_token,
             credentials=credentials or self.credentials,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

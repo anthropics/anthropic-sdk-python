@@ -8,7 +8,7 @@ import httpx2
 
 from ..._qs import Querystring
 from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
-from ..._utils import is_dict, asyncify, is_given
+from ..._utils import is_dict, asyncify
 from ..._client import _keep_client_header_params
 from ..._compat import cached_property
 from ..._version import __version__
@@ -27,6 +27,7 @@ from ..._base_client import (
     build_headers,
     merge_headers,
 )
+from .._platform_client import copy_platform_client
 from ..aws._credentials import (
     resolve_region,
     resolve_api_key,
@@ -295,25 +296,8 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
@@ -322,13 +306,15 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -498,25 +484,8 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
@@ -525,13 +494,15 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

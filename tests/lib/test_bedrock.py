@@ -403,6 +403,13 @@ def test_api_key_from_env(monkeypatch: t.Any) -> None:
     assert client.api_key == "env-api-key"
 
 
+@pytest.mark.parametrize("client_class", [AnthropicBedrock, AsyncAnthropicBedrock], ids=["sync", "async"])
+def test_copy_overrides_aws_profile(client_class: "type[AnthropicBedrock] | type[AsyncAnthropicBedrock]") -> None:
+    client = client_class(aws_region="us-east-1", aws_profile="first")
+
+    assert client.copy(aws_profile="second").aws_profile == "second"
+
+
 def test_api_key_mutual_exclusion() -> None:
     with pytest.raises(ValueError, match="Cannot specify both"):
         AnthropicBedrock(
