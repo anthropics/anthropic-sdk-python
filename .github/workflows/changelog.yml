@@ -25,7 +25,6 @@ jobs:
       - name: Check that the pull request has a changelog entry for each package it changes
         run: |
           export LC_ALL=C
-          git rev-parse --quiet --verify HEAD^1 > /dev/null
           title='^(feat|fix|perf|revert|chore|docs|style|refactor|build)(\([^()]+\))?!?: +'
           number='(0|[1-9][0-9]*)'
           word="($number|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
@@ -58,9 +57,6 @@ jobs:
                 entry=yes
               fi
             done < <(git diff --name-status --no-renames --diff-filter=d -z HEAD^1 HEAD -- "$dir")
-            if ! git diff --quiet HEAD^1 HEAD -- "$1/CHANGELOG.md"; then
-              entry=yes
-            fi
             if [ -z "$entry" ] &&
               ! git diff --quiet HEAD^1 HEAD -- "$@" ":(exclude)$dir" ":(exclude)$1/CHANGELOG.md" ':(exclude).version-manifest.json' ':(exclude)scripts/mock-spec.json.gz'; then
               missing="$missing $dir"
