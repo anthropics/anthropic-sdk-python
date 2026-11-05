@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import httpx2
 
 from ..._utils import lru_cache
+from ..._exceptions import CredentialsError
 
 if TYPE_CHECKING:
     import boto3
@@ -62,7 +63,7 @@ def get_auth_headers(
     request = AWSRequest(method=method.upper(), url=url, headers=headers, data=data)
     credentials = session.get_credentials()
     if not credentials:
-        raise RuntimeError("could not resolve credentials from session")
+        raise CredentialsError("could not resolve credentials from session")
 
     signer = SigV4Auth(credentials, "bedrock", session.region_name)
     signer.add_auth(request)
