@@ -245,6 +245,81 @@ async def test_copy_sends_requests_through_the_http_client(client_class: ClientC
     assert len(requests) == 1
 
 
+@pytest.mark.parametrize("copied", [False, True], ids=["client", "copy"])
+@each_client_class
+async def test_custom_headers_from_the_environment(
+    client_class: ClientClass, copied: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"id": "msg_fake"})
+
+    monkeypatch.setenv(
+        "ANTHROPIC_CUSTOM_HEADERS",
+        "x-environment: environment\nno colon\n x-spaces :  a b \nx-colons: a:b\nx-argument: environment\nx-request: environment",
+    )
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {
+            "default_headers": {"X-Argument": "argument"},
+            "http_client": http_client(client_class, httpx2.MockTransport(respond)),
+        },
+    )
+    if copied:
+        client = client.with_options(max_retries=0)
+
+    message = client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Hi"}],
+        model="claude-fake",
+        extra_headers={"X-Request": "request"},
+    )
+    if issubclass(client_class, AsyncAPIClient):
+        await message
+
+    expected = {
+        "x-environment": ["environment"],
+        "x-spaces": ["a b"],
+        "x-colons": ["a:b"],
+        "x-argument": ["argument"],
+        "x-request": ["request"],
+    }
+    assert {name: requests[0].headers.get_list(name) for name in expected} == expected
+
+
+@each_client_class
+async def test_list_in_a_query(client_class: ClientClass) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"id": "msg_fake"})
+
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {"http_client": http_client(client_class, httpx2.MockTransport(respond))},
+    )
+
+    message = client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Hi"}],
+        model="claude-fake",
+        extra_query={"a": [1, 2]},
+    )
+    if issubclass(client_class, AsyncAPIClient):
+        await message
+
+    # These two have the format of the base client.
+    if client_class.__name__.removeprefix("Async") in {"AnthropicBedrock", "AnthropicVertex"}:
+        assert requests[0].url.query == b"a=1&a=2"
+    else:
+        assert requests[0].url.query == b"a%5B%5D=1&a%5B%5D=2"
+
+
 @each_client_class
 def test_with_options_overrides_win(client_class: ClientClass) -> None:
     client = construct(client_class, platform_arguments(client_class)[0], common_arguments(client_class))

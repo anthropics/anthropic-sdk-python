@@ -1055,3 +1055,31 @@ def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     assert len(calls) == 1
     assert "anthropic-user-profile-id" not in calls[0].request.headers
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_custom_headers_from_the_environment_are_signed(sync: bool, monkeypatch: pytest.MonkeyPatch) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"foo": "bar"})
+
+    monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "x-environment: environment")
+    http_client = (httpx2.Client if sync else httpx2.AsyncClient)(transport=httpx2.MockTransport(respond))
+    message = (AnthropicBedrock if sync else AsyncAnthropicBedrock)(
+        aws_region="us-east-1",
+        aws_access_key="example-access-key",
+        aws_secret_key="example-secret-key",
+        http_client=cast(t.Any, http_client),
+    ).messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Hello"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    if not sync:
+        await cast("t.Awaitable[object]", message)
+
+    signed_headers = re.search(r"SignedHeaders=([^,]+)", requests[0].headers["authorization"])
+    assert signed_headers is not None
+    assert "x-environment" in signed_headers.group(1).split(";")

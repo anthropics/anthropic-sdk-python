@@ -7,6 +7,7 @@ from typing_extensions import Self, override
 import httpx2
 
 from ..._qs import Querystring
+from .._env import with_environment_headers
 from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
 from ..._utils import is_dict, asyncify
 from ..._client import _keep_client_header_params
@@ -137,11 +138,7 @@ def _resolve_mantle_config(
             )
         base_url = f"https://bedrock-mantle.{resolved_region}.api.aws/anthropic"
 
-    merged_headers: dict[str, str] = {}
-    if default_headers:
-        merged_headers.update(default_headers)
-
-    return resolved_api_key, base_url, use_sigv4, merged_headers
+    return resolved_api_key, base_url, use_sigv4, dict(with_environment_headers(default_headers) or {})
 
 
 class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncAPIClient):
@@ -220,7 +217,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="comma")
+        return Querystring(array_format="brackets")
 
     @property
     @override
@@ -408,7 +405,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="comma")
+        return Querystring(array_format="brackets")
 
     @property
     @override

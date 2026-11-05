@@ -6,6 +6,7 @@ from typing_extensions import Self, override
 
 import httpx2
 
+from .._env import with_environment_headers
 from ._auth import load_auth, refresh_auth
 from ._beta import Beta, AsyncBeta
 from ..._types import NotGiven, OpenTelemetryClientOption, not_given
@@ -100,7 +101,7 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
             timeout=timeout,
             max_retries=max_retries,
             open_telemetry=open_telemetry,
-            custom_headers=default_headers,
+            custom_headers=with_environment_headers(default_headers),
             custom_query=default_query,
             http_client=http_client,
             middleware=middleware,
@@ -253,7 +254,7 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
             timeout=timeout,
             max_retries=max_retries,
             open_telemetry=open_telemetry,
-            custom_headers=default_headers,
+            custom_headers=with_environment_headers(default_headers),
             custom_query=default_query,
             http_client=http_client,
             middleware=middleware,
