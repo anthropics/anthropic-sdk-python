@@ -55,7 +55,11 @@ class Webhooks(SyncAPIResource):
         self,
         *,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ],
         url: str,
         description: str | Omit = omit,
@@ -209,7 +213,11 @@ class Webhooks(SyncAPIResource):
         *,
         description: str | Omit = omit,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ]
         | Omit = omit,
         name: str | Omit = omit,
@@ -543,7 +551,11 @@ class AsyncWebhooks(AsyncAPIResource):
         self,
         *,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ],
         url: str,
         description: str | Omit = omit,
@@ -697,7 +709,11 @@ class AsyncWebhooks(AsyncAPIResource):
         *,
         description: str | Omit = omit,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ]
         | Omit = omit,
         name: str | Omit = omit,
