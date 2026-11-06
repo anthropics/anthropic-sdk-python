@@ -17,6 +17,7 @@ from .cmek_context_unavailable_error_details import CMEKContextUnavailableErrorD
 from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDetails
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
+from .sandbox_egress_restricted_error_details import SandboxEgressRestrictedErrorDetails
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
 from ..thread_continue_in_flight_error_details import ThreadContinueInFlightErrorDetails
 from ..tool_reference_unresolved_error_details import ToolReferenceUnresolvedErrorDetails
@@ -149,6 +150,7 @@ ErrorDetails: TypeAlias = Annotated[
         CMEKContextUnavailableErrorDetails,
         OrgAPIKeyLimitExceededErrorDetails,
         WorkspaceAPIKeyLimitExceededErrorDetails,
+        SandboxEgressRestrictedErrorDetails,
         UserProfileNotFoundErrorDetails,
         ExternalKeyInWorkspacePolicyErrorDetails,
         AlreadyMemberErrorDetails,

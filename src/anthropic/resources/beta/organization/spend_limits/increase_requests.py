@@ -188,6 +188,9 @@ class IncreaseRequests(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not spend_limit_increase_request_id:
             raise ValueError(
@@ -246,6 +249,9 @@ class IncreaseRequests(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not spend_limit_increase_request_id:
             raise ValueError(
@@ -434,6 +440,9 @@ class AsyncIncreaseRequests(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not spend_limit_increase_request_id:
             raise ValueError(
@@ -492,6 +501,9 @@ class AsyncIncreaseRequests(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not spend_limit_increase_request_id:
             raise ValueError(

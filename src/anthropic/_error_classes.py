@@ -56,6 +56,7 @@ from .types.compaction_nothing_to_summarize_error import CompactionNothingToSumm
 from .types.shared.cmek_context_unavailable_error import CMEKContextUnavailableError
 from .types.shared.cmek_key_network_blocked_error import CMEKKeyNetworkBlockedError
 from .types.compaction_tool_changes_mismatch_error import CompactionToolChangesMismatchError
+from .types.shared.sandbox_egress_restricted_error import SandboxEgressRestrictedError
 from .types.skill_read_blocked_undecryptable_error import SkillReadBlockedUndecryptableError
 from .types.organization.external_key_changed_error import ExternalKeyChangedError
 from .types.organization.key_profile_mismatch_error import KeyProfileMismatchError
@@ -197,6 +198,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "environment_create_disabled"): BetaEnvironmentCreateDisabledError,
     (403, "environment_update_disabled"): BetaEnvironmentUpdateDisabledError,
     (403, "organization_level_scoped_api_key_required"): BetaOrganizationLevelScopedAPIKeyRequiredError,
+    (403, "sandbox_egress_restricted"): SandboxEgressRestrictedError,
     (403, "spend_limits_admin_api_writes_not_enabled"): BetaSpendLimitsAdminAPIWritesNotEnabledError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,

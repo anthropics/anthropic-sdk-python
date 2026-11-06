@@ -424,6 +424,9 @@ class Webhooks(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -492,6 +495,9 @@ class Webhooks(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -920,6 +926,9 @@ class AsyncWebhooks(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -988,6 +997,9 @@ class AsyncWebhooks(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(

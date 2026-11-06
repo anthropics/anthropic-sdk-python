@@ -98,6 +98,9 @@ class Issuers(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return self._post(
             "/v1/organizations/federation_issuers",
@@ -233,6 +236,9 @@ class Issuers(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_issuer_id:
             raise ValueError(
@@ -353,6 +359,9 @@ class Issuers(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_issuer_id:
             raise ValueError(
@@ -452,6 +461,9 @@ class AsyncIssuers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return await self._post(
             "/v1/organizations/federation_issuers",
@@ -587,6 +599,9 @@ class AsyncIssuers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_issuer_id:
             raise ValueError(
@@ -707,6 +722,9 @@ class AsyncIssuers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_issuer_id:
             raise ValueError(
