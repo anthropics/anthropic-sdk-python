@@ -15,7 +15,6 @@ from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDeta
 from ..user_profile_not_found_error_details import UserProfileNotFoundErrorDetails
 from .cmek_context_unavailable_error_details import CMEKContextUnavailableErrorDetails
 from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDetails
-from ..beta.beta_billing_frozen_error_details import BetaBillingFrozenErrorDetails
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
@@ -181,7 +180,6 @@ ErrorDetails: TypeAlias = Annotated[
         BetaCannotSignOutMembershipAdminErrorDetails,
         BetaCannotSignOutOwnerErrorDetails,
         BetaCannotSignOutPrivilegedMemberErrorDetails,
-        BetaBillingFrozenErrorDetails,
         BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
         BetaUnsupportedCharsetErrorDetails,
         BetaPluginNameTakenErrorDetails,

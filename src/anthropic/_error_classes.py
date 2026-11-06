@@ -30,7 +30,6 @@ from .types.file_not_downloadable_error import FileNotDownloadableError
 from .types.compaction_unavailable_error import CompactionUnavailableError
 from .types.storage_quota_exceeded_error import StorageQuotaExceededError
 from .types.user_profile_not_found_error import UserProfileNotFoundError
-from .types.beta.beta_billing_frozen_error import BetaBillingFrozenError
 from .types.beta_unsupported_charset_error import BetaUnsupportedCharsetError
 from .types.shared.cmek_key_disabled_error import CMEKKeyDisabledError
 from .types.thread_already_continued_error import ThreadAlreadyContinuedError
@@ -189,7 +188,6 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "workspace_member_limit_exceeded"): WorkspaceMemberLimitExceededError,
     (400, "workspace_policy_violation"): WorkspacePolicyViolationError,
     (403, "api_key_scope_missing"): BetaAPIKeyScopeMissingError,
-    (403, "billing_frozen"): BetaBillingFrozenError,
     (403, "cannot_sign_out_managed_member"): BetaCannotSignOutManagedMemberError,
     (403, "cannot_sign_out_membership_admin"): BetaCannotSignOutMembershipAdminError,
     (403, "cannot_sign_out_owner"): BetaCannotSignOutOwnerError,

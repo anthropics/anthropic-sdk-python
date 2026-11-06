@@ -239,8 +239,6 @@ class SpendLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
-
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
@@ -307,8 +305,6 @@ class SpendLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
-
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
@@ -532,8 +528,6 @@ class AsyncSpendLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
-
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
@@ -600,8 +594,6 @@ class AsyncSpendLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
-
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {

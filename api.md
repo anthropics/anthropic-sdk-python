@@ -2843,12 +2843,7 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import (
-    BetaBillingFrozenErrorDetails,
-    BetaOrganization,
-    BetaOrganizationRole,
-    BetaBillingFrozenError,
-)
+from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
 ```
 
 Methods:
