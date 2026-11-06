@@ -2719,6 +2719,7 @@ from anthropic.types.beta import (
     BetaWebhookSessionUpdatedEventData,
     BetaWebhookUserProfileEnforcementActionOpenedEventData,
     BetaWebhookUserProfileEnforcementActionResolvedEventData,
+    BetaWebhookUserProfileProgramStatusUpdatedEventData,
     BetaWebhookVaultArchivedEventData,
     BetaWebhookVaultCreatedEventData,
     BetaWebhookVaultCredentialArchivedEventData,

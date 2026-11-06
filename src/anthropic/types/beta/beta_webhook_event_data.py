@@ -46,6 +46,9 @@ from .beta_webhook_session_status_rescheduled_event_data import BetaWebhookSessi
 from .beta_webhook_session_status_run_started_event_data import BetaWebhookSessionStatusRunStartedEventData
 from .beta_webhook_vault_credential_refresh_failed_event_data import BetaWebhookVaultCredentialRefreshFailedEventData
 from .beta_webhook_session_outcome_evaluation_ended_event_data import BetaWebhookSessionOutcomeEvaluationEndedEventData
+from .beta_webhook_user_profile_program_status_updated_event_data import (
+    BetaWebhookUserProfileProgramStatusUpdatedEventData,
+)
 from .beta_webhook_user_profile_enforcement_action_opened_event_data import (
     BetaWebhookUserProfileEnforcementActionOpenedEventData,
 )
@@ -103,6 +106,7 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookSessionBudgetReachedEventData,
         BetaWebhookUserProfileEnforcementActionOpenedEventData,
         BetaWebhookUserProfileEnforcementActionResolvedEventData,
+        BetaWebhookUserProfileProgramStatusUpdatedEventData,
     ],
     UnionDiscriminator("type"),
 ]

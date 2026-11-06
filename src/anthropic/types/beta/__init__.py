@@ -1701,6 +1701,9 @@ from .beta_managed_agents_multiagent_inline_agents_enabled_params import (
 from .beta_managed_agents_web_fetch_url_source_tool_filter_params import (
     BetaManagedAgentsWebFetchURLSourceToolFilterParams as BetaManagedAgentsWebFetchURLSourceToolFilterParams,
 )
+from .beta_webhook_user_profile_program_status_updated_event_data import (
+    BetaWebhookUserProfileProgramStatusUpdatedEventData as BetaWebhookUserProfileProgramStatusUpdatedEventData,
+)
 from .beta_managed_agents_multiagent_inline_agents_disabled_params import (
     BetaManagedAgentsMultiagentInlineAgentsDisabledParams as BetaManagedAgentsMultiagentInlineAgentsDisabledParams,
 )
