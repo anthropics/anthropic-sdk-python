@@ -1941,20 +1941,16 @@ async def test_a_call_already_in_the_turn_gets_the_input_error_of_the_tool_added
     )
 
     assert calls == []
-    assert _sent_request_bodies(respx_mock)[1]["messages"][-2:] == [
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "tool_result",
-                    "tool_use_id": "toolu_weather",
-                    "content": "ValueError('Invalid arguments for function get_weather')",
-                    "is_error": True,
-                }
-            ],
-        },
-        _tool_changes_message(_addition(new_get_weather.to_dict())),
-    ]
+    bodies = _sent_request_bodies(respx_mock)[1]["messages"][-2:]
+    tool_result, changes = bodies
+    assert tool_result["role"] == "user"
+    block = tool_result["content"][0]
+    assert block["type"] == "tool_result"
+    assert block["tool_use_id"] == "toolu_weather"
+    assert block["is_error"] is True
+    assert str(block["content"]).startswith("ValueError('Invalid arguments for function get_weather")
+    assert "city:" in str(block["content"])
+    assert changes == _tool_changes_message(_addition(new_get_weather.to_dict()))
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
