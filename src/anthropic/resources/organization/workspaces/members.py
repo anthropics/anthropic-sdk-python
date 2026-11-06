@@ -128,7 +128,7 @@ class Members(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -248,7 +248,7 @@ class Members(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -430,7 +430,7 @@ class AsyncMembers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -550,7 +550,7 @@ class AsyncMembers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          WorkspaceMemberLimitExceededError: The workspace has reached the member limit that Anthropic set for it.
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")

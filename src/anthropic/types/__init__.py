@@ -18,12 +18,14 @@ from .shared import (
     GatewayTimeoutError as GatewayTimeoutError,
     InvalidRequestError as InvalidRequestError,
     CMEKKeyDisabledError as CMEKKeyDisabledError,
+    RampLimitExceededError as RampLimitExceededError,
     CMEKKeyUnreachableError as CMEKKeyUnreachableError,
     OrganizationOnHoldError as OrganizationOnHoldError,
     CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError,
     CMEKContextUnavailableError as CMEKContextUnavailableError,
     CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails,
     ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError,
+    RampLimitExceededErrorDetails as RampLimitExceededErrorDetails,
     CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails,
     EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError,
     OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails,
@@ -686,6 +688,9 @@ from .user_profile_enforcement_action_restriction import (
 from .available_tools_limit_exceeded_error_details import (
     AvailableToolsLimitExceededErrorDetails as AvailableToolsLimitExceededErrorDetails,
 )
+from .beta_organization_not_enrolled_in_beta_error import (
+    BetaOrganizationNotEnrolledInBetaError as BetaOrganizationNotEnrolledInBetaError,
+)
 from .response_browser_double_click_tool_use_block import (
     ResponseBrowserDoubleClickToolUseBlock as ResponseBrowserDoubleClickToolUseBlock,
 )
@@ -784,6 +789,9 @@ from .text_editor_code_execution_view_result_block_param import (
 )
 from .text_editor_code_execution_str_replace_result_block import (
     TextEditorCodeExecutionStrReplaceResultBlock as TextEditorCodeExecutionStrReplaceResultBlock,
+)
+from .beta_organization_not_enrolled_in_beta_error_details import (
+    BetaOrganizationNotEnrolledInBetaErrorDetails as BetaOrganizationNotEnrolledInBetaErrorDetails,
 )
 from .code_execution_tool_result_block_param_content_param import (
     CodeExecutionToolResultBlockParamContentParam as CodeExecutionToolResultBlockParamContentParam,

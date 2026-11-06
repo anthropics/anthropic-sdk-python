@@ -13,7 +13,18 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import APIStatusError, AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
+from anthropic import (
+    APIStatusError,
+    BadRequestError,
+    OverloadedError,
+    AnthropicBedrock,
+    InternalServerError,
+    AsyncAnthropicBedrock,
+    PreconditionFailedError,
+    beta_tool,
+    beta_async_tool,
+)
+from anthropic.types import ToolNameConflictError
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import FinalRequestOptions
 from anthropic._constants import ANTHROPIC_API_VERSION
@@ -33,6 +44,34 @@ async_client = AsyncAnthropicBedrock(
 
 
 INVOKE_URL = re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")
+
+STATUS_ERRORS = [
+    pytest.param(
+        400,
+        {
+            "type": "invalid_request_error",
+            "message": "Tool name is already in use",
+            "details": {"error_code": "tool_name_conflict"},
+        },
+        ToolNameConflictError,
+        BadRequestError,
+        id="error-code",
+    ),
+    pytest.param(
+        412,
+        {"type": "invalid_request_error", "message": "Precondition failed"},
+        PreconditionFailedError,
+        APIStatusError,
+        id="status",
+    ),
+    pytest.param(
+        529,
+        {"type": "overloaded_error", "message": "Overloaded"},
+        OverloadedError,
+        InternalServerError,
+        id="narrowed-status",
+    ),
+]
 
 
 class MockRequestCall(Protocol):
@@ -141,6 +180,37 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
         calls[1].request.url
         == "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke"
     )
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+async def test_status_error_class(
+    status: int,
+    error: dict[str, object],
+    error_class: type[APIStatusError],
+    parent_class: type[APIStatusError],
+    sync: bool,
+    respx_mock: MockRouter,
+) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(status, json={"type": "error", "error": error}))
+
+    with pytest.raises(parent_class) as exc_info:
+        if sync:
+            sync_client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            )
+        else:
+            await async_client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            )
+
+    assert type(exc_info.value) is error_class
 
 
 @pytest.mark.respx()
@@ -331,6 +401,13 @@ def test_api_key_from_env(monkeypatch: t.Any) -> None:
     monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-api-key")
     client = AnthropicBedrock(aws_region="us-east-1")
     assert client.api_key == "env-api-key"
+
+
+@pytest.mark.parametrize("client_class", [AnthropicBedrock, AsyncAnthropicBedrock], ids=["sync", "async"])
+def test_copy_overrides_aws_profile(client_class: "type[AnthropicBedrock] | type[AsyncAnthropicBedrock]") -> None:
+    client = client_class(aws_region="us-east-1", aws_profile="first")
+
+    assert client.copy(aws_profile="second").aws_profile == "second"
 
 
 def test_api_key_mutual_exclusion() -> None:
