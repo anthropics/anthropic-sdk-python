@@ -115,9 +115,9 @@ class APIKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          OrgAPIKeyLimitExceededError: The organization has reached its limit of active API keys.
+          OrgAPIKeyLimitExceededError:
 
-          WorkspaceAPIKeyLimitExceededError: The workspace has reached its limit of active API keys.
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
@@ -299,9 +299,9 @@ class AsyncAPIKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          OrgAPIKeyLimitExceededError: The organization has reached its limit of active API keys.
+          OrgAPIKeyLimitExceededError:
 
-          WorkspaceAPIKeyLimitExceededError: The workspace has reached its limit of active API keys.
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")

@@ -6,6 +6,7 @@ from ..file_expired_error_details import FileExpiredErrorDetails
 from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
+from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
@@ -53,23 +54,40 @@ from .request_body_too_large_after_decoding_error_details import RequestBodyTooL
 from ..beta.beta_environment_create_disabled_error_details import BetaEnvironmentCreateDisabledErrorDetails
 from ..beta.beta_environment_update_disabled_error_details import BetaEnvironmentUpdateDisabledErrorDetails
 from ..organization.email_domain_not_allowed_error_details import EmailDomainNotAllowedErrorDetails
+from ..beta_organization_not_enrolled_in_beta_error_details import BetaOrganizationNotEnrolledInBetaErrorDetails
 from ..organization.cannot_remove_last_member_error_details import CannotRemoveLastMemberErrorDetails
 from ..beta.organization.beta_skill_name_taken_error_details import BetaSkillNameTakenErrorDetails
 from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLimitExceededErrorDetails
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
 from ..beta.organization.beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails
+from ..beta.organization.beta_cannot_sign_out_self_error_details import BetaCannotSignOutSelfErrorDetails
 from ..beta.organization.beta_registration_pending_error_details import BetaRegistrationPendingErrorDetails
+from ..organization.external_key_validation_failed_error_details import ExternalKeyValidationFailedErrorDetails
 from ..organization.rbac_group_grants_owner_access_error_details import RBACGroupGrantsOwnerAccessErrorDetails
 from ..beta.organization.beta_api_key_scope_missing_error_details import BetaAPIKeyScopeMissingErrorDetails
+from ..beta.organization.beta_cannot_sign_out_owner_error_details import BetaCannotSignOutOwnerErrorDetails
 from ..organization.workspace_member_limit_exceeded_error_details import WorkspaceMemberLimitExceededErrorDetails
 from ..organization.external_key_in_workspace_policy_error_details import ExternalKeyInWorkspacePolicyErrorDetails
 from ..organization.workspace_api_key_limit_exceeded_error_details import WorkspaceAPIKeyLimitExceededErrorDetails
+from ..organization.external_key_validation_timed_out_error_details import ExternalKeyValidationTimedOutErrorDetails
 from ..organization.rbac_group_owner_access_unconfirmed_error_details import RBACGroupOwnerAccessUnconfirmedErrorDetails
 from ..beta.environments.beta_heartbeat_precondition_failed_error_details import (
     BetaHeartbeatPreconditionFailedErrorDetails,
 )
+from ..beta.organization.beta_cannot_sign_out_primary_owner_error_details import (
+    BetaCannotSignOutPrimaryOwnerErrorDetails,
+)
 from ..beta.organization.beta_claude_tag_writes_not_enabled_error_details import (
     BetaClaudeTagWritesNotEnabledErrorDetails,
+)
+from ..beta.organization.beta_cannot_sign_out_managed_member_error_details import (
+    BetaCannotSignOutManagedMemberErrorDetails,
+)
+from ..beta.organization.beta_cannot_sign_out_membership_admin_error_details import (
+    BetaCannotSignOutMembershipAdminErrorDetails,
+)
+from ..beta.organization.beta_cannot_sign_out_privileged_member_error_details import (
+    BetaCannotSignOutPrivilegedMemberErrorDetails,
 )
 from ..organization.cannot_invite_emails_with_unverified_domains_error_details import (
     CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
@@ -123,6 +141,7 @@ ErrorDetails: TypeAlias = Annotated[
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
+        RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,
         CompactionUnavailableErrorDetails,
         StorageQuotaExceededErrorDetails,
@@ -142,6 +161,8 @@ ErrorDetails: TypeAlias = Annotated[
         RBACGroupOwnerAccessUnconfirmedErrorDetails,
         CannotRemoveLastMemberErrorDetails,
         ConcurrentMembershipChangeErrorDetails,
+        ExternalKeyValidationFailedErrorDetails,
+        ExternalKeyValidationTimedOutErrorDetails,
         KeyProfileMismatchErrorDetails,
         WorkspacePolicyViolationErrorDetails,
         ExternalKeyChangedErrorDetails,
@@ -153,6 +174,13 @@ ErrorDetails: TypeAlias = Annotated[
         BetaEnvironmentUpdateDisabledErrorDetails,
         BetaHeartbeatPreconditionFailedErrorDetails,
         BetaInvalidMetadataErrorDetails,
+        BetaCannotSignOutPrimaryOwnerErrorDetails,
+        BetaCannotSignOutSelfErrorDetails,
+        BetaOrganizationNotEnrolledInBetaErrorDetails,
+        BetaCannotSignOutManagedMemberErrorDetails,
+        BetaCannotSignOutMembershipAdminErrorDetails,
+        BetaCannotSignOutOwnerErrorDetails,
+        BetaCannotSignOutPrivilegedMemberErrorDetails,
         BetaBillingFrozenErrorDetails,
         BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
         BetaUnsupportedCharsetErrorDetails,

@@ -7,5 +7,10 @@ __all__ = ["BetaAPIError"]
 
 class BetaAPIError(BaseModel):
     message: str
+    """A human-readable explanation of the error.
+
+    Its wording can change, so don't match on it.
+    """
 
     type: Literal["api_error"]
+    """The broad category of the error."""

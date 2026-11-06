@@ -25,7 +25,6 @@ from ._models import FinalRequestOptions
 from ._version import __version__
 from ._constants import ANTHROPIC_API_VERSION
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
-from ._exceptions import APIStatusError
 from ._middleware import MiddlewareInput
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -33,7 +32,6 @@ from ._base_client import (
     AsyncAPIClient,
     merge_headers,
 )
-from ._error_classes import make_status_error
 from .lib.credentials import (
     TokenCache,
     InMemoryConfig,
@@ -564,16 +562,6 @@ class Anthropic(SyncAPIClient):
         """
         return self.copy(middleware=[*self._middleware, *middleware])
 
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        return make_status_error(err_msg, body=body, response=response)
-
 
 class AsyncAnthropic(AsyncAPIClient):
     _supports_message_threads = True
@@ -975,16 +963,6 @@ class AsyncAnthropic(AsyncAPIClient):
         ```
         """
         return self.copy(middleware=[*self._middleware, *middleware])
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        return make_status_error(err_msg, body=body, response=response)
 
 
 class AnthropicWithRawResponse:

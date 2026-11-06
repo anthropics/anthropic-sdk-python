@@ -133,20 +133,15 @@ class Versions(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
 
-          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
-              or US-ASCII. Send the request with no charset, or with one of these.
+          BetaUnsupportedCharsetError:
 
-          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
-              is that name.
+          BetaSkillNameTakenError:
 
-          BetaRegistrationPendingError: The Plugin version was stored but is not yet usable in claude.ai. `plugin_id`
-              and `plugin_version_id` identify what was stored.
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -444,11 +439,9 @@ class Versions(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -579,20 +572,15 @@ class AsyncVersions(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
 
-          BetaUnsupportedCharsetError: The request's `Content-Type` header names a charset other than UTF-8, ISO-8859-1
-              or US-ASCII. Send the request with no charset, or with one of these.
+          BetaUnsupportedCharsetError:
 
-          BetaSkillNameTakenError: One of the Plugin's skills has the name of an organization skill. `skill_name`
-              is that name.
+          BetaSkillNameTakenError:
 
-          BetaRegistrationPendingError: The Plugin version was stored but is not yet usable in claude.ai. `plugin_id`
-              and `plugin_version_id` identify what was stored.
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -890,11 +878,9 @@ class AsyncVersions(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          CMEKKeyDisabledError: The workspace's customer-managed encryption key is disabled or revoked.
-              Re-enable the key, then retry.
+          CMEKKeyDisabledError:
 
-          CMEKKeyNetworkBlockedError: The key management service's network access controls blocked the request to the
-              workspace's customer-managed encryption key. The key itself may be healthy.
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

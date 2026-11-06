@@ -87,15 +87,13 @@ class Bundles(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
-              `write:claude_tag` for a change.
+          BetaAPIKeyScopeMissingError:
 
-          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+          BetaClaudeTagWritesNotEnabledError:
 
-          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
-              anything new.
+          BetaComplianceConfigurationRestrictedError:
 
-          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -160,15 +158,13 @@ class Bundles(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
-              `write:claude_tag` for a change.
+          BetaAPIKeyScopeMissingError:
 
-          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+          BetaClaudeTagWritesNotEnabledError:
 
-          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
-              anything new.
+          BetaComplianceConfigurationRestrictedError:
 
-          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(
@@ -257,15 +253,13 @@ class AsyncBundles(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
-              `write:claude_tag` for a change.
+          BetaAPIKeyScopeMissingError:
 
-          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+          BetaClaudeTagWritesNotEnabledError:
 
-          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
-              anything new.
+          BetaComplianceConfigurationRestrictedError:
 
-          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -330,15 +324,13 @@ class AsyncBundles(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaAPIKeyScopeMissingError: The API key lacks the scope the request needs: `read:claude_tag` for a read,
-              `write:claude_tag` for a change.
+          BetaAPIKeyScopeMissingError:
 
-          BetaClaudeTagWritesNotEnabledError: Changes through the Claude Tag API are not enabled for the organization.
+          BetaClaudeTagWritesNotEnabledError:
 
-          BetaComplianceConfigurationRestrictedError: The organization's compliance configuration does not let Claude Tag store
-              anything new.
+          BetaComplianceConfigurationRestrictedError:
 
-          BetaOrganizationLevelScopedAPIKeyRequiredError: The credential is not a scoped API key that is bound at the organization level.
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(

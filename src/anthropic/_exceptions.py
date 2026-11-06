@@ -91,16 +91,33 @@ class APIStatusError(APIError):
     workspace_id: str | None
 
     api_message: str | None
-    """`error.message` from the response body, if present."""
+    """A human-readable explanation of the error.
+
+    Its wording can change, so don't match on it.
+
+    `error.message` from the response body, if present.
+    """
 
     type: ErrorType | None
-    """`error.type` from the response body, if present."""
+    """The broad category of the error.
+
+    `error.type` from the response body, if present.
+    """
 
     error_code: str | None
-    """`error.details.error_code` from the response body, if present and a string."""
+    """A stable code that names the cause.
+
+    `error.details.error_code` from the response body, if present and a string.
+    """
 
     details: ErrorDetails | None
-    """`error.details` from the response body, if present."""
+    """Machine-readable detail about the cause of the error.
+
+    `error_code` names the cause; branch on it rather than on `message`. Absent when
+    the error has no code. Treat an unrecognized `error_code` as the bare `type`.
+
+    `error.details` from the response body, if present.
+    """
 
     def __init__(self, message: str, *, response: httpx2.Response, body: object | None) -> None:
         # imported here so that modules in `types` can import this one
