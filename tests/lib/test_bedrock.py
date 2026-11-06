@@ -18,6 +18,7 @@ from anthropic import (
     BadRequestError,
     OverloadedError,
     AnthropicBedrock,
+    CredentialsError,
     InternalServerError,
     AsyncAnthropicBedrock,
     PreconditionFailedError,
@@ -111,6 +112,55 @@ def mock_aws_config(
         temp_file.flush()
         monkeypatch.setenv("AWS_CONFIG_FILE", str(temp_file.name))
         yield
+
+
+@pytest.fixture
+def missing_bedrock_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    class NoCredentialsSession:
+        region_name = "us-east-1"
+
+        def get_credentials(self) -> None:
+            return None
+
+    def no_credentials_session(**_kwargs: object) -> NoCredentialsSession:
+        return NoCredentialsSession()
+
+    monkeypatch.delenv("AWS_BEARER_TOKEN_BEDROCK", raising=False)
+    monkeypatch.setattr("anthropic.lib.bedrock._auth._get_session", no_credentials_session)
+
+
+@pytest.mark.respx()
+@pytest.mark.parametrize("beta", [False, True])
+@pytest.mark.usefixtures("missing_bedrock_credentials")
+def test_missing_credentials(respx_mock: MockRouter, beta: bool) -> None:
+    with AnthropicBedrock(aws_region="us-east-1") as client:
+        messages = client.beta.messages if beta else client.messages
+        with pytest.raises(CredentialsError) as exc_info:
+            messages.create(
+                model="anthropic.claude-3-sonnet-20240229-v1:0",
+                max_tokens=16,
+                messages=[{"role": "user", "content": "Hello"}],
+            )
+
+    assert str(exc_info.value) == "could not resolve credentials from session"
+    assert not respx_mock.calls
+
+
+@pytest.mark.respx()
+@pytest.mark.parametrize("beta", [False, True])
+@pytest.mark.usefixtures("missing_bedrock_credentials")
+async def test_missing_credentials_async(respx_mock: MockRouter, beta: bool) -> None:
+    async with AsyncAnthropicBedrock(aws_region="us-east-1") as client:
+        messages = client.beta.messages if beta else client.messages
+        with pytest.raises(CredentialsError) as exc_info:
+            await messages.create(
+                model="anthropic.claude-3-sonnet-20240229-v1:0",
+                max_tokens=16,
+                messages=[{"role": "user", "content": "Hello"}],
+            )
+
+    assert str(exc_info.value) == "could not resolve credentials from session"
+    assert not respx_mock.calls
 
 
 @pytest.mark.respx()

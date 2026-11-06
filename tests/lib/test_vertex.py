@@ -4,6 +4,7 @@ import os
 import sys
 import json
 from typing import Any, Dict, List, cast
+from collections.abc import Iterator
 from typing_extensions import Protocol
 
 import httpx2
@@ -15,6 +16,7 @@ from anthropic import (
     AnthropicVertex,
     BadRequestError,
     OverloadedError,
+    CredentialsError,
     InternalServerError,
     AsyncAnthropicVertex,
     PreconditionFailedError,
@@ -122,8 +124,44 @@ def _assert_tool_runner_calls(calls: List[MockRequestCall]) -> None:
     }
 
 
+@pytest.fixture
+def tokenless_credentials(monkeypatch: pytest.MonkeyPatch) -> Iterator[object]:
+    class TokenlessCredentials:
+        token = None
+        expired = False
+
+    credentials = TokenlessCredentials()
+    refreshed: list[object] = []
+
+    def refresh_without_token(value: object) -> None:
+        refreshed.append(value)
+
+    monkeypatch.setattr("anthropic.lib.vertex._client.refresh_auth", refresh_without_token)
+    yield credentials
+    assert refreshed == [credentials]
+
+
 class TestAnthropicVertex:
     client = AnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("beta", [False, True])
+    def test_tokenless_credentials_after_refresh(
+        self, tokenless_credentials: object, respx_mock: MockRouter, beta: bool
+    ) -> None:
+        with AnthropicVertex(
+            region="region", project_id="project", credentials=cast(Any, tokenless_credentials)
+        ) as client:
+            messages = client.beta.messages if beta else client.messages
+            with pytest.raises(CredentialsError) as exc_info:
+                messages.create(
+                    model="claude-3-sonnet@20240229",
+                    max_tokens=16,
+                    messages=[{"role": "user", "content": "Hello"}],
+                )
+
+        assert str(exc_info.value) == "Could not resolve API token from the environment"
+        assert not respx_mock.calls
 
     @pytest.mark.respx()
     def test_messages_retries(self, respx_mock: MockRouter) -> None:
@@ -476,6 +514,25 @@ def test_refresh_without_google_auth_raises_actionable_error(monkeypatch: pytest
 
 class TestAsyncAnthropicVertex:
     client = AsyncAnthropicVertex(region="region", project_id="project", access_token="my-access-token")
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("beta", [False, True])
+    async def test_tokenless_credentials_after_refresh(
+        self, tokenless_credentials: object, respx_mock: MockRouter, beta: bool
+    ) -> None:
+        async with AsyncAnthropicVertex(
+            region="region", project_id="project", credentials=cast(Any, tokenless_credentials)
+        ) as client:
+            messages = client.beta.messages if beta else client.messages
+            with pytest.raises(CredentialsError) as exc_info:
+                await messages.create(
+                    model="claude-3-sonnet@20240229",
+                    max_tokens=16,
+                    messages=[{"role": "user", "content": "Hello"}],
+                )
+
+        assert str(exc_info.value) == "Could not resolve API token from the environment"
+        assert not respx_mock.calls
 
     @pytest.mark.respx()
     @pytest.mark.asyncio()
