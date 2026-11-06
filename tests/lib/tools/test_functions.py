@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import functools
 from typing import Any, cast
 from contextlib import contextmanager, asynccontextmanager
 from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from anthropic import beta_tool
 from anthropic._compat import PYDANTIC_V1
@@ -85,19 +86,48 @@ class TestFunctionTool:
 
         assert result == "8"
 
+    def test_callable_instance_preserves_annotations_for_validation(self) -> None:
+        class Adder:
+            def __call__(self, value: int) -> str:
+                return str(value + 1)
+
+        function_tool = beta_tool(Adder(), name="adder", description="Add one.")
+
+        assert function_tool.input_schema["properties"] == {"value": {"title": "Value", "type": "integer"}}
+        assert function_tool.call({"value": 2}) == "3"
+        with pytest.raises(ValueError, match="value: Input should be a valid integer"):
+            function_tool.call({"value": "invalid"})
+
+    def test_partial_preserves_remaining_signature_for_validation(self) -> None:
+        def add(left: int, right: int) -> str:
+            """Add two numbers."""
+            return str(left + right)
+
+        function_tool = beta_tool(functools.partial(add, right=2))
+
+        assert function_tool.name == "add"
+        assert function_tool.description == "Add two numbers."
+        assert function_tool.input_schema["properties"] == {
+            "left": {"title": "Left", "type": "integer"},
+            "right": {"title": "Right", "type": "integer", "default": 2},
+        }
+        assert function_tool.call({"left": 3}) == "5"
+        with pytest.raises(ValueError, match="left: Input should be a valid integer"):
+            function_tool.call({"left": "invalid"})
+
     @pytest.mark.parametrize(
         "input_data, expected_error_type, expected_error_msg",
         [
             pytest.param(
                 {"a": "not a number", "b": 3},
                 ValueError,
-                "Invalid arguments for function add_numbers",
+                "Invalid arguments for function add_numbers: a: Input should be a valid integer",
                 id="invalid_argument_type",
             ),
             pytest.param(
                 {"b": 3},
                 ValueError,
-                "Invalid arguments for function add_numbers",
+                "Invalid arguments for function add_numbers: a: Missing required argument",
                 id="missing_required_argument",
             ),
             pytest.param(
@@ -118,6 +148,58 @@ class TestFunctionTool:
 
         with pytest.raises(expected_error_type, match=expected_error_msg):
             function_tool.call(input_data)
+
+    def test_invalid_arguments_message_names_the_field_and_reason(self) -> None:
+        @beta_tool
+        def set_temp(city: str, celsius: int) -> str:
+            """Set temperature."""
+            return f"{city} {celsius}"
+
+        with pytest.raises(
+            ValueError, match=r"Invalid arguments for function set_temp: celsius: Input should be a valid integer"
+        ):
+            set_temp.call({"city": "Paris", "celsius": "hot"})
+
+    def test_validation_error_from_the_body_is_not_reported_as_invalid_arguments(self) -> None:
+        class Payload(BaseModel):
+            count: int
+
+        @beta_tool
+        def parse(count: str) -> str:
+            """Parse a payload."""
+            return str(Payload(count=count).count)
+
+        with pytest.raises(ValidationError, match="count"):
+            parse.call({"count": "not a number"})
+
+    async def test_async_validation_error_from_the_body_is_not_reported_as_invalid_arguments(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        class Payload(BaseModel):
+            count: int
+
+        async def parse(count: str) -> str:
+            """Parse a payload."""
+            return str(Payload(count=count).count)
+
+        tool = beta_async_tool(parse)
+
+        with pytest.raises(ValidationError, match="count"):
+            await tool.call({"count": "not a number"})
+
+    async def test_async_invalid_arguments_message_names_the_field_and_reason(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        async def set_temp(city: str, celsius: int) -> str:
+            """Set temperature."""
+            return f"{city} {celsius}"
+
+        tool = beta_async_tool(set_temp)
+
+        with pytest.raises(
+            ValueError, match=r"Invalid arguments for function set_temp: celsius: Input should be a valid integer"
+        ):
+            await tool.call({"city": "Paris", "celsius": "hot"})
 
     def test_custom_name_and_description(self) -> None:
         def some_function(x: int) -> str:

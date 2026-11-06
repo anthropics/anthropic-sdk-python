@@ -1948,7 +1948,7 @@ async def test_a_call_already_in_the_turn_gets_the_input_error_of_the_tool_added
                 {
                     "type": "tool_result",
                     "tool_use_id": "toolu_weather",
-                    "content": "ValueError('Invalid arguments for function get_weather')",
+                    "content": "ValueError('Invalid arguments for function get_weather: city: Missing required argument')",
                     "is_error": True,
                 }
             ],
