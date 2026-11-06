@@ -30,6 +30,7 @@ from contextlib import (
 from collections.abc import Iterable, Sequence, Generator, AsyncGenerator
 from typing_extensions import Literal, TypedDict, override
 
+import anyio
 import httpx2
 from opentelemetry.trace import Span
 
@@ -1149,6 +1150,8 @@ class BaseAsyncToolRunner(
             raise constructor_arguments_error(thread=thread, params=params, tools=tools, client=client)
 
         super().__init__(thread=thread, options=options, tools=tools or (), max_iterations=max_iterations)
+        self._tool_response_lock = anyio.Lock()
+        # Concurrent callers must share the generated tool response instead of executing the tool twice.
         self._iterator = self.__run__()
         self._last_message: (
             Callable[[], Coroutine[None, None, ParsedBetaMessage[ResponseFormatT]]]
@@ -1311,19 +1314,20 @@ class BaseAsyncToolRunner(
     async def generate_tool_call_response(self) -> BetaUserMessageParam | None:
         """Generate a MessageParam by calling tool functions with any tool use blocks from the last message.
 
-        Note the tool call response is cached, repeated calls to this method will return the same response.
+        The tool call response is cached. Concurrent calls wait for the same generation and return its response.
         With `run_tools_eagerly`, it reuses the results of the reply's calls that have run and runs the rest,
         including the ones `defer_tool_call()` is holding, so that no call runs twice.
 
         None can be returned if no tool call was applicable.
         """
-        if self._cached_tool_call_response is not None:
-            log.debug("Returning cached tool call response.")
-            return self._cached_tool_call_response
+        async with self._tool_response_lock:
+            if self._cached_tool_call_response is not None:
+                log.debug("Returning cached tool call response.")
+                return self._cached_tool_call_response
 
-        response = await self._generate_tool_call_response()
-        self._cached_tool_call_response = response
-        return response
+            response = await self._generate_tool_call_response()
+            self._cached_tool_call_response = response
+            return response
 
     async def _get_last_message(self) -> ParsedBetaMessage[ResponseFormatT] | None:
         if callable(self._last_message):
