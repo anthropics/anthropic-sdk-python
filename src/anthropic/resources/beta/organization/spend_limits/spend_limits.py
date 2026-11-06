@@ -95,6 +95,9 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -167,6 +170,9 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -231,6 +237,11 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -294,6 +305,11 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -372,6 +388,9 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -444,6 +463,9 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -508,6 +530,11 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -571,6 +598,11 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),

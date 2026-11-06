@@ -7,6 +7,7 @@ from .shared import (
     ErrorType as ErrorType,
     ErrorObject as ErrorObject,
     BillingError as BillingError,
+    ErrorDetails as ErrorDetails,
     ErrorResponse as ErrorResponse,
     NotFoundError as NotFoundError,
     APIErrorObject as APIErrorObject,
@@ -16,6 +17,32 @@ from .shared import (
     AuthenticationError as AuthenticationError,
     GatewayTimeoutError as GatewayTimeoutError,
     InvalidRequestError as InvalidRequestError,
+    CMEKKeyDisabledError as CMEKKeyDisabledError,
+    RampLimitExceededError as RampLimitExceededError,
+    CMEKKeyUnreachableError as CMEKKeyUnreachableError,
+    OrganizationOnHoldError as OrganizationOnHoldError,
+    CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError,
+    CMEKContextUnavailableError as CMEKContextUnavailableError,
+    CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails,
+    ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError,
+    RampLimitExceededErrorDetails as RampLimitExceededErrorDetails,
+    CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails,
+    EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError,
+    OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails,
+    RequestBodyEncodingInvalidError as RequestBodyEncodingInvalidError,
+    CMEKKeyNetworkBlockedErrorDetails as CMEKKeyNetworkBlockedErrorDetails,
+    OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
+    ClaudeCodeKeyCreatorNotMemberError as ClaudeCodeKeyCreatorNotMemberError,
+    CMEKContextUnavailableErrorDetails as CMEKContextUnavailableErrorDetails,
+    ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
+    RequestBodyEncodingUnsupportedError as RequestBodyEncodingUnsupportedError,
+    EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
+    RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
+    RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
+    OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
+    ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,
+    RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
 )
 from .message import Message as Message
 from .container import Container as Container
@@ -84,6 +111,7 @@ from .browser_wait_input import BrowserWaitInput as BrowserWaitInput
 from .browser_zoom_input import BrowserZoomInput as BrowserZoomInput
 from .capability_support import CapabilitySupport as CapabilitySupport
 from .computer_key_input import ComputerKeyInput as ComputerKeyInput
+from .file_expired_error import FileExpiredError as FileExpiredError
 from .file_upload_params import FileUploadParams as FileUploadParams
 from .message_stop_event import MessageStopEvent as MessageStopEvent
 from .model_capabilities import ModelCapabilities as ModelCapabilities
@@ -151,6 +179,7 @@ from .citation_page_location import CitationPageLocation as CitationPageLocation
 from .citations_config_param import CitationsConfigParam as CitationsConfigParam
 from .container_upload_block import ContainerUploadBlock as ContainerUploadBlock
 from .raw_message_stop_event import RawMessageStopEvent as RawMessageStopEvent
+from .thread_not_found_error import ThreadNotFoundError as ThreadNotFoundError
 from .tool_choice_auto_param import ToolChoiceAutoParam as ToolChoiceAutoParam
 from .tool_choice_none_param import ToolChoiceNoneParam as ToolChoiceNoneParam
 from .tool_choice_tool_param import ToolChoiceToolParam as ToolChoiceToolParam
@@ -191,6 +220,7 @@ from .json_output_format_param import JSONOutputFormatParam as JSONOutputFormatP
 from .raw_message_stream_event import RawMessageStreamEvent as RawMessageStreamEvent
 from .server_tool_caller_param import ServerToolCallerParam as ServerToolCallerParam
 from .tool_bash_20250124_param import ToolBash20250124Param as ToolBash20250124Param
+from .tool_name_conflict_error import ToolNameConflictError as ToolNameConflictError
 from .user_profile_access_type import UserProfileAccessType as UserProfileAccessType
 from .user_profile_efs_feature import UserProfileEfsFeature as UserProfileEfsFeature
 from .user_profile_efs_program import UserProfileEfsProgram as UserProfileEfsProgram
@@ -231,6 +261,7 @@ from .computer_wait_config_param import ComputerWaitConfigParam as ComputerWaitC
 from .computer_zoom_config_param import ComputerZoomConfigParam as ComputerZoomConfigParam
 from .content_block_source_param import ContentBlockSourceParam as ContentBlockSourceParam
 from .file_document_source_param import FileDocumentSourceParam as FileDocumentSourceParam
+from .file_expired_error_details import FileExpiredErrorDetails as FileExpiredErrorDetails
 from .memory_tool_20250818_param import MemoryTool20250818Param as MemoryTool20250818Param
 from .tool_reference_block_param import ToolReferenceBlockParam as ToolReferenceBlockParam
 from .user_profile_create_params import UserProfileCreateParams as UserProfileCreateParams
@@ -251,6 +282,7 @@ from .computer_double_click_input import ComputerDoubleClickInput as ComputerDou
 from .computer_key_tool_use_block import ComputerKeyToolUseBlock as ComputerKeyToolUseBlock
 from .computer_middle_click_input import ComputerMiddleClickInput as ComputerMiddleClickInput
 from .computer_triple_click_input import ComputerTripleClickInput as ComputerTripleClickInput
+from .file_not_downloadable_error import FileNotDownloadableError as FileNotDownloadableError
 from .image_transformations_param import ImageTransformationsParam as ImageTransformationsParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
 from .server_tool_caller_20260120 import ServerToolCaller20260120 as ServerToolCaller20260120
@@ -262,6 +294,7 @@ from .browser_hover_tool_use_block import BrowserHoverToolUseBlock as BrowserHov
 from .browser_new_tab_config_param import BrowserNewTabConfigParam as BrowserNewTabConfigParam
 from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
 from .citation_page_location_param import CitationPageLocationParam as CitationPageLocationParam
+from .compaction_unavailable_error import CompactionUnavailableError as CompactionUnavailableError
 from .computer_left_mouse_up_input import ComputerLeftMouseUpInput as ComputerLeftMouseUpInput
 from .computer_scroll_config_param import ComputerScrollConfigParam as ComputerScrollConfigParam
 from .computer_type_tool_use_block import ComputerTypeToolUseBlock as ComputerTypeToolUseBlock
@@ -269,6 +302,8 @@ from .computer_wait_tool_use_block import ComputerWaitToolUseBlock as ComputerWa
 from .computer_zoom_tool_use_block import ComputerZoomToolUseBlock as ComputerZoomToolUseBlock
 from .container_upload_block_param import ContainerUploadBlockParam as ContainerUploadBlockParam
 from .raw_content_block_stop_event import RawContentBlockStopEvent as RawContentBlockStopEvent
+from .storage_quota_exceeded_error import StorageQuotaExceededError as StorageQuotaExceededError
+from .user_profile_not_found_error import UserProfileNotFoundError as UserProfileNotFoundError
 from .web_search_tool_result_block import WebSearchToolResultBlock as WebSearchToolResultBlock
 from .web_search_tool_result_error import WebSearchToolResultError as WebSearchToolResultError
 from .browser_hold_key_config_param import BrowserHoldKeyConfigParam as BrowserHoldKeyConfigParam
@@ -293,6 +328,7 @@ from .web_fetch_tool_20260209_param import WebFetchTool20260209Param as WebFetch
 from .web_fetch_tool_20260309_param import WebFetchTool20260309Param as WebFetchTool20260309Param
 from .web_fetch_tool_20260318_param import WebFetchTool20260318Param as WebFetchTool20260318Param
 from .web_search_result_block_param import WebSearchResultBlockParam as WebSearchResultBlockParam
+from .beta_unsupported_charset_error import BetaUnsupportedCharsetError as BetaUnsupportedCharsetError
 from .browser_close_tab_config_param import BrowserCloseTabConfigParam as BrowserCloseTabConfigParam
 from .browser_list_tabs_config_param import BrowserListTabsConfigParam as BrowserListTabsConfigParam
 from .browser_new_tab_tool_use_block import BrowserNewTabToolUseBlock as BrowserNewTabToolUseBlock
@@ -307,6 +343,8 @@ from .computer_scroll_tool_use_block import ComputerScrollToolUseBlock as Comput
 from .computer_toolset_configs_param import ComputerToolsetConfigsParam as ComputerToolsetConfigsParam
 from .thinking_config_adaptive_param import ThinkingConfigAdaptiveParam as ThinkingConfigAdaptiveParam
 from .thinking_config_disabled_param import ThinkingConfigDisabledParam as ThinkingConfigDisabledParam
+from .thread_already_continued_error import ThreadAlreadyContinuedError as ThreadAlreadyContinuedError
+from .thread_not_found_error_details import ThreadNotFoundErrorDetails as ThreadNotFoundErrorDetails
 from .web_fetch_url_source_all_param import WebFetchURLSourceAllParam as WebFetchURLSourceAllParam
 from .web_search_tool_20250305_param import WebSearchTool20250305Param as WebSearchTool20250305Param
 from .web_search_tool_20260209_param import WebSearchTool20260209Param as WebSearchTool20260209Param
@@ -321,7 +359,11 @@ from .browser_switch_tab_config_param import BrowserSwitchTabConfigParam as Brow
 from .citation_content_block_location import CitationContentBlockLocation as CitationContentBlockLocation
 from .computer_toolset_20260801_param import ComputerToolset20260801Param as ComputerToolset20260801Param
 from .message_count_tokens_tool_param import MessageCountTokensToolParam as MessageCountTokensToolParam
+from .org_member_limit_exceeded_error import OrgMemberLimitExceededError as OrgMemberLimitExceededError
 from .response_browser_tool_use_block import ResponseBrowserToolUseBlock as ResponseBrowserToolUseBlock
+from .thread_continue_in_flight_error import ThreadContinueInFlightError as ThreadContinueInFlightError
+from .thread_unsupported_feature_name import ThreadUnsupportedFeatureName as ThreadUnsupportedFeatureName
+from .tool_reference_unresolved_error import ToolReferenceUnresolvedError as ToolReferenceUnresolvedError
 from .tool_text_editor_20250124_param import ToolTextEditor20250124Param as ToolTextEditor20250124Param
 from .tool_text_editor_20250429_param import ToolTextEditor20250429Param as ToolTextEditor20250429Param
 from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as ToolTextEditor20250728Param
@@ -341,11 +383,16 @@ from .browser_scroll_to_tool_use_block import BrowserScrollToToolUseBlock as Bro
 from .citations_search_result_location import CitationsSearchResultLocation as CitationsSearchResultLocation
 from .code_execution_tool_result_block import CodeExecutionToolResultBlock as CodeExecutionToolResultBlock
 from .code_execution_tool_result_error import CodeExecutionToolResultError as CodeExecutionToolResultError
+from .compaction_block_ambiguous_error import CompactionBlockAmbiguousError as CompactionBlockAmbiguousError
+from .compaction_block_misplaced_error import CompactionBlockMisplacedError as CompactionBlockMisplacedError
+from .compaction_incomplete_turn_error import CompactionIncompleteTurnError as CompactionIncompleteTurnError
 from .computer_hold_key_tool_use_block import ComputerHoldKeyToolUseBlock as ComputerHoldKeyToolUseBlock
 from .computer_left_click_config_param import ComputerLeftClickConfigParam as ComputerLeftClickConfigParam
 from .computer_mouse_move_config_param import ComputerMouseMoveConfigParam as ComputerMouseMoveConfigParam
 from .computer_screenshot_config_param import ComputerScreenshotConfigParam as ComputerScreenshotConfigParam
 from .response_computer_tool_use_block import ResponseComputerToolUseBlock as ResponseComputerToolUseBlock
+from .thread_unsupported_request_error import ThreadUnsupportedRequestError as ThreadUnsupportedRequestError
+from .tool_name_conflict_error_details import ToolNameConflictErrorDetails as ToolNameConflictErrorDetails
 from .web_fetch_tool_result_error_code import WebFetchToolResultErrorCode as WebFetchToolResultErrorCode
 from .browser_double_click_config_param import BrowserDoubleClickConfigParam as BrowserDoubleClickConfigParam
 from .browser_form_input_tool_use_block import BrowserFormInputToolUseBlock as BrowserFormInputToolUseBlock
@@ -359,8 +406,10 @@ from .browser_switch_tab_tool_use_block import BrowserSwitchTabToolUseBlock as B
 from .browser_triple_click_config_param import BrowserTripleClickConfigParam as BrowserTripleClickConfigParam
 from .code_execution_output_block_param import CodeExecutionOutputBlockParam as CodeExecutionOutputBlockParam
 from .code_execution_result_block_param import CodeExecutionResultBlockParam as CodeExecutionResultBlockParam
+from .compaction_content_mismatch_error import CompactionContentMismatchError as CompactionContentMismatchError
 from .computer_right_click_config_param import ComputerRightClickConfigParam as ComputerRightClickConfigParam
 from .server_tool_caller_20260120_param import ServerToolCaller20260120Param as ServerToolCaller20260120Param
+from .thread_fingerprint_mismatch_error import ThreadFingerprintMismatchError as ThreadFingerprintMismatchError
 from .web_fetch_tool_result_block_param import WebFetchToolResultBlockParam as WebFetchToolResultBlockParam
 from .web_fetch_tool_result_error_block import WebFetchToolResultErrorBlock as WebFetchToolResultErrorBlock
 from .web_fetch_url_source_except_param import WebFetchURLSourceExceptParam as WebFetchURLSourceExceptParam
@@ -373,12 +422,14 @@ from .code_execution_tool_20250522_param import CodeExecutionTool20250522Param a
 from .code_execution_tool_20250825_param import CodeExecutionTool20250825Param as CodeExecutionTool20250825Param
 from .code_execution_tool_20260120_param import CodeExecutionTool20260120Param as CodeExecutionTool20260120Param
 from .code_execution_tool_20260521_param import CodeExecutionTool20260521Param as CodeExecutionTool20260521Param
+from .compaction_signature_invalid_error import CompactionSignatureInvalidError as CompactionSignatureInvalidError
 from .computer_double_click_config_param import ComputerDoubleClickConfigParam as ComputerDoubleClickConfigParam
 from .computer_left_click_tool_use_block import ComputerLeftClickToolUseBlock as ComputerLeftClickToolUseBlock
 from .computer_middle_click_config_param import ComputerMiddleClickConfigParam as ComputerMiddleClickConfigParam
 from .computer_mouse_move_tool_use_block import ComputerMouseMoveToolUseBlock as ComputerMouseMoveToolUseBlock
 from .computer_screenshot_tool_use_block import ComputerScreenshotToolUseBlock as ComputerScreenshotToolUseBlock
 from .computer_triple_click_config_param import ComputerTripleClickConfigParam as ComputerTripleClickConfigParam
+from .concurrent_membership_change_error import ConcurrentMembershipChangeError as ConcurrentMembershipChangeError
 from .content_block_source_content_param import ContentBlockSourceContentParam as ContentBlockSourceContentParam
 from .tool_search_tool_result_error_code import ToolSearchToolResultErrorCode as ToolSearchToolResultErrorCode
 from .user_profile_external_user_details import UserProfileExternalUserDetails as UserProfileExternalUserDetails
@@ -390,18 +441,21 @@ from .browser_read_network_tool_use_block import BrowserReadNetworkToolUseBlock 
 from .browser_triple_click_tool_use_block import BrowserTripleClickToolUseBlock as BrowserTripleClickToolUseBlock
 from .computer_left_mouse_up_config_param import ComputerLeftMouseUpConfigParam as ComputerLeftMouseUpConfigParam
 from .computer_right_click_tool_use_block import ComputerRightClickToolUseBlock as ComputerRightClickToolUseBlock
+from .file_not_downloadable_error_details import FileNotDownloadableErrorDetails as FileNotDownloadableErrorDetails
 from .response_browser_key_tool_use_block import ResponseBrowserKeyToolUseBlock as ResponseBrowserKeyToolUseBlock
 from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam as ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
 from .user_profile_enforcement_action_ban import UserProfileEnforcementActionBan as UserProfileEnforcementActionBan
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
+from .available_tools_limit_exceeded_error import AvailableToolsLimitExceededError as AvailableToolsLimitExceededError
 from .browser_get_page_text_tool_use_block import BrowserGetPageTextToolUseBlock as BrowserGetPageTextToolUseBlock
 from .browser_javascript_exec_config_param import BrowserJavascriptExecConfigParam as BrowserJavascriptExecConfigParam
 from .browser_left_click_drag_config_param import BrowserLeftClickDragConfigParam as BrowserLeftClickDragConfigParam
 from .browser_left_mouse_down_config_param import BrowserLeftMouseDownConfigParam as BrowserLeftMouseDownConfigParam
 from .browser_left_mouse_up_tool_use_block import BrowserLeftMouseUpToolUseBlock as BrowserLeftMouseUpToolUseBlock
 from .citations_web_search_result_location import CitationsWebSearchResultLocation as CitationsWebSearchResultLocation
+from .compaction_unavailable_error_details import CompactionUnavailableErrorDetails as CompactionUnavailableErrorDetails
 from .computer_double_click_tool_use_block import ComputerDoubleClickToolUseBlock as ComputerDoubleClickToolUseBlock
 from .computer_middle_click_tool_use_block import ComputerMiddleClickToolUseBlock as ComputerMiddleClickToolUseBlock
 from .computer_triple_click_tool_use_block import ComputerTripleClickToolUseBlock as ComputerTripleClickToolUseBlock
@@ -410,8 +464,10 @@ from .response_browser_type_tool_use_block import ResponseBrowserTypeToolUseBloc
 from .response_browser_wait_tool_use_block import ResponseBrowserWaitToolUseBlock as ResponseBrowserWaitToolUseBlock
 from .response_browser_zoom_tool_use_block import ResponseBrowserZoomToolUseBlock as ResponseBrowserZoomToolUseBlock
 from .response_computer_key_tool_use_block import ResponseComputerKeyToolUseBlock as ResponseComputerKeyToolUseBlock
+from .storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails as StorageQuotaExceededErrorDetails
 from .tool_search_tool_bm25_20251119_param import ToolSearchToolBm25_20251119Param as ToolSearchToolBm25_20251119Param
 from .tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock as ToolSearchToolSearchResultBlock
+from .user_profile_not_found_error_details import UserProfileNotFoundErrorDetails as UserProfileNotFoundErrorDetails
 from .web_search_tool_result_block_content import WebSearchToolResultBlockContent as WebSearchToolResultBlockContent
 from .bash_code_execution_tool_result_block import BashCodeExecutionToolResultBlock as BashCodeExecutionToolResultBlock
 from .bash_code_execution_tool_result_error import BashCodeExecutionToolResultError as BashCodeExecutionToolResultError
@@ -424,6 +480,9 @@ from .citation_search_result_location_param import (
     CitationSearchResultLocationParam as CitationSearchResultLocationParam,
 )
 from .code_execution_tool_result_error_code import CodeExecutionToolResultErrorCode as CodeExecutionToolResultErrorCode
+from .compaction_nothing_to_summarize_error import (
+    CompactionNothingToSummarizeError as CompactionNothingToSummarizeError,
+)
 from .computer_cursor_position_config_param import (
     ComputerCursorPositionConfigParam as ComputerCursorPositionConfigParam,
 )
@@ -447,6 +506,9 @@ from .bash_code_execution_output_block_param import (
 from .bash_code_execution_result_block_param import (
     BashCodeExecutionResultBlockParam as BashCodeExecutionResultBlockParam,
 )
+from .beta_unsupported_charset_error_details import (
+    BetaUnsupportedCharsetErrorDetails as BetaUnsupportedCharsetErrorDetails,
+)
 from .browser_javascript_exec_tool_use_block import (
     BrowserJavascriptExecToolUseBlock as BrowserJavascriptExecToolUseBlock,
 )
@@ -458,8 +520,17 @@ from .code_execution_tool_result_block_param import (
 from .code_execution_tool_result_error_param import (
     CodeExecutionToolResultErrorParam as CodeExecutionToolResultErrorParam,
 )
+from .compaction_tool_changes_mismatch_error import (
+    CompactionToolChangesMismatchError as CompactionToolChangesMismatchError,
+)
 from .response_browser_scroll_tool_use_block import (
     ResponseBrowserScrollToolUseBlock as ResponseBrowserScrollToolUseBlock,
+)
+from .skill_read_blocked_undecryptable_error import (
+    SkillReadBlockedUndecryptableError as SkillReadBlockedUndecryptableError,
+)
+from .thread_already_continued_error_details import (
+    ThreadAlreadyContinuedErrorDetails as ThreadAlreadyContinuedErrorDetails,
 )
 from .user_profile_enforcement_action_reason import (
     UserProfileEnforcementActionReason as UserProfileEnforcementActionReason,
@@ -476,11 +547,20 @@ from .computer_left_click_drag_tool_use_block import (
 from .computer_left_mouse_down_tool_use_block import (
     ComputerLeftMouseDownToolUseBlock as ComputerLeftMouseDownToolUseBlock,
 )
+from .org_member_limit_exceeded_error_details import (
+    OrgMemberLimitExceededErrorDetails as OrgMemberLimitExceededErrorDetails,
+)
 from .response_browser_new_tab_tool_use_block import (
     ResponseBrowserNewTabToolUseBlock as ResponseBrowserNewTabToolUseBlock,
 )
 from .response_computer_scroll_tool_use_block import (
     ResponseComputerScrollToolUseBlock as ResponseComputerScrollToolUseBlock,
+)
+from .thread_continue_in_flight_error_details import (
+    ThreadContinueInFlightErrorDetails as ThreadContinueInFlightErrorDetails,
+)
+from .tool_reference_unresolved_error_details import (
+    ToolReferenceUnresolvedErrorDetails as ToolReferenceUnresolvedErrorDetails,
 )
 from .web_fetch_tool_result_error_block_param import (
     WebFetchToolResultErrorBlockParam as WebFetchToolResultErrorBlockParam,
@@ -488,14 +568,32 @@ from .web_fetch_tool_result_error_block_param import (
 from .code_execution_tool_result_block_content import (
     CodeExecutionToolResultBlockContent as CodeExecutionToolResultBlockContent,
 )
+from .compaction_block_ambiguous_error_details import (
+    CompactionBlockAmbiguousErrorDetails as CompactionBlockAmbiguousErrorDetails,
+)
+from .compaction_block_misplaced_error_details import (
+    CompactionBlockMisplacedErrorDetails as CompactionBlockMisplacedErrorDetails,
+)
+from .compaction_incomplete_turn_error_details import (
+    CompactionIncompleteTurnErrorDetails as CompactionIncompleteTurnErrorDetails,
+)
 from .response_browser_hold_key_tool_use_block import (
     ResponseBrowserHoldKeyToolUseBlock as ResponseBrowserHoldKeyToolUseBlock,
 )
 from .response_browser_navigate_tool_use_block import (
     ResponseBrowserNavigateToolUseBlock as ResponseBrowserNavigateToolUseBlock,
 )
+from .thread_unsupported_request_error_details import (
+    ThreadUnsupportedRequestErrorDetails as ThreadUnsupportedRequestErrorDetails,
+)
 from .citation_web_search_result_location_param import (
     CitationWebSearchResultLocationParam as CitationWebSearchResultLocationParam,
+)
+from .compaction_content_mismatch_error_details import (
+    CompactionContentMismatchErrorDetails as CompactionContentMismatchErrorDetails,
+)
+from .compaction_too_many_tool_references_error import (
+    CompactionTooManyToolReferencesError as CompactionTooManyToolReferencesError,
 )
 from .response_browser_close_tab_tool_use_block import (
     ResponseBrowserCloseTabToolUseBlock as ResponseBrowserCloseTabToolUseBlock,
@@ -511,6 +609,9 @@ from .response_browser_scroll_to_tool_use_block import (
 )
 from .response_computer_hold_key_tool_use_block import (
     ResponseComputerHoldKeyToolUseBlock as ResponseComputerHoldKeyToolUseBlock,
+)
+from .thread_fingerprint_mismatch_error_details import (
+    ThreadFingerprintMismatchErrorDetails as ThreadFingerprintMismatchErrorDetails,
 )
 from .user_profile_enforcement_action_next_step import (
     UserProfileEnforcementActionNextStep as UserProfileEnforcementActionNextStep,
@@ -529,6 +630,12 @@ from .bash_code_execution_tool_result_error_code import (
 )
 from .browser_state_change_download_failed_param import (
     BrowserStateChangeDownloadFailedParam as BrowserStateChangeDownloadFailedParam,
+)
+from .compaction_signature_invalid_error_details import (
+    CompactionSignatureInvalidErrorDetails as CompactionSignatureInvalidErrorDetails,
+)
+from .concurrent_membership_change_error_details import (
+    ConcurrentMembershipChangeErrorDetails as ConcurrentMembershipChangeErrorDetails,
 )
 from .response_browser_form_input_tool_use_block import (
     ResponseBrowserFormInputToolUseBlock as ResponseBrowserFormInputToolUseBlock,
@@ -578,6 +685,12 @@ from .response_computer_screenshot_tool_use_block import (
 from .user_profile_enforcement_action_restriction import (
     UserProfileEnforcementActionRestriction as UserProfileEnforcementActionRestriction,
 )
+from .available_tools_limit_exceeded_error_details import (
+    AvailableToolsLimitExceededErrorDetails as AvailableToolsLimitExceededErrorDetails,
+)
+from .beta_organization_not_enrolled_in_beta_error import (
+    BetaOrganizationNotEnrolledInBetaError as BetaOrganizationNotEnrolledInBetaError,
+)
 from .response_browser_double_click_tool_use_block import (
     ResponseBrowserDoubleClickToolUseBlock as ResponseBrowserDoubleClickToolUseBlock,
 )
@@ -608,6 +721,9 @@ from .text_editor_code_execution_view_result_block import (
 from .browser_state_change_download_completed_param import (
     BrowserStateChangeDownloadCompletedParam as BrowserStateChangeDownloadCompletedParam,
 )
+from .compaction_nothing_to_summarize_error_details import (
+    CompactionNothingToSummarizeErrorDetails as CompactionNothingToSummarizeErrorDetails,
+)
 from .response_browser_get_page_text_tool_use_block import (
     ResponseBrowserGetPageTextToolUseBlock as ResponseBrowserGetPageTextToolUseBlock,
 )
@@ -623,8 +739,14 @@ from .response_computer_middle_click_tool_use_block import (
 from .response_computer_triple_click_tool_use_block import (
     ResponseComputerTripleClickToolUseBlock as ResponseComputerTripleClickToolUseBlock,
 )
+from .compaction_tool_changes_mismatch_error_details import (
+    CompactionToolChangesMismatchErrorDetails as CompactionToolChangesMismatchErrorDetails,
+)
 from .response_computer_left_mouse_up_tool_use_block import (
     ResponseComputerLeftMouseUpToolUseBlock as ResponseComputerLeftMouseUpToolUseBlock,
+)
+from .skill_read_blocked_undecryptable_error_details import (
+    SkillReadBlockedUndecryptableErrorDetails as SkillReadBlockedUndecryptableErrorDetails,
 )
 from .text_editor_code_execution_create_result_block import (
     TextEditorCodeExecutionCreateResultBlock as TextEditorCodeExecutionCreateResultBlock,
@@ -650,6 +772,9 @@ from .response_computer_left_mouse_down_tool_use_block import (
 from .web_search_tool_result_block_param_content_param import (
     WebSearchToolResultBlockParamContentParam as WebSearchToolResultBlockParamContentParam,
 )
+from .compaction_too_many_tool_references_error_details import (
+    CompactionTooManyToolReferencesErrorDetails as CompactionTooManyToolReferencesErrorDetails,
+)
 from .text_editor_code_execution_tool_result_error_code import (
     TextEditorCodeExecutionToolResultErrorCode as TextEditorCodeExecutionToolResultErrorCode,
 )
@@ -664,6 +789,9 @@ from .text_editor_code_execution_view_result_block_param import (
 )
 from .text_editor_code_execution_str_replace_result_block import (
     TextEditorCodeExecutionStrReplaceResultBlock as TextEditorCodeExecutionStrReplaceResultBlock,
+)
+from .beta_organization_not_enrolled_in_beta_error_details import (
+    BetaOrganizationNotEnrolledInBetaErrorDetails as BetaOrganizationNotEnrolledInBetaErrorDetails,
 )
 from .code_execution_tool_result_block_param_content_param import (
     CodeExecutionToolResultBlockParamContentParam as CodeExecutionToolResultBlockParamContentParam,

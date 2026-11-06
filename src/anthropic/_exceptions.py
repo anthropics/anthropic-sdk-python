@@ -1,27 +1,38 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Union, cast
+from typing import TYPE_CHECKING, Any, cast
 from typing_extensions import Literal
 
 import httpx2
 
-from ._utils import is_dict
-from .types.shared.error_type import ErrorType
+from ._utils import extract_property
+from ._models import construct_type_or_none
+
+if TYPE_CHECKING:
+    from .types.shared.error_type import ErrorType
+    from .types.shared.error_details import ErrorDetails
 
 __all__ = [
     "BadRequestError",
     "AuthenticationError",
     "PermissionDeniedError",
     "NotFoundError",
+    "RequestTimeoutError",
     "ConflictError",
+    "PreconditionFailedError",
+    "ContentTooLargeError",
     "UnprocessableEntityError",
     "RateLimitError",
+    "RequestHeaderFieldsTooLargeError",
+    "ClientClosedRequestError",
     "InternalServerError",
+    "HTTPNotImplementedError",
+    "ServiceUnavailableError",
+    "GatewayTimeoutError",
+    "OverloadedError",
     "RetryableError",
     "RequestTooLargeError",
-    "ServiceUnavailableError",
-    "OverloadedError",
     "DeadlineExceededError",
     "CredentialsError",
     "IdentityTokenFileError",
@@ -72,24 +83,57 @@ class APIStatusError(APIError):
     """Raised when an API response has a status code of 4xx or 5xx."""
 
     response: httpx2.Response
+
     status_code: int
+
     request_id: str | None
-    type: ErrorType | None
 
     workspace_id: str | None
 
+    api_message: str | None
+    """A human-readable explanation of the error.
+
+    Its wording can change, so don't match on it.
+
+    `error.message` from the response body, if present.
+    """
+
+    type: ErrorType | None
+    """The broad category of the error.
+
+    `error.type` from the response body, if present.
+    """
+
+    error_code: str | None
+    """A stable code that names the cause.
+
+    `error.details.error_code` from the response body, if present and a string.
+    """
+
+    details: ErrorDetails | None
+    """Machine-readable detail about the cause of the error.
+
+    `error_code` names the cause; branch on it rather than on `message`. Absent when
+    the error has no code. Treat an unrecognized `error_code` as the bare `type`.
+
+    `error.details` from the response body, if present.
+    """
+
     def __init__(self, message: str, *, response: httpx2.Response, body: object | None) -> None:
+        # imported here so that modules in `types` can import this one
+        from .types.shared.error_details import ErrorDetails
+
         super().__init__(message, response.request, body=body)
         self.response = response
         self.status_code = response.status_code
         self.request_id = response.headers.get("request-id")
         self.workspace_id = response.headers.get("anthropic-workspace-id")
-
-        self.type = None
-        if is_dict(body):
-            error = body.get("error")
-            if is_dict(error):
-                self.type = cast(Union[ErrorType, None], error.get("type"))
+        self.api_message = extract_property(body, "error", "message")
+        self.type = extract_property(body, "error", "type")
+        self.error_code = extract_error_code(body)
+        self.details = construct_type_or_none(
+            value=extract_property(body, "error", "details"), type_=cast(Any, ErrorDetails)
+        )
 
 
 class APIConnectionError(APIError):
@@ -148,12 +192,24 @@ class NotFoundError(APIStatusError):
     status_code: Literal[404] = 404  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
+class RequestTimeoutError(APIStatusError):
+    status_code: Literal[408] = 408  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
 class ConflictError(APIStatusError):
     status_code: Literal[409] = 409  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class RequestTooLargeError(APIStatusError):
+class PreconditionFailedError(APIStatusError):
+    status_code: Literal[412] = 412  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class ContentTooLargeError(APIStatusError):
     status_code: Literal[413] = 413  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+RequestTooLargeError = ContentTooLargeError
+"""Deprecated: use `ContentTooLargeError`."""
 
 
 class UnprocessableEntityError(APIStatusError):
@@ -164,17 +220,38 @@ class RateLimitError(APIStatusError):
     status_code: Literal[429] = 429  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class ServiceUnavailableError(APIStatusError):
-    status_code: Literal[503] = 503  # pyright: ignore[reportIncompatibleVariableOverride]
+class RequestHeaderFieldsTooLargeError(APIStatusError):
+    status_code: Literal[431] = 431  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
-class OverloadedError(APIStatusError):
-    status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]
-
-
-class DeadlineExceededError(APIStatusError):
-    status_code: Literal[504] = 504  # pyright: ignore[reportIncompatibleVariableOverride]
+class ClientClosedRequestError(APIStatusError):
+    status_code: Literal[499] = 499  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class InternalServerError(APIStatusError):
     pass
+
+
+class HTTPNotImplementedError(InternalServerError):
+    status_code: Literal[501] = 501  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class ServiceUnavailableError(InternalServerError):
+    status_code: Literal[503] = 503  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class GatewayTimeoutError(InternalServerError):
+    status_code: Literal[504] = 504  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+DeadlineExceededError = GatewayTimeoutError
+"""Deprecated: use `GatewayTimeoutError`."""
+
+
+class OverloadedError(InternalServerError):
+    status_code: Literal[529] = 529  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+def extract_error_code(body: object) -> str | None:
+    error_code = extract_property(body, "error", "details", "error_code")
+    return error_code if isinstance(error_code, str) else None

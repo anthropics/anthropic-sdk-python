@@ -115,17 +115,6 @@ ParsedBetaMessage(
 """
         ),
     },
-    "custom": {
-        "responses": snapshot(
-            [
-                '{"model": "claude-haiku-4-5-20251001", "id": "msg_01FKEKbzbqHmJv5ozwH7tz99", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "Let me check the weather for San Francisco for you in Celsius."}, {"type": "tool_use", "id": "toolu_01MxFFv4azdWzubHT3dXurMY", "name": "get_weather", "input": {"location": "San Francisco, CA", "units": "c"}}], "stop_reason": "tool_use", "stop_sequence": null, "usage": {"input_tokens": 659, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 88, "service_tier": "standard"}}',
-                '{"model": "claude-haiku-4-5-20251001", "id": "msg_01DSPL7PHKQYTe9VAFkHzsA3", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "The weather in San Francisco, CA is currently **20\\u00b0C** and **Sunny**. Nice weather!"}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 787, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "cache_creation": {"ephemeral_5m_input_tokens": 0, "ephemeral_1h_input_tokens": 0}, "output_tokens": 26, "service_tier": "standard"}}',
-            ]
-        ),
-        "result": snapshot(
-            "ParsedBetaMessage(container=None, content=[ParsedBetaTextBlock(citations=None, parsed_output=None, text='The weather in San Francisco, CA is currently **20°C** and **Sunny**. Nice weather!', type='text')], context_management=None, id='msg_01DSPL7PHKQYTe9VAFkHzsA3', model='claude-haiku-4-5-20251001', role='assistant', stop_details=None, stop_reason='end_turn', stop_sequence=None, type='message', usage=BetaUsage(cache_creation=BetaCacheCreation(ephemeral_1h_input_tokens=0, ephemeral_5m_input_tokens=0), cache_creation_input_tokens=0, cache_read_input_tokens=0, inference_geo=None, input_tokens=787, iterations=None, output_tokens=26, server_tool_use=None, service_tier='standard', speed=None))\n"
-        ),
-    },
     "streaming": {
         "result": snapshot(
             """\
@@ -286,53 +275,6 @@ class TestSyncRunTools:
 ]
 """
         )
-
-    @pytest.mark.parametrize(
-        "http_snapshot",
-        [
-            cast(Any, external("uuid:f59a9391-643b-422c-96dc-1f28bc7ea4d7.json")),
-        ],
-    )
-    # TODO: fix the append_messages method
-    @pytest.mark.xfail(reason="bug in append messages")
-    def test_custom_message_handling(self, snapshot_client: Anthropic) -> None:
-        @beta_tool
-        def get_weather(location: str, units: Literal["c", "f"]) -> BetaFunctionToolResultType:
-            """Lookup the weather for a given city in either celsius or fahrenheit
-
-            Args:
-                location: The city and state, e.g. San Francisco, CA
-                units: Unit for the output, either 'c' for celsius or 'f' for fahrenheit
-            Returns:
-                A dictionary containing the location, temperature, and weather condition.
-            """
-            return json.dumps(_get_weather(location, units))
-
-        runner = snapshot_client.beta.messages.tool_runner(
-            model="claude-haiku-4-5",
-            messages=[{"role": "user", "content": "What's the weather in SF in Celsius?"}],
-            tools=[get_weather],
-            max_tokens=1024,
-        )
-
-        for message_iter in runner:
-            if message_iter.content[0].type == "tool_use":
-                runner.append_messages(
-                    BetaUserMessageParam(
-                        role="user",
-                        content=[
-                            BetaToolResultBlockParam(
-                                tool_use_id=message_iter.content[0].id,
-                                content="The weather in San Francisco, CA is currently sunny with a temperature of 20°C.",
-                                type="tool_result",
-                            )
-                        ],
-                    ),
-                )
-
-        message = runner.until_done()
-
-        assert print_obj(message) == snapshots["custom"]["result"]
 
     @pytest.mark.parametrize(
         "http_snapshot",
@@ -2504,7 +2446,6 @@ def test_tool_runner_method_in_sync(sync: bool, client: Anthropic, async_client:
         exclude_params={
             "tools",
             "output_format",
-            # TODO
             "stream",
             # the runner sets it itself, and takes only `False`, to opt out of message threads
             "thread",

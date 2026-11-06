@@ -82,6 +82,9 @@ class Effective(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",
@@ -165,6 +168,9 @@ class AsyncEffective(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",

@@ -83,6 +83,15 @@ class Targets(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -153,6 +162,15 @@ class Targets(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -232,6 +250,15 @@ class Targets(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -303,6 +330,15 @@ class Targets(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -396,6 +432,15 @@ class AsyncTargets(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -466,6 +511,15 @@ class AsyncTargets(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -545,6 +599,15 @@ class AsyncTargets(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -616,6 +679,15 @@ class AsyncTargets(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")

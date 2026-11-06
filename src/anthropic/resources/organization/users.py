@@ -226,6 +226,11 @@ class Users(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -448,6 +453,11 @@ class AsyncUsers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")

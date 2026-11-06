@@ -142,7 +142,7 @@ class TestUserProfiles:
             external_id="x",
             external_user_details={
                 "account_status": "suspended",
-                "country": "country",
+                "country": "SE",
                 "email_hash": "x",
                 "entity_type": "individual",
                 "name_hash": "x",
@@ -464,7 +464,7 @@ class TestAsyncUserProfiles:
             external_id="x",
             external_user_details={
                 "account_status": "suspended",
-                "country": "country",
+                "country": "SE",
                 "email_hash": "x",
                 "entity_type": "individual",
                 "name_hash": "x",

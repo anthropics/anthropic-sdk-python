@@ -11,8 +11,8 @@ from opentelemetry.trace import Status, StatusCode
 from ._utils import MessageCreateBody, get
 from ...types import Message, ParsedMessage, RawMessageStartEvent, RawMessageStreamEvent
 from ._content import set_message_content
-from ._response import set_response, set_time_to_first_chunk
-from ..._tracing import FirstEnd, StreamEnd, set_error_status
+from ._response import set_usage_sums, set_time_to_first_chunk, without_message_delta_fields
+from ..._tracing import FirstEnd, StreamEnd, set_error_status, set_response_attributes
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaMessage, BetaRawMessageStartEvent, BetaRawMessageStreamEvent
 from ..._exceptions import AnthropicError
@@ -44,12 +44,14 @@ class StreamedMessage:
         span: trace.Span,
         body: MessageCreateBody,
         *,
+        span_name: str | None,
         request_headers: httpx2.Headers,
         content: bool,
         max_content_bytes: int,
         start_time: int,
     ) -> None:
         self._span = span
+        self._span_name = span_name
         self._body = body
         self._request_headers = request_headers
         self._parsed = False
@@ -95,8 +97,12 @@ class StreamedMessage:
             withheld = self._snapshot_withheld
             message = self._snapshot if shared is None else shared()
             if message is not None:
-                # `message_delta` has the last of what `set_response` reads, so a stream that ends after it lacks nothing.
-                set_response(self._span, message, complete=self._has_message_delta and not withheld)
+                # `message_delta` has the last of what the span reads, so a stream that ends after it lacks nothing.
+                complete = self._has_message_delta and not withheld
+                set_response_attributes(
+                    self._span, self._span_name, message if complete else without_message_delta_fields(message)
+                )
+                set_usage_sums(self._span, message, complete=complete, iterations=isinstance(message, BetaMessage))
             if self._content:
                 # Before `message_stop` the snapshot is partial: a `tool_use` block has the input parsed so far.
                 output = message.content if message is not None and shared is not None and not withheld else None

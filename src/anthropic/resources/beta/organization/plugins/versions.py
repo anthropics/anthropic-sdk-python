@@ -131,6 +131,17 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -426,6 +437,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -554,6 +570,17 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -849,6 +876,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

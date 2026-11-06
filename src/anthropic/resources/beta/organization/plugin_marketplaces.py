@@ -366,6 +366,9 @@ class PluginMarketplaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError:
         """
         extra_headers = {
             **strip_not_given(
@@ -843,6 +846,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError:
         """
         extra_headers = {
             **strip_not_given(

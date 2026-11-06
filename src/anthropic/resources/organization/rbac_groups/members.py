@@ -130,6 +130,11 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -181,6 +186,11 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -316,6 +326,11 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -367,6 +382,11 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")

@@ -85,6 +85,15 @@ class Bundles(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -147,6 +156,15 @@ class Bundles(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(
@@ -233,6 +251,15 @@ class AsyncBundles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not bundle_id:
             raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
@@ -295,6 +322,15 @@ class AsyncBundles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(

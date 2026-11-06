@@ -1,10 +1,81 @@
 # Changelog
 
-## Unreleased
+## [2.6.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.5.0...v2.6.0) (2026-11-05)
+
+### Features
+
+* **api:** add error code for ramp limit errors
+* **api:** add error codes for External Key validation failures
+* **api:** add support for signing organization members out everywhere
+
 
 ### Bug Fixes
 
-* **middleware:** preserve serving-hop usage iterations and relabel only the final sampling iteration during streaming refusal fallback.
+* **bedrock,vertex:** raise error-code and status exception classes on platform clients
+* **bedrock:** keep a custom http_client and aws_profile on copies made with copy and with_options
+
+
+### Chores
+
+* **client:** stop recording sampling parameters on OpenTelemetry spans
+* **docs:** describe the type and message of API errors
+* **internal:** define the status error mapping once on the base client
+* **internal:** tell contributors when a runtime type check belongs
+* **tests:** remove ambient ANTHROPIC_ and AWS_ variables before the tests run
+
+
+### Documentation
+
+* **client:** describe the type, message, code and details of API errors
+* **client:** list each method's errors without their descriptions
+
+## [2.5.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.5.0) (2026-11-04)
+
+### Features
+
+* **api:** add error details types and new error type values
+* **api:** add ids filter to list workspaces
+* **client:** add error classes for HTTP statuses and API error codes, and error_code, details and api_message on APIStatusError
+
+
+### Bug Fixes
+
+* **api:** capitalize CMEK in error details type names
+* **api:** move some error details types to the resource they describe
+* **bedrock:** raise a ValueError when model is "." or ".." instead of sending the request to a different path
+* **bedrock:** raise a ValueError when model is empty instead of sending the request to `/model//invoke`
+* **client:** make OverloadedError and ServiceUnavailableError subclasses of InternalServerError
+* **client:** make the first parse of each response model thread-safe
+* **client:** reject path parameters such as '..;x' and ';x'
+* **client:** validate unions correctly across threads on pydantic v1
+* **tools:** keep the memory tool from renaming or deleting the /memories directory
+* **vertex:** percent-encode the model, project ID and region in the request path
+
+
+### Chores
+
+* **api:** update example values for pattern-constrained string fields
+* **ci:** also run the tests with deferred pydantic model builds
+* **docs:** clarify plugin reach values
+* **docs:** clarify plugin version description and plugin reach
+* **docs:** clarify plugin version description length
+* **docs:** clarify some API field descriptions
+* **docs:** clarify three error descriptions
+* **docs:** clarify which blocks to send back around a fallback block
+* **docs:** correct Claude Tag direct message notes in usage reports
+* **docs:** reword Dream and RBAC role permission descriptions
+* **docs:** update the telemetry destination headers description
+* **docs:** use the Claude Platform name in analytics filter docs
+* **internal:** accept changelog entry files in the changelog check
+* **internal:** move error body helpers into the internal utils
+* **internal:** remove stale TODO comments and a test that could not pass
+* **tests:** check that a None path param is rejected
+
+
+### Documentation
+
+* **api:** show each field's own description for `speed`
+* clean up escapes and code spans in doc comments
 
 ## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-11-02)
 

@@ -172,6 +172,19 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaPluginNameTakenError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         extra_headers = {
             **strip_not_given(
@@ -357,6 +370,17 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaScanFailedError:
+
+          BetaScanPendingError:
+
+          BetaSkillNameTakenError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -557,6 +581,9 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -698,6 +725,19 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaPluginNameTakenError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         extra_headers = {
             **strip_not_given(
@@ -883,6 +923,17 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaScanFailedError:
+
+          BetaScanPendingError:
+
+          BetaSkillNameTakenError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -1083,6 +1134,9 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

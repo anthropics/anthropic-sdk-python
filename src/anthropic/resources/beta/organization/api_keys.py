@@ -114,6 +114,11 @@ class APIKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrgAPIKeyLimitExceededError:
+
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
@@ -296,6 +301,11 @@ class AsyncAPIKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrgAPIKeyLimitExceededError:
+
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")

@@ -189,6 +189,56 @@ class TestUsers:
                 "",
             )
 
+    @parametrize
+    def test_method_sign_out(self, client: Anthropic) -> None:
+        user = client.beta.organization.users.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_method_sign_out_with_all_params(self, client: Anthropic) -> None:
+        user = client.beta.organization.users.sign_out(
+            user_id="user_id",
+            betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_raw_response_sign_out(self, client: Anthropic) -> None:
+        response = client.beta.organization.users.with_raw_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        user = response.parse()
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_streaming_response_sign_out(self, client: Anthropic) -> None:
+        with client.beta.organization.users.with_streaming_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            user = response.parse()
+            assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_sign_out(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
+            client.beta.organization.users.with_raw_response.sign_out(
+                user_id="",
+            )
+
 
 class TestAsyncUsers:
     parametrize = pytest.mark.parametrize(
@@ -363,4 +413,54 @@ class TestAsyncUsers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
             await async_client.beta.organization.users.with_raw_response.remove(
                 "",
+            )
+
+    @parametrize
+    async def test_method_sign_out(self, async_client: AsyncAnthropic) -> None:
+        user = await async_client.beta.organization.users.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_method_sign_out_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        user = await async_client.beta.organization.users.sign_out(
+            user_id="user_id",
+            betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_raw_response_sign_out(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.organization.users.with_raw_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        user = await response.parse()
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_sign_out(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.organization.users.with_streaming_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            user = await response.parse()
+            assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_sign_out(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
+            await async_client.beta.organization.users.with_raw_response.sign_out(
+                user_id="",
             )

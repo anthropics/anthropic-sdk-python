@@ -7,7 +7,6 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from ... import _exceptions
 from ._beta import Beta, AsyncBeta
 from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import is_dict, asyncify, is_given
@@ -16,7 +15,7 @@ from ..._compat import model_copy
 from ..._version import __version__
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -25,9 +24,9 @@ from ..._base_client import (
     AsyncAPIClient,
     FinalRequestOptions,
     build_headers,
-    merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
+from .._platform_client import copy_platform_client
 from ...resources.messages import Messages, AsyncMessages
 
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
@@ -50,12 +49,18 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             raise RuntimeError("Expected dictionary json_data for post /v1/messages endpoint")
 
         model = options.json_data.pop("model", None)
+        if not model:
+            raise ValueError(f"Expected a non-empty value for `model` but received {model!r}")
+
         model = urllib.parse.quote(str(model), safe=":")
         stream = options.json_data.pop("stream", False)
         if stream:
             options.url = f"/model/{model}/invoke-with-response-stream"
         else:
             options.url = f"/model/{model}/invoke"
+
+        if model in (".", ".."):
+            raise ValueError(f"Constructed path {options.url!r} contains dot-segment {model!r} which is not allowed")
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
@@ -94,42 +99,6 @@ def _infer_region(aws_profile: str | None) -> str:
 class BaseBedrockClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
     _gen_ai_provider_name = "aws.bedrock"
     _otel_platform = "bedrock"
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
-
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
-
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
-
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 503:
-            return _exceptions.ServiceUnavailableError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
 
 
 class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPIClient):
@@ -248,6 +217,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         aws_secret_key: str | None = None,
         aws_access_key: str | None = None,
         aws_region: str | None = None,
+        aws_profile: str | None = None,
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx2.URL | None = None,
@@ -265,38 +235,24 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
+            aws_profile=aws_profile or self.aws_profile,
             aws_session_token=aws_session_token or self.aws_session_token,
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -432,6 +388,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         aws_secret_key: str | None = None,
         aws_access_key: str | None = None,
         aws_region: str | None = None,
+        aws_profile: str | None = None,
         aws_session_token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx2.URL | None = None,
@@ -449,38 +406,24 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_region=aws_region or self.aws_region,
+            aws_profile=aws_profile or self.aws_profile,
             aws_session_token=aws_session_token or self.aws_session_token,
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

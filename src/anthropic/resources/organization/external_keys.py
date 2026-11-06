@@ -81,6 +81,9 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError:
         """
         return self._post(
             "/v1/organizations/external_keys",
@@ -181,6 +184,9 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -278,6 +284,9 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -400,6 +409,9 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError:
         """
         return await self._post(
             "/v1/organizations/external_keys",
@@ -500,6 +512,9 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
@@ -597,6 +612,9 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")

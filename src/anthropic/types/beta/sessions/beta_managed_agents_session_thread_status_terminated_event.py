@@ -22,6 +22,6 @@ class BetaManagedAgentsSessionThreadStatusTerminatedEvent(BaseModel):
     """Timestamp of the status transition."""
 
     session_thread_id: str
-    """Public sthr\\__ ID of the thread that terminated."""
+    """Public sthr_ ID of the thread that terminated."""
 
     type: Literal["session.thread_status_terminated"]

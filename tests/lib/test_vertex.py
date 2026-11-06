@@ -10,7 +10,18 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicVertex, AsyncAnthropicVertex, beta_tool, beta_async_tool
+from anthropic import (
+    APIStatusError,
+    AnthropicVertex,
+    BadRequestError,
+    OverloadedError,
+    InternalServerError,
+    AsyncAnthropicVertex,
+    PreconditionFailedError,
+    beta_tool,
+    beta_async_tool,
+)
+from anthropic.types import ToolNameConflictError
 from anthropic._compat import PYDANTIC_V1
 from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.vertex._auth import refresh_auth
@@ -27,6 +38,43 @@ MODELS_URL = (
     "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/"
 )
 TOOL_RUNNER_URL = "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-haiku-4-5@20251001:rawPredict"
+
+PROJECT_ID_AND_REGION_PATHS = [
+    ("my-project", "us-east5", "/v1/projects/my-project/locations/us-east5"),
+    ("example.com:my-project", "global", "/v1/projects/example.com:my-project/locations/global"),
+    ("pro/ject", "region", "/v1/projects/pro%2Fject/locations/region"),
+    ("project", "reg/ion", "/v1/projects/project/locations/reg%2Fion"),
+    ("a/../b?c#d", "region", "/v1/projects/a%2F..%2Fb%3Fc%23d/locations/region"),
+]
+DOT_SEGMENT_PROJECT_IDS_AND_REGIONS = [(".", "region"), ("..", "region"), ("project", "."), ("project", "..")]
+
+STATUS_ERRORS = [
+    pytest.param(
+        400,
+        {
+            "type": "invalid_request_error",
+            "message": "Tool name is already in use",
+            "details": {"error_code": "tool_name_conflict"},
+        },
+        ToolNameConflictError,
+        BadRequestError,
+        id="error-code",
+    ),
+    pytest.param(
+        412,
+        {"type": "invalid_request_error", "message": "Precondition failed"},
+        PreconditionFailedError,
+        APIStatusError,
+        id="status",
+    ),
+    pytest.param(
+        529,
+        {"type": "overloaded_error", "message": "Overloaded"},
+        OverloadedError,
+        InternalServerError,
+        id="narrowed-status",
+    ),
+]
 
 
 def _vertex_message(content: List[Dict[str, Any]], stop_reason: str) -> httpx2.Response:
@@ -104,6 +152,29 @@ class TestAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+    def test_status_error_class(
+        self,
+        status: int,
+        error: dict[str, object],
+        error_class: type[APIStatusError],
+        parent_class: type[APIStatusError],
+        respx_mock: MockRouter,
+    ) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(
+            return_value=httpx2.Response(status, json={"type": "error", "error": error})
+        )
+
+        with pytest.raises(parent_class) as exc_info:
+            self.client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-haiku-4-5@20251001",
+            )
+
+        assert type(exc_info.value) is error_class
 
     @pytest.mark.respx()
     def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:
@@ -284,6 +355,82 @@ class TestAnthropicVertex:
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
 
+    @pytest.mark.respx()
+    def test_model_is_percent_encoded_in_path(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="we:ird/model?x=1#frag ment",
+        )
+        self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-7-sonnet@20250219",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 2
+        assert (
+            calls[0].request.url
+            == "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/we:ird%2Fmodel%3Fx=1%23frag%20ment:rawPredict"
+        )
+        assert (
+            calls[1].request.url
+            == "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict"
+        )
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region", "prefix"), PROJECT_ID_AND_REGION_PATHS)
+    def test_project_id_and_region_are_percent_encoded_in_path(
+        self, project_id: str, region: str, prefix: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id=project_id, region=region)
+        messages = client.beta.messages if beta else client.messages
+
+        messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5@20250929",
+        )
+        messages.count_tokens(
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5@20250929",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"{prefix}/publishers/anthropic/models/claude-sonnet-4-5@20250929:rawPredict",
+            f"{prefix}/publishers/anthropic/models/count-tokens:rawPredict",
+        ]
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region"), DOT_SEGMENT_PROJECT_IDS_AND_REGIONS)
+    def test_dot_segment_project_id_or_region_is_rejected(
+        self, project_id: str, region: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id=project_id, region=region)
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+        with pytest.raises(ValueError, match="dot-segment"):
+            messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
     @pytest.mark.respx()
     def test_beta_tool_runner_routes_through_raw_predict(self, respx_mock: MockRouter) -> None:
@@ -358,6 +505,30 @@ class TestAsyncAnthropicVertex:
 
         assert calls[0].request.url == request_url
         assert calls[1].request.url == request_url
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+    async def test_status_error_class(
+        self,
+        status: int,
+        error: dict[str, object],
+        error_class: type[APIStatusError],
+        parent_class: type[APIStatusError],
+        respx_mock: MockRouter,
+    ) -> None:
+        respx_mock.post(TOOL_RUNNER_URL).mock(
+            return_value=httpx2.Response(status, json={"type": "error", "error": error})
+        )
+
+        with pytest.raises(parent_class) as exc_info:
+            await self.client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-haiku-4-5@20251001",
+            )
+
+        assert type(exc_info.value) is error_class
 
     @pytest.mark.respx()
     async def test_extra_body_anthropic_version_wins(self, respx_mock: MockRouter) -> None:
@@ -541,6 +712,85 @@ class TestAsyncAnthropicVertex:
             base_url="https://test.googleapis.com/v1",
         )
         assert str(client.base_url).rstrip("/") == "https://test.googleapis.com/v1"
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    async def test_model_is_percent_encoded_in_path(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        await self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="we:ird/model?x=1#frag ment",
+        )
+        await self.client.messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-3-7-sonnet@20250219",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 2
+        assert (
+            calls[0].request.url
+            == "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/we:ird%2Fmodel%3Fx=1%23frag%20ment:rawPredict"
+        )
+        assert (
+            calls[1].request.url
+            == "https://region-aiplatform.googleapis.com/v1/projects/project/locations/region/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict"
+        )
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region", "prefix"), PROJECT_ID_AND_REGION_PATHS)
+    async def test_project_id_and_region_are_percent_encoded_in_path(
+        self, project_id: str, region: str, prefix: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id=project_id, region=region)
+        messages = client.beta.messages if beta else client.messages
+
+        await messages.create(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5@20250929",
+        )
+        await messages.count_tokens(
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-4-5@20250929",
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"{prefix}/publishers/anthropic/models/claude-sonnet-4-5@20250929:rawPredict",
+            f"{prefix}/publishers/anthropic/models/count-tokens:rawPredict",
+        ]
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region"), DOT_SEGMENT_PROJECT_IDS_AND_REGIONS)
+    async def test_dot_segment_project_id_or_region_is_rejected(
+        self, project_id: str, region: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id=project_id, region=region)
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            await messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+        with pytest.raises(ValueError, match="dot-segment"):
+            await messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
 
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
     @pytest.mark.respx()

@@ -85,6 +85,15 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -149,6 +158,21 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -228,6 +252,15 @@ class SlackWorkspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(
@@ -323,6 +356,15 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -387,6 +429,21 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -466,6 +523,15 @@ class AsyncSlackWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(

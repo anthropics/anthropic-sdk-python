@@ -37,7 +37,7 @@ from ..._base_client import (
     merge_headers,
     make_request_options,
 )
-from ...lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
+from ...lib._tracing import messages_create_request_attributes
 from ...lib.streaming import MessageStreamManager, AsyncMessageStreamManager
 from ...types.message import Message
 from ...types.model_param import ModelParam
@@ -412,6 +412,65 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -709,6 +768,65 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -1006,6 +1124,65 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -1095,7 +1272,7 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=stream or False,
@@ -1217,7 +1394,7 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=True,
@@ -1340,7 +1517,7 @@ class Messages(SyncAPIResource):
                 post_parser=parser,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -1581,6 +1758,39 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          CompactionUnavailableError:
         """
         extra_headers = {
             **strip_not_given(
@@ -1643,7 +1853,6 @@ class Messages(SyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )
@@ -1967,6 +2176,65 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -2264,6 +2532,65 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -2561,6 +2888,65 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -2650,7 +3036,7 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=stream or False,
@@ -2771,7 +3157,7 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=Message,
             stream=True,
@@ -2894,7 +3280,7 @@ class AsyncMessages(AsyncAPIResource):
                 post_parser=parser,
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedMessage[ResponseFormatT]], Message),
             stream=False,
@@ -3135,6 +3521,39 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          CompactionUnavailableError:
         """
         extra_headers = {
             **strip_not_given(
@@ -3197,7 +3616,6 @@ class AsyncMessages(AsyncAPIResource):
                 timeout=timeout,
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=MessageTokensCount,
         )

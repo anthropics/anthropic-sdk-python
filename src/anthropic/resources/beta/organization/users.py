@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from typing import List
+from itertools import chain
 from typing_extensions import Literal
 
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ...._utils import path_template
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -16,6 +18,7 @@ from ...._response import (
 )
 from ....pagination import SyncPage, AsyncPage
 from ...._base_client import AsyncPaginator, make_request_options
+from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.organization.user_remove_response import UserRemoveResponse
 from ....types.beta.organization.beta_organization_user import BetaOrganizationUser
 
@@ -229,6 +232,11 @@ class Users(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -245,6 +253,102 @@ class Users(SyncAPIResource):
                 span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
+        )
+
+    def sign_out(
+        self,
+        user_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaOrganizationUser:
+        """
+        Sign a member out of Claude everywhere, without removing them from the
+        organization. This ends their sign-in sessions and removes their trusted devices
+        wherever they use Claude, including other organizations and individual plans. It
+        also ends the OAuth tokens issued to them for this organization, so apps such as
+        Claude Code must sign in again.
+
+        A token can take up to an hour to stop working, though it almost always stops at
+        once. The member keeps their role and can sign in again right away. To keep them
+        out, remove them from the organization or, if your organization uses single
+        sign-on, block them in your identity provider. Signing out does not end API
+        keys, OAuth tokens that were not issued for this organization, or the member's
+        Claude Code cloud sessions and routines.
+
+        You cannot sign out the organization's primary owner or the person your API key
+        or token acts for, and a request to sign out another owner, a member with owner
+        permissions, or a membership admin may be refused. A refused request returns a
+        `400` or `403` error that says why. If the request returns `503`, send it again
+        to finish; anything already ended stays ended.
+
+        Every request must include the beta header
+        `anthropic-beta: admin-user-sign-out-2026-10-08`. A request without it returns
+        `400`. Sign-out is in beta. Anthropic turns it on for each organization and has
+        turned it on for every Claude Enterprise organization; until yours is on,
+        requests also return `400`. In a Claude Enterprise organization, an API key
+        needs the `write:members` scope; a key without it gets `403`.
+
+        Args:
+          user_id: ID of the User.
+
+          betas: This endpoint is in beta: requests must send `admin-user-sign-out-2026-10-08` in
+              this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaCannotSignOutPrimaryOwnerError:
+
+          BetaCannotSignOutSelfError:
+
+          BetaOrganizationNotEnrolledInBetaError:
+
+          BetaCannotSignOutManagedMemberError:
+
+          BetaCannotSignOutMembershipAdminError:
+
+          BetaCannotSignOutOwnerError:
+
+          BetaCannotSignOutPrivilegedMemberError:
+        """
+        if not user_id:
+            raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["admin-user-sign-out-2026-10-08"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "admin-user-sign-out-2026-10-08", **(extra_headers or {})}
+        return self._post(
+            path_template("/v1/organizations/users/{user_id}/sign_out", user_id=user_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.users.sign_out",
+                span_route="/v1/organizations/users/{user_id}/sign_out",
+                span_attributes={"anthropic.organization.user.id": user_id},
+            ),
+            cast_to=BetaOrganizationUser,
         )
 
 
@@ -455,6 +559,11 @@ class AsyncUsers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -471,6 +580,102 @@ class AsyncUsers(AsyncAPIResource):
                 span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
+        )
+
+    async def sign_out(
+        self,
+        user_id: str,
+        *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaOrganizationUser:
+        """
+        Sign a member out of Claude everywhere, without removing them from the
+        organization. This ends their sign-in sessions and removes their trusted devices
+        wherever they use Claude, including other organizations and individual plans. It
+        also ends the OAuth tokens issued to them for this organization, so apps such as
+        Claude Code must sign in again.
+
+        A token can take up to an hour to stop working, though it almost always stops at
+        once. The member keeps their role and can sign in again right away. To keep them
+        out, remove them from the organization or, if your organization uses single
+        sign-on, block them in your identity provider. Signing out does not end API
+        keys, OAuth tokens that were not issued for this organization, or the member's
+        Claude Code cloud sessions and routines.
+
+        You cannot sign out the organization's primary owner or the person your API key
+        or token acts for, and a request to sign out another owner, a member with owner
+        permissions, or a membership admin may be refused. A refused request returns a
+        `400` or `403` error that says why. If the request returns `503`, send it again
+        to finish; anything already ended stays ended.
+
+        Every request must include the beta header
+        `anthropic-beta: admin-user-sign-out-2026-10-08`. A request without it returns
+        `400`. Sign-out is in beta. Anthropic turns it on for each organization and has
+        turned it on for every Claude Enterprise organization; until yours is on,
+        requests also return `400`. In a Claude Enterprise organization, an API key
+        needs the `write:members` scope; a key without it gets `403`.
+
+        Args:
+          user_id: ID of the User.
+
+          betas: This endpoint is in beta: requests must send `admin-user-sign-out-2026-10-08` in
+              this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaCannotSignOutPrimaryOwnerError:
+
+          BetaCannotSignOutSelfError:
+
+          BetaOrganizationNotEnrolledInBetaError:
+
+          BetaCannotSignOutManagedMemberError:
+
+          BetaCannotSignOutMembershipAdminError:
+
+          BetaCannotSignOutOwnerError:
+
+          BetaCannotSignOutPrivilegedMemberError:
+        """
+        if not user_id:
+            raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["admin-user-sign-out-2026-10-08"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "admin-user-sign-out-2026-10-08", **(extra_headers or {})}
+        return await self._post(
+            path_template("/v1/organizations/users/{user_id}/sign_out", user_id=user_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.users.sign_out",
+                span_route="/v1/organizations/users/{user_id}/sign_out",
+                span_attributes={"anthropic.organization.user.id": user_id},
+            ),
+            cast_to=BetaOrganizationUser,
         )
 
 
@@ -490,6 +695,9 @@ class UsersWithRawResponse:
         self.remove = to_raw_response_wrapper(
             users.remove,
         )
+        self.sign_out = to_raw_response_wrapper(
+            users.sign_out,
+        )
 
 
 class AsyncUsersWithRawResponse:
@@ -507,6 +715,9 @@ class AsyncUsersWithRawResponse:
         )
         self.remove = async_to_raw_response_wrapper(
             users.remove,
+        )
+        self.sign_out = async_to_raw_response_wrapper(
+            users.sign_out,
         )
 
 
@@ -526,6 +737,9 @@ class UsersWithStreamingResponse:
         self.remove = to_streamed_response_wrapper(
             users.remove,
         )
+        self.sign_out = to_streamed_response_wrapper(
+            users.sign_out,
+        )
 
 
 class AsyncUsersWithStreamingResponse:
@@ -543,4 +757,7 @@ class AsyncUsersWithStreamingResponse:
         )
         self.remove = async_to_streamed_response_wrapper(
             users.remove,
+        )
+        self.sign_out = async_to_streamed_response_wrapper(
+            users.sign_out,
         )

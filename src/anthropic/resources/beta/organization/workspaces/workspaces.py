@@ -12,7 +12,7 @@ from .members import (
     MembersWithStreamingResponse,
     AsyncMembersWithStreamingResponse,
 )
-from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ....._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from .rate_limits import (
@@ -138,6 +138,19 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -263,6 +276,19 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -294,6 +320,7 @@ class Workspaces(SyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        ids: SequenceNotStr[str] | Omit = omit,
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
@@ -313,6 +340,10 @@ class Workspaces(SyncAPIResource):
 
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
+
+          ids: Only the Workspaces with these IDs, at most 100. `include_archived` and
+              `include_default` still apply, and IDs of Workspaces the caller can't list are
+              left out.
 
           include_archived: Whether to include Workspaces that have been archived in the response
 
@@ -341,6 +372,7 @@ class Workspaces(SyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "ids": ids,
                     "include_archived": include_archived,
                     "include_default": include_default,
                     "limit": limit,
@@ -483,6 +515,19 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -608,6 +653,19 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -639,6 +697,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        ids: SequenceNotStr[str] | Omit = omit,
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
@@ -658,6 +717,10 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
+
+          ids: Only the Workspaces with these IDs, at most 100. `include_archived` and
+              `include_default` still apply, and IDs of Workspaces the caller can't list are
+              left out.
 
           include_archived: Whether to include Workspaces that have been archived in the response
 
@@ -686,6 +749,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "ids": ids,
                     "include_archived": include_archived,
                     "include_default": include_default,
                     "limit": limit,

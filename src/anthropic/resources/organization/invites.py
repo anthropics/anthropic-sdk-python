@@ -86,6 +86,21 @@ class Invites(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AlreadyMemberError:
+
+          CannotInviteEmailsWithUnverifiedDomainsError:
+
+          EmailDomainNotAllowedError:
+
+          InviteAlreadyExistsError:
+
+          OrgMemberLimitExceededError:
+
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         return self._post(
             "/v1/organizations/invites",
@@ -326,6 +341,21 @@ class AsyncInvites(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AlreadyMemberError:
+
+          CannotInviteEmailsWithUnverifiedDomainsError:
+
+          EmailDomainNotAllowedError:
+
+          InviteAlreadyExistsError:
+
+          OrgMemberLimitExceededError:
+
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         return await self._post(
             "/v1/organizations/invites",

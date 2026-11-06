@@ -1,6 +1,7 @@
 from .error_type import ErrorType as ErrorType
 from .error_object import ErrorObject as ErrorObject
 from .billing_error import BillingError as BillingError
+from .error_details import ErrorDetails as ErrorDetails
 from .error_response import ErrorResponse as ErrorResponse
 from .not_found_error import NotFoundError as NotFoundError
 from .api_error_object import APIErrorObject as APIErrorObject
@@ -10,3 +11,55 @@ from .rate_limit_error import RateLimitError as RateLimitError
 from .authentication_error import AuthenticationError as AuthenticationError
 from .gateway_timeout_error import GatewayTimeoutError as GatewayTimeoutError
 from .invalid_request_error import InvalidRequestError as InvalidRequestError
+from .cmek_key_disabled_error import CMEKKeyDisabledError as CMEKKeyDisabledError
+from .ramp_limit_exceeded_error import RampLimitExceededError as RampLimitExceededError
+from .cmek_key_unreachable_error import CMEKKeyUnreachableError as CMEKKeyUnreachableError
+from .organization_on_hold_error import OrganizationOnHoldError as OrganizationOnHoldError
+from .cmek_context_unavailable_error import CMEKContextUnavailableError as CMEKContextUnavailableError
+from .cmek_key_network_blocked_error import CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError
+from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails
+from .claude_code_version_too_old_error import ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError
+from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails as RampLimitExceededErrorDetails
+from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
+from .enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError
+from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails
+from .request_body_encoding_invalid_error import RequestBodyEncodingInvalidError as RequestBodyEncodingInvalidError
+from .organization_type_not_supported_error import (
+    OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
+)
+from .cmek_context_unavailable_error_details import (
+    CMEKContextUnavailableErrorDetails as CMEKContextUnavailableErrorDetails,
+)
+from .cmek_key_network_blocked_error_details import (
+    CMEKKeyNetworkBlockedErrorDetails as CMEKKeyNetworkBlockedErrorDetails,
+)
+from .request_body_encoding_unsupported_error import (
+    RequestBodyEncodingUnsupportedError as RequestBodyEncodingUnsupportedError,
+)
+from .claude_code_key_creator_not_member_error import (
+    ClaudeCodeKeyCreatorNotMemberError as ClaudeCodeKeyCreatorNotMemberError,
+)
+from .claude_code_version_too_old_error_details import (
+    ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
+)
+from .enforced_spend_limit_reached_error_details import (
+    EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
+)
+from .request_body_encoding_invalid_error_details import (
+    RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
+)
+from .request_body_too_large_after_decoding_error import (
+    RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
+)
+from .organization_type_not_supported_error_details import (
+    OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
+)
+from .request_body_encoding_unsupported_error_details import (
+    RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,
+)
+from .claude_code_key_creator_not_member_error_details import (
+    ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
+)
+from .request_body_too_large_after_decoding_error_details import (
+    RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
+)
