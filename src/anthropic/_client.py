@@ -6,9 +6,15 @@ from typing_extensions import Self, override
 
 import httpx2
 
-from . import _exceptions
 from ._qs import Querystring
-from ._types import Omit, Timeout, NotGiven, RequestOptions, not_given
+from ._types import (
+    Omit,
+    Timeout,
+    NotGiven,
+    RequestOptions,
+    OpenTelemetryClientOption,
+    not_given,
+)
 from ._utils import (
     is_given,
     is_mapping_t,
@@ -17,8 +23,8 @@ from ._utils import (
 from ._compat import model_copy, cached_property
 from ._models import FinalRequestOptions
 from ._version import __version__
+from ._constants import ANTHROPIC_API_VERSION
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
-from ._exceptions import APIStatusError
 from ._middleware import MiddlewareInput
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
@@ -26,8 +32,6 @@ from ._base_client import (
     AsyncAPIClient,
     merge_headers,
 )
-
-# --- credentials support (hand-written, upstream to Stainless) ---
 from .lib.credentials import (
     TokenCache,
     InMemoryConfig,
@@ -40,7 +44,7 @@ from .lib.credentials import (
 )
 from .lib.credentials._auth import (
     warn_env_static_shadows_auto_discovery,
-    warn_explicit_static_shadows_credentials,
+    warn_env_api_key_shadows_env_auth_token,
 )
 from .lib.credentials._close import has_async_close, close_credentials, async_close_credentials
 from .lib.credentials._types import is_async_token_provider
@@ -82,42 +86,42 @@ def _keeps_base_url(current: httpx2.URL, requested: str | httpx2.URL | None) -> 
     return requested is None or str(httpx2.URL(requested)).rstrip("/") == str(current).rstrip("/")
 
 
-def _warn_explicit_shadow(*, api_key: str | None, auth_token: str | None, credentials: object) -> None:
-    """Warn when an explicit `api_key=` / `auth_token=` argument shadows
-    an explicit `credentials=` provider. Call *after* any copy-inheritance
-    merging so the params reflect the resolved values."""
-    if credentials is None:
-        return
-    if api_key is not None:
-        warn_explicit_static_shadows_credentials("api_key")
-    if auth_token is not None:
-        warn_explicit_static_shadows_credentials("auth_token")
+def has_explicit_credential(**arguments: object) -> bool:
+    """Whether one of a client's credential arguments was passed. Raises `ValueError` for more than one."""
+    names = [f"`{name}=`" for name in arguments]
+    passed = [f"`{name}=`" for name, value in arguments.items() if value is not None]
+    if len(passed) > 1:
+        raise ValueError(f"Pass at most one of {', '.join(names[:-1])}, or {names[-1]}. Received {', '.join(passed)}.")
+    return bool(passed)
 
 
-def _warn_env_shadow(*, api_key: str | None, auth_token: str | None) -> None:
-    """Warn when an `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from the
-    environment is set alongside signals that would normally drive profile /
-    federation auto-discovery (`ANTHROPIC_PROFILE`, a `configs/` directory,
-    or the workload-identity env trio). Per the credential-precedence spec,
-    the static credential wins and auto-discovery is silently skipped."""
-    if not _has_auto_discoverable_credentials():
-        return
-    if api_key is not None and os.environ.get("ANTHROPIC_API_KEY"):
-        warn_env_static_shadows_auto_discovery("ANTHROPIC_API_KEY")
-    if auth_token is not None and os.environ.get("ANTHROPIC_AUTH_TOKEN"):
-        warn_env_static_shadows_auto_discovery("ANTHROPIC_AUTH_TOKEN")
+def static_credential_from_env(*, warn: bool) -> tuple[str | None, str | None]:
+    """The `(api_key, auth_token)` that the environment supplies. At most one of the two is set.
 
+    With `warn`, logs what that credential shadows: `ANTHROPIC_AUTH_TOKEN`, or the profile or
+    federation configuration that auto-discovery would have used. A subclass has its own auth
+    and never runs auto-discovery, so it passes `False`.
+    """
+    api_key = os.environ.get("ANTHROPIC_API_KEY") or None
+    auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
 
-# --- end credentials support ---
+    if warn and api_key is not None and auth_token is not None:
+        warn_env_api_key_shadows_env_auth_token()
+    if warn and (api_key is not None or auth_token is not None) and _has_auto_discoverable_credentials():
+        warn_env_static_shadows_auto_discovery("ANTHROPIC_API_KEY" if api_key is not None else "ANTHROPIC_AUTH_TOKEN")
+
+    return (api_key, None) if api_key is not None else (None, auth_token)
+
 
 if TYPE_CHECKING:
-    from .resources import beta, files, models, skills, messages, organization
+    from .resources import beta, files, models, skills, messages, organization, user_profiles
     from .resources.files import Files, AsyncFiles
     from .resources.models import Models, AsyncModels
     from .resources.beta.beta import Beta, AsyncBeta
     from .resources.skills.skills import Skills, AsyncSkills
     from .resources.messages.messages import Messages, AsyncMessages
     from .resources.organization.organization import Organization, AsyncOrganization
+    from .resources.user_profiles.user_profiles import UserProfiles, AsyncUserProfiles
 
 __all__ = ["Timeout", "RequestOptions", "Anthropic", "AsyncAnthropic", "Client", "AsyncClient"]
 
@@ -145,6 +149,8 @@ def _keep_client_header_params(options: FinalRequestOptions) -> FinalRequestOpti
 
 
 class Anthropic(SyncAPIClient):
+    _supports_message_threads = True
+
     # client options
     api_key: str | None
     auth_token: str | None
@@ -152,6 +158,8 @@ class Anthropic(SyncAPIClient):
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
+    _credential_headers: Mapping[str, str]
+    _unchosen_base_url: httpx2.URL | None
 
     def __init__(
         self,
@@ -167,6 +175,9 @@ class Anthropic(SyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#client) for more details.
@@ -187,10 +198,10 @@ class Anthropic(SyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
-           `credentials=`, `config=`, or `profile=`. When any of these
+        1. An explicit constructor argument — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When one of these
            is passed, environment variables are not consulted for credentials.
-        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
+        2. `ANTHROPIC_API_KEY`, then `ANTHROPIC_AUTH_TOKEN` environment
            variables.
         3. `ANTHROPIC_PROFILE` environment variable — loads the named
            profile from `<config_dir>/configs/<profile>.json`.
@@ -200,31 +211,27 @@ class Anthropic(SyncAPIClient):
         5. The active profile on disk — the profile named by
            `<config_dir>/active_config`, or `default`.
 
-        `credentials=`, `config=`, and `profile=` are mutually exclusive.
+        `ANTHROPIC_CONFIG_DIR` sets `<config_dir>`. It does not select a profile.
 
-        If a static credential is supplied alongside a credentials provider
-        (`credentials=` / `config=` / `profile=`), or if
-        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
+        `api_key=`, `auth_token=`, `credentials=`, `config=`, and `profile=`
+        are mutually exclusive. Passing more than one raises `ValueError`.
+
+        If `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
         precedence and a one-shot warning is logged on the `anthropic`
         logger.
+
+        If both `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` are set, the
+        API key is used and a one-shot warning is logged on the same logger.
         """
-        # --- credentials support (hand-written, upstream to Stainless) ---
         # Explicit ctor args are total. If the caller passed any explicit
         # credential argument, do NOT read credential env vars.
-        has_explicit_credential = (
-            api_key is not None
-            or auth_token is not None
-            or credentials is not None
-            or config is not None
-            or profile is not None
-        )
-        if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
+        if not has_explicit_credential(
+            api_key=api_key, auth_token=auth_token, credentials=credentials, config=config, profile=profile
+        ):
+            api_key, auth_token = static_credential_from_env(warn=_is_base_client(self))
         self.api_key = api_key
         self.auth_token = auth_token
-        # --- end credentials support ---
 
         if webhook_key is None:
             webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
@@ -249,31 +256,29 @@ class Anthropic(SyncAPIClient):
                     parsed[line[:colon].strip()] = line[colon + 1 :].strip()
             default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
 
-        # --- credentials support (hand-written, upstream to Stainless) ---
         credential_headers: dict[str, str] = {}
+        credential_base_url: str | None = None
         if config is not None:
-            if credentials is not None or profile is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             in_memory = InMemoryConfig(dict(config))
             credentials = in_memory
             credential_headers = in_memory.extra_headers()
-            if not base_url_is_explicit and in_memory.resolved_base_url:
-                base_url = in_memory.resolved_base_url
+            credential_base_url = in_memory.resolved_base_url
         elif profile is not None:
-            if credentials is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             creds_file = CredentialsFile(profile=profile)
             credentials = creds_file
             credential_headers = creds_file.extra_headers()
-            if not base_url_is_explicit and creds_file.resolved_base_url:
-                base_url = creds_file.resolved_base_url
+            credential_base_url = creds_file.resolved_base_url
         if credentials is None and api_key is None and auth_token is None and _is_base_client(self):
             result = default_credentials(base_url=str(base_url) if base_url else "https://api.anthropic.com")
             if result is not None:
                 credentials = result.provider
                 credential_headers = result.extra_headers
-                if not base_url_is_explicit and result.base_url:
-                    base_url = result.base_url
+                credential_base_url = result.base_url
+
+        self._credential_headers = credential_headers
+        if not base_url_is_explicit and credential_base_url:
+            base_url = credential_base_url
+        self._unchosen_base_url = None if base_url_is_explicit else self._enforce_trailing_slash(httpx2.URL(base_url))
 
         if is_async_token_provider(credentials):
             raise TypeError("`Anthropic` cannot await an async `credentials` provider; use `AsyncAnthropic` instead.")
@@ -284,25 +289,18 @@ class Anthropic(SyncAPIClient):
 
         credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
-        _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
-        if _is_base_client(self):
-            # Subclasses never run the auto-discovery chain (gated on `_is_base_client`
-            # below), so nothing is shadowed and the warning would be spurious.
-            _warn_env_shadow(api_key=api_key, auth_token=auth_token)
         if not isinstance(_token_cache, NotGiven):
             self._token_cache = _token_cache
         else:
             self._token_cache = TokenCache(credentials) if credentials is not None else None
         self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
-        if credential_headers:
-            default_headers = {**credential_headers, **(default_headers or {})}
-        # --- end credentials support ---
 
         super().__init__(
             version=__version__,
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -337,6 +335,12 @@ class Anthropic(SyncAPIClient):
         return Skills(self)
 
     @cached_property
+    def user_profiles(self) -> UserProfiles:
+        from .resources.user_profiles import UserProfiles
+
+        return UserProfiles(self)
+
+    @cached_property
     def organization(self) -> Organization:
         from .resources.organization import Organization
 
@@ -364,23 +368,17 @@ class Anthropic(SyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._api_key_auth, **self._bearer_auth}
+        return {**self._bearer_auth, **self._api_key_auth}
 
     @property
     def _api_key_auth(self) -> dict[str, str]:
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     def _bearer_auth(self) -> dict[str, str]:
-        # Symmetric with _api_key_auth: always emit if self.auth_token is set,
-        # regardless of whether a TokenCache is also installed. When both a
-        # static auth_token and a credentials provider are present, the static
-        # credential wins per the documented precedence — AccessTokenAuth
-        # short-circuits on a pre-set Authorization header and no token
-        # exchange runs.
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -392,7 +390,8 @@ class Anthropic(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
+            **self._credential_headers,
             **self._custom_headers,
         }
 
@@ -416,14 +415,11 @@ class Anthropic(SyncAPIClient):
             # valid
             return
 
-        if headers.get("X-Api-Key") or "x-api-key" in omitted:
-            return
-
         if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted"'
         )
 
     # --- credentials support (hand-written, upstream to Stainless) ---
@@ -467,6 +463,7 @@ class Anthropic(SyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -476,6 +473,10 @@ class Anthropic(SyncAPIClient):
     ) -> Self:
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
+
+        A credential passed here (`api_key=`, `auth_token=`, `credentials=`, `config=`, or `profile=`) replaces
+        this client's credential, whichever kind that is. Passing more than one raises `ValueError`.
+        A base URL and headers that came with this client's config or profile go with that credential.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
@@ -496,30 +497,40 @@ class Anthropic(SyncAPIClient):
             params = set_default_query
 
         http_client = http_client or self._client
-        # --- credentials support (hand-written, upstream to Stainless) ---
+
+        resolved_credentials = None if isinstance(credentials, NotGiven) else credentials
+        keeps_credential = False
+        if not api_key and not auth_token and resolved_credentials is None and config is None and profile is None:
+            keeps_credential = isinstance(credentials, NotGiven)
+            # The attributes can be assigned to, so inherit only the credential this client sends.
+            api_key = self.api_key
+            auth_token = self.auth_token if api_key is None else None
+            if isinstance(credentials, NotGiven) and api_key is None and auth_token is None and _is_base_client(self):
+                resolved_credentials = self.credentials
+        inherits_provider = isinstance(credentials, NotGiven) and resolved_credentials is not None
+
         if config is not None:
-            if not isinstance(credentials, NotGiven) or profile is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             _extra_kwargs = {"config": config, **_extra_kwargs}
-        elif profile is not None:
-            if not isinstance(credentials, NotGiven):
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+        if profile is not None:
             _extra_kwargs = {"profile": profile, **_extra_kwargs}
-        else:
-            resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
-            if resolved_credentials is not None and _is_base_client(self):
-                _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Share the parent's TokenCache only while the provider and
-                # deployment are unchanged; a new credentials= or base_url= gets
-                # its own cache.
-                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
-                    _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
-        # --- end credentials support ---
+        if resolved_credentials is not None:
+            _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
+            # Share the parent's TokenCache only while the provider and
+            # deployment are unchanged; a new credentials= or base_url= gets
+            # its own cache.
+            if inherits_provider and _keeps_base_url(self.base_url, base_url):
+                _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
+
+        # A host that the caller chose stays. Otherwise a new credential brings its own, or gets the default.
+        inherited_base_url = None
+        if keeps_credential or self.base_url != self._unchosen_base_url:
+            inherited_base_url = self.base_url
+
         client = self.__class__(
-            api_key=api_key or self.api_key,
-            auth_token=auth_token or self.auth_token,
+            api_key=api_key,
+            auth_token=auth_token,
             webhook_key=webhook_key or self.webhook_key,
-            base_url=base_url or self.base_url,
+            base_url=base_url or inherited_base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
@@ -529,6 +540,11 @@ class Anthropic(SyncAPIClient):
             **_extra_kwargs,
         )
         client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        if keeps_credential:
+            client._credential_headers = self._credential_headers
+            client._unchosen_base_url = self._unchosen_base_url
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
         return client
 
     # Alias for `copy` for nicer inline usage, e.g.
@@ -546,47 +562,10 @@ class Anthropic(SyncAPIClient):
         """
         return self.copy(middleware=[*self._middleware, *middleware])
 
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
-
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
-
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
-
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 413:
-            return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 529:
-            return _exceptions.OverloadedError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
-
 
 class AsyncAnthropic(AsyncAPIClient):
+    _supports_message_threads = True
+
     # client options
     api_key: str | None
     auth_token: str | None
@@ -594,6 +573,8 @@ class AsyncAnthropic(AsyncAPIClient):
     credentials: AccessTokenProvider | AsyncAccessTokenProvider | None
     _token_cache: TokenCache | None
     _custom_auth: AccessTokenAuth | None
+    _credential_headers: Mapping[str, str]
+    _unchosen_base_url: httpx2.URL | None
 
     def __init__(
         self,
@@ -609,6 +590,9 @@ class AsyncAnthropic(AsyncAPIClient):
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
         # Configure a custom httpx2 client.
         # We provide a `DefaultAsyncHttpxClient` class that you can pass to retain the default values we use for `limits`, `timeout` & `follow_redirects`.
         # See the [httpx2 documentation](https://httpx2.pydantic.dev/api/#asyncclient) for more details.
@@ -629,10 +613,10 @@ class AsyncAnthropic(AsyncAPIClient):
 
         Credentials are resolved in the following order (first match wins):
 
-        1. Explicit constructor arguments — `api_key=`, `auth_token=`,
-           `credentials=`, `config=`, or `profile=`. When any of these
+        1. An explicit constructor argument — `api_key=`, `auth_token=`,
+           `credentials=`, `config=`, or `profile=`. When one of these
            is passed, environment variables are not consulted for credentials.
-        2. `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` environment
+        2. `ANTHROPIC_API_KEY`, then `ANTHROPIC_AUTH_TOKEN` environment
            variables.
         3. `ANTHROPIC_PROFILE` environment variable — loads the named
            profile from `<config_dir>/configs/<profile>.json`.
@@ -642,31 +626,27 @@ class AsyncAnthropic(AsyncAPIClient):
         5. The active profile on disk — the profile named by
            `<config_dir>/active_config`, or `default`.
 
-        `credentials=`, `config=`, and `profile=` are mutually exclusive.
+        `ANTHROPIC_CONFIG_DIR` sets `<config_dir>`. It does not select a profile.
 
-        If a static credential is supplied alongside a credentials provider
-        (`credentials=` / `config=` / `profile=`), or if
-        `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
+        `api_key=`, `auth_token=`, `credentials=`, `config=`, and `profile=`
+        are mutually exclusive. Passing more than one raises `ValueError`.
+
+        If `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` is set alongside a
         profile or federation configuration, the static credential takes
         precedence and a one-shot warning is logged on the `anthropic`
         logger.
+
+        If both `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` are set, the
+        API key is used and a one-shot warning is logged on the same logger.
         """
-        # --- credentials support (hand-written, upstream to Stainless) ---
         # Explicit ctor args are total. If the caller passed any explicit
         # credential argument, do NOT read credential env vars.
-        has_explicit_credential = (
-            api_key is not None
-            or auth_token is not None
-            or credentials is not None
-            or config is not None
-            or profile is not None
-        )
-        if not has_explicit_credential:
-            api_key = os.environ.get("ANTHROPIC_API_KEY") or None
-            auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN") or None
+        if not has_explicit_credential(
+            api_key=api_key, auth_token=auth_token, credentials=credentials, config=config, profile=profile
+        ):
+            api_key, auth_token = static_credential_from_env(warn=_is_base_client(self))
         self.api_key = api_key
         self.auth_token = auth_token
-        # --- end credentials support ---
 
         if webhook_key is None:
             webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
@@ -691,52 +671,44 @@ class AsyncAnthropic(AsyncAPIClient):
                     parsed[line[:colon].strip()] = line[colon + 1 :].strip()
             default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
 
-        # --- credentials support (hand-written, upstream to Stainless) ---
         credential_headers: dict[str, str] = {}
+        credential_base_url: str | None = None
         if config is not None:
-            if credentials is not None or profile is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             in_memory = InMemoryConfig(dict(config))
             credentials = in_memory
             credential_headers = in_memory.extra_headers()
-            if not base_url_is_explicit and in_memory.resolved_base_url:
-                base_url = in_memory.resolved_base_url
+            credential_base_url = in_memory.resolved_base_url
         elif profile is not None:
-            if credentials is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             creds_file = CredentialsFile(profile=profile)
             credentials = creds_file
             credential_headers = creds_file.extra_headers()
-            if not base_url_is_explicit and creds_file.resolved_base_url:
-                base_url = creds_file.resolved_base_url
+            credential_base_url = creds_file.resolved_base_url
         if credentials is None and api_key is None and auth_token is None and _is_base_client(self):
             result = default_credentials(base_url=str(base_url) if base_url else "https://api.anthropic.com")
             if result is not None:
                 credentials = result.provider
                 credential_headers = result.extra_headers
-                if not base_url_is_explicit and result.base_url:
-                    base_url = result.base_url
+                credential_base_url = result.base_url
+
+        self._credential_headers = credential_headers
+        if not base_url_is_explicit and credential_base_url:
+            base_url = credential_base_url
+        self._unchosen_base_url = None if base_url_is_explicit else self._enforce_trailing_slash(httpx2.URL(base_url))
+
         credentials = _bind_credentials_base_url(credentials, str(base_url))
         self.credentials = credentials
-        _warn_explicit_shadow(api_key=api_key, auth_token=auth_token, credentials=credentials)
-        if _is_base_client(self):
-            # Subclasses never run the auto-discovery chain (gated on `_is_base_client`
-            # below), so nothing is shadowed and the warning would be spurious.
-            _warn_env_shadow(api_key=api_key, auth_token=auth_token)
         if not isinstance(_token_cache, NotGiven):
             self._token_cache = _token_cache
         else:
             self._token_cache = TokenCache(credentials) if credentials is not None else None
         self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
-        if credential_headers:
-            default_headers = {**credential_headers, **(default_headers or {})}
-        # --- end credentials support ---
 
         super().__init__(
             version=__version__,
             base_url=base_url,
             max_retries=max_retries,
             timeout=timeout,
+            open_telemetry=open_telemetry,
             http_client=http_client,
             custom_headers=default_headers,
             custom_query=default_query,
@@ -771,6 +743,12 @@ class AsyncAnthropic(AsyncAPIClient):
         return AsyncSkills(self)
 
     @cached_property
+    def user_profiles(self) -> AsyncUserProfiles:
+        from .resources.user_profiles import AsyncUserProfiles
+
+        return AsyncUserProfiles(self)
+
+    @cached_property
     def organization(self) -> AsyncOrganization:
         from .resources.organization import AsyncOrganization
 
@@ -798,23 +776,17 @@ class AsyncAnthropic(AsyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._api_key_auth, **self._bearer_auth}
+        return {**self._bearer_auth, **self._api_key_auth}
 
     @property
     def _api_key_auth(self) -> dict[str, str]:
         api_key = self.api_key
         if api_key is None:
             return {}
-        return {"X-Api-Key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     def _bearer_auth(self) -> dict[str, str]:
-        # Symmetric with _api_key_auth: always emit if self.auth_token is set,
-        # regardless of whether a TokenCache is also installed. When both a
-        # static auth_token and a credentials provider are present, the static
-        # credential wins per the documented precedence — AccessTokenAuth
-        # short-circuits on a pre-set Authorization header and no token
-        # exchange runs.
         auth_token = self.auth_token
         if auth_token is None:
             return {}
@@ -826,7 +798,8 @@ class AsyncAnthropic(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
+            **self._credential_headers,
             **self._custom_headers,
         }
 
@@ -844,14 +817,11 @@ class AsyncAnthropic(AsyncAPIClient):
             # valid
             return
 
-        if headers.get("X-Api-Key") or "x-api-key" in omitted:
-            return
-
         if headers.get("Authorization") or "authorization" in omitted:
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted"'
         )
 
     # --- credentials support (hand-written, upstream to Stainless) ---
@@ -895,6 +865,7 @@ class AsyncAnthropic(AsyncAPIClient):
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -904,6 +875,10 @@ class AsyncAnthropic(AsyncAPIClient):
     ) -> Self:
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
+
+        A credential passed here (`api_key=`, `auth_token=`, `credentials=`, `config=`, or `profile=`) replaces
+        this client's credential, whichever kind that is. Passing more than one raises `ValueError`.
+        A base URL and headers that came with this client's config or profile go with that credential.
         """
         if default_headers is not None and set_default_headers is not None:
             raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
@@ -924,30 +899,40 @@ class AsyncAnthropic(AsyncAPIClient):
             params = set_default_query
 
         http_client = http_client or self._client
-        # --- credentials support (hand-written, upstream to Stainless) ---
+
+        resolved_credentials = None if isinstance(credentials, NotGiven) else credentials
+        keeps_credential = False
+        if not api_key and not auth_token and resolved_credentials is None and config is None and profile is None:
+            keeps_credential = isinstance(credentials, NotGiven)
+            # The attributes can be assigned to, so inherit only the credential this client sends.
+            api_key = self.api_key
+            auth_token = self.auth_token if api_key is None else None
+            if isinstance(credentials, NotGiven) and api_key is None and auth_token is None and _is_base_client(self):
+                resolved_credentials = self.credentials
+        inherits_provider = isinstance(credentials, NotGiven) and resolved_credentials is not None
+
         if config is not None:
-            if not isinstance(credentials, NotGiven) or profile is not None:
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
             _extra_kwargs = {"config": config, **_extra_kwargs}
-        elif profile is not None:
-            if not isinstance(credentials, NotGiven):
-                raise TypeError("Pass at most one of `credentials=`, `config=`, or `profile=`.")
+        if profile is not None:
             _extra_kwargs = {"profile": profile, **_extra_kwargs}
-        else:
-            resolved_credentials = self.credentials if isinstance(credentials, NotGiven) else credentials
-            if resolved_credentials is not None and _is_base_client(self):
-                _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
-                # Share the parent's TokenCache only while the provider and
-                # deployment are unchanged; a new credentials= or base_url= gets
-                # its own cache.
-                if isinstance(credentials, NotGiven) and _keeps_base_url(self.base_url, base_url):
-                    _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
-        # --- end credentials support ---
+        if resolved_credentials is not None:
+            _extra_kwargs = {"credentials": resolved_credentials, **_extra_kwargs}
+            # Share the parent's TokenCache only while the provider and
+            # deployment are unchanged; a new credentials= or base_url= gets
+            # its own cache.
+            if inherits_provider and _keeps_base_url(self.base_url, base_url):
+                _extra_kwargs = {"_token_cache": self._token_cache, **_extra_kwargs}
+
+        # A host that the caller chose stays. Otherwise a new credential brings its own, or gets the default.
+        inherited_base_url = None
+        if keeps_credential or self.base_url != self._unchosen_base_url:
+            inherited_base_url = self.base_url
+
         client = self.__class__(
-            api_key=api_key or self.api_key,
-            auth_token=auth_token or self.auth_token,
+            api_key=api_key,
+            auth_token=auth_token,
             webhook_key=webhook_key or self.webhook_key,
-            base_url=base_url or self.base_url,
+            base_url=base_url or inherited_base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
@@ -957,6 +942,11 @@ class AsyncAnthropic(AsyncAPIClient):
             **_extra_kwargs,
         )
         client._timeout_overridden = self._timeout_overridden or is_given(timeout)
+        if keeps_credential:
+            client._credential_headers = self._credential_headers
+            client._unchosen_base_url = self._unchosen_base_url
+        # Set on the copy, not through its constructor, which a subclass may define without `open_telemetry`.
+        client._set_open_telemetry(self._copy_open_telemetry(open_telemetry))
         return client
 
     # Alias for `copy` for nicer inline usage, e.g.
@@ -973,45 +963,6 @@ class AsyncAnthropic(AsyncAPIClient):
         ```
         """
         return self.copy(middleware=[*self._middleware, *middleware])
-
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx2.Response,
-    ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
-
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
-
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
-
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 413:
-            return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 529:
-            return _exceptions.OverloadedError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
 
 
 class AnthropicWithRawResponse:
@@ -1043,6 +994,12 @@ class AnthropicWithRawResponse:
         from .resources.skills import SkillsWithRawResponse
 
         return SkillsWithRawResponse(self._client.skills)
+
+    @cached_property
+    def user_profiles(self) -> user_profiles.UserProfilesWithRawResponse:
+        from .resources.user_profiles import UserProfilesWithRawResponse
+
+        return UserProfilesWithRawResponse(self._client.user_profiles)
 
     @cached_property
     def organization(self) -> organization.OrganizationWithRawResponse:
@@ -1088,6 +1045,12 @@ class AsyncAnthropicWithRawResponse:
         return AsyncSkillsWithRawResponse(self._client.skills)
 
     @cached_property
+    def user_profiles(self) -> user_profiles.AsyncUserProfilesWithRawResponse:
+        from .resources.user_profiles import AsyncUserProfilesWithRawResponse
+
+        return AsyncUserProfilesWithRawResponse(self._client.user_profiles)
+
+    @cached_property
     def organization(self) -> organization.AsyncOrganizationWithRawResponse:
         from .resources.organization import AsyncOrganizationWithRawResponse
 
@@ -1131,6 +1094,12 @@ class AnthropicWithStreamedResponse:
         return SkillsWithStreamingResponse(self._client.skills)
 
     @cached_property
+    def user_profiles(self) -> user_profiles.UserProfilesWithStreamingResponse:
+        from .resources.user_profiles import UserProfilesWithStreamingResponse
+
+        return UserProfilesWithStreamingResponse(self._client.user_profiles)
+
+    @cached_property
     def organization(self) -> organization.OrganizationWithStreamingResponse:
         from .resources.organization import OrganizationWithStreamingResponse
 
@@ -1172,6 +1141,12 @@ class AsyncAnthropicWithStreamedResponse:
         from .resources.skills import AsyncSkillsWithStreamingResponse
 
         return AsyncSkillsWithStreamingResponse(self._client.skills)
+
+    @cached_property
+    def user_profiles(self) -> user_profiles.AsyncUserProfilesWithStreamingResponse:
+        from .resources.user_profiles import AsyncUserProfilesWithStreamingResponse
+
+        return AsyncUserProfilesWithStreamingResponse(self._client.user_profiles)
 
     @cached_property
     def organization(self) -> organization.AsyncOrganizationWithStreamingResponse:

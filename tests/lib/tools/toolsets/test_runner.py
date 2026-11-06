@@ -15,7 +15,12 @@ from respx import MockRouter
 from anthropic import Anthropic, AsyncAnthropic, beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import BetaFunctionTool, BetaAsyncFunctionTool
-from anthropic.types.beta import BetaMessageParam, BetaToolUseBlock, BetaContentBlockParam
+from anthropic.types.beta import (
+    BetaMessageParam,
+    BetaToolUseBlock,
+    BetaUserMessageParam,
+    BetaRequestToolRemovalBlockParam,
+)
 from anthropic.lib.tools._toolsets import ToolsetClosedError, ToolsetContractError
 from anthropic.lib._stainless_helpers import tag_helper
 
@@ -97,7 +102,7 @@ def _sse(message: dict[str, Any]) -> httpx2.Response:
     return httpx2.Response(200, content="".join(events).encode(), headers={"content-type": "text/event-stream"})
 
 
-def _tool_removal(name: str) -> BetaContentBlockParam:
+def _tool_removal(name: str) -> BetaRequestToolRemovalBlockParam:
     return {"type": "tool_removal", "tool": {"type": "tool_reference", "name": name}}
 
 
@@ -111,9 +116,9 @@ def async_client(async_client: AsyncAnthropic) -> AsyncAnthropic:
     return async_client.with_options(max_retries=0)
 
 
-def _run_sync(client: Anthropic, *, tools: list[Any], messages: list[BetaMessageParam]) -> list[BetaMessageParam]:
+def _run_sync(client: Anthropic, *, tools: list[Any], messages: list[BetaMessageParam]) -> list[BetaUserMessageParam]:
     runner = client.beta.messages.tool_runner(max_tokens=1024, model="claude-haiku-4-5", tools=tools, messages=messages)
-    responses: list[BetaMessageParam] = []
+    responses: list[BetaUserMessageParam] = []
     for _ in runner:
         response = runner.generate_tool_call_response()
         if response is not None:
@@ -123,9 +128,9 @@ def _run_sync(client: Anthropic, *, tools: list[Any], messages: list[BetaMessage
 
 async def _run_async(
     client: AsyncAnthropic, *, tools: list[Any], messages: list[BetaMessageParam]
-) -> list[BetaMessageParam]:
+) -> list[BetaUserMessageParam]:
     runner = client.beta.messages.tool_runner(max_tokens=1024, model="claude-haiku-4-5", tools=tools, messages=messages)
-    responses: list[BetaMessageParam] = []
+    responses: list[BetaUserMessageParam] = []
     async for _ in runner:
         response = await runner.generate_tool_call_response()
         if response is not None:

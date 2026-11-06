@@ -34,7 +34,7 @@ class IncreaseRequests(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return IncreaseRequestsWithRawResponse(self)
 
@@ -43,7 +43,7 @@ class IncreaseRequests(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return IncreaseRequestsWithStreamingResponse(self)
 
@@ -81,7 +81,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._get(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             options=make_request_options(
@@ -89,6 +89,12 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -129,7 +135,7 @@ class IncreaseRequests(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/spend_limit_increase_requests?beta=true",
+            "/v1/organizations/spend_limit_increase_requests",
             page=SyncPageCursor[BetaSpendLimitIncreaseRequest],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -142,6 +148,9 @@ class IncreaseRequests(SyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.list",
+                span_route="/v1/organizations/spend_limit_increase_requests",
             ),
             model=BetaSpendLimitIncreaseRequest,
         )
@@ -186,7 +195,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={
@@ -199,6 +208,12 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.approve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=IncreaseRequestApproveResponse,
         )
@@ -238,7 +253,7 @@ class IncreaseRequests(SyncAPIResource):
             )
         return self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={"suppress_notification": suppress_notification},
@@ -247,6 +262,12 @@ class IncreaseRequests(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.deny",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -259,7 +280,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncIncreaseRequestsWithRawResponse(self)
 
@@ -268,7 +289,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncIncreaseRequestsWithStreamingResponse(self)
 
@@ -306,7 +327,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._get(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             options=make_request_options(
@@ -314,6 +335,12 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.retrieve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )
@@ -354,7 +381,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/spend_limit_increase_requests?beta=true",
+            "/v1/organizations/spend_limit_increase_requests",
             page=AsyncPageCursor[BetaSpendLimitIncreaseRequest],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -367,6 +394,9 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                     "page": page,
                     "status": status,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.list",
+                span_route="/v1/organizations/spend_limit_increase_requests",
             ),
             model=BetaSpendLimitIncreaseRequest,
         )
@@ -411,7 +441,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={
@@ -424,6 +454,12 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.approve",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=IncreaseRequestApproveResponse,
         )
@@ -463,7 +499,7 @@ class AsyncIncreaseRequests(AsyncAPIResource):
             )
         return await self._post(
             path_template(
-                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny?beta=true",
+                "/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
                 spend_limit_increase_request_id=spend_limit_increase_request_id,
             ),
             body={"suppress_notification": suppress_notification},
@@ -472,6 +508,12 @@ class AsyncIncreaseRequests(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.increase_requests.deny",
+                span_route="/v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny",
+                span_attributes={
+                    "anthropic.organization.spend_limit_increase_request.id": spend_limit_increase_request_id
+                },
             ),
             cast_to=BetaSpendLimitIncreaseRequest,
         )

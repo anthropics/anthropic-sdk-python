@@ -24,6 +24,7 @@ class TestEvents:
     def test_method_list(self, client: Anthropic) -> None:
         event = client.beta.sessions.events.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -41,6 +42,7 @@ class TestEvents:
             types=["user.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -48,6 +50,7 @@ class TestEvents:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.events.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -59,6 +62,7 @@ class TestEvents:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.events.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -90,6 +94,7 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -110,6 +115,7 @@ class TestEvents:
             ],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -128,6 +134,7 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -150,6 +157,7 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -181,6 +189,7 @@ class TestEvents:
     def test_method_stream(self, client: Anthropic) -> None:
         event_stream = client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         event_stream.response.close()
 
@@ -191,6 +200,7 @@ class TestEvents:
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         event_stream.response.close()
 
@@ -198,6 +208,7 @@ class TestEvents:
     def test_raw_response_stream(self, client: Anthropic) -> None:
         response = client.beta.sessions.events.with_raw_response.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -208,6 +219,7 @@ class TestEvents:
     def test_streaming_response_stream(self, client: Anthropic) -> None:
         with client.beta.sessions.events.with_streaming_response.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -234,6 +246,7 @@ class TestAsyncEvents:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         event = await async_client.beta.sessions.events.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -251,6 +264,7 @@ class TestAsyncEvents:
             types=["user.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionEvent], event, path=["response"])
 
@@ -258,6 +272,7 @@ class TestAsyncEvents:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.events.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -269,6 +284,7 @@ class TestAsyncEvents:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.events.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -300,6 +316,7 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -320,6 +337,7 @@ class TestAsyncEvents:
             ],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSendSessionEvents, event, path=["response"])
 
@@ -338,6 +356,7 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -360,6 +379,7 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -391,6 +411,7 @@ class TestAsyncEvents:
     async def test_method_stream(self, async_client: AsyncAnthropic) -> None:
         event_stream = await async_client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         await event_stream.response.aclose()
 
@@ -401,6 +422,7 @@ class TestAsyncEvents:
             event_deltas=["agent.message"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         await event_stream.response.aclose()
 
@@ -408,6 +430,7 @@ class TestAsyncEvents:
     async def test_raw_response_stream(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.events.with_raw_response.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -418,6 +441,7 @@ class TestAsyncEvents:
     async def test_streaming_response_stream(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.events.with_streaming_response.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

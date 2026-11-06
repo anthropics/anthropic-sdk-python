@@ -15,7 +15,7 @@ backports-asyncio-runner==1.2.0 ; python_full_version < '3.11'
 boto3-stubs==1.42.69
 botocore-stubs==1.42.41
     # via boto3-stubs
-certifi==2026.2.25
+certifi==2026.10.18
     # via
     #   httpcore
     #   httpx
@@ -76,6 +76,14 @@ mdurl==0.1.2
     # via markdown-it-py
 nodeenv==1.10.0
     # via pyright
+opentelemetry-api==1.44.0
+    # via
+    #   anthropic
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
+    # via opentelemetry-sdk
 packaging==26.0
     # via pytest
 pluggy==1.6.0
@@ -125,6 +133,9 @@ typing-extensions==4.15.0
     #   exceptiongroup
     #   httpx2
     #   inline-snapshot
+    #   opentelemetry-api
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
     #   pyright

@@ -1,5 +1,305 @@
 # Changelog
 
+## [2.6.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.5.0...v2.6.0) (2026-11-05)
+
+### Features
+
+* **api:** add error code for ramp limit errors
+* **api:** add error codes for External Key validation failures
+* **api:** add support for signing organization members out everywhere
+
+
+### Bug Fixes
+
+* **bedrock,vertex:** raise error-code and status exception classes on platform clients
+* **bedrock:** keep a custom http_client and aws_profile on copies made with copy and with_options
+
+
+### Chores
+
+* **client:** stop recording sampling parameters on OpenTelemetry spans
+* **docs:** describe the type and message of API errors
+* **internal:** define the status error mapping once on the base client
+* **internal:** tell contributors when a runtime type check belongs
+* **tests:** remove ambient ANTHROPIC_ and AWS_ variables before the tests run
+
+
+### Documentation
+
+* **client:** describe the type, message, code and details of API errors
+* **client:** list each method's errors without their descriptions
+
+## [2.5.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.4.0...v2.5.0) (2026-11-04)
+
+### Features
+
+* **api:** add error details types and new error type values
+* **api:** add ids filter to list workspaces
+* **client:** add error classes for HTTP statuses and API error codes, and error_code, details and api_message on APIStatusError
+
+
+### Bug Fixes
+
+* **api:** capitalize CMEK in error details type names
+* **api:** move some error details types to the resource they describe
+* **bedrock:** raise a ValueError when model is "." or ".." instead of sending the request to a different path
+* **bedrock:** raise a ValueError when model is empty instead of sending the request to `/model//invoke`
+* **client:** make OverloadedError and ServiceUnavailableError subclasses of InternalServerError
+* **client:** make the first parse of each response model thread-safe
+* **client:** reject path parameters such as '..;x' and ';x'
+* **client:** validate unions correctly across threads on pydantic v1
+* **tools:** keep the memory tool from renaming or deleting the /memories directory
+* **vertex:** percent-encode the model, project ID and region in the request path
+
+
+### Chores
+
+* **api:** update example values for pattern-constrained string fields
+* **ci:** also run the tests with deferred pydantic model builds
+* **docs:** clarify plugin reach values
+* **docs:** clarify plugin version description and plugin reach
+* **docs:** clarify plugin version description length
+* **docs:** clarify some API field descriptions
+* **docs:** clarify three error descriptions
+* **docs:** clarify which blocks to send back around a fallback block
+* **docs:** correct Claude Tag direct message notes in usage reports
+* **docs:** reword Dream and RBAC role permission descriptions
+* **docs:** update the telemetry destination headers description
+* **docs:** use the Claude Platform name in analytics filter docs
+* **internal:** accept changelog entry files in the changelog check
+* **internal:** move error body helpers into the internal utils
+* **internal:** remove stale TODO comments and a test that could not pass
+* **tests:** check that a None path param is rejected
+
+
+### Documentation
+
+* **api:** show each field's own description for `speed`
+* clean up escapes and code spans in doc comments
+
+## [2.4.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.3.0...v2.4.0) (2026-11-02)
+
+### Features
+
+* **api:** add GA methods for analytics, spend limits and RBAC
+* **api:** add named beta types for unified metrics and RBAC delete responses
+* **api:** add shared analytics order and increase request actor types
+* **api:** add tool_use_limit_reached_error and compaction_limit_reached_error session error types
+* **api:** add types for analytics group_by and spend limit period filters
+* **api:** add user_profile_id to External Keys and Workspaces
+
+
+### Bug Fixes
+
+* **api:** make spend_limit nullable in the spend limit increase request approve response
+* **api:** require always-sent analytics fields and drop the unused project product field
+* **client:** let pydantic validate params types that accept omit
+
+
+### Chores
+
+* **ci:** remove unused build upload steps
+* **docs:** clarify the Slack channel id description
+* **docs:** clarify what disabling the Compliance API stops
+* **docs:** clarify what the capability_access_all role action grants
+* **docs:** link Dreams model fields to the supported models section
+* **docs:** update example user ID in Admin API examples
+* **internal:** add a section for each repository's own review rules
+* **internal:** plainer wording in worker comments
+
+### Documentation
+
+* **client:** add missing await to the async parse() docstring example
+* **examples:** keep the message threads example valid on Sonnet 5.5
+* **examples:** use current model IDs
+* **readme:** point to the docs site for documentation
+* link to the SDK documentation instead of removed README sections
+
+## [2.3.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.2.0...v2.3.0) (2026-10-23)
+
+### Features
+
+* **api:** add Claude Tag endpoints for Claude Enterprise organizations
+
+
+### Bug Fixes
+
+* **google-cloud:** send user profiles requests to the organization endpoint
+
+
+### Chores
+
+* **client:** stop sending query params hardcoded in endpoint paths
+* **docs:** improve the descriptions of the code execution tool and its encrypted results
+* **docs:** reword work queue, skill and external key descriptions
+* **docs:** update descriptions of the per-user usage and cost reports
+* **internal:** carry endpoint path query params to the request layer
+* **internal:** check the repository by owner and public name in workflows
+* **internal:** read the beta route qualifier instead of the beta=true query
+* **internal:** remove preview build upload from CI
+* **internal:** stop sending the beta query param from parse and stream
+
+
+### Documentation
+
+* **mcp:** remove the stray `await` from the async `tool_runner` examples
+* **google-cloud:** update the product name
+* **client:** link the Bedrock and Vertex raw response docstrings to the SDK documentation
+* update the README and the example request
+
+## [2.2.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.1.0...v2.2.0) (2026-10-23)
+
+### Features
+
+* **api:** add support for message threads
+* **api:** add usage and cost reports by dimension, mark older reports legacy
+
+
+### Bug Fixes
+
+* **client:** stop suggesting math.inf in the max_retries error message
+* **tools:** leave the tool runner's history to the caller after `append_messages()`, and keep the current reply out of the `set_messages_params()` callback
+* **tools:** keep running the tool runner's function tools when `set_messages_params()` gives `tools` as definitions, and stop running one it takes out of `tools`
+* **tools:** give the `set_messages_params()` callback of a tool runner its `tools` as definitions again
+* **tools:** keep a tool runner's `betas`, `user_profile_id` and `workspace_id` when `set_messages_params()` leaves them out
+
+
+### Chores
+
+* **deps:** bump certifi in the dev lockfile
+* **docs:** clarify plugin content scan and validation descriptions
+* **docs:** clarify plugin served_version_pinned and updated_at
+* **docs:** fix usage and cost report examples and ending_at docs
+* **docs:** rate limit model lists vary by organization and workspace
+
+## [2.1.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.0.0...v2.1.0) (2026-10-21)
+
+### Features
+
+* **api:** add enforcement status, actions and filter to user profiles
+
+## [2.0.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.17.0...v2.0.0) (2026-10-21)
+
+### ⚠ BREAKING CHANGES
+
+* **api:** add support for new API version 2026-10-21
+
+### Features
+
+* **api:** add a workspace_id filter and the usage_tier scope type to list spend limits
+* **api:** add support for new API version 2026-10-21
+
+
+### Documentation
+
+* **api:** remove outdated system role note from messages description
+
+## [1.17.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.16.0...v1.17.0) (2026-10-20)
+
+### Features
+
+* **api:** add org webhook endpoints and user profile enforcement events
+* **api:** add RBAC Group owner-access error codes to the Admin API
+* **api:** document the unsupported_charset error code for plugin uploads
+
+
+### Bug Fixes
+
+* **bedrock:** keep a workspace ID set in default_headers on the Bedrock and Mantle clients
+* **google-cloud:** keep workspace and user profile IDs set in default_headers
+
+
+### Chores
+
+* **ci:** run the changelog check on a standard runner
+
+## [1.16.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.15.0...v1.16.0) (2026-10-20)
+
+### Features
+
+* **api:** add data_refreshed_at and has_more to analytics report pages
+* **api:** add workspace rate-limit updates to the Admin API
+* **api:** make User Profiles generally available
+* **client:** yield server-sent events with unrecognized event names
+* **google-cloud:** use the v1 endpoints and add the organization endpoint
+
+
+### Chores
+
+* **ci:** skip the changelog check on draft pull requests
+* **docs:** add credential expiry descriptions to the Managed Agents API reference
+* **docs:** add Messages API request descriptions
+* **docs:** correct plugin manifest_version and reach descriptions
+* **docs:** improve Managed Agents memory store descriptions
+* **docs:** improve Managed Agents vault and credential descriptions
+
+## [1.15.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.14.0...v1.15.0) (2026-10-15)
+
+### Features
+
+* **api:** add between_tools to thinking types in model capabilities
+* **api:** add the speed parameter and usage.speed to Messages
+* **api:** return a Console organization's usage-tier spend cap as a read-only spend limit
+
+
+### Chores
+
+* **ci:** speed up breaking change detection
+* **docs:** describe headers on Managed Agents and telemetry endpoints
+* **internal:** simplify the script that formats code blocks in docs
+* **tests:** cover OpenTelemetry options and method default timeouts
+
+
+### Documentation
+
+* **api:** note that some models need a beta header to use speed
+
+## [1.14.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.13.0...v1.14.0) (2026-10-14)
+
+### Features
+
+* **api:** add execution_identity to Managed Agents agents
+* **api:** add organization_type_not_supported error to spend limit lists
+* **api:** add telemetry destination test endpoint
+* **api:** add telemetry destinations to the Admin API
+* **client:** add native support for OpenTelemetry tracing
+
+  If your app registers a global tracer provider, the SDK will create spans with it after upgrading, and they'll be exported with the rest of your traces. Requests will also get trace context headers from the global propagator. To disable, pass `open_telemetry=False` to the client or set `ANTHROPIC_OPEN_TELEMETRY=false`. Learn more in the [documentation](https://platform.claude.com/docs/en/manage-claude/opentelemetry/sdk).
+
+
+### Bug Fixes
+
+* **api:** rename telemetry destination test response model
+* **client:** close dropped streams without waiting for the collector
+* **streaming:** pass unknown event types through the message stream helpers
+* **streaming:** stop raising "Unexpected event order" for an event before message_start
+
+
+### Chores
+
+* **docs:** correct prefill, thinking, fallback and model descriptions
+* **docs:** document the scope required to assign the managed role
+* **docs:** update model examples
+* **internal:** narrow the tripwire test rule in the contributor guides
+
+
+### Documentation
+
+* **api:** clarify when custom tool results can be sent
+* **api:** say is_enabled is always true for user spend limits
+
+## [1.13.0](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.1...v1.13.0) (2026-10-09)
+
+### Features
+
+* **api:** add types for the Chat and Cowork unified analytics metrics
+* **api:** add workflows, multiagent configuration and thread status filtering to Managed Agents
+
+
+### Chores
+
+* **internal:** name the default API version header value
+
 ## [1.12.1](https://github.com/anthropics/anthropic-sdk-python/compare/v1.12.0...v1.12.1) (2026-10-08)
 
 ### Chores

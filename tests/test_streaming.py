@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TypeVar, Iterator, AsyncIterator
+from typing import Any, TypeVar, Iterator, AsyncIterator
+from typing_extensions import override
 
 import httpx2
 import pytest
@@ -8,6 +9,19 @@ import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic._streaming import Stream, AsyncStream, ServerSentEvent
 from anthropic._exceptions import APIStatusError
+
+from .utils import (
+    STREAMS,
+    ASYNC_STREAMS,
+    Body,
+    Held,
+    AsyncHeld,
+    collect,
+    requester,
+    async_collect,
+    async_requester,
+    without_collection,
+)
 
 _T = TypeVar("_T")
 
@@ -194,6 +208,102 @@ async def test_special_new_line_character(
     assert sse.json() == {"content": "foo"}
 
     await assert_empty_iter(iterator)
+
+
+# The test suite turns warnings, and exceptions that nothing can catch, into failures, so every test checks for silence.
+
+
+class TestSync:
+    @pytest.mark.parametrize("held", STREAMS.values(), ids=STREAMS)
+    def test_dropped_response_is_closed_at_once(self, client: Anthropic, held: Held[Any, Any]) -> None:
+        body = Body()
+
+        with without_collection():
+            items = held.iterate(held.keep(held.request(requester(client, body))))
+            next(items)
+            del items
+            assert body.closes == 1
+
+        collect(client)
+        assert body.closes == 1
+
+    @pytest.mark.parametrize("held", STREAMS.values(), ids=STREAMS)
+    def test_held_response_stays_open(self, client: Anthropic, held: Held[Any, Any]) -> None:
+        body = Body()
+        kept = held.keep(held.request(requester(client, body)))
+        collect(client)
+        assert body.closes == 0
+
+        items = held.iterate(kept)
+        del kept
+        next(items)
+        collect(client)
+        assert body.closes == 0
+
+        next(items)
+        del items
+        collect(client)
+        assert body.closes == 1
+
+    def test_stream_has_what_its_subclass_sets_after_init(self, client: Anthropic) -> None:
+        class Tagged(Stream[object]):
+            def __init__(self, **kwargs: Any) -> None:
+                super().__init__(**kwargs)
+                self.tag = "tag"
+
+            @override
+            def __stream__(self) -> Iterator[object]:
+                for _ in super().__stream__():
+                    yield self.tag
+
+        assert next(requester(client, Body(), stream_cls=Tagged)()) == "tag"
+
+
+class TestAsync:
+    @pytest.mark.parametrize("held", ASYNC_STREAMS.values(), ids=ASYNC_STREAMS)
+    async def test_dropped_response_is_closed_at_once(
+        self, async_client: AsyncAnthropic, held: AsyncHeld[Any, Any]
+    ) -> None:
+        body = Body()
+
+        with without_collection():
+            items = held.iterate(held.keep(await held.request(async_requester(async_client, body))))
+            await anext(items)
+            del items
+            await body.wait_closed()
+
+        await async_collect(async_client)
+        assert body.closes == 1
+
+    @pytest.mark.parametrize("held", ASYNC_STREAMS.values(), ids=ASYNC_STREAMS)
+    async def test_held_response_stays_open(self, async_client: AsyncAnthropic, held: AsyncHeld[Any, Any]) -> None:
+        body = Body()
+        kept = held.keep(await held.request(async_requester(async_client, body)))
+        await async_collect(async_client)
+        assert body.closes == 0
+
+        items = held.iterate(kept)
+        del kept
+        await anext(items)
+        await async_collect(async_client)
+        assert body.closes == 0
+
+        await anext(items)
+        del items
+        await body.wait_closed()
+
+    async def test_stream_has_what_its_subclass_sets_after_init(self, async_client: AsyncAnthropic) -> None:
+        class Tagged(AsyncStream[object]):
+            def __init__(self, **kwargs: Any) -> None:
+                super().__init__(**kwargs)
+                self.tag = "tag"
+
+            @override
+            async def __stream__(self) -> AsyncIterator[object]:
+                async for _ in super().__stream__():
+                    yield self.tag
+
+        assert await anext(await async_requester(async_client, Body(), stream_cls=Tagged)()) == "tag"
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

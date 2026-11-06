@@ -23,6 +23,7 @@ class TestPluginMarketplaces:
     def test_method_retrieve(self, client: Anthropic) -> None:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -32,6 +33,7 @@ class TestPluginMarketplaces:
             marketplace_id="marketplace_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -39,6 +41,7 @@ class TestPluginMarketplaces:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.plugin_marketplaces.with_raw_response.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -50,6 +53,7 @@ class TestPluginMarketplaces:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.plugin_marketplaces.with_streaming_response.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -71,6 +75,7 @@ class TestPluginMarketplaces:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -80,6 +85,7 @@ class TestPluginMarketplaces:
             marketplace_id="marketplace_id",
             default_installation_preference="available",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -88,6 +94,7 @@ class TestPluginMarketplaces:
         response = client.beta.organization.plugin_marketplaces.with_raw_response.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -100,6 +107,7 @@ class TestPluginMarketplaces:
         with client.beta.organization.plugin_marketplaces.with_streaming_response.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -119,7 +127,9 @@ class TestPluginMarketplaces:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        plugin_marketplace = client.beta.organization.plugin_marketplaces.list()
+        plugin_marketplace = client.beta.organization.plugin_marketplaces.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
 
     @parametrize
@@ -131,12 +141,15 @@ class TestPluginMarketplaces:
             page="page",
             source="directory",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.plugin_marketplaces.with_raw_response.list()
+        response = client.beta.organization.plugin_marketplaces.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -145,7 +158,9 @@ class TestPluginMarketplaces:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.plugin_marketplaces.with_streaming_response.list() as response:
+        with client.beta.organization.plugin_marketplaces.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -158,6 +173,7 @@ class TestPluginMarketplaces:
     def test_method_validate_archive(self, client: Anthropic) -> None:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -166,6 +182,7 @@ class TestPluginMarketplaces:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -173,6 +190,7 @@ class TestPluginMarketplaces:
     def test_raw_response_validate_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.plugin_marketplaces.with_raw_response.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -184,6 +202,7 @@ class TestPluginMarketplaces:
     def test_streaming_response_validate_archive(self, client: Anthropic) -> None:
         with client.beta.organization.plugin_marketplaces.with_streaming_response.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -197,6 +216,7 @@ class TestPluginMarketplaces:
     def test_method_validate_repository(self, client: Anthropic) -> None:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -206,6 +226,7 @@ class TestPluginMarketplaces:
             repository_url="https://github.com/example-org/example-marketplace",
             ref="main",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -213,6 +234,7 @@ class TestPluginMarketplaces:
     def test_raw_response_validate_repository(self, client: Anthropic) -> None:
         response = client.beta.organization.plugin_marketplaces.with_raw_response.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -224,6 +246,7 @@ class TestPluginMarketplaces:
     def test_streaming_response_validate_repository(self, client: Anthropic) -> None:
         with client.beta.organization.plugin_marketplaces.with_streaming_response.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -243,6 +266,7 @@ class TestAsyncPluginMarketplaces:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -252,6 +276,7 @@ class TestAsyncPluginMarketplaces:
             marketplace_id="marketplace_id",
             organization_id="organization_id",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -259,6 +284,7 @@ class TestAsyncPluginMarketplaces:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -270,6 +296,7 @@ class TestAsyncPluginMarketplaces:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.retrieve(
             marketplace_id="marketplace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -291,6 +318,7 @@ class TestAsyncPluginMarketplaces:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -300,6 +328,7 @@ class TestAsyncPluginMarketplaces:
             marketplace_id="marketplace_id",
             default_installation_preference="available",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
 
@@ -308,6 +337,7 @@ class TestAsyncPluginMarketplaces:
         response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -320,6 +350,7 @@ class TestAsyncPluginMarketplaces:
         async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -339,7 +370,9 @@ class TestAsyncPluginMarketplaces:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.list()
+        plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
 
     @parametrize
@@ -351,12 +384,15 @@ class TestAsyncPluginMarketplaces:
             page="page",
             source="directory",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.list()
+        response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -365,7 +401,9 @@ class TestAsyncPluginMarketplaces:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.list() as response:
+        async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -378,6 +416,7 @@ class TestAsyncPluginMarketplaces:
     async def test_method_validate_archive(self, async_client: AsyncAnthropic) -> None:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -386,6 +425,7 @@ class TestAsyncPluginMarketplaces:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -393,6 +433,7 @@ class TestAsyncPluginMarketplaces:
     async def test_raw_response_validate_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -404,6 +445,7 @@ class TestAsyncPluginMarketplaces:
     async def test_streaming_response_validate_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.validate_archive(
             archive=b"Example data",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -417,6 +459,7 @@ class TestAsyncPluginMarketplaces:
     async def test_method_validate_repository(self, async_client: AsyncAnthropic) -> None:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -426,6 +469,7 @@ class TestAsyncPluginMarketplaces:
             repository_url="https://github.com/example-org/example-marketplace",
             ref="main",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
 
@@ -433,6 +477,7 @@ class TestAsyncPluginMarketplaces:
     async def test_raw_response_validate_repository(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.plugin_marketplaces.with_raw_response.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -444,6 +489,7 @@ class TestAsyncPluginMarketplaces:
     async def test_streaming_response_validate_repository(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.plugin_marketplaces.with_streaming_response.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

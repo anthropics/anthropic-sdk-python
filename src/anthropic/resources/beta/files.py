@@ -54,7 +54,7 @@ class Files(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return FilesWithRawResponse(self)
 
@@ -63,7 +63,7 @@ class Files(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return FilesWithStreamingResponse(self)
 
@@ -119,6 +119,15 @@ class Files(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -130,7 +139,7 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/files?beta=true",
+            "/v1/files",
             page=SyncPageCursor[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -143,6 +152,9 @@ class Files(SyncAPIResource):
                     "page": page,
                     "scope_id": scope_id,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=BetaFileMetadata,
         )
@@ -182,6 +194,15 @@ class Files(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -195,12 +216,16 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._delete(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaDeletedFile,
         )
@@ -240,6 +265,19 @@ class Files(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          FileNotDownloadableError:
+
+          OrganizationOnHoldError:
+
+          FileExpiredError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -254,12 +292,16 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -299,6 +341,15 @@ class Files(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -312,12 +363,16 @@ class Files(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaFileMetadata,
         )
@@ -364,6 +419,17 @@ class Files(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          StorageQuotaExceededError:
         """
         extra_headers = {
             **strip_not_given(
@@ -388,7 +454,7 @@ class Files(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            "/v1/files?beta=true",
+            "/v1/files",
             body=body,
             files=files,
             options=make_request_options(
@@ -396,6 +462,10 @@ class Files(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=BetaFileMetadata,
         )
@@ -408,7 +478,7 @@ class AsyncFiles(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncFilesWithRawResponse(self)
 
@@ -417,7 +487,7 @@ class AsyncFiles(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncFilesWithStreamingResponse(self)
 
@@ -473,6 +543,15 @@ class AsyncFiles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -484,7 +563,7 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/files?beta=true",
+            "/v1/files",
             page=AsyncPageCursor[BetaFileMetadata],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -497,6 +576,9 @@ class AsyncFiles(AsyncAPIResource):
                     "page": page,
                     "scope_id": scope_id,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.list",
+                span_route="/v1/files",
             ),
             model=BetaFileMetadata,
         )
@@ -536,6 +618,15 @@ class AsyncFiles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -549,12 +640,16 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._delete(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.delete",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaDeletedFile,
         )
@@ -594,6 +689,19 @@ class AsyncFiles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          FileNotDownloadableError:
+
+          OrganizationOnHoldError:
+
+          FileExpiredError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -608,12 +716,16 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/files/{file_id}/content?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}/content", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.download",
+                span_route="/v1/files/{file_id}/content",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )
@@ -653,6 +765,15 @@ class AsyncFiles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
         """
         if not file_id:
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
@@ -666,12 +787,16 @@ class AsyncFiles(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/files/{file_id}?beta=true", file_id=file_id),
+            path_template("/v1/files/{file_id}", file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.retrieve_metadata",
+                span_route="/v1/files/{file_id}",
+                span_attributes={"anthropic.file.id": file_id},
             ),
             cast_to=BetaFileMetadata,
         )
@@ -718,6 +843,17 @@ class AsyncFiles(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          StorageQuotaExceededError:
         """
         extra_headers = {
             **strip_not_given(
@@ -742,7 +878,7 @@ class AsyncFiles(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            "/v1/files?beta=true",
+            "/v1/files",
             body=body,
             files=files,
             options=make_request_options(
@@ -750,6 +886,10 @@ class AsyncFiles(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.files.upload",
+                span_route="/v1/files",
+                span_created_id="anthropic.file.id",
             ),
             cast_to=BetaFileMetadata,
         )

@@ -30,7 +30,7 @@ class Models(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ModelsWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Models(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ModelsWithStreamingResponse(self)
 
@@ -81,6 +81,11 @@ class Models(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
@@ -94,12 +99,16 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -158,6 +167,11 @@ class Models(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -169,7 +183,7 @@ class Models(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=SyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -182,6 +196,9 @@ class Models(SyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )
@@ -194,7 +211,7 @@ class AsyncModels(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncModelsWithRawResponse(self)
 
@@ -203,7 +220,7 @@ class AsyncModels(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncModelsWithStreamingResponse(self)
 
@@ -245,6 +262,11 @@ class AsyncModels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not model_id:
             raise ValueError(f"Expected a non-empty value for `model_id` but received {model_id!r}")
@@ -258,12 +280,16 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/models/{model_id}?beta=true", model_id=model_id),
+            path_template("/v1/models/{model_id}", model_id=model_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.models.retrieve",
+                span_route="/v1/models/{model_id}",
+                span_attributes={"anthropic.model.id": model_id},
             ),
             cast_to=BetaModelInfo,
         )
@@ -322,6 +348,11 @@ class AsyncModels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -333,7 +364,7 @@ class AsyncModels(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/models?beta=true",
+            "/v1/models",
             page=AsyncPage[BetaModelInfo],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -346,6 +377,9 @@ class AsyncModels(AsyncAPIResource):
                     "lifecycle": lifecycle,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.models.list",
+                span_route="/v1/models",
             ),
             model=BetaModelInfo,
         )

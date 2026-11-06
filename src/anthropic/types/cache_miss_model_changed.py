@@ -6,6 +6,12 @@ __all__ = ["CacheMissModelChanged"]
 
 
 class CacheMissModelChanged(BaseModel):
+    """
+    A `cache_miss_reason` for a request whose `model` or `speed` differs from the previous request's.
+
+    See the [cache diagnostics guide](https://platform.claude.com/docs/en/build-with-claude/cache-diagnostics#cache-miss-reason-types) to learn what to change for each reason.
+    """
+
     cache_missed_input_tokens: int
     """
     Approximate number of input tokens that would have been read from cache had the

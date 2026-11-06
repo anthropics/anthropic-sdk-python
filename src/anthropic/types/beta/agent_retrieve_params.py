@@ -16,7 +16,10 @@ class AgentRetrieveParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

@@ -31,7 +31,7 @@ class Shares(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SharesWithRawResponse(self)
 
@@ -40,7 +40,7 @@ class Shares(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SharesWithStreamingResponse(self)
 
@@ -126,7 +126,7 @@ class Shares(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/shares?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/shares", plugin_id=plugin_id),
             page=SyncPageCursor[BetaPluginShare],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -139,6 +139,10 @@ class Shares(SyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.shares.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/shares",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginShare,
         )
@@ -151,7 +155,7 @@ class AsyncShares(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSharesWithRawResponse(self)
 
@@ -160,7 +164,7 @@ class AsyncShares(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSharesWithStreamingResponse(self)
 
@@ -246,7 +250,7 @@ class AsyncShares(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/shares?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/shares", plugin_id=plugin_id),
             page=AsyncPageCursor[BetaPluginShare],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -259,6 +263,10 @@ class AsyncShares(AsyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.shares.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/shares",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginShare,
         )

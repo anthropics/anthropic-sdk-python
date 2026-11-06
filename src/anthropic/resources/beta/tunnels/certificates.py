@@ -30,7 +30,7 @@ class Certificates(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return CertificatesWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Certificates(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return CertificatesWithStreamingResponse(self)
 
@@ -74,7 +74,8 @@ class Certificates(SyncAPIResource):
           ca_certificate_pem: PEM-encoded X.509 CA certificate. Must contain exactly one certificate and no
               private-key material. Maximum 8KB.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -106,13 +107,18 @@ class Certificates(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.create",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
+                span_created_id="anthropic.tunnel.certificate.id",
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -145,7 +151,8 @@ class Certificates(SyncAPIResource):
 
           certificate_id: ID of the certificate (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -180,7 +187,7 @@ class Certificates(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -189,6 +196,10 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -228,7 +239,8 @@ class Certificates(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnel_certificates` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -260,7 +272,7 @@ class Certificates(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             page=SyncPageCursor[BetaTunnelCertificate],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -272,6 +284,10 @@ class Certificates(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.list",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             model=BetaTunnelCertificate,
         )
@@ -307,7 +323,8 @@ class Certificates(SyncAPIResource):
 
           certificate_id: ID of the certificate to archive (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -342,7 +359,7 @@ class Certificates(SyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -351,6 +368,10 @@ class Certificates(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.archive",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -363,7 +384,7 @@ class AsyncCertificates(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncCertificatesWithRawResponse(self)
 
@@ -372,7 +393,7 @@ class AsyncCertificates(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncCertificatesWithStreamingResponse(self)
 
@@ -407,7 +428,8 @@ class AsyncCertificates(AsyncAPIResource):
           ca_certificate_pem: PEM-encoded X.509 CA certificate. Must contain exactly one certificate and no
               private-key material. Maximum 8KB.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -439,13 +461,18 @@ class AsyncCertificates(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             body={"ca_certificate_pem": ca_certificate_pem},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.create",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
+                span_created_id="anthropic.tunnel.certificate.id",
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -478,7 +505,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           certificate_id: ID of the certificate (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -513,7 +541,7 @@ class AsyncCertificates(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -522,6 +550,10 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )
@@ -561,7 +593,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnel_certificates` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -593,7 +626,7 @@ class AsyncCertificates(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/tunnels/{tunnel_id}/certificates?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/certificates", tunnel_id=tunnel_id),
             page=AsyncPageCursor[BetaTunnelCertificate],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -605,6 +638,10 @@ class AsyncCertificates(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.list",
+                span_route="/v1/tunnels/{tunnel_id}/certificates",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             model=BetaTunnelCertificate,
         )
@@ -640,7 +677,8 @@ class AsyncCertificates(AsyncAPIResource):
 
           certificate_id: ID of the certificate to archive (`tcrt_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -675,7 +713,7 @@ class AsyncCertificates(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive?beta=true",
+                "/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
                 tunnel_id=tunnel_id,
                 certificate_id=certificate_id,
             ),
@@ -684,6 +722,10 @@ class AsyncCertificates(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.certificates.archive",
+                span_route="/v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id, "anthropic.tunnel.certificate.id": certificate_id},
             ),
             cast_to=BetaTunnelCertificate,
         )

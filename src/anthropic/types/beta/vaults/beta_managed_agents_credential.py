@@ -26,7 +26,7 @@ class BetaManagedAgentsCredential(BaseModel):
     """
 
     id: str
-    """Unique identifier for the credential."""
+    """The unique ID of the credential (`vcrd_...`)."""
 
     archived_at: Optional[datetime] = None
     """When the credential was archived. Null if not archived."""

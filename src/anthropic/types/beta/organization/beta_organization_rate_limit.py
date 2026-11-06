@@ -30,22 +30,12 @@ class BetaOrganizationRateLimit(BaseModel):
     """Identifier of this rate-limit entry.
 
     It is stable within the organization and differs between organizations; the
-    group's own identifier is `group.id`.
+    group's own identifier is `group.id`. Pass it as `rate_limit_id` to set a
+    workspace's overrides for this group.
     """
 
     group: Group
-    """The rate-limit group this entry's limits apply to.
-
-    Its `type` equals `group_type`.
-    """
-
-    group_type: Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]
-    """Deprecated: use `group.type` instead.
-
-    The kind of rate-limit group this entry represents. `model_group` entries apply
-    to a family of models (listed in `models`); other values apply to an API-surface
-    category and have `models` set to `null`. Always equal to `group.type`.
-    """
+    """The rate-limit group this entry's limits apply to."""
 
     limits: List[BetaOrganizationRateLimitValue]
     """The limiter values that apply to this group."""
@@ -53,7 +43,8 @@ class BetaOrganizationRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group_type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`. The list covers the models your
+    organization has access to, so it can differ between organizations.
     """
 
     type: Literal["rate_limit"]

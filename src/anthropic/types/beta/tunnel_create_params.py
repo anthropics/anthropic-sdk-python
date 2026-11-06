@@ -13,7 +13,10 @@ class TunnelCreateParams(TypedDict, total=False):
     """Optional human-readable name for the tunnel (1-255 characters)."""
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

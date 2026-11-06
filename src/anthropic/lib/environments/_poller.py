@@ -11,6 +11,7 @@ import anyio
 
 from .._retry import TRANSIENT_ERRORS, jitter, backoff, is_fatal_status_error
 from ..._types import Headers, omit
+from .._tracing import WorkSpan, as_current_span
 from ..._exceptions import APIStatusError
 from ...types.beta.environments import BetaSelfHostedWork
 from ...resources.beta.environments.work import Work, AsyncWork
@@ -90,6 +91,7 @@ def iter_work(
     drain: bool = False,
     auto_stop: bool = True,
     extra_headers: Headers | None = None,
+    _work_span: WorkSpan | None = None,
 ) -> Iterator[BetaSelfHostedWork]:
     """Iterate work items claimed from a self-hosted environment.
 
@@ -104,6 +106,12 @@ def iter_work(
     such as `anthropic.lib.environments.EnvironmentWorker` extract the
     sessions token it carries and prefer that over the environment key for the
     item's downstream calls. Treat it as opaque and never log it.
+
+    Each item has an OpenTelemetry span, `anthropic.environment.work`, when the
+    client has spans. It is open from when the poll returns the item until the
+    consumer asks for the next item or stops iterating. It is not the current
+    span in the consumer's code, so a span that the consumer starts for the
+    item is its sibling.
 
     Two consumption shapes are supported:
 
@@ -148,6 +156,8 @@ def iter_work(
     poll_attempt = 0
     ack_attempt = 0
     idle = _IdleLog(environment_id)
+    # The consumer that gave `_work_span` reads the item's span from it, and ends it before this generator does.
+    work_span = _work_span if _work_span is not None else WorkSpan()
     while True:
         try:
             item = work.poll(
@@ -175,41 +185,54 @@ def iter_work(
             time.sleep(_jitter(1.0, 3.0))
             continue
         idle.on_claim()
+        work_span.start(work._client, item)
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
         try:
-            work.ack(
-                item.id,
-                environment_id=environment_id,
-                extra_headers=extra_headers,
-            )
+            with as_current_span(work_span.span):
+                work.ack(
+                    item.id,
+                    environment_id=environment_id,
+                    extra_headers=extra_headers,
+                )
         except TRANSIENT_ERRORS as e:
             if _is_fatal_4xx(e):
                 log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
-                _force_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+                with as_current_span(work_span.span):
+                    _force_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+                work_span.end(e)
                 continue
             ack_attempt += 1
             wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
             log.warning(
                 "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s", item.id, ack_attempt, wait, e
             )
+            work_span.end(e)
             time.sleep(wait)
             continue
+        except BaseException as e:
+            work_span.end(e)
+            raise
         ack_attempt = 0
         if not auto_stop:
-            yield item
+            try:
+                yield item
+            finally:
+                work_span.end()
             continue
         try:
             yield item
         finally:
             try:
-                work.stop(
-                    item.id,
-                    environment_id=environment_id,
-                    extra_headers=extra_headers,
-                )
+                with as_current_span(work_span.span):
+                    work.stop(
+                        item.id,
+                        environment_id=environment_id,
+                        extra_headers=extra_headers,
+                    )
             except Exception as e:
                 if not _is_status(e, 409):
                     log.warning("stop failed work_id=%s error=%s", item.id, e)
+            work_span.end()
 
 
 def _force_stop_quietly(work: Work, work_id: str, *, environment_id: str, extra_headers: Headers | None = None) -> None:
@@ -235,6 +258,7 @@ async def aiter_work(
     drain: bool = False,
     auto_stop: bool = True,
     extra_headers: Headers | None = None,
+    _work_span: WorkSpan | None = None,
 ) -> AsyncIterator[BetaSelfHostedWork]:
     """Async version of `iter_work`. See its docstring for semantics,
     including how `extra_headers` is passed through per request.
@@ -244,6 +268,8 @@ async def aiter_work(
     poll_attempt = 0
     ack_attempt = 0
     idle = _IdleLog(environment_id)
+    # The consumer that gave `_work_span` reads the item's span from it, and ends it before this generator does.
+    work_span = _work_span if _work_span is not None else WorkSpan()
     while True:
         try:
             item = await work.poll(
@@ -271,41 +297,56 @@ async def aiter_work(
             await anyio.sleep(_jitter(1.0, 3.0))
             continue
         idle.on_claim()
+        work_span.start(work._client, item)
         log.info("claimed work work_id=%s work_type=%s", item.id, getattr(item.data, "type", None))
         try:
-            await work.ack(
-                item.id,
-                environment_id=environment_id,
-                extra_headers=extra_headers,
-            )
+            with as_current_span(work_span.span):
+                await work.ack(
+                    item.id,
+                    environment_id=environment_id,
+                    extra_headers=extra_headers,
+                )
         except TRANSIENT_ERRORS as e:
             if _is_fatal_4xx(e):
                 log.error("ack failed permanently; force-stopping work_id=%s error=%s", item.id, e)
-                await _aforce_stop_quietly(work, item.id, environment_id=environment_id, extra_headers=extra_headers)
+                with as_current_span(work_span.span):
+                    await _aforce_stop_quietly(
+                        work, item.id, environment_id=environment_id, extra_headers=extra_headers
+                    )
+                work_span.end(e)
                 continue
             ack_attempt += 1
             wait = _backoff(ack_attempt) + _jitter(0.0, 1.0)
             log.warning(
                 "ack failed, backing off work_id=%s attempt=%d backoff=%.1fs error=%s", item.id, ack_attempt, wait, e
             )
+            work_span.end(e)
             await anyio.sleep(wait)
             continue
+        except BaseException as e:
+            work_span.end(e)
+            raise
         ack_attempt = 0
         if not auto_stop:
-            yield item
+            try:
+                yield item
+            finally:
+                work_span.end()
             continue
         try:
             yield item
         finally:
             try:
-                await work.stop(
-                    item.id,
-                    environment_id=environment_id,
-                    extra_headers=extra_headers,
-                )
+                with as_current_span(work_span.span):
+                    await work.stop(
+                        item.id,
+                        environment_id=environment_id,
+                        extra_headers=extra_headers,
+                    )
             except Exception as e:
                 if not _is_status(e, 409):
                     log.warning("stop failed work_id=%s error=%s", item.id, e)
+            work_span.end()
 
 
 async def _aforce_stop_quietly(

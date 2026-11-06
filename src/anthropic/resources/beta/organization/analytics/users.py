@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,7 +16,10 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
+from .....types.beta.organization import BetaAnalyticsOrder
+from .....types.beta.organization.beta_analytics_order import BetaAnalyticsOrder
 from .....types.beta.organization.beta_analytics_user_activity import BetaAnalyticsUserActivity
+from .....types.beta.organization.beta_analytics_user_group_by import BetaAnalyticsUserGroupBy
 
 __all__ = ["Users", "AsyncUsers"]
 
@@ -29,7 +31,7 @@ class Users(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsersWithRawResponse(self)
 
@@ -38,7 +40,7 @@ class Users(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsersWithStreamingResponse(self)
 
@@ -48,9 +50,9 @@ class Users(SyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["rbac_group_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsUserGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -86,14 +88,18 @@ class Users(SyncAPIResource):
           filter: Filters as `dimension:value`, e.g. `filter[]=rbac_group_id:{id}`. Repeat the
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `project_id`, `rbac_group_id`, `user_id`. Value
-              forms: `project_id` takes a tagged project id (`claude_proj_...`) and scopes
-              each member's row to their claude.ai chat activity within that project (it
-              cannot be combined with `group_by[]` or an `rbac_group_id` filter);
+              forms: `project_id` takes a tagged project id (`claude_proj_...`);
               `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted in responses
               and by the spend-limits API) or a bare group UUID, and matches users who held
               the group at any point during each covered UTC day (time-of-usage attribution);
               `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              unsupported dimension returns 400. At most 100 entries. A `project_id` filter
+              limits each member's row to their claude.ai chat activity in that project and
+              cannot be combined with `group_by[]` or an `rbac_group_id` filter. On these
+              rows, every count in `chat_cowork_unified_metrics.sessions` is 0, because
+              sessions are not measured per project. On any day a member sent a chat message
+              in Chat and Cowork unified, all of that member's project activity for the day is
+              counted in `chat_cowork_unified_metrics.chat` instead of `chat_metrics`.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=rbac_group_id`). Supported
               on this endpoint: `rbac_group_id`. Rows are already per-member, so the one
@@ -138,7 +144,7 @@ class Users(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/users?beta=true",
+            "/v1/organizations/analytics/users",
             page=SyncPageCursor[BetaAnalyticsUserActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -156,6 +162,10 @@ class Users(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.users.list",
+                span_route="/v1/organizations/analytics/users",
+                span_content_query_params=("page",),
             ),
             model=BetaAnalyticsUserActivity,
         )
@@ -168,7 +178,7 @@ class AsyncUsers(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsersWithRawResponse(self)
 
@@ -177,7 +187,7 @@ class AsyncUsers(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsersWithStreamingResponse(self)
 
@@ -187,9 +197,9 @@ class AsyncUsers(AsyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["rbac_group_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsUserGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -225,14 +235,18 @@ class AsyncUsers(AsyncAPIResource):
           filter: Filters as `dimension:value`, e.g. `filter[]=rbac_group_id:{id}`. Repeat the
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `project_id`, `rbac_group_id`, `user_id`. Value
-              forms: `project_id` takes a tagged project id (`claude_proj_...`) and scopes
-              each member's row to their claude.ai chat activity within that project (it
-              cannot be combined with `group_by[]` or an `rbac_group_id` filter);
+              forms: `project_id` takes a tagged project id (`claude_proj_...`);
               `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted in responses
               and by the spend-limits API) or a bare group UUID, and matches users who held
               the group at any point during each covered UTC day (time-of-usage attribution);
               `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              unsupported dimension returns 400. At most 100 entries. A `project_id` filter
+              limits each member's row to their claude.ai chat activity in that project and
+              cannot be combined with `group_by[]` or an `rbac_group_id` filter. On these
+              rows, every count in `chat_cowork_unified_metrics.sessions` is 0, because
+              sessions are not measured per project. On any day a member sent a chat message
+              in Chat and Cowork unified, all of that member's project activity for the day is
+              counted in `chat_cowork_unified_metrics.chat` instead of `chat_metrics`.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=rbac_group_id`). Supported
               on this endpoint: `rbac_group_id`. Rows are already per-member, so the one
@@ -277,7 +291,7 @@ class AsyncUsers(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/users?beta=true",
+            "/v1/organizations/analytics/users",
             page=AsyncPageCursor[BetaAnalyticsUserActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -295,6 +309,10 @@ class AsyncUsers(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.users.list",
+                span_route="/v1/organizations/analytics/users",
+                span_content_query_params=("page",),
             ),
             model=BetaAnalyticsUserActivity,
         )

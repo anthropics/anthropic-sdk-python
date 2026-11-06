@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,7 +16,10 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
+from .....types.beta.organization import BetaAnalyticsOrder
+from .....types.beta.organization.beta_analytics_order import BetaAnalyticsOrder
 from .....types.beta.organization.beta_analytics_plugin_activity import BetaAnalyticsPluginActivity
+from .....types.beta.organization.beta_analytics_plugin_group_by import BetaAnalyticsPluginGroupBy
 
 __all__ = ["Plugins", "AsyncPlugins"]
 
@@ -29,7 +31,7 @@ class Plugins(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginsWithRawResponse(self)
 
@@ -38,7 +40,7 @@ class Plugins(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginsWithStreamingResponse(self)
 
@@ -48,9 +50,9 @@ class Plugins(SyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsPluginGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -92,21 +94,24 @@ class Plugins(SyncAPIResource):
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `plugin_name`, `product`, `rbac_group_id`,
               `user_id`. Value forms: `plugin_name` matches case-insensitively; `product` is
-              `claude_code` or `cowork` (the only surfaces with plugin attribution);
-              `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted in responses
-              and by the spend-limits API) or a bare group UUID, and matches users who held
-              the group at any point during each covered UTC day (time-of-usage attribution);
-              `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified`, `claude_code`, or `cowork` (the only surfaces with plugin
+              attribution); `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted
+              in responses and by the spend-limits API) or a bare group UUID, and matches
+              users who held the group at any point during each covered UTC day (time-of-usage
+              attribution); `user_id` takes a tagged user id (`user_...`), as emitted in
+              responses. An unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified` is accepted as a `product` value only where Chat and
+              Cowork unified is available.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=user_id`). Supported on
               this endpoint: `product`, `rbac_group_id`, `user_id`. On this endpoint `product`
-              takes the values `claude_code` or `cowork` only (the surfaces with plugin
-              attribution). Grouped rows carry the requested dimension values as additional
-              fields and paginate like ungrouped responses via `next_page`; an unsupported
-              dimension returns 400. `rbac_group_id` attributes a user to every group they
-              held at any point during each covered UTC day, so grouped rows are not an
-              exclusive partition and can sum above org-level totals. At most 100 entries.
+              takes the values `chat_cowork_unified`, `claude_code`, or `cowork` only (the
+              surfaces with plugin attribution). Grouped rows carry the requested dimension
+              values as additional fields and paginate like ungrouped responses via
+              `next_page`; an unsupported dimension returns 400. `rbac_group_id` attributes a
+              user to every group they held at any point during each covered UTC day, so
+              grouped rows are not an exclusive partition and can sum above org-level totals.
+              At most 100 entries.
 
           limit: Number of results per page (1-1000, default 100).
 
@@ -142,7 +147,7 @@ class Plugins(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/plugins?beta=true",
+            "/v1/organizations/analytics/plugins",
             page=SyncPageCursor[BetaAnalyticsPluginActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -160,6 +165,10 @@ class Plugins(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.plugins.list",
+                span_route="/v1/organizations/analytics/plugins",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsPluginActivity,
         )
@@ -172,7 +181,7 @@ class AsyncPlugins(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginsWithRawResponse(self)
 
@@ -181,7 +190,7 @@ class AsyncPlugins(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginsWithStreamingResponse(self)
 
@@ -191,9 +200,9 @@ class AsyncPlugins(AsyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsPluginGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -235,21 +244,24 @@ class AsyncPlugins(AsyncAPIResource):
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `plugin_name`, `product`, `rbac_group_id`,
               `user_id`. Value forms: `plugin_name` matches case-insensitively; `product` is
-              `claude_code` or `cowork` (the only surfaces with plugin attribution);
-              `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted in responses
-              and by the spend-limits API) or a bare group UUID, and matches users who held
-              the group at any point during each covered UTC day (time-of-usage attribution);
-              `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified`, `claude_code`, or `cowork` (the only surfaces with plugin
+              attribution); `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted
+              in responses and by the spend-limits API) or a bare group UUID, and matches
+              users who held the group at any point during each covered UTC day (time-of-usage
+              attribution); `user_id` takes a tagged user id (`user_...`), as emitted in
+              responses. An unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified` is accepted as a `product` value only where Chat and
+              Cowork unified is available.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=user_id`). Supported on
               this endpoint: `product`, `rbac_group_id`, `user_id`. On this endpoint `product`
-              takes the values `claude_code` or `cowork` only (the surfaces with plugin
-              attribution). Grouped rows carry the requested dimension values as additional
-              fields and paginate like ungrouped responses via `next_page`; an unsupported
-              dimension returns 400. `rbac_group_id` attributes a user to every group they
-              held at any point during each covered UTC day, so grouped rows are not an
-              exclusive partition and can sum above org-level totals. At most 100 entries.
+              takes the values `chat_cowork_unified`, `claude_code`, or `cowork` only (the
+              surfaces with plugin attribution). Grouped rows carry the requested dimension
+              values as additional fields and paginate like ungrouped responses via
+              `next_page`; an unsupported dimension returns 400. `rbac_group_id` attributes a
+              user to every group they held at any point during each covered UTC day, so
+              grouped rows are not an exclusive partition and can sum above org-level totals.
+              At most 100 entries.
 
           limit: Number of results per page (1-1000, default 100).
 
@@ -285,7 +297,7 @@ class AsyncPlugins(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/plugins?beta=true",
+            "/v1/organizations/analytics/plugins",
             page=AsyncPageCursor[BetaAnalyticsPluginActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -303,6 +315,10 @@ class AsyncPlugins(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.plugins.list",
+                span_route="/v1/organizations/analytics/plugins",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsPluginActivity,
         )

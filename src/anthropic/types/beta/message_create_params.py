@@ -16,6 +16,7 @@ from .beta_tool_union_param import BetaToolUnionParam
 from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
+from .beta_message_thread_param import BetaMessageThreadParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_fallback_credit_token_param import BetaFallbackCreditTokenParam
@@ -64,7 +65,10 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     If the final message uses the `assistant` role, the response content will
     continue immediately from the content in that message. This can be used to
-    constrain part of the model's response.
+    constrain part of the model's response. This is called prefill. On models that
+    don't support prefill, creating a message that ends with a partial `assistant`
+    response returns a 400 error. See
+    [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
 
     Example with a single `user` message:
 
@@ -82,7 +86,8 @@ class MessageCreateParamsBase(TypedDict, total=False):
     ]
     ```
 
-    Example with a partially-filled response from Claude:
+    Example with a partially-filled response from Claude, for models that support
+    prefill:
 
     ```json
     [
@@ -112,8 +117,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
 
     Note that if you want to include a
     [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role),
-    you can use the top-level `system` parameter — there is no `"system"` role for
-    input messages in the Messages API.
+    you can use the top-level `system` parameter.
 
     There is a limit of 100,000 messages in a single request.
     """
@@ -187,8 +191,12 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
     Opt-in server-side retry on one or more substitute models when the requested
     model declines for policy reasons. Tried in order: if the first entry also
-    declines, the second is tried, and so on. The string "default" requests the
-    requested model's server-defined default fallback configuration.
+    declines, the second is tried, and so on. Some models don't support fallbacks;
+    on those models, a list of fallback models returns a 400 error. See
+    [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback).
+    The string "default" requests the requested model's server-defined default
+    fallback configuration. On a model that doesn't support fallbacks, the request
+    runs on the requested model alone, so a declined request stays declined.
     """
 
     inference_geo: Optional[str]
@@ -220,6 +228,11 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """The inference speed mode for this request.
 
     `"fast"` enables high output-tokens-per-second inference.
+
+    Some models require the `fast-mode-2026-02-01` beta header for any `speed`
+    value. See
+    [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for
+    which models.
     """
 
     stop_sequences: SequenceNotStr[str]
@@ -243,15 +256,25 @@ class MessageCreateParamsBase(TypedDict, total=False):
     """
 
     thinking: BetaThinkingConfigParam
-    """Configuration for enabling Claude's extended thinking.
+    """Configuration for Claude's thinking.
 
-    When enabled, responses include `thinking` content blocks showing Claude's
-    thinking process before the final answer. Requires a minimum budget of 1,024
-    tokens and counts towards your `max_tokens` limit.
+    With `{"type": "adaptive"}`, Claude decides when and how much to think. With
+    `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of
+    at least 1,024. Thinking tokens count toward your `max_tokens` limit.
 
-    See
-    [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)
-    for details.
+    Which `type` values are accepted, and what happens when you omit `thinking`,
+    depend on the model. See
+    [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking)
+    for each model's behavior.
+    """
+
+    thread: Optional[BetaMessageThreadParam]
+    """Server-held conversation state (a Thread).
+
+    `{"type": "create"}` asks the server to hold this conversation's state under the
+    response's `id`; `{"type": "continue", "previous_message_id": ...}` resumes from
+    a previous response so only the new turn's messages are sent. The response shape
+    is unchanged.
     """
 
     tool_choice: BetaToolChoiceParam
@@ -347,8 +370,7 @@ class MessageCreateParamsBase(TypedDict, total=False):
     user_profile_id: str
     """The user profile ID to attribute this request to.
 
-    Use when acting on behalf of a party other than your organization. Requires the
-    `user-profiles` beta header.
+    Use when acting on behalf of a party other than your organization.
     """
 
     workspace_id: str

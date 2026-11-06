@@ -35,7 +35,7 @@ class Resources(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ResourcesWithRawResponse(self)
 
@@ -44,7 +44,7 @@ class Resources(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ResourcesWithStreamingResponse(self)
 
@@ -66,7 +66,8 @@ class Resources(SyncAPIResource):
         Get Session Resource
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -103,15 +104,17 @@ class Resources(SyncAPIResource):
             ResourceRetrieveResponse,
             self._get(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 options=make_request_options(
                     extra_headers=extra_headers,
                     extra_query=extra_query,
                     extra_body=extra_body,
                     timeout=timeout,
+                    qualifiers={"beta": "true"},
+                    span_name="anthropic.sessions.resources.retrieve",
+                    span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                    span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
                 ),
                 cast_to=cast(
                     Any, ResourceRetrieveResponse
@@ -141,7 +144,8 @@ class Resources(SyncAPIResource):
           authorization_token: New authorization token for the resource. Currently only `github_repository`
               resources support token rotation.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -178,9 +182,7 @@ class Resources(SyncAPIResource):
             ResourceUpdateResponse,
             self._post(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
@@ -188,6 +190,10 @@ class Resources(SyncAPIResource):
                     extra_query=extra_query,
                     extra_body=extra_body,
                     timeout=timeout,
+                    qualifiers={"beta": "true"},
+                    span_name="anthropic.sessions.resources.update",
+                    span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                    span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
                 ),
                 cast_to=cast(
                     Any, ResourceUpdateResponse
@@ -219,7 +225,8 @@ class Resources(SyncAPIResource):
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -251,7 +258,7 @@ class Resources(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             page=SyncPageCursor[BetaManagedAgentsSessionResource],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -262,6 +269,10 @@ class Resources(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.list",
+                span_route="/v1/sessions/{session_id}/resources",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionResource
@@ -286,7 +297,8 @@ class Resources(SyncAPIResource):
         Delete Session Resource
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -321,15 +333,17 @@ class Resources(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
             path_template(
-                "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                session_id=session_id,
-                resource_id=resource_id,
+                "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.delete",
+                span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
             ),
             cast_to=BetaManagedAgentsDeleteSessionResource,
         )
@@ -358,7 +372,8 @@ class Resources(SyncAPIResource):
 
           mount_path: Mount path in the container. Defaults to `/mnt/session/uploads/<file_id>`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -390,7 +405,7 @@ class Resources(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             body={
                 "file_id": file_id,
                 "type": type,
@@ -401,6 +416,11 @@ class Resources(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.add",
+                span_route="/v1/sessions/{session_id}/resources",
+                span_attributes={"anthropic.session.id": session_id},
+                span_created_id="anthropic.session.resource.id",
             ),
             cast_to=BetaManagedAgentsFileResource,
         )
@@ -413,7 +433,7 @@ class AsyncResources(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncResourcesWithRawResponse(self)
 
@@ -422,7 +442,7 @@ class AsyncResources(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncResourcesWithStreamingResponse(self)
 
@@ -444,7 +464,8 @@ class AsyncResources(AsyncAPIResource):
         Get Session Resource
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -481,15 +502,17 @@ class AsyncResources(AsyncAPIResource):
             ResourceRetrieveResponse,
             await self._get(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 options=make_request_options(
                     extra_headers=extra_headers,
                     extra_query=extra_query,
                     extra_body=extra_body,
                     timeout=timeout,
+                    qualifiers={"beta": "true"},
+                    span_name="anthropic.sessions.resources.retrieve",
+                    span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                    span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
                 ),
                 cast_to=cast(
                     Any, ResourceRetrieveResponse
@@ -519,7 +542,8 @@ class AsyncResources(AsyncAPIResource):
           authorization_token: New authorization token for the resource. Currently only `github_repository`
               resources support token rotation.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -556,9 +580,7 @@ class AsyncResources(AsyncAPIResource):
             ResourceUpdateResponse,
             await self._post(
                 path_template(
-                    "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                    session_id=session_id,
-                    resource_id=resource_id,
+                    "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
                 ),
                 body={"authorization_token": authorization_token},
                 options=make_request_options(
@@ -566,6 +588,10 @@ class AsyncResources(AsyncAPIResource):
                     extra_query=extra_query,
                     extra_body=extra_body,
                     timeout=timeout,
+                    qualifiers={"beta": "true"},
+                    span_name="anthropic.sessions.resources.update",
+                    span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                    span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
                 ),
                 cast_to=cast(
                     Any, ResourceUpdateResponse
@@ -597,7 +623,8 @@ class AsyncResources(AsyncAPIResource):
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -629,7 +656,7 @@ class AsyncResources(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             page=AsyncPageCursor[BetaManagedAgentsSessionResource],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -640,6 +667,10 @@ class AsyncResources(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.list",
+                span_route="/v1/sessions/{session_id}/resources",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=cast(
                 Any, BetaManagedAgentsSessionResource
@@ -664,7 +695,8 @@ class AsyncResources(AsyncAPIResource):
         Delete Session Resource
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -699,15 +731,17 @@ class AsyncResources(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
             path_template(
-                "/v1/sessions/{session_id}/resources/{resource_id}?beta=true",
-                session_id=session_id,
-                resource_id=resource_id,
+                "/v1/sessions/{session_id}/resources/{resource_id}", session_id=session_id, resource_id=resource_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.delete",
+                span_route="/v1/sessions/{session_id}/resources/{resource_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.resource.id": resource_id},
             ),
             cast_to=BetaManagedAgentsDeleteSessionResource,
         )
@@ -736,7 +770,8 @@ class AsyncResources(AsyncAPIResource):
 
           mount_path: Mount path in the container. Defaults to `/mnt/session/uploads/<file_id>`.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -768,7 +803,7 @@ class AsyncResources(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/sessions/{session_id}/resources?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/resources", session_id=session_id),
             body={
                 "file_id": file_id,
                 "type": type,
@@ -779,6 +814,11 @@ class AsyncResources(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.resources.add",
+                span_route="/v1/sessions/{session_id}/resources",
+                span_attributes={"anthropic.session.id": session_id},
+                span_created_id="anthropic.session.resource.id",
             ),
             cast_to=BetaManagedAgentsFileResource,
         )

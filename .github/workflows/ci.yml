@@ -44,7 +44,6 @@ jobs:
     name: build
     permissions:
       contents: read
-      id-token: write
     runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -60,25 +59,6 @@ jobs:
       - name: Run build
         run: uv build
 
-      - name: Get GitHub OIDC Token
-        if: |-
-          github.repository == 'anthropics/anthropic-sdk-python-private' &&
-          !startsWith(github.ref, 'refs/heads/stl/')
-        id: github-oidc
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          script: core.setOutput('github_token', await core.getIDToken());
-
-      - name: Upload tarball
-        if: |-
-          github.repository == 'anthropics/anthropic-sdk-python-private' &&
-          !startsWith(github.ref, 'refs/heads/stl/')
-        env:
-          URL: https://pkg.stainless.com/s
-          AUTH: ${{ steps.github-oidc.outputs.github_token }}
-          SHA: ${{ github.sha }}
-        run: ./scripts/utils/upload-artifact.sh
-
   test:
     timeout-minutes: 10
     name: test
@@ -92,6 +72,9 @@ jobs:
             python: '>=3.10.0'
           - name: newest python
             python: '>=3.14.0'
+          - name: newest python with deferred pydantic builds
+            python: '>=3.14.0'
+            defer_pydantic_build: 'true'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -106,6 +89,7 @@ jobs:
       - name: Run tests
         env:
           UV_PYTHON: ${{ matrix.python }}
+          DEFER_PYDANTIC_BUILD: ${{ matrix.defer_pydantic_build }}
         run: ./scripts/test
 
   detect_breaking_changes:
@@ -121,7 +105,7 @@ jobs:
       # tags, so the base ref is available) so `git merge-base`
       # below can resolve the fork point. filter: blob:none keeps the
       # fetch cheap: commit metadata is downloaded eagerly, file blobs
-      # only when a later `git checkout` asks for them.
+      # only when a later git command needs them.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
@@ -152,6 +136,22 @@ jobs:
           echo "Comparing against $BASE_REF"
           BASE_SHA=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "")
           echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+
+      - name: Download the base commit's files
+        if: env.BASE_SHA != ''
+        run: |
+          # scripts/detect-breaking-changes restores old files with `git checkout <commit> -- <path>`, which downloads each
+          # file this clone lacks in a separate request. So first download all the base commit's missing files in one request.
+          # Without noop, git tells the server which commits this clone has, and the server leaves out those commits' files.
+          MISSING=$(git rev-list --objects --no-walk --missing=print "$BASE_SHA" | sed -n 's/^?//p') || true
+          # Never run the fetch with an empty list: git would then fetch branches, not files.
+          if [ -z "$MISSING" ]; then
+            echo "Found no files of base commit $BASE_SHA left to download."
+          elif echo "$MISSING" | git -c fetch.negotiationAlgorithm=noop fetch --quiet --no-tags --no-write-fetch-head --stdin origin; then
+            echo "Downloaded the $(echo "$MISSING" | wc -l) missing file(s) of base commit $BASE_SHA in one request."
+          else
+            echo "::warning::Could not download the files of base commit $BASE_SHA in one request (the error is in the log of the Download the base commit's files step, which still passes). The rest of the job will try to download the files it needs one at a time, which is slower."
+          fi
 
       - name: Detect removed symbols
         if: env.BASE_SHA != ''

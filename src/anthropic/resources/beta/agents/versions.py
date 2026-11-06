@@ -30,7 +30,7 @@ class Versions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Versions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithStreamingResponse(self)
 
@@ -68,7 +68,8 @@ class Versions(SyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -100,7 +101,7 @@ class Versions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/agents/{agent_id}/versions?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/versions", agent_id=agent_id),
             page=SyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -111,6 +112,10 @@ class Versions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.agents.versions.list",
+                span_route="/v1/agents/{agent_id}/versions",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             model=BetaManagedAgentsAgent,
         )
@@ -123,7 +128,7 @@ class AsyncVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithRawResponse(self)
 
@@ -132,7 +137,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithStreamingResponse(self)
 
@@ -161,7 +166,8 @@ class AsyncVersions(AsyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -193,7 +199,7 @@ class AsyncVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/agents/{agent_id}/versions?beta=true", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}/versions", agent_id=agent_id),
             page=AsyncPageCursor[BetaManagedAgentsAgent],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -204,6 +210,10 @@ class AsyncVersions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.agents.versions.list",
+                span_route="/v1/agents/{agent_id}/versions",
+                span_attributes={"gen_ai.agent.id": agent_id},
             ),
             model=BetaManagedAgentsAgent,
         )

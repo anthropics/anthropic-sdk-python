@@ -30,7 +30,7 @@ class Summaries(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SummariesWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Summaries(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SummariesWithStreamingResponse(self)
 
@@ -108,7 +108,7 @@ class Summaries(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/summaries?beta=true",
+            "/v1/organizations/analytics/summaries",
             page=SyncPageCursor[BetaAnalyticsSingleDayActivitySummary],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -122,6 +122,9 @@ class Summaries(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.summaries.list",
+                span_route="/v1/organizations/analytics/summaries",
             ),
             model=BetaAnalyticsSingleDayActivitySummary,
         )
@@ -134,7 +137,7 @@ class AsyncSummaries(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSummariesWithRawResponse(self)
 
@@ -143,7 +146,7 @@ class AsyncSummaries(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSummariesWithStreamingResponse(self)
 
@@ -212,7 +215,7 @@ class AsyncSummaries(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/summaries?beta=true",
+            "/v1/organizations/analytics/summaries",
             page=AsyncPageCursor[BetaAnalyticsSingleDayActivitySummary],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -226,6 +229,9 @@ class AsyncSummaries(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.summaries.list",
+                span_route="/v1/organizations/analytics/summaries",
             ),
             model=BetaAnalyticsSingleDayActivitySummary,
         )

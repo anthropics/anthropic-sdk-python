@@ -39,7 +39,10 @@ class DreamListParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

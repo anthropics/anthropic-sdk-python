@@ -1,24 +1,12 @@
-from typing import List, Union
-from typing_extensions import Literal, Annotated, TypeAlias
+from typing import Union
+from typing_extensions import Annotated, TypeAlias
 
-from ..._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_advisor import BetaManagedAgentsAdvisor
-from .beta_managed_agents_agent_reference import BetaManagedAgentsAgentReference
+from ..._models import UnionDiscriminator
+from .beta_managed_agents_multiagent20261001 import BetaManagedAgentsMultiagent20261001
+from .beta_managed_agents_multiagent_coordinator import BetaManagedAgentsMultiagentCoordinator
 
-__all__ = ["BetaManagedAgentsMultiagent", "Agent"]
+__all__ = ["BetaManagedAgentsMultiagent"]
 
-Agent: TypeAlias = Annotated[
-    Union[BetaManagedAgentsAgentReference, BetaManagedAgentsAdvisor], UnionDiscriminator("type")
+BetaManagedAgentsMultiagent: TypeAlias = Annotated[
+    Union[BetaManagedAgentsMultiagentCoordinator, BetaManagedAgentsMultiagent20261001], UnionDiscriminator("type")
 ]
-
-
-class BetaManagedAgentsMultiagent(BaseModel):
-    """Resolved multiagent orchestration configuration as returned in API responses."""
-
-    agents: List[Agent]
-    """
-    Agents the coordinator may spawn as session threads, each resolved to a specific
-    version.
-    """
-
-    type: Literal["coordinator"]

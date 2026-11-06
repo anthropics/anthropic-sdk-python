@@ -11,7 +11,7 @@ class BetaManagedAgentsVault(BaseModel):
     """A vault that stores credentials for use by agents during sessions."""
 
     id: str
-    """Unique identifier for the vault."""
+    """The unique ID of the vault (`vlt_...`)."""
 
     archived_at: Optional[datetime] = None
     """When the vault was archived. Null if not archived."""

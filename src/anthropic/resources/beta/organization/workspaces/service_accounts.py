@@ -32,7 +32,7 @@ class ServiceAccounts(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ServiceAccountsWithRawResponse(self)
 
@@ -41,7 +41,7 @@ class ServiceAccounts(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ServiceAccountsWithStreamingResponse(self)
 
@@ -97,7 +97,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -106,6 +106,13 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -165,7 +172,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -175,6 +182,13 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -231,9 +245,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/service_accounts", workspace_id=workspace_id),
             page=SyncPageCursor[BetaServiceAccountWorkspaceMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -244,6 +256,10 @@ class ServiceAccounts(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -302,9 +318,7 @@ class ServiceAccounts(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/service_accounts", workspace_id=workspace_id),
             body={
                 "service_account_id": service_account_id,
                 "workspace_role": workspace_role,
@@ -314,6 +328,11 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.service_account.id", "service_account_id"),
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -370,7 +389,7 @@ class ServiceAccounts(SyncAPIResource):
         }
         return self._delete(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -379,6 +398,13 @@ class ServiceAccounts(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=ServiceAccountRemoveResponse,
         )
@@ -391,7 +417,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncServiceAccountsWithRawResponse(self)
 
@@ -400,7 +426,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncServiceAccountsWithStreamingResponse(self)
 
@@ -456,7 +482,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -465,6 +491,13 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -524,7 +557,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -534,6 +567,13 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -590,9 +630,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/service_accounts", workspace_id=workspace_id),
             page=AsyncPageCursor[BetaServiceAccountWorkspaceMember],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -603,6 +641,10 @@ class AsyncServiceAccounts(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaServiceAccountWorkspaceMember,
         )
@@ -661,9 +703,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/service_accounts", workspace_id=workspace_id),
             body={
                 "service_account_id": service_account_id,
                 "workspace_role": workspace_role,
@@ -673,6 +713,11 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.service_account.id", "service_account_id"),
             ),
             cast_to=BetaServiceAccountWorkspaceMember,
         )
@@ -729,7 +774,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         }
         return await self._delete(
             path_template(
-                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}?beta=true",
+                "/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
                 workspace_id=workspace_id,
                 service_account_id=service_account_id,
             ),
@@ -738,6 +783,13 @@ class AsyncServiceAccounts(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.service_accounts.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/service_accounts/{service_account_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.service_account.id": service_account_id,
+                },
             ),
             cast_to=ServiceAccountRemoveResponse,
         )

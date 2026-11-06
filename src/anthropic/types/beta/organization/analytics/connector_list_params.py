@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_order import BetaAnalyticsOrder
+from ..beta_analytics_connector_group_by import BetaAnalyticsConnectorGroupBy
 
 __all__ = ["ConnectorListParams"]
 
@@ -39,16 +41,17 @@ class ConnectorListParams(TypedDict, total=False):
     `connector_name` matches case-insensitively, a display name such as 'GitHub MCP'
     also matches its normalized stored form ('github'), and for rows whose
     `connector_name` is an opaque connector id the connector's display name
-    (`connector_display_name`) also matches; `product` is one of `chat`,
-    `claude_code`, `cowork`, or `office_agent`; `rbac_group_id` takes the tagged id
-    (`rbac_group_...`, as emitted in responses and by the spend-limits API) or a
-    bare group UUID, and matches users who held the group at any point during each
-    covered UTC day (time-of-usage attribution); `user_id` takes a tagged user id
-    (`user_...`), as emitted in responses. An unsupported dimension returns 400. At
-    most 100 entries.
+    (`connector_display_name`) also matches; `product` is one of
+    `chat_cowork_unified`, `chat`, `claude_code`, `cowork`, or `office_agent`;
+    `rbac_group_id` takes the tagged id (`rbac_group_...`, as emitted in responses
+    and by the spend-limits API) or a bare group UUID, and matches users who held
+    the group at any point during each covered UTC day (time-of-usage attribution);
+    `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
+    unsupported dimension returns 400. At most 100 entries. `chat_cowork_unified` is
+    accepted as a `product` value only where Chat and Cowork unified is available.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsConnectorGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=user_id`). Supported on this endpoint: `product`, `rbac_group_id`,
@@ -62,7 +65,7 @@ class ConnectorListParams(TypedDict, total=False):
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`

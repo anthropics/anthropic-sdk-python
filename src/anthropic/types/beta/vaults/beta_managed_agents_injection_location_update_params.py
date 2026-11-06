@@ -6,7 +6,14 @@ __all__ = ["BetaManagedAgentsInjectionLocationUpdateParams"]
 
 
 class BetaManagedAgentsInjectionLocationUpdateParams(TypedDict, total=False):
-    """Updated injection location."""
+    """Changes which parts of an outbound request the secret is substituted into.
+
+    A location you leave out keeps its current setting.
+
+    After the change, at least one location must be enabled.
+
+    See [Authenticate with vaults](https://platform.claude.com/docs/en/managed-agents/vaults#add-a-credential) to learn more about injection locations.
+    """
 
     body: bool
     """Substitute when the placeholder appears in the request body."""

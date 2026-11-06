@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Required, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy
 
 __all__ = ["ArtifactListParams"]
 
@@ -26,24 +27,26 @@ class ArtifactListParams(TypedDict, total=False):
     across dimensions for AND. Supported dimensions on this endpoint:
     `artifact_type`, `is_shared`, `product`, `rbac_group_id`, `user_id`. Value
     forms: `artifact_type` is a canonical artifact MIME type (e.g. `text/markdown`)
-    or `other`; `is_shared` is `true` or `false`; `product` is `chat`,
-    `claude_code`, or `cowork` (the surfaces that create artifacts); `rbac_group_id`
-    takes the tagged id (`rbac_group_...`, as emitted in responses and by the
-    spend-limits API) or a bare group UUID, and matches users who held the group at
-    any point during each covered UTC day (time-of-usage attribution); `user_id`
-    takes a tagged user id (`user_...`), as emitted in responses. An unsupported
-    dimension returns 400. At most 100 entries.
+    or `other`; `is_shared` is `true` or `false`; `product` is
+    `chat_cowork_unified`, `chat`, `claude_code`, or `cowork` (the surfaces that
+    create artifacts); `rbac_group_id` takes the tagged id (`rbac_group_...`, as
+    emitted in responses and by the spend-limits API) or a bare group UUID, and
+    matches users who held the group at any point during each covered UTC day
+    (time-of-usage attribution); `user_id` takes a tagged user id (`user_...`), as
+    emitted in responses. An unsupported dimension returns 400. At most 100 entries.
+    `chat_cowork_unified` is accepted as a `product` value only where Chat and
+    Cowork unified is available.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsArtifactGroupBy]]
     """Dimensions to break results out by: `product`, `user_id` and/or `rbac_group_id`.
 
     The ungrouped artifact-type cube is finite and returned in full; grouped queries
     multiply the cube and paginate via `next_page`. `product` takes the values
-    `chat`, `claude_code`, or `cowork` (the surfaces that create artifacts).
-    `rbac_group_id` attributes a user to every group they held at any point during
-    the requested UTC day, so grouped rows are not an exclusive partition. At most
-    100 entries.
+    `chat_cowork_unified`, `chat`, `claude_code`, or `cowork` (the surfaces that
+    create artifacts). `rbac_group_id` attributes a user to every group they held at
+    any point during the requested UTC day, so grouped rows are not an exclusive
+    partition. At most 100 entries.
     """
 
     limit: Optional[int]

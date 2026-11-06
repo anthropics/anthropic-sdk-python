@@ -58,7 +58,7 @@ class SpendLimits(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SpendLimitsWithRawResponse(self)
 
@@ -67,7 +67,7 @@ class SpendLimits(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SpendLimitsWithStreamingResponse(self)
 
@@ -95,16 +95,23 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return self._get(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.retrieve",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=BetaSpendLimit,
         )
@@ -115,9 +122,14 @@ class SpendLimits(SyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         scope_type: Optional[
-            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+            List[
+                Literal[
+                    "organization", "organization_service", "rbac_group", "seat_tier", "usage_tier", "user", "workspace"
+                ]
+            ]
         ]
         | Omit = omit,
+        workspace_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -129,22 +141,24 @@ class SpendLimits(SyncAPIResource):
         """
         List the organization's spend limits.
 
-        A Claude Console organization's limits come in an order that is stable across
-        pages. A Claude Enterprise organization's are grouped by scope type, in the
-        order `organization`, `seat_tier`, `rbac_group`, `organization_service`, `user`;
-        within a type they come in a fixed order that is not creation order. Listing
-        Claude Console limits is in an early access preview. To request access, contact
-        your Anthropic account team.
+        A Claude Console organization's limits, including any read-only `usage_tier`
+        limit, come newest first. Listing them is in an early access preview. To request
+        access, contact your Anthropic account team. A Claude Enterprise organization's
+        limits are grouped by scope type, in the order `organization`, `seat_tier`,
+        `rbac_group`, `organization_service`, `user`; within a type they come in a fixed
+        order that is not creation order.
 
         Args:
           limit: Maximum number of limits per page. Defaults to `20`.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          scope_type: Return only limits with these scope types. A Claude Console organization has
-              `organization` and `workspace` limits; a Claude Enterprise organization has
-              `organization`, `seat_tier`, `rbac_group`, `organization_service` and `user`
-              limits. Omit for all.
+          scope_type: Return only limits with these scope types. Omit for all. A scope type that
+              doesn't apply to the organization gets a 400 error.
+
+          workspace_id: Return only the limits whose `scope.workspace_id` is this workspace
+              (`wrkspc_...`). Claude Console organizations only; other organizations get a 400
+              error.
 
           betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
               this header.
@@ -156,6 +170,9 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -169,7 +186,7 @@ class SpendLimits(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "spend-limit-reads-2026-09-26", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             page=SyncPageCursor[BetaSpendLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -180,7 +197,11 @@ class SpendLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                     "scope_type": scope_type,
+                    "workspace_id": workspace_id,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.list",
+                span_route="/v1/organizations/spend_limits",
             ),
             model=BetaSpendLimit,
         )
@@ -202,8 +223,9 @@ class SpendLimits(SyncAPIResource):
         For a Claude Enterprise organization, this deletes a per-user override, and the
         member falls back to any inherited spend limit at that period. Its seat-tier,
         group, and organization-level rows cannot be deleted via this endpoint. A Claude
-        Console organization deletes its organization and workspace limits. Deleting
-        them through the API is in an early access preview.
+        Console organization deletes its organization and workspace limits, but not its
+        `usage_tier` limit. Deleting organization and workspace limits through the API
+        is in an early access preview.
 
         Args:
           spend_limit_id: ID of the Spend Limit.
@@ -215,16 +237,25 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return self._delete(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.delete",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=SpendLimitDeleteResponse,
         )
@@ -274,13 +305,18 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             body={
                 "amount": amount,
                 "scope": scope,
@@ -291,6 +327,10 @@ class SpendLimits(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.set",
+                span_route="/v1/organizations/spend_limits",
+                span_created_id="anthropic.organization.spend_limit.id",
             ),
             cast_to=BetaSpendLimit,
         )
@@ -311,7 +351,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSpendLimitsWithRawResponse(self)
 
@@ -320,7 +360,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSpendLimitsWithStreamingResponse(self)
 
@@ -348,16 +388,23 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return await self._get(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.retrieve",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=BetaSpendLimit,
         )
@@ -368,9 +415,14 @@ class AsyncSpendLimits(AsyncAPIResource):
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
         scope_type: Optional[
-            List[Literal["organization", "organization_service", "rbac_group", "seat_tier", "user", "workspace"]]
+            List[
+                Literal[
+                    "organization", "organization_service", "rbac_group", "seat_tier", "usage_tier", "user", "workspace"
+                ]
+            ]
         ]
         | Omit = omit,
+        workspace_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -382,22 +434,24 @@ class AsyncSpendLimits(AsyncAPIResource):
         """
         List the organization's spend limits.
 
-        A Claude Console organization's limits come in an order that is stable across
-        pages. A Claude Enterprise organization's are grouped by scope type, in the
-        order `organization`, `seat_tier`, `rbac_group`, `organization_service`, `user`;
-        within a type they come in a fixed order that is not creation order. Listing
-        Claude Console limits is in an early access preview. To request access, contact
-        your Anthropic account team.
+        A Claude Console organization's limits, including any read-only `usage_tier`
+        limit, come newest first. Listing them is in an early access preview. To request
+        access, contact your Anthropic account team. A Claude Enterprise organization's
+        limits are grouped by scope type, in the order `organization`, `seat_tier`,
+        `rbac_group`, `organization_service`, `user`; within a type they come in a fixed
+        order that is not creation order.
 
         Args:
           limit: Maximum number of limits per page. Defaults to `20`.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
-          scope_type: Return only limits with these scope types. A Claude Console organization has
-              `organization` and `workspace` limits; a Claude Enterprise organization has
-              `organization`, `seat_tier`, `rbac_group`, `organization_service` and `user`
-              limits. Omit for all.
+          scope_type: Return only limits with these scope types. Omit for all. A scope type that
+              doesn't apply to the organization gets a 400 error.
+
+          workspace_id: Return only the limits whose `scope.workspace_id` is this workspace
+              (`wrkspc_...`). Claude Console organizations only; other organizations get a 400
+              error.
 
           betas: This endpoint is in beta: requests must send `spend-limit-reads-2026-09-26` in
               this header.
@@ -409,6 +463,9 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -422,7 +479,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "spend-limit-reads-2026-09-26", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             page=AsyncPageCursor[BetaSpendLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -433,7 +490,11 @@ class AsyncSpendLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                     "scope_type": scope_type,
+                    "workspace_id": workspace_id,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.list",
+                span_route="/v1/organizations/spend_limits",
             ),
             model=BetaSpendLimit,
         )
@@ -455,8 +516,9 @@ class AsyncSpendLimits(AsyncAPIResource):
         For a Claude Enterprise organization, this deletes a per-user override, and the
         member falls back to any inherited spend limit at that period. Its seat-tier,
         group, and organization-level rows cannot be deleted via this endpoint. A Claude
-        Console organization deletes its organization and workspace limits. Deleting
-        them through the API is in an early access preview.
+        Console organization deletes its organization and workspace limits, but not its
+        `usage_tier` limit. Deleting organization and workspace limits through the API
+        is in an early access preview.
 
         Args:
           spend_limit_id: ID of the Spend Limit.
@@ -468,16 +530,25 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
         return await self._delete(
-            path_template("/v1/organizations/spend_limits/{spend_limit_id}?beta=true", spend_limit_id=spend_limit_id),
+            path_template("/v1/organizations/spend_limits/{spend_limit_id}", spend_limit_id=spend_limit_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.delete",
+                span_route="/v1/organizations/spend_limits/{spend_limit_id}",
+                span_attributes={"anthropic.organization.spend_limit.id": spend_limit_id},
             ),
             cast_to=SpendLimitDeleteResponse,
         )
@@ -527,13 +598,18 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBillingFrozenError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/spend_limits?beta=true",
+            "/v1/organizations/spend_limits",
             body={
                 "amount": amount,
                 "scope": scope,
@@ -544,6 +620,10 @@ class AsyncSpendLimits(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.spend_limits.set",
+                span_route="/v1/organizations/spend_limits",
+                span_created_id="anthropic.organization.spend_limit.id",
             ),
             cast_to=BetaSpendLimit,
         )

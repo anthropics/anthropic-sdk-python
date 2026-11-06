@@ -35,7 +35,7 @@ class Dreams(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DreamsWithRawResponse(self)
 
@@ -44,7 +44,7 @@ class Dreams(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DreamsWithStreamingResponse(self)
 
@@ -87,7 +87,7 @@ class Dreams(SyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
@@ -100,7 +100,8 @@ class Dreams(SyncAPIResource):
           output_behavior: Which memory store a dream writes its result to. Defaults to `create_new` when
               left out of a create request.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -130,7 +131,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -142,6 +143,10 @@ class Dreams(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.create",
+                span_route="/v1/dreams",
+                span_created_id="anthropic.dream.id",
             ),
             cast_to=BetaDream,
         )
@@ -171,7 +176,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to get (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -203,12 +209,16 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.retrieve",
+                span_route="/v1/dreams/{dream_id}",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -259,7 +269,8 @@ class Dreams(SyncAPIResource):
               Repeat the parameter to give more than one status. Leave it out to return dreams
               of every status.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -289,7 +300,7 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=SyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -304,6 +315,9 @@ class Dreams(SyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.list",
+                span_route="/v1/dreams",
             ),
             model=BetaDream,
         )
@@ -336,7 +350,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to archive (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -368,12 +383,16 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.archive",
+                span_route="/v1/dreams/{dream_id}/archive",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -406,7 +425,8 @@ class Dreams(SyncAPIResource):
         Args:
           dream_id: The ID of the dream to cancel (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -438,12 +458,16 @@ class Dreams(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.cancel",
+                span_route="/v1/dreams/{dream_id}/cancel",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -456,7 +480,7 @@ class AsyncDreams(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDreamsWithRawResponse(self)
 
@@ -465,7 +489,7 @@ class AsyncDreams(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDreamsWithStreamingResponse(self)
 
@@ -508,7 +532,7 @@ class AsyncDreams(AsyncAPIResource):
               In the object form, `speed` can only be `standard`.
 
               The
-              [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+              [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
               lists the supported models.
 
           instructions: Guidance that steers how the dream reads the sessions and organizes the output
@@ -521,7 +545,8 @@ class AsyncDreams(AsyncAPIResource):
           output_behavior: Which memory store a dream writes its result to. Defaults to `create_new` when
               left out of a create request.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -551,7 +576,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             body={
                 "inputs": inputs,
                 "model": model,
@@ -563,6 +588,10 @@ class AsyncDreams(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.create",
+                span_route="/v1/dreams",
+                span_created_id="anthropic.dream.id",
             ),
             cast_to=BetaDream,
         )
@@ -592,7 +621,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to get (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -624,12 +654,16 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/dreams/{dream_id}?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.retrieve",
+                span_route="/v1/dreams/{dream_id}",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -680,7 +714,8 @@ class AsyncDreams(AsyncAPIResource):
               Repeat the parameter to give more than one status. Leave it out to return dreams
               of every status.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -710,7 +745,7 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/dreams?beta=true",
+            "/v1/dreams",
             page=AsyncPageCursor[BetaDream],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -725,6 +760,9 @@ class AsyncDreams(AsyncAPIResource):
                     "page": page,
                     "statuses": statuses,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.list",
+                span_route="/v1/dreams",
             ),
             model=BetaDream,
         )
@@ -757,7 +795,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to archive (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -789,12 +828,16 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/archive?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/archive", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.archive",
+                span_route="/v1/dreams/{dream_id}/archive",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )
@@ -827,7 +870,8 @@ class AsyncDreams(AsyncAPIResource):
         Args:
           dream_id: The ID of the dream to cancel (`drm_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -859,12 +903,16 @@ class AsyncDreams(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "dreaming-2026-04-21", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/dreams/{dream_id}/cancel?beta=true", dream_id=dream_id),
+            path_template("/v1/dreams/{dream_id}/cancel", dream_id=dream_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.dreams.cancel",
+                span_route="/v1/dreams/{dream_id}/cancel",
+                span_attributes={"anthropic.dream.id": dream_id},
             ),
             cast_to=BetaDream,
         )

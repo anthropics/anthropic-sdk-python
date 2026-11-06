@@ -136,6 +136,25 @@ Blocks until the stream has been read to completion and returns the accumulated 
 
 Blocks until the stream has been read to completion and returns all `text` content blocks concatenated together.
 
+## Message Threads
+
+A message thread (beta) keeps the conversation on the server, so each request sends only the new messages instead of the whole history. `client.beta.messages.thread(...)` takes what `create()` takes and sends nothing until the first turn.
+
+```py
+thread = client.beta.messages.thread(
+    model="claude-sonnet-5-5",
+    max_tokens=1024,
+    system="You are a support agent for Acme.",
+)
+
+first = thread.send({"role": "user", "content": "My order #4821 hasn't arrived."})
+second = thread.send({"role": "user", "content": "It's been two weeks."})
+```
+
+`thread.tool_runner()` runs the [tool loop](tools.md#tool-runner) over this thread.
+
+See [`examples/message_threads.py`](examples/message_threads.py).
+
 ## MCP Helpers
 
 This SDK provides helpers for integrating with [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers. These helpers convert MCP types to Anthropic API types, reducing boilerplate when working with MCP tools, prompts, and resources.
@@ -162,7 +181,7 @@ async with stdio_client(StdioServerParameters(command="mcp-server")) as (read, w
         await mcp_client.initialize()
 
         tools_result = await mcp_client.list_tools()
-        runner = await client.beta.messages.tool_runner(
+        runner = client.beta.messages.tool_runner(
             model="claude-sonnet-5-5",
             max_tokens=1024,
             messages=[{"role": "user", "content": "Use the available tools"}],
@@ -245,7 +264,7 @@ For running a managed agent's tools locally against a self-hosted environment, t
   answered with `user.custom_tool_result` — posts the result back, and yields one
   `DispatchedToolCall` per completed call. Use it directly when you want to observe each dispatch
   (the worker drives one internally). Async only.
-- `client.beta.environments.work.poller(...)` — the control-plane only piece: claims work items,
+- `client.beta.environments.work.poller(...)` — the polling-only piece: claims work items,
   ack's each one, and yields each claimed work item. Async only — available on `AsyncAnthropic`
   (its `worker(...)` companion is async too, so the sync client does not expose either).
 

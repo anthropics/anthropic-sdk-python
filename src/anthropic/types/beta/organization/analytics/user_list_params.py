@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_order import BetaAnalyticsOrder
+from ..beta_analytics_user_group_by import BetaAnalyticsUserGroupBy
 
 __all__ = ["UserListParams"]
 
@@ -36,16 +38,21 @@ class UserListParams(TypedDict, total=False):
     `filter[]=rbac_group_id:{id}`. Repeat the param for OR within a dimension and
     across dimensions for AND. Supported dimensions on this endpoint: `project_id`,
     `rbac_group_id`, `user_id`. Value forms: `project_id` takes a tagged project id
-    (`claude_proj_...`) and scopes each member's row to their claude.ai chat
-    activity within that project (it cannot be combined with `group_by[]` or an
-    `rbac_group_id` filter); `rbac_group_id` takes the tagged id (`rbac_group_...`,
-    as emitted in responses and by the spend-limits API) or a bare group UUID, and
+    (`claude_proj_...`); `rbac_group_id` takes the tagged id (`rbac_group_...`, as
+    emitted in responses and by the spend-limits API) or a bare group UUID, and
     matches users who held the group at any point during each covered UTC day
     (time-of-usage attribution); `user_id` takes a tagged user id (`user_...`), as
     emitted in responses. An unsupported dimension returns 400. At most 100 entries.
+    A `project_id` filter limits each member's row to their claude.ai chat activity
+    in that project and cannot be combined with `group_by[]` or an `rbac_group_id`
+    filter. On these rows, every count in `chat_cowork_unified_metrics.sessions` is
+    0, because sessions are not measured per project. On any day a member sent a
+    chat message in Chat and Cowork unified, all of that member's project activity
+    for the day is counted in `chat_cowork_unified_metrics.chat` instead of
+    `chat_metrics`.
     """
 
-    group_by: Optional[List[Literal["rbac_group_id"]]]
+    group_by: Optional[List[BetaAnalyticsUserGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=rbac_group_id`). Supported on this endpoint: `rbac_group_id`. Rows
@@ -60,7 +67,7 @@ class UserListParams(TypedDict, total=False):
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`

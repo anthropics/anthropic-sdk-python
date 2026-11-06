@@ -14,6 +14,7 @@ import httpx2
 import pytest
 
 from anthropic import APIStatusError
+from anthropic.pagination import SyncPageCursor, AsyncPageCursor
 from anthropic.lib.google_cloud import AnthropicGoogleCloud, AsyncAnthropicGoogleCloud
 
 pytestmark = [
@@ -90,6 +91,26 @@ class TestSyncLive:
                 messages=[{"role": "user", "content": "hi"}],
             )
 
+    def test_organization_route(self, sync_client: AnthropicGoogleCloud) -> None:
+        if sync_client.workspace_id is None:
+            pytest.skip("Set ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID to run this test")
+
+        workspace = sync_client.organization.workspaces.retrieve(sync_client.workspace_id)
+        assert workspace.id == sync_client.workspace_id
+
+    def test_user_profiles_route(self, sync_client: AnthropicGoogleCloud) -> None:
+        assert isinstance(sync_client.user_profiles.list(limit=1), SyncPageCursor)
+
+    def test_managed_agents_routes(self, sync_client: AnthropicGoogleCloud) -> None:
+        agent = sync_client.beta.agents.create(model=MODEL, name="sdk-live-test")
+        try:
+            assert sync_client.beta.agents.retrieve(agent.id).id == agent.id
+            assert sync_client.beta.agents.list(limit=1).data
+        finally:
+            archived = sync_client.beta.agents.archive(agent.id)
+
+        assert archived.archived_at is not None
+
 
 class TestAsyncLive:
     async def test_non_streaming(self, async_client: AsyncAnthropicGoogleCloud) -> None:
@@ -124,3 +145,23 @@ class TestAsyncLive:
                 max_tokens=16,
                 messages=[{"role": "user", "content": "hi"}],
             )
+
+    async def test_organization_route(self, async_client: AsyncAnthropicGoogleCloud) -> None:
+        if async_client.workspace_id is None:
+            pytest.skip("Set ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID to run this test")
+
+        workspace = await async_client.organization.workspaces.retrieve(async_client.workspace_id)
+        assert workspace.id == async_client.workspace_id
+
+    async def test_user_profiles_route(self, async_client: AsyncAnthropicGoogleCloud) -> None:
+        assert isinstance(await async_client.user_profiles.list(limit=1), AsyncPageCursor)
+
+    async def test_managed_agents_routes(self, async_client: AsyncAnthropicGoogleCloud) -> None:
+        agent = await async_client.beta.agents.create(model=MODEL, name="sdk-live-test")
+        try:
+            assert (await async_client.beta.agents.retrieve(agent.id)).id == agent.id
+            assert (await async_client.beta.agents.list(limit=1)).data
+        finally:
+            archived = await async_client.beta.agents.archive(agent.id)
+
+        assert archived.archived_at is not None

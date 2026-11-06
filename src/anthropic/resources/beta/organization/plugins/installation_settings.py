@@ -34,7 +34,7 @@ class InstallationSettings(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return InstallationSettingsWithRawResponse(self)
 
@@ -43,7 +43,7 @@ class InstallationSettings(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return InstallationSettingsWithStreamingResponse(self)
 
@@ -127,7 +127,7 @@ class InstallationSettings(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/installation_settings?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/installation_settings", plugin_id=plugin_id),
             page=SyncPageCursor[BetaPluginInstallationSetting],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -140,6 +140,10 @@ class InstallationSettings(SyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginInstallationSetting,
         )
@@ -222,7 +226,7 @@ class InstallationSettings(SyncAPIResource):
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._delete(
             path_template(
-                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true",
+                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 plugin_id=plugin_id,
                 target=target,
             ),
@@ -231,6 +235,13 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.remove",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -313,7 +324,7 @@ class InstallationSettings(SyncAPIResource):
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true",
+                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 plugin_id=plugin_id,
                 target=target,
             ),
@@ -323,6 +334,13 @@ class InstallationSettings(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.set",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaPluginInstallationSetting,
         )
@@ -335,7 +353,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncInstallationSettingsWithRawResponse(self)
 
@@ -344,7 +362,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncInstallationSettingsWithStreamingResponse(self)
 
@@ -428,7 +446,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/organizations/plugins/{plugin_id}/installation_settings?beta=true", plugin_id=plugin_id),
+            path_template("/v1/organizations/plugins/{plugin_id}/installation_settings", plugin_id=plugin_id),
             page=AsyncPageCursor[BetaPluginInstallationSetting],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -441,6 +459,10 @@ class AsyncInstallationSettings(AsyncAPIResource):
                     "page": page,
                     "target_type": target_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.list",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings",
+                span_attributes={"anthropic.organization.plugin.id": plugin_id},
             ),
             model=BetaPluginInstallationSetting,
         )
@@ -523,7 +545,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._delete(
             path_template(
-                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true",
+                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 plugin_id=plugin_id,
                 target=target,
             ),
@@ -532,6 +554,13 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.remove",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaDeletedPluginInstallationSetting,
         )
@@ -614,7 +643,7 @@ class AsyncInstallationSettings(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}?beta=true",
+                "/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
                 plugin_id=plugin_id,
                 target=target,
             ),
@@ -624,6 +653,13 @@ class AsyncInstallationSettings(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugins.installation_settings.set",
+                span_route="/v1/organizations/plugins/{plugin_id}/installation_settings/{target}",
+                span_attributes={
+                    "anthropic.organization.plugin.id": plugin_id,
+                    "anthropic.organization.plugin.installation_setting.id": target,
+                },
             ),
             cast_to=BetaPluginInstallationSetting,
         )

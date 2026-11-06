@@ -35,7 +35,6 @@ class BetaMessageDeltaUsage(BaseModel):
     (model sampling iterations, such as the turns of a server-side tool use loop),
     this allows you to:
 
-    - Determine which iterations exceeded long context thresholds (>=200k tokens)
     - Calculate the context window size from the last `message` entry
     - Understand token accumulation across server-side tool use loops
 

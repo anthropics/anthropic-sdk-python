@@ -32,7 +32,7 @@ def _build_federation_result(*, base_url: str) -> Optional[CredentialResult]:
     isn't fully set."""
     federation_rule_id = os.environ.get(ENV_FEDERATION_RULE_ID)
     organization_id = os.environ.get(ENV_ORGANIZATION_ID)
-    has_literal_token = ENV_IDENTITY_TOKEN in os.environ
+    has_literal_token = bool(os.environ.get(ENV_IDENTITY_TOKEN))
     identity_token_path = resolve_identity_token_path()
 
     if not federation_rule_id or not organization_id:
@@ -80,31 +80,31 @@ def default_credentials(*, base_url: str = "https://api.anthropic.com") -> Optio
     Implements steps 2-5 of the spec precedence chain (step 1 is handled at
     the client constructor level, above this function):
 
-    Step 2a: `ANTHROPIC_API_KEY` → return `None` so the client uses its
-             existing `X-Api-Key` header path. (API keys are not Bearer
-             tokens, so they can't flow through this chain.)
+    Step 2a: `ANTHROPIC_API_KEY` → return `None` so the client sends the
+             key itself. (A key needs no token cache or OAuth beta header,
+             so it doesn't flow through this chain.)
     Step 2b: `ANTHROPIC_AUTH_TOKEN` → `StaticToken` (Bearer).
-    Step 3:  `ANTHROPIC_PROFILE` / `ANTHROPIC_CONFIG_DIR` set, or the
-             `active_config` pointer file exists → load that profile.
-             This is *explicit profile selection*; failures propagate.
+    Step 3:  `ANTHROPIC_PROFILE` → load the profile it names. This is
+             *explicit profile selection*; failures propagate.
     Step 4:  `ANTHROPIC_FEDERATION_RULE_ID` + `ANTHROPIC_ORGANIZATION_ID`
              + `ANTHROPIC_IDENTITY_TOKEN[_FILE]` → direct jwt-bearer
              exchange via `WorkloadIdentityCredentials`. Critically,
              step 4 sits **between** explicit profile (step 3) and
-             fallback profile (step 5): a machine with WIF env vars wired
-             up must use WIF even if a leftover `default` profile exists
-             on disk, but a user who explicitly `ANTHROPIC_PROFILE=dev`
-             still gets their profile.
-    Step 5:  Fallback active profile from disk (`configs/default.json`
-             or whatever `active_config` points at). Errors at this step
-             are swallowed and the chain falls through — a corrupt
-             unselected profile shouldn't break an otherwise-explicit
-             api_key= path.
+             active profile (step 5): a machine with WIF env vars wired
+             up must use WIF even if a leftover profile exists on disk,
+             but a user who explicitly `ANTHROPIC_PROFILE=dev` still gets
+             their profile.
+    Step 5:  Active profile from disk: the one `active_config` points at,
+             otherwise `default`. `ANTHROPIC_CONFIG_DIR` says where
+             profiles are looked up and selects none. Failures propagate
+             when it is set or the `active_config` pointer file exists.
+             Otherwise they are swallowed and the chain falls through — a
+             corrupt auto-discovered profile shouldn't break construction.
 
     Returns `None` when nothing matches — the client will fall back to
     its normal "no auth configured" error.
     """
-    # Step 2a — env api_key: return None so the base client handles X-Api-Key.
+    # Step 2a — env api_key: return None so the base client sends the key.
     if os.environ.get(ENV_API_KEY):
         return None
 
@@ -113,12 +113,10 @@ def default_credentials(*, base_url: str = "https://api.anthropic.com") -> Optio
     if auth_token:
         return CredentialResult(provider=StaticToken(auth_token))
 
-    # Step 3 — explicit profile selection (ANTHROPIC_PROFILE / ANTHROPIC_CONFIG_DIR
-    # / active_config pointer). Failures propagate — a user who explicitly
-    # names a profile expects a broken config to surface, not to fall through.
-    env_explicit = bool(os.environ.get(ENV_PROFILE) or os.environ.get(ENV_CONFIG_DIR))
-    pointer_explicit = _has_explicit_active_config()
-    if env_explicit or pointer_explicit:
+    # Step 3 — explicit profile selection (ANTHROPIC_PROFILE). Failures
+    # propagate — a user who explicitly names a profile expects a broken
+    # config to surface, not to fall through.
+    if os.environ.get(ENV_PROFILE):
         creds_file = CredentialsFile()
         creds_file.bind_base_url(base_url)
         extra_headers = creds_file.extra_headers()
@@ -129,22 +127,23 @@ def default_credentials(*, base_url: str = "https://api.anthropic.com") -> Optio
         )
 
     # Step 4 — env-var workload identity federation. Sits above the
-    # fallback on-disk profile so a machine with WIF env vars uses WIF
-    # even if a leftover `default` profile exists on disk.
+    # active on-disk profile so a machine with WIF env vars uses WIF
+    # even if a leftover profile exists on disk.
     federation_result = _build_federation_result(base_url=base_url)
     if federation_result is not None:
         return federation_result
 
-    # Step 5 — fallback active profile from disk. Errors are swallowed and
-    # the chain falls through because the user didn't explicitly select
-    # this profile; a corrupt auto-discovered config shouldn't break
-    # construction.
-    if _has_active_profile_config():
+    # Step 5 — active profile from disk. A user who set ANTHROPIC_CONFIG_DIR or
+    # wrote the active_config pointer expects a broken config to surface.
+    user_configured = bool(os.environ.get(ENV_CONFIG_DIR)) or _has_explicit_active_config()
+    if user_configured or _has_active_profile_config():
         creds_file = CredentialsFile()
         creds_file.bind_base_url(base_url)
         try:
             extra_headers = creds_file.extra_headers()
         except AnthropicError:
+            if user_configured:
+                raise
             return None
         return CredentialResult(
             provider=creds_file,

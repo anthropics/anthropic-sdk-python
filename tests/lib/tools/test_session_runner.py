@@ -78,10 +78,19 @@ def _tool_use(
     input: dict[str, Any],
     *,
     evaluated_permission: str | None = None,
+    session_thread_id: str | None = None,
 ) -> _StubEvent:
     # `evaluated_permission` is always present on the real (typed) event —
     # `None` unless the server evaluated a permission policy for the call.
-    return _StubEvent("agent.tool_use", id=id, name=name, input=input, evaluated_permission=evaluated_permission)
+    # So is `session_thread_id`, which is `None` for a call of the primary thread.
+    return _StubEvent(
+        "agent.tool_use",
+        id=id,
+        name=name,
+        input=input,
+        evaluated_permission=evaluated_permission,
+        session_thread_id=session_thread_id,
+    )
 
 
 def _tool_result(tool_use_id: str) -> _StubEvent:
@@ -93,10 +102,10 @@ def _tool_confirmation(tool_use_id: str, result: str) -> _StubEvent:
     return _StubEvent("user.tool_confirmation", id=f"conf_{tool_use_id}", tool_use_id=tool_use_id, result=result)
 
 
-def _custom_tool_use(id: str, name: str, input: dict[str, Any]) -> _StubEvent:
+def _custom_tool_use(id: str, name: str, input: dict[str, Any], *, session_thread_id: str | None = None) -> _StubEvent:
     """A CUSTOM (user-defined) tool call — the agent emits `agent.custom_tool_use`
     rather than `agent.tool_use` for these."""
-    return _StubEvent("agent.custom_tool_use", id=id, name=name, input=input)
+    return _StubEvent("agent.custom_tool_use", id=id, name=name, input=input, session_thread_id=session_thread_id)
 
 
 def _custom_tool_result(custom_tool_use_id: str) -> _StubEvent:
@@ -273,12 +282,22 @@ class _FakeClient:
     """Minimal stand-in for `AsyncAnthropic` — only exposes the resource path
     the runner reads."""
 
+    _tracer = None
+
     def __init__(self, events: FakeAsyncEvents) -> None:
         self.beta = type(
             "_Beta",
             (),
             {"sessions": type("_Sessions", (), {"events": events})()},
         )()
+
+    @property
+    def open_telemetry(self) -> dict[str, Any]:
+        return {}
+
+    def with_options(self, **_options: Any) -> _FakeClient:
+        """The copy that sends a thread's tool results is this client: the fake events record every send."""
+        return self
 
 
 async def _run_with_fakes(
@@ -1772,7 +1791,7 @@ def test_environments_public_reexports() -> None:
 
 
 def _to_session_content(content: Any) -> list[Any]:
-    return cast("list[Any]", session_runner_mod._to_session_content(content))  # pyright: ignore[reportPrivateUsage]
+    return cast("list[Any]", session_runner_mod._to_session_content(content)[0])  # pyright: ignore[reportPrivateUsage]
 
 
 def test_to_session_content_text_passthrough() -> None:

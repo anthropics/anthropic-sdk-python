@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -33,7 +33,7 @@ class UserCostReport(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UserCostReportWithRawResponse(self)
 
@@ -42,7 +42,7 @@ class UserCostReport(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UserCostReportWithStreamingResponse(self)
 
@@ -91,16 +91,25 @@ class UserCostReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsCostUsersItem]:
+    ) -> SyncReportPageCursor[BetaAnalyticsCostUsersItem]:
         """
-        Get per-user cost in USD across a date range.
+        [Legacy] Get per-user cost in USD across a date range.
 
-        Returns one row per user, ranked by spend. Use this to see which users account
-        for the most cost. Only cost attributable to a seat user is included; for
-        organization-wide totals including direct API-key and automation traffic, use
-        the bucketed `/v1/organizations/analytics/cost_report` endpoint. Available to
+        Returns cost per user, ranked by spend; `group_by[]` or `bucket_width` splits a
+        user across several rows. Use this to see which users account for the most cost.
+        Only cost attributed to a user account is included, so cost with no user
+        account, such as Code Review usage and Claude Tag usage in Slack channels, is
+        left out. Claude Tag one-to-one direct messages are included, with product
+        `claude-tag`, only for members who have connected a Claude account. Available to
         organizations on a Claude Enterprise plan. Requires an API key with the
         `read:analytics` scope.
+
+        This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
+        new integrations, use
+        [`GET /v1/organizations/analytics/cost`](/docs/en/api/beta/organization/analytics/cost/list)
+        in the Usage and Cost Analytics API instead. To move an existing integration,
+        see
+        [Migrate from the Claude Enterprise usage and cost reports](/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-enterprise-analytics-reports).
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -114,10 +123,8 @@ class UserCostReport(SyncAPIResource):
               aggregates the full `[starting_at, ending_at)` range.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that
@@ -185,8 +192,8 @@ class UserCostReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_cost_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsCostUsersItem],
+            "/v1/organizations/analytics/user_cost_report",
+            page=SyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -213,6 +220,9 @@ class UserCostReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.user_cost_report.list",
+                span_route="/v1/organizations/analytics/user_cost_report",
             ),
             model=BetaAnalyticsCostUsersItem,
         )
@@ -225,7 +235,7 @@ class AsyncUserCostReport(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUserCostReportWithRawResponse(self)
 
@@ -234,7 +244,7 @@ class AsyncUserCostReport(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUserCostReportWithStreamingResponse(self)
 
@@ -283,16 +293,25 @@ class AsyncUserCostReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsCostUsersItem, AsyncPageCursor[BetaAnalyticsCostUsersItem]]:
+    ) -> AsyncPaginator[BetaAnalyticsCostUsersItem, AsyncReportPageCursor[BetaAnalyticsCostUsersItem]]:
         """
-        Get per-user cost in USD across a date range.
+        [Legacy] Get per-user cost in USD across a date range.
 
-        Returns one row per user, ranked by spend. Use this to see which users account
-        for the most cost. Only cost attributable to a seat user is included; for
-        organization-wide totals including direct API-key and automation traffic, use
-        the bucketed `/v1/organizations/analytics/cost_report` endpoint. Available to
+        Returns cost per user, ranked by spend; `group_by[]` or `bucket_width` splits a
+        user across several rows. Use this to see which users account for the most cost.
+        Only cost attributed to a user account is included, so cost with no user
+        account, such as Code Review usage and Claude Tag usage in Slack channels, is
+        left out. Claude Tag one-to-one direct messages are included, with product
+        `claude-tag`, only for members who have connected a Claude account. Available to
         organizations on a Claude Enterprise plan. Requires an API key with the
         `read:analytics` scope.
+
+        This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
+        new integrations, use
+        [`GET /v1/organizations/analytics/cost`](/docs/en/api/beta/organization/analytics/cost/list)
+        in the Usage and Cost Analytics API instead. To move an existing integration,
+        see
+        [Migrate from the Claude Enterprise usage and cost reports](/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-enterprise-analytics-reports).
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -306,10 +325,8 @@ class AsyncUserCostReport(AsyncAPIResource):
               aggregates the full `[starting_at, ending_at)` range.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that
@@ -377,8 +394,8 @@ class AsyncUserCostReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/user_cost_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsCostUsersItem],
+            "/v1/organizations/analytics/user_cost_report",
+            page=AsyncReportPageCursor[BetaAnalyticsCostUsersItem],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -405,6 +422,9 @@ class AsyncUserCostReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.user_cost_report.list",
+                span_route="/v1/organizations/analytics/user_cost_report",
             ),
             model=BetaAnalyticsCostUsersItem,
         )

@@ -35,6 +35,7 @@ from anthropic import (
 from anthropic._models import FinalRequestOptions
 from anthropic.lib.aws import AnthropicAWS, AsyncAnthropicAWS
 from anthropic._response import BinaryAPIResponse, AsyncBinaryAPIResponse, StreamedBinaryAPIResponse
+from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
 from anthropic._base_client import BaseClient
 from anthropic.types.message import Message
@@ -1114,9 +1115,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_response_wrapper_cast_to_is_returned_unparsed(self, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
-            return_value=httpx2.Response(200, content=b"file contents")
-        )
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, content=b"file contents"))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=[recorder])
@@ -1139,7 +1138,7 @@ class TestSyncMiddleware:
         # use `with_streaming_response.download` as it relies on the internal cast_to
         # override header which the request pipeline consumes; a retrying middleware
         # must observe identical request state on every `call_next(...)` invocation
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
+        respx_mock.get("/v1/files/file_id/content").mock(
             side_effect=[
                 httpx2.Response(503, json=error_body(type="api_error", message="Service unavailable")),
                 httpx2.Response(200, json={"foo": "bar"}),
@@ -1209,7 +1208,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_file_upload_with_request_copying_middleware(self, respx_mock: MockRouter, tmp_path: Path) -> None:
-        respx_mock.post("/v1/files?beta=true").mock(return_value=httpx2.Response(200, json=file_metadata_body()))
+        respx_mock.post("/v1/files").mock(return_value=httpx2.Response(200, json=file_metadata_body()))
 
         def add_trace_header(request: APIRequest, call_next: CallNext) -> Any:
             return call_next(request.copy(headers={**request.headers, "x-trace-id": "abc-123"}))
@@ -1639,9 +1638,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_response_wrapper_cast_to_is_returned_unparsed(self, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
-            return_value=httpx2.Response(200, content=b"file contents")
-        )
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, content=b"file contents"))
 
         recorder = RecordingMiddleware()
         client = make_async_client(middleware=[recorder])
@@ -1971,7 +1968,7 @@ class TestLibClientMiddleware:
         assert wire.url.path == "/model/claude-opus-4-6/invoke"
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "bedrock-2023-05-31"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_bedrock_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
@@ -2013,7 +2010,7 @@ class TestLibClientMiddleware:
         wire = cast("MockRequestCall", respx_mock.calls[0]).request
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "vertex-2023-10-16"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_vertex_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:

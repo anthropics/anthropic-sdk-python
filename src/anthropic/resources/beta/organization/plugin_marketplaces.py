@@ -33,7 +33,7 @@ class PluginMarketplaces(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginMarketplacesWithRawResponse(self)
 
@@ -42,7 +42,7 @@ class PluginMarketplaces(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginMarketplacesWithStreamingResponse(self)
 
@@ -109,15 +109,17 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.retrieve",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -184,15 +186,17 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.update",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -279,7 +283,7 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugin_marketplaces?beta=true",
+            "/v1/organizations/plugin_marketplaces",
             page=SyncPageCursor[BetaPluginMarketplace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -293,6 +297,9 @@ class PluginMarketplaces(SyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.list",
+                span_route="/v1/organizations/plugin_marketplaces",
             ),
             model=BetaPluginMarketplace,
         )
@@ -321,9 +328,9 @@ class PluginMarketplaces(SyncAPIResource):
         part, with some files left out. An archive that cannot be read as a marketplace
         is reported, not refused: the response is a report with `valid: false`. Plugin
         sources outside the marketplace are fetched anonymously from GitHub, so a
-        private one is reported as not found; a source on any other host is not fetched
-        here, and the report notes that it will be checked when the marketplace actually
-        synchronizes.
+        private one is reported as not found or as needing a GitHub sign-in; a source on
+        any other host is not fetched here, and the report notes that it will be checked
+        when the marketplace actually synchronizes.
 
         Nothing is recorded on the Compliance API activity feed.
 
@@ -359,6 +366,9 @@ class PluginMarketplaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError:
         """
         extra_headers = {
             **strip_not_given(
@@ -378,7 +388,7 @@ class PluginMarketplaces(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            "/v1/organizations/plugin_marketplaces/validate_archive?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_archive",
             body=body,
             files=files,
             options=make_request_options(
@@ -386,6 +396,9 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.validate_archive",
+                span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -415,9 +428,9 @@ class PluginMarketplaces(SyncAPIResource):
         part, with some files left out. A repository that is missing, private, or has no
         such branch or commit is reported, not refused: the response is a report with
         `valid: false`. Plugin sources outside the marketplace are fetched anonymously
-        from GitHub, so a private one is reported as not found; a source on any other
-        host is not fetched here, and the report notes that it will be checked when the
-        marketplace actually synchronizes.
+        from GitHub, so a private one is reported as not found or as needing a GitHub
+        sign-in; a source on any other host is not fetched here, and the report notes
+        that it will be checked when the marketplace actually synchronizes.
 
         Nothing is recorded on the Compliance API activity feed.
 
@@ -438,14 +451,19 @@ class PluginMarketplaces(SyncAPIResource):
 
         Args:
           repository_url: The `https://` URL of a public repository on github.com that holds the
-              marketplace. Any other host, a URL with credentials in it, or one that does not
-              name a repository is a 400.
+              marketplace. A URL longer than 2,048 characters, on any other host or scheme,
+              with a port other than 443 or 80, with credentials in it, or that does not name
+              exactly `owner/repo` (a trailing `.git` or `/` is accepted) is a 400. A private
+              or missing repository is reported in the response, not refused.
 
           ref: The branch to validate the tip of, or the full 40-character SHA of the commit to
               validate. When omitted, the branch a synchronization would read (usually the
               repository's default branch); if that is not the default branch, the report's
-              `ref` says which branch was read. An empty string, or a value that is neither a
-              branch name nor a 40-character SHA, is a 400.
+              `ref` says which branch was read. An empty string, a value longer than 255
+              characters, or one that contains `..` or a character other than ASCII letters,
+              digits, `.`, `_`, `-`, `+`, and `/`, is a 400. Any other value that is not a
+              40-character SHA is read as a branch name; if the repository has no such branch,
+              the response is a report with `valid: false`, not a 400.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -470,7 +488,7 @@ class PluginMarketplaces(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._post(
-            "/v1/organizations/plugin_marketplaces/validate_repository?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_repository",
             body={
                 "repository_url": repository_url,
                 "ref": ref,
@@ -480,6 +498,9 @@ class PluginMarketplaces(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.validate_repository",
+                span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -492,7 +513,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginMarketplacesWithRawResponse(self)
 
@@ -501,7 +522,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginMarketplacesWithStreamingResponse(self)
 
@@ -568,15 +589,17 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"organization_id": organization_id},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.retrieve",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -643,15 +666,17 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/organizations/plugin_marketplaces/{marketplace_id}?beta=true", marketplace_id=marketplace_id
-            ),
+            path_template("/v1/organizations/plugin_marketplaces/{marketplace_id}", marketplace_id=marketplace_id),
             body={"default_installation_preference": default_installation_preference},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.update",
+                span_route="/v1/organizations/plugin_marketplaces/{marketplace_id}",
+                span_attributes={"anthropic.organization.plugin_marketplace.id": marketplace_id},
             ),
             cast_to=BetaPluginMarketplace,
         )
@@ -738,7 +763,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/organizations/plugin_marketplaces?beta=true",
+            "/v1/organizations/plugin_marketplaces",
             page=AsyncPageCursor[BetaPluginMarketplace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -752,6 +777,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.list",
+                span_route="/v1/organizations/plugin_marketplaces",
             ),
             model=BetaPluginMarketplace,
         )
@@ -780,9 +808,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         part, with some files left out. An archive that cannot be read as a marketplace
         is reported, not refused: the response is a report with `valid: false`. Plugin
         sources outside the marketplace are fetched anonymously from GitHub, so a
-        private one is reported as not found; a source on any other host is not fetched
-        here, and the report notes that it will be checked when the marketplace actually
-        synchronizes.
+        private one is reported as not found or as needing a GitHub sign-in; a source on
+        any other host is not fetched here, and the report notes that it will be checked
+        when the marketplace actually synchronizes.
 
         Nothing is recorded on the Compliance API activity feed.
 
@@ -818,6 +846,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaUnsupportedCharsetError:
         """
         extra_headers = {
             **strip_not_given(
@@ -837,7 +868,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            "/v1/organizations/plugin_marketplaces/validate_archive?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_archive",
             body=body,
             files=files,
             options=make_request_options(
@@ -845,6 +876,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.validate_archive",
+                span_route="/v1/organizations/plugin_marketplaces/validate_archive",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )
@@ -874,9 +908,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         part, with some files left out. A repository that is missing, private, or has no
         such branch or commit is reported, not refused: the response is a report with
         `valid: false`. Plugin sources outside the marketplace are fetched anonymously
-        from GitHub, so a private one is reported as not found; a source on any other
-        host is not fetched here, and the report notes that it will be checked when the
-        marketplace actually synchronizes.
+        from GitHub, so a private one is reported as not found or as needing a GitHub
+        sign-in; a source on any other host is not fetched here, and the report notes
+        that it will be checked when the marketplace actually synchronizes.
 
         Nothing is recorded on the Compliance API activity feed.
 
@@ -897,14 +931,19 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
 
         Args:
           repository_url: The `https://` URL of a public repository on github.com that holds the
-              marketplace. Any other host, a URL with credentials in it, or one that does not
-              name a repository is a 400.
+              marketplace. A URL longer than 2,048 characters, on any other host or scheme,
+              with a port other than 443 or 80, with credentials in it, or that does not name
+              exactly `owner/repo` (a trailing `.git` or `/` is accepted) is a 400. A private
+              or missing repository is reported in the response, not refused.
 
           ref: The branch to validate the tip of, or the full 40-character SHA of the commit to
               validate. When omitted, the branch a synchronization would read (usually the
               repository's default branch); if that is not the default branch, the report's
-              `ref` says which branch was read. An empty string, or a value that is neither a
-              branch name nor a 40-character SHA, is a 400.
+              `ref` says which branch was read. An empty string, a value longer than 255
+              characters, or one that contains `..` or a character other than ASCII letters,
+              digits, `.`, `_`, `-`, `+`, and `/`, is a 400. Any other value that is not a
+              40-character SHA is read as a branch name; if the repository has no such branch,
+              the response is a report with `valid: false`, not a 400.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -929,7 +968,7 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "ce-plugins-2026-09-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/organizations/plugin_marketplaces/validate_repository?beta=true",
+            "/v1/organizations/plugin_marketplaces/validate_repository",
             body={
                 "repository_url": repository_url,
                 "ref": ref,
@@ -939,6 +978,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.plugin_marketplaces.validate_repository",
+                span_route="/v1/organizations/plugin_marketplaces/validate_repository",
             ),
             cast_to=BetaPluginMarketplaceValidationReport,
         )

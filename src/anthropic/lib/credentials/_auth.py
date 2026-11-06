@@ -27,22 +27,6 @@ def _warn_once(key: str, message: str, *args: object) -> None:
     log.warning(message, *args)
 
 
-def warn_explicit_static_shadows_credentials(param: str) -> None:
-    """Warn that an explicit `api_key=` / `auth_token=` argument shadows
-    an explicit `credentials=` provider passed to the same constructor or
-    `copy()` call. The static credential wins at the request-header level
-    (`AccessTokenAuth.sync_auth_flow` short-circuits on the pre-set header),
-    which silently disables the credentials provider.
-    """
-    _warn_once(
-        f"explicit-shadow:{param}",
-        "`%s=` was passed alongside `credentials=`; the static credential "
-        "takes precedence and the credentials provider is silently disabled. "
-        "Pass only one.",
-        param,
-    )
-
-
 def warn_env_static_shadows_auto_discovery(env_var: str) -> None:
     """Warn that an `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` from the
     environment is shadowing the SDK's profile / federation auto-discovery.
@@ -61,6 +45,14 @@ def warn_env_static_shadows_auto_discovery(env_var: str) -> None:
     )
 
 
+def warn_env_api_key_shadows_env_auth_token() -> None:
+    """Warn that `ANTHROPIC_AUTH_TOKEN` is ignored because `ANTHROPIC_API_KEY` is set as well."""
+    _warn_once(
+        "env-shadow:ANTHROPIC_API_KEY:ANTHROPIC_AUTH_TOKEN",
+        "Anthropic: ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are both set. Using ANTHROPIC_API_KEY.",
+    )
+
+
 class AccessTokenAuth(httpx2.Auth):
     """Adapts a `TokenCache` to httpx's `httpx2.Auth` protocol.
 
@@ -68,11 +60,8 @@ class AccessTokenAuth(httpx2.Auth):
     plus the OAuth beta header on every request, with proactive refresh handled by
     `TokenCache`.
 
-    Static credentials shadow federation: if the outgoing request already carries
-    an `X-Api-Key` or `Authorization` header (set by the client's api_key /
-    auth_token path), this auth flow is a no-op. That matches the Go SDK's
-    `authMiddleware` and the documented precedence in the WIF user guide —
-    a static `ANTHROPIC_API_KEY` shadows any credentials provider.
+    If the outgoing request already carries an `Authorization` or `X-Api-Key`
+    header, this auth flow is a no-op.
     """
 
     requires_response_body = False
@@ -93,7 +82,7 @@ class AccessTokenAuth(httpx2.Auth):
         #
         # The flag we inject here is the *API* beta (oauth-2025-04-20), which
         # unlocks `Authorization: Bearer` auth on the API. The *federation*
-        # beta (oidc-federation-2026-04-01) is a separate routing switch used
+        # beta (oidc-federation-2026-04-01) is a separate header sent
         # only on jwt-bearer POSTs to /v1/oauth/token — see _workload.py.
         existing_flags = [flag.strip() for flag in existing_beta.split(",") if flag.strip()]
         if OAUTH_API_BETA_HEADER not in existing_flags:

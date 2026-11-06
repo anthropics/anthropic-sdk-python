@@ -20,7 +20,7 @@ from respx import MockRouter
 from pydantic import ValidationError
 
 from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
-from anthropic._types import Omit
+from anthropic._types import Omit, Timeout, NotGiven, not_given
 from anthropic._utils import asyncify
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
@@ -130,6 +130,21 @@ def test_make_status_error_sync_async_parity(status_code: int) -> None:
 
 
 class TestAnthropic:
+    @pytest.mark.respx(base_url=base_url)
+    def test_user_profile_id_header(self, respx_mock: MockRouter, client: Anthropic) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json={}))
+
+        client.messages.with_raw_response.create(
+            max_tokens=16,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude",
+            user_profile_id="uprof_test",
+        )
+
+        request = respx_mock.calls.last.request
+        assert request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(request.content)
+
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response(self, respx_mock: MockRouter, client: Anthropic) -> None:
         respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
@@ -382,6 +397,95 @@ class TestAnthropic:
 
             client.close()
 
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        ("timeout", "assigned", "copy_options", "expected"),
+        [
+            pytest.param(not_given, not_given, None, 600, id="unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, None, DEFAULT_TIMEOUT.read, id="set to the default"),
+            pytest.param(30, not_given, None, 30, id="set"),
+            pytest.param(None, not_given, None, None, id="set to none"),
+            pytest.param(not_given, not_given, {"max_retries": 1}, 600, id="copy of unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of set"),
+            pytest.param(not_given, not_given, {"timeout": DEFAULT_TIMEOUT}, DEFAULT_TIMEOUT.read, id="copy that sets"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, None, DEFAULT_TIMEOUT.read, id="assigned the default"),
+            pytest.param(not_given, 30, None, 30, id="assigned"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of assigned"),
+        ],
+    )
+    def test_method_default_timeout(
+        self,
+        respx_mock: MockRouter,
+        timeout: float | Timeout | None | NotGiven,
+        assigned: float | Timeout | None | NotGiven,
+        copy_options: dict[str, Any] | None,
+        expected: float | None,
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+        if not isinstance(assigned, NotGiven):
+            client.timeout = assigned
+        if copy_options is not None:
+            client = client.with_options(**copy_options)
+
+        response = client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == expected
+
+        client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("timeout", [not_given, 30], ids=["unset", "set"])
+    def test_method_default_timeout_request_option(self, respx_mock: MockRouter, timeout: float | NotGiven) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        response = client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+            timeout=7,
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == 7
+
+        client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_default_timeout_http_client_option(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        with httpx2.Client(timeout=30) as http_client:
+            client = Anthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+            response = client.messages.with_raw_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-opus-5-5",
+            )
+
+        assert response.http_request.extensions["timeout"]["read"] == 30
+
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             async with httpx2.AsyncClient() as http_client:
@@ -449,7 +553,7 @@ class TestAnthropic:
     def test_validate_headers(self) -> None:
         client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("X-Api-Key") == api_key
+        assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
         def no_default_credentials(**_kwargs: object) -> None:
             return None
@@ -461,18 +565,22 @@ class TestAnthropic:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
-        request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
-        assert request2.headers.get("X-Api-Key") is None
-        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
-        assert request3.headers.get("X-Api-Key") is None
-        request4 = client2._build_request(
-            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        request2 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"Authorization": Omit()})
         )
-        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+        assert request2.headers.get("Authorization") is None
+        request3 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": Omit()})
+        )
+        assert request3.headers.get("Authorization") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": "from-header"})
+        )
+        assert request4.headers.get_list("Authorization") == ["from-header"]
 
     def test_default_headers_case_insensitive(self) -> None:
         # replaces the SDK's own `User-Agent` rather than being sent next to it
@@ -1118,6 +1226,10 @@ class TestAnthropic:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
             Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
 
+    def test_none_path_param_is_rejected(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
+
     @pytest.mark.respx(base_url=base_url)
     def test_default_stream_cls(self, respx_mock: MockRouter, client: Anthropic) -> None:
         class Model(BaseModel):
@@ -1204,7 +1316,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__enter__()
 
         assert _get_open_connections(client) == 0
@@ -1226,7 +1338,7 @@ class TestAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__enter__()
         assert _get_open_connections(client) == 0
 
@@ -1266,7 +1378,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -1304,7 +1416,7 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -1342,11 +1454,34 @@ class TestAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_every_attempt_has_the_qualifiers(
+        self,
+        client: Anthropic,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
+        seen: list[object] = []
+
+        def prepare_options(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(options.qualifiers)
+            return options
+
+        client = client.with_options(max_retries=1)
+        monkeypatch.setattr(client, "_prepare_options", prepare_options)
+        respx_mock.get("/foo").mock(side_effect=[httpx2.Response(500), httpx2.Response(200)])
+
+        client.get("/foo", cast_to=httpx2.Response, options=make_request_options(qualifiers={"variant": "b"}))
+
+        assert seen == [{"variant": "b"}, {"variant": "b"}]
 
     def test_proxy_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         # Test that the proxy environment variables are set correctly
@@ -1423,6 +1558,21 @@ class TestAnthropic:
 
 
 class TestAsyncAnthropic:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_user_profile_id_header(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json={}))
+
+        await async_client.messages.with_raw_response.create(
+            max_tokens=16,
+            messages=[{"role": "user", "content": "Hello"}],
+            model="claude",
+            user_profile_id="uprof_test",
+        )
+
+        request = respx_mock.calls.last.request
+        assert request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(request.content)
+
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         respx_mock.post("/foo").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
@@ -1677,6 +1827,97 @@ class TestAsyncAnthropic:
 
             await client.close()
 
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize(
+        ("timeout", "assigned", "copy_options", "expected"),
+        [
+            pytest.param(not_given, not_given, None, 600, id="unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, None, DEFAULT_TIMEOUT.read, id="set to the default"),
+            pytest.param(30, not_given, None, 30, id="set"),
+            pytest.param(None, not_given, None, None, id="set to none"),
+            pytest.param(not_given, not_given, {"max_retries": 1}, 600, id="copy of unset"),
+            pytest.param(DEFAULT_TIMEOUT, not_given, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of set"),
+            pytest.param(not_given, not_given, {"timeout": DEFAULT_TIMEOUT}, DEFAULT_TIMEOUT.read, id="copy that sets"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, None, DEFAULT_TIMEOUT.read, id="assigned the default"),
+            pytest.param(not_given, 30, None, 30, id="assigned"),
+            pytest.param(not_given, DEFAULT_TIMEOUT, {"max_retries": 1}, DEFAULT_TIMEOUT.read, id="copy of assigned"),
+        ],
+    )
+    async def test_method_default_timeout(
+        self,
+        respx_mock: MockRouter,
+        timeout: float | Timeout | None | NotGiven,
+        assigned: float | Timeout | None | NotGiven,
+        copy_options: dict[str, Any] | None,
+        expected: float | None,
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+        if not isinstance(assigned, NotGiven):
+            client.timeout = assigned
+        if copy_options is not None:
+            client = client.with_options(**copy_options)
+
+        response = await client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == expected
+
+        await client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("timeout", [not_given, 30], ids=["unset", "set"])
+    async def test_method_default_timeout_request_option(
+        self, respx_mock: MockRouter, timeout: float | NotGiven
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=timeout)
+
+        response = await client.messages.with_raw_response.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "content": "Hello, world",
+                    "role": "user",
+                }
+            ],
+            model="claude-opus-5-5",
+            timeout=7,
+        )
+
+        assert response.http_request.extensions["timeout"]["read"] == 7
+
+        await client.close()
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_default_timeout_http_client_option(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200))
+        async with httpx2.AsyncClient(timeout=30) as http_client:
+            client = AsyncAnthropic(
+                base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
+            )
+
+            response = await client.messages.with_raw_response.create(
+                max_tokens=1024,
+                messages=[
+                    {
+                        "content": "Hello, world",
+                        "role": "user",
+                    }
+                ],
+                model="claude-opus-5-5",
+            )
+
+        assert response.http_request.extensions["timeout"]["read"] == 30
+
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             with httpx2.Client() as http_client:
@@ -1746,7 +1987,7 @@ class TestAsyncAnthropic:
     def test_validate_headers(self) -> None:
         client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("X-Api-Key") == api_key
+        assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
         def no_default_credentials(**_kwargs: object) -> None:
             return None
@@ -1758,18 +1999,22 @@ class TestAsyncAnthropic:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
-        request2 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"X-Api-Key": Omit()}))
-        assert request2.headers.get("X-Api-Key") is None
-        request3 = client2._build_request(FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": Omit()}))
-        assert request3.headers.get("X-Api-Key") is None
-        request4 = client2._build_request(
-            FinalRequestOptions(method="get", url="/foo", headers={"x-api-key": "from-header"})
+        request2 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"Authorization": Omit()})
         )
-        assert request4.headers.get_list("X-Api-Key") == ["from-header"]
+        assert request2.headers.get("Authorization") is None
+        request3 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": Omit()})
+        )
+        assert request3.headers.get("Authorization") is None
+        request4 = client2._build_request(
+            FinalRequestOptions(method="get", url="/foo", headers={"authorization": "from-header"})
+        )
+        assert request4.headers.get_list("Authorization") == ["from-header"]
 
     async def test_default_headers_case_insensitive(self) -> None:
         # replaces the SDK's own `User-Agent` rather than being sent next to it
@@ -2432,6 +2677,10 @@ class TestAsyncAnthropic:
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
+    async def test_none_path_param_is_rejected(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            await async_client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
+
     @pytest.mark.respx(base_url=base_url)
     async def test_default_stream_cls(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         class Model(BaseModel):
@@ -2518,7 +2767,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__aenter__()
 
         assert _get_open_connections(async_client) == 0
@@ -2540,7 +2789,7 @@ class TestAsyncAnthropic:
                         "role": "user",
                     }
                 ],
-                model="claude-opus-5",
+                model="claude-opus-5-5",
             ).__aenter__()
         assert _get_open_connections(async_client) == 0
 
@@ -2580,7 +2829,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.retries_taken == failures_before_success
@@ -2618,7 +2867,7 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": Omit()},
         )
 
@@ -2656,11 +2905,34 @@ class TestAsyncAnthropic:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             extra_headers={"x-stainless-retry-count": "42"},
         )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_every_attempt_has_the_qualifiers(
+        self,
+        async_client: AsyncAnthropic,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
+
+        seen: list[object] = []
+
+        async def prepare_options(options: FinalRequestOptions) -> FinalRequestOptions:
+            seen.append(options.qualifiers)
+            return options
+
+        client = async_client.with_options(max_retries=1)
+        monkeypatch.setattr(client, "_prepare_options", prepare_options)
+        respx_mock.get("/foo").mock(side_effect=[httpx2.Response(500), httpx2.Response(200)])
+
+        await client.get("/foo", cast_to=httpx2.Response, options=make_request_options(qualifiers={"variant": "b"}))
+
+        assert seen == [{"variant": "b"}, {"variant": "b"}]
 
     async def test_get_platform(self) -> None:
         platform = await asyncify(get_platform)()

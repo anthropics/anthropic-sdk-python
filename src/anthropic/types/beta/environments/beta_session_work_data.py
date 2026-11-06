@@ -13,7 +13,7 @@ class BetaSessionWorkData(BaseModel):
     """
 
     id: str
-    """Session identifier (e.g., 'session\\__...')"""
+    """Session identifier (e.g., 'session_...')"""
 
     type: Literal["session"]
     """Type of work data"""

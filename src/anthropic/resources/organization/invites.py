@@ -30,7 +30,7 @@ class Invites(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return InvitesWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Invites(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return InvitesWithStreamingResponse(self)
 
@@ -72,7 +72,8 @@ class Invites(SyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; inviting with the `managed` role requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           rbac_group_ids: RBAC group IDs to assign to the User when the Invite is accepted. A non-empty
               array is accepted only for a Claude Enterprise organization with RBAC groups,
@@ -85,6 +86,21 @@ class Invites(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AlreadyMemberError:
+
+          CannotInviteEmailsWithUnverifiedDomainsError:
+
+          EmailDomainNotAllowedError:
+
+          InviteAlreadyExistsError:
+
+          OrgMemberLimitExceededError:
+
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         return self._post(
             "/v1/organizations/invites",
@@ -98,6 +114,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=OrganizationInvite,
         )
@@ -136,6 +155,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=OrganizationInvite,
         )
@@ -208,6 +230,8 @@ class Invites(SyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=OrganizationInvite,
         )
@@ -246,6 +270,9 @@ class Invites(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )
@@ -258,7 +285,7 @@ class AsyncInvites(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncInvitesWithRawResponse(self)
 
@@ -267,7 +294,7 @@ class AsyncInvites(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncInvitesWithStreamingResponse(self)
 
@@ -300,7 +327,8 @@ class AsyncInvites(AsyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; inviting with the `managed` role requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           rbac_group_ids: RBAC group IDs to assign to the User when the Invite is accepted. A non-empty
               array is accepted only for a Claude Enterprise organization with RBAC groups,
@@ -313,6 +341,21 @@ class AsyncInvites(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AlreadyMemberError:
+
+          CannotInviteEmailsWithUnverifiedDomainsError:
+
+          EmailDomainNotAllowedError:
+
+          InviteAlreadyExistsError:
+
+          OrgMemberLimitExceededError:
+
+          RBACGroupGrantsOwnerAccessError:
+
+          RBACGroupOwnerAccessUnconfirmedError:
         """
         return await self._post(
             "/v1/organizations/invites",
@@ -326,6 +369,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.create",
+                span_route="/v1/organizations/invites",
+                span_created_id="anthropic.organization.invite.id",
             ),
             cast_to=OrganizationInvite,
         )
@@ -364,6 +410,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.retrieve",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=OrganizationInvite,
         )
@@ -436,6 +485,8 @@ class AsyncInvites(AsyncAPIResource):
                     "roles": roles,
                     "statuses": statuses,
                 },
+                span_name="anthropic.organization.invites.list",
+                span_route="/v1/organizations/invites",
             ),
             model=OrganizationInvite,
         )
@@ -474,6 +525,9 @@ class AsyncInvites(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.invites.delete",
+                span_route="/v1/organizations/invites/{invite_id}",
+                span_attributes={"anthropic.organization.invite.id": invite_id},
             ),
             cast_to=InviteDeleteResponse,
         )

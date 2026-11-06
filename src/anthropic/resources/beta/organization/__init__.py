@@ -30,6 +30,14 @@ from .api_keys import (
     APIKeysWithStreamingResponse,
     AsyncAPIKeysWithStreamingResponse,
 )
+from .webhooks import (
+    Webhooks,
+    AsyncWebhooks,
+    WebhooksWithRawResponse,
+    AsyncWebhooksWithRawResponse,
+    WebhooksWithStreamingResponse,
+    AsyncWebhooksWithStreamingResponse,
+)
 from .analytics import (
     Analytics,
     AsyncAnalytics,
@@ -37,6 +45,14 @@ from .analytics import (
     AsyncAnalyticsWithRawResponse,
     AnalyticsWithStreamingResponse,
     AsyncAnalyticsWithStreamingResponse,
+)
+from .claude_tag import (
+    ClaudeTag,
+    AsyncClaudeTag,
+    ClaudeTagWithRawResponse,
+    AsyncClaudeTagWithRawResponse,
+    ClaudeTagWithStreamingResponse,
+    AsyncClaudeTagWithStreamingResponse,
 )
 from .federation import (
     Federation,
@@ -125,6 +141,14 @@ from .plugin_marketplaces import (
     AsyncPluginMarketplacesWithRawResponse,
     PluginMarketplacesWithStreamingResponse,
     AsyncPluginMarketplacesWithStreamingResponse,
+)
+from .telemetry_destinations import (
+    TelemetryDestinations,
+    AsyncTelemetryDestinations,
+    TelemetryDestinationsWithRawResponse,
+    AsyncTelemetryDestinationsWithRawResponse,
+    TelemetryDestinationsWithStreamingResponse,
+    AsyncTelemetryDestinationsWithStreamingResponse,
 )
 
 __all__ = [
@@ -218,6 +242,24 @@ __all__ = [
     "AsyncPluginMarketplacesWithRawResponse",
     "PluginMarketplacesWithStreamingResponse",
     "AsyncPluginMarketplacesWithStreamingResponse",
+    "TelemetryDestinations",
+    "AsyncTelemetryDestinations",
+    "TelemetryDestinationsWithRawResponse",
+    "AsyncTelemetryDestinationsWithRawResponse",
+    "TelemetryDestinationsWithStreamingResponse",
+    "AsyncTelemetryDestinationsWithStreamingResponse",
+    "Webhooks",
+    "AsyncWebhooks",
+    "WebhooksWithRawResponse",
+    "AsyncWebhooksWithRawResponse",
+    "WebhooksWithStreamingResponse",
+    "AsyncWebhooksWithStreamingResponse",
+    "ClaudeTag",
+    "AsyncClaudeTag",
+    "ClaudeTagWithRawResponse",
+    "AsyncClaudeTagWithRawResponse",
+    "ClaudeTagWithStreamingResponse",
+    "AsyncClaudeTagWithStreamingResponse",
     "Organization",
     "AsyncOrganization",
     "OrganizationWithRawResponse",

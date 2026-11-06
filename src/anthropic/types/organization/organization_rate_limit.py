@@ -30,14 +30,12 @@ class OrganizationRateLimit(BaseModel):
     """Identifier of this rate-limit entry.
 
     It is stable within the organization and differs between organizations; the
-    group's own identifier is `group.id`.
+    group's own identifier is `group.id`. Pass it as `rate_limit_id` to set a
+    workspace's overrides for this group.
     """
 
     group: Group
-    """The rate-limit group this entry's limits apply to.
-
-    Its `type` equals `group_type`.
-    """
+    """The rate-limit group this entry's limits apply to."""
 
     limits: List[OrganizationRateLimitValue]
     """The limiter values that apply to this group."""
@@ -45,7 +43,8 @@ class OrganizationRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group_type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`. The list covers the models your
+    organization has access to, so it can differ between organizations.
     """
 
     type: Literal["rate_limit"]

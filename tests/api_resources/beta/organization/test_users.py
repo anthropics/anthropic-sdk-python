@@ -23,6 +23,7 @@ class TestUsers:
     def test_method_retrieve(self, client: Anthropic) -> None:
         user = client.beta.organization.users.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])
 
@@ -30,6 +31,7 @@ class TestUsers:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.users.with_raw_response.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -41,6 +43,7 @@ class TestUsers:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.users.with_streaming_response.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -62,6 +65,7 @@ class TestUsers:
         user = client.beta.organization.users.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])
 
@@ -70,6 +74,7 @@ class TestUsers:
         response = client.beta.organization.users.with_raw_response.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -82,6 +87,7 @@ class TestUsers:
         with client.beta.organization.users.with_streaming_response.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -101,7 +107,9 @@ class TestUsers:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        user = client.beta.organization.users.list()
+        user = client.beta.organization.users.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaOrganizationUser], user, path=["response"])
 
     @parametrize
@@ -112,12 +120,15 @@ class TestUsers:
             email="dev@stainless.com",
             limit=1,
             roles=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaOrganizationUser], user, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.users.with_raw_response.list()
+        response = client.beta.organization.users.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -126,7 +137,9 @@ class TestUsers:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.users.with_streaming_response.list() as response:
+        with client.beta.organization.users.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -139,6 +152,7 @@ class TestUsers:
     def test_method_remove(self, client: Anthropic) -> None:
         user = client.beta.organization.users.remove(
             "user_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(UserRemoveResponse, user, path=["response"])
 
@@ -146,6 +160,7 @@ class TestUsers:
     def test_raw_response_remove(self, client: Anthropic) -> None:
         response = client.beta.organization.users.with_raw_response.remove(
             "user_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -157,6 +172,7 @@ class TestUsers:
     def test_streaming_response_remove(self, client: Anthropic) -> None:
         with client.beta.organization.users.with_streaming_response.remove(
             "user_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -173,6 +189,56 @@ class TestUsers:
                 "",
             )
 
+    @parametrize
+    def test_method_sign_out(self, client: Anthropic) -> None:
+        user = client.beta.organization.users.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_method_sign_out_with_all_params(self, client: Anthropic) -> None:
+        user = client.beta.organization.users.sign_out(
+            user_id="user_id",
+            betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_raw_response_sign_out(self, client: Anthropic) -> None:
+        response = client.beta.organization.users.with_raw_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        user = response.parse()
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    def test_streaming_response_sign_out(self, client: Anthropic) -> None:
+        with client.beta.organization.users.with_streaming_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            user = response.parse()
+            assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_sign_out(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
+            client.beta.organization.users.with_raw_response.sign_out(
+                user_id="",
+            )
+
 
 class TestAsyncUsers:
     parametrize = pytest.mark.parametrize(
@@ -183,6 +249,7 @@ class TestAsyncUsers:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         user = await async_client.beta.organization.users.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])
 
@@ -190,6 +257,7 @@ class TestAsyncUsers:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.users.with_raw_response.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -201,6 +269,7 @@ class TestAsyncUsers:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.users.with_streaming_response.retrieve(
             "user_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -222,6 +291,7 @@ class TestAsyncUsers:
         user = await async_client.beta.organization.users.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])
 
@@ -230,6 +300,7 @@ class TestAsyncUsers:
         response = await async_client.beta.organization.users.with_raw_response.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -242,6 +313,7 @@ class TestAsyncUsers:
         async with async_client.beta.organization.users.with_streaming_response.update(
             user_id="user_id",
             role="user",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -261,7 +333,9 @@ class TestAsyncUsers:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        user = await async_client.beta.organization.users.list()
+        user = await async_client.beta.organization.users.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaOrganizationUser], user, path=["response"])
 
     @parametrize
@@ -272,12 +346,15 @@ class TestAsyncUsers:
             email="dev@stainless.com",
             limit=1,
             roles=["string"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaOrganizationUser], user, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.users.with_raw_response.list()
+        response = await async_client.beta.organization.users.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -286,7 +363,9 @@ class TestAsyncUsers:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.users.with_streaming_response.list() as response:
+        async with async_client.beta.organization.users.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -299,6 +378,7 @@ class TestAsyncUsers:
     async def test_method_remove(self, async_client: AsyncAnthropic) -> None:
         user = await async_client.beta.organization.users.remove(
             "user_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(UserRemoveResponse, user, path=["response"])
 
@@ -306,6 +386,7 @@ class TestAsyncUsers:
     async def test_raw_response_remove(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.users.with_raw_response.remove(
             "user_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -317,6 +398,7 @@ class TestAsyncUsers:
     async def test_streaming_response_remove(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.users.with_streaming_response.remove(
             "user_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -331,4 +413,54 @@ class TestAsyncUsers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
             await async_client.beta.organization.users.with_raw_response.remove(
                 "",
+            )
+
+    @parametrize
+    async def test_method_sign_out(self, async_client: AsyncAnthropic) -> None:
+        user = await async_client.beta.organization.users.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_method_sign_out_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        user = await async_client.beta.organization.users.sign_out(
+            user_id="user_id",
+            betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_raw_response_sign_out(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.organization.users.with_raw_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        user = await response.parse()
+        assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_sign_out(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.organization.users.with_streaming_response.sign_out(
+            user_id="user_id",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            user = await response.parse()
+            assert_matches_type(BetaOrganizationUser, user, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_sign_out(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `user_id` but received ''"):
+            await async_client.beta.organization.users.with_raw_response.sign_out(
+                user_id="",
             )

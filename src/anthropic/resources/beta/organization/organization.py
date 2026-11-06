@@ -26,6 +26,14 @@ from .api_keys import (
     APIKeysWithStreamingResponse,
     AsyncAPIKeysWithStreamingResponse,
 )
+from .webhooks import (
+    Webhooks,
+    AsyncWebhooks,
+    WebhooksWithRawResponse,
+    AsyncWebhooksWithRawResponse,
+    WebhooksWithStreamingResponse,
+    AsyncWebhooksWithStreamingResponse,
+)
 from ...._types import Body, Query, Headers, NotGiven, not_given
 from ...._compat import cached_property
 from .rate_limits import (
@@ -84,6 +92,14 @@ from .plugin_marketplaces import (
     PluginMarketplacesWithStreamingResponse,
     AsyncPluginMarketplacesWithStreamingResponse,
 )
+from .claude_tag.claude_tag import (
+    ClaudeTag,
+    AsyncClaudeTag,
+    ClaudeTagWithRawResponse,
+    AsyncClaudeTagWithRawResponse,
+    ClaudeTagWithStreamingResponse,
+    AsyncClaudeTagWithStreamingResponse,
+)
 from .federation.federation import (
     Federation,
     AsyncFederation,
@@ -132,6 +148,14 @@ from .service_accounts.service_accounts import (
     AsyncServiceAccountsWithRawResponse,
     ServiceAccountsWithStreamingResponse,
     AsyncServiceAccountsWithStreamingResponse,
+)
+from .telemetry_destinations.telemetry_destinations import (
+    TelemetryDestinations,
+    AsyncTelemetryDestinations,
+    TelemetryDestinationsWithRawResponse,
+    AsyncTelemetryDestinationsWithRawResponse,
+    TelemetryDestinationsWithStreamingResponse,
+    AsyncTelemetryDestinationsWithStreamingResponse,
 )
 
 __all__ = ["Organization", "AsyncOrganization"]
@@ -199,12 +223,24 @@ class Organization(SyncAPIResource):
         return PluginMarketplaces(self._client)
 
     @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinations:
+        return TelemetryDestinations(self._client)
+
+    @cached_property
+    def webhooks(self) -> Webhooks:
+        return Webhooks(self._client)
+
+    @cached_property
+    def claude_tag(self) -> ClaudeTag:
+        return ClaudeTag(self._client)
+
+    @cached_property
     def with_raw_response(self) -> OrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return OrganizationWithRawResponse(self)
 
@@ -213,7 +249,7 @@ class Organization(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return OrganizationWithStreamingResponse(self)
 
@@ -232,12 +268,15 @@ class Organization(SyncAPIResource):
         API key.
         """
         return self._get(
-            "/v1/organizations/me?beta=true",
+            "/v1/organizations/me",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=BetaOrganization,
         )
@@ -305,12 +344,24 @@ class AsyncOrganization(AsyncAPIResource):
         return AsyncPluginMarketplaces(self._client)
 
     @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinations:
+        return AsyncTelemetryDestinations(self._client)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooks:
+        return AsyncWebhooks(self._client)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTag:
+        return AsyncClaudeTag(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncOrganizationWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncOrganizationWithRawResponse(self)
 
@@ -319,7 +370,7 @@ class AsyncOrganization(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncOrganizationWithStreamingResponse(self)
 
@@ -338,12 +389,15 @@ class AsyncOrganization(AsyncAPIResource):
         API key.
         """
         return await self._get(
-            "/v1/organizations/me?beta=true",
+            "/v1/organizations/me",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.retrieve",
+                span_route="/v1/organizations/me",
             ),
             cast_to=BetaOrganization,
         )
@@ -417,6 +471,18 @@ class OrganizationWithRawResponse:
     def plugin_marketplaces(self) -> PluginMarketplacesWithRawResponse:
         return PluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
 
+    @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinationsWithRawResponse:
+        return TelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> WebhooksWithRawResponse:
+        return WebhooksWithRawResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> ClaudeTagWithRawResponse:
+        return ClaudeTagWithRawResponse(self._organization.claude_tag)
+
 
 class AsyncOrganizationWithRawResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -485,6 +551,18 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithRawResponse:
         return AsyncPluginMarketplacesWithRawResponse(self._organization.plugin_marketplaces)
+
+    @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithRawResponse:
+        return AsyncTelemetryDestinationsWithRawResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooksWithRawResponse:
+        return AsyncWebhooksWithRawResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTagWithRawResponse:
+        return AsyncClaudeTagWithRawResponse(self._organization.claude_tag)
 
 
 class OrganizationWithStreamingResponse:
@@ -555,6 +633,18 @@ class OrganizationWithStreamingResponse:
     def plugin_marketplaces(self) -> PluginMarketplacesWithStreamingResponse:
         return PluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
 
+    @cached_property
+    def telemetry_destinations(self) -> TelemetryDestinationsWithStreamingResponse:
+        return TelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> WebhooksWithStreamingResponse:
+        return WebhooksWithStreamingResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> ClaudeTagWithStreamingResponse:
+        return ClaudeTagWithStreamingResponse(self._organization.claude_tag)
+
 
 class AsyncOrganizationWithStreamingResponse:
     def __init__(self, organization: AsyncOrganization) -> None:
@@ -623,3 +713,15 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def plugin_marketplaces(self) -> AsyncPluginMarketplacesWithStreamingResponse:
         return AsyncPluginMarketplacesWithStreamingResponse(self._organization.plugin_marketplaces)
+
+    @cached_property
+    def telemetry_destinations(self) -> AsyncTelemetryDestinationsWithStreamingResponse:
+        return AsyncTelemetryDestinationsWithStreamingResponse(self._organization.telemetry_destinations)
+
+    @cached_property
+    def webhooks(self) -> AsyncWebhooksWithStreamingResponse:
+        return AsyncWebhooksWithStreamingResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_tag(self) -> AsyncClaudeTagWithStreamingResponse:
+        return AsyncClaudeTagWithStreamingResponse(self._organization.claude_tag)

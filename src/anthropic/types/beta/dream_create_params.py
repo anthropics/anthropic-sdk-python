@@ -26,7 +26,7 @@ class DreamCreateParams(TypedDict, total=False):
     In the object form, `speed` can only be `standard`.
 
     The
-    [limits table in the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#limits)
+    [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability)
     lists the supported models.
     """
 
@@ -47,7 +47,10 @@ class DreamCreateParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `dreaming-2026-04-21` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

@@ -69,6 +69,12 @@ _ALL_ENV = [
     "ANTHROPIC_SCOPE",
 ]
 
+_CREDENTIAL_ARGUMENTS = ["api_key", "auth_token", "credentials", "config", "profile"]
+
+_BOTH_STATIC_ENV_VARS_WARNING = (
+    "Anthropic: ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are both set. Using ANTHROPIC_API_KEY."
+)
+
 
 class MockRequestCall(Protocol):
     request: httpx2.Request
@@ -720,10 +726,8 @@ class TestCredentialsFile:
 
     @pytest.mark.respx(base_url=BASE_URL)
     def test_authorized_user_refresh_beta_headers(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
-        """refresh_token POST must carry oauth-2025-04-20 (unlocks the token
-        endpoint family) but NOT oidc-federation-2026-04-01 (that header is a
-        routing switch that would send this POST to the Go userauth handler,
-        which only accepts jwt-bearer grants)."""
+        """refresh_token POST must carry oauth-2025-04-20 but NOT
+        oidc-federation-2026-04-01."""
         _write_profile(
             tmp_path,
             "default",
@@ -799,7 +803,7 @@ class TestCredentialsFile:
             CredentialsFile()()
 
     def test_config_base_url_localhost_http_allowed(self, tmp_path: pathlib.Path) -> None:
-        """Localhost HTTP is allowed for local oauth_server testing."""
+        """Localhost HTTP is allowed for local testing."""
         _write_profile(
             tmp_path,
             "default",
@@ -1066,9 +1070,6 @@ class TestWorkloadIdentityCredentials:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         req = calls[0].request
-        # jwt-bearer exchange must carry BOTH: oauth-2025-04-20 unlocks the
-        # token endpoint, oidc-federation-2026-04-01 routes to the federation
-        # handler.
         beta_flags = {f.strip() for f in req.headers["anthropic-beta"].split(",")}
         assert OAUTH_API_BETA_HEADER in beta_flags
         assert FEDERATION_BETA_HEADER in beta_flags
@@ -1386,12 +1387,12 @@ class TestWorkloadIdentityCredentials:
 
 
 # --------------------------------------------------------------------------- #
-# Profile env-var fill (PY-01) + identity_token validation (PY-06)
+# Profile env-var fill + identity_token validation
 # --------------------------------------------------------------------------- #
 
 
 class TestProfileEnvFill:
-    """PY-01: profile fields left empty are filled from ANTHROPIC_* env vars,
+    """Profile fields left empty are filled from ANTHROPIC_* env vars,
     matching Go's `fillMissingFromEnv` precedence (file wins, env fills gaps)."""
 
     @pytest.fixture(autouse=True)
@@ -1486,7 +1487,7 @@ class TestProfileEnvFill:
 
 
 class TestIdentityTokenValidation:
-    """PY-06: identity_token.source 'file' with empty path is a config bug,
+    """identity_token.source 'file' with empty path is a config bug,
     not an env-var fallback signal."""
 
     @pytest.fixture(autouse=True)
@@ -1849,7 +1850,7 @@ class TestTokenCache:
         assert len(provider_calls) == 2
 
     def test_invalidate_forces_provider_refresh(self) -> None:
-        """PY-02: after invalidate(), the next provider call receives
+        """After invalidate(), the next provider call receives
         force_refresh=True so providers with on-disk caches bypass their
         freshness short-circuit. Without this, a 401 retry would re-read
         the same expired token from disk and serve it again."""
@@ -1924,7 +1925,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
         """If invalidate() set the force flag and the provider then raises,
         the flag must NOT be consumed — a subsequent retry must still see
         force_refresh=True. Otherwise the retry serves the stale disk token
-        PY-02 was added to bypass."""
+        force_refresh exists to bypass."""
         force_seen: List[bool] = []
         attempts = iter([RuntimeError("transient"), AccessToken("ok", expires_at=None)])
 
@@ -2041,7 +2042,7 @@ def provider({signature}) -> OnlyForTypeCheckers:
         assert force_seen == [False, False, True]
 
     def test_advisory_refresh_backoff_after_failure(self) -> None:
-        """PY-07: after an advisory refresh failure, subsequent advisory
+        """After an advisory refresh failure, subsequent advisory
         callers within ADVISORY_REFRESH_BACKOFF_SECONDS reuse the cached
         token instead of re-attempting the provider — preventing an
         outage during the advisory window from being hammered at request rate."""
@@ -2095,7 +2096,7 @@ class TestDefaultCredentials:
         assert result.provider().token == "bearer-tok"
 
     def test_config_dir_env_triggers_tier1(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
-        """ANTHROPIC_CONFIG_DIR set → tier 1 fires even if dir is empty (explicit opt-in)."""
+        """ANTHROPIC_CONFIG_DIR set → the active profile is looked up in that directory."""
         # Re-point _config_dir at tmp_path (the no_default_creds_file fixture
         # already patched it to an empty dir; override that here).
         clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
@@ -2224,6 +2225,79 @@ class TestDefaultCredentials:
         assert result is not None
         assert isinstance(result.provider, WorkloadIdentityCredentials)
 
+    def test_env_federation_beats_active_config_pointer(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """The profile that `active_config` points at is step 5, like `default`."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        (tmp_path / "active_config").write_text("prod")
+        _write_profile(tmp_path, "prod", {"type": "external"}, {"access_token": "from-prod"})
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "00000000-0000-0000-0000-000000000000")
+        result = default_credentials()
+        assert result is not None
+        assert isinstance(result.provider, WorkloadIdentityCredentials)
+
+    def test_empty_identity_token_does_not_beat_active_profile(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        (tmp_path / "active_config").write_text("prod")
+        _write_profile(tmp_path, "prod", {"type": "external"}, {"access_token": "from-prod"})
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "00000000-0000-0000-0000-000000000000")
+        result = default_credentials()
+        assert result is not None
+        assert isinstance(result.provider, CredentialsFile)
+
+    def test_env_federation_beats_profile_in_config_dir_env(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        """`ANTHROPIC_CONFIG_DIR` says where profiles are looked up. It selects none."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "from-on-disk-profile"})
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "00000000-0000-0000-0000-000000000000")
+        result = default_credentials()
+        assert result is not None
+        assert isinstance(result.provider, WorkloadIdentityCredentials)
+
+    def test_env_federation_does_not_read_broken_profile_in_config_dir_env(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        (tmp_path / "configs").mkdir()
+        (tmp_path / "configs" / "default.json").write_text("this is not JSON")
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "literal-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "00000000-0000-0000-0000-000000000000")
+        result = default_credentials()
+        assert result is not None
+        assert isinstance(result.provider, WorkloadIdentityCredentials)
+
+    def test_config_dir_env_propagates_error(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        (tmp_path / "configs").mkdir()
+        (tmp_path / "configs" / "default.json").write_text("this is not JSON")
+        (tmp_path / "configs" / "default.json").chmod(0o644)
+        with pytest.raises(AnthropicError, match="not valid JSON"):
+            default_credentials()
+
+    def test_auto_discovered_profile_error_is_silent_fallthrough(
+        self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        (tmp_path / "configs").mkdir()
+        (tmp_path / "configs" / "default.json").write_text("this is not JSON")
+        (tmp_path / "configs" / "default.json").chmod(0o644)
+        assert default_credentials() is None
+
     def test_explicit_profile_beats_env_federation(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
         """Step 3 (ANTHROPIC_PROFILE) sits above step 4 (env federation).
         An explicit profile selection wins over a federation-configured
@@ -2346,7 +2420,7 @@ class TestAnthropicCredentials:
         req = msg_calls[0].request
         assert req.headers["Authorization"] == "Bearer sk-ant-oat01-test"
         # Authenticated API requests carry oauth-2025-04-20 (API beta) —
-        # NOT the federation routing switch, which is only for jwt-bearer
+        # NOT the federation beta, which is only for jwt-bearer
         # exchanges at /v1/oauth/token.
         msg_flags = {f.strip() for f in req.headers["anthropic-beta"].split(",")}
         assert OAUTH_API_BETA_HEADER in msg_flags
@@ -2494,6 +2568,29 @@ class TestAnthropicCredentials:
         assert len(token_calls) == 1
         assert json.loads(token_calls[0].request.content)["assertion"] == "env-jwt"
         assert msg_calls[0].request.headers["Authorization"] == "Bearer sk-ant-oat01-test"
+
+    @pytest.mark.respx()
+    def test_zero_config_workload_identity_beats_active_profile(
+        self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> None:
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
+        (tmp_path / "active_config").write_text("prod")
+        _write_profile(tmp_path, "prod", {"type": "external"}, {"access_token": "sk-ant-oat01-file"})
+        clean_env.setenv("ANTHROPIC_IDENTITY_TOKEN", "env-jwt")
+        clean_env.setenv("ANTHROPIC_FEDERATION_RULE_ID", "fdrl_01abc")
+        clean_env.setenv("ANTHROPIC_ORGANIZATION_ID", "org-uuid")
+
+        _mock_token_endpoint(respx_mock)
+        _mock_messages_endpoint(respx_mock)
+
+        assert isinstance(AsyncAnthropic().credentials, WorkloadIdentityCredentials)
+        _send_message(Anthropic())
+
+        requests = [c.request for c in cast("list[MockRequestCall]", respx_mock.calls)]
+        assert [str(r.url) for r in requests] == [TOKEN_URL, f"{BASE_URL}/v1/messages"]
+        assert json.loads(requests[0].content)["assertion"] == "env-jwt"
+        assert requests[1].headers["Authorization"] == "Bearer sk-ant-oat01-test"
 
     @pytest.mark.respx()
     def test_zero_config_credentials_file_from_env(
@@ -2712,7 +2809,7 @@ class TestAnthropicCredentials:
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
     ) -> None:
         # ANTHROPIC_API_KEY takes precedence over the credential chain — credentials
-        # stays None and X-Api-Key is used (existing behavior preserved).
+        # stays None and the key is sent (existing behavior preserved).
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-ant-api-key")
         # also set chain env vars; they should be ignored
         clean_env.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
@@ -2726,8 +2823,8 @@ class TestAnthropicCredentials:
         _send_message(client)
 
         req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
-        assert req.headers["X-Api-Key"] == "sk-ant-api-key"
-        assert "Authorization" not in req.headers
+        assert req.headers["Authorization"] == "Bearer sk-ant-api-key"
+        assert "X-Api-Key" not in req.headers
 
     def test_copy_propagates_credentials(self) -> None:
         creds = StaticToken("a")
@@ -2896,32 +2993,6 @@ class TestAnthropicCredentials:
         token_req = cast("list[MockRequestCall]", respx_mock.calls)[0].request
         assert json.loads(token_req.content)["workspace_id"] == "wrkspc_x"
 
-    def test_config_and_credentials_mutually_exclusive(self) -> None:
-        with pytest.raises(TypeError, match="at most one of"):
-            Anthropic(
-                credentials=StaticToken("a"),
-                config={"authentication": {"type": "oidc_federation"}},
-            )
-
-    def test_explicit_api_key_shadows_explicit_config(self, tmp_path: pathlib.Path) -> None:
-        """Explicit `api_key=` + explicit `config=` is an explicit-explicit
-        shadow case: the static api_key wins at the header level and the
-        config-derived credentials provider is silently disabled.
-        """
-        jwt_path = tmp_path / "jwt"
-        jwt_path.write_text("ext-jwt.ext-jwt.ext-jwt")
-        cfg = {
-            "organization_id": "org_x",
-            "authentication": {
-                "type": "oidc_federation",
-                "federation_rule_id": "fdrl_x",
-                "identity_token": {"source": "file", "path": str(jwt_path)},
-            },
-        }
-        explicit = Anthropic(api_key="sk-explicit", config=cfg)
-        assert explicit.api_key == "sk-explicit"
-        assert isinstance(explicit.credentials, InMemoryConfig)
-
     def test_explicit_config_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Explicit `config=` is step 1 and beats env `ANTHROPIC_API_KEY`
         (step 2). The env api_key is ignored entirely and the config-derived
@@ -2957,14 +3028,6 @@ class TestAnthropicCredentials:
         assert isinstance(client.credentials, CredentialsFile)
         assert client.credentials.profile == "staging"
         assert str(client.base_url).rstrip("/") == "https://staging.example"
-
-    def test_profile_and_config_mutually_exclusive(self) -> None:
-        with pytest.raises(TypeError, match="at most one of"):
-            Anthropic(profile="x", config={"authentication": {"type": "oidc_federation"}})
-
-    def test_profile_and_credentials_mutually_exclusive(self) -> None:
-        with pytest.raises(TypeError, match="at most one of"):
-            Anthropic(profile="x", credentials=StaticToken("a"))
 
     def test_explicit_profile_beats_env_api_key(self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Explicit `profile=` is a constructor argument and beats env
@@ -4072,6 +4135,14 @@ class TestTokenCacheDeadlock:
         assert cache.get_token() == "ok"
 
 
+class _SubclassedAnthropic(Anthropic):
+    pass
+
+
+class _SubclassedAsyncAnthropic(AsyncAnthropic):
+    pass
+
+
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestCredentialPrecedence:
     """Credential precedence per the WIF user guide and the credential-
@@ -4084,16 +4155,13 @@ class TestCredentialPrecedence:
     credentials provider wins over env `ANTHROPIC_API_KEY` /
     `ANTHROPIC_AUTH_TOKEN` outright.
 
-    Passing an explicit `api_key=` or `auth_token=` *argument* alongside
-    an explicit `credentials=` is a separate shadow case: the static
-    credential wins at the header level and we warn.
+    Passing two explicit credential arguments to one constructor or
+    `copy()` call raises.
     """
 
     @pytest.fixture(autouse=True)
-    def _reset_shadow_one_shot(self) -> None:
-        from anthropic.lib.credentials import _auth
-
-        _auth._warn_once_seen.clear()
+    def _reset_shadow_one_shot(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr("anthropic.lib.credentials._auth._warn_once_seen", set[str]())
 
     @staticmethod
     def _walk_sync_auth(client: Anthropic) -> httpx2.Request:
@@ -4109,6 +4177,36 @@ class TestCredentialPrecedence:
             pass
         return modified
 
+    @pytest.fixture
+    def credential_arguments(self, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> dict[str, Any]:
+        """A value for each credential argument. The one named `x` sends `Bearer from-x`."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(tmp_path, "dev", {"type": "external"}, {"access_token": "from-profile"})
+        _write_profile(tmp_path, "in-memory", {"type": "external"}, {"access_token": "from-config"})
+        return {
+            "api_key": "from-api_key",
+            "auth_token": "from-auth_token",
+            "credentials": StaticToken("from-credentials"),
+            "config": {
+                "authentication": {
+                    "type": "user_oauth",
+                    "credentials_path": str(tmp_path / "credentials" / "in-memory.json"),
+                }
+            },
+            "profile": "dev",
+        }
+
+    @staticmethod
+    async def _sent_authorization(client: Anthropic | AsyncAnthropic, respx_mock: MockRouter) -> list[str]:
+        _mock_messages_endpoint(respx_mock)
+        if isinstance(client, Anthropic):
+            _send_message(client)
+        else:
+            await _send_message_async(client)
+        request = cast("list[MockRequestCall]", respx_mock.calls)[-1].request
+        assert "X-Api-Key" not in request.headers
+        return request.headers.get_list("Authorization")
+
     # -- step 1 beats step 2: explicit credentials= beats env static --------
 
     def test_explicit_credentials_beats_env_api_key(
@@ -4116,7 +4214,7 @@ class TestCredentialPrecedence:
     ) -> None:
         """Per spec, explicit `credentials=` is step 1 and beats env
         `ANTHROPIC_API_KEY` (step 2). The credentials provider wins, env
-        api_key is ignored entirely, no X-Api-Key on the wire, no warning."""
+        api_key is ignored entirely, not on the wire, no warning."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
             client = Anthropic(credentials=StaticToken("bearer-from-creds"))
@@ -4161,49 +4259,48 @@ class TestCredentialPrecedence:
         assert client.api_key is None
         assert isinstance(client.credentials, InMemoryConfig)
 
-    # -- step 1 ∩ step 1: explicit static arg + explicit credentials= --------
-
-    def test_explicit_api_key_shadows_explicit_credentials_with_warning(self, caplog: pytest.LogCaptureFixture) -> None:
-        """When both explicit `api_key=` AND explicit `credentials=` are
-        passed, the static api_key wins at the header level and credentials
-        is silently disabled. Warn."""
-        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
-            client = Anthropic(api_key="sk-explicit", credentials=StaticToken("bearer-from-creds"))
-        req = self._walk_sync_auth(client)
-        assert req.headers.get("X-Api-Key") == "sk-explicit"
-        assert req.headers.get("Authorization") is None
-        assert any("`api_key=`" in r.message for r in caplog.records)
-
-    def test_explicit_auth_token_shadows_explicit_credentials_with_warning(
-        self, caplog: pytest.LogCaptureFixture
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize("name", _CREDENTIAL_ARGUMENTS)
+    async def test_passed_credential_ignores_the_environment(
+        self,
+        respx_mock: MockRouter,
+        clean_env: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        name: str,
     ) -> None:
-        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
-            client = Anthropic(auth_token="static-bearer", credentials=StaticToken("bearer-from-creds"))
-        req = self._walk_sync_auth(client)
-        assert req.headers.get("Authorization") == "Bearer static-bearer"
-        assert req.headers.get("X-Api-Key") is None
-        assert any("`auth_token=`" in r.message for r in caplog.records)
+        clean_env.setenv("ANTHROPIC_API_KEY", "env-key")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "env-token")
+        clean_env.setenv("ANTHROPIC_PROFILE", "missing-profile")
+        client = client_cls(**{name: credential_arguments[name]})
+        assert await self._sent_authorization(client, respx_mock) == [f"Bearer from-{name}"]
+        assert [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING] == []
 
-    def test_async_explicit_api_key_shadows_explicit_credentials(self, caplog: pytest.LogCaptureFixture) -> None:
-        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
-            client = AsyncAnthropic(api_key="sk-explicit", credentials=StaticToken("bearer-from-creds"))
-        assert client.api_key == "sk-explicit"
-        assert client.credentials is not None
-        assert any("`api_key=`" in r.message for r in caplog.records)
+    # -- step 1 ∩ step 1: two explicit credential arguments ------------------
 
-    def test_copy_with_explicit_api_key_shadows_inherited_credentials(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Reviewer ask: copy() should warn when a new explicit `api_key=`
-        shadows an inherited `credentials=` provider from the parent."""
-        parent = Anthropic(credentials=StaticToken("bearer-parent"))
-        assert parent.api_key is None
-        with caplog.at_level(logging.WARNING, logger="anthropic.lib.credentials._auth"):
-            shadowed = parent.copy(api_key="sk-new")
-        assert shadowed.api_key == "sk-new"
-        assert shadowed.credentials is parent.credentials
-        req = self._walk_sync_auth(shadowed)
-        assert req.headers.get("X-Api-Key") == "sk-new"
-        assert req.headers.get("Authorization") is None
-        assert any("`api_key=`" in r.message for r in caplog.records)
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize("names", list(itertools.combinations(_CREDENTIAL_ARGUMENTS, 2)), ids="+".join)
+    def test_two_passed_credentials_raise(
+        self,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        names: tuple[str, str],
+    ) -> None:
+        passed = {name: credential_arguments[name] for name in names}
+        message = (
+            "Pass at most one of `api_key=`, `auth_token=`, `credentials=`, `config=`, or `profile=`. "
+            f"Received `{names[0]}=`, `{names[1]}=`."
+        )
+
+        with pytest.raises(ValueError) as constructed:
+            client_cls(**passed)
+        assert str(constructed.value) == message
+
+        with pytest.raises(ValueError) as copied:
+            client_cls(api_key="parent-key").copy(**passed)
+        assert str(copied.value) == message
 
     # -- step 2 shadows steps 3-5: env static shadows auto-discovery ---------
 
@@ -4246,6 +4343,287 @@ class TestCredentialPrecedence:
         assert client.api_key == "sk-from-env"
         assert not any("takes precedence" in r.message for r in caplog.records)
 
+    # -- step 2: both static env vars are set -------------------------------
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_env_api_key_and_auth_token_warn_once_per_process(
+        self,
+        respx_mock: MockRouter,
+        clean_env: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        clean_env.setenv("ANTHROPIC_API_KEY", "env-key")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "env-token")
+
+        client = client_cls()
+
+        assert [(r.name, r.levelno) for r in caplog.records if r.getMessage() == _BOTH_STATIC_ENV_VARS_WARNING] == [
+            ("anthropic.lib.credentials._auth", logging.WARNING)
+        ]
+        assert await self._sent_authorization(client, respx_mock) == ["Bearer env-key"]
+
+        Anthropic()
+        AsyncAnthropic()
+
+        assert caplog.messages.count(_BOTH_STATIC_ENV_VARS_WARNING) == 1
+
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize(
+        "env",
+        [
+            pytest.param({"ANTHROPIC_API_KEY": "env-key"}, id="only the key"),
+            pytest.param({"ANTHROPIC_AUTH_TOKEN": "env-token"}, id="only the token"),
+            pytest.param({"ANTHROPIC_API_KEY": "env-key", "ANTHROPIC_AUTH_TOKEN": ""}, id="empty token"),
+            pytest.param({"ANTHROPIC_API_KEY": "", "ANTHROPIC_AUTH_TOKEN": "env-token"}, id="empty key"),
+        ],
+    )
+    def test_one_static_env_var_does_not_warn(
+        self,
+        clean_env: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        env: dict[str, str],
+    ) -> None:
+        for key, value in env.items():
+            clean_env.setenv(key, value)
+
+        client_cls()
+
+        assert [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING] == []
+
+    # -- steps 2-5: the first environment source that is set is the only one used --
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize(
+        "first", range(5), ids=["api key", "auth token", "profile", "federation", "active profile"]
+    )
+    async def test_environment_order(
+        self,
+        respx_mock: MockRouter,
+        clean_env: pytest.MonkeyPatch,
+        tmp_path: pathlib.Path,
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        first: int,
+    ) -> None:
+        """With the sources before `first` unset and every later one set, `first` is sent."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        _write_profile(tmp_path, "dev", {"type": "external"}, {"access_token": "from-profile"})
+        _write_profile(tmp_path, "default", {"type": "external"}, {"access_token": "from-active-profile"})
+        _mock_token_exchange(respx_mock, BASE_URL, "from-federation")
+        sources: list[tuple[dict[str, str], str]] = [
+            ({"ANTHROPIC_API_KEY": "from-api-key"}, "from-api-key"),
+            ({"ANTHROPIC_AUTH_TOKEN": "from-auth-token"}, "from-auth-token"),
+            ({"ANTHROPIC_PROFILE": "dev"}, "from-profile"),
+            (
+                {
+                    "ANTHROPIC_IDENTITY_TOKEN": "ext-jwt",
+                    "ANTHROPIC_FEDERATION_RULE_ID": "fdrl_01abc",
+                    "ANTHROPIC_ORGANIZATION_ID": "org-uuid",
+                },
+                "from-federation",
+            ),
+            ({}, "from-active-profile"),
+        ]
+        for env, _ in sources[first:]:
+            for key, value in env.items():
+                clean_env.setenv(key, value)
+
+        client = client_cls()
+
+        assert await self._sent_authorization(client, respx_mock) == [f"Bearer {sources[first][1]}"]
+        held = [client.api_key, client.auth_token, client.credentials]
+        assert len([credential for credential in held if credential is not None]) == 1
+
+    # -- copy(): a passed credential replaces the parent's, none inherits it --
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize(("parent", "passed"), list(itertools.permutations(_CREDENTIAL_ARGUMENTS, 2)))
+    async def test_copy_credential_replaces_the_parents(
+        self,
+        respx_mock: MockRouter,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        parent: str,
+        passed: str,
+    ) -> None:
+        client = client_cls(**{parent: credential_arguments[parent]})
+        copied = client.copy(**{passed: credential_arguments[passed]})
+        assert await self._sent_authorization(copied, respx_mock) == [f"Bearer from-{passed}"]
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize("parent", _CREDENTIAL_ARGUMENTS)
+    async def test_copy_inherits_the_parents_credential(
+        self,
+        respx_mock: MockRouter,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        parent: str,
+    ) -> None:
+        copied = client_cls(**{parent: credential_arguments[parent]}).copy()
+        assert await self._sent_authorization(copied, respx_mock) == [f"Bearer from-{parent}"]
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_copy_of_a_client_resolved_from_both_env_vars(
+        self,
+        respx_mock: MockRouter,
+        clean_env: pytest.MonkeyPatch,
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        clean_env.setenv("ANTHROPIC_API_KEY", "env-key")
+        clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "env-token")
+        copied = client_cls().copy()
+        assert await self._sent_authorization(copied, respx_mock) == ["Bearer env-key"]
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize("parent", ["auth_token", "credentials"])
+    async def test_copy_of_a_client_assigned_a_second_credential(
+        self,
+        respx_mock: MockRouter,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        parent: str,
+    ) -> None:
+        client = client_cls(**{parent: credential_arguments[parent]})
+        client.api_key = "assigned-key"
+        assert await self._sent_authorization(client, respx_mock) == ["Bearer assigned-key"]
+        assert await self._sent_authorization(client.copy(), respx_mock) == ["Bearer assigned-key"]
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [_SubclassedAnthropic, _SubclassedAsyncAnthropic])
+    async def test_copy_credentials_replaces_a_subclass_api_key(
+        self,
+        respx_mock: MockRouter,
+        credential_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        copied = client_cls(api_key="parent-key").copy(credentials=credential_arguments["credentials"])
+        assert await self._sent_authorization(copied, respx_mock) == ["Bearer from-credentials"]
+
+    # -- copy(): the host and headers a credential brings go where it goes ---
+
+    @pytest.fixture(params=["config", "profile", "environment"])
+    def parent_arguments(
+        self, request: pytest.FixtureRequest, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    ) -> dict[str, Any]:
+        """Constructor arguments for a credential that brings the host `parent.example` and the
+        workspace ID `wrkspc_parent`. The profile `other` brings `other.example` and `wrkspc_other`."""
+        clean_env.setattr("anthropic.lib.credentials._constants._config_dir", lambda: tmp_path)
+        for name in ("parent", "other"):
+            _write_profile(
+                tmp_path,
+                name,
+                {"type": "external", "base_url": f"https://{name}.example", "workspace_id": f"wrkspc_{name}"},
+                {"access_token": f"from-{name}"},
+            )
+        if request.param == "config":
+            return {
+                "config": {
+                    "base_url": "https://parent.example",
+                    "workspace_id": "wrkspc_parent",
+                    "authentication": {
+                        "type": "user_oauth",
+                        "credentials_path": str(tmp_path / "credentials" / "parent.json"),
+                    },
+                }
+            }
+        if request.param == "profile":
+            return {"profile": "parent"}
+        clean_env.setenv("ANTHROPIC_PROFILE", "parent")
+        return {}
+
+    @staticmethod
+    async def _sent_host_and_workspace(
+        client: Anthropic | AsyncAnthropic, respx_mock: MockRouter
+    ) -> tuple[str, str | None]:
+        respx_mock.post(url__regex=r"^https://[^/]+/v1/messages$").mock(return_value=_message_response())
+        if isinstance(client, Anthropic):
+            _send_message(client)
+        else:
+            await _send_message_async(client)
+        request = cast("list[MockRequestCall]", respx_mock.calls)[-1].request
+        return request.url.host, request.headers.get("anthropic-workspace-id")
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_copy_credential_drops_the_parents_host_and_headers(
+        self,
+        respx_mock: MockRouter,
+        parent_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        client = client_cls(**parent_arguments)
+        for copied in (client.copy(api_key="new-key"), client.copy().copy(api_key="new-key")):
+            assert await self._sent_host_and_workspace(copied, respx_mock) == ("api.anthropic.com", None)
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_copy_credential_brings_its_own_host_and_headers(
+        self,
+        respx_mock: MockRouter,
+        parent_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        for client in (client_cls(**parent_arguments), client_cls(api_key="parent-key")):
+            copied = client.copy(profile="other")
+            assert await self._sent_host_and_workspace(copied, respx_mock) == ("other.example", "wrkspc_other")
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_copy_inherits_the_parents_host_and_headers(
+        self,
+        respx_mock: MockRouter,
+        parent_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        client = client_cls(**parent_arguments)
+        for inheritor in (client, client.copy(), client.copy(set_default_headers={})):
+            assert await self._sent_host_and_workspace(inheritor, respx_mock) == ("parent.example", "wrkspc_parent")
+
+        client.api_key = "assigned-key"
+        for inheritor in (client, client.copy()):
+            assert await self._sent_host_and_workspace(inheritor, respx_mock) == ("parent.example", "wrkspc_parent")
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    @pytest.mark.parametrize("passed_to", ["constructor", "environment", "attribute", "copy"])
+    async def test_copy_credential_keeps_a_passed_base_url(
+        self,
+        respx_mock: MockRouter,
+        clean_env: pytest.MonkeyPatch,
+        parent_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+        passed_to: str,
+    ) -> None:
+        if passed_to == "environment":
+            clean_env.setenv("ANTHROPIC_BASE_URL", "https://passed.example")
+        client = client_cls(
+            **parent_arguments, base_url="https://passed.example" if passed_to == "constructor" else None
+        )
+        if passed_to == "attribute":
+            client.base_url = "https://passed.example"
+        copied = client.copy(api_key="new-key", base_url="https://passed.example" if passed_to == "copy" else None)
+        assert await self._sent_host_and_workspace(copied, respx_mock) == ("passed.example", None)
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
+    async def test_copy_credential_keeps_passed_default_headers(
+        self,
+        respx_mock: MockRouter,
+        parent_arguments: dict[str, Any],
+        client_cls: type[Anthropic] | type[AsyncAnthropic],
+    ) -> None:
+        client = client_cls(**parent_arguments, default_headers={"anthropic-workspace-id": "wrkspc_passed"})
+        assert await self._sent_host_and_workspace(client, respx_mock) == ("parent.example", "wrkspc_passed")
+        copied = client.copy(api_key="new-key")
+        assert await self._sent_host_and_workspace(copied, respx_mock) == ("api.anthropic.com", "wrkspc_passed")
+
     # -- step 2: empty env values are unset, not empty credentials -----------
 
     @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
@@ -4253,13 +4631,13 @@ class TestCredentialPrecedence:
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
         """`ANTHROPIC_AUTH_TOKEN=` (present but empty) must not produce a
-        malformed `Authorization: Bearer ` header alongside the api key."""
+        malformed `Authorization: Bearer ` header."""
         clean_env.setenv("ANTHROPIC_API_KEY", "sk-from-env")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("Authorization") is None
-        assert request.headers.get("X-Api-Key") == "sk-from-env"
+        assert request.headers.get("Authorization") == "Bearer sk-from-env"
+        assert request.headers.get("X-Api-Key") is None
         assert client.auth_token is None
 
     @pytest.mark.parametrize("client_cls", [Anthropic, AsyncAnthropic])
@@ -4267,7 +4645,7 @@ class TestCredentialPrecedence:
         self, clean_env: pytest.MonkeyPatch, client_cls: type[Anthropic] | type[AsyncAnthropic]
     ) -> None:
         """Both env vars empty → same "no auth configured" error as unset,
-        rather than sending empty `X-Api-Key` / `Authorization: Bearer `."""
+        rather than sending an empty `Authorization: Bearer `."""
         clean_env.setenv("ANTHROPIC_API_KEY", "")
         clean_env.setenv("ANTHROPIC_AUTH_TOKEN", "")
         client = client_cls()

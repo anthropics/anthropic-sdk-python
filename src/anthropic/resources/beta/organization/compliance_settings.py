@@ -26,7 +26,7 @@ class ComplianceSettings(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ComplianceSettingsWithRawResponse(self)
 
@@ -35,7 +35,7 @@ class ComplianceSettings(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ComplianceSettingsWithStreamingResponse(self)
 
@@ -58,12 +58,15 @@ class ComplianceSettings(SyncAPIResource):
         organization reads the state inherited from the parent's configuration.
         """
         return self._get(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -83,8 +86,11 @@ class ComplianceSettings(SyncAPIResource):
         Update your organization's Compliance Settings.
 
         Setting `state` to `enabled` turns on the Compliance API and begins capturing
-        organization activity events. Setting it to `disabled` turns both off. `state`
-        reflects whether the Compliance API is enabled.
+        organization activity events. Setting it to `disabled` turns both off. Access
+        Transparency events are an exception: they are still captured while the
+        Compliance API is disabled, and the Compliance API activity feed returns them
+        once it is enabled again. `state` reflects whether the Compliance API is
+        enabled.
 
         A request that sets `state` to its current value succeeds and leaves the
         resource unchanged. A `disabled` request stays in effect until a later `enabled`
@@ -107,13 +113,16 @@ class ComplianceSettings(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._post(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -126,7 +135,7 @@ class AsyncComplianceSettings(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncComplianceSettingsWithRawResponse(self)
 
@@ -135,7 +144,7 @@ class AsyncComplianceSettings(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncComplianceSettingsWithStreamingResponse(self)
 
@@ -158,12 +167,15 @@ class AsyncComplianceSettings(AsyncAPIResource):
         organization reads the state inherited from the parent's configuration.
         """
         return await self._get(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.compliance_settings.retrieve",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )
@@ -183,8 +195,11 @@ class AsyncComplianceSettings(AsyncAPIResource):
         Update your organization's Compliance Settings.
 
         Setting `state` to `enabled` turns on the Compliance API and begins capturing
-        organization activity events. Setting it to `disabled` turns both off. `state`
-        reflects whether the Compliance API is enabled.
+        organization activity events. Setting it to `disabled` turns both off. Access
+        Transparency events are an exception: they are still captured while the
+        Compliance API is disabled, and the Compliance API activity feed returns them
+        once it is enabled again. `state` reflects whether the Compliance API is
+        enabled.
 
         A request that sets `state` to its current value succeeds and leaves the
         resource unchanged. A `disabled` request stays in effect until a later `enabled`
@@ -207,13 +222,16 @@ class AsyncComplianceSettings(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return await self._post(
-            "/v1/organizations/compliance_settings?beta=true",
+            "/v1/organizations/compliance_settings",
             body={"state": state},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.compliance_settings.update",
+                span_route="/v1/organizations/compliance_settings",
             ),
             cast_to=BetaComplianceSettings,
         )

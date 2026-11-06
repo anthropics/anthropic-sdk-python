@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,7 +16,10 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
+from .....types.beta.organization import BetaAnalyticsOrder
+from .....types.beta.organization.beta_analytics_order import BetaAnalyticsOrder
 from .....types.beta.organization.beta_analytics_skill_activity import BetaAnalyticsSkillActivity
+from .....types.beta.organization.beta_analytics_skill_group_by import BetaAnalyticsSkillGroupBy
 
 __all__ = ["Skills", "AsyncSkills"]
 
@@ -29,7 +31,7 @@ class Skills(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SkillsWithRawResponse(self)
 
@@ -38,7 +40,7 @@ class Skills(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SkillsWithStreamingResponse(self)
 
@@ -48,9 +50,9 @@ class Skills(SyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsSkillGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -86,14 +88,16 @@ class Skills(SyncAPIResource):
           filter: Filters as `dimension:value`, e.g. `filter[]=rbac_group_id:{id}`. Repeat the
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `product`, `rbac_group_id`, `share_status`,
-              `skill_name`, `user_id`. Value forms: `product` is one of `chat`, `claude_code`,
-              `cowork`, or `office_agent`; `rbac_group_id` takes the tagged id
-              (`rbac_group_...`, as emitted in responses and by the spend-limits API) or a
-              bare group UUID, and matches users who held the group at any point during each
-              covered UTC day (time-of-usage attribution); `share_status` is one of
-              `organization`, `private`, or `public`; `skill_name` matches case-insensitively;
-              `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              `skill_name`, `user_id`. Value forms: `product` is one of `chat_cowork_unified`,
+              `chat`, `claude_code`, `cowork`, or `office_agent`; `rbac_group_id` takes the
+              tagged id (`rbac_group_...`, as emitted in responses and by the spend-limits
+              API) or a bare group UUID, and matches users who held the group at any point
+              during each covered UTC day (time-of-usage attribution); `share_status` is one
+              of `organization`, `private`, or `public`; `skill_name` matches
+              case-insensitively; `user_id` takes a tagged user id (`user_...`), as emitted in
+              responses. An unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified` is accepted as a `product` value only where Chat and
+              Cowork unified is available.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=user_id`). Supported on
               this endpoint: `product`, `rbac_group_id`, `user_id`. Grouped rows carry the
@@ -137,7 +141,7 @@ class Skills(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/skills?beta=true",
+            "/v1/organizations/analytics/skills",
             page=SyncPageCursor[BetaAnalyticsSkillActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -155,6 +159,10 @@ class Skills(SyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.skills.list",
+                span_route="/v1/organizations/analytics/skills",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsSkillActivity,
         )
@@ -167,7 +175,7 @@ class AsyncSkills(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSkillsWithRawResponse(self)
 
@@ -176,7 +184,7 @@ class AsyncSkills(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSkillsWithStreamingResponse(self)
 
@@ -186,9 +194,9 @@ class AsyncSkills(AsyncAPIResource):
         date: Union[str, date, None] | Omit = omit,
         ending_date: Union[str, date, None] | Omit = omit,
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsSkillGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
-        order: Optional[Literal["asc", "desc"]] | Omit = omit,
+        order: Optional[BetaAnalyticsOrder] | Omit = omit,
         order_by: Optional[str] | Omit = omit,
         page: Optional[str] | Omit = omit,
         starting_date: Union[str, date, None] | Omit = omit,
@@ -224,14 +232,16 @@ class AsyncSkills(AsyncAPIResource):
           filter: Filters as `dimension:value`, e.g. `filter[]=rbac_group_id:{id}`. Repeat the
               param for OR within a dimension and across dimensions for AND. Supported
               dimensions on this endpoint: `product`, `rbac_group_id`, `share_status`,
-              `skill_name`, `user_id`. Value forms: `product` is one of `chat`, `claude_code`,
-              `cowork`, or `office_agent`; `rbac_group_id` takes the tagged id
-              (`rbac_group_...`, as emitted in responses and by the spend-limits API) or a
-              bare group UUID, and matches users who held the group at any point during each
-              covered UTC day (time-of-usage attribution); `share_status` is one of
-              `organization`, `private`, or `public`; `skill_name` matches case-insensitively;
-              `user_id` takes a tagged user id (`user_...`), as emitted in responses. An
-              unsupported dimension returns 400. At most 100 entries.
+              `skill_name`, `user_id`. Value forms: `product` is one of `chat_cowork_unified`,
+              `chat`, `claude_code`, `cowork`, or `office_agent`; `rbac_group_id` takes the
+              tagged id (`rbac_group_...`, as emitted in responses and by the spend-limits
+              API) or a bare group UUID, and matches users who held the group at any point
+              during each covered UTC day (time-of-usage attribution); `share_status` is one
+              of `organization`, `private`, or `public`; `skill_name` matches
+              case-insensitively; `user_id` takes a tagged user id (`user_...`), as emitted in
+              responses. An unsupported dimension returns 400. At most 100 entries.
+              `chat_cowork_unified` is accepted as a `product` value only where Chat and
+              Cowork unified is available.
 
           group_by: Dimensions to break results out by (e.g. `group_by[]=user_id`). Supported on
               this endpoint: `product`, `rbac_group_id`, `user_id`. Grouped rows carry the
@@ -275,7 +285,7 @@ class AsyncSkills(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/skills?beta=true",
+            "/v1/organizations/analytics/skills",
             page=AsyncPageCursor[BetaAnalyticsSkillActivity],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -293,6 +303,10 @@ class AsyncSkills(AsyncAPIResource):
                     "page": page,
                     "starting_date": starting_date,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.skills.list",
+                span_route="/v1/organizations/analytics/skills",
+                span_content_query_params=("filter",),
             ),
             model=BetaAnalyticsSkillActivity,
         )

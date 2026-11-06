@@ -9,6 +9,6 @@ class BetaManagedAgentsDeletedVault(BaseModel):
     """Confirmation of a deleted vault."""
 
     id: str
-    """Unique identifier of the deleted vault."""
+    """The unique ID of the deleted vault (`vlt_...`)."""
 
     type: Literal["vault_deleted"]

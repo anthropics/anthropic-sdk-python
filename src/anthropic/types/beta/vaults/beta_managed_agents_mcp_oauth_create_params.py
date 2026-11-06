@@ -13,7 +13,7 @@ class BetaManagedAgentsMCPOAuthCreateParams(TypedDict, total=False):
     """Parameters for creating an MCP OAuth credential."""
 
     access_token: Required[str]
-    """OAuth access token."""
+    """The OAuth access token to send to the MCP server."""
 
     mcp_server_url: Required[str]
     """URL of the MCP server this credential authenticates against."""
@@ -21,7 +21,10 @@ class BetaManagedAgentsMCPOAuthCreateParams(TypedDict, total=False):
     type: Required[Literal["mcp_oauth"]]
 
     expires_at: Union[str, datetime, None]
-    """A timestamp in RFC 3339 format"""
+    """When `access_token` expires, in RFC 3339.
+
+    Must be in the future.
+    """
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshParams]
     """Refresh token configuration, if the credential supports token refresh."""

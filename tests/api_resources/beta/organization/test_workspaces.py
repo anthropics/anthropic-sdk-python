@@ -22,6 +22,7 @@ class TestWorkspaces:
     def test_method_create(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.create(
             name="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -40,7 +41,9 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -48,6 +51,7 @@ class TestWorkspaces:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.create(
             name="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -59,6 +63,7 @@ class TestWorkspaces:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.create(
             name="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -72,6 +77,7 @@ class TestWorkspaces:
     def test_method_retrieve(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -79,6 +85,7 @@ class TestWorkspaces:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -90,6 +97,7 @@ class TestWorkspaces:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -110,6 +118,7 @@ class TestWorkspaces:
     def test_method_update(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -128,6 +137,8 @@ class TestWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -135,6 +146,7 @@ class TestWorkspaces:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -146,6 +158,7 @@ class TestWorkspaces:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -164,7 +177,9 @@ class TestWorkspaces:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        workspace = client.beta.organization.workspaces.list()
+        workspace = client.beta.organization.workspaces.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPage[BetaWorkspace], workspace, path=["response"])
 
     @parametrize
@@ -172,15 +187,19 @@ class TestWorkspaces:
         workspace = client.beta.organization.workspaces.list(
             after_id="after_id",
             before_id="before_id",
+            ids=["string"],
             include_archived=True,
             include_default=True,
             limit=1,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaWorkspace], workspace, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.workspaces.with_raw_response.list()
+        response = client.beta.organization.workspaces.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -189,7 +208,9 @@ class TestWorkspaces:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.workspaces.with_streaming_response.list() as response:
+        with client.beta.organization.workspaces.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -202,6 +223,7 @@ class TestWorkspaces:
     def test_method_archive(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -209,6 +231,7 @@ class TestWorkspaces:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -220,6 +243,7 @@ class TestWorkspaces:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -246,6 +270,7 @@ class TestAsyncWorkspaces:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.create(
             name="x",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -264,7 +289,9 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
             betas=["message-batches-2024-09-24"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -272,6 +299,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.create(
             name="x",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -283,6 +311,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.create(
             name="x",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -296,6 +325,7 @@ class TestAsyncWorkspaces:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -303,6 +333,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -314,6 +345,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.retrieve(
             "workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -334,6 +366,7 @@ class TestAsyncWorkspaces:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -352,6 +385,8 @@ class TestAsyncWorkspaces:
                 "env": "prod",
                 "team": "platform",
             },
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -359,6 +394,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -370,6 +406,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.update(
             workspace_id="workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -388,7 +425,9 @@ class TestAsyncWorkspaces:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        workspace = await async_client.beta.organization.workspaces.list()
+        workspace = await async_client.beta.organization.workspaces.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPage[BetaWorkspace], workspace, path=["response"])
 
     @parametrize
@@ -396,15 +435,19 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.workspaces.list(
             after_id="after_id",
             before_id="before_id",
+            ids=["string"],
             include_archived=True,
             include_default=True,
             limit=1,
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaWorkspace], workspace, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.workspaces.with_raw_response.list()
+        response = await async_client.beta.organization.workspaces.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -413,7 +456,9 @@ class TestAsyncWorkspaces:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.workspaces.with_streaming_response.list() as response:
+        async with async_client.beta.organization.workspaces.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -426,6 +471,7 @@ class TestAsyncWorkspaces:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
 
@@ -433,6 +479,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -444,6 +491,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.archive(
             "workspace_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

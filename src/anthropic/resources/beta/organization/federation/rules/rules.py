@@ -43,7 +43,7 @@ class Rules(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RulesWithRawResponse(self)
 
@@ -52,7 +52,7 @@ class Rules(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RulesWithStreamingResponse(self)
 
@@ -146,7 +146,7 @@ class Rules(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             body={
                 "issuer_id": issuer_id,
                 "match": match,
@@ -164,6 +164,10 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.create",
+                span_route="/v1/organizations/federation_rules",
+                span_created_id="anthropic.organization.federation_rule.id",
             ),
             cast_to=BetaFederationRule,
         )
@@ -209,14 +213,17 @@ class Rules(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.retrieve",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )
@@ -317,8 +324,7 @@ class Rules(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             body={
                 "applies_to_all_workspaces": applies_to_all_workspaces,
@@ -336,6 +342,10 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.update",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )
@@ -390,7 +400,7 @@ class Rules(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             page=SyncPageCursor[BetaFederationRule],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -403,6 +413,9 @@ class Rules(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.list",
+                span_route="/v1/organizations/federation_rules",
             ),
             model=BetaFederationRule,
         )
@@ -455,14 +468,17 @@ class Rules(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/archive?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}/archive", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.archive",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/archive",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )
@@ -479,7 +495,7 @@ class AsyncRules(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRulesWithRawResponse(self)
 
@@ -488,7 +504,7 @@ class AsyncRules(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRulesWithStreamingResponse(self)
 
@@ -582,7 +598,7 @@ class AsyncRules(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             body={
                 "issuer_id": issuer_id,
                 "match": match,
@@ -600,6 +616,10 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.create",
+                span_route="/v1/organizations/federation_rules",
+                span_created_id="anthropic.organization.federation_rule.id",
             ),
             cast_to=BetaFederationRule,
         )
@@ -645,14 +665,17 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.retrieve",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )
@@ -753,8 +776,7 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}", federation_rule_id=federation_rule_id
             ),
             body={
                 "applies_to_all_workspaces": applies_to_all_workspaces,
@@ -772,6 +794,10 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.update",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )
@@ -826,7 +852,7 @@ class AsyncRules(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_rules?beta=true",
+            "/v1/organizations/federation_rules",
             page=AsyncPageCursor[BetaFederationRule],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -839,6 +865,9 @@ class AsyncRules(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.list",
+                span_route="/v1/organizations/federation_rules",
             ),
             model=BetaFederationRule,
         )
@@ -891,14 +920,17 @@ class AsyncRules(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_rules/{federation_rule_id}/archive?beta=true",
-                federation_rule_id=federation_rule_id,
+                "/v1/organizations/federation_rules/{federation_rule_id}/archive", federation_rule_id=federation_rule_id
             ),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.rules.archive",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/archive",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=BetaFederationRule,
         )

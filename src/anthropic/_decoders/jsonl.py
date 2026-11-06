@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+from copy import copy
 from typing_extensions import Generic, TypeVar, Iterator, AsyncIterator
 
 import httpx2
 
+from .._compat import cached_property
 from .._models import construct_type_unchecked
 
 _T = TypeVar("_T")
@@ -31,7 +33,12 @@ class JSONLDecoder(Generic[_T]):
         self.http_response = http_response
         self._raw_iterator = raw_iterator
         self._line_type = line_type
-        self._iterator = self.__decode__()
+
+    @cached_property
+    def _iterator(self) -> Iterator[_T]:
+        # On a copy, as a generator that referred to this decoder would form a cycle with it, which would leave it to
+        # the garbage collector to free a dropped decoder. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__decode__()
 
     def close(self) -> None:
         """Close the response body stream.
@@ -87,7 +94,12 @@ class AsyncJSONLDecoder(Generic[_T]):
         self.http_response = http_response
         self._raw_iterator = raw_iterator
         self._line_type = line_type
-        self._iterator = self.__decode__()
+
+    @cached_property
+    def _iterator(self) -> AsyncIterator[_T]:
+        # On a copy, as a generator that referred to this decoder would form a cycle with it, which would leave it to
+        # the garbage collector to free a dropped decoder. Made on first use to copy what a subclass sets in `__init__`.
+        return copy(self).__decode__()
 
     async def close(self) -> None:
         """Close the response body stream.

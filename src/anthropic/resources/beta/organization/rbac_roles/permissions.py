@@ -28,7 +28,7 @@ class Permissions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PermissionsWithRawResponse(self)
 
@@ -37,7 +37,7 @@ class Permissions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PermissionsWithStreamingResponse(self)
 
@@ -79,9 +79,7 @@ class Permissions(SyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_roles/{rbac_role_id}/permissions?beta=true", rbac_role_id=rbac_role_id
-            ),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}/permissions", rbac_role_id=rbac_role_id),
             page=SyncPageCursor[BetaRBACRolePermission],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -92,6 +90,10 @@ class Permissions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rbac_roles.permissions.list",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             model=BetaRBACRolePermission,
         )
@@ -104,7 +106,7 @@ class AsyncPermissions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPermissionsWithRawResponse(self)
 
@@ -113,7 +115,7 @@ class AsyncPermissions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPermissionsWithStreamingResponse(self)
 
@@ -155,9 +157,7 @@ class AsyncPermissions(AsyncAPIResource):
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/rbac_roles/{rbac_role_id}/permissions?beta=true", rbac_role_id=rbac_role_id
-            ),
+            path_template("/v1/organizations/rbac_roles/{rbac_role_id}/permissions", rbac_role_id=rbac_role_id),
             page=AsyncPageCursor[BetaRBACRolePermission],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -168,6 +168,10 @@ class AsyncPermissions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rbac_roles.permissions.list",
+                span_route="/v1/organizations/rbac_roles/{rbac_role_id}/permissions",
+                span_attributes={"anthropic.organization.rbac_role.id": rbac_role_id},
             ),
             model=BetaRBACRolePermission,
         )

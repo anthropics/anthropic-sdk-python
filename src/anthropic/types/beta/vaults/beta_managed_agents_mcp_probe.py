@@ -10,9 +10,10 @@ class BetaManagedAgentsMCPProbe(BaseModel):
     """The failing step of an MCP validation probe."""
 
     http_response: Optional[BetaManagedAgentsRefreshHTTPResponse] = None
-    """The captured HTTP error response.
-
-    Null when no HTTP response was received (timeout, DNS, TLS).
+    """
+    The HTTP error response from the MCP server, or `null` if the MCP server didn't
+    return one for the failing step, for example after a timeout or a DNS or TLS
+    failure.
     """
 
     method: str

@@ -40,7 +40,7 @@ class Versions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithRawResponse(self)
 
@@ -49,7 +49,7 @@ class Versions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithStreamingResponse(self)
 
@@ -93,6 +93,17 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -112,6 +123,10 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=SkillVersion,
         )
@@ -157,6 +172,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -170,6 +190,9 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=SkillVersion,
         )
@@ -216,6 +239,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -232,6 +260,9 @@ class Versions(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=SkillVersion,
         )
@@ -276,6 +307,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -289,6 +325,9 @@ class Versions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=DeletedSkillVersion,
         )
@@ -301,7 +340,7 @@ class AsyncVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithRawResponse(self)
 
@@ -310,7 +349,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithStreamingResponse(self)
 
@@ -354,6 +393,17 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -373,6 +423,10 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
             cast_to=SkillVersion,
         )
@@ -418,6 +472,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -431,6 +490,9 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=SkillVersion,
         )
@@ -477,6 +539,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -493,6 +560,9 @@ class AsyncVersions(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             model=SkillVersion,
         )
@@ -537,6 +607,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -550,6 +625,9 @@ class AsyncVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=DeletedSkillVersion,
         )

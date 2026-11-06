@@ -45,7 +45,7 @@ class Environments(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EnvironmentsWithRawResponse(self)
 
@@ -54,7 +54,7 @@ class Environments(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EnvironmentsWithStreamingResponse(self)
 
@@ -108,6 +108,13 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
+
+          BetaEnvironmentCreateDisabledError:
         """
         extra_headers = {
             **strip_not_given(
@@ -122,7 +129,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             body={
                 "name": name,
                 "config": config,
@@ -135,6 +142,10 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.create",
+                span_route="/v1/environments",
+                span_created_id="anthropic.environment.id",
             ),
             cast_to=BetaEnvironment,
         )
@@ -172,6 +183,11 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -188,12 +204,16 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.retrieve",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -250,6 +270,17 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          BetaEnvironmentArchivedError:
+
+          BetaInvalidConfigTypeChangeError:
+
+          OrganizationOnHoldError:
+
+          BetaEnvironmentUpdateDisabledError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -266,7 +297,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             body={
                 "config": config,
                 "description": description,
@@ -279,6 +310,10 @@ class Environments(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.update",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -325,6 +360,11 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -339,7 +379,7 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             page=SyncPageCursor[BetaEnvironment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -351,6 +391,9 @@ class Environments(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.list",
+                span_route="/v1/environments",
             ),
             model=BetaEnvironment,
         )
@@ -389,6 +432,11 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -405,12 +453,16 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.delete",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironmentDeleteResponse,
         )
@@ -450,6 +502,11 @@ class Environments(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -466,12 +523,16 @@ class Environments(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/environments/{environment_id}/archive?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/archive", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.archive",
+                span_route="/v1/environments/{environment_id}/archive",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -488,7 +549,7 @@ class AsyncEnvironments(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEnvironmentsWithRawResponse(self)
 
@@ -497,7 +558,7 @@ class AsyncEnvironments(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEnvironmentsWithStreamingResponse(self)
 
@@ -551,6 +612,13 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
+
+          BetaEnvironmentCreateDisabledError:
         """
         extra_headers = {
             **strip_not_given(
@@ -565,7 +633,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             body={
                 "name": name,
                 "config": config,
@@ -578,6 +646,10 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.create",
+                span_route="/v1/environments",
+                span_created_id="anthropic.environment.id",
             ),
             cast_to=BetaEnvironment,
         )
@@ -615,6 +687,11 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -631,12 +708,16 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.retrieve",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -693,6 +774,17 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          BetaEnvironmentArchivedError:
+
+          BetaInvalidConfigTypeChangeError:
+
+          OrganizationOnHoldError:
+
+          BetaEnvironmentUpdateDisabledError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -709,7 +801,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             body={
                 "config": config,
                 "description": description,
@@ -722,6 +814,10 @@ class AsyncEnvironments(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.update",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )
@@ -768,6 +864,11 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -782,7 +883,7 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/environments?beta=true",
+            "/v1/environments",
             page=AsyncPageCursor[BetaEnvironment],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -794,6 +895,9 @@ class AsyncEnvironments(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.list",
+                span_route="/v1/environments",
             ),
             model=BetaEnvironment,
         )
@@ -832,6 +936,11 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -848,12 +957,16 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/environments/{environment_id}?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.delete",
+                span_route="/v1/environments/{environment_id}",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironmentDeleteResponse,
         )
@@ -893,6 +1006,11 @@ class AsyncEnvironments(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -909,12 +1027,16 @@ class AsyncEnvironments(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/environments/{environment_id}/archive?beta=true", environment_id=environment_id),
+            path_template("/v1/environments/{environment_id}/archive", environment_id=environment_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.environments.archive",
+                span_route="/v1/environments/{environment_id}/archive",
+                span_attributes={"anthropic.environment.id": environment_id},
             ),
             cast_to=BetaEnvironment,
         )

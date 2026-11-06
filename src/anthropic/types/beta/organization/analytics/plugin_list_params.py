@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_order import BetaAnalyticsOrder
+from ..beta_analytics_plugin_group_by import BetaAnalyticsPluginGroupBy
 
 __all__ = ["PluginListParams"]
 
@@ -36,31 +38,33 @@ class PluginListParams(TypedDict, total=False):
     `filter[]=rbac_group_id:{id}`. Repeat the param for OR within a dimension and
     across dimensions for AND. Supported dimensions on this endpoint: `plugin_name`,
     `product`, `rbac_group_id`, `user_id`. Value forms: `plugin_name` matches
-    case-insensitively; `product` is `claude_code` or `cowork` (the only surfaces
-    with plugin attribution); `rbac_group_id` takes the tagged id (`rbac_group_...`,
-    as emitted in responses and by the spend-limits API) or a bare group UUID, and
-    matches users who held the group at any point during each covered UTC day
-    (time-of-usage attribution); `user_id` takes a tagged user id (`user_...`), as
-    emitted in responses. An unsupported dimension returns 400. At most 100 entries.
+    case-insensitively; `product` is `chat_cowork_unified`, `claude_code`, or
+    `cowork` (the only surfaces with plugin attribution); `rbac_group_id` takes the
+    tagged id (`rbac_group_...`, as emitted in responses and by the spend-limits
+    API) or a bare group UUID, and matches users who held the group at any point
+    during each covered UTC day (time-of-usage attribution); `user_id` takes a
+    tagged user id (`user_...`), as emitted in responses. An unsupported dimension
+    returns 400. At most 100 entries. `chat_cowork_unified` is accepted as a
+    `product` value only where Chat and Cowork unified is available.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsPluginGroupBy]]
     """Dimensions to break results out by (e.g.
 
     `group_by[]=user_id`). Supported on this endpoint: `product`, `rbac_group_id`,
-    `user_id`. On this endpoint `product` takes the values `claude_code` or `cowork`
-    only (the surfaces with plugin attribution). Grouped rows carry the requested
-    dimension values as additional fields and paginate like ungrouped responses via
-    `next_page`; an unsupported dimension returns 400. `rbac_group_id` attributes a
-    user to every group they held at any point during each covered UTC day, so
-    grouped rows are not an exclusive partition and can sum above org-level totals.
-    At most 100 entries.
+    `user_id`. On this endpoint `product` takes the values `chat_cowork_unified`,
+    `claude_code`, or `cowork` only (the surfaces with plugin attribution). Grouped
+    rows carry the requested dimension values as additional fields and paginate like
+    ungrouped responses via `next_page`; an unsupported dimension returns 400.
+    `rbac_group_id` attributes a user to every group they held at any point during
+    each covered UTC day, so grouped rows are not an exclusive partition and can sum
+    above org-level totals. At most 100 entries.
     """
 
     limit: Optional[int]
     """Number of results per page (1-1000, default 100)."""
 
-    order: Optional[Literal["asc", "desc"]]
+    order: Optional[BetaAnalyticsOrder]
     """Sort direction: `asc` or `desc`.
 
     Defaults to `asc` for the endpoint's sort column and to `desc` when `order_by`

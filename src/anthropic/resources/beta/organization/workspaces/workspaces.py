@@ -12,7 +12,7 @@ from .members import (
     MembersWithStreamingResponse,
     AsyncMembersWithStreamingResponse,
 )
-from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ....._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from .rate_limits import (
@@ -67,7 +67,7 @@ class Workspaces(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkspacesWithRawResponse(self)
 
@@ -76,7 +76,7 @@ class Workspaces(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkspacesWithStreamingResponse(self)
 
@@ -88,6 +88,7 @@ class Workspaces(SyncAPIResource):
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -112,16 +113,21 @@ class Workspaces(SyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. The user profile can't be replaced or removed
+              later; only deleting the user profile clears it.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -132,25 +138,43 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             body={
                 "name": name,
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=BetaWorkspace,
         )
@@ -183,12 +207,16 @@ class Workspaces(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -202,6 +230,7 @@ class Workspaces(SyncAPIResource):
         external_key_id: str | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -221,18 +250,24 @@ class Workspaces(SyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. Once set, it can't be replaced or removed
+              (sending the same ID again changes nothing); only deleting the user profile
+              clears it. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 
@@ -241,23 +276,41 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "name": name,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -267,6 +320,7 @@ class Workspaces(SyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        ids: SequenceNotStr[str] | Omit = omit,
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
@@ -287,6 +341,10 @@ class Workspaces(SyncAPIResource):
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
 
+          ids: Only the Workspaces with these IDs, at most 100. `include_archived` and
+              `include_default` still apply, and IDs of Workspaces the caller can't list are
+              left out.
+
           include_archived: Whether to include Workspaces that have been archived in the response
 
           include_default: Whether to include the organization's default Workspace in the response
@@ -304,7 +362,7 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             page=SyncPage[BetaWorkspace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -314,10 +372,14 @@ class Workspaces(SyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "ids": ids,
                     "include_archived": include_archived,
                     "include_default": include_default,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=BetaWorkspace,
         )
@@ -348,12 +410,16 @@ class Workspaces(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -378,7 +444,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkspacesWithRawResponse(self)
 
@@ -387,7 +453,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkspacesWithStreamingResponse(self)
 
@@ -399,6 +465,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -423,16 +490,21 @@ class AsyncWorkspaces(AsyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. The user profile can't be replaced or removed
+              later; only deleting the user profile clears it.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -443,25 +515,43 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             body={
                 "name": name,
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.create",
+                span_route="/v1/organizations/workspaces",
+                span_created_id="anthropic.organization.workspace.id",
             ),
             cast_to=BetaWorkspace,
         )
@@ -494,12 +584,16 @@ class AsyncWorkspaces(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._get(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -513,6 +607,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         external_key_id: str | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
+        user_profile_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -532,18 +627,24 @@ class AsyncWorkspaces(AsyncAPIResource):
               Workspace. Setting this field requires CMEK to be enabled for your organization.
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
-              the value is the AWS KMS key ARN, and the key must be a single-Region key in the
-              same AWS account and Region as the Workspace. On that platform the key is
-              validated against this Workspace when it is attached, so a key-policy problem is
-              reported as an error on this request. This field is write-once: once a key is
-              attached to a Workspace it cannot be detached or replaced. To rotate key
-              material, rotate the underlying key on your cloud KMS; the `external_key_id`
-              stays the same.
+              the value for an AWS KMS key is the key's ARN, and your organization's own key
+              must be a single-Region key in the same AWS account and Region as the Workspace.
+              On that platform the key is validated against this Workspace when it is
+              attached, so a key-policy problem is reported as an error on this request. This
+              field is write-once: once a key is attached to a Workspace it cannot be detached
+              or replaced. To rotate key material, rotate the underlying key on your cloud
+              KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
+
+          user_profile_id: ID of a user profile to attach to the Workspace. Every inference request through
+              the Workspace must then name this user profile; the API rejects a request that
+              names none or a different one. Once set, it can't be replaced or removed
+              (sending the same ID again changes nothing); only deleting the user profile
+              clears it. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 
@@ -552,23 +653,41 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyValidationFailedError:
+
+          ExternalKeyValidationTimedOutError:
+
+          KeyProfileMismatchError:
+
+          UserProfileNotFoundError:
+
+          WorkspacePolicyViolationError:
+
+          ExternalKeyChangedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
                 "name": name,
                 "tags": tags,
+                "user_profile_id": user_profile_id,
             },
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )
@@ -578,6 +697,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         *,
         after_id: str | Omit = omit,
         before_id: str | Omit = omit,
+        ids: SequenceNotStr[str] | Omit = omit,
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
@@ -598,6 +718,10 @@ class AsyncWorkspaces(AsyncAPIResource):
           before_id: ID of the object to use as a cursor for pagination. When provided, returns the
               page of results immediately before this object.
 
+          ids: Only the Workspaces with these IDs, at most 100. `include_archived` and
+              `include_default` still apply, and IDs of Workspaces the caller can't list are
+              left out.
+
           include_archived: Whether to include Workspaces that have been archived in the response
 
           include_default: Whether to include the organization's default Workspace in the response
@@ -615,7 +739,7 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/workspaces?beta=true",
+            "/v1/organizations/workspaces",
             page=AsyncPage[BetaWorkspace],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -625,10 +749,14 @@ class AsyncWorkspaces(AsyncAPIResource):
                 query={
                     "after_id": after_id,
                     "before_id": before_id,
+                    "ids": ids,
                     "include_archived": include_archived,
                     "include_default": include_default,
                     "limit": limit,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.list",
+                span_route="/v1/organizations/workspaces",
             ),
             model=BetaWorkspace,
         )
@@ -659,12 +787,16 @@ class AsyncWorkspaces(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return await self._post(
-            path_template("/v1/organizations/workspaces/{workspace_id}/archive?beta=true", workspace_id=workspace_id),
+            path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.archive",
+                span_route="/v1/organizations/workspaces/{workspace_id}/archive",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             cast_to=BetaWorkspace,
         )

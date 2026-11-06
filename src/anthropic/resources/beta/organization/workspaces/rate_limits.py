@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Iterable, Optional
 from typing_extensions import Literal
 
 import httpx2
@@ -18,6 +18,9 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.workspaces.beta_workspace_rate_limit import BetaWorkspaceRateLimit
+from .....types.beta.organization.workspaces.beta_workspace_rate_limit_update_value_param import (
+    BetaWorkspaceRateLimitUpdateValueParam,
+)
 
 __all__ = ["RateLimits", "AsyncRateLimits"]
 
@@ -29,7 +32,7 @@ class RateLimits(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithRawResponse(self)
 
@@ -38,9 +41,76 @@ class RateLimits(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithStreamingResponse(self)
+
+    def update(
+        self,
+        rate_limit_id: str,
+        *,
+        workspace_id: str,
+        limits: Iterable[BetaWorkspaceRateLimitUpdateValueParam],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaWorkspaceRateLimit:
+        """
+        Set or clear rate-limit overrides for one rate-limit group in a workspace.
+
+        Only the limiter types named in `limits` change: an integer `value` sets that
+        type's override and `null` clears it. Types not named keep their current value.
+        A value above the organization's own limit is stored, but the organization limit
+        still applies, so the lower of the two is enforced.
+
+        Returns the targeted group's entry with this request applied, in the shape
+        `GET /v1/organizations/workspaces/{workspace_id}/rate_limits` returns. Changes
+        take effect within about an hour.
+
+        Args:
+          workspace_id: The ID of the workspace.
+
+          rate_limit_id: The `id` of the organization's rate-limit entry to set overrides for.
+
+          limits: Limits to set or clear. Unspecified limit types are unchanged.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        if not rate_limit_id:
+            raise ValueError(f"Expected a non-empty value for `rate_limit_id` but received {rate_limit_id!r}")
+        return self._post(
+            path_template(
+                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
+                workspace_id=workspace_id,
+                rate_limit_id=rate_limit_id,
+            ),
+            body={"limits": limits},
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.rate_limits.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.rate_limit.id": rate_limit_id,
+                },
+            ),
+            cast_to=BetaWorkspaceRateLimit,
+        )
 
     def list(
         self,
@@ -96,9 +166,7 @@ class RateLimits(SyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/rate_limits", workspace_id=workspace_id),
             page=SyncPageCursor[BetaWorkspaceRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -111,6 +179,10 @@ class RateLimits(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )
@@ -123,7 +195,7 @@ class AsyncRateLimits(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithRawResponse(self)
 
@@ -132,9 +204,76 @@ class AsyncRateLimits(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithStreamingResponse(self)
+
+    async def update(
+        self,
+        rate_limit_id: str,
+        *,
+        workspace_id: str,
+        limits: Iterable[BetaWorkspaceRateLimitUpdateValueParam],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaWorkspaceRateLimit:
+        """
+        Set or clear rate-limit overrides for one rate-limit group in a workspace.
+
+        Only the limiter types named in `limits` change: an integer `value` sets that
+        type's override and `null` clears it. Types not named keep their current value.
+        A value above the organization's own limit is stored, but the organization limit
+        still applies, so the lower of the two is enforced.
+
+        Returns the targeted group's entry with this request applied, in the shape
+        `GET /v1/organizations/workspaces/{workspace_id}/rate_limits` returns. Changes
+        take effect within about an hour.
+
+        Args:
+          workspace_id: The ID of the workspace.
+
+          rate_limit_id: The `id` of the organization's rate-limit entry to set overrides for.
+
+          limits: Limits to set or clear. Unspecified limit types are unchanged.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not workspace_id:
+            raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        if not rate_limit_id:
+            raise ValueError(f"Expected a non-empty value for `rate_limit_id` but received {rate_limit_id!r}")
+        return await self._post(
+            path_template(
+                "/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
+                workspace_id=workspace_id,
+                rate_limit_id=rate_limit_id,
+            ),
+            body={"limits": limits},
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.rate_limits.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits/{rate_limit_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.rate_limit.id": rate_limit_id,
+                },
+            ),
+            cast_to=BetaWorkspaceRateLimit,
+        )
 
     def list(
         self,
@@ -190,9 +329,7 @@ class AsyncRateLimits(AsyncAPIResource):
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
         return self._get_api_list(
-            path_template(
-                "/v1/organizations/workspaces/{workspace_id}/rate_limits?beta=true", workspace_id=workspace_id
-            ),
+            path_template("/v1/organizations/workspaces/{workspace_id}/rate_limits", workspace_id=workspace_id),
             page=AsyncPageCursor[BetaWorkspaceRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -205,6 +342,10 @@ class AsyncRateLimits(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.workspaces.rate_limits.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/rate_limits",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=BetaWorkspaceRateLimit,
         )
@@ -214,6 +355,9 @@ class RateLimitsWithRawResponse:
     def __init__(self, rate_limits: RateLimits) -> None:
         self._rate_limits = rate_limits
 
+        self.update = to_raw_response_wrapper(
+            rate_limits.update,
+        )
         self.list = to_raw_response_wrapper(
             rate_limits.list,
         )
@@ -223,6 +367,9 @@ class AsyncRateLimitsWithRawResponse:
     def __init__(self, rate_limits: AsyncRateLimits) -> None:
         self._rate_limits = rate_limits
 
+        self.update = async_to_raw_response_wrapper(
+            rate_limits.update,
+        )
         self.list = async_to_raw_response_wrapper(
             rate_limits.list,
         )
@@ -232,6 +379,9 @@ class RateLimitsWithStreamingResponse:
     def __init__(self, rate_limits: RateLimits) -> None:
         self._rate_limits = rate_limits
 
+        self.update = to_streamed_response_wrapper(
+            rate_limits.update,
+        )
         self.list = to_streamed_response_wrapper(
             rate_limits.list,
         )
@@ -241,6 +391,9 @@ class AsyncRateLimitsWithStreamingResponse:
     def __init__(self, rate_limits: AsyncRateLimits) -> None:
         self._rate_limits = rate_limits
 
+        self.update = async_to_streamed_response_wrapper(
+            rate_limits.update,
+        )
         self.list = async_to_streamed_response_wrapper(
             rate_limits.list,
         )

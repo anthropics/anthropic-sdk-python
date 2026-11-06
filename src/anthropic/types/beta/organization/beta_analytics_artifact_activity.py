@@ -52,13 +52,15 @@ class BetaAnalyticsArtifactActivity(BaseModel):
     product: Optional[str] = None
     """
     Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, or `office_agent` (the canonical Cost & Usage product naming; an
-    `office_agent` row's per-surface breakdown is in its `office_metrics`). On
-    `/plugins` only `cowork` and `claude_code` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, and `cowork` occur
-    (the surfaces that create artifacts); `/apps/chat/projects` does not support the
-    product dimension (a `product` entry in `group_by[]` or `filter[]` there is
-    rejected). Present only when the request grouped by `product`.
+    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
+    These are the canonical Cost & Usage product names; an `office_agent` row's
+    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
+    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
+    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
+    `chat_cowork_unified` occur (the surfaces that create artifacts);
+    `/apps/chat/projects` does not support the product dimension (a `product` entry
+    in `group_by[]` or `filter[]` there is rejected). Present only when the request
+    grouped by `product`.
     """
 
     rbac_group_id: Optional[str] = None

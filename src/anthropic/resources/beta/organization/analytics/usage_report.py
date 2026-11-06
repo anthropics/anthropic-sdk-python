@@ -15,7 +15,7 @@ from ....._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .....pagination import SyncPageCursor, AsyncPageCursor
+from .....pagination import SyncReportPageCursor, AsyncReportPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_context_window import BetaAnalyticsContextWindow
 from .....types.beta.organization.beta_analytics_product_filter import BetaAnalyticsProductFilter
@@ -33,7 +33,7 @@ class UsageReport(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsageReportWithRawResponse(self)
 
@@ -42,7 +42,7 @@ class UsageReport(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsageReportWithStreamingResponse(self)
 
@@ -86,14 +86,21 @@ class UsageReport(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[BetaAnalyticsUsageReportTimeBucket]:
+    ) -> SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket]:
         """
-        Get token usage over time across a date range.
+        [Legacy] Get token usage over time across a date range.
 
         Returns token usage bucketed by minute, hour, or day, optionally broken down by
-        product, model, context window, inference region, or speed. Available to
+        one or more `group_by[]` dimensions, such as product or model. Available to
         organizations on a Claude Enterprise plan. Requires an API key with the
         `read:analytics` scope.
+
+        This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
+        new integrations, use
+        [`GET /v1/organizations/analytics/usage`](/docs/en/api/beta/organization/analytics/usage/list)
+        in the Usage and Cost Analytics API instead. To move an existing integration,
+        see
+        [Migrate from the Claude Enterprise usage and cost reports](/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-enterprise-analytics-reports).
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -102,10 +109,8 @@ class UsageReport(SyncAPIResource):
           bucket_width: Time bucket granularity.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that
@@ -160,8 +165,8 @@ class UsageReport(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/usage_report?beta=true",
-            page=SyncPageCursor[BetaAnalyticsUsageReportTimeBucket],
+            "/v1/organizations/analytics/usage_report",
+            page=SyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -185,6 +190,9 @@ class UsageReport(SyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.usage_report.list",
+                span_route="/v1/organizations/analytics/usage_report",
             ),
             model=BetaAnalyticsUsageReportTimeBucket,
         )
@@ -197,7 +205,7 @@ class AsyncUsageReport(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsageReportWithRawResponse(self)
 
@@ -206,7 +214,7 @@ class AsyncUsageReport(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsageReportWithStreamingResponse(self)
 
@@ -250,14 +258,21 @@ class AsyncUsageReport(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[BetaAnalyticsUsageReportTimeBucket, AsyncPageCursor[BetaAnalyticsUsageReportTimeBucket]]:
+    ) -> AsyncPaginator[BetaAnalyticsUsageReportTimeBucket, AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket]]:
         """
-        Get token usage over time across a date range.
+        [Legacy] Get token usage over time across a date range.
 
         Returns token usage bucketed by minute, hour, or day, optionally broken down by
-        product, model, context window, inference region, or speed. Available to
+        one or more `group_by[]` dimensions, such as product or model. Available to
         organizations on a Claude Enterprise plan. Requires an API key with the
         `read:analytics` scope.
+
+        This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
+        new integrations, use
+        [`GET /v1/organizations/analytics/usage`](/docs/en/api/beta/organization/analytics/usage/list)
+        in the Usage and Cost Analytics API instead. To move an existing integration,
+        see
+        [Migrate from the Claude Enterprise usage and cost reports](/docs/en/manage-claude/usage-cost-analytics-api#migrate-from-enterprise-analytics-reports).
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -266,10 +281,8 @@ class AsyncUsageReport(AsyncAPIResource):
           bucket_width: Time bucket granularity.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that
@@ -324,8 +337,8 @@ class AsyncUsageReport(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/analytics/usage_report?beta=true",
-            page=AsyncPageCursor[BetaAnalyticsUsageReportTimeBucket],
+            "/v1/organizations/analytics/usage_report",
+            page=AsyncReportPageCursor[BetaAnalyticsUsageReportTimeBucket],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -349,6 +362,9 @@ class AsyncUsageReport(AsyncAPIResource):
                     "speeds": speeds,
                     "user_ids": user_ids,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.analytics.usage_report.list",
+                span_route="/v1/organizations/analytics/usage_report",
             ),
             model=BetaAnalyticsUsageReportTimeBucket,
         )

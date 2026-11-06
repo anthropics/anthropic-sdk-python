@@ -42,7 +42,7 @@ class Rules(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RulesWithRawResponse(self)
 
@@ -51,7 +51,7 @@ class Rules(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RulesWithStreamingResponse(self)
 
@@ -151,6 +151,9 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.create",
+                span_route="/v1/organizations/federation_rules",
+                span_created_id="anthropic.organization.federation_rule.id",
             ),
             cast_to=FederationRule,
         )
@@ -196,6 +199,9 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.retrieve",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )
@@ -301,6 +307,9 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.update",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )
@@ -361,6 +370,8 @@ class Rules(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.rules.list",
+                span_route="/v1/organizations/federation_rules",
             ),
             model=FederationRule,
         )
@@ -413,6 +424,9 @@ class Rules(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.archive",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/archive",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )
@@ -429,7 +443,7 @@ class AsyncRules(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRulesWithRawResponse(self)
 
@@ -438,7 +452,7 @@ class AsyncRules(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRulesWithStreamingResponse(self)
 
@@ -538,6 +552,9 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.create",
+                span_route="/v1/organizations/federation_rules",
+                span_created_id="anthropic.organization.federation_rule.id",
             ),
             cast_to=FederationRule,
         )
@@ -583,6 +600,9 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.retrieve",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )
@@ -688,6 +708,9 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.update",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )
@@ -748,6 +771,8 @@ class AsyncRules(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                span_name="anthropic.organization.federation.rules.list",
+                span_route="/v1/organizations/federation_rules",
             ),
             model=FederationRule,
         )
@@ -800,6 +825,9 @@ class AsyncRules(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.federation.rules.archive",
+                span_route="/v1/organizations/federation_rules/{federation_rule_id}/archive",
+                span_attributes={"anthropic.organization.federation_rule.id": federation_rule_id},
             ),
             cast_to=FederationRule,
         )

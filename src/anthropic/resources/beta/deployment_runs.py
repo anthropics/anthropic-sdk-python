@@ -33,7 +33,7 @@ class DeploymentRuns(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DeploymentRunsWithRawResponse(self)
 
@@ -42,7 +42,7 @@ class DeploymentRuns(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DeploymentRunsWithStreamingResponse(self)
 
@@ -65,7 +65,8 @@ class DeploymentRuns(SyncAPIResource):
         Args:
           deployment_run_id: Unique identifier of the deployment run.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -97,12 +98,16 @@ class DeploymentRuns(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/deployment_runs/{deployment_run_id}?beta=true", deployment_run_id=deployment_run_id),
+            path_template("/v1/deployment_runs/{deployment_run_id}", deployment_run_id=deployment_run_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployment_runs.retrieve",
+                span_route="/v1/deployment_runs/{deployment_run_id}",
+                span_attributes={"anthropic.deployment_run.id": deployment_run_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -154,7 +159,8 @@ class DeploymentRuns(SyncAPIResource):
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -184,7 +190,7 @@ class DeploymentRuns(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployment_runs?beta=true",
+            "/v1/deployment_runs",
             page=SyncPageCursor[BetaManagedAgentsDeploymentRun],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -202,6 +208,9 @@ class DeploymentRuns(SyncAPIResource):
                     "page": page,
                     "trigger_type": trigger_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployment_runs.list",
+                span_route="/v1/deployment_runs",
             ),
             model=BetaManagedAgentsDeploymentRun,
         )
@@ -214,7 +223,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDeploymentRunsWithRawResponse(self)
 
@@ -223,7 +232,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDeploymentRunsWithStreamingResponse(self)
 
@@ -246,7 +255,8 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         Args:
           deployment_run_id: Unique identifier of the deployment run.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -278,12 +288,16 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/deployment_runs/{deployment_run_id}?beta=true", deployment_run_id=deployment_run_id),
+            path_template("/v1/deployment_runs/{deployment_run_id}", deployment_run_id=deployment_run_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployment_runs.retrieve",
+                span_route="/v1/deployment_runs/{deployment_run_id}",
+                span_attributes={"anthropic.deployment_run.id": deployment_run_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -335,7 +349,8 @@ class AsyncDeploymentRuns(AsyncAPIResource):
 
           trigger_type: Filter runs by what triggered them. Omit to return all runs.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -365,7 +380,7 @@ class AsyncDeploymentRuns(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployment_runs?beta=true",
+            "/v1/deployment_runs",
             page=AsyncPageCursor[BetaManagedAgentsDeploymentRun],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -383,6 +398,9 @@ class AsyncDeploymentRuns(AsyncAPIResource):
                     "page": page,
                     "trigger_type": trigger_type,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployment_runs.list",
+                span_route="/v1/deployment_runs",
             ),
             model=BetaManagedAgentsDeploymentRun,
         )

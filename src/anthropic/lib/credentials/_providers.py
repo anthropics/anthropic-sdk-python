@@ -567,10 +567,8 @@ class CredentialsFile:
                 content=_json_dumps_secrets(body),
                 headers={
                     "Content-Type": "application/json",
-                    # oauth-2025-04-20 unlocks the token endpoint family. Do
-                    # NOT send oidc-federation-2026-04-01 — that's a routing
-                    # switch that misroutes refresh_token grants to the Go
-                    # userauth handler, which only accepts jwt-bearer.
+                    # Do NOT send oidc-federation-2026-04-01 here; it is only
+                    # for jwt-bearer exchanges.
                     "anthropic-beta": OAUTH_API_BETA_HEADER,
                     "User-Agent": _user_agent(),
                 },

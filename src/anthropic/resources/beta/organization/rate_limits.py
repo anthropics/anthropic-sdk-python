@@ -28,7 +28,7 @@ class RateLimits(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithRawResponse(self)
 
@@ -37,7 +37,7 @@ class RateLimits(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithStreamingResponse(self)
 
@@ -89,7 +89,7 @@ class RateLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=SyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -102,6 +102,9 @@ class RateLimits(SyncAPIResource):
                     "model": model,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )
@@ -114,7 +117,7 @@ class AsyncRateLimits(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithRawResponse(self)
 
@@ -123,7 +126,7 @@ class AsyncRateLimits(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithStreamingResponse(self)
 
@@ -175,7 +178,7 @@ class AsyncRateLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=AsyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -188,6 +191,9 @@ class AsyncRateLimits(AsyncAPIResource):
                     "model": model,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )

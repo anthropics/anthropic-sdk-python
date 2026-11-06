@@ -52,7 +52,7 @@ else
   echo
 fi
 
-export DEFER_PYDANTIC_BUILD=false
+export DEFER_PYDANTIC_BUILD="${DEFER_PYDANTIC_BUILD:-false}"
 
 # Note that we need to specify the patch version here so that uv
 # won't use unstable (alpha, beta, rc) releases for the tests

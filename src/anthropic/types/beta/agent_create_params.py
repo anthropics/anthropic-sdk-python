@@ -11,6 +11,7 @@ from .beta_managed_agents_custom_tool_params import BetaManagedAgentsCustomToolP
 from .beta_managed_agents_mcp_toolset_params import BetaManagedAgentsMCPToolsetParams
 from .beta_managed_agents_model_config_params import BetaManagedAgentsModelConfigParams
 from .beta_managed_agents_url_mcp_server_params import BetaManagedAgentsURLMCPServerParams
+from .beta_managed_agents_execution_identity_params import BetaManagedAgentsExecutionIdentityParams
 from .beta_managed_agents_agent_toolset20260401_params import BetaManagedAgentsAgentToolset20260401Params
 
 __all__ = ["AgentCreateParams", "Model", "Tool"]
@@ -22,7 +23,7 @@ class AgentCreateParams(TypedDict, total=False):
 
     Accepts the
     [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison),
-    e.g. `claude-opus-5`, or a `model_config` object for additional configuration
+    e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration
     control
     """
 
@@ -31,6 +32,13 @@ class AgentCreateParams(TypedDict, total=False):
 
     description: Optional[str]
     """Description of what the agent does."""
+
+    execution_identity: Optional[BetaManagedAgentsExecutionIdentityParams]
+    """Execution principal for runs of this agent.
+
+    Omitting it, sending null, or sending `{"type": "service_account"}` stores the
+    default.
+    """
 
     mcp_servers: Iterable[BetaManagedAgentsURLMCPServerParams]
     """MCP servers this agent connects to.
@@ -63,7 +71,10 @@ class AgentCreateParams(TypedDict, total=False):
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

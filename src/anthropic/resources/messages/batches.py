@@ -17,6 +17,7 @@ from ..._response import (
 from ...pagination import SyncPage, AsyncPage
 from ..._exceptions import AnthropicError
 from ..._base_client import AsyncPaginator, make_request_options
+from ...lib._tracing import get, count, attributes
 from ...types.messages import batch_create_params
 from ..._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
 from ...types.messages.message_batch import MessageBatch
@@ -33,7 +34,7 @@ class Batches(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithRawResponse(self)
 
@@ -42,7 +43,7 @@ class Batches(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithStreamingResponse(self)
 
@@ -74,9 +75,9 @@ class Batches(SyncAPIResource):
               a Message.
 
           user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
-              on behalf of a party other than your organization. Requires the `user-profiles`
-              beta header. Applies to every request in the batch; an individual request whose
-              `user_profile_id` body field conflicts with this header is errored.
+              on behalf of a party other than your organization. Applies to every request in
+              the batch; an individual request whose `user_profile_id` body field conflicts
+              with this header is errored.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -92,6 +93,15 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -110,6 +120,12 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,
         )
@@ -152,6 +168,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -163,6 +184,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -214,6 +238,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -229,6 +258,8 @@ class Batches(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=MessageBatch,
         )
@@ -271,6 +302,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -282,6 +318,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -330,6 +369,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -341,6 +385,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -384,6 +431,13 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -403,6 +457,9 @@ class Batches(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=JSONLDecoder[MessageBatchIndividualResponse],
             stream=True,
@@ -416,7 +473,7 @@ class AsyncBatches(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithRawResponse(self)
 
@@ -425,7 +482,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithStreamingResponse(self)
 
@@ -457,9 +514,9 @@ class AsyncBatches(AsyncAPIResource):
               a Message.
 
           user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
-              on behalf of a party other than your organization. Requires the `user-profiles`
-              beta header. Applies to every request in the batch; an individual request whose
-              `user_profile_id` body field conflicts with this header is errored.
+              on behalf of a party other than your organization. Applies to every request in
+              the batch; an individual request whose `user_profile_id` body field conflicts
+              with this header is errored.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -475,6 +532,15 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -493,6 +559,12 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=MessageBatch,
         )
@@ -535,6 +607,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -546,6 +623,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -597,6 +677,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {**strip_not_given({"anthropic-workspace-id": workspace_id}), **(extra_headers or {})}
         return self._get_api_list(
@@ -612,6 +697,8 @@ class AsyncBatches(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=MessageBatch,
         )
@@ -654,6 +741,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -665,6 +757,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=DeletedMessageBatch,
         )
@@ -713,6 +808,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -724,6 +824,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=MessageBatch,
         )
@@ -767,6 +870,13 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -786,6 +896,9 @@ class AsyncBatches(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=AsyncJSONLDecoder[MessageBatchIndividualResponse],
             stream=True,

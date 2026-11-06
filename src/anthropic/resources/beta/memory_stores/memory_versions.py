@@ -39,7 +39,7 @@ class MemoryVersions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryVersionsWithRawResponse(self)
 
@@ -48,7 +48,7 @@ class MemoryVersions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryVersionsWithStreamingResponse(self)
 
@@ -68,20 +68,21 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Retrieve a memory version
+        Retrieve a Memory Version
 
         Args:
           memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
           memory_version_id: The ID of the memory version to retrieve (`memver_...`).
 
-          view: Selects which projection of a `memory` or `memory_version` the server returns.
-              `basic` returns the object with `content` set to `null`; `full` populates
-              `content`. When omitted, the default is endpoint-specific: retrieve operations
-              default to `full`; list, create, and update operations default to `basic`.
-              Listing with `view=full` caps `limit` at 20.
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -116,7 +117,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -126,6 +127,13 @@ class MemoryVersions(SyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -154,7 +162,7 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryVersion]:
         """
-        List memory versions
+        List Memory Versions
 
         Args:
           memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
@@ -165,12 +173,15 @@ class MemoryVersions(SyncAPIResource):
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: The maximum number of versions to return per page. Defaults to 20.
+          limit: The maximum number of versions to return per page, from 1 to 100. Defaults
+              to 20.
+
+              With `view=full`, a page holds at most 20 versions.
 
           memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-              The filter still works after the memory is deleted. The results then include the
-              version whose `operation` is `deleted`.
+              The filter still works after the memory is deleted. While that memory's versions
+              are retained, the results include the version whose `operation` is `deleted`.
 
           operation: Return only versions that record this kind of change.
 
@@ -181,13 +192,14 @@ class MemoryVersions(SyncAPIResource):
 
           session_id: Return only versions written by the session with this ID.
 
-          view: Selects which projection of a `memory` or `memory_version` the server returns.
-              `basic` returns the object with `content` set to `null`; `full` populates
-              `content`. When omitted, the default is endpoint-specific: retrieve operations
-              default to `full`; list, create, and update operations default to `basic`.
-              Listing with `view=full` caps `limit` at 20.
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -219,9 +231,7 @@ class MemoryVersions(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=SyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -240,6 +250,10 @@ class MemoryVersions(SyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -259,14 +273,15 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Redact a memory version
+        Redact a Memory Version
 
         Args:
           memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
           memory_version_id: The ID of the memory version to redact (`memver_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -301,7 +316,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -310,6 +325,13 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -322,7 +344,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryVersionsWithRawResponse(self)
 
@@ -331,7 +353,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryVersionsWithStreamingResponse(self)
 
@@ -351,20 +373,21 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Retrieve a memory version
+        Retrieve a Memory Version
 
         Args:
           memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
           memory_version_id: The ID of the memory version to retrieve (`memver_...`).
 
-          view: Selects which projection of a `memory` or `memory_version` the server returns.
-              `basic` returns the object with `content` set to `null`; `full` populates
-              `content`. When omitted, the default is endpoint-specific: retrieve operations
-              default to `full`; list, create, and update operations default to `basic`.
-              Listing with `view=full` caps `limit` at 20.
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -399,7 +422,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -409,6 +432,13 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_body=extra_body,
                 timeout=timeout,
                 query={"view": view},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -437,7 +467,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryVersion, AsyncPageCursor[BetaManagedAgentsMemoryVersion]]:
         """
-        List memory versions
+        List Memory Versions
 
         Args:
           memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
@@ -448,12 +478,15 @@ class AsyncMemoryVersions(AsyncAPIResource):
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: The maximum number of versions to return per page. Defaults to 20.
+          limit: The maximum number of versions to return per page, from 1 to 100. Defaults
+              to 20.
+
+              With `view=full`, a page holds at most 20 versions.
 
           memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-              The filter still works after the memory is deleted. The results then include the
-              version whose `operation` is `deleted`.
+              The filter still works after the memory is deleted. While that memory's versions
+              are retained, the results include the version whose `operation` is `deleted`.
 
           operation: Return only versions that record this kind of change.
 
@@ -464,13 +497,14 @@ class AsyncMemoryVersions(AsyncAPIResource):
 
           session_id: Return only versions written by the session with this ID.
 
-          view: Selects which projection of a `memory` or `memory_version` the server returns.
-              `basic` returns the object with `content` set to `null`; `full` populates
-              `content`. When omitted, the default is endpoint-specific: retrieve operations
-              default to `full`; list, create, and update operations default to `basic`.
-              Listing with `view=full` caps `limit` at 20.
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -502,9 +536,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=AsyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -523,6 +555,10 @@ class AsyncMemoryVersions(AsyncAPIResource):
                     "session_id": session_id,
                     "view": view,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -542,14 +578,15 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Redact a memory version
+        Redact a Memory Version
 
         Args:
           memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
           memory_version_id: The ID of the memory version to redact (`memver_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -584,7 +621,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -593,6 +630,13 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )

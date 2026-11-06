@@ -49,7 +49,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -70,7 +70,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -96,6 +96,7 @@ class TestBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
@@ -172,7 +173,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -197,7 +198,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -469,7 +470,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -490,7 +491,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -516,6 +517,7 @@ class TestAsyncBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
@@ -592,7 +594,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -617,7 +619,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],

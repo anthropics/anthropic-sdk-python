@@ -29,7 +29,7 @@ class Users(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsersWithRawResponse(self)
 
@@ -38,7 +38,7 @@ class Users(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsersWithStreamingResponse(self)
 
@@ -76,6 +76,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -103,7 +106,8 @@ class Users(SyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -123,6 +127,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -189,6 +196,8 @@ class Users(SyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=OrganizationUser,
         )
@@ -217,6 +226,11 @@ class Users(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -227,6 +241,9 @@ class Users(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )
@@ -239,7 +256,7 @@ class AsyncUsers(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsersWithRawResponse(self)
 
@@ -248,7 +265,7 @@ class AsyncUsers(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsersWithStreamingResponse(self)
 
@@ -286,6 +303,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.retrieve",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -313,7 +333,8 @@ class AsyncUsers(AsyncAPIResource):
               The accepted values depend on the organization type. Console and API
               organizations accept `user`, `developer`, `billing`, and `claude_code_user`;
               `admin` cannot be assigned through the API. Claude Enterprise organizations
-              accept `user` and `managed`.
+              accept `user` and `managed`; changing a User's role to `managed` requires the
+              `write:rbac_groups` scope in addition to `write:members`.
 
           extra_headers: Send extra headers
 
@@ -333,6 +354,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.update",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=OrganizationUser,
         )
@@ -399,6 +423,8 @@ class AsyncUsers(AsyncAPIResource):
                     "limit": limit,
                     "roles": roles,
                 },
+                span_name="anthropic.organization.users.list",
+                span_route="/v1/organizations/users",
             ),
             model=OrganizationUser,
         )
@@ -427,6 +453,11 @@ class AsyncUsers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CannotRemoveLastMemberError:
+
+          ConcurrentMembershipChangeError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -437,6 +468,9 @@ class AsyncUsers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.users.remove",
+                span_route="/v1/organizations/users/{user_id}",
+                span_attributes={"anthropic.organization.user.id": user_id},
             ),
             cast_to=UserRemoveResponse,
         )

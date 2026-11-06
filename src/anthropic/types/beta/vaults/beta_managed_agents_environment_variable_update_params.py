@@ -21,7 +21,7 @@ class BetaManagedAgentsEnvironmentVariableUpdateParams(TypedDict, total=False):
     """Updated injection location."""
 
     networking: Optional[BetaManagedAgentsCredentialNetworkingParams]
-    """Updated networking scope. Full replacement."""
+    """The new networking scope, which replaces the stored one as a whole."""
 
     secret_value: Optional[str]
-    """Updated secret value."""
+    """The new secret value to replace the stored one."""

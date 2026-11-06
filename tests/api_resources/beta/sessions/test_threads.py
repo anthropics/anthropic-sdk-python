@@ -21,6 +21,7 @@ class TestThreads:
         thread = client.beta.sessions.threads.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -31,6 +32,7 @@ class TestThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -39,6 +41,7 @@ class TestThreads:
         response = client.beta.sessions.threads.with_raw_response.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -51,6 +54,7 @@ class TestThreads:
         with client.beta.sessions.threads.with_streaming_response.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -78,6 +82,7 @@ class TestThreads:
     def test_method_list(self, client: Anthropic) -> None:
         thread = client.beta.sessions.threads.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -87,8 +92,10 @@ class TestThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
+            statuses=["running"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -96,6 +103,7 @@ class TestThreads:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.sessions.threads.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -107,6 +115,7 @@ class TestThreads:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.sessions.threads.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -128,6 +137,7 @@ class TestThreads:
         thread = client.beta.sessions.threads.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -138,6 +148,7 @@ class TestThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -146,6 +157,7 @@ class TestThreads:
         response = client.beta.sessions.threads.with_raw_response.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -158,6 +170,7 @@ class TestThreads:
         with client.beta.sessions.threads.with_streaming_response.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -192,6 +205,7 @@ class TestAsyncThreads:
         thread = await async_client.beta.sessions.threads.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -202,6 +216,7 @@ class TestAsyncThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -210,6 +225,7 @@ class TestAsyncThreads:
         response = await async_client.beta.sessions.threads.with_raw_response.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -222,6 +238,7 @@ class TestAsyncThreads:
         async with async_client.beta.sessions.threads.with_streaming_response.retrieve(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -249,6 +266,7 @@ class TestAsyncThreads:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         thread = await async_client.beta.sessions.threads.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -258,8 +276,10 @@ class TestAsyncThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
+            statuses=["running"],
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaManagedAgentsSessionThread], thread, path=["response"])
 
@@ -267,6 +287,7 @@ class TestAsyncThreads:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.sessions.threads.with_raw_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -278,6 +299,7 @@ class TestAsyncThreads:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.sessions.threads.with_streaming_response.list(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -299,6 +321,7 @@ class TestAsyncThreads:
         thread = await async_client.beta.sessions.threads.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -309,6 +332,7 @@ class TestAsyncThreads:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             betas=["message-batches-2024-09-24"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsSessionThread, thread, path=["response"])
 
@@ -317,6 +341,7 @@ class TestAsyncThreads:
         response = await async_client.beta.sessions.threads.with_raw_response.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -329,6 +354,7 @@ class TestAsyncThreads:
         async with async_client.beta.sessions.threads.with_streaming_response.archive(
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

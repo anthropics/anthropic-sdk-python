@@ -27,18 +27,7 @@ Group: TypeAlias = Annotated[
 
 class BetaWorkspaceRateLimit(BaseModel):
     group: Group
-    """The rate-limit group this entry's limits apply to.
-
-    Its `type` equals `group_type`.
-    """
-
-    group_type: Literal["batch", "files", "model_group", "skills", "token_count", "web_search"]
-    """Deprecated: use `group.type` instead.
-
-    The kind of rate-limit group this entry represents. `model_group` entries apply
-    to a family of models (listed in `models`); other values apply to an API-surface
-    category and have `models` set to `null`. Always equal to `group.type`.
-    """
+    """The rate-limit group this entry's limits apply to."""
 
     limits: List[BetaWorkspaceRateLimitValue]
     """The workspace's limiter values for this group.
@@ -51,7 +40,8 @@ class BetaWorkspaceRateLimit(BaseModel):
     models: Optional[List[str]] = None
     """Model names this entry's limits apply to, including aliases.
 
-    `null` when `group_type` is not `"model_group"`.
+    `null` when `group.type` is not `"model_group"`. The list covers the models this
+    workspace has access to, so it can differ between workspaces.
     """
 
     rate_limit_id: str

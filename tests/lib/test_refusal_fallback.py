@@ -5,6 +5,7 @@ import json
 import logging
 import threading
 from typing import Any, List, Protocol, cast
+from typing_extensions import Literal
 
 import httpx2
 import pytest
@@ -14,12 +15,15 @@ from anthropic import (
     Omit,
     Anthropic,
     AnthropicError,
+    APIStatusError,
     AsyncAnthropic,
     BetaFallbackState,
     BetaRefusalFallbackMiddleware,
     omit,
 )
+from anthropic._compat import PYDANTIC_V1
 from anthropic.types.beta import BetaMessage, BetaFallbackParam, BetaOutputConfigParam
+from anthropic._base_client import make_request_options
 from anthropic.lib.middleware._fallbacks import _fallback_state
 from anthropic.types.anthropic_beta_param import AnthropicBetaParam
 
@@ -67,6 +71,10 @@ def refusal(model: str, fallback_credit_token: str | None = None) -> httpx2.Resp
     )
 
 
+def error(status: int) -> httpx2.Response:
+    return httpx2.Response(status, json={"type": "error", "error": {"type": "api_error", "message": "nope"}})
+
+
 class MockRequestCall(Protocol):
     request: httpx2.Request
 
@@ -77,6 +85,7 @@ def create_message(
     betas: List[AnthropicBetaParam] | Omit = omit,
     fallbacks: List[BetaFallbackParam] | Omit = omit,
     output_config: BetaOutputConfigParam | Omit = omit,
+    speed: Literal["standard", "fast"] | Omit = omit,
 ) -> BetaMessage:
     return client.beta.messages.create(
         model="primary-model",
@@ -85,14 +94,18 @@ def create_message(
         betas=betas,
         fallbacks=fallbacks,
         output_config=output_config,
+        speed=speed,
     )
 
 
-async def create_message_async(client: AsyncAnthropic) -> BetaMessage:
+async def create_message_async(
+    client: AsyncAnthropic, *, speed: Literal["standard", "fast"] | Omit = omit
+) -> BetaMessage:
     return await client.beta.messages.create(
         model="primary-model",
         max_tokens=1024,
         messages=[{"role": "user", "content": "hi"}],
+        speed=speed,
     )
 
 
@@ -104,6 +117,15 @@ def request_bodies(respx_mock: MockRouter) -> list[dict[str, Any]]:
 def beta_headers(respx_mock: MockRouter) -> list[str | None]:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     return [call.request.headers.get("anthropic-beta") for call in calls]
+
+
+def without_speed(body: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in body.items() if key != "speed"}
+
+
+def resend_warnings(caplog: pytest.LogCaptureFixture) -> list[str]:
+    messages = [record.getMessage() for record in caplog.records if record.name == LOGGER_NAME]
+    return [message for message in messages if "retrying without `speed`" in message]
 
 
 class TestRefusalFallback:
@@ -571,6 +593,44 @@ class TestRefusalFallback:
         assert len(respx_mock.calls) == 1
         assert beta_headers(respx_mock) == [None]
 
+    @pytest.mark.parametrize(
+        ("path", "qualifiers", "models"),
+        [
+            ("/v1/messages", {"beta": "true"}, ["primary-model", "fallback-model"]),
+            ("/v1/messages?beta=true", None, ["primary-model"]),
+        ],
+        ids=["qualifier", "query"],
+    )
+    @pytest.mark.respx(base_url=base_url)
+    def test_only_the_qualifier_marks_a_request_as_beta(
+        self, respx_mock: MockRouter, path: str, qualifiers: dict[str, str] | None, models: list[str]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.post(
+            path,
+            body={"model": "primary-model", "max_tokens": 1024, "messages": [{"role": "user", "content": "hi"}]},
+            cast_to=BetaMessage,
+            options=make_request_options(qualifiers=qualifiers),
+        )
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == models
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    @pytest.mark.respx(base_url=base_url)
+    def test_parse_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        client.beta.messages.parse(model="primary-model", max_tokens=1024, messages=[{"role": "user", "content": "hi"}])
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["primary-model", "fallback-model"]
+
 
 class TestBetaHeader:
     @pytest.mark.respx(base_url=base_url)
@@ -753,6 +813,225 @@ class TestAsyncRefusalFallback:
 
         assert result.model == "last-model"
         assert state.index == 1
+
+    @pytest.mark.skipif(PYDANTIC_V1, reason="parse() response post-parser is pydantic-v2 only")
+    @pytest.mark.respx(base_url=base_url)
+    async def test_parse_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        await client.beta.messages.parse(
+            model="primary-model", max_tokens=1024, messages=[{"role": "user", "content": "hi"}]
+        )
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["primary-model", "fallback-model"]
+
+
+FAILED_HOPS_THAT_ARE_NOT_RESENT = [
+    pytest.param({"model": "fallback-model", "speed": "fast"}, "fast", 429, id="the-entry-sets-fast"),
+    pytest.param({"model": "fallback-model"}, omit, 429, id="no-speed"),
+    pytest.param({"model": "fallback-model"}, "standard", 429, id="standard-speed"),
+    pytest.param({"model": "fallback-model"}, "fast", 400, id="http-400"),
+    pytest.param({"model": "fallback-model"}, "fast", 500, id="http-500"),
+]
+
+
+class TestRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        result = create_message(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert result.stop_reason == "end_turn"
+        assert [block.type for block in result.content] == ["fallback"]
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("primary-model", "fast"),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
+        assert bodies[2] == without_speed(bodies[1])
+        assert len(resend_warnings(caplog)) == 1
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            create_message(client, speed=speed)
+
+        assert exc_info.value.status_code == status
+        assert len(respx_mock.calls) == 2
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_resend_that_is_rate_limited_too_surfaces_to_the_app(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(429), error(429), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            create_message(client, speed="fast")
+
+        assert exc_info.value.status_code == 429
+        assert [body.get("speed") for body in request_bodies(respx_mock)] == ["fast", "fast", None]
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error(429), message("fallback-model"), error(429), message("fallback-model")]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            result = create_message(client, speed="fast")
+            create_message(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert state.index == 0
+        # the second request starts fast again: the dropped `speed` is not remembered
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[error(429), message("primary-model")])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError):
+            create_message(client, speed="fast")
+
+        assert len(respx_mock.calls) == 1
+
+
+class TestAsyncRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    async def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        result = await create_message_async(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert result.stop_reason == "end_turn"
+        assert [block.type for block in result.content] == ["fallback"]
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("primary-model", "fast"),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"] == {"token": "credit-token", "mode": "best_effort"}
+        assert bodies[2] == without_speed(bodies[1])
+        assert len(resend_warnings(caplog)) == 1
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    async def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(status), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            await create_message_async(client, speed=speed)
+
+        assert exc_info.value.status_code == status
+        assert len(respx_mock.calls) == 2
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_resend_that_is_rate_limited_too_surfaces_to_the_app(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[refusal("primary-model", "credit-token"), error(429), error(429), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError) as exc_info:
+            await create_message_async(client, speed="fast")
+
+        assert exc_info.value.status_code == 429
+        assert [body.get("speed") for body in request_bodies(respx_mock)] == ["fast", "fast", None]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error(429), message("fallback-model"), error(429), message("fallback-model")]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            result = await create_message_async(client, speed="fast")
+            await create_message_async(client, speed="fast")
+
+        assert result.model == "fallback-model"
+        assert state.index == 0
+        # the second request starts fast again: the dropped `speed` is not remembered
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+            ("fallback-model", "fast"),
+            ("fallback-model", None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[error(429), message("primary-model")])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([{"model": "fallback-model"}])])
+
+        with pytest.raises(APIStatusError):
+            await create_message_async(client, speed="fast")
+
+        assert len(respx_mock.calls) == 1
 
 
 class TestBetaFallbackState:

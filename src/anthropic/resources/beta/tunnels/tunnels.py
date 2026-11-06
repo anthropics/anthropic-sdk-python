@@ -43,7 +43,7 @@ class Tunnels(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return TunnelsWithRawResponse(self)
 
@@ -52,7 +52,7 @@ class Tunnels(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return TunnelsWithStreamingResponse(self)
 
@@ -83,7 +83,8 @@ class Tunnels(SyncAPIResource):
         Args:
           display_name: Optional human-readable name for the tunnel (1-255 characters).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -113,13 +114,17 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.create",
+                span_route="/v1/tunnels",
+                span_created_id="anthropic.tunnel.id",
             ),
             cast_to=BetaTunnel,
         )
@@ -149,7 +154,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -181,12 +187,16 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -223,7 +233,8 @@ class Tunnels(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnels` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -253,7 +264,7 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             page=SyncPageCursor[BetaTunnel],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -265,6 +276,9 @@ class Tunnels(SyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.list",
+                span_route="/v1/tunnels",
             ),
             model=BetaTunnel,
         )
@@ -297,7 +311,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -329,12 +344,16 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/archive", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.archive",
+                span_route="/v1/tunnels/{tunnel_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -367,7 +386,8 @@ class Tunnels(SyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -399,12 +419,16 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/reveal_token", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.reveal_token",
+                span_route="/v1/tunnels/{tunnel_id}/reveal_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -439,7 +463,8 @@ class Tunnels(SyncAPIResource):
 
           reason: Optional free-text reason for the rotation, recorded for audit.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -471,13 +496,17 @@ class Tunnels(SyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/rotate_token", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.rotate_token",
+                span_route="/v1/tunnels/{tunnel_id}/rotate_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -494,7 +523,7 @@ class AsyncTunnels(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncTunnelsWithRawResponse(self)
 
@@ -503,7 +532,7 @@ class AsyncTunnels(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncTunnelsWithStreamingResponse(self)
 
@@ -534,7 +563,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           display_name: Optional human-readable name for the tunnel (1-255 characters).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -564,13 +594,17 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             body={"display_name": display_name},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.create",
+                span_route="/v1/tunnels",
+                span_created_id="anthropic.tunnel.id",
             ),
             cast_to=BetaTunnel,
         )
@@ -600,7 +634,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -632,12 +667,16 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/tunnels/{tunnel_id}?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.retrieve",
+                span_route="/v1/tunnels/{tunnel_id}",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -674,7 +713,8 @@ class AsyncTunnels(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous `list_tunnels` response.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -704,7 +744,7 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/tunnels?beta=true",
+            "/v1/tunnels",
             page=AsyncPageCursor[BetaTunnel],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -716,6 +756,9 @@ class AsyncTunnels(AsyncAPIResource):
                     "limit": limit,
                     "page": page,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.list",
+                span_route="/v1/tunnels",
             ),
             model=BetaTunnel,
         )
@@ -748,7 +791,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -780,12 +824,16 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/archive?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/archive", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.archive",
+                span_route="/v1/tunnels/{tunnel_id}/archive",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnel,
         )
@@ -818,7 +866,8 @@ class AsyncTunnels(AsyncAPIResource):
         Args:
           tunnel_id: ID of the tunnel (`tnl_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -850,12 +899,16 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/reveal_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/reveal_token", tunnel_id=tunnel_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.reveal_token",
+                span_route="/v1/tunnels/{tunnel_id}/reveal_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )
@@ -890,7 +943,8 @@ class AsyncTunnels(AsyncAPIResource):
 
           reason: Optional free-text reason for the rotation, recorded for audit.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this
+              header.
 
           workspace_id: Optional header to select the Workspace for this request. The value is a
               Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
@@ -922,13 +976,17 @@ class AsyncTunnels(AsyncAPIResource):
         }
         extra_headers = {"anthropic-beta": "mcp-tunnels-2026-06-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/tunnels/{tunnel_id}/rotate_token?beta=true", tunnel_id=tunnel_id),
+            path_template("/v1/tunnels/{tunnel_id}/rotate_token", tunnel_id=tunnel_id),
             body={"reason": reason},
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.tunnels.rotate_token",
+                span_route="/v1/tunnels/{tunnel_id}/rotate_token",
+                span_attributes={"anthropic.tunnel.id": tunnel_id},
             ),
             cast_to=BetaTunnelToken,
         )

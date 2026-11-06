@@ -30,7 +30,7 @@ class Members(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MembersWithRawResponse(self)
 
@@ -39,7 +39,7 @@ class Members(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MembersWithStreamingResponse(self)
 
@@ -86,6 +86,12 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=WorkspaceMember,
         )
@@ -120,6 +126,9 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -137,6 +146,12 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=WorkspaceMember,
         )
@@ -194,6 +209,9 @@ class Members(SyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.members.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=WorkspaceMember,
         )
@@ -228,6 +246,9 @@ class Members(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -242,6 +263,10 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.member.id", "user_id"),
             ),
             cast_to=WorkspaceMember,
         )
@@ -289,6 +314,12 @@ class Members(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )
@@ -301,7 +332,7 @@ class AsyncMembers(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMembersWithRawResponse(self)
 
@@ -310,7 +341,7 @@ class AsyncMembers(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMembersWithStreamingResponse(self)
 
@@ -357,6 +388,12 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.retrieve",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=WorkspaceMember,
         )
@@ -391,6 +428,9 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -408,6 +448,12 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.update",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=WorkspaceMember,
         )
@@ -465,6 +511,9 @@ class AsyncMembers(AsyncAPIResource):
                     "before_id": before_id,
                     "limit": limit,
                 },
+                span_name="anthropic.organization.workspaces.members.list",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
             ),
             model=WorkspaceMember,
         )
@@ -499,6 +548,9 @@ class AsyncMembers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          WorkspaceMemberLimitExceededError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -513,6 +565,10 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.add",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members",
+                span_attributes={"anthropic.organization.workspace.id": workspace_id},
+                span_created_id=("anthropic.organization.workspace.member.id", "user_id"),
             ),
             cast_to=WorkspaceMember,
         )
@@ -560,6 +616,12 @@ class AsyncMembers(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                span_name="anthropic.organization.workspaces.members.remove",
+                span_route="/v1/organizations/workspaces/{workspace_id}/members/{user_id}",
+                span_attributes={
+                    "anthropic.organization.workspace.id": workspace_id,
+                    "anthropic.organization.workspace.member.id": user_id,
+                },
             ),
             cast_to=MemberRemoveResponse,
         )

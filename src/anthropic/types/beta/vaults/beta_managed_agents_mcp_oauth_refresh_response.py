@@ -22,7 +22,7 @@ class BetaManagedAgentsMCPOAuthRefreshResponse(BaseModel):
     """OAuth refresh token configuration returned in credential responses."""
 
     client_id: str
-    """OAuth client ID."""
+    """The OAuth client ID used when refreshing the access token."""
 
     token_endpoint: str
     """Token endpoint URL used to refresh the access token."""

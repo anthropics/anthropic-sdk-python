@@ -29,10 +29,9 @@ class BetaExternalKey(BaseModel):
     """
 
     id: str
-    """Identifier of the external key config.
-
-    A tagged ID prefixed `ekey_`, or — for organizations on the Claude Platform on
-    AWS — the AWS KMS key ARN.
+    """
+    Identifier of the external key config: a tagged ID prefixed `ekey_`, or, on
+    Claude Platform on AWS, an AWS KMS key's ARN.
     """
 
     attachment: Attachment
@@ -49,10 +48,7 @@ class BetaExternalKey(BaseModel):
     """Human-friendly display name. Null if none was set."""
 
     geo: str
-    """Data residency geo.
-
-    Selects which regional validator handles this key's encrypt/decrypt roundtrips.
-    """
+    """Data residency geo. Selects the region this key is used in."""
 
     provider_config: ProviderConfig
     """KMS provider identity and auth coordinates."""
@@ -60,3 +56,11 @@ class BetaExternalKey(BaseModel):
     type: Literal["external_key"]
 
     updated_at: datetime
+
+    user_profile_id: Optional[str] = None
+    """
+    ID of the user profile the key is bound to, or null if the key is not bound to
+    one. A key bound to a user profile can only be attached to a Workspace that has
+    the same user profile. A key that isn't bound can be attached to a Workspace
+    whatever its user profile.
+    """

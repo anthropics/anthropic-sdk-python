@@ -14,16 +14,19 @@ class MemoryVersionRetrieveParams(TypedDict, total=False):
     """The ID of the memory store that holds the version (`memstore_...`)."""
 
     view: BetaManagedAgentsMemoryView
-    """Selects which projection of a `memory` or `memory_version` the server returns.
+    """Whether a `memory` or `memory_version` in the response includes its `content`.
 
-    `basic` returns the object with `content` set to `null`; `full` populates
-    `content`. When omitted, the default is endpoint-specific: retrieve operations
-    default to `full`; list, create, and update operations default to `basic`.
-    Listing with `view=full` caps `limit` at 20.
+    Defaults to `full` on retrieve operations and to `basic` on list, create, and
+    update operations.
+
+    With `full`, list operations return at most 20 items per page.
     """
 
     betas: List[AnthropicBetaParam]
-    """Optional header to specify the beta version(s) you want to use."""
+    """
+    This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+    `managed-agents-2026-04-01` in this header.
+    """
 
     workspace_id: str
     """Optional header to select the Workspace for this request.

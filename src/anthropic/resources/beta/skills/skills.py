@@ -53,7 +53,7 @@ class Skills(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SkillsWithRawResponse(self)
 
@@ -62,7 +62,7 @@ class Skills(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SkillsWithStreamingResponse(self)
 
@@ -109,6 +109,17 @@ class Skills(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         extra_headers = {
             **strip_not_given(
@@ -132,7 +143,7 @@ class Skills(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -140,6 +151,10 @@ class Skills(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.create",
+                span_route="/v1/skills",
+                span_created_id="anthropic.skill.id",
             ),
             cast_to=BetaSkill,
         )
@@ -181,6 +196,11 @@ class Skills(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -194,12 +214,16 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.retrieve",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaSkill,
         )
@@ -255,6 +279,11 @@ class Skills(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -266,7 +295,7 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             page=SyncPageCursor[BetaSkill],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -278,6 +307,9 @@ class Skills(SyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.list",
+                span_route="/v1/skills",
             ),
             model=BetaSkill,
         )
@@ -319,6 +351,11 @@ class Skills(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -332,12 +369,16 @@ class Skills(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._delete(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.delete",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaDeletedSkill,
         )
@@ -354,7 +395,7 @@ class AsyncSkills(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSkillsWithRawResponse(self)
 
@@ -363,7 +404,7 @@ class AsyncSkills(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSkillsWithStreamingResponse(self)
 
@@ -410,6 +451,17 @@ class AsyncSkills(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         extra_headers = {
             **strip_not_given(
@@ -433,7 +485,7 @@ class AsyncSkills(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             body=body,
             files=extracted_files,
             options=make_request_options(
@@ -441,6 +493,10 @@ class AsyncSkills(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.create",
+                span_route="/v1/skills",
+                span_created_id="anthropic.skill.id",
             ),
             cast_to=BetaSkill,
         )
@@ -482,6 +538,11 @@ class AsyncSkills(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -495,12 +556,16 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._get(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.retrieve",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaSkill,
         )
@@ -556,6 +621,11 @@ class AsyncSkills(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
@@ -567,7 +637,7 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/skills?beta=true",
+            "/v1/skills",
             page=AsyncPageCursor[BetaSkill],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -579,6 +649,9 @@ class AsyncSkills(AsyncAPIResource):
                     "page": page,
                     "source": source,
                 },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.list",
+                span_route="/v1/skills",
             ),
             model=BetaSkill,
         )
@@ -620,6 +693,11 @@ class AsyncSkills(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -633,12 +711,16 @@ class AsyncSkills(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._delete(
-            path_template("/v1/skills/{skill_id}?beta=true", skill_id=skill_id),
+            path_template("/v1/skills/{skill_id}", skill_id=skill_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.delete",
+                span_route="/v1/skills/{skill_id}",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
             cast_to=BetaDeletedSkill,
         )

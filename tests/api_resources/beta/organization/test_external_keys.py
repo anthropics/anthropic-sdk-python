@@ -27,6 +27,7 @@ class TestExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -41,6 +42,8 @@ class TestExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -51,6 +54,7 @@ class TestExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -65,6 +69,7 @@ class TestExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -78,6 +83,7 @@ class TestExternalKeys:
     def test_method_retrieve(self, client: Anthropic) -> None:
         external_key = client.beta.organization.external_keys.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -85,6 +91,7 @@ class TestExternalKeys:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.external_keys.with_raw_response.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -96,6 +103,7 @@ class TestExternalKeys:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.external_keys.with_streaming_response.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -116,6 +124,7 @@ class TestExternalKeys:
     def test_method_update(self, client: Anthropic) -> None:
         external_key = client.beta.organization.external_keys.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -131,6 +140,7 @@ class TestExternalKeys:
                 "region": "us-east-1",
                 "role_arn": "arn:aws:iam::111122223333:role/anthropic-cmek",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -138,6 +148,7 @@ class TestExternalKeys:
     def test_raw_response_update(self, client: Anthropic) -> None:
         response = client.beta.organization.external_keys.with_raw_response.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -149,6 +160,7 @@ class TestExternalKeys:
     def test_streaming_response_update(self, client: Anthropic) -> None:
         with client.beta.organization.external_keys.with_streaming_response.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -167,7 +179,9 @@ class TestExternalKeys:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        external_key = client.beta.organization.external_keys.list()
+        external_key = client.beta.organization.external_keys.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaExternalKey], external_key, path=["response"])
 
     @parametrize
@@ -175,12 +189,15 @@ class TestExternalKeys:
         external_key = client.beta.organization.external_keys.list(
             limit=1,
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaExternalKey], external_key, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.external_keys.with_raw_response.list()
+        response = client.beta.organization.external_keys.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -189,7 +206,9 @@ class TestExternalKeys:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.external_keys.with_streaming_response.list() as response:
+        with client.beta.organization.external_keys.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -202,6 +221,7 @@ class TestExternalKeys:
     def test_method_delete(self, client: Anthropic) -> None:
         external_key = client.beta.organization.external_keys.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ExternalKeyDeleteResponse, external_key, path=["response"])
 
@@ -209,6 +229,7 @@ class TestExternalKeys:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.organization.external_keys.with_raw_response.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -220,6 +241,7 @@ class TestExternalKeys:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.organization.external_keys.with_streaming_response.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -240,6 +262,7 @@ class TestExternalKeys:
     def test_method_validate(self, client: Anthropic) -> None:
         external_key = client.beta.organization.external_keys.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ExternalKeyValidateResponse, external_key, path=["response"])
 
@@ -247,6 +270,7 @@ class TestExternalKeys:
     def test_raw_response_validate(self, client: Anthropic) -> None:
         response = client.beta.organization.external_keys.with_raw_response.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -258,6 +282,7 @@ class TestExternalKeys:
     def test_streaming_response_validate(self, client: Anthropic) -> None:
         with client.beta.organization.external_keys.with_streaming_response.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -287,6 +312,7 @@ class TestAsyncExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -301,6 +327,8 @@ class TestAsyncExternalKeys:
             },
             display_name="x",
             geo="us",
+            user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -311,6 +339,7 @@ class TestAsyncExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -325,6 +354,7 @@ class TestAsyncExternalKeys:
                 "kms_arn": "arn:aws:kms:us-east-1:111122223333:key/abcd1234-5678-90ab-cdef-000011112222",
                 "type": "aws",
             },
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -338,6 +368,7 @@ class TestAsyncExternalKeys:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         external_key = await async_client.beta.organization.external_keys.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -345,6 +376,7 @@ class TestAsyncExternalKeys:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.external_keys.with_raw_response.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -356,6 +388,7 @@ class TestAsyncExternalKeys:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.external_keys.with_streaming_response.retrieve(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -376,6 +409,7 @@ class TestAsyncExternalKeys:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         external_key = await async_client.beta.organization.external_keys.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -391,6 +425,7 @@ class TestAsyncExternalKeys:
                 "region": "us-east-1",
                 "role_arn": "arn:aws:iam::111122223333:role/anthropic-cmek",
             },
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaExternalKey, external_key, path=["response"])
 
@@ -398,6 +433,7 @@ class TestAsyncExternalKeys:
     async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.external_keys.with_raw_response.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -409,6 +445,7 @@ class TestAsyncExternalKeys:
     async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.external_keys.with_streaming_response.update(
             external_key_id="external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -427,7 +464,9 @@ class TestAsyncExternalKeys:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        external_key = await async_client.beta.organization.external_keys.list()
+        external_key = await async_client.beta.organization.external_keys.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaExternalKey], external_key, path=["response"])
 
     @parametrize
@@ -435,12 +474,15 @@ class TestAsyncExternalKeys:
         external_key = await async_client.beta.organization.external_keys.list(
             limit=1,
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaExternalKey], external_key, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.external_keys.with_raw_response.list()
+        response = await async_client.beta.organization.external_keys.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -449,7 +491,9 @@ class TestAsyncExternalKeys:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.external_keys.with_streaming_response.list() as response:
+        async with async_client.beta.organization.external_keys.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -462,6 +506,7 @@ class TestAsyncExternalKeys:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         external_key = await async_client.beta.organization.external_keys.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ExternalKeyDeleteResponse, external_key, path=["response"])
 
@@ -469,6 +514,7 @@ class TestAsyncExternalKeys:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.external_keys.with_raw_response.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -480,6 +526,7 @@ class TestAsyncExternalKeys:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.external_keys.with_streaming_response.delete(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -500,6 +547,7 @@ class TestAsyncExternalKeys:
     async def test_method_validate(self, async_client: AsyncAnthropic) -> None:
         external_key = await async_client.beta.organization.external_keys.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(ExternalKeyValidateResponse, external_key, path=["response"])
 
@@ -507,6 +555,7 @@ class TestAsyncExternalKeys:
     async def test_raw_response_validate(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.external_keys.with_raw_response.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -518,6 +567,7 @@ class TestAsyncExternalKeys:
     async def test_streaming_response_validate(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.external_keys.with_streaming_response.validate(
             "external_key_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
