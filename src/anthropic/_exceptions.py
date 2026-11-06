@@ -42,7 +42,6 @@ __all__ = [
 class AnthropicError(Exception):
     @override
     def __reduce__(self) -> tuple[Any, ...]:
-        # `pickle` and `copy` otherwise call `__init__` with `self.args`, which most subclasses don't accept
         return new_error, (self.__class__, *self.args), self.__dict__
 
 
@@ -261,5 +260,4 @@ def extract_error_code(body: object) -> str | None:
 
 
 def new_error(error_class: type[AnthropicError], *args: object) -> AnthropicError:
-    # pickled errors refer to this function by name, so renaming or moving it stops them loading
     return error_class.__new__(error_class, *args)
