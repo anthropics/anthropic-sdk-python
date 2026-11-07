@@ -78,6 +78,7 @@ class Usage(SyncAPIResource):
         models: Optional[SequenceNotStr[str]] | Omit = omit,
         order: BetaAnalyticsUsageCostSortOrder | Omit = omit,
         order_by: BetaAnalyticsUsageOrderBy | Omit = omit,
+        organization_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         page: Optional[str] | Omit = omit,
         products: Optional[List[BetaAnalyticsUsageCostProductFilter]] | Omit = omit,
         rbac_group_ids: Optional[SequenceNotStr[str]] | Omit = omit,
@@ -184,6 +185,11 @@ class Usage(SyncAPIResource):
               with `time_bucket_width`; without it, `time` is the same as `total_tokens`.
               Defaults to `total_tokens`.
 
+          organization_ids: Filter a parent organization's report to specific child organizations, by
+              organization UUID or `org_` ID; an ID that is not one of its child organizations
+              matches nothing. Requires an API key created at the parent organization level.
+              Use `group_by[]=organization_id` to break out per-organization values.
+
           page: Opaque cursor from a previous response's `next_page` field.
 
           products: Product surfaces to include. Defaults to all products.
@@ -272,6 +278,7 @@ class Usage(SyncAPIResource):
                     "models": models,
                     "order": order,
                     "order_by": order_by,
+                    "organization_ids": organization_ids,
                     "page": page,
                     "products": products,
                     "rbac_group_ids": rbac_group_ids,
@@ -332,6 +339,7 @@ class AsyncUsage(AsyncAPIResource):
         models: Optional[SequenceNotStr[str]] | Omit = omit,
         order: BetaAnalyticsUsageCostSortOrder | Omit = omit,
         order_by: BetaAnalyticsUsageOrderBy | Omit = omit,
+        organization_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         page: Optional[str] | Omit = omit,
         products: Optional[List[BetaAnalyticsUsageCostProductFilter]] | Omit = omit,
         rbac_group_ids: Optional[SequenceNotStr[str]] | Omit = omit,
@@ -438,6 +446,11 @@ class AsyncUsage(AsyncAPIResource):
               with `time_bucket_width`; without it, `time` is the same as `total_tokens`.
               Defaults to `total_tokens`.
 
+          organization_ids: Filter a parent organization's report to specific child organizations, by
+              organization UUID or `org_` ID; an ID that is not one of its child organizations
+              matches nothing. Requires an API key created at the parent organization level.
+              Use `group_by[]=organization_id` to break out per-organization values.
+
           page: Opaque cursor from a previous response's `next_page` field.
 
           products: Product surfaces to include. Defaults to all products.
@@ -526,6 +539,7 @@ class AsyncUsage(AsyncAPIResource):
                     "models": models,
                     "order": order,
                     "order_by": order_by,
+                    "organization_ids": organization_ids,
                     "page": page,
                     "products": products,
                     "rbac_group_ids": rbac_group_ids,

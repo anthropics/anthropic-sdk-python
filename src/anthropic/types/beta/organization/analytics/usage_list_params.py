@@ -156,6 +156,14 @@ class UsageListParams(TypedDict, total=False):
     to `total_tokens`.
     """
 
+    organization_ids: Optional[SequenceNotStr[str]]
+    """
+    Filter a parent organization's report to specific child organizations, by
+    organization UUID or `org_` ID; an ID that is not one of its child organizations
+    matches nothing. Requires an API key created at the parent organization level.
+    Use `group_by[]=organization_id` to break out per-organization values.
+    """
+
     page: Optional[str]
     """Opaque cursor from a previous response's `next_page` field."""
 
