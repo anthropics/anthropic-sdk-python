@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union
@@ -20,6 +18,6 @@ class BetaManagedAgentsImageBlockParam(TypedDict, total=False):
     """Image content specified directly as base64 data or as a reference via a URL."""
 
     source: Required[Source]
-    """Union type for image source variants."""
+    """The source of the image data."""
 
     type: Required[Literal["image"]]

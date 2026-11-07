@@ -21,7 +21,7 @@ LOGGER = "anthropic.lib.tools.agent_toolset"
 async def _downloaded(
     tmp_path: Path, initial: dict[str, str], *, access: str | None = None
 ) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial, access=access)
     stores = SessionMemoryStores(client, workdir=tmp_path)
     await stores.download(await client.beta.sessions.retrieve("s1"))

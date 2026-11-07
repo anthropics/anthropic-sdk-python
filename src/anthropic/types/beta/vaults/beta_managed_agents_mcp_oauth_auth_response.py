@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -19,7 +17,10 @@ class BetaManagedAgentsMCPOAuthAuthResponse(BaseModel):
     type: Literal["mcp_oauth"]
 
     expires_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the credential's access token expires, in RFC 3339.
+
+    Absent if the expiry isn't known.
+    """
 
     refresh: Optional[BetaManagedAgentsMCPOAuthRefreshResponse] = None
-    """OAuth refresh token configuration returned in credential responses."""
+    """Refresh token configuration, if the credential supports token refresh."""

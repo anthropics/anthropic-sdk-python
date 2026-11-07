@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -12,7 +10,7 @@ class BetaManagedAgentsMemoryStoreResourceParam(TypedDict, total=False):
     """Parameters for attaching a memory store to an agent session."""
 
     memory_store_id: Required[str]
-    """The memory store ID (memstore\\__...).
+    """The memory store ID (memstore_...).
 
     Must belong to the caller's organization and workspace.
     """
@@ -20,7 +18,10 @@ class BetaManagedAgentsMemoryStoreResourceParam(TypedDict, total=False):
     type: Required[Literal["memory_store"]]
 
     access: Optional[Literal["read_write", "read_only"]]
-    """Access mode for an attached memory store."""
+    """Access mode for the mounted store.
+
+    Defaults to read_write. read_only mounts the store as a read-only filesystem.
+    """
 
     instructions: Optional[str]
     """Per-attachment guidance for the agent on how to use this store.

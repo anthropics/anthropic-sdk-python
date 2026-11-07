@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -20,18 +18,12 @@ Tool: TypeAlias = Union[
 class BetaRequestToolRemovalBlockParam(TypedDict, total=False):
     """Mid-conversation directive to withdraw a tool.
 
-    ``tool`` references a tool (or MCP toolset) by name from the request's
-    ``tools``; it is no longer offered to the model from this point in the
-    conversation onward.
+    ``tool`` references a tool (or MCP toolset) by name: one declared in the
+    request's ``tools`` or defined earlier in ``messages``. It is no longer
+    offered to the model from this point in the conversation onward.
     """
 
     tool: Required[Tool]
-    """Reference to a single tool the caller declared directly in `tools[]`.
-
-    Does not accept the composed `{server}_{name}` form the server assigns to
-    MCP-resolved tools — use `mcp_tool_reference` or `mcp_toolset_reference` for
-    those.
-    """
 
     type: Required[Literal["tool_removal"]]
 

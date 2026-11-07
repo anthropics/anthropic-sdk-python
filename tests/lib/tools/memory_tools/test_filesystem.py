@@ -341,6 +341,43 @@ class TestBetaLocalFilesystemMemoryTool:
         dir_snapshot = get_directory_snapshot(str(sync_local_filesystem_tool.base_path))
         assert dir_snapshot == {"memories/insert_test.txt": "Line 1\nLine 2\nLast Line\n"}
 
+    def test_view_preserves_crlf_line_endings(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
+        (sync_local_filesystem_tool.memory_root / "crlf.txt").write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        result = sync_local_filesystem_tool.view(
+            BetaMemoryTool20250818ViewCommand(command="view", path="/memories/crlf.txt")
+        )
+        assert (
+            result
+            == "Here's the content of /memories/crlf.txt with line numbers:\n     1\tline1\r\n     2\tline2\r\n     3\tline3\r\n     4\t"
+        )
+
+    def test_str_replace_preserves_crlf_line_endings(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        path = sync_local_filesystem_tool.memory_root / "crlf.txt"
+        path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        sync_local_filesystem_tool.str_replace(
+            BetaMemoryTool20250818StrReplaceCommand(
+                command="str_replace", path="/memories/crlf.txt", old_str="line2", new_str="LINE2"
+            )
+        )
+        assert path.read_bytes() == b"line1\r\nLINE2\r\nline3\r\n"
+
+    def test_insert_preserves_crlf_line_endings(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        path = sync_local_filesystem_tool.memory_root / "crlf.txt"
+        path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        sync_local_filesystem_tool.insert(
+            BetaMemoryTool20250818InsertCommand(
+                command="insert", path="/memories/crlf.txt", insert_line=1, insert_text="Inserted"
+            )
+        )
+        assert path.read_bytes() == b"line1\r\nInserted\nline2\r\nline3\r\n"
+
     def test_insert_error_for_non_existent_file(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
     ) -> None:
@@ -406,11 +443,14 @@ class TestBetaLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
     def test_delete_not_allow_deleting_memories_directory(
-        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
-            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories"))
+            sync_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert sync_local_filesystem_tool.memory_root.is_dir()
 
     def test_rename(self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool) -> None:
         sync_local_filesystem_tool.create(
@@ -471,6 +511,17 @@ class TestBetaLocalFilesystemMemoryTool:
                     command="rename", old_path="/memories/file1.txt", new_path="/memories/file2.txt"
                 )
             )
+
+    @pytest.mark.parametrize("old_path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
+    def test_rename_not_allow_renaming_memories_directory(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool, old_path: str
+    ) -> None:
+        with pytest.raises(ToolError, match="Cannot rename the /memories directory itself") as exc_info:
+            sync_local_filesystem_tool.rename(
+                BetaMemoryTool20250818RenameCommand(command="rename", old_path=old_path, new_path="/memories/moved")
+            )
+
+        assert str(sync_local_filesystem_tool.base_path) not in str(exc_info.value)
 
     def test_path_validation_reject_paths_not_starting_with_memories(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
@@ -831,6 +882,51 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
         dir_snapshot = get_directory_snapshot(str(async_local_filesystem_tool.base_path))
         assert dir_snapshot == {"memories/insert_test.txt": "Line 1\nLine 2\nLast Line\n"}
 
+    async def test_view_preserves_crlf_line_endings(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        memory_root = Path(str(async_local_filesystem_tool.memory_root))
+        memory_root.mkdir(parents=True, exist_ok=True)
+        (memory_root / "crlf.txt").write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        result = await async_local_filesystem_tool.view(
+            BetaMemoryTool20250818ViewCommand(command="view", path="/memories/crlf.txt")
+        )
+        assert (
+            result
+            == "Here's the content of /memories/crlf.txt with line numbers:\n     1\tline1\r\n     2\tline2\r\n     3\tline3\r\n     4\t"
+        )
+
+    async def test_str_replace_preserves_crlf_line_endings(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        memory_root = Path(str(async_local_filesystem_tool.memory_root))
+        memory_root.mkdir(parents=True, exist_ok=True)
+        path = memory_root / "crlf.txt"
+        path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        await async_local_filesystem_tool.str_replace(
+            BetaMemoryTool20250818StrReplaceCommand(
+                command="str_replace", path="/memories/crlf.txt", old_str="line2", new_str="LINE2"
+            )
+        )
+        assert path.read_bytes() == b"line1\r\nLINE2\r\nline3\r\n"
+
+    async def test_insert_preserves_crlf_line_endings(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        memory_root = Path(str(async_local_filesystem_tool.memory_root))
+        memory_root.mkdir(parents=True, exist_ok=True)
+        path = memory_root / "crlf.txt"
+        path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+
+        await async_local_filesystem_tool.insert(
+            BetaMemoryTool20250818InsertCommand(
+                command="insert", path="/memories/crlf.txt", insert_line=1, insert_text="Inserted"
+            )
+        )
+        assert path.read_bytes() == b"line1\r\nInserted\nline2\r\nline3\r\n"
+
     async def test_insert_error_for_non_existent_file(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
     ) -> None:
@@ -898,13 +994,14 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories/nonexistent.txt")
             )
 
+    @pytest.mark.parametrize("path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
     async def test_delete_not_allow_deleting_memories_directory(
-        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, path: str
     ) -> None:
         with pytest.raises(ToolError, match="Cannot delete the /memories directory itself"):
-            await async_local_filesystem_tool.delete(
-                BetaMemoryTool20250818DeleteCommand(command="delete", path="/memories")
-            )
+            await async_local_filesystem_tool.delete(BetaMemoryTool20250818DeleteCommand(command="delete", path=path))
+
+        assert await async_local_filesystem_tool.memory_root.is_dir()
 
     async def test_rename(self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool) -> None:
         await async_local_filesystem_tool.create(
@@ -965,6 +1062,17 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                     command="rename", old_path="/memories/file1.txt", new_path="/memories/file2.txt"
                 )
             )
+
+    @pytest.mark.parametrize("old_path", ["/memories", "/memories/", "/memories/.", "/memories/sub/.."])
+    async def test_rename_not_allow_renaming_memories_directory(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool, old_path: str
+    ) -> None:
+        with pytest.raises(ToolError, match="Cannot rename the /memories directory itself") as exc_info:
+            await async_local_filesystem_tool.rename(
+                BetaMemoryTool20250818RenameCommand(command="rename", old_path=old_path, new_path="/memories/moved")
+            )
+
+        assert str(async_local_filesystem_tool.base_path) not in str(exc_info.value)
 
     async def test_path_validation_reject_paths_not_starting_with_memories(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool

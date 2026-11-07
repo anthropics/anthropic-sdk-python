@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing_extensions import Literal
 
 from ...._models import BaseModel
@@ -11,7 +9,10 @@ class BetaSelfHostedWorkHeartbeatResponse(BaseModel):
     """Response after recording a heartbeat for a work item."""
 
     last_heartbeat: str
-    """RFC 3339 timestamp of the actual heartbeat from DB"""
+    """
+    RFC 3339 timestamp of the most recent heartbeat recorded for this work item, or
+    an empty string if none has been recorded
+    """
 
     lease_extended: bool
     """Whether the heartbeat succeeded in extending the lease"""

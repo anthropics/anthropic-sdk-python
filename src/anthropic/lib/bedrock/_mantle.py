@@ -4,26 +4,30 @@ import os
 from typing import Any, Union, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
-from ... import _exceptions
 from ..._qs import Querystring
-from ..._types import Omit, Timeout, NotGiven, not_given
-from ..._utils import asyncify, is_given
+from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
+from ..._utils import is_dict, asyncify
+from ..._client import _keep_client_header_params
 from ..._compat import cached_property
 from ..._version import __version__
 from ..aws._auth import get_auth_headers
 from ..._resource import SyncAPIResource, AsyncAPIResource
+from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
-from ..._exceptions import AnthropicError, APIStatusError
+from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
 from ..._base_client import (
     DEFAULT_MAX_RETRIES,
     BaseClient,
     SyncAPIClient,
     AsyncAPIClient,
+    FinalRequestOptions,
+    build_headers,
     merge_headers,
 )
+from .._platform_client import copy_platform_client
 from ..aws._credentials import (
     resolve_region,
     resolve_api_key,
@@ -37,11 +41,19 @@ DEFAULT_SERVICE_NAME = "bedrock-mantle"
 
 _MANTLE_API_KEY_ENV_VARS = ("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY")
 
-_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx.Client, httpx.AsyncClient])
+USER_PROFILE_ID_HEADER = "anthropic-user-profile-id"
+
+USER_PROFILE_ID_BODY_PATHS = frozenset(
+    {
+        "/v1/messages",
+        "/v1/messages?beta=true",
+        "/v1/messages/count_tokens",
+        "/v1/messages/count_tokens?beta=true",
+    }
+)
+
+_HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
-
-
-# --- Beta resources (messages-only) ---
 
 
 class MantleBeta(SyncAPIResource):
@@ -56,51 +68,25 @@ class AsyncMantleBeta(AsyncAPIResource):
         return AsyncBetaMessages(self._client)
 
 
-# --- Base ---
-
-
 class BaseMantleClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
-    @override
-    def _make_status_error(
-        self,
-        err_msg: str,
-        *,
-        body: object,
-        response: httpx.Response,
-    ) -> APIStatusError:
-        if response.status_code == 400:
-            return _exceptions.BadRequestError(err_msg, response=response, body=body)
+    # Mantle is an Amazon Bedrock endpoint.
+    _gen_ai_provider_name = "aws.bedrock"
+    _otel_platform = "bedrock"
 
-        if response.status_code == 401:
-            return _exceptions.AuthenticationError(err_msg, response=response, body=body)
+    def _move_user_profile_id_to_body(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        """Mantle reads the user profile ID from the body of these requests, and from the header on other routes."""
+        body = options.json_data
+        if options.url not in USER_PROFILE_ID_BODY_PATHS or not is_dict(body):
+            return options
 
-        if response.status_code == 403:
-            return _exceptions.PermissionDeniedError(err_msg, response=response, body=body)
+        headers: Headers = options.headers or {}
+        user_profile_id = build_headers(self._custom_headers, headers)[0].get(USER_PROFILE_ID_HEADER)
+        if user_profile_id is None:
+            return options
 
-        if response.status_code == 404:
-            return _exceptions.NotFoundError(err_msg, response=response, body=body)
-
-        if response.status_code == 409:
-            return _exceptions.ConflictError(err_msg, response=response, body=body)
-
-        if response.status_code == 413:
-            return _exceptions.RequestTooLargeError(err_msg, response=response, body=body)
-
-        if response.status_code == 422:
-            return _exceptions.UnprocessableEntityError(err_msg, response=response, body=body)
-
-        if response.status_code == 429:
-            return _exceptions.RateLimitError(err_msg, response=response, body=body)
-
-        if response.status_code == 529:
-            return _exceptions.OverloadedError(err_msg, response=response, body=body)
-
-        if response.status_code >= 500:
-            return _exceptions.InternalServerError(err_msg, response=response, body=body)
-        return APIStatusError(err_msg, response=response, body=body)
-
-
-# --- Shared init logic ---
+        options.headers = merge_headers(headers, {USER_PROFILE_ID_HEADER: omit})
+        options.json_data = {"user_profile_id": user_profile_id, **body}
+        return options
 
 
 def _resolve_mantle_config(
@@ -111,9 +97,9 @@ def _resolve_mantle_config(
     aws_region: str | None,
     aws_profile: str | None,
     skip_auth: bool,
-    base_url: str | httpx.URL | None,
+    base_url: str | httpx2.URL | None,
     default_headers: Mapping[str, str] | None,
-) -> tuple[str | None, str | httpx.URL, bool, dict[str, str]]:
+) -> tuple[str | None, str | httpx2.URL, bool, dict[str, str]]:
     """Resolve and validate all Mantle client configuration.
 
     Returns (resolved_api_key, resolved_base_url, use_sigv4, merged_headers).
@@ -158,10 +144,7 @@ def _resolve_mantle_config(
     return resolved_api_key, base_url, use_sigv4, merged_headers
 
 
-# --- Sync client ---
-
-
-class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAPIClient):
+class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncAPIClient):
     messages: Messages
     beta: MantleBeta
 
@@ -184,12 +167,15 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -211,6 +197,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
             base_url=resolved_base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=merged_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -251,20 +238,24 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return self._move_user_profile_id_to_body(_keep_client_header_params(options))
+
+    @override
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if self.skip_auth or not self._use_sigv4:
             return
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = get_auth_headers(
             method=request.method,
@@ -290,10 +281,11 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -304,25 +296,8 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
@@ -331,12 +306,15 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -354,10 +332,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx.Client, Stream[Any]], SyncAP
         return self.copy(middleware=[*self._middleware, *middleware])
 
 
-# --- Async client ---
-
-
-class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
+class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStream[Any]], AsyncAPIClient):
     messages: AsyncMessages
     beta: AsyncMantleBeta
 
@@ -380,12 +355,15 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
@@ -407,6 +385,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
             base_url=resolved_base_url,
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             custom_headers=merged_headers,
             custom_query=default_query,
             http_client=http_client,
@@ -447,20 +426,24 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         return {
             **super().default_headers,
             "X-Stainless-Async": "async:asyncio",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_API_VERSION,
             **self._custom_headers,
         }
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         pass
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        return self._move_user_profile_id_to_body(_keep_client_header_params(options))
+
+    @override
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if self.skip_auth or not self._use_sigv4:
             return
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = await asyncify(get_auth_headers)(
             method=request.method,
@@ -486,10 +469,11 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -500,25 +484,8 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
@@ -527,12 +494,15 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx.AsyncClient, AsyncStrea
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
             base_url=base_url or self.base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
+            timeout=timeout,
             http_client=http_client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

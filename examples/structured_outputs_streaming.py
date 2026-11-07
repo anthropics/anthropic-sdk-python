@@ -17,7 +17,7 @@ Extract the product name, price, and quantity from this customer message:
 """
 
 with client.messages.stream(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     messages=[{"role": "user", "content": prompt}],
     max_tokens=1024,
     output_format=Order,
@@ -26,6 +26,5 @@ with client.messages.stream(
         if event.type == "text":
             print(event.parsed_snapshot())
 
-    # Get the final parsed output
     final_message = stream.get_final_message()
     print(f"\nFinal parsed order: {final_message.parsed_output}")

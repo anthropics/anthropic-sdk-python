@@ -6,8 +6,9 @@ import json
 import logging
 from typing import Any, List, Protocol, cast
 from pathlib import Path
+from typing_extensions import Literal
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -19,6 +20,7 @@ from anthropic import (
     APIResponse,
     AsyncStream,
     AnthropicError,
+    APIStatusError,
     AsyncAnthropic,
     BetaFallbackState,
     BetaRefusalFallbackMiddleware,
@@ -27,6 +29,8 @@ from anthropic import (
 from anthropic._models import FinalRequestOptions
 from anthropic.types.beta import BetaMessage, BetaFallbackParam, BetaRawMessageStreamEvent
 from anthropic.types.anthropic_beta_param import AnthropicBetaParam
+
+from ..utils import Body
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -90,15 +94,15 @@ def make_lenient_client(**kwargs: Any) -> Anthropic:
     return Anthropic(base_url=base_url, api_key=api_key, max_retries=0, **kwargs)
 
 
-def sse_response(body: str) -> httpx.Response:
-    return httpx.Response(200, headers={"content-type": "text/event-stream"}, content=body.encode("utf-8"))
+def sse_response(body: str) -> httpx2.Response:
+    return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=body.encode("utf-8"))
 
 
-def json_response(body: Any, status: int) -> httpx.Response:
-    return httpx.Response(status, json=body)
+def json_response(body: Any, status: int) -> httpx2.Response:
+    return httpx2.Response(status, json=body)
 
 
-def error_response(message: str, status: int) -> httpx.Response:
+def error_response(message: str, status: int) -> httpx2.Response:
     return json_response({"type": "error", "error": {"type": "invalid_request_error", "message": message}}, status)
 
 
@@ -155,7 +159,7 @@ def collect(stream: Stream[BetaRawMessageStreamEvent]) -> list[BetaRawMessageStr
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 def request_bodies(respx_mock: MockRouter) -> list[dict[str, Any]]:
@@ -166,6 +170,15 @@ def request_bodies(respx_mock: MockRouter) -> list[dict[str, Any]]:
 def beta_headers(respx_mock: MockRouter) -> list[str | None]:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     return [call.request.headers.get("anthropic-beta") for call in calls]
+
+
+def without_speed(body: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in body.items() if key != "speed"}
+
+
+def resend_warnings(caplog: pytest.LogCaptureFixture) -> list[str]:
+    messages = [record.getMessage() for record in caplog.records if record.name == LOGGER_NAME]
+    return [message for message in messages if "retrying without `speed`" in message]
 
 
 def skeleton(events: list[BetaRawMessageStreamEvent]) -> list[str]:
@@ -196,22 +209,29 @@ def block_starts(events: list[BetaRawMessageStreamEvent]) -> list[tuple[int, str
 
 
 def create_stream(
-    client: Anthropic, *, betas: List[AnthropicBetaParam] | Omit = omit
+    client: Anthropic,
+    *,
+    betas: List[AnthropicBetaParam] | Omit = omit,
+    speed: Literal["standard", "fast"] | Omit = omit,
 ) -> Stream[BetaRawMessageStreamEvent]:
     return client.beta.messages.create(
         model="claude-fable-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "Hey claudius! Can you tell me what a solar eclipse is?"}],
         betas=betas,
+        speed=speed,
         stream=True,
     )
 
 
-async def create_stream_async(client: AsyncAnthropic) -> "AsyncStream[BetaRawMessageStreamEvent]":
+async def create_stream_async(
+    client: AsyncAnthropic, *, speed: Literal["standard", "fast"] | Omit = omit
+) -> "AsyncStream[BetaRawMessageStreamEvent]":
     return await client.beta.messages.create(
         model="claude-fable-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "Hey claudius! Can you tell me what a solar eclipse is?"}],
+        speed=speed,
         stream=True,
     )
 
@@ -248,6 +268,21 @@ class TestShapeBContinuation:
         assert len([e for e in events if e.type == "message_start"]) == 1
         assert len([e for e in events if e.type == "message_stop"]) == 1
         assert len([e for e in events if e.type == "message_delta"]) == 1
+
+        # B's message_start (not re-emitted) has no `input_transformations`, so
+        # the emitted message_delta gains none.
+        delta = next(e for e in events if e.type == "message_delta")
+        assert "input_transformations" not in delta.to_dict()
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_stream_helper_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        with client.beta.messages.stream(**PARAMS) as stream:
+            stream.until_done()
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["claude-fable-5", FALLBACK_MODEL]
 
     @pytest.mark.respx(base_url=base_url)
     def test_usage_iterations_is_the_two_entry_server_shape(self, respx_mock: MockRouter) -> None:
@@ -300,6 +335,17 @@ class TestShapeBContinuation:
         assert "signature" in appended["content"][0]
 
     @pytest.mark.respx(base_url=base_url)
+    def test_between_tools_thinking_degrades_to_disabled_on_the_hop(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        collect(client.beta.messages.create(**PARAMS, thinking={"type": "between_tools"}, stream=True))
+
+        bodies = request_bodies(respx_mock)
+        assert bodies[0]["thinking"] == {"type": "between_tools"}
+        assert bodies[1]["thinking"] == {"type": "disabled"}
+
+    @pytest.mark.respx(base_url=base_url)
     def test_appends_the_fallback_credit_beta_to_both_the_original_and_hop_requests(
         self, respx_mock: MockRouter
     ) -> None:
@@ -310,8 +356,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["interleaved-thinking-2025-05-14"]))
 
         assert beta_headers(respx_mock) == [
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
-            "interleaved-thinking-2025-05-14, fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
+            "interleaved-thinking-2025-05-14,fallback-credit-2026-07-01",
         ]
 
     @pytest.mark.respx(base_url=base_url)
@@ -324,8 +370,8 @@ class TestShapeBContinuation:
         collect(create_stream(client, betas=["fallback-credit-2026-06-01"]))
 
         assert beta_headers(respx_mock) == [
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
-            "fallback-credit-2026-06-01, fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
+            "fallback-credit-2026-06-01,fallback-credit-2027-01-01",
         ]
 
 
@@ -492,7 +538,7 @@ class TestEdgeCases:
         self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
     ) -> None:
         respx_mock.post("/v1/messages").mock(
-            side_effect=[sse_response(STREAM_A), httpx.ConnectError("connection reset")]
+            side_effect=[sse_response(STREAM_A), httpx2.ConnectError("connection reset")]
         )
         client = make_lenient_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
 
@@ -598,7 +644,8 @@ class TestEdgeCases:
         client = make_lenient_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
 
         with pytest.raises(
-            AnthropicError, match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\."
+            AnthropicError,
+            match=r"Sending the `fallbacks:` request param is not supported when using the `BetaRefusalFallbackMiddleware`\. You should either remove the middleware and send `fallbacks:` with the `server-side-fallback-2026-07-01` beta header to let the API handle refusal fallbacks, or omit the `fallbacks:` param if you'd like `BetaRefusalFallbackMiddleware` to handle fallbacks on the client side\.",
         ):
             client.beta.messages.create(
                 model="claude-fable-5",
@@ -855,6 +902,7 @@ class TestFallbackChain:
         options = FinalRequestOptions.construct(
             method="post", url="/v1/messages?beta=true", json_data=dict(PARAMS), headers={}
         )
+        options.qualifiers = {"beta": "true"}
         request = APIRequest(
             options=options,
             cast_to=BetaMessage,
@@ -892,7 +940,7 @@ class TestFallbackChain:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
                 sse_response(STREAM_A),
-                httpx.ConnectError("connection reset"),
+                httpx2.ConnectError("connection reset"),
                 sse_response(STREAM_B),
             ]
         )
@@ -953,6 +1001,51 @@ def serving_stream(model: str = FALLBACK_MODEL, message_id: str = "msg_b") -> st
                     "usage": {"output_tokens": 9},
                 }
             ),
+            ev({"type": "message_stop"}),
+        ]
+    )
+
+
+TRANSFORMS: List[dict[str, Any]] = [
+    {"type": "thinking_dropped", "path": "messages.1.content.0", "reason": "model_binding_mismatch"}
+]
+
+
+def transforming_stream(
+    *, delta_transformations: List[dict[str, Any]] | None = None, terminal: str | None = None
+) -> str:
+    """A hop whose message_start reports `input_transformations`. It serves —
+    its terminal message_delta carrying `delta_transformations` only when given —
+    unless `terminal` supplies the closing message_delta frame instead."""
+    delta: dict[str, Any] = {
+        "type": "message_delta",
+        "delta": {"stop_reason": "end_turn", "stop_sequence": None},
+        "usage": {"output_tokens": 9},
+    }
+    if delta_transformations is not None:
+        delta["input_transformations"] = delta_transformations
+    return "".join(
+        [
+            ev(
+                {
+                    "type": "message_start",
+                    "message": {
+                        "id": "msg_b",
+                        "type": "message",
+                        "role": "assistant",
+                        "model": FALLBACK_MODEL,
+                        "content": [],
+                        "stop_reason": None,
+                        "stop_sequence": None,
+                        "input_transformations": TRANSFORMS,
+                        "usage": {"input_tokens": 12, "output_tokens": 1},
+                    },
+                }
+            ),
+            ev({"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}),
+            ev({"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Happy to help."}}),
+            ev({"type": "content_block_stop", "index": 0}),
+            terminal if terminal is not None else ev(delta),
             ev({"type": "message_stop"}),
         ]
     )
@@ -1039,6 +1132,78 @@ class TestPreStreamRefusals:
 
 
 # --- history seam replay ------------------------------------------------------
+
+
+class TestSplicedInputTransformations:
+    """A mid-stream fallback's message_start is not re-emitted, so its
+    `input_transformations` are copied onto the emitted message_delta, matching
+    what a server-side fallback sends. A list already on the delta is kept."""
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_suppressed_starts_list_is_forwarded_on_the_terminal(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(transforming_stream())])
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        assert len([e for e in events if e.type == "message_start"]) == 1
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_list_already_on_the_delta_is_kept(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(STREAM_A), sse_response(transforming_stream(delta_transformations=[]))]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == []
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_list_is_forwarded_on_a_degraded_chains_replayed_refusal(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        # the spliced fallback refuses with a token and every later entry fails
+        # over HTTP: its held-back refusal is replayed as the final message_delta,
+        # with the list on it
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                sse_response(transforming_stream(terminal=refusal_delta("tok_b", False))),
+                error_response("down", 503),
+            ]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        assert len(respx_mock.calls) == 3
+        assert len(error_logs(caplog)) == 1
+        assert len([e for e in events if e.type == "message_start"]) == 1
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.delta.stop_reason == "refusal"
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
+        assert events[-1].type == "message_stop"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_an_emitted_start_leaves_the_delta_untouched(self, respx_mock: MockRouter) -> None:
+        # a pre-stream refusal: the fallback's message_start is emitted itself,
+        # so nothing is copied onto the message_delta
+        pre_stream_refusal = "".join([message_start(), refusal_delta("tok_abc", False), ev({"type": "message_stop"})])
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(pre_stream_refusal), sse_response(transforming_stream())]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client))
+
+        start = next(e for e in events if e.type == "message_start")
+        assert start.message.to_dict()["input_transformations"] == TRANSFORMS
+        delta = next(e for e in events if e.type == "message_delta")
+        assert "input_transformations" not in delta.to_dict()
 
 
 class TestHistorySeamReplay:
@@ -1451,6 +1616,175 @@ class TestToolUseRefusals:
         assert body_b["messages"] == PARAMS["messages"]
 
 
+# --- rate-limited fast hops ---------------------------------------------------
+
+
+# No prefill claim, so a 400 on the hop is a plain failure rather than a rejected prefill.
+REFUSAL_WITHOUT_A_PREFILL_CLAIM = "".join(
+    [message_start(), refusal_delta("tok_abc", False), ev({"type": "message_stop"})]
+)
+
+FAILED_HOPS_THAT_ARE_NOT_RESENT = [
+    pytest.param({"model": FALLBACK_MODEL, "speed": "fast"}, "fast", 429, id="the-entry-sets-fast"),
+    pytest.param({"model": FALLBACK_MODEL}, omit, 429, id="no-speed"),
+    pytest.param({"model": FALLBACK_MODEL}, "standard", 429, id="standard-speed"),
+    pytest.param({"model": FALLBACK_MODEL}, "fast", 400, id="http-400"),
+    pytest.param({"model": FALLBACK_MODEL}, "fast", 500, id="http-500"),
+]
+
+
+# The statuses one entry's requests draw before it serves, with the `speed` each request
+# carries and whether it has the refused model's partial output appended.
+HOPS_THAT_ALSO_DROP_THE_PARTIAL = [
+    pytest.param([429, 400], [("fast", True), (None, True), (None, False)], id="rate-limited-first"),
+    pytest.param([400, 429], [("fast", True), ("fast", False), (None, False)], id="partial-rejected-first"),
+]
+
+
+class TestRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        rejected = Body()
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(STREAM_A), httpx2.Response(status, stream=rejected), sse_response(STREAM_B)]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client, speed="fast"))
+
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("claude-fable-5", "fast"),
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"]["mode"] == "best_effort"
+        assert bodies[2] == without_speed(bodies[1])
+        assert rejected.closes == 1
+        assert len(resend_warnings(caplog)) == 1
+
+        # The recovered hop is not a failure: one boundary, a normal completion.
+        assert error_logs(caplog) == []
+        assert block_starts(events) == [(0, "thinking"), (1, "text"), (2, "fallback"), (3, "text")]
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(REFUSAL_WITHOUT_A_PREFILL_CLAIM),
+                error_response("nope", status),
+                sse_response(serving_stream()),
+            ]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        events = collect(create_stream(client, speed=speed))
+
+        assert len(respx_mock.calls) == 2
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "refusal"
+
+    @pytest.mark.parametrize(("statuses", "hop_requests"), HOPS_THAT_ALSO_DROP_THE_PARTIAL)
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_retry_without_the_partial_does_not_go_back_to_fast(
+        self, respx_mock: MockRouter, statuses: List[int], hop_requests: List[tuple[str | None, bool]]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                *(error_response("nope", status) for status in statuses),
+                sse_response(STREAM_B),
+            ]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        events = collect(create_stream(client, speed="fast"))
+
+        hops = request_bodies(respx_mock)[1:]
+        assert [(body.get("speed"), len(body["messages"]) == 2) for body in hops] == hop_requests
+        assert ["speed" in body for body in hops] == [speed is not None for speed, _ in hop_requests]
+        assert {body["model"] for body in hops} == {FALLBACK_MODEL}
+        assert all(body["fallback_credit_token"] == hops[0]["fallback_credit_token"] for body in hops)
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_resend_that_is_rate_limited_too_fails_the_hop(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                error_response("slow down", 429),
+                error_response("slow down", 429),
+                sse_response(STREAM_B),
+            ]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        events = collect(create_stream(client, speed="fast"))
+
+        # The failed hop is skipped as usual, and the next entry starts from the original `speed`.
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("claude-fable-5", "fast"),
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+            (SECOND_MODEL, "fast"),
+        ]
+        assert bodies[3]["fallback_credit_token"] == bodies[1]["fallback_credit_token"]
+        errors = error_logs(caplog)
+        assert len(errors) == 1
+        assert "HTTP 429" in errors[0]
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(self, respx_mock: MockRouter) -> None:
+        rejected = Body()
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[httpx2.Response(429, stream=rejected), sse_response(serving_stream())]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            events = collect(create_stream(client, speed="fast"))
+
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+        assert rejected.closes == 1
+        assert state.index == 0
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error_response("slow down", 429), sse_response(serving_stream())]
+        )
+        client = make_sync_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        with pytest.raises(APIStatusError):
+            create_stream(client, speed="fast")
+
+        assert len(respx_mock.calls) == 1
+
+
 # --- async ------------------------------------------------------------------
 
 
@@ -1488,6 +1822,29 @@ class TestAsyncSplicing:
         appended = bodies[1]["messages"][1]
         assert appended["role"] == "assistant"
         assert [block["type"] for block in appended["content"]] == ["thinking", "text"]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_stream_helper_gets_the_fallback(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(STREAM_B)])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        async with client.beta.messages.stream(**PARAMS) as stream:
+            await stream.until_done()
+
+        assert [body["model"] for body in request_bodies(respx_mock)] == ["claude-fable-5", FALLBACK_MODEL]
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_suppressed_starts_input_transformations_are_forwarded_on_the_terminal(
+        self, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(side_effect=[sse_response(STREAM_A), sse_response(transforming_stream())])
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        stream = await create_stream_async(client)
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        delta = next(e for e in events if e.type == "message_delta")
+        assert delta.to_dict()["input_transformations"] == TRANSFORMS
 
     @pytest.mark.respx(base_url=base_url)
     async def test_a_refused_hop_splices_its_partial_and_chains_to_the_next_entry(self, respx_mock: MockRouter) -> None:
@@ -1531,5 +1888,154 @@ class TestAsyncSplicing:
             if seen == 2:
                 break
         await stream.close()
+
+        assert len(respx_mock.calls) == 1
+
+
+class TestAsyncRateLimitedFastHop:
+    @pytest.mark.parametrize("status", [429, 529])
+    @pytest.mark.respx(base_url=base_url)
+    async def test_is_resent_once_without_speed(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture, status: int
+    ) -> None:
+        rejected = Body()
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[sse_response(STREAM_A), httpx2.Response(status, stream=rejected), sse_response(STREAM_B)]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        stream = await create_stream_async(client, speed="fast")
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("claude-fable-5", "fast"),
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+        ]
+        assert "speed" not in bodies[2]
+        assert bodies[2]["fallback_credit_token"]["mode"] == "best_effort"
+        assert bodies[2] == without_speed(bodies[1])
+        assert rejected.closes == 1
+        assert len(resend_warnings(caplog)) == 1
+
+        assert error_logs(caplog) == []
+        assert block_starts(events) == [(0, "thinking"), (1, "text"), (2, "fallback"), (3, "text")]
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.parametrize(("entry", "speed", "status"), FAILED_HOPS_THAT_ARE_NOT_RESENT)
+    @pytest.mark.respx(base_url=base_url)
+    async def test_any_other_failed_hop_is_not_resent(
+        self,
+        respx_mock: MockRouter,
+        entry: BetaFallbackParam,
+        speed: Literal["standard", "fast"] | Omit,
+        status: int,
+    ) -> None:
+        # the last response is a spare: an unwanted resend would be served and counted
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(REFUSAL_WITHOUT_A_PREFILL_CLAIM),
+                error_response("nope", status),
+                sse_response(serving_stream()),
+            ]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware([entry])])
+
+        stream = await create_stream_async(client, speed=speed)
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        assert len(respx_mock.calls) == 2
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "refusal"
+
+    @pytest.mark.parametrize(("statuses", "hop_requests"), HOPS_THAT_ALSO_DROP_THE_PARTIAL)
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_retry_without_the_partial_does_not_go_back_to_fast(
+        self, respx_mock: MockRouter, statuses: List[int], hop_requests: List[tuple[str | None, bool]]
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                *(error_response("nope", status) for status in statuses),
+                sse_response(STREAM_B),
+            ]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        stream = await create_stream_async(client, speed="fast")
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        hops = request_bodies(respx_mock)[1:]
+        assert [(body.get("speed"), len(body["messages"]) == 2) for body in hops] == hop_requests
+        assert ["speed" in body for body in hops] == [speed is not None for speed, _ in hop_requests]
+        assert {body["model"] for body in hops} == {FALLBACK_MODEL}
+        assert all(body["fallback_credit_token"] == hops[0]["fallback_credit_token"] for body in hops)
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_resend_that_is_rate_limited_too_fails_the_hop(
+        self, respx_mock: MockRouter, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[
+                sse_response(STREAM_A),
+                error_response("slow down", 429),
+                error_response("slow down", 429),
+                sse_response(STREAM_B),
+            ]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        stream = await create_stream_async(client, speed="fast")
+        events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            ("claude-fable-5", "fast"),
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+            (SECOND_MODEL, "fast"),
+        ]
+        assert bodies[3]["fallback_credit_token"] == bodies[1]["fallback_credit_token"]
+        errors = error_logs(caplog)
+        assert len(errors) == 1
+        assert "HTTP 429" in errors[0]
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_a_request_that_starts_on_the_pinned_entry_is_resent_without_speed(
+        self, respx_mock: MockRouter
+    ) -> None:
+        rejected = Body()
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[httpx2.Response(429, stream=rejected), sse_response(serving_stream())]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(TWO_FALLBACKS)])
+
+        state = BetaFallbackState()
+        state.index = 0
+        with state:
+            stream = await create_stream_async(client, speed="fast")
+            events: List[BetaRawMessageStreamEvent] = [event async for event in stream]
+
+        bodies = request_bodies(respx_mock)
+        assert [(body["model"], body.get("speed")) for body in bodies] == [
+            (FALLBACK_MODEL, "fast"),
+            (FALLBACK_MODEL, None),
+        ]
+        assert bodies[1] == without_speed(bodies[0])
+        assert rejected.closes == 1
+        assert state.index == 0
+        assert next(e for e in events if e.type == "message_delta").delta.stop_reason == "end_turn"
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_the_original_request_is_not_resent(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            side_effect=[error_response("slow down", 429), sse_response(serving_stream())]
+        )
+        client = make_async_client(middleware=[BetaRefusalFallbackMiddleware(FALLBACKS)])
+
+        with pytest.raises(APIStatusError):
+            await create_stream_async(client, speed="fast")
 
         assert len(respx_mock.calls) == 1

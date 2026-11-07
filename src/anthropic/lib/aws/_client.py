@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 from typing_extensions import Self, override
 
-import httpx2 as httpx
+import httpx2
 
-from ..._types import Omit, Timeout, NotGiven, not_given
+from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
 from ..._utils import asyncify
 from ..._client import Anthropic, AsyncAnthropic
 from ._credentials import (
@@ -18,8 +18,7 @@ from ._credentials import (
 )
 from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
-from ..._base_client import DEFAULT_MAX_RETRIES
-from ..credentials._types import AccessTokenProvider
+from ..._base_client import DEFAULT_MAX_RETRIES, FinalRequestOptions
 
 
 class AnthropicAWS(Anthropic):
@@ -31,6 +30,7 @@ class AnthropicAWS(Anthropic):
     workspace_id: str | None
     _use_sigv4: bool
     _skip_auth: bool
+    _otel_platform = "aws"
 
     def __init__(
         self,
@@ -43,15 +43,18 @@ class AnthropicAWS(Anthropic):
         aws_session_token: str | None = None,
         workspace_id: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.Client | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
+        http_client: httpx2.Client | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
-        # Passed through to parent but not used for AWS auth
+        # Not used for AWS auth
         auth_token: str | None = None,
         webhook_key: str | None = None,
     ) -> None:
@@ -94,32 +97,36 @@ class AnthropicAWS(Anthropic):
                 )
             self.workspace_id = resolved_workspace_id
 
-        if not skip_auth:
-            resolved_base_url = resolve_base_url(
-                str(base_url) if base_url is not None else None,
-                region=resolved_region,
+        resolved_base_url = resolve_base_url(
+            str(base_url) if base_url is not None else None,
+            region=resolved_region,
+        )
+        if resolved_base_url is None:
+            raise AnthropicError(
+                "No AWS region was provided and no base_url was given. "
+                "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
+                "or provide a `base_url` directly."
             )
-            if resolved_base_url is None:
-                raise AnthropicError(
-                    "No AWS region was provided and no base_url was given. "
-                    "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
-                    "or provide a `base_url` directly."
-                )
-            base_url = resolved_base_url
+        base_url = resolved_base_url
 
         super().__init__(
             api_key=resolved_api_key,
-            auth_token=auth_token,
             webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+
+        # Undo the base client's ambient ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN fallback; only explicit ones apply.
+        # `auth_token` is set here and not passed up, because the base client rejects it next to an API key.
+        self.api_key = resolved_api_key
+        self.auth_token = auth_token
 
     @property
     @override
@@ -137,19 +144,24 @@ class AnthropicAWS(Anthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
         super()._validate_headers(headers, omitted)
 
     @override
-    def _prepare_request(self, request: httpx.Request) -> None:
+    def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        reject_action_url_request(options)
+        return super()._prepare_options(options)
+
+    @override
+    def _prepare_request(self, request: httpx2.Request) -> None:
         if not self._use_sigv4:
             return
 
         from ._auth import get_auth_headers
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = get_auth_headers(
             method=request.method,
@@ -178,12 +190,13 @@ class AnthropicAWS(Anthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None = None,
+        credentials: None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.Client | None = None,
+        http_client: httpx2.Client | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -193,23 +206,26 @@ class AnthropicAWS(Anthropic):
     ) -> Self:
         # The AWS client authenticates with SigV4 (or an API key), not a token
         # provider, so it has no `credentials`. Accept the argument for signature
-        # compatibility with the base client — internal helpers such as
-        # `_copy_client_with_bearer_auth` call `copy(credentials=None, ...)` — but
-        # only as a no-op; reject a real provider rather than silently ignoring it.
+        # compatibility with the base client, but only as a no-op; reject a real
+        # provider rather than silently ignoring it.
         if credentials is not None:
             raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
 
-        # If region is changing and no explicit base_url, let __init__ derive it
-        resolved_base_url = base_url or (None if aws_region else self.base_url)
+        # A region-derived host must follow the region (SigV4 signs for it); a custom base_url is kept.
+        if base_url is None and aws_region is not None:
+            derived = resolve_base_url(None, region=self.aws_region)
+            if derived is not None and self.base_url == self._enforce_trailing_slash(httpx2.URL(derived)):
+                base_url = resolve_base_url(None, region=aws_region)
 
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
             webhook_key=webhook_key,
-            base_url=resolved_base_url,
+            base_url=base_url,
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             set_default_headers=set_default_headers,
             default_query=default_query,
@@ -239,6 +255,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
     workspace_id: str | None
     _use_sigv4: bool
     _skip_auth: bool
+    _otel_platform = "aws"
 
     def __init__(
         self,
@@ -251,12 +268,15 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         aws_session_token: str | None = None,
         workspace_id: str | None = None,
         skip_auth: bool = False,
-        base_url: str | httpx.URL | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+        base_url: str | httpx2.URL | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        # OpenTelemetry tracing of this client's API calls. `False` disables the spans, and
+        # `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
+        open_telemetry: OpenTelemetryClientOption = None,
+        http_client: httpx2.AsyncClient | None = None,
         middleware: Sequence[MiddlewareInput] | None = None,
         _strict_response_validation: bool = False,
         # Accepted for compatibility with AsyncAnthropic.copy() but not used
@@ -302,32 +322,36 @@ class AsyncAnthropicAWS(AsyncAnthropic):
                 )
             self.workspace_id = resolved_workspace_id
 
-        if not skip_auth:
-            resolved_base_url = resolve_base_url(
-                str(base_url) if base_url is not None else None,
-                region=resolved_region,
+        resolved_base_url = resolve_base_url(
+            str(base_url) if base_url is not None else None,
+            region=resolved_region,
+        )
+        if resolved_base_url is None:
+            raise AnthropicError(
+                "No AWS region was provided and no base_url was given. "
+                "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
+                "or provide a `base_url` directly."
             )
-            if resolved_base_url is None:
-                raise AnthropicError(
-                    "No AWS region was provided and no base_url was given. "
-                    "Set the `aws_region` argument, the `AWS_REGION`/`AWS_DEFAULT_REGION` environment variable, "
-                    "or provide a `base_url` directly."
-                )
-            base_url = resolved_base_url
+        base_url = resolved_base_url
 
         super().__init__(
             api_key=resolved_api_key,
-            auth_token=auth_token,
             webhook_key=webhook_key,
             base_url=base_url,  # type: ignore[arg-type]
             timeout=timeout,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             default_query=default_query,
             http_client=http_client,
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
+
+        # Undo the base client's ambient ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN fallback; only explicit ones apply.
+        # `auth_token` is set here and not passed up, because the base client rejects it next to an API key.
+        self.api_key = resolved_api_key
+        self.auth_token = auth_token
 
     @property
     @override
@@ -345,19 +369,24 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         return super()._api_key_auth
 
     @override
-    def _validate_headers(self, headers: httpx.Headers, omitted: frozenset[str]) -> None:
+    def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
         if self._use_sigv4 or self._skip_auth:
             return
         super()._validate_headers(headers, omitted)
 
     @override
-    async def _prepare_request(self, request: httpx.Request) -> None:
+    async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
+        reject_action_url_request(options)
+        return await super()._prepare_options(options)
+
+    @override
+    async def _prepare_request(self, request: httpx2.Request) -> None:
         if not self._use_sigv4:
             return
 
         from ._auth import get_auth_headers
 
-        data = request.read().decode()
+        data = request.read()
 
         headers = await asyncify(get_auth_headers)(
             method=request.method,
@@ -386,12 +415,13 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         workspace_id: str | None = None,
         skip_auth: bool | None = None,
         auth_token: str | None = None,
-        credentials: AccessTokenProvider | None = None,
+        credentials: None = None,
         webhook_key: str | None = None,
-        base_url: str | httpx.URL | None = None,
+        base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx2.AsyncClient | None = None,
         max_retries: int | NotGiven = not_given,
+        open_telemetry: OpenTelemetryClientOption = None,
         default_headers: Mapping[str, str] | None = None,
         set_default_headers: Mapping[str, str] | None = None,
         default_query: Mapping[str, object] | None = None,
@@ -401,23 +431,26 @@ class AsyncAnthropicAWS(AsyncAnthropic):
     ) -> Self:
         # The AWS client authenticates with SigV4 (or an API key), not a token
         # provider, so it has no `credentials`. Accept the argument for signature
-        # compatibility with the base client — internal helpers such as
-        # `_copy_client_with_bearer_auth` call `copy(credentials=None, ...)` — but
-        # only as a no-op; reject a real provider rather than silently ignoring it.
+        # compatibility with the base client, but only as a no-op; reject a real
+        # provider rather than silently ignoring it.
         if credentials is not None:
             raise TypeError("AnthropicAWS does not support a `credentials` provider (it authenticates with AWS SigV4).")
 
-        # If region is changing and no explicit base_url, let __init__ derive it
-        resolved_base_url = base_url or (None if aws_region else self.base_url)
+        # A region-derived host must follow the region (SigV4 signs for it); a custom base_url is kept.
+        if base_url is None and aws_region is not None:
+            derived = resolve_base_url(None, region=self.aws_region)
+            if derived is not None and self.base_url == self._enforce_trailing_slash(httpx2.URL(derived)):
+                base_url = resolve_base_url(None, region=aws_region)
 
         return super().copy(
             api_key=api_key or self.api_key,
             auth_token=auth_token,
             webhook_key=webhook_key,
-            base_url=resolved_base_url,
+            base_url=base_url,
             timeout=timeout,
             http_client=http_client,
             max_retries=max_retries,
+            open_telemetry=open_telemetry,
             default_headers=default_headers,
             set_default_headers=set_default_headers,
             default_query=default_query,
@@ -436,3 +469,9 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         )
 
     with_options = copy  # type: ignore[assignment]
+
+
+def reject_action_url_request(options: FinalRequestOptions) -> None:
+    path = options.url.partition("?")[0]
+    if path.startswith("/v1/user_profiles/") and path.endswith("/action_urls"):
+        raise AnthropicError("User profile action URLs are not supported in the AWS client.")

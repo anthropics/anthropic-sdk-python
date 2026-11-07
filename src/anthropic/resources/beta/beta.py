@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from .files import (
@@ -53,14 +51,6 @@ from .skills.skills import (
     SkillsWithStreamingResponse,
     AsyncSkillsWithStreamingResponse,
 )
-from .user_profiles import (
-    UserProfiles,
-    AsyncUserProfiles,
-    UserProfilesWithRawResponse,
-    AsyncUserProfilesWithRawResponse,
-    UserProfilesWithStreamingResponse,
-    AsyncUserProfilesWithStreamingResponse,
-)
 from .vaults.vaults import (
     Vaults,
     AsyncVaults,
@@ -109,6 +99,14 @@ from .environments.environments import (
     EnvironmentsWithStreamingResponse,
     AsyncEnvironmentsWithStreamingResponse,
 )
+from .organization.organization import (
+    Organization,
+    AsyncOrganization,
+    OrganizationWithRawResponse,
+    AsyncOrganizationWithRawResponse,
+    OrganizationWithStreamingResponse,
+    AsyncOrganizationWithStreamingResponse,
+)
 from .memory_stores.memory_stores import (
     MemoryStores,
     AsyncMemoryStores,
@@ -116,6 +114,14 @@ from .memory_stores.memory_stores import (
     AsyncMemoryStoresWithRawResponse,
     MemoryStoresWithStreamingResponse,
     AsyncMemoryStoresWithStreamingResponse,
+)
+from .user_profiles.user_profiles import (
+    UserProfiles,
+    AsyncUserProfiles,
+    UserProfilesWithRawResponse,
+    AsyncUserProfilesWithRawResponse,
+    UserProfilesWithStreamingResponse,
+    AsyncUserProfilesWithStreamingResponse,
 )
 
 __all__ = ["Beta", "AsyncBeta"]
@@ -183,12 +189,16 @@ class Beta(SyncAPIResource):
         return Tunnels(self._client)
 
     @cached_property
+    def organization(self) -> Organization:
+        return Organization(self._client)
+
+    @cached_property
     def with_raw_response(self) -> BetaWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BetaWithRawResponse(self)
 
@@ -197,7 +207,7 @@ class Beta(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BetaWithStreamingResponse(self)
 
@@ -264,12 +274,16 @@ class AsyncBeta(AsyncAPIResource):
         return AsyncTunnels(self._client)
 
     @cached_property
+    def organization(self) -> AsyncOrganization:
+        return AsyncOrganization(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncBetaWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBetaWithRawResponse(self)
 
@@ -278,7 +292,7 @@ class AsyncBeta(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBetaWithStreamingResponse(self)
 
@@ -343,6 +357,10 @@ class BetaWithRawResponse:
     def tunnels(self) -> TunnelsWithRawResponse:
         return TunnelsWithRawResponse(self._beta.tunnels)
 
+    @cached_property
+    def organization(self) -> OrganizationWithRawResponse:
+        return OrganizationWithRawResponse(self._beta.organization)
+
 
 class AsyncBetaWithRawResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -403,6 +421,10 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def tunnels(self) -> AsyncTunnelsWithRawResponse:
         return AsyncTunnelsWithRawResponse(self._beta.tunnels)
+
+    @cached_property
+    def organization(self) -> AsyncOrganizationWithRawResponse:
+        return AsyncOrganizationWithRawResponse(self._beta.organization)
 
 
 class BetaWithStreamingResponse:
@@ -465,6 +487,10 @@ class BetaWithStreamingResponse:
     def tunnels(self) -> TunnelsWithStreamingResponse:
         return TunnelsWithStreamingResponse(self._beta.tunnels)
 
+    @cached_property
+    def organization(self) -> OrganizationWithStreamingResponse:
+        return OrganizationWithStreamingResponse(self._beta.organization)
+
 
 class AsyncBetaWithStreamingResponse:
     def __init__(self, beta: AsyncBeta) -> None:
@@ -525,3 +551,7 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def tunnels(self) -> AsyncTunnelsWithStreamingResponse:
         return AsyncTunnelsWithStreamingResponse(self._beta.tunnels)
+
+    @cached_property
+    def organization(self) -> AsyncOrganizationWithStreamingResponse:
+        return AsyncOrganizationWithStreamingResponse(self._beta.organization)

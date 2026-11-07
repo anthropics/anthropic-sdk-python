@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Optional
 from typing_extensions import Literal
 
@@ -18,7 +16,7 @@ class BetaSelfHostedWork(BaseModel):
     """
 
     id: str
-    """Work identifier (e.g., 'work\\__...')"""
+    """Work identifier (e.g., 'work_...')"""
 
     acknowledged_at: Optional[str] = None
     """

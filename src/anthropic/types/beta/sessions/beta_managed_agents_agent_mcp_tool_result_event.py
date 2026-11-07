@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_text_block import BetaManagedAgentsTextBlock
 from .beta_managed_agents_image_block import BetaManagedAgentsImageBlock
 from .beta_managed_agents_document_block import BetaManagedAgentsDocumentBlock
@@ -20,7 +17,7 @@ Content: TypeAlias = Annotated[
         BetaManagedAgentsDocumentBlock,
         BetaManagedAgentsSearchResultBlock,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
@@ -34,7 +31,7 @@ class BetaManagedAgentsAgentMCPToolResultEvent(BaseModel):
     """The id of the `agent.mcp_tool_use` event this result corresponds to."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this event was processed."""
 
     type: Literal["agent.mcp_tool_result"]
 

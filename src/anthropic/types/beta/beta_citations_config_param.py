@@ -1,11 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+from typing import Optional
 
-from __future__ import annotations
-
-from typing_extensions import TypedDict
+from ..._models import BaseModel
 
 __all__ = ["BetaCitationsConfigParam"]
 
 
-class BetaCitationsConfigParam(TypedDict, total=False):
-    enabled: bool
+class BetaCitationsConfigParam(BaseModel):
+    enabled: Optional[bool] = None

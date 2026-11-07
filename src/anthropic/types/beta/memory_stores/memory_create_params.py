@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
 
@@ -14,23 +11,43 @@ __all__ = ["MemoryCreateParams"]
 
 class MemoryCreateParams(TypedDict, total=False):
     content: Required[Optional[str]]
-    """UTF-8 text content for the new memory.
+    """The UTF-8 text content of the new memory. Pass `""` to create an empty memory.
 
-    Maximum 100 kB (102,400 bytes). Required; pass `""` explicitly to create an
-    empty memory.
+    The maximum size is 100 kB (102,400 bytes).
     """
 
     path: Required[str]
-    """Hierarchical path for the new memory, e.g.
+    """The path of the new memory, such as `/projects/foo/notes.md`.
 
-    `/projects/foo/notes.md`. Must start with `/`, contain at least one non-empty
-    segment, and be at most 1,024 bytes. Must not contain empty segments, `.` or
-    `..` segments, control or format characters, and must be NFC-normalized. Paths
-    are case-sensitive.
+    Paths are case-sensitive.
+
+    A path starts with `/` and has 1 to 20 segments. A segment can't be empty and
+    can't be `.` or `..`. A path can't contain control characters, format
+    characters, or the line and paragraph separators U+2028 and U+2029. It must be
+    in Unicode Normalization Form C and at most 1,024 bytes long.
     """
 
     view: BetaManagedAgentsMemoryView
-    """Query parameter for view"""
+    """Whether a `memory` or `memory_version` in the response includes its `content`.
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    Defaults to `full` on retrieve operations and to `basic` on list, create, and
+    update operations.
+
+    With `full`, list operations return at most 20 items per page.
+    """
+
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+    `managed-agents-2026-04-01` in this header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

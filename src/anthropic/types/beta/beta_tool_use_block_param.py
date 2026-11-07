@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, Union, Optional
@@ -28,7 +26,6 @@ class BetaToolUseBlockParam(TypedDict, total=False):
     """Create a cache control breakpoint at this content block."""
 
     caller: Caller
-    """Tool invocation directly from the model."""
 
     toolset_name: Optional[str]
     """For a toolset member tool_use, the toolset family this member belongs to."""

@@ -1,6 +1,6 @@
 """Skill download + archive extraction for the agent toolset.
 
-Split out from ``agent_toolset`` because fetching a session agent's skills and
+Split out from `agent_toolset` because fetching a session agent's skills and
 safely unpacking a (possibly third-party) archive is a distinct concern from the
 tool implementations themselves.
 """
@@ -36,7 +36,7 @@ log = logging.getLogger("anthropic.lib.tools.agent_toolset")
 
 
 def _within(child: Path, root: Path) -> bool:
-    """True if ``child`` is ``root`` or a path inside it (both already resolved)."""
+    """True if `child` is `root` or a path inside it (both already resolved)."""
     try:
         child.relative_to(root)
     except ValueError:
@@ -45,11 +45,11 @@ def _within(child: Path, root: Path) -> bool:
 
 
 def _safe_member_name(name: str) -> str:
-    """Return ``name`` as a confined relative path, or raise on path-traversal.
+    """Return `name` as a confined relative path, or raise on path-traversal.
 
-    Strips ``.`` components; rejects absolute paths and any ``..`` component
-    outright (those only appear in malicious archives). Returns ``""`` for
-    entries that resolve to nothing (e.g. ``"./"``) — the caller should skip
+    Strips `.` components; rejects absolute paths and any `..` component
+    outright (those only appear in malicious archives). Returns `""` for
+    entries that resolve to nothing (e.g. `"./"`) — the caller should skip
     those.
     """
     norm = name.replace("\\", "/")
@@ -63,12 +63,12 @@ def _safe_member_name(name: str) -> str:
 
 def _archive_top_dir(names: list[str]) -> str:
     """Return the single top-level directory shared by every archive entry, or
-    ``""`` if the entries don't all live under one common directory.
+    `""` if the entries don't all live under one common directory.
 
     Skill bundles are packaged wrapped in one directory named after the skill
-    (e.g. ``pdf/SKILL.md``, ``pdf/scripts/...``). The extractor strips that
+    (e.g. `pdf/SKILL.md`, `pdf/scripts/...`). The extractor strips that
     wrapper so the contents land directly in the skill's destination directory
-    instead of a redundant nested ``<skill>/<skill>/`` level.
+    instead of a redundant nested `<skill>/<skill>/` level.
     """
     tops: set[str] = set()
     has_nested = False
@@ -91,7 +91,7 @@ def _wrapper_dir(all_names: Iterable[str], plain_names: Iterable[str]) -> str:
     return _archive_top_dir([s for n in plain_names if (s := _safe_member_name(n))])
 
 
-# Zip creator hosts whose ``external_attr`` high bits are a Unix ``st_mode``.
+# Zip creator hosts whose `external_attr` high bits are a Unix `st_mode`.
 _ZIP_UNIX_HOSTS = (3, 19)
 _SPECIAL_FILE_TYPES = (stat.S_IFLNK, stat.S_IFCHR, stat.S_IFBLK, stat.S_IFIFO, stat.S_IFSOCK)
 
@@ -113,8 +113,8 @@ def _zip_info_is_dir(info: zipfile.ZipInfo) -> bool:
 
 
 def _strip_top(safe: str, top: str) -> str:
-    """Drop the leading ``top`` component from ``safe`` (an already-confined
-    relative path). Returns ``""`` for the bare top-dir entry itself."""
+    """Drop the leading `top` component from `safe` (an already-confined
+    relative path). Returns `""` for the bare top-dir entry itself."""
     if not top:
         return safe
     parts = PurePosixPath(safe).parts
@@ -125,10 +125,10 @@ def _strip_top(safe: str, top: str) -> str:
 
 
 def _archive_file_mode(src_mode: int) -> int:
-    """Reduce an archive entry's Unix mode to ``0o755`` if it is executable,
-    ``0o644`` otherwise.
+    """Reduce an archive entry's Unix mode to `0o755` if it is executable,
+    `0o644` otherwise.
 
-    Skill bundles can ship executable scripts (e.g. ``scripts/foo.sh``), so the
+    Skill bundles can ship executable scripts (e.g. `scripts/foo.sh`), so the
     execute bit recorded in the archive must survive extraction or invoking the
     script directly fails with permission denied. The mode is deliberately
     collapsed to one of two values: this preserves "is it executable" while
@@ -139,12 +139,12 @@ def _archive_file_mode(src_mode: int) -> int:
 
 
 def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
-    """Extract a skill download (a zip or tar.* archive) from disk into ``dest``.
+    """Extract a skill download (a zip or tar.* archive) from disk into `dest`.
 
     Skill bundles are wrapped in a single directory named after the skill; that
-    wrapper is stripped so files land directly under ``dest`` rather than a
-    redundant ``dest/<skill>/`` level. Skills can be third-party, so this
-    refuses any member that would escape ``dest`` (zip-slip / tar-slip) and
+    wrapper is stripped so files land directly under `dest` rather than a
+    redundant `dest/<skill>/` level. Skills can be third-party, so this
+    refuses any member that would escape `dest` (zip-slip / tar-slip) and
     skips any member that is not a regular file or directory (symlink,
     hardlink, device, FIFO), in zip and tar archives alike.
     """
@@ -169,7 +169,7 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
                 target.parent.mkdir(parents=True, exist_ok=True)
                 with zf.open(info) as src, open(target, "wb") as out:
                     shutil.copyfileobj(src, out)
-                # ``external_attr``'s high 16 bits hold the Unix mode; it is 0
+                # `external_attr`'s high 16 bits hold the Unix mode; it is 0
                 # for archives created without Unix attrs -> non-executable.
                 os.chmod(target, _archive_file_mode(info.external_attr >> 16))
         return
@@ -198,25 +198,6 @@ def _extract_skill_archive(archive_path: Path, dest: Path) -> None:
             os.chmod(target, _archive_file_mode(member.mode))
 
 
-async def _resolve_skill_version(client: AsyncAnthropic, skill_id: str, version: str) -> str:
-    """Resolve ``version`` to the concrete numeric timestamp the
-    ``/v1/skills/{id}/versions/{version}`` endpoints require.
-
-    ``session.agent.skills[].version`` may be an alias such as ``"latest"``,
-    which those endpoints reject — so list the skill's versions and pick the
-    newest. Numeric versions are returned unchanged.
-    """
-    if version.isdigit():
-        return version
-    newest: str | None = None
-    async for v in client.beta.skills.versions.list(skill_id):
-        if v.version.isdigit() and (newest is None or int(v.version) > int(newest)):
-            newest = v.version
-    if newest is None:
-        raise ValueError(f"skill {skill_id!r} has no concrete version to resolve {version!r} against")
-    return newest
-
-
 async def download_session_skills(
     client: AsyncAnthropic,
     *,
@@ -224,22 +205,22 @@ async def download_session_skills(
     session: BetaManagedAgentsSession | None = None,
     session_id: str | None = None,
 ) -> list[Path]:
-    """Download the session agent's skills into ``{workdir}/skills/<name>/``.
+    """Download the session agent's skills into `{workdir}/skills/<name>/`.
 
-    Reads the resolved agent off ``session``, and for each skill fetches its
-    files via ``client.beta.skills.versions.download`` and extracts the archive
+    Reads the resolved agent off `session`, and for each skill fetches its
+    files via `client.beta.skills.versions.download` and extracts the archive
     under a directory named after the skill. The archive is streamed to a temp
     file rather than buffered whole in memory. A failure on one skill is logged
     and does not block the others.
 
-    Pass ``session``. A session's resources cannot change while it runs, so the
+    Pass `session`. A session's resources cannot change while it runs, so the
     caller fetches it once and shares that snapshot with the memory-store
     download — the two can then never disagree about the attached resources.
 
-    ``session_id`` is deprecated: it costs an extra ``sessions.retrieve`` round
+    `session_id` is deprecated: it costs an extra `sessions.retrieve` round
     trip on every call, and a caller that uses it for both this and the
     memory-store download fetches the session twice. It remains supported for
-    callers written before ``session`` existed.
+    callers written before `session` existed.
 
     Returns the list of skill directories that were created, so the caller can
     remove them when the workdir is torn down.
@@ -255,13 +236,12 @@ async def download_session_skills(
         # (managed-agents / skills) themselves — no need to pass `betas=` here.
         session = await client.beta.sessions.retrieve(session_id)
     skills_root = Path(await (anyio.Path(workdir) / "skills").resolve())
-    # ``skills_root`` is created lazily by the extraction below — don't create it
+    # `skills_root` is created lazily by the extraction below — don't create it
     # up front so an agent with no skills leaves no stray directory behind.
     downloaded: list[Path] = []
     for skill in session.agent.skills:
         try:
-            version_id = await _resolve_skill_version(client, skill.skill_id, skill.version)
-            version = await client.beta.skills.versions.retrieve(version_id, skill_id=skill.skill_id)
+            version = await client.beta.skills.versions.retrieve(skill.version, skill_id=skill.skill_id)
             # The directory is the skill's name, but reduce it to a single safe
             # path component so a hostile name can't escape skills_root.
             dirname = os.path.basename(version.name.strip()) or skill.skill_id
@@ -274,32 +254,20 @@ async def download_session_skills(
             adest = anyio.Path(dest)
             if await adest.is_symlink():
                 await adest.unlink()
-            # If the directory already exists and contains the expected version,
-            # skip the download. This prevents race conditions and redundant
-            # work when multiple sessions share a workdir.
-            version_file = dest / ".version"
-            if await adest.is_dir() and await anyio.Path(version_file).exists():
-                try:
-                    if (await anyio.Path(version_file).read_text()).strip() == version_id:
-                        log.info("skill skill_id=%s version=%s already exists at %s; skipping", skill.skill_id, version_id, dest)
-                        downloaded.append(dest)
-                        continue
-                except Exception:
-                    pass
-
-            # ``shutil.rmtree`` is blocking; keep it off the event loop.
+            # `shutil.rmtree` is blocking; keep it off the event loop.
             await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
-            await _download_and_extract(client, skill.skill_id, version_id, dest)
-            await anyio.Path(version_file).write_text(version_id)
+            # `skill.version` may be the alias `"latest"`, which only the
+            # retrieve endpoint resolves; download by the concrete id it returned.
+            await _download_and_extract(client, skill.skill_id, version.id, dest)
             downloaded.append(dest)
-            log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version_id, dest)
+            log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version.id, dest)
         except Exception as e:
             log.warning("failed to download skill skill_id=%s: %s", skill.skill_id, e)
     return downloaded
 
 
 async def _download_and_extract(client: AsyncAnthropic, skill_id: str, version_id: str, dest: Path) -> None:
-    """Stream the skill archive to a temp file, then extract it into ``dest``."""
+    """Stream the skill archive to a temp file, then extract it into `dest`."""
     await anyio.Path(dest.parent).mkdir(parents=True, exist_ok=True, mode=_SKILL_DIR_MODE)
     fd, tmp_name = await run_sync(partial(tempfile.mkstemp, prefix=".skill-", suffix=".archive", dir=dest.parent))
     os.close(fd)

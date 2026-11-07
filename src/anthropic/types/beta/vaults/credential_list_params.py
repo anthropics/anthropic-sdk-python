@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["CredentialListParams"]
@@ -13,13 +10,30 @@ __all__ = ["CredentialListParams"]
 
 class CredentialListParams(TypedDict, total=False):
     include_archived: bool
-    """Whether to include archived credentials in the results."""
+    """Whether to include archived credentials in the results. Defaults to `false`."""
 
     limit: int
     """Maximum number of credentials to return per page. Defaults to 20, maximum 100."""
 
     page: str
-    """Opaque pagination token from a previous `list_credentials` response."""
+    """
+    The `next_page` value from a previous
+    [List Credentials](https://platform.claude.com/docs/en/api/beta/vaults/credentials/list)
+    response, to get the next page. Leave it out to get the first page.
+    """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

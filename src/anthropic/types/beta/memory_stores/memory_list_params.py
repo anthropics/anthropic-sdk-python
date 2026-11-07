@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
 
@@ -14,39 +11,58 @@ __all__ = ["MemoryListParams"]
 
 class MemoryListParams(TypedDict, total=False):
     depth: int
-    """`0` (or omitted) returns all descendants below `path_prefix` (recursive).
+    """How far below `path_prefix` to list.
 
-    `1` returns immediate children only; deeper entries roll up as `memory_prefix`
-    items. `depth=1` behaves like `ls`; omitting `depth` behaves like `find`.
+    Defaults to `0`, which lists every memory below the prefix.
+
+    Pass `1` to list only the direct children. Deeper memories are then grouped into
+    `memory_prefix` items.
     """
 
     limit: int
-    """Maximum number of items to return per page.
+    """The maximum number of items to return per page, from 1 to 100. Defaults to 20.
 
-    Must be between 1 and 100. Defaults to 20 when omitted. Capped at 20 when
-    `view=full`. Both `memory` and `memory_prefix` items count toward the limit.
+    With `view=full`, a page holds at most 20 items. `memory` and `memory_prefix`
+    items both count toward the limit.
     """
 
     page: str
-    """Opaque pagination cursor (a `page_...` value).
+    """The `next_page` value from a previous response, to get the next page.
 
-    Pass the `next_page` value from a previous response to fetch the next page; omit
-    for the first page.
+    Omit it to get the first page.
     """
 
     path_prefix: str
-    """Optional path prefix filter.
+    """Return only memories whose path starts with this prefix, such as `/notes/`.
 
-    Must end with `/` (segment-aligned), e.g., `/notes/`. This value appears in
-    request URLs. Do not include secrets or personally identifiable information.
+    This value appears in request URLs. Do not include secrets or personally
+    identifiable information.
+
+    Omit it to list the whole store. The prefix must end with `/` and matches whole
+    segments, so `/notes/` matches `/notes/todo.md` but not
+    `/notes-archive/todo.md`.
     """
 
     view: BetaManagedAgentsMemoryView
-    """Which projection of each `memory` to return.
+    """Whether each memory in the response includes `content`.
 
-    Defaults to `basic` (content omitted). `full` populates `content` on each item
-    and caps `limit` at 20; use this as the bulk-read path for export and sync.
+    Defaults to `basic`, which sets it to `null`.
+
+    With `full`, a page holds at most 20 items.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+    `managed-agents-2026-04-01` in this header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

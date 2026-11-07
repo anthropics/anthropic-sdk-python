@@ -34,7 +34,7 @@ def assert_is_file_content(obj: object, *, key: str | None = None) -> None:
     if not is_file_content(obj) and not is_tuple_t(obj):
         prefix = f"Expected entry at `{key}`" if key is not None else f"Expected file input `{obj!r}`"
         raise RuntimeError(
-            f"{prefix} to be bytes, an io.IOBase instance, PathLike or a tuple but received {type(obj)} instead. See https://github.com/anthropics/anthropic-sdk-python/tree/main#file-uploads"
+            f"{prefix} to be bytes, an io.IOBase instance, PathLike or a tuple but received {type(obj)} instead. See https://platform.claude.com/docs/en/api/sdks/python"
         ) from None
 
 
@@ -66,12 +66,27 @@ def _transform_file(file: FileTypes) -> HttpxFileTypes:
             path = pathlib.Path(file)
             return (path.name, path.read_bytes())
 
+        if file_name(file) is None:
+            return unnamed_file(file)
+
         return file
 
     if is_tuple_t(file):
-        return (file[0], read_file_content(file[1]), *file[2:])
+        return (file[0] or file_name(file[1]), read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
+
+
+def file_name(file: FileContent) -> str | None:
+    name = os.fspath(file) if isinstance(file, os.PathLike) else getattr(file, "name", None)
+    if isinstance(name, (str, bytes)):
+        return pathlib.Path(os.fsdecode(name)).name
+    return None
+
+
+def unnamed_file(file: HttpxFileContent) -> HttpxFileTypes:
+    # Passed bare, httpx would name the file "upload"; the content type is the one that name implied.
+    return (None, file, "application/octet-stream")
 
 
 def read_file_content(file: FileContent) -> HttpxFileContent:
@@ -108,10 +123,13 @@ async def _async_transform_file(file: FileTypes) -> HttpxFileTypes:
             path = anyio.Path(file)
             return (path.name, await path.read_bytes())
 
+        if file_name(file) is None:
+            return unnamed_file(file)
+
         return file
 
     if is_tuple_t(file):
-        return (file[0], await async_read_file_content(file[1]), *file[2:])
+        return (file[0] or file_name(file[1]), await async_read_file_content(file[1]), *file[2:])
 
     raise TypeError(f"Expected file types input to be a FileContent type or to be a tuple")
 

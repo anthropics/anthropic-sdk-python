@@ -1,27 +1,22 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
-from typing import List
-from typing_extensions import Annotated, TypedDict
+from typing import List, Optional
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
+from ..._types import SequenceNotStr
 from ..anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["FileListParams"]
 
 
 class FileListParams(TypedDict, total=False):
-    after_id: str
-    """ID of the object to use as a cursor for pagination.
+    ids: Optional[SequenceNotStr[str]]
+    """Restrict the result set to Files whose `id` is in this list.
 
-    When provided, returns the page of results immediately after this object.
-    """
-
-    before_id: str
-    """ID of the object to use as a cursor for pagination.
-
-    When provided, returns the page of results immediately before this object.
+    At most 100 entries (after de-duplication). Mutually exclusive with `page` and
+    `limit`. When supplied, the response is always a single page (`next_page` is
+    null). IDs that do not resolve to a visible File — including deleted Files — are
+    silently omitted.
     """
 
     limit: int
@@ -30,11 +25,27 @@ class FileListParams(TypedDict, total=False):
     Defaults to `20`. Ranges from `1` to `1000`.
     """
 
+    page: Optional[str]
+    """Opaque page cursor returned in a prior list response's `next_page`.
+
+    Prefixed `page_`.
+    """
+
     scope_id: str
     """Filter by scope ID.
 
     Only returns files associated with the specified scope (e.g., a session ID).
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
+    betas: List[AnthropicBetaParam]
     """Optional header to specify the beta version(s) you want to use."""
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

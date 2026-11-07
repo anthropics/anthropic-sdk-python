@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -9,8 +7,12 @@ __all__ = ["BetaUserProfileEnrollmentURL"]
 
 
 class BetaUserProfileEnrollmentURL(BaseModel):
+    """
+    A URL to give to the entity that a user profile represents, so that the entity can enroll in a program.
+    """
+
     expires_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this enrollment URL expires, in RFC 3339 format."""
 
     type: Literal["enrollment_url"]
     """Object type. Always `enrollment_url`."""

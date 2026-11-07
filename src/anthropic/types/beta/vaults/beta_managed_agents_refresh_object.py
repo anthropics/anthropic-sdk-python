@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -13,7 +11,19 @@ class BetaManagedAgentsRefreshObject(BaseModel):
     """Outcome of a refresh-token exchange attempted during credential validation."""
 
     http_response: Optional[BetaManagedAgentsRefreshHTTPResponse] = None
-    """An HTTP response captured during a credential validation probe."""
+    """The captured HTTP error response from the token endpoint.
+
+    Populated only when `status` is `failed`.
+    """
 
     status: Literal["succeeded", "failed", "connect_error", "no_refresh_token"]
-    """Outcome of a refresh-token exchange attempted during credential validation."""
+    """Outcome of the refresh attempt.
+
+    - `succeeded` - The token endpoint returned a new access token.
+    - `failed` - The token endpoint returned an error response. See `http_response`
+      for detail.
+    - `connect_error` - The token endpoint could not be reached (DNS, TLS, or
+      connection error).
+    - `no_refresh_token` - No refresh token is stored for the credential, so no
+      exchange was attempted.
+    """

@@ -1,12 +1,11 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
-from typing import Optional
+from typing import List, Optional
 from typing_extensions import Literal
 
 from ..._models import BaseModel
 from .beta_container import BetaContainer
 from .beta_stop_reason import BetaStopReason
 from .beta_message_delta_usage import BetaMessageDeltaUsage
+from .beta_input_transformation import BetaInputTransformation
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_context_management_response import BetaContextManagementResponse
 
@@ -15,13 +14,16 @@ __all__ = ["BetaRawMessageDeltaEvent", "Delta"]
 
 class Delta(BaseModel):
     container: Optional[BetaContainer] = None
-    """
-    Information about the container used in the request (for the code execution
-    tool)
+    """Information about the container used in this request.
+
+    This will be non-null if a container tool (e.g. code execution) was used.
     """
 
     stop_details: Optional[BetaRefusalStopDetails] = None
-    """Structured information about a refusal."""
+    """Structured information about why model output stopped.
+
+    This is `null` when the `stop_reason` has no additional detail to report.
+    """
 
     stop_reason: Optional[BetaStopReason] = None
 
@@ -52,4 +54,28 @@ class BetaRawMessageDeltaEvent(BaseModel):
 
     Total input tokens in a request is the summation of `input_tokens`,
     `cache_creation_input_tokens`, and `cache_read_input_tokens`.
+    """
+
+    input_transformations: Optional[List[BetaInputTransformation]] = None
+    """
+    Changes the API made to the request's input before showing it to the model, and
+    blocks that failed a binding check but were left unchanged: one entry per block,
+    in request order. Two entry types today. `thinking_dropped` — a `thinking`,
+    `redacted_thinking` or `connector_text` block from the request's `messages` that
+    was removed from the prompt instead of being shown to the model because it
+    failed a binding check. `thinking_mismatch_allowed` — a `thinking` or
+    `redacted_thinking` block that failed the conversation check (the conversation
+    before it differs from the one it was created in, or it carries no record of one
+    on a model that requires it) and was shown to the model all the same, because
+    that check is not enforced for this request. More entry types may be added over
+    time; ignore types you do not recognize.
+
+    Requires `anthropic-beta: thinking-binding-controls-2026-08-01`. Present on
+    every such response from a model that supports extended thinking, as `[]` when
+    there is no entry to report; without the beta, blocks are removed or left in
+    place all the same but nothing is reported. Removed blocks contribute nothing to
+    `usage.input_tokens`; blocks left in place count as sent. When streaming, the
+    array is final in `message_start`; the final `message_delta` event carries it
+    only when a server-side model fallback happened mid-stream, in which case it
+    holds the serving model's entries and replaces the one in `message_start`.
     """

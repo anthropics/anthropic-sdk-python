@@ -1,9 +1,6 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Mapping, Optional, cast
-from itertools import chain
 
 import httpx2
 
@@ -19,7 +16,7 @@ from ...._types import (
     omit,
     not_given,
 )
-from ...._utils import is_given, extract_files, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, extract_files, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -38,12 +35,9 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.skills import version_list_params, version_create_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
-from ....types.beta.skills.version_list_response import VersionListResponse
-from ....types.beta.skills.version_create_response import VersionCreateResponse
-from ....types.beta.skills.version_delete_response import VersionDeleteResponse
-from ....types.beta.skills.version_retrieve_response import VersionRetrieveResponse
+from ....types.beta.skills.beta_skill_version import BetaSkillVersion
+from ....types.beta.skills.beta_deleted_skill_version import BetaDeletedSkillVersion
 
 __all__ = ["Versions", "AsyncVersions"]
 
@@ -55,7 +49,7 @@ class Versions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithRawResponse(self)
 
@@ -64,7 +58,7 @@ class Versions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithStreamingResponse(self)
 
@@ -74,13 +68,14 @@ class Versions(SyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionCreateResponse:
+    ) -> BetaSkillVersion:
         """
         Create Skill Version
 
@@ -96,6 +91,13 @@ class Versions(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -103,34 +105,51 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            body=maybe_transform(body, version_create_params.VersionCreateParams),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
+            body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
-            cast_to=VersionCreateResponse,
+            cast_to=BetaSkillVersion,
         )
 
     def retrieve(
@@ -139,13 +158,14 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionRetrieveResponse:
+    ) -> BetaSkillVersion:
         """
         Get Skill Version
 
@@ -154,11 +174,20 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version: a version ID, or the literal `latest` for the
+              skill's most recent version.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -167,6 +196,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -175,20 +209,25 @@ class Versions(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
-            cast_to=VersionRetrieveResponse,
+            cast_to=BetaSkillVersion,
         )
 
     def list(
@@ -198,13 +237,14 @@ class Versions(SyncAPIResource):
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> SyncPageCursor[VersionListResponse]:
+    ) -> SyncPageCursor[BetaSkillVersion]:
         """
         List Skill Versions
 
@@ -213,13 +253,20 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          limit: Number of items to return per page.
+          limit: Number of results to return per page.
 
-              Defaults to `20`. Ranges from `1` to `1000`.
+              Ranges from `1` to `1000`. Defaults to `20`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -228,37 +275,41 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            page=SyncPageCursor[VersionListResponse],
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
+            page=SyncPageCursor[BetaSkillVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
-            model=VersionListResponse,
+            model=BetaSkillVersion,
         )
 
     def delete(
@@ -267,13 +318,14 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionDeleteResponse:
+    ) -> BetaDeletedSkillVersion:
         """
         Delete Skill Version
 
@@ -282,11 +334,19 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version by its version ID.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -295,6 +355,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -303,20 +368,25 @@ class Versions(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
-            cast_to=VersionDeleteResponse,
+            cast_to=BetaDeletedSkillVersion,
         )
 
     def download(
@@ -325,6 +395,7 @@ class Versions(SyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -340,11 +411,19 @@ class Versions(SyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version by its version ID.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -362,20 +441,23 @@ class Versions(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
-            ),
+            path_template("/v1/skills/{skill_id}/versions/{version}/content", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.download",
+                span_route="/v1/skills/{skill_id}/versions/{version}/content",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=BinaryAPIResponse,
         )
@@ -388,7 +470,7 @@ class AsyncVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithRawResponse(self)
 
@@ -397,7 +479,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithStreamingResponse(self)
 
@@ -407,13 +489,14 @@ class AsyncVersions(AsyncAPIResource):
         *,
         files: SequenceNotStr[FileTypes],
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionCreateResponse:
+    ) -> BetaSkillVersion:
         """
         Create Skill Version
 
@@ -429,6 +512,13 @@ class AsyncVersions(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -436,34 +526,51 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          OrganizationOnHoldError:
+
+          CMEKContextUnavailableError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         body = deepcopy_with_paths({"files": files}, [["files", "<array>"]])
         extracted_files = extract_files(cast(Mapping[str, object], body), paths=[["files", "<array>"]])
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            body=await async_maybe_transform(body, version_create_params.VersionCreateParams),
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
+            body=body,
             files=extracted_files,
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.create",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
+                span_created_id="anthropic.skill.version.id",
             ),
-            cast_to=VersionCreateResponse,
+            cast_to=BetaSkillVersion,
         )
 
     async def retrieve(
@@ -472,13 +579,14 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionRetrieveResponse:
+    ) -> BetaSkillVersion:
         """
         Get Skill Version
 
@@ -487,11 +595,20 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version: a version ID, or the literal `latest` for the
+              skill's most recent version.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -500,6 +617,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -508,20 +630,25 @@ class AsyncVersions(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.retrieve",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
-            cast_to=VersionRetrieveResponse,
+            cast_to=BetaSkillVersion,
         )
 
     def list(
@@ -531,13 +658,14 @@ class AsyncVersions(AsyncAPIResource):
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[VersionListResponse, AsyncPageCursor[VersionListResponse]]:
+    ) -> AsyncPaginator[BetaSkillVersion, AsyncPageCursor[BetaSkillVersion]]:
         """
         List Skill Versions
 
@@ -546,13 +674,20 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          limit: Number of items to return per page.
+          limit: Number of results to return per page.
 
-              Defaults to `20`. Ranges from `1` to `1000`.
+              Ranges from `1` to `1000`. Defaults to `20`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -561,37 +696,41 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/skills/{skill_id}/versions?beta=true", skill_id=skill_id),
-            page=AsyncPageCursor[VersionListResponse],
+            path_template("/v1/skills/{skill_id}/versions", skill_id=skill_id),
+            page=AsyncPageCursor[BetaSkillVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    version_list_params.VersionListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.list",
+                span_route="/v1/skills/{skill_id}/versions",
+                span_attributes={"anthropic.skill.id": skill_id},
             ),
-            model=VersionListResponse,
+            model=BetaSkillVersion,
         )
 
     async def delete(
@@ -600,13 +739,14 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
-    ) -> VersionDeleteResponse:
+    ) -> BetaDeletedSkillVersion:
         """
         Delete Skill Version
 
@@ -615,11 +755,19 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version by its version ID.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -628,6 +776,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not skill_id:
             raise ValueError(f"Expected a non-empty value for `skill_id` but received {skill_id!r}")
@@ -636,20 +789,25 @@ class AsyncVersions(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/skills/{skill_id}/versions/{version}?beta=true", skill_id=skill_id, version=version),
+            path_template("/v1/skills/{skill_id}/versions/{version}", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.delete",
+                span_route="/v1/skills/{skill_id}/versions/{version}",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
-            cast_to=VersionDeleteResponse,
+            cast_to=BetaDeletedSkillVersion,
         )
 
     async def download(
@@ -658,6 +816,7 @@ class AsyncVersions(AsyncAPIResource):
         *,
         skill_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -673,11 +832,19 @@ class AsyncVersions(AsyncAPIResource):
 
               The format and length of IDs may change over time.
 
-          version: Version identifier for the skill.
+          version: Identifies the skill version by its version ID.
 
-              Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+              Requests carrying the `skills-2025-10-02` beta header address versions by their
+              Unix epoch timestamp instead (e.g., "1759178010641129").
 
           betas: Optional header to specify the beta version(s) you want to use.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -695,20 +862,23 @@ class AsyncVersions(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["skills-2025-10-02"]))
-                    if is_given(betas)
-                    else not_given
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "skills-2025-10-02", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/skills/{skill_id}/versions/{version}/content?beta=true", skill_id=skill_id, version=version
-            ),
+            path_template("/v1/skills/{skill_id}/versions/{version}/content", skill_id=skill_id, version=version),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.skills.versions.download",
+                span_route="/v1/skills/{skill_id}/versions/{version}/content",
+                span_attributes={"anthropic.skill.id": skill_id, "anthropic.skill.version.id": version},
             ),
             cast_to=AsyncBinaryAPIResponse,
         )

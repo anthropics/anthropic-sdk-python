@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
@@ -9,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -23,8 +21,6 @@ from ...._base_client import AsyncPaginator, make_request_options
 from ....types.beta.memory_stores import (
     BetaManagedAgentsMemoryView,
     BetaManagedAgentsMemoryVersionOperation,
-    memory_version_list_params,
-    memory_version_retrieve_params,
 )
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.memory_stores.beta_managed_agents_memory_view import BetaManagedAgentsMemoryView
@@ -43,7 +39,7 @@ class MemoryVersions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryVersionsWithRawResponse(self)
 
@@ -52,7 +48,7 @@ class MemoryVersions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryVersionsWithStreamingResponse(self)
 
@@ -63,6 +59,7 @@ class MemoryVersions(SyncAPIResource):
         memory_store_id: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -71,12 +68,28 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Retrieve a memory version
+        Retrieve a Memory Version
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
+
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -95,7 +108,8 @@ class MemoryVersions(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -103,7 +117,7 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -112,7 +126,14 @@ class MemoryVersions(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams),
+                query={"view": view},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -132,6 +153,7 @@ class MemoryVersions(SyncAPIResource):
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -140,30 +162,51 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryVersion]:
         """
-        List memory versions
+        List Memory Versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
 
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          limit: The maximum number of versions to return per page, from 1 to 100. Defaults
+              to 20.
 
-          memory_id: Query parameter for memory_id
+              With `view=full`, a page holds at most 20 versions.
 
-          operation: Query parameter for operation
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-          page: Query parameter for page
+              The filter still works after the memory is deleted. While that memory's versions
+              are retained, the results include the version whose `operation` is `deleted`.
 
-          service_account_id: Query parameter for service_account_id
+          operation: Return only versions that record this kind of change.
 
-          session_id: Query parameter for session_id
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          view: Query parameter for view
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          session_id: Return only versions written by the session with this ID.
+
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
+
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -180,37 +223,37 @@ class MemoryVersions(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=SyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -221,6 +264,7 @@ class MemoryVersions(SyncAPIResource):
         *,
         memory_store_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -229,10 +273,22 @@ class MemoryVersions(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Redact a memory version
+        Redact a Memory Version
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -251,7 +307,8 @@ class MemoryVersions(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -259,12 +316,22 @@ class MemoryVersions(SyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -277,7 +344,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryVersionsWithRawResponse(self)
 
@@ -286,7 +353,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryVersionsWithStreamingResponse(self)
 
@@ -297,6 +364,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         memory_store_id: str,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -305,12 +373,28 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Retrieve a memory version
+        Retrieve a Memory Version
 
         Args:
-          view: Query parameter for view
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_version_id: The ID of the memory version to retrieve (`memver_...`).
+
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
+
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -329,7 +413,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -337,7 +422,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
@@ -346,9 +431,14 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
-                    {"view": view}, memory_version_retrieve_params.MemoryVersionRetrieveParams
-                ),
+                query={"view": view},
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )
@@ -368,6 +458,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         session_id: str | Omit = omit,
         view: BetaManagedAgentsMemoryView | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -376,30 +467,51 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryVersion, AsyncPageCursor[BetaManagedAgentsMemoryVersion]]:
         """
-        List memory versions
+        List Memory Versions
 
         Args:
-          api_key_id: Query parameter for api_key_id
+          memory_store_id: The ID of the memory store whose version history to list (`memstore_...`).
+
+          api_key_id: Return only versions written with the API key that has this ID.
 
           created_at_gte: Return versions created at or after this time (inclusive).
 
           created_at_lte: Return versions created at or before this time (inclusive).
 
-          limit: Query parameter for limit
+          limit: The maximum number of versions to return per page, from 1 to 100. Defaults
+              to 20.
 
-          memory_id: Query parameter for memory_id
+              With `view=full`, a page holds at most 20 versions.
 
-          operation: Query parameter for operation
+          memory_id: Return only versions of the memory with this ID (`mem_...`).
 
-          page: Query parameter for page
+              The filter still works after the memory is deleted. While that memory's versions
+              are retained, the results include the version whose `operation` is `deleted`.
 
-          service_account_id: Query parameter for service_account_id
+          operation: Return only versions that record this kind of change.
 
-          session_id: Query parameter for session_id
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          view: Query parameter for view
+          service_account_id: Return only versions written by the service account with this ID (`svac_...`).
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          session_id: Return only versions written by the session with this ID.
+
+          view: Whether a `memory` or `memory_version` in the response includes its `content`.
+              Defaults to `full` on retrieve operations and to `basic` on list, create, and
+              update operations.
+
+              With `full`, list operations return at most 20 items per page.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -416,37 +528,37 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true", memory_store_id=memory_store_id
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}/memory_versions", memory_store_id=memory_store_id),
             page=AsyncPageCursor[BetaManagedAgentsMemoryVersion],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "api_key_id": api_key_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "limit": limit,
-                        "memory_id": memory_id,
-                        "operation": operation,
-                        "page": page,
-                        "service_account_id": service_account_id,
-                        "session_id": session_id,
-                        "view": view,
-                    },
-                    memory_version_list_params.MemoryVersionListParams,
-                ),
+                query={
+                    "api_key_id": api_key_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "limit": limit,
+                    "memory_id": memory_id,
+                    "operation": operation,
+                    "page": page,
+                    "service_account_id": service_account_id,
+                    "session_id": session_id,
+                    "view": view,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.list",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             model=BetaManagedAgentsMemoryVersion,
         )
@@ -457,6 +569,7 @@ class AsyncMemoryVersions(AsyncAPIResource):
         *,
         memory_store_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -465,10 +578,22 @@ class AsyncMemoryVersions(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryVersion:
         """
-        Redact a memory version
+        Redact a Memory Version
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store that holds the version (`memstore_...`).
+
+          memory_version_id: The ID of the memory version to redact (`memver_...`).
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -487,7 +612,8 @@ class AsyncMemoryVersions(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -495,12 +621,22 @@ class AsyncMemoryVersions(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true",
+                "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
                 memory_store_id=memory_store_id,
                 memory_version_id=memory_version_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.memory_versions.redact",
+                span_route="/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact",
+                span_attributes={
+                    "gen_ai.memory.store.id": memory_store_id,
+                    "anthropic.memory_store.memory_version.id": memory_version_id,
+                },
             ),
             cast_to=BetaManagedAgentsMemoryVersion,
         )

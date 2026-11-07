@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -25,4 +23,4 @@ class BetaManagedAgentsSystemMessageEvent(BaseModel):
     type: Literal["system.message"]
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this system message was processed."""

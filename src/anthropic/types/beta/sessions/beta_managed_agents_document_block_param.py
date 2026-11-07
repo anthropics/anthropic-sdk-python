@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -26,7 +24,7 @@ class BetaManagedAgentsDocumentBlockParam(TypedDict, total=False):
     """
 
     source: Required[Source]
-    """Union type for document source variants."""
+    """The source of the document data."""
 
     type: Required[Literal["document"]]
 

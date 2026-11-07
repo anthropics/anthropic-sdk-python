@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Required, Annotated, TypedDict
+from typing_extensions import Required, TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
 
 __all__ = ["MemoryDeleteParams"]
@@ -13,9 +10,29 @@ __all__ = ["MemoryDeleteParams"]
 
 class MemoryDeleteParams(TypedDict, total=False):
     memory_store_id: Required[str]
+    """The ID of the memory store that holds the memory (`memstore_...`)."""
 
     expected_content_sha256: str
-    """Query parameter for expected_content_sha256"""
+    """
+    Delete the memory only if its current `content_sha256` equals this value, given
+    as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    If the hashes differ, the request fails with HTTP status 409 and nothing is
+    deleted.
+    """
+
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+    `managed-agents-2026-04-01` in this header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

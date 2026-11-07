@@ -117,7 +117,7 @@ def test_resolve_path_rejects_symlink_loop(tmp_path: Path, p: str) -> None:
 
 @needs_symlinks
 def test_resolve_path_dotdot_is_lexical_before_symlinks(tmp_path: Path) -> None:
-    """``a/../b`` never touches ``a``, so a cycle at ``a`` cannot carry ``b``
+    """`a/../b` never touches `a`, so a cycle at `a` cannot carry `b`
     past the containment check on any interpreter."""
     work = _symlink_fixture(tmp_path)
     env = AgentToolContext(workdir=str(work))
@@ -214,7 +214,7 @@ async def test_read_write_edit_roundtrip(tmp_path: Path) -> None:
 
 @needs_pydantic_v2
 async def test_read_view_range(tmp_path: Path) -> None:
-    (tmp_path / "f.txt").write_text("a\nb\nc\nd\n")
+    (tmp_path / "f.txt").write_bytes(b"a\nb\nc\nd\n")
     env = AgentToolContext(workdir=str(tmp_path))
     out = await beta_read_tool(env).call({"file_path": "f.txt", "view_range": [2, 3]})
     assert out == "b\nc"
@@ -232,7 +232,7 @@ async def test_read_view_range(tmp_path: Path) -> None:
     ],
 )
 async def test_read_view_range_edges(tmp_path: Path, view_range: list[int], want: str) -> None:
-    (tmp_path / "a.txt").write_text("line1\nline2\nline3")
+    (tmp_path / "a.txt").write_bytes(b"line1\nline2\nline3")
     env = AgentToolContext(workdir=str(tmp_path))
     assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": view_range}) == want
 
@@ -247,11 +247,121 @@ async def test_read_view_range_wrong_arity_is_rejected(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+async def test_read_preserves_crlf_line_endings(tmp_path: Path) -> None:
+    (tmp_path / "crlf.txt").write_bytes(b"line1\r\nline2\r\nline3\r\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "crlf.txt"}) == "line1\r\nline2\r\nline3\r\n"
+    out = await beta_read_tool(env).call({"file_path": "crlf.txt", "view_range": [1, 2]})
+    assert out == "line1\r\nline2\r"
+
+
+@needs_pydantic_v2
+async def test_read_preserves_lone_cr(tmp_path: Path) -> None:
+    (tmp_path / "cr.txt").write_bytes(b"a\rb\rc\r")
+    env = AgentToolContext(workdir=str(tmp_path))
+    assert await beta_read_tool(env).call({"file_path": "cr.txt"}) == "a\rb\rc\r"
+    assert await beta_read_tool(env).call({"file_path": "cr.txt", "view_range": [1, 1]}) == "a\rb\rc\r"
+    assert await beta_read_tool(env).call({"file_path": "cr.txt", "view_range": [2, 2]}) == ""
+
+
+@needs_pydantic_v2
+async def test_edit_preserves_crlf_line_endings(tmp_path: Path) -> None:
+    path = tmp_path / "crlf.txt"
+    path.write_bytes(b"line1\r\nline2\r\nline3\r\n")
+    env = AgentToolContext(workdir=str(tmp_path))
+    await beta_edit_tool(env).call({"file_path": "crlf.txt", "old_string": "line2", "new_string": "LINE2"})
+    assert path.read_bytes() == b"line1\r\nLINE2\r\nline3\r\n"
+
+
+@needs_pydantic_v2
+async def test_write_preserves_content_bytes(tmp_path: Path) -> None:
+    env = AgentToolContext(workdir=str(tmp_path))
+    await beta_write_tool(env).call({"file_path": "w.txt", "content": "a\r\nb\nc\r"})
+    assert (tmp_path / "w.txt").read_bytes() == b"a\r\nb\nc\r"
+
+
+@needs_pydantic_v2
 async def test_read_rejects_oversized_file(tmp_path: Path) -> None:
     (tmp_path / "big.txt").write_bytes(b"a" * (257 * 1024))
     env = AgentToolContext(workdir=str(tmp_path))
-    with pytest.raises(ToolError, match="exceeds"):
+    with pytest.raises(ToolError, match="exceeds") as exc_info:
         await beta_read_tool(env).call({"file_path": "big.txt"})
+    assert "view_range" in str(exc_info.value)
+    assert "bash" not in str(exc_info.value)
+
+
+@needs_pydantic_v2
+async def test_read_oversized_file_view_range_wrong_arity_is_rejected(tmp_path: Path) -> None:
+    (tmp_path / "big.txt").write_bytes(b"a" * (257 * 1024))
+    env = AgentToolContext(workdir=str(tmp_path))
+    with pytest.raises(ToolError) as exc_info:
+        await beta_read_tool(env).call({"file_path": "big.txt", "view_range": [2]})
+    assert str(exc_info.value) == "read: view_range must be [start_line, end_line]"
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize(
+    ("view_range", "want"),
+    [
+        ([2, 2], "line2"),
+        ([2, 0], "line2\nline3\n"),
+        ([10, 12], ""),
+        ([3, 1], ""),
+    ],
+)
+async def test_read_view_range_streams_file_over_cap(tmp_path: Path, view_range: list[int], want: str) -> None:
+    (tmp_path / "a.txt").write_bytes(b"line1\nline2\nline3\n")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=16)
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": view_range}) == want
+
+
+@needs_pydantic_v2
+async def test_read_view_range_over_cap_rejects_oversized_slice(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_bytes(b"line1\nline2\nline3\n")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=16)
+    with pytest.raises(ToolError, match="exceeds") as exc_info:
+        await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [1, 3]})
+    assert "Narrow the view_range" in str(exc_info.value)
+    assert "bash" not in str(exc_info.value)
+
+
+@needs_pydantic_v2
+async def test_read_view_range_over_cap_single_long_line(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_bytes(b"x" * 100 + b"\nok\n")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=16)
+    with pytest.raises(ToolError, match="cannot return part of a line"):
+        await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [1, 1]})
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [2, 2]}) == "ok"
+
+
+@needs_pydantic_v2
+async def test_read_view_range_over_cap_preserves_crlf_line_endings(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_bytes(b"line1\r\nline2\r\nline3\r\n")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=16)
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [1, 2]}) == "line1\r\nline2\r"
+
+
+@needs_pydantic_v2
+async def test_read_view_range_over_cap_preserves_lone_cr(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_bytes(b"a\rb\rc\r")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=4)
+    with pytest.raises(ToolError, match="cannot return part of a line"):
+        await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [1, 1]})
+    assert await beta_read_tool(env).call({"file_path": "a.txt", "view_range": [2, 2]}) == ""
+
+    (tmp_path / "b.txt").write_bytes(b"a\rb\rc\r\n0123456789\n")
+    env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=16)
+    assert await beta_read_tool(env).call({"file_path": "b.txt", "view_range": [1, 1]}) == "a\rb\rc\r"
+    assert await beta_read_tool(env).call({"file_path": "b.txt", "view_range": [3, 3]}) == ""
+
+
+@needs_pydantic_v2
+async def test_read_view_range_over_cap_crosses_chunk_boundaries(tmp_path: Path) -> None:
+    rows = [f"row{i:04d}" + "." * 90 for i in range(1, 5001)]
+    (tmp_path / "big.txt").write_bytes("".join(row + "\n" for row in rows).encode())
+    env = AgentToolContext(workdir=str(tmp_path))
+    out = await beta_read_tool(env).call({"file_path": "big.txt", "view_range": [1000, 1002]})
+    assert out == "\n".join(rows[999:1002])
 
 
 @needs_pydantic_v2
@@ -266,8 +376,9 @@ async def test_read_rejects_directory(tmp_path: Path) -> None:
 async def test_edit_rejects_oversized_file(tmp_path: Path) -> None:
     (tmp_path / "big.txt").write_bytes(b"a" * (257 * 1024))
     env = AgentToolContext(workdir=str(tmp_path))
-    with pytest.raises(ToolError, match="exceeds"):
+    with pytest.raises(ToolError, match="exceeds") as exc_info:
         await beta_edit_tool(env).call({"file_path": "big.txt", "old_string": "a", "new_string": "b"})
+    assert "bash" not in str(exc_info.value)
 
 
 @needs_pydantic_v2
@@ -290,8 +401,9 @@ async def test_edit_normal_within_limit(tmp_path: Path) -> None:
 async def test_edit_custom_max_bytes_rejects_below_cap(tmp_path: Path) -> None:
     (tmp_path / "f.txt").write_bytes(b"OLD" + b"\x00" * 2000)
     env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=1024)
-    with pytest.raises(ToolError, match="exceeds"):
+    with pytest.raises(ToolError, match="exceeds") as exc_info:
         await beta_edit_tool(env).call({"file_path": "f.txt", "old_string": "OLD", "new_string": "NEW"})
+    assert "bash" not in str(exc_info.value)
 
 
 @needs_pydantic_v2
@@ -321,8 +433,10 @@ async def test_edit_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
 async def test_read_custom_max_bytes_rejects_below_cap(tmp_path: Path) -> None:
     (tmp_path / "f.txt").write_bytes(b"a" * 2000)
     env = AgentToolContext(workdir=str(tmp_path), max_file_bytes=1024)
-    with pytest.raises(ToolError, match="exceeds"):
+    with pytest.raises(ToolError, match="exceeds") as exc_info:
         await beta_read_tool(env).call({"file_path": "f.txt"})
+    assert "view_range" in str(exc_info.value)
+    assert "bash" not in str(exc_info.value)
 
 
 @needs_pydantic_v2
@@ -341,7 +455,7 @@ async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
 
 
 def _media_type_literal_values(typed_dict: type, key: str) -> set[str]:
-    """Extract the values of a ``Required[Literal[...]]`` TypedDict field."""
+    """Extract the values of a `Required[Literal[...]]` TypedDict field."""
     hint = get_type_hints(typed_dict, include_extras=True)[key]
     if get_origin(hint) is Required:
         (hint,) = get_args(hint)
@@ -437,7 +551,7 @@ async def test_read_binary_custom_media_caps(tmp_path: Path) -> None:
     with pytest.raises(ToolError, match="exceeds"):
         await beta_read_tool(tight).call({"file_path": "doc.pdf"})
 
-    # A larger cap (or ``None`` to disable) admits the same files.
+    # A larger cap (or `None` to disable) admits the same files.
     loose = AgentToolContext(workdir=str(tmp_path), max_image_base64_bytes=1024 * 1024, max_pdf_bytes=None)
     for name, kind in (("img.png", "image"), ("doc.pdf", "document")):
         result = await beta_read_tool(loose).call({"file_path": name})
@@ -629,8 +743,8 @@ async def test_bash_stdin_redirect(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
 async def test_bash_session_closed_property(tmp_path: Path) -> None:
-    """``closed`` is the inverse of the old ``alive`` (TS parity) and there is
-    no ``alive`` attribute any more."""
+    """`closed` is the inverse of the old `alive` (TS parity) and there is
+    no `alive` attribute any more."""
     s = await BashSession.start(str(tmp_path))
     assert s.closed is False
     assert not hasattr(s, "alive")
@@ -644,12 +758,12 @@ async def test_bash_session_closed_property(tmp_path: Path) -> None:
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
 async def test_bash_outer_cancel_closes_subprocess_no_stale_state(tmp_path: Path) -> None:
     """Regression: a cancellation from an *outer* scope (e.g. the session
-    runner's ``TOOL_TIMEOUT``) during a bash exec must tear the subprocess down,
+    runner's `TOOL_TIMEOUT`) during a bash exec must tear the subprocess down,
     so the next call can't read the cancelled command's stale output/sentinel.
 
-    anyio raises an outer-scope cancel as a plain ``Cancelled`` (not
-    ``TimeoutError``), so the ``except TimeoutError`` cleanup never runs — only
-    the new ``except get_cancelled_exc_class()`` path saves us here.
+    anyio raises an outer-scope cancel as a plain `Cancelled` (not
+    `TimeoutError`), so the `except TimeoutError` cleanup never runs — only
+    the new `except get_cancelled_exc_class()` path saves us here.
     """
     s = await BashSession.start(str(tmp_path))
     try:
@@ -759,7 +873,7 @@ async def test_read_under_unreadable_directory_reports_permission_denied(tmp_pat
 
 @needs_pydantic_v2
 async def test_glob_rejects_dotdot_pattern(tmp_path: Path) -> None:
-    """``Path.glob`` honours literal ``..`` segments — the tool must reject a
+    """`Path.glob` honours literal `..` segments — the tool must reject a
     pattern that would walk out of the workdir before it ever runs."""
     outside = tmp_path / "outside"
     outside.mkdir()

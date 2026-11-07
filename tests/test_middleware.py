@@ -7,7 +7,7 @@ from typing import Any, Protocol, cast
 from pathlib import Path
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 import pytest
 from respx import MockRouter
 
@@ -30,10 +30,12 @@ from anthropic import (
     AsyncAnthropicBedrock,
     AnthropicBedrockMantle,
     AsyncAnthropicBedrockMantle,
+    omit,
 )
 from anthropic._models import FinalRequestOptions
 from anthropic.lib.aws import AnthropicAWS, AsyncAnthropicAWS
 from anthropic._response import BinaryAPIResponse, AsyncBinaryAPIResponse, StreamedBinaryAPIResponse
+from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
 from anthropic._base_client import BaseClient
 from anthropic.types.message import Message
@@ -43,7 +45,7 @@ api_key = "my-anthropic-api-key"
 
 
 class MockRequestCall(Protocol):
-    request: httpx.Request
+    request: httpx2.Request
 
 
 def _low_retry_timeout(*_args: Any, **_kwargs: Any) -> float:
@@ -412,11 +414,11 @@ class TestAPIRequest:
         )
         request = APIRequest(options=options, cast_to=Message)
 
-        copied = request.copy(body={"model": "claude-sonnet-4-5"}, headers={"x-trace-id": "123"})
+        copied = request.copy(body={"model": "claude-sonnet-5-5"}, headers={"x-trace-id": "123"})
 
         assert copied is not request
         assert copied.options is not request.options
-        assert copied.json == {"model": "claude-sonnet-4-5"}
+        assert copied.json == {"model": "claude-sonnet-5-5"}
         assert copied.headers == {"x-trace-id": "123"}
         assert copied.method == "post"
         assert copied.url == "/v1/messages"
@@ -530,7 +532,7 @@ class TestMiddlewareValidation:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_async_callable_object_handles_requests(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         middleware = AsyncCallableMiddleware()
         client = make_async_client(middleware=[middleware])
@@ -555,7 +557,7 @@ class TestMiddlewareValidation:
 
     @pytest.mark.respx(base_url=base_url)
     def test_sync_callable_object_handles_requests(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         middleware = SyncCallableMiddleware()
         client = make_sync_client(middleware=[middleware])
@@ -589,7 +591,7 @@ class TestMiddlewareValidation:
 class TestSyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     def test_middleware_sees_request_and_returns_response(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=[recorder])
@@ -621,8 +623,55 @@ class TestSyncMiddleware:
         assert response.parse() is message
 
     @pytest.mark.respx(base_url=base_url)
+    def test_middleware_sees_prepared_body(self, respx_mock: MockRouter, tmp_path: Path) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
+
+        recorder = RecordingMiddleware()
+        client = make_sync_client(middleware=[recorder])
+
+        image = tmp_path / "image.png"
+        image.write_bytes(b"abc")
+
+        client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-opus-4-6",
+            system=omit,
+            extra_body={"zzz": 1},
+            extra_query={"q": omit, "r": 1},
+        )
+
+        # by the time middleware runs the file has been read, omitted values are gone
+        # and `extra_body` / `extra_query` have been merged in
+        assert len(recorder.requests) == 1
+        request = recorder.requests[0]
+        body = middleware_request_body(request)
+        assert body["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert "system" not in body
+        assert body["zzz"] == 1
+        # a top-level `omit` in the query stays until the request is built, as it may unset one of
+        # the client's default query params
+        assert request.query_params["r"] == 1
+        assert {key: value for key, value in request.query_params.items() if value is not omit} == {"r": 1}
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        sent = request_body(calls[0])
+        assert sent["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert sent["zzz"] == 1
+        assert calls[0].request.url.params.get("r") == "1"
+        assert "q" not in calls[0].request.url.params
+
+    @pytest.mark.respx(base_url=base_url)
     def test_middleware_ordering(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events)
@@ -639,9 +688,9 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_request_mutation_changes_outgoing_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
-        client = make_sync_client(middleware=[MutateBody(model="claude-sonnet-4-5", max_tokens=4096)])
+        client = make_sync_client(middleware=[MutateBody(model="claude-sonnet-5-5", max_tokens=4096)])
 
         message = client.messages.create(
             max_tokens=1024,
@@ -653,7 +702,7 @@ class TestSyncMiddleware:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         sent = request_body(calls[0])
-        assert sent["model"] == "claude-sonnet-4-5"
+        assert sent["model"] == "claude-sonnet-5-5"
         assert sent["max_tokens"] == 4096
         assert sent["messages"] == [{"role": "user", "content": "Hello"}]
 
@@ -661,12 +710,12 @@ class TestSyncMiddleware:
     def test_fallback_on_overloaded_error(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
-        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         message = client.messages.create(
             max_tokens=1024,
@@ -675,19 +724,19 @@ class TestSyncMiddleware:
         )
 
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
         assert request_body(calls[0])["model"] == "claude-opus-4-6"
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
 
     @pytest.mark.respx(base_url=base_url)
     def test_retry_with_modified_params_on_request_too_large(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(413, json=error_body(type="invalid_request_error", message="Request too large")),
-                httpx.Response(200, json=message_body()),
+                httpx2.Response(413, json=error_body(type="invalid_request_error", message="Request too large")),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -707,7 +756,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
     def test_short_circuit_skips_http_request(self, respx_mock: MockRouter) -> None:
-        route = respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        route = respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         cached = short_circuit_message(model="claude-cached")
         middleware = ShortCircuit(cached)
@@ -725,7 +774,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_functional_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         def add_trace_header(request: APIRequest, call_next: CallNext) -> Any:
             return call_next(request.copy(headers={**request.headers, "x-trace-id": "abc-123"}))
@@ -748,9 +797,9 @@ class TestSyncMiddleware:
 
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(500),
-                httpx.Response(500),
-                httpx.Response(200, json=message_body()),
+                httpx2.Response(500),
+                httpx2.Response(500),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -775,7 +824,7 @@ class TestSyncMiddleware:
     def test_middleware_error_is_not_retried(self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = AttemptRecorder()
         client = make_sync_client(middleware=[recorder, Exploding()], max_retries=2)
@@ -797,7 +846,7 @@ class TestSyncMiddleware:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         attempts: list[int] = []
 
@@ -825,8 +874,8 @@ class TestSyncMiddleware:
 
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.ConnectError("kaboom"),
-                httpx.Response(200, json=message_body()),
+                httpx2.ConnectError("kaboom"),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -855,7 +904,7 @@ class TestSyncMiddleware:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(400, json=error_body(type="invalid_request_error", message="bad request"))
+            return_value=httpx2.Response(400, json=error_body(type="invalid_request_error", message="bad request"))
         )
 
         recorder = AttemptRecorder()
@@ -882,8 +931,8 @@ class TestSyncMiddleware:
 
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(500),
-                httpx.Response(200, json=message_body()),
+                httpx2.Response(500),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -908,7 +957,7 @@ class TestSyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_flows_through_middleware(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, headers={"content-type": "text/event-stream"}, content=b"")
+            return_value=httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=b"")
         )
 
         recorder = RecordingMiddleware()
@@ -933,12 +982,12 @@ class TestSyncMiddleware:
     def test_streaming_error_response_is_visible_to_middleware(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx.Response(200, headers={"content-type": "text/event-stream"}, content=b""),
+                httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
+                httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=b""),
             ]
         )
 
-        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_sync_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         stream = client.messages.create(
             max_tokens=1024,
@@ -950,13 +999,13 @@ class TestSyncMiddleware:
         assert isinstance(stream, Stream)
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
         stream.close()
 
     @pytest.mark.respx(base_url=base_url)
     def test_call_next_returns_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -977,7 +1026,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_parse_in_middleware_shares_parse_cache(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         middleware = ParseInMiddleware()
         client = make_sync_client(middleware=[middleware])
@@ -995,7 +1044,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_with_raw_response_flows_through_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=[recorder])
@@ -1014,7 +1063,7 @@ class TestSyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     def test_with_raw_response_middleware_sees_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -1041,7 +1090,7 @@ class TestSyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     def test_with_streaming_response_middleware_sees_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -1066,9 +1115,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_response_wrapper_cast_to_is_returned_unparsed(self, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
-            return_value=httpx.Response(200, content=b"file contents")
-        )
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, content=b"file contents"))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=[recorder])
@@ -1091,10 +1138,10 @@ class TestSyncMiddleware:
         # use `with_streaming_response.download` as it relies on the internal cast_to
         # override header which the request pipeline consumes; a retrying middleware
         # must observe identical request state on every `call_next(...)` invocation
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
+        respx_mock.get("/v1/files/file_id/content").mock(
             side_effect=[
-                httpx.Response(503, json=error_body(type="api_error", message="Service unavailable")),
-                httpx.Response(200, json={"foo": "bar"}),
+                httpx2.Response(503, json=error_body(type="api_error", message="Service unavailable")),
+                httpx2.Response(200, json={"foo": "bar"}),
             ]
         )
 
@@ -1120,7 +1167,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_middleware_ordering_across_sequential_requests(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events)
@@ -1143,7 +1190,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_middleware_iterator_argument_runs_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=iter([recorder]))
@@ -1161,7 +1208,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_file_upload_with_request_copying_middleware(self, respx_mock: MockRouter, tmp_path: Path) -> None:
-        respx_mock.post("/v1/files?beta=true").mock(return_value=httpx.Response(200, json=file_metadata_body()))
+        respx_mock.post("/v1/files").mock(return_value=httpx2.Response(200, json=file_metadata_body()))
 
         def add_trace_header(request: APIRequest, call_next: CallNext) -> Any:
             return call_next(request.copy(headers={**request.headers, "x-trace-id": "abc-123"}))
@@ -1215,7 +1262,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_with_middleware_client_runs_appended_middleware_innermost(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events=events)
@@ -1242,7 +1289,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_with_options_client_runs_inherited_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_sync_client(middleware=[recorder])
@@ -1257,7 +1304,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
     def test_middleware_exception_propagates(self, respx_mock: MockRouter) -> None:
-        route = respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        route = respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         client = make_sync_client(middleware=[Exploding()])
 
@@ -1272,7 +1319,7 @@ class TestSyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     def test_no_middleware_behavior_unchanged(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         client = make_sync_client()
         assert client._middleware == ()
@@ -1306,7 +1353,7 @@ class TestSyncMiddleware:
 class TestAsyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     async def test_middleware_sees_request_and_returns_response(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_client(middleware=[recorder])
@@ -1334,8 +1381,55 @@ class TestAsyncMiddleware:
         assert await response.parse() is message
 
     @pytest.mark.respx(base_url=base_url)
+    async def test_middleware_sees_prepared_body(self, respx_mock: MockRouter, tmp_path: Path) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
+
+        recorder = RecordingMiddleware()
+        client = make_async_client(middleware=[recorder])
+
+        image = tmp_path / "image.png"
+        image.write_bytes(b"abc")
+
+        await client.messages.create(
+            max_tokens=1024,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image}}
+                    ],
+                }
+            ],
+            model="claude-opus-4-6",
+            system=omit,
+            extra_body={"zzz": 1},
+            extra_query={"q": omit, "r": 1},
+        )
+
+        # by the time middleware runs the file has been read, omitted values are gone
+        # and `extra_body` / `extra_query` have been merged in
+        assert len(recorder.requests) == 1
+        request = recorder.requests[0]
+        body = middleware_request_body(request)
+        assert body["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert "system" not in body
+        assert body["zzz"] == 1
+        # a top-level `omit` in the query stays until the request is built, as it may unset one of
+        # the client's default query params
+        assert request.query_params["r"] == 1
+        assert {key: value for key, value in request.query_params.items() if value is not omit} == {"r": 1}
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert len(calls) == 1
+        sent = request_body(calls[0])
+        assert sent["messages"][0]["content"][0]["source"]["data"] == "YWJj"
+        assert sent["zzz"] == 1
+        assert calls[0].request.url.params.get("r") == "1"
+        assert "q" not in calls[0].request.url.params
+
+    @pytest.mark.respx(base_url=base_url)
     async def test_middleware_ordering(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events)
@@ -1352,9 +1446,9 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_request_mutation_changes_outgoing_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
-        client = make_async_client(middleware=[MutateBody(model="claude-sonnet-4-5", max_tokens=4096)])
+        client = make_async_client(middleware=[MutateBody(model="claude-sonnet-5-5", max_tokens=4096)])
 
         message = await client.messages.create(
             max_tokens=1024,
@@ -1366,19 +1460,19 @@ class TestAsyncMiddleware:
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 1
         sent = request_body(calls[0])
-        assert sent["model"] == "claude-sonnet-4-5"
+        assert sent["model"] == "claude-sonnet-5-5"
         assert sent["max_tokens"] == 4096
 
     @pytest.mark.respx(base_url=base_url)
     async def test_fallback_on_overloaded_error(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
-        client = make_async_client(middleware=[ModelFallback("claude-sonnet-4-5")], max_retries=0)
+        client = make_async_client(middleware=[ModelFallback("claude-sonnet-5-5")], max_retries=0)
 
         message = await client.messages.create(
             max_tokens=1024,
@@ -1387,16 +1481,16 @@ class TestAsyncMiddleware:
         )
 
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         calls = cast("list[MockRequestCall]", respx_mock.calls)
         assert len(calls) == 2
         assert request_body(calls[0])["model"] == "claude-opus-4-6"
-        assert request_body(calls[1])["model"] == "claude-sonnet-4-5"
+        assert request_body(calls[1])["model"] == "claude-sonnet-5-5"
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
     async def test_short_circuit_skips_http_request(self, respx_mock: MockRouter) -> None:
-        route = respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        route = respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         cached = short_circuit_message(model="claude-cached")
         middleware = ShortCircuit(cached)
@@ -1414,7 +1508,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_functional_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         async def add_trace_header(request: APIRequest, call_next: AsyncCallNext) -> Any:
             return await call_next(request.copy(headers={**request.headers, "x-trace-id": "abc-123"}))
@@ -1434,7 +1528,7 @@ class TestAsyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     async def test_call_next_returns_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -1455,7 +1549,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_parse_in_middleware_shares_parse_cache(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         middleware = ParseInMiddleware()
         client = make_async_client(middleware=[middleware])
@@ -1473,7 +1567,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_with_raw_response_flows_through_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_client(middleware=[recorder])
@@ -1492,7 +1586,7 @@ class TestAsyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     async def test_with_raw_response_middleware_sees_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -1519,7 +1613,7 @@ class TestAsyncMiddleware:
     @pytest.mark.respx(base_url=base_url)
     async def test_with_streaming_response_middleware_sees_api_response(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
+            return_value=httpx2.Response(200, json=message_body(), headers={"x-custom-header": "custom-value"})
         )
 
         middleware = InspectResponse()
@@ -1544,9 +1638,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_response_wrapper_cast_to_is_returned_unparsed(self, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/files/file_id/content?beta=true").mock(
-            return_value=httpx.Response(200, content=b"file contents")
-        )
+        respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, content=b"file contents"))
 
         recorder = RecordingMiddleware()
         client = make_async_client(middleware=[recorder])
@@ -1568,8 +1660,8 @@ class TestAsyncMiddleware:
     async def test_fallback_retry_sees_identical_request_state(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(503, json=error_body(type="api_error", message="Service unavailable")),
-                httpx.Response(200, json=message_body()),
+                httpx2.Response(503, json=error_body(type="api_error", message="Service unavailable")),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -1595,7 +1687,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_middleware_ordering_across_sequential_requests(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events)
@@ -1618,7 +1710,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_middleware_iterator_argument_runs_middleware(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_client(middleware=iter([recorder]))
@@ -1636,7 +1728,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
     async def test_middleware_exception_propagates(self, respx_mock: MockRouter) -> None:
-        route = respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        route = respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         client = make_async_client(middleware=[Exploding()])
 
@@ -1655,9 +1747,9 @@ class TestAsyncMiddleware:
 
         respx_mock.post("/v1/messages").mock(
             side_effect=[
-                httpx.Response(500),
-                httpx.Response(500),
-                httpx.Response(200, json=message_body()),
+                httpx2.Response(500),
+                httpx2.Response(500),
+                httpx2.Response(200, json=message_body()),
             ]
         )
 
@@ -1684,7 +1776,7 @@ class TestAsyncMiddleware:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         attempts: list[int] = []
 
@@ -1710,7 +1802,7 @@ class TestAsyncMiddleware:
     ) -> None:
         monkeypatch.setattr(BaseClient, "_calculate_retry_timeout", _low_retry_timeout)
 
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = AttemptRecorder()
         client = make_async_client(middleware=[recorder, Exploding()], max_retries=2)
@@ -1740,7 +1832,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_with_middleware_client_runs_appended_middleware_innermost(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events=events)
@@ -1762,7 +1854,7 @@ class TestAsyncMiddleware:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_no_middleware_behavior_unchanged(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         client = make_async_client()
         assert client._middleware == ()
@@ -1801,7 +1893,7 @@ class TestMiddlewareProperty:
 
     @pytest.mark.respx(base_url=base_url)
     def test_with_options_append_idiom(self, respx_mock: MockRouter) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=message_body()))
 
         events: list[str] = []
         outer = RecordingMiddleware("outer", events)
@@ -1855,7 +1947,7 @@ class TestLibClientMiddleware:
 
     @pytest.mark.respx()
     def test_bedrock_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.bedrock_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.bedrock_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_bedrock_client(middleware=[recorder])
@@ -1876,11 +1968,11 @@ class TestLibClientMiddleware:
         assert wire.url.path == "/model/claude-opus-4-6/invoke"
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "bedrock-2023-05-31"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_bedrock_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.bedrock_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.bedrock_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_bedrock_client(middleware=[recorder])
@@ -1900,7 +1992,7 @@ class TestLibClientMiddleware:
 
     @pytest.mark.respx()
     def test_vertex_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.vertex_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.vertex_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_vertex_client(middleware=[recorder])
@@ -1918,11 +2010,11 @@ class TestLibClientMiddleware:
         wire = cast("MockRequestCall", respx_mock.calls[0]).request
         wire_body = json.loads(wire.content)
         assert "model" not in wire_body
-        assert wire_body["anthropic_version"] == "vertex-2023-10-16"
+        assert wire_body["anthropic_version"] == ANTHROPIC_API_VERSION
 
     @pytest.mark.respx()
     async def test_async_vertex_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.vertex_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.vertex_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_vertex_client(middleware=[recorder])
@@ -1939,7 +2031,7 @@ class TestLibClientMiddleware:
 
     @pytest.mark.respx()
     def test_mantle_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.mantle_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.mantle_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_mantle_client(middleware=[recorder])
@@ -1959,7 +2051,7 @@ class TestLibClientMiddleware:
 
     @pytest.mark.respx()
     async def test_async_mantle_middleware_sees_canonical_request(self, respx_mock: MockRouter) -> None:
-        respx_mock.post(self.mantle_url).mock(return_value=httpx.Response(200, json=message_body()))
+        respx_mock.post(self.mantle_url).mock(return_value=httpx2.Response(200, json=message_body()))
 
         recorder = RecordingMiddleware()
         client = make_async_mantle_client(middleware=[recorder])
@@ -1981,8 +2073,8 @@ class TestLibClientMiddleware:
     def test_bedrock_fallback_middleware_retries_with_new_model(self, respx_mock: MockRouter) -> None:
         respx_mock.post(self.bedrock_url).mock(
             side_effect=[
-                httpx.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
-                httpx.Response(200, json=message_body(model="claude-sonnet-4-5")),
+                httpx2.Response(529, json=error_body(type="overloaded_error", message="Overloaded")),
+                httpx2.Response(200, json=message_body(model="claude-sonnet-5-5")),
             ]
         )
 
@@ -1993,7 +2085,7 @@ class TestLibClientMiddleware:
                 if response.status_code != 529:
                     return response
                 fallback = request.copy(
-                    body={**middleware_request_body(request), "model": "claude-sonnet-4-5"},
+                    body={**middleware_request_body(request), "model": "claude-sonnet-5-5"},
                 )
                 return call_next(fallback)
 
@@ -2004,13 +2096,13 @@ class TestLibClientMiddleware:
             model="claude-opus-4-6",
         )
         assert isinstance(message, Message)
-        assert message.model == "claude-sonnet-4-5"
+        assert message.model == "claude-sonnet-5-5"
 
         # the fallback model is reflected in the rewritten URL of the second wire request
         first = cast("MockRequestCall", respx_mock.calls[0]).request
         second = cast("MockRequestCall", respx_mock.calls[1]).request
         assert first.url.path == "/model/claude-opus-4-6/invoke"
-        assert second.url.path == "/model/claude-sonnet-4-5/invoke"
+        assert second.url.path == "/model/claude-sonnet-5-5/invoke"
 
     def test_foundry_clients_accept_middleware(self) -> None:
         recorder = RecordingMiddleware()

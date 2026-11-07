@@ -1,5 +1,4 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
+from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -9,7 +8,7 @@ __all__ = ["BetaManagedAgentsSessionThreadCreatedEvent"]
 
 
 class BetaManagedAgentsSessionThreadCreatedEvent(BaseModel):
-    """Emitted when a subagent is spawned as a new thread.
+    """Emitted when a child thread is created.
 
     Written to the parent thread's output stream so clients observing the session see child creation.
     """
@@ -21,9 +20,15 @@ class BetaManagedAgentsSessionThreadCreatedEvent(BaseModel):
     """Name of the callable agent the thread runs."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the thread was created."""
 
     session_thread_id: str
     """Public `sthr_` ID of the newly created thread."""
 
     type: Literal["session.thread_created"]
+
+    workflow_run_id: Optional[str] = None
+    """
+    Identifier of the workflow run that created the thread, or `null` for any other
+    thread.
+    """

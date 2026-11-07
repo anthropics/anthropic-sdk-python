@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -29,6 +27,7 @@ class TestDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -45,6 +44,8 @@ class TestDreams:
             instructions="x",
             output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -58,6 +59,7 @@ class TestDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -75,6 +77,7 @@ class TestDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -88,6 +91,7 @@ class TestDreams:
     def test_method_retrieve(self, client: Anthropic) -> None:
         dream = client.beta.dreams.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -96,6 +100,8 @@ class TestDreams:
         dream = client.beta.dreams.retrieve(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -103,6 +109,7 @@ class TestDreams:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.dreams.with_raw_response.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -114,6 +121,7 @@ class TestDreams:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.dreams.with_streaming_response.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -132,7 +140,9 @@ class TestDreams:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        dream = client.beta.dreams.list()
+        dream = client.beta.dreams.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaDream], dream, path=["response"])
 
     @parametrize
@@ -145,12 +155,16 @@ class TestDreams:
             page="page",
             statuses=["pending"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaDream], dream, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.dreams.with_raw_response.list()
+        response = client.beta.dreams.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -159,7 +173,9 @@ class TestDreams:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.dreams.with_streaming_response.list() as response:
+        with client.beta.dreams.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -172,6 +188,7 @@ class TestDreams:
     def test_method_archive(self, client: Anthropic) -> None:
         dream = client.beta.dreams.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -180,6 +197,8 @@ class TestDreams:
         dream = client.beta.dreams.archive(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -187,6 +206,7 @@ class TestDreams:
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.dreams.with_raw_response.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -198,6 +218,7 @@ class TestDreams:
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.dreams.with_streaming_response.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -218,6 +239,7 @@ class TestDreams:
     def test_method_cancel(self, client: Anthropic) -> None:
         dream = client.beta.dreams.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -226,6 +248,8 @@ class TestDreams:
         dream = client.beta.dreams.cancel(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -233,6 +257,7 @@ class TestDreams:
     def test_raw_response_cancel(self, client: Anthropic) -> None:
         response = client.beta.dreams.with_raw_response.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -244,6 +269,7 @@ class TestDreams:
     def test_streaming_response_cancel(self, client: Anthropic) -> None:
         with client.beta.dreams.with_streaming_response.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -276,6 +302,7 @@ class TestAsyncDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -292,6 +319,8 @@ class TestAsyncDreams:
             instructions="x",
             output_behavior={"type": "create_new"},
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -305,6 +334,7 @@ class TestAsyncDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -322,6 +352,7 @@ class TestAsyncDreams:
                 }
             ],
             model="string",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -335,6 +366,7 @@ class TestAsyncDreams:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -343,6 +375,8 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.retrieve(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -350,6 +384,7 @@ class TestAsyncDreams:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.dreams.with_raw_response.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -361,6 +396,7 @@ class TestAsyncDreams:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.dreams.with_streaming_response.retrieve(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -379,7 +415,9 @@ class TestAsyncDreams:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        dream = await async_client.beta.dreams.list()
+        dream = await async_client.beta.dreams.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaDream], dream, path=["response"])
 
     @parametrize
@@ -392,12 +430,16 @@ class TestAsyncDreams:
             page="page",
             statuses=["pending"],
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaDream], dream, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.dreams.with_raw_response.list()
+        response = await async_client.beta.dreams.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -406,7 +448,9 @@ class TestAsyncDreams:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.dreams.with_streaming_response.list() as response:
+        async with async_client.beta.dreams.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -419,6 +463,7 @@ class TestAsyncDreams:
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -427,6 +472,8 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.archive(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -434,6 +481,7 @@ class TestAsyncDreams:
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.dreams.with_raw_response.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -445,6 +493,7 @@ class TestAsyncDreams:
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.dreams.with_streaming_response.archive(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -465,6 +514,7 @@ class TestAsyncDreams:
     async def test_method_cancel(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -473,6 +523,8 @@ class TestAsyncDreams:
         dream = await async_client.beta.dreams.cancel(
             dream_id="dream_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDream, dream, path=["response"])
 
@@ -480,6 +532,7 @@ class TestAsyncDreams:
     async def test_raw_response_cancel(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.dreams.with_raw_response.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -491,6 +544,7 @@ class TestAsyncDreams:
     async def test_streaming_response_cancel(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.dreams.with_streaming_response.cancel(
             dream_id="dream_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

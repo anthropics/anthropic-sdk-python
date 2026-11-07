@@ -1,16 +1,12 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
-from typing import Union, Iterable
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union
+from typing_extensions import TypeAlias
 
-from .beta_content_block_param import BetaContentBlockParam
+from .beta_user_message_param import BetaUserMessageParam
+from .beta_system_message_param import BetaSystemMessageParam
+from .beta_assistant_message_param import BetaAssistantMessageParam
 
 __all__ = ["BetaMessageParam"]
 
-
-class BetaMessageParam(TypedDict, total=False):
-    content: Required[Union[str, Iterable[BetaContentBlockParam]]]
-
-    role: Required[Literal["user", "assistant", "system"]]
+BetaMessageParam: TypeAlias = Union[BetaUserMessageParam, BetaAssistantMessageParam, BetaSystemMessageParam]

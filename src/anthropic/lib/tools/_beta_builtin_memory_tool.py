@@ -20,6 +20,7 @@ from anthropic.types.beta import (
     BetaMemoryTool20250818StrReplaceCommand,
 )
 
+from ._files import read_text_exact
 from ..._models import construct_type_unchecked
 from ...types.beta import (
     BetaMemoryTool20250818Param,
@@ -77,7 +78,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -190,7 +191,7 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -304,9 +305,9 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
 
 
 def _secure_mkdir(path: Path, mode: int = _DIR_CREATE_MODE) -> None:
-    """Create ``path`` and any missing parents with ``mode``, regardless of umask.
+    """Create `path` and any missing parents with `mode`, regardless of umask.
 
-    ``Path.mkdir(parents=True, mode=...)`` and ``os.makedirs(mode=...)`` apply the
+    `Path.mkdir(parents=True, mode=...)` and `os.makedirs(mode=...)` apply the
     requested mode only to the final (leaf) directory; intermediate parents are
     created with the process umask default, which can be world-writable under a
     permissive umask. We create each missing component explicitly so the entire
@@ -353,11 +354,19 @@ def _validate_no_symlink_escape(target_path: Path, memory_root: Path) -> None:
 
 def _read_file_content(full_path: Path, memory_path: str) -> str:
     try:
-        return full_path.read_text(encoding="utf-8")
+        return read_text_exact(full_path)
     except FileNotFoundError as err:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
         ) from err
+
+
+def _split_lines_keeping_cr(content: str) -> List[str]:
+    """Split on LF only (keeping any CR), without the empty tail a trailing newline leaves."""
+    lines = content.split("\n")
+    if lines[-1] == "":
+        lines.pop()
+    return lines
 
 
 def _format_file_size(bytes_size: int) -> str:
@@ -547,7 +556,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = _read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = _split_lines_keeping_cr(content)
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(
@@ -566,7 +575,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def delete(self, command: BetaMemoryTool20250818DeleteCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if full_path == self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -585,6 +594,9 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def rename(self, command: BetaMemoryTool20250818RenameCommand) -> str:
         old_full_path = self._validate_path(command.old_path)
         new_full_path = self._validate_path(command.new_path)
+
+        if old_full_path == self.memory_root.resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
 
         if new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")
@@ -650,7 +662,7 @@ async def _async_secure_mkdir(path: AsyncPath, mode: int = _DIR_CREATE_MODE) -> 
 
 async def _async_read_file_content(full_path: AsyncPath, memory_path: str) -> str:
     try:
-        return await full_path.read_text(encoding="utf-8")
+        return await run_sync(read_text_exact, Path(str(full_path)))
     except FileNotFoundError as err:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
@@ -848,7 +860,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             raise ToolError(f"The path {command.path} is not a file.")
 
         content = await _async_read_file_content(full_path, command.path)
-        lines = content.splitlines()
+        lines = _split_lines_keeping_cr(content)
 
         if command.insert_line < 0 or command.insert_line > len(lines):
             raise ToolError(
@@ -868,7 +880,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        if command.path == "/memories":
+        if full_path == await self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -888,6 +900,9 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         old_full_path = await self._validate_path(command.old_path)
         new_full_path = await self._validate_path(command.new_path)
+
+        if old_full_path == await self.memory_root.resolve():
+            raise ToolError("Cannot rename the /memories directory itself")
 
         if await new_full_path.exists():
             raise ToolError(f"The destination {command.new_path} already exists")

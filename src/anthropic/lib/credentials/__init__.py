@@ -7,6 +7,7 @@ from ._types import (
     AccessTokenProvider as AccessTokenProvider,
     BaseURLBoundProvider as BaseURLBoundProvider,
     IdentityTokenProvider as IdentityTokenProvider,
+    AsyncAccessTokenProvider as AsyncAccessTokenProvider,
 )
 from ._workload import (
     WorkloadIdentityError as WorkloadIdentityError,
@@ -24,6 +25,7 @@ from ._providers import (
 __all__ = [
     "AccessToken",
     "AccessTokenProvider",
+    "AsyncAccessTokenProvider",
     "BaseURLBoundProvider",
     "CredentialResult",
     "IdentityTokenProvider",

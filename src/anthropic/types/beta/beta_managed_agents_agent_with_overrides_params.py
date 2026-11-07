@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Iterable, Optional
@@ -43,8 +41,8 @@ class BetaManagedAgentsAgentWithOverridesParams(TypedDict, total=False):
     model: Model
     """Replacement model.
 
-    Accepts the model string, e.g. `claude-opus-5`, or a `model_config` object. Omit
-    to use the agent's model.
+    Accepts the model string, e.g. `claude-opus-5-5`, or a `model_config` object.
+    Omit to use the agent's model.
     """
 
     skills: Iterable[BetaManagedAgentsSkillParams]

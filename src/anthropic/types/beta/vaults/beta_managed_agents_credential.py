@@ -1,11 +1,8 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_mcp_oauth_auth_response import BetaManagedAgentsMCPOAuthAuthResponse
 from .beta_managed_agents_static_bearer_auth_response import BetaManagedAgentsStaticBearerAuthResponse
 from .beta_managed_agents_environment_variable_auth_response import BetaManagedAgentsEnvironmentVariableAuthResponse
@@ -18,7 +15,7 @@ Auth: TypeAlias = Annotated[
         BetaManagedAgentsStaticBearerAuthResponse,
         BetaManagedAgentsEnvironmentVariableAuthResponse,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
@@ -29,13 +26,13 @@ class BetaManagedAgentsCredential(BaseModel):
     """
 
     id: str
-    """Unique identifier for the credential."""
+    """The unique ID of the credential (`vcrd_...`)."""
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the credential was archived. Null if not archived."""
 
     auth: Auth
-    """Authentication details for a credential."""
+    """Authentication configuration for this credential."""
 
     created_at: datetime
     """A timestamp in RFC 3339 format"""

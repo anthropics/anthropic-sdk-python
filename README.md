@@ -1,8 +1,8 @@
-# Claude SDK for Python
+# Anthropic SDK for Python
 
 [![PyPI version](https://img.shields.io/pypi/v/anthropic.svg)](https://pypi.org/project/anthropic/)
 
-The Claude SDK for Python provides access to the [Claude API](https://docs.anthropic.com/en/api/) from Python applications.
+The Anthropic SDK for Python provides access to the [Claude API](https://docs.anthropic.com/en/api/) from Python applications.
 
 ## Documentation
 
@@ -34,13 +34,10 @@ message = client.messages.create(
             "content": "Hello, Claude",
         }
     ],
-
-    model="claude-opus-5",
+    model="claude-opus-5-5",
 )
-
 print(message.content)
 ```
-
 
 ## Requirements
 
@@ -52,4 +49,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details. Versions released before the change from the MIT License, and third-party contributions merged before it, remain under the MIT License. See [LICENSE-MIT](LICENSE-MIT).

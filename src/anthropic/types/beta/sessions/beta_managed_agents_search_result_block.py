@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List
 from typing_extensions import Literal
 
@@ -14,7 +12,7 @@ class BetaManagedAgentsSearchResultBlock(BaseModel):
     """A block containing a web search result."""
 
     citations: BetaManagedAgentsSearchResultCitations
-    """Citation settings for a search result."""
+    """Citation settings for this search result."""
 
     content: List[BetaManagedAgentsSearchResultContent]
     """Array of text content blocks from the search result."""

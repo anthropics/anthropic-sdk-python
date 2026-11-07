@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -53,5 +51,6 @@ class BetaManagedAgentsModelConfigParams(TypedDict, total=False):
     """Inference speed mode.
 
     `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    Defaults to `standard`. Not all models support `fast`; invalid combinations are
+    rejected at create time.
     """

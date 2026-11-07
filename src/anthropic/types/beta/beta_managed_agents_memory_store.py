@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -16,14 +14,41 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     """
 
     id: str
-    """Unique identifier for the memory store (a `memstore_...` tagged ID).
+    """The unique ID of the memory store (`memstore_...`).
 
-    Use this when attaching the store to a session, or in the `{memory_store_id}`
-    path parameter of subsequent calls.
+    Use it to attach the store to a session.
+    """
+
+    archived_at: Optional[datetime] = None
+    """When the memory store was archived, in RFC 3339, or `null` if it hasn't been.
+
+    Archiving can't be undone. An archived store can't be attached to new sessions.
+    You can't create or update its memories or update the store. You can still read
+    and delete its memories, redact their versions, and delete the store.
+
+    See the
+    [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#archive-a-store)
+    to learn more about archiving.
     """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the memory store was created, in RFC 3339."""
+
+    description: str
+    """Free-text description of what the store contains, up to 1,024 characters.
+
+    Included in the agent's system prompt when the store is attached, so word it to
+    be useful to the agent. Empty string when unset.
+    """
+
+    metadata: Dict[str, str]
+    """
+    Key-value pairs for your own use, such as the end user that the store belongs
+    to.
+
+    A store has at most 16 pairs. Keys are 1 to 64 characters long and values at
+    most 512 characters. You can't filter lists by metadata.
+    """
 
     name: str
     """Human-readable name for the store.
@@ -35,21 +60,8 @@ class BetaManagedAgentsMemoryStore(BaseModel):
     type: Literal["memory_store"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the memory store was last changed, in RFC 3339.
 
-    archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
-
-    description: Optional[str] = None
-    """Free-text description of what the store contains, up to 1024 characters.
-
-    Included in the agent's system prompt when the store is attached, so word it to
-    be useful to the agent. Empty string when unset.
-    """
-
-    metadata: Optional[Dict[str, str]] = None
-    """
-    Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-    belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-    Returned on retrieve/list but not filterable.
+    Changing its `name`, `description`, or `metadata` updates it. Archiving the
+    store does too. Changes to the store's memories don't.
     """

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TypeVar
 
-import httpx2 as httpx
+import httpx2
 
 from ..._client import Anthropic, AsyncAnthropic
 from ..._streaming import Stream, AsyncStream
@@ -16,7 +16,7 @@ class BedrockStream(Stream[_T]):
         self,
         *,
         cast_to: type[_T],
-        response: httpx.Response,
+        response: httpx2.Response,
         client: Anthropic,
     ) -> None:
         super().__init__(cast_to=cast_to, response=response, client=client)
@@ -29,7 +29,7 @@ class AsyncBedrockStream(AsyncStream[_T]):
         self,
         *,
         cast_to: type[_T],
-        response: httpx.Response,
+        response: httpx2.Response,
         client: AsyncAnthropic,
     ) -> None:
         super().__init__(cast_to=cast_to, response=response, client=client)

@@ -1,34 +1,33 @@
-"""Reference implementations of the ``agent_toolset_20260401`` tools — ``bash``,
-``read``, ``write``, ``edit``, ``glob``, ``grep`` — plus the workdir/skills
-:class:`AgentToolContext`.
+"""Reference implementations of the `agent_toolset_20260401` tools — `bash`,
+`read`, `write`, `edit`, `glob`, `grep` — plus the workdir/skills
+`AgentToolContext`.
 
-This sits next to the other ``lib/tools`` helpers (the Messages tool runner, the
-memory tool, …). Importing it pulls in ``subprocess`` etc., so it is kept out of
-``anthropic.lib.tools.__init__`` — depend on it explicitly
-(``from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401``).
+This sits next to the other `lib/tools` helpers (the Messages tool runner, the
+memory tool, …). Importing it pulls in `subprocess` etc., so it is kept out of
+`anthropic.lib.tools.__init__` — depend on it explicitly
+(`from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401`).
 
-The result of :func:`beta_agent_toolset_20260401` is a plain
-``list[BetaAsyncFunctionTool]`` — *async* function tools, so it is for the
-**async** runners only: ``client.beta.sessions.events.tool_runner(...)`` (the
-``SessionToolRunner``, always async) for a managed-agents session, or — via the
-:class:`~anthropic.lib.environments.EnvironmentWorker` — the self-hosted
-environment worker. The sync ``Anthropic`` ``messages.tool_runner`` accepts
-``BetaRunnableTool``, which excludes the async function tools this returns, so
+The result of `beta_agent_toolset_20260401` is a plain
+`list[BetaAsyncFunctionTool]` — *async* function tools, so it is for the
+**async** runners only: `client.beta.sessions.events.tool_runner(...)` (the
+`SessionToolRunner`, always async) for a managed-agents session, or — via the
+`anthropic.lib.environments.EnvironmentWorker` — the self-hosted
+environment worker. The sync `Anthropic` `messages.tool_runner` accepts
+`BetaRunnableTool`, which excludes the async function tools this returns, so
 it cannot consume this toolset.
 
-.. warning::
-   ``bash`` is **stateful**: it owns a persistent ``/bin/bash`` subprocess that
-   is only torn down by its ``close`` cleanup hook. Only ``SessionToolRunner``
-   (and the ``EnvironmentWorker`` built on it) invoke that hook. The Messages
-   ``client.beta.messages.tool_runner(...)`` does **not** call ``close``, so
-   handing this toolset to the Messages tool runner leaks the bash subprocess
-   (one orphaned shell per run). Run stateful tools under
-   ``client.beta.sessions.events.tool_runner(...)`` / the environment worker,
-   or drop ``bash`` from the toolset before using the Messages tool runner.
+Warning: `bash` is **stateful**: it owns a persistent `/bin/bash` subprocess that
+is only torn down by its `close` cleanup hook. Only `SessionToolRunner`
+(and the `EnvironmentWorker` built on it) invoke that hook. The Messages
+`client.beta.messages.tool_runner(...)` does **not** call `close`, so
+handing this toolset to the Messages tool runner leaks the bash subprocess
+(one orphaned shell per run). Run stateful tools under
+`client.beta.sessions.events.tool_runner(...)` / the environment worker,
+or drop `bash` from the toolset before using the Messages tool runner.
 
-Trust model: the file tools confine to ``workdir`` plus any ``allowed_roots``
-(symlink-aware) and are safe without a sandbox; ``bash`` is unrestricted and
-should run inside one. See :class:`AgentToolContext`.
+Trust model: the file tools confine to `workdir` plus any `allowed_roots`
+(symlink-aware) and are safe without a sandbox; `bash` is unrestricted and
+should run inside one. See `AgentToolContext`.
 """
 
 from __future__ import annotations
@@ -54,6 +53,7 @@ import anyio
 import anyio.abc
 from anyio.to_thread import run_sync
 
+from ._files import read_line_range, read_text_exact, write_text_exact
 from ._skills import _within, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
@@ -95,8 +95,8 @@ __all__ = [
 BASH_OUTPUT_LIMIT = 100 * 1024
 BASH_DEFAULT_TIMEOUT = 120.0
 DEFAULT_MAX_FILE_BYTES = 256 * 1024
-# Default image/PDF caps for the binary ``read`` path (overridable on
-# :class:`AgentToolContext`, same shape as ``max_file_bytes``). The API
+# Default image/PDF caps for the binary `read` path (overridable on
+# `AgentToolContext`, same shape as `max_file_bytes`). The API
 # enforces a per-image limit on the *encoded* (base64) form and a total
 # request-size limit that the raw-PDF cap stays under after the ~4/3 base64
 # inflation; an oversized block would be rejected at request time, so reject
@@ -108,9 +108,9 @@ DEFAULT_MAX_IMAGE_BASE64_BYTES = 5 * 1024 * 1024
 DEFAULT_MAX_PDF_BYTES = 20 * 1024 * 1024
 READ_IMAGE_MAX_BASE64_BYTES = DEFAULT_MAX_IMAGE_BASE64_BYTES  # For backwards compat only.
 READ_PDF_MAX_BYTES = DEFAULT_MAX_PDF_BYTES  # For backwards compat only.
-# Extension → media type for files ``read`` returns as base64 content blocks
+# Extension → media type for files `read` returns as base64 content blocks
 # rather than text. The supported media types ARE codegen'd
-# (``BetaBase64ImageSourceParam`` / ``BetaBase64PDFSourceParam``); a test pins
+# (`BetaBase64ImageSourceParam` / `BetaBase64PDFSourceParam`); a test pins
 # this map's values to those literals, so a spec change that adds or removes a
 # media type fails CI until the map is updated. Not user-configurable (yet).
 _BINARY_MEDIA_TYPES = {
@@ -131,7 +131,7 @@ _ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
 def _resolve_max_bytes(configured: int | None | NotGiven, default: int = DEFAULT_MAX_FILE_BYTES) -> int | None:
     """Resolve a configured cap to an effective size limit.
 
-    ``not_given`` selects ``default``; ``None`` disables the size check
+    `not_given` selects `default`; `None` disables the size check
     (uncapped); a positive int is the cap. Governs only the size guard — callers
     still reject non-regular files.
     """
@@ -146,10 +146,10 @@ def _default_bash_env() -> dict[str, str]:
     credentials scrubbed.
 
     The bash tool runs model-issued commands, so it must never inherit the
-    runner's ``ANTHROPIC_*`` variables (API key, environment key, per-work
-    session tokens): a prompt-injected ``echo $ANTHROPIC_API_KEY`` would
+    runner's `ANTHROPIC_*` variables (API key, environment key, per-work
+    session tokens): a prompt-injected `echo $ANTHROPIC_API_KEY` would
     otherwise land the credential straight in the session transcript. Passing
-    an explicit ``env`` to :class:`AgentToolContext` does NOT add to this
+    an explicit `env` to `AgentToolContext` does NOT add to this
     default — it FULLY REPLACES it. The provided mapping becomes the entire
     bash environment verbatim; nothing here is merged in, so callers who want
     the scrubbed process environment plus extras must build that mapping
@@ -159,9 +159,9 @@ def _default_bash_env() -> dict[str, str]:
 
 
 def _fs_reason(e: OSError) -> str:
-    """Map a filesystem ``OSError`` to a consistent, runtime-independent phrase.
+    """Map a filesystem `OSError` to a consistent, runtime-independent phrase.
 
-    The raw ``OSError`` string is platform-specific (``[Errno 2] ENOENT: ...``)
+    The raw `OSError` string is platform-specific (`[Errno 2] ENOENT: ...`)
     and can embed a host path; normalise the common cases so the model sees the
     same wording everywhere and never the runner's absolute paths.
     """
@@ -194,80 +194,82 @@ class AgentToolContext:
 
     Trust model — two tiers:
 
-    - The file tools (:func:`beta_read_tool`, :func:`beta_write_tool`,
-      :func:`beta_edit_tool`, :func:`beta_glob_tool`, :func:`beta_grep_tool`)
-      resolve paths against ``workdir`` and reject anything outside ``workdir``
-      and ``allowed_roots``. :func:`resolve_path` follows every symlink
+    - The file tools (`beta_read_tool`, `beta_write_tool`,
+      `beta_edit_tool`, `beta_glob_tool`, `beta_grep_tool`)
+      resolve paths against `workdir` and reject anything outside `workdir`
+      and `allowed_roots`. `resolve_path` follows every symlink
       (including the leaf, even a dangling one) before the check and returns
       that canonical path for the operation, so a symlink inside the workdir
       that points outside it can neither pass the check nor be followed
       afterwards — a real boundary, consistent with the memory tool, so the
       file tools are safe to use without a sandbox.
-    - :func:`beta_bash_tool` runs an unrestricted ``/bin/bash`` regardless of
+    - `beta_bash_tool` runs an unrestricted `/bin/bash` regardless of
       the path policy. Confinement for it must come from the OS layer
       (e.g. a self-hosted environment runner).
 
     Attributes:
         workdir: Base directory for resolving relative tool paths. Defaults to
-            :func:`os.getcwd` captured when the context is constructed (TS
-            parity: ``process.cwd()`` at construction), so a ``chdir`` between
+            `os.getcwd` captured when the context is constructed (TS
+            parity: `process.cwd()` at construction), so a `chdir` between
             constructing this context and the first tool call does not move
             where paths resolve. Pass an explicit path to override.
         unrestricted_paths: Deprecated and no longer accepted. The file tools
-            are always confined to ``workdir`` plus ``allowed_roots``, which is
+            are always confined to `workdir` plus `allowed_roots`, which is
             neither of the two behaviors this flag used to select, so passing
-            either value raises :class:`TypeError` explaining what to do
+            either value raises `TypeError` explaining what to do
             instead. The parameter itself will be removed in a future release.
-        allowed_roots: Directories outside ``workdir`` that the file tools may
+        allowed_roots: Directories outside `workdir` that the file tools may
             also reach. The environment worker sets this to the session's
             memory-store folders, so memories mounted outside the working
             directory stay readable and writable. Does **not** constrain
-            :func:`beta_bash_tool`.
+            `beta_bash_tool`.
         env: Optional environment for the bash subprocess. When unset, the bash
             tool inherits the process environment with the runner's
-            ``ANTHROPIC_*`` credentials scrubbed. When provided, it FULLY
+            `ANTHROPIC_*` credentials scrubbed. When provided, it FULLY
             REPLACES that default environment — the mapping is used verbatim
             and is NOT merged with or added to the scrubbed process
             environment. To keep the defaults plus extra vars, build the
             combined mapping yourself before passing it.
-        max_file_bytes: Size cap for the ``read`` and ``edit`` tools, which both
-            load the whole file into memory. ``not_given`` (default) uses the
-            built-in 256 KiB cap; a positive int sets a custom cap; ``None``
+        max_file_bytes: Size cap for a whole-file `read` and for `edit`,
+            which both load the whole file into memory. A `read` with
+            `view_range` on a larger file streams it and applies the cap to
+            the selected lines instead. `not_given` (default) uses the
+            built-in 256 KiB cap; a positive int sets a custom cap; `None`
             disables the cap entirely. Disabling it reintroduces the OOM risk on
-            a model-controlled path, so pass ``None`` only when the sandbox can
+            a model-controlled path, so pass `None` only when the sandbox can
             absorb arbitrarily large files. The non-regular-file (FIFO/device)
             guard always applies regardless of this value. Image/PDF files,
-            which ``read`` returns as base64 content blocks, are not subject to
-            the 256 KiB default (``max_image_base64_bytes`` /
-            ``max_pdf_bytes`` govern instead), but an explicit positive cap
+            which `read` returns as base64 content blocks, are not subject to
+            the 256 KiB default (`max_image_base64_bytes` /
+            `max_pdf_bytes` govern instead), but an explicit positive cap
             binds them too.
         max_image_base64_bytes: Cap on the *base64-encoded* size of an image
-            ``read`` returns as a content block. ``not_given`` (default)
+            `read` returns as a content block. `not_given` (default)
             uses the built-in 5 MiB cap — a memory bound plus the API's
-            per-image limit; a positive int overrides it; ``None`` disables it
-            (only ``max_file_bytes`` / the API's own limit then apply).
-        max_pdf_bytes: Cap on the raw size of a PDF ``read`` returns as a
-            document block. ``not_given`` (default) uses the built-in 20 MiB
-            cap; a positive int overrides it; ``None`` disables it.
+            per-image limit; a positive int overrides it; `None` disables it
+            (only `max_file_bytes` / the API's own limit then apply).
+        max_pdf_bytes: Cap on the raw size of a PDF `read` returns as a
+            document block. `not_given` (default) uses the built-in 20 MiB
+            cap; a positive int overrides it; `None` disables it.
     """
 
-    # ``default_factory`` (not a literal "." ) so the cwd is snapshotted at
+    # `default_factory` (not a literal "." ) so the cwd is snapshotted at
     # *construction* time, not resolved lazily at first use — a chdir in
     # between must not change where tools resolve paths (TS parity).
     workdir: str | os.PathLike[str] = field(default_factory=os.getcwd)
     unrestricted_paths: bool | NotGiven = not_given
     allowed_roots: list[Path] = field(default_factory=list[Path])
-    # When ``client`` and ``session`` are both set, entering the context
+    # When `client` and `session` are both set, entering the context
     # manager downloads each of the session agent's skills into
-    # ``{workdir}/skills/<name>/`` before any tool runs.
+    # `{workdir}/skills/<name>/` before any tool runs.
     client: AsyncAnthropic | None = None
     # The already-fetched session. A session's resources cannot change while it
     # runs, so the caller fetches it once and shares that snapshot with the
     # memory-store download; the two can then never disagree about them.
     session: BetaManagedAgentsSession | None = None
-    # Deprecated: ``setup_skills`` fetches the session itself when given only
-    # an id, one extra round trip per context. Prefer ``session``. Kept for
-    # callers written before ``session`` existed; ignored when ``session`` is
+    # Deprecated: `setup_skills` fetches the session itself when given only
+    # an id, one extra round trip per context. Prefer `session`. Kept for
+    # callers written before `session` existed; ignored when `session` is
     # set.
     session_id: str | None = None
     env: Optional[Mapping[str, str]] = None
@@ -284,8 +286,8 @@ class AgentToolContext:
     # syncing; the mechanism is generic to any directory.
     read_only_roots: list[Path] = field(default_factory=list[Path])
     _bash: BashSession | None = field(default=None, init=False, repr=False)
-    # Skill directories downloaded by ``setup_skills``; removed again on
-    # ``__aexit__`` so a context doesn't leave downloaded skills behind.
+    # Skill directories downloaded by `setup_skills`; removed again on
+    # `__aexit__` so a context doesn't leave downloaded skills behind.
     _skill_dirs: list[Path] = field(default_factory=_empty_skill_dirs, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -302,11 +304,11 @@ class AgentToolContext:
             self._bash = None
 
     async def setup_skills(self) -> None:
-        """Download the session agent's skills into ``{workdir}/skills/<name>/``.
+        """Download the session agent's skills into `{workdir}/skills/<name>/`.
 
-        No-op unless :attr:`client` is set together with :attr:`session` (or
-        the deprecated :attr:`session_id`). The download + safe archive
-        extraction lives in :mod:`anthropic.lib.tools._skills`.
+        No-op unless `client` is set together with `session` (or
+        the deprecated `session_id`). The download + safe archive
+        extraction lives in `anthropic.lib.tools._skills`.
         """
         if self.client is None or (self.session is None and self.session_id is None):
             return
@@ -315,16 +317,16 @@ class AgentToolContext:
         )
 
     async def _cleanup_skills(self) -> None:
-        """Remove the skill directories :meth:`setup_skills` downloaded.
+        """Remove the skill directories `setup_skills` downloaded.
 
         Only the directories this context created are removed — a pre-existing
-        ``{workdir}/skills`` tree is left untouched.
+        `{workdir}/skills` tree is left untouched.
         """
         if self.keep_skills:
             return
         for skill_dir in self._skill_dirs:
             try:
-                # ``shutil.rmtree`` is blocking; keep it off the event loop.
+                # `shutil.rmtree` is blocking; keep it off the event loop.
                 await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
             except Exception as e:
                 log.warning("failed to remove downloaded skill dir %s: %s", skill_dir, e)
@@ -350,14 +352,14 @@ def _symlink_loop_error() -> OSError:
 
 
 def _canonicalize(path: Path) -> Path:
-    """Return ``path`` with ``.``/``..`` collapsed lexically and every symlink
-    followed, or raise ``OSError`` — the same outcome on every supported Python,
+    """Return `path` with `.`/`..` collapsed lexically and every symlink
+    followed, or raise `OSError` — the same outcome on every supported Python,
     and never a partly resolved path.
 
     Trailing components that do not exist yet are kept as spelled, so a new
     file under new directories still canonicalises; a dangling symlink met on
-    the way is read and followed by hand, and more than ``_MAX_SYMLINK_HOPS``
-    such hops count as a loop. Non-strict ``Path.resolve()`` is avoided because
+    the way is read and followed by hand, and more than `_MAX_SYMLINK_HOPS`
+    such hops count as a loop. Non-strict `Path.resolve()` is avoided because
     its symlink-loop handling differs between CPython versions.
     """
     prefix = Path(os.path.normpath(str(path)))
@@ -367,7 +369,7 @@ def _canonicalize(path: Path) -> Path:
         try:
             return prefix.resolve(strict=True).joinpath(*reversed(missing_tail))
         except RuntimeError:
-            # CPython < 3.13 reports a symlink loop from ``resolve(strict=True)`` this way.
+            # CPython < 3.13 reports a symlink loop from `resolve(strict=True)` this way.
             raise _symlink_loop_error() from None
         except OSError as e:
             if e.errno not in _MISSING_ERRNOS:
@@ -390,19 +392,19 @@ def _canonicalize(path: Path) -> Path:
 
 
 def resolve_path(ctx: AgentToolContext, p: str) -> Path:
-    """Resolve ``p`` against the workdir; reject results outside the permitted roots.
+    """Resolve `p` against the workdir; reject results outside the permitted roots.
 
-    The permitted roots are ``workdir`` plus each entry of ``allowed_roots``.
+    The permitted roots are `workdir` plus each entry of `allowed_roots`.
     Absolute and relative inputs go through the same canonicalise-then-contain
     check — an absolute path that lands inside a permitted root is accepted,
-    only paths that resolve *outside* all of them are rejected. ``.`` and ``..``
+    only paths that resolve *outside* all of them are rejected. `.` and `..`
     components are collapsed lexically first; then every symlink (including the
     leaf, even a dangling one) is followed before the containment check, so a
-    symlink under the workdir that targets ``/etc`` is rejected — and the
+    symlink under the workdir that targets `/etc` is rejected — and the
     resolved path is what the tool then operates on, so it can't be followed
     afterwards either. A symlink loop or an unreadable component rejects the
     path outright rather than falling back to an unresolved path. See the trust
-    model on :class:`AgentToolContext`.
+    model on `AgentToolContext`.
     """
     candidate = Path(p)
     root = Path(ctx.workdir).resolve()
@@ -418,10 +420,10 @@ def resolve_path(ctx: AgentToolContext, p: str) -> Path:
 
 
 def _reject_read_only(ctx: AgentToolContext, target: Path, *, op: str, file_path: str) -> None:
-    """Raise :class:`ToolError` when ``target`` falls under a read-only root.
+    """Raise `ToolError` when `target` falls under a read-only root.
 
-    Roots resolve at check time, exactly like ``allowed_roots`` in
-    :func:`resolve_path` — a symlinked entry must not grant access on one
+    Roots resolve at check time, exactly like `allowed_roots` in
+    `resolve_path` — a symlinked entry must not grant access on one
     side while its write protection misses on the other.
     """
     for root in ctx.read_only_roots:
@@ -430,38 +432,37 @@ def _reject_read_only(ctx: AgentToolContext, target: Path, *, op: str, file_path
 
 
 class BashResult(NamedTuple):
-    """Result of :meth:`BashSession.exec` — the captured output and exit code.
+    """Result of `BashSession.exec` — the captured output and exit code.
 
-    A ``NamedTuple`` so it unpacks positionally (``out, code = await s.exec(...)``)
-    and reads by name (``result.output`` / ``result.exit_code``) interchangeably.
+    A `NamedTuple` so it unpacks positionally (`out, code = await s.exec(...)`)
+    and reads by name (`result.output` / `result.exit_code`) interchangeably.
     """
 
     output: str
     """The command's combined stdout + stderr (ANSI escapes stripped, possibly
-    truncated to the last :data:`BASH_OUTPUT_LIMIT` bytes)."""
+    truncated to the last `BASH_OUTPUT_LIMIT` bytes)."""
 
     exit_code: int
-    """The command's exit status. ``-1`` when the exit code could not be parsed
+    """The command's exit status. `-1` when the exit code could not be parsed
     from the shell sentinel (e.g. truncated output)."""
 
 
 class BashSession:
-    """A persistent ``/bin/bash`` process; cwd, env and jobs survive across calls.
+    """A persistent `/bin/bash` process; cwd, env and jobs survive across calls.
 
-    .. warning::
-        :class:`BashSession` is **stateful and not safe to share concurrently**.
-        Interleaved :meth:`exec` calls would race for the same stdin/stdout
-        pipes (mixed input, output read by the wrong caller, and corrupted
-        sentinel detection). Each :class:`AgentToolContext` creates its own
-        session, so the safe pattern is *one context per session* — never a
-        single ``AgentToolContext`` (or hand-constructed ``BashSession``) shared
-        across multiple sessions running on different self-hosted environments.
-        Holding the shared instance behind a per-call lock would serialize all
-        bash work and is almost certainly not what you want.
+    Warning: `BashSession` is **stateful and not safe to share concurrently**.
+    Interleaved `exec` calls would race for the same stdin/stdout
+    pipes (mixed input, output read by the wrong caller, and corrupted
+    sentinel detection). Each `AgentToolContext` creates its own
+    session, so the safe pattern is *one context per session* — never a
+    single `AgentToolContext` (or hand-constructed `BashSession`) shared
+    across multiple sessions running on different self-hosted environments.
+    Holding the shared instance behind a per-call lock would serialize all
+    bash work and is almost certainly not what you want.
     """
 
     def __init__(self, proc: anyio.abc.Process) -> None:
-        """Use :meth:`BashSession.start` to construct — ``__init__`` takes an
+        """Use `BashSession.start` to construct — `__init__` takes an
         already-spawned process and is intended for internal use."""
         self._proc = proc
 
@@ -482,8 +483,8 @@ class BashSession:
     def closed(self) -> bool:
         """Whether the underlying bash process has exited / been torn down.
 
-        Inverse of "alive". Named ``closed`` (not ``alive``) to match the TS
-        ``BashSession.closed`` boolean — porting code between the two SDKs
+        Inverse of "alive". Named `closed` (not `alive`) to match the TS
+        `BashSession.closed` boolean — porting code between the two SDKs
         should not have to flip the sense of this check.
         """
         return self._proc.returncode is not None
@@ -538,8 +539,8 @@ class BashSession:
             raise TimeoutError(f"bash command timed out after {timeout}s") from e
         except anyio.get_cancelled_exc_class():
             # A cancellation from *any outer scope* (e.g. the session runner's
-            # ``TOOL_TIMEOUT`` fail_after winning a race, or a worker-wide
-            # shutdown) unwinds this call without ever raising ``TimeoutError``,
+            # `TOOL_TIMEOUT` fail_after winning a race, or a worker-wide
+            # shutdown) unwinds this call without ever raising `TimeoutError`,
             # so the branch above never runs. Without closing here the
             # subprocess would be left alive with the in-flight command still
             # queued, and the NEXT exec() would read this command's stale
@@ -590,7 +591,7 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         # tool run. Defining it as an async context manager lets the tool runner
         # drive this cleanup on exit, so the bash tool no longer needs
         # AgentToolContext purely for that lifecycle — it only reads the workdir
-        # and subprocess env off ``ctx``.
+        # and subprocess env off `ctx`.
         session: BashSession | None = None
 
         async def _session() -> BashSession:
@@ -599,9 +600,9 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                 session = await BashSession.start(ctx.workdir, env=ctx.env)
             return session
 
-        # ``Optional[...]`` (not ``| None``) because ``@beta_async_tool``
+        # `Optional[...]` (not `| None`) because `@beta_async_tool`
         # evaluates these annotations at runtime via pydantic, and PEP 604 union
-        # syntax can't be ``eval``'d under Python 3.9 — our minimum version.
+        # syntax can't be `eval`'d under Python 3.9 — our minimum version.
         async def bash(
             command: Optional[str] = None, restart: Optional[bool] = None, timeout_ms: Optional[int] = None
         ) -> str:
@@ -630,9 +631,9 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             if session is not None:
                 await session.close()
 
-    # ``@beta_async_tool`` detects the async context manager, enters it lazily
-    # on first call to obtain the ``bash`` callable, and drives its ``__aexit__``
-    # on the tool-runner cleanup path. The ``cast`` is only to satisfy the
+    # `@beta_async_tool` detects the async context manager, enters it lazily
+    # on first call to obtain the `bash` callable, and drives its `__aexit__`
+    # on the tool-runner cleanup path. The `cast` is only to satisfy the
     # decorator's "async function" overload — the runtime object is the
     # context-manager factory the decorator expects.
     return beta_async_tool(
@@ -642,13 +643,13 @@ def beta_bash_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 
 def _read_binary_block(target: Path, file_path: str, size: int, media_type: str, ctx: AgentToolContext) -> BetaContent:
-    """Read an image/PDF as a base64 ``image``/``document`` content block.
+    """Read an image/PDF as a base64 `image`/`document` content block.
 
     The text cap does not apply here — its 256 KiB default would reject most
-    real images. Instead the media caps (``max_image_base64_bytes`` /
-    ``max_pdf_bytes``, defaulting to the API's own limits) govern, checked
+    real images. Instead the media caps (`max_image_base64_bytes` /
+    `max_pdf_bytes`, defaulting to the API's own limits) govern, checked
     against the stat size before opening (same OOM rationale as the text path)
-    and tightened by an *explicitly* configured ``max_file_bytes`` — an
+    and tightened by an *explicitly* configured `max_file_bytes` — an
     explicit cap is a memory bound and binds every read.
     """
     # The image cap is on the encoded form: n raw bytes -> 4*ceil(n/3) base64.
@@ -678,6 +679,8 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             target = resolve_path(ctx, file_path)
         except ValueError as e:
             raise ToolError(f"read: {e}") from e
+        if view_range and len(view_range) != 2:
+            raise ToolError("read: view_range must be [start_line, end_line]")
         try:
             # stat() before any open(): the size cap stops a multi-GB file from
             # OOM'ing the runner, and is_file() rejects FIFOs/devices/dirs
@@ -694,13 +697,15 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
                 return [_read_binary_block(target, file_path, st.st_size, media_type, ctx)]
             limit = _resolve_max_bytes(ctx.max_file_bytes)
             if limit is not None and st.st_size > limit:
-                raise ToolError(
-                    f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
-                    "Use bash (head/tail/sed) to read a slice."
-                )
+                if not view_range:
+                    raise ToolError(
+                        f"read: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
+                        "Use the view_range parameter to read specific line ranges, e.g. view_range: [1, 500]."
+                    )
+                return await run_sync(partial(read_line_range, target, file_path, view_range[0], view_range[1], limit))
             # Explicit UTF-8: the locale default varies by host (ASCII under
             # LANG=C), which would mislabel valid UTF-8 as binary below.
-            text = target.read_text(encoding="utf-8")
+            text = read_text_exact(target)
         except ToolError:
             raise
         except UnicodeDecodeError as e:
@@ -711,8 +716,6 @@ def beta_read_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise _fs_error("read", file_path, e) from e
         if not view_range:
             return text
-        if len(view_range) != 2:
-            raise ToolError("read: view_range must be [start_line, end_line]")
         start_line, end_line = view_range
         lines = text.split("\n")
         start = max(0, start_line - 1)
@@ -733,7 +736,7 @@ def beta_write_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         _reject_read_only(ctx, target, op="write", file_path=file_path)
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content, encoding="utf-8")
+            write_text_exact(target, content)
         except OSError as e:
             raise _fs_error("write", file_path, e) from e
         return f"wrote {len(content)} bytes to {file_path}"
@@ -762,9 +765,9 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             if limit is not None and st.st_size > limit:
                 raise ToolError(
                     f"edit: {file_path} is {st.st_size} bytes, exceeds {limit}-byte limit. "
-                    "Use bash (sed/awk) to edit a large file."
+                    "The edit tool loads the whole file and cannot modify a file this large."
                 )
-            text = target.read_text(encoding="utf-8")
+            text = read_text_exact(target)
         except ToolError:
             raise
         except UnicodeDecodeError as e:
@@ -778,7 +781,7 @@ def beta_edit_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"edit: old_string appears {count} times in {file_path} (must be unique)")
         updated = text.replace(old_string, new_string) if replace_all else text.replace(old_string, new_string, 1)
         try:
-            target.write_text(updated, encoding="utf-8")
+            write_text_exact(target, updated)
         except OSError as e:
             raise _fs_error("edit", file_path, e) from e
         return f"edited {file_path} ({count if replace_all else 1} replacement(s))"
@@ -794,7 +797,7 @@ def _mtime_or_zero(p: Path) -> float:
 
 
 def _confined(matches: Iterable[Path], root: Path) -> Iterator[Path]:
-    """Yield the matches whose canonical path is inside ``root``; a match that
+    """Yield the matches whose canonical path is inside `root`; a match that
     cannot be canonicalised (symlink loop, unreadable) is dropped, not raised."""
     for match in matches:
         try:
@@ -811,8 +814,8 @@ def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         """List files matching a glob pattern, newest first."""
         if Path(pattern).is_absolute():
             raise ToolError("glob: absolute pattern not permitted; pass a relative pattern (and optionally path)")
-        # ``Path.glob`` honours literal ``..`` segments, so a pattern like
-        # ``../../etc/*`` would escape the workdir before resolve_path() is
+        # `Path.glob` honours literal `..` segments, so a pattern like
+        # `../../etc/*` would escape the workdir before resolve_path() is
         # ever consulted — reject it up front.
         if ".." in PurePosixPath(pattern).parts:
             raise ToolError("glob: '..' is not permitted in the pattern")
@@ -830,7 +833,7 @@ def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         except (ValueError, OSError) as e:
             raise ToolError(f"glob: {e}") from e
         # Post-filter: a symlink traversed mid-pattern (glob follows symlinks
-        # for non-``**`` segments) must not let a result escape the search root.
+        # for non-`**` segments) must not let a result escape the search root.
         matches = list(_confined(matches, root))
         if not matches:
             return "no matches"
@@ -850,7 +853,7 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             raise ToolError(f"grep: {e}") from e
 
         if rg := shutil.which("rg"):
-            # ``check=False`` because ripgrep exits 1 on "no matches", which
+            # `check=False` because ripgrep exits 1 on "no matches", which
             # isn't an error for us — we surface it as a friendly string.
             result = await anyio.run_process(
                 [rg, "-n", "--no-heading", "-e", pattern, "--", str(search)],
@@ -894,8 +897,8 @@ def _walk_grep(rx: re.Pattern[str], search: Path) -> str:
                     return True
                 f.seek(0)
                 for i, raw in enumerate(f, 1):
-                    # Cap line length: ``pattern`` is model-supplied and Python's
-                    # ``re`` backtracks, so a pathological pattern against a very
+                    # Cap line length: `pattern` is model-supplied and Python's
+                    # `re` backtracks, so a pathological pattern against a very
                     # long line is a ReDoS.
                     if len(raw) > GREP_MAX_LINE_LENGTH:
                         continue
@@ -912,7 +915,7 @@ def _walk_grep(rx: re.Pattern[str], search: Path) -> str:
         seen = 0
         for dirpath, dirnames, filenames in os.walk(search):
             # Never descend into a symlinked directory: a symlink in the workdir
-            # pointing at ``/`` would otherwise let grep walk straight out of it.
+            # pointing at `/` would otherwise let grep walk straight out of it.
             dirnames[:] = [
                 d for d in dirnames if d not in (".git", "node_modules") and not (Path(dirpath) / d).is_symlink()
             ]
@@ -929,18 +932,20 @@ def _walk_grep(rx: re.Pattern[str], search: Path) -> str:
 
 
 def beta_agent_toolset_20260401(ctx: AgentToolContext) -> list[BetaAsyncFunctionTool[Any]]:
-    """Return the ``agent_toolset_20260401`` implementations bound to ``ctx``.
+    """Return the `agent_toolset_20260401` implementations bound to `ctx`.
 
-    The result is a plain list of :class:`~anthropic.lib.tools.BetaAsyncFunctionTool`
+    The result is a plain list of `anthropic.lib.tools.BetaAsyncFunctionTool`
     instances — *async* function tools, so it is for the **async** runners only:
-    the ``AsyncAnthropic`` ``client.beta.messages.tool_runner`` and
-    ``client.beta.sessions.events.tool_runner`` (always async). The sync
-    ``Anthropic`` ``messages.tool_runner`` takes ``BetaRunnableTool``, which
+    the `AsyncAnthropic` `client.beta.messages.tool_runner` and
+    `client.beta.sessions.events.tool_runner` (always async). The sync
+    `Anthropic` `messages.tool_runner` takes `BetaRunnableTool`, which
     excludes the async function tools this returns. Filter or extend it before
-    passing it on::
+    passing it on:
 
-        tools = [*beta_agent_toolset_20260401(ctx), my_custom_tool]
-        tools = [t for t in beta_agent_toolset_20260401(ctx) if t.name != "grep"]
+    ```py
+    tools = [*beta_agent_toolset_20260401(ctx), my_custom_tool]
+    tools = [t for t in beta_agent_toolset_20260401(ctx) if t.name != "grep"]
+    ```
     """
     return [
         beta_bash_tool(ctx),

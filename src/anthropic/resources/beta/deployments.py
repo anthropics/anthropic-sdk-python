@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
@@ -9,7 +7,7 @@ from itertools import chain
 import httpx2
 
 from ..._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
-from ..._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ..._utils import is_given, path_template, strip_not_given
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -22,7 +20,6 @@ from ...pagination import SyncPageCursor, AsyncPageCursor
 from ...types.beta import (
     BetaManagedAgentsScheduleParams,
     BetaManagedAgentsDeploymentStatus,
-    deployment_list_params,
     deployment_create_params,
     deployment_update_params,
 )
@@ -47,7 +44,7 @@ class Deployments(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DeploymentsWithRawResponse(self)
 
@@ -56,7 +53,7 @@ class Deployments(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return DeploymentsWithStreamingResponse(self)
 
@@ -74,6 +71,7 @@ class Deployments(SyncAPIResource):
         schedule: Optional[BetaManagedAgentsScheduleParams] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -98,8 +96,11 @@ class Deployments(SyncAPIResource):
 
           name: Human-readable name for the deployment.
 
-          budget: A hard spend ceiling. The session stops issuing new model requests once the
-              tracked list cost reaches `max_list_cost`.
+          budget: Enforced spend ceiling stamped onto each session created from this deployment,
+              copied at session-creation time. Omit to leave sessions uncapped. The deployment
+              agent's model must have a public list price, or the request is rejected; a
+              multiagent roster is re-validated in full when each fire copies the cap, which
+              fails closed the same way.
 
           description: Description of what the deployment does.
 
@@ -109,13 +110,21 @@ class Deployments(SyncAPIResource):
           resources: Resources (e.g. repositories, files) to mount into each session's container.
               Maximum 500.
 
-          schedule: 5-field POSIX cron schedule. Literal wall-clock matching in the configured
-              timezone.
+          schedule: Optional recurring cron schedule. When present, the deployment fires
+              automatically. Both expression and timezone are required when schedule is set.
 
           vault_ids: Vault IDs for stored credentials the agent can use during sessions created from
               this deployment. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -130,31 +139,36 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            "/v1/deployments?beta=true",
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            "/v1/deployments",
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.create",
+                span_route="/v1/deployments",
+                span_created_id="anthropic.deployment.id",
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -164,6 +178,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -175,7 +190,17 @@ class Deployments(SyncAPIResource):
         Get Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -192,16 +217,24 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.retrieve",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -221,6 +254,7 @@ class Deployments(SyncAPIResource):
         schedule: Optional[BetaManagedAgentsScheduleParams] | Omit = omit,
         vault_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -228,17 +262,21 @@ class Deployments(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
-        """Update Deployment
+        """
+        Update Deployment
 
         Args:
-          agent: Agent to deploy.
+          deployment_id: Unique identifier of the deployment to update.
 
-        Accepts the `agent` ID string, which re-pins to the latest
+          agent: Agent to deploy. Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
 
-          budget: A hard spend ceiling. The session stops issuing new model requests once the
-              tracked list cost reaches `max_list_cost`.
+          budget: Spend ceiling for future sessions. Full replacement. Omit to preserve; send null
+              to clear (sessions created afterwards are uncapped). The deployment agent's
+              model must have a public list price, or the request is rejected; a multiagent
+              roster is re-validated in full when each fire copies the cap, which fails closed
+              the same way.
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
@@ -256,13 +294,21 @@ class Deployments(SyncAPIResource):
           resources: Session resources. Full replacement. Omit to preserve; send empty array or null
               to clear. Maximum 500.
 
-          schedule: 5-field POSIX cron schedule. Literal wall-clock matching in the configured
-              timezone.
+          schedule: Cron schedule. Full replacement. Omit to preserve; send null to clear (revert to
+              manual-only).
 
           vault_ids: Vault IDs. Full replacement. Omit to preserve; send empty array or null to
               clear. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -279,31 +325,36 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.update",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -319,6 +370,7 @@ class Deployments(SyncAPIResource):
         page: str | Omit = omit,
         status: BetaManagedAgentsDeploymentStatus | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -342,10 +394,18 @@ class Deployments(SyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          status: Filter by status: active or paused. Omit for both. To include archived
-              deployments, use include_archived instead; the two cannot be combined.
+          status: Filter by status: `active` or `paused`. Omit for both. To include archived
+              deployments, use `include_archived` instead; the two cannot be combined.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -360,32 +420,33 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             page=SyncPageCursor[BetaManagedAgentsDeployment],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.list",
+                span_route="/v1/deployments",
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -395,6 +456,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -406,7 +468,17 @@ class Deployments(SyncAPIResource):
         Archive Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to archive.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -423,16 +495,24 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/archive", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.archive",
+                span_route="/v1/deployments/{deployment_id}/archive",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -442,6 +522,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -453,7 +534,17 @@ class Deployments(SyncAPIResource):
         Pause Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to pause.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -470,16 +561,24 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/pause", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.pause",
+                span_route="/v1/deployments/{deployment_id}/pause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -489,6 +588,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -500,7 +600,17 @@ class Deployments(SyncAPIResource):
         Run Deployment Now
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to run.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -517,16 +627,24 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/run", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.run",
+                span_route="/v1/deployments/{deployment_id}/run",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -536,6 +654,7 @@ class Deployments(SyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -547,7 +666,17 @@ class Deployments(SyncAPIResource):
         Unpause Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to unpause.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -564,16 +693,24 @@ class Deployments(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/unpause", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.unpause",
+                span_route="/v1/deployments/{deployment_id}/unpause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -586,7 +723,7 @@ class AsyncDeployments(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDeploymentsWithRawResponse(self)
 
@@ -595,7 +732,7 @@ class AsyncDeployments(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncDeploymentsWithStreamingResponse(self)
 
@@ -613,6 +750,7 @@ class AsyncDeployments(AsyncAPIResource):
         schedule: Optional[BetaManagedAgentsScheduleParams] | Omit = omit,
         vault_ids: SequenceNotStr[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -637,8 +775,11 @@ class AsyncDeployments(AsyncAPIResource):
 
           name: Human-readable name for the deployment.
 
-          budget: A hard spend ceiling. The session stops issuing new model requests once the
-              tracked list cost reaches `max_list_cost`.
+          budget: Enforced spend ceiling stamped onto each session created from this deployment,
+              copied at session-creation time. Omit to leave sessions uncapped. The deployment
+              agent's model must have a public list price, or the request is rejected; a
+              multiagent roster is re-validated in full when each fire copies the cap, which
+              fails closed the same way.
 
           description: Description of what the deployment does.
 
@@ -648,13 +789,21 @@ class AsyncDeployments(AsyncAPIResource):
           resources: Resources (e.g. repositories, files) to mount into each session's container.
               Maximum 500.
 
-          schedule: 5-field POSIX cron schedule. Literal wall-clock matching in the configured
-              timezone.
+          schedule: Optional recurring cron schedule. When present, the deployment fires
+              automatically. Both expression and timezone are required when schedule is set.
 
           vault_ids: Vault IDs for stored credentials the agent can use during sessions created from
               this deployment. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -669,31 +818,36 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            "/v1/deployments?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "name": name,
-                    "budget": budget,
-                    "description": description,
-                    "metadata": metadata,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_create_params.DeploymentCreateParams,
-            ),
+            "/v1/deployments",
+            body={
+                "agent": agent,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "name": name,
+                "budget": budget,
+                "description": description,
+                "metadata": metadata,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.create",
+                span_route="/v1/deployments",
+                span_created_id="anthropic.deployment.id",
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -703,6 +857,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -714,7 +869,17 @@ class AsyncDeployments(AsyncAPIResource):
         Get Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -731,16 +896,24 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.retrieve",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -760,6 +933,7 @@ class AsyncDeployments(AsyncAPIResource):
         schedule: Optional[BetaManagedAgentsScheduleParams] | Omit = omit,
         vault_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -767,17 +941,21 @@ class AsyncDeployments(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeployment:
-        """Update Deployment
+        """
+        Update Deployment
 
         Args:
-          agent: Agent to deploy.
+          deployment_id: Unique identifier of the deployment to update.
 
-        Accepts the `agent` ID string, which re-pins to the latest
+          agent: Agent to deploy. Accepts the `agent` ID string, which re-pins to the latest
               version, or an `agent` object with both id and version specified. Omit to
               preserve. Cannot be cleared.
 
-          budget: A hard spend ceiling. The session stops issuing new model requests once the
-              tracked list cost reaches `max_list_cost`.
+          budget: Spend ceiling for future sessions. Full replacement. Omit to preserve; send null
+              to clear (sessions created afterwards are uncapped). The deployment agent's
+              model must have a public list price, or the request is rejected; a multiagent
+              roster is re-validated in full when each fire copies the cap, which fails closed
+              the same way.
 
           description: Description. Omit to preserve; send empty string or null to clear.
 
@@ -795,13 +973,21 @@ class AsyncDeployments(AsyncAPIResource):
           resources: Session resources. Full replacement. Omit to preserve; send empty array or null
               to clear. Maximum 500.
 
-          schedule: 5-field POSIX cron schedule. Literal wall-clock matching in the configured
-              timezone.
+          schedule: Cron schedule. Full replacement. Omit to preserve; send null to clear (revert to
+              manual-only).
 
           vault_ids: Vault IDs. Full replacement. Omit to preserve; send empty array or null to
               clear. Maximum 50.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -818,31 +1004,36 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}?beta=true", deployment_id=deployment_id),
-            body=await async_maybe_transform(
-                {
-                    "agent": agent,
-                    "budget": budget,
-                    "description": description,
-                    "environment_id": environment_id,
-                    "initial_events": initial_events,
-                    "metadata": metadata,
-                    "name": name,
-                    "resources": resources,
-                    "schedule": schedule,
-                    "vault_ids": vault_ids,
-                },
-                deployment_update_params.DeploymentUpdateParams,
-            ),
+            path_template("/v1/deployments/{deployment_id}", deployment_id=deployment_id),
+            body={
+                "agent": agent,
+                "budget": budget,
+                "description": description,
+                "environment_id": environment_id,
+                "initial_events": initial_events,
+                "metadata": metadata,
+                "name": name,
+                "resources": resources,
+                "schedule": schedule,
+                "vault_ids": vault_ids,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.update",
+                span_route="/v1/deployments/{deployment_id}",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -858,6 +1049,7 @@ class AsyncDeployments(AsyncAPIResource):
         page: str | Omit = omit,
         status: BetaManagedAgentsDeploymentStatus | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -881,10 +1073,18 @@ class AsyncDeployments(AsyncAPIResource):
 
           page: Opaque pagination cursor.
 
-          status: Filter by status: active or paused. Omit for both. To include archived
-              deployments, use include_archived instead; the two cannot be combined.
+          status: Filter by status: `active` or `paused`. Omit for both. To include archived
+              deployments, use `include_archived` instead; the two cannot be combined.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -899,32 +1099,33 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/deployments?beta=true",
+            "/v1/deployments",
             page=AsyncPageCursor[BetaManagedAgentsDeployment],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "agent_id": agent_id,
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                        "status": status,
-                    },
-                    deployment_list_params.DeploymentListParams,
-                ),
+                query={
+                    "agent_id": agent_id,
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                    "status": status,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.list",
+                span_route="/v1/deployments",
             ),
             model=BetaManagedAgentsDeployment,
         )
@@ -934,6 +1135,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -945,7 +1147,17 @@ class AsyncDeployments(AsyncAPIResource):
         Archive Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to archive.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -962,16 +1174,24 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/archive?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/archive", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.archive",
+                span_route="/v1/deployments/{deployment_id}/archive",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -981,6 +1201,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -992,7 +1213,17 @@ class AsyncDeployments(AsyncAPIResource):
         Pause Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to pause.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1009,16 +1240,24 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/pause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/pause", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.pause",
+                span_route="/v1/deployments/{deployment_id}/pause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )
@@ -1028,6 +1267,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1039,7 +1279,17 @@ class AsyncDeployments(AsyncAPIResource):
         Run Deployment Now
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to run.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1056,16 +1306,24 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/run?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/run", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.run",
+                span_route="/v1/deployments/{deployment_id}/run",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeploymentRun,
         )
@@ -1075,6 +1333,7 @@ class AsyncDeployments(AsyncAPIResource):
         deployment_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -1086,7 +1345,17 @@ class AsyncDeployments(AsyncAPIResource):
         Unpause Deployment
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          deployment_id: Unique identifier of the deployment to unpause.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -1103,16 +1372,24 @@ class AsyncDeployments(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/deployments/{deployment_id}/unpause?beta=true", deployment_id=deployment_id),
+            path_template("/v1/deployments/{deployment_id}/unpause", deployment_id=deployment_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.deployments.unpause",
+                span_route="/v1/deployments/{deployment_id}/unpause",
+                span_attributes={"anthropic.deployment.id": deployment_id},
             ),
             cast_to=BetaManagedAgentsDeployment,
         )

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing_extensions import Literal
 
 from ..._models import BaseModel
@@ -8,7 +6,7 @@ __all__ = ["BetaManagedAgentsSystemContentBlock"]
 
 
 class BetaManagedAgentsSystemContentBlock(BaseModel):
-    """Regular text content."""
+    """Content block in a mid-conversation system message. Text-only."""
 
     text: str
     """The text content."""

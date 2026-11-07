@@ -1,12 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Iterable, Optional
-from typing_extensions import Required, Annotated, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
 from ..._types import SequenceNotStr
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_agent_params import BetaManagedAgentsAgentParams
 from .beta_managed_agents_budget_limit_param import BetaManagedAgentsBudgetLimitParam
@@ -32,10 +29,11 @@ class SessionCreateParams(TypedDict, total=False):
     """ID of the `environment` defining the container configuration for this session."""
 
     budget: BetaManagedAgentsBudgetLimitParam
-    """A hard spend ceiling.
+    """Enforced spend ceiling for the session.
 
-    The session stops issuing new model requests once the tracked list cost reaches
-    `max_list_cost`.
+    Omit to create an uncapped session. Every model the session can run — the
+    agent's model and each callable agent's model — must have a public list price,
+    or the request is rejected with reason `model_not_budgetable`.
     """
 
     initial_events: Iterable[InitialEvent]
@@ -59,8 +57,21 @@ class SessionCreateParams(TypedDict, total=False):
     vault_ids: SequenceNotStr[str]
     """Vault IDs for stored credentials the agent can use during the session."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """
 
 
 Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams, BetaManagedAgentsAgentWithOverridesParams]

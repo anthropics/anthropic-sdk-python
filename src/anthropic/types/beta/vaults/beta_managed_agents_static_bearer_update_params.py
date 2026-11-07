@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -17,4 +15,4 @@ class BetaManagedAgentsStaticBearerUpdateParams(TypedDict, total=False):
     type: Required[Literal["static_bearer"]]
 
     token: Optional[str]
-    """Updated static bearer token value."""
+    """The new static bearer token to replace the stored one."""

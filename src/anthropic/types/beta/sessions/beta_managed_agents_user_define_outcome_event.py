@@ -1,18 +1,15 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ...._utils import PropertyInfo
-from ...._models import BaseModel
+from ...._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_file_rubric import BetaManagedAgentsFileRubric
 from .beta_managed_agents_text_rubric import BetaManagedAgentsTextRubric
 
 __all__ = ["BetaManagedAgentsUserDefineOutcomeEvent", "Rubric"]
 
 Rubric: TypeAlias = Annotated[
-    Union[BetaManagedAgentsFileRubric, BetaManagedAgentsTextRubric], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsFileRubric, BetaManagedAgentsTextRubric], UnionDiscriminator("type")
 ]
 
 
@@ -39,9 +36,13 @@ class BetaManagedAgentsUserDefineOutcomeEvent(BaseModel):
     """
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the outcome was accepted."""
 
     rubric: Rubric
-    """Rubric for grading the quality of an outcome."""
+    """How to grade the outcome.
+
+    File rubrics are currently resolved to their text content; clients should handle
+    both variants.
+    """
 
     type: Literal["user.define_outcome"]

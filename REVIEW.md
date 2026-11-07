@@ -1,0 +1,43 @@
+# Review instructions
+
+## Report these as Important, as well as functional bugs
+
+- A violation of this repository's `CLAUDE.md`. Quote the rule
+- A new public name, parameter or option that the PR description does not list
+- A behavior change that still applies with the PR's feature switched off
+- A client-side copy of validation that the API does
+- A new runtime check of an API response, including a model's tool input, or a
+  new runtime type check of input the caller's types cover, even in a language
+  that doesn't enforce them, where the code could go on without it. A clearer
+  error for a value that would fail anyway isn't a reason, and neither is being
+  more idiomatic or more robust. This rule doesn't cover a null check on an
+  optional value, a value that decides a security or permission question, a tool
+  runner parsing a model's tool input into the tool's declared type, or reading
+  into an error body that may not be an object, where that read would otherwise
+  throw, though the fields it reads still pass through as-is
+- Code that validates, reorders, defaults or drops part of a request the caller
+  built
+- Code that fails on an enum member, union variant or field this version does
+  not know
+- A fix made to one copy of logic that exists more than once
+- A behavior change with no test that fails before it and passes after
+- A hand-written list of fields, variants or names that generated code also
+  carries, where a missed member would cause a bug, with no tripwire test
+- A comment that restates the code, or that runs past three lines on a symbol
+  that is not public
+
+## Don't report these
+
+- A missing runtime check of an API response, a missing runtime type check of
+  input the caller's types cover, or missing client-side validation. Don't
+  suggest one as an idiom or for robustness. The exceptions are a value that
+  decides a security or permission question, and reading into an error body that
+  may not be an object, where that read would otherwise throw, though the fields
+  it reads still pass through as-is
+- What an application can do to its own process, credentials or telemetry
+
+## This repository's own rules
+
+The generator writes the rest of this file. Rules for reviewing this
+repository's hand-written code go in this section, and a change anywhere else in
+the file belongs in the generator.

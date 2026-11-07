@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing_extensions import Literal
 
 from ...._models import BaseModel
@@ -15,7 +13,7 @@ class BetaSessionWorkData(BaseModel):
     """
 
     id: str
-    """Session identifier (e.g., 'session\\__...')"""
+    """Session identifier (e.g., 'session_...')"""
 
     type: Literal["session"]
     """Type of work data"""

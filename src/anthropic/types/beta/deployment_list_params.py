@@ -1,12 +1,9 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Union
 from datetime import datetime
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ..._utils import PropertyInfo
 from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_managed_agents_deployment_status import BetaManagedAgentsDeploymentStatus
 
@@ -17,10 +14,10 @@ class DeploymentListParams(TypedDict, total=False):
     agent_id: str
     """Filter by agent ID."""
 
-    created_at_gte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[gte]", format="iso8601")]
+    created_at_gte: Union[str, datetime]
     """Return deployments created at or after this time (inclusive)."""
 
-    created_at_lte: Annotated[Union[str, datetime], PropertyInfo(alias="created_at[lte]", format="iso8601")]
+    created_at_lte: Union[str, datetime]
     """Return deployments created at or before this time (inclusive)."""
 
     include_archived: bool
@@ -33,11 +30,24 @@ class DeploymentListParams(TypedDict, total=False):
     """Opaque pagination cursor."""
 
     status: BetaManagedAgentsDeploymentStatus
-    """Filter by status: active or paused.
+    """Filter by status: `active` or `paused`.
 
-    Omit for both. To include archived deployments, use include_archived instead;
+    Omit for both. To include archived deployments, use `include_archived` instead;
     the two cannot be combined.
     """
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

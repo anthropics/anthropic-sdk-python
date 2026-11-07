@@ -1,12 +1,10 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import TypedDict
 
-from ...._utils import PropertyInfo
 from ...anthropic_beta_param import AnthropicBetaParam
+from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["ThreadListParams"]
 
@@ -16,7 +14,27 @@ class ThreadListParams(TypedDict, total=False):
     """Maximum results per page. Defaults to 1000."""
 
     page: str
-    """Opaque pagination cursor from a previous response's next_page. Forward-only."""
+    """Opaque pagination cursor from a previous response's `next_page`. Forward-only."""
 
-    betas: Annotated[List[AnthropicBetaParam], PropertyInfo(alias="anthropic-beta")]
-    """Optional header to specify the beta version(s) you want to use."""
+    statuses: List[BetaManagedAgentsSessionThreadStatus]
+    """Return only threads that have one of these statuses.
+
+    Repeat the parameter to give more than one status. Leave it out to return
+    threads of every status.
+    """
+
+    betas: List[AnthropicBetaParam]
+    """
+    This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+    header.
+    """
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

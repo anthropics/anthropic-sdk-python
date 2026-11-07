@@ -168,3 +168,26 @@ def test_unknown_block_type_pair_is_a_noop_forward_compat() -> None:
     msg.content.append(cast(Any, future_block))
     next_ = fold(msg, delta("evt_1", "ignored", 0))
     assert next_.content[0].model_dump() == before
+
+
+def test_unknown_event_type_passes_the_snapshot_through_forward_compat() -> None:
+    msg = seed("evt_1")
+    msg = fold(msg, delta("evt_1", "x", 0))
+    # An event of a future type this SDK version does not know about:
+    future_event = BetaManagedAgentsAgentMessageEvent.model_construct(type="agent.future_event", id="evt_2")
+    assert accumulate_managed_agents_event(msg, cast(Any, future_event)) is msg
+    assert accumulate_managed_agents_event(None, cast(Any, future_event)) is None
+
+
+def test_unknown_fragment_type_on_an_existing_index_is_a_noop_forward_compat() -> None:
+    msg = seed("evt_1")
+    msg = fold(msg, delta("evt_1", "x", 0))
+    # A delta fragment of a future, non-text type:
+    future_fragment = BetaManagedAgentsTextBlock.model_construct(type="citation", url="u")
+    ev = BetaManagedAgentsDeltaEvent(
+        type="event_delta",
+        event_id="evt_1",
+        delta=build(BetaManagedAgentsDeltaContent, type="content_delta", index=0, content=cast(Any, future_fragment)),
+    )
+    next_ = fold(msg, ev)
+    assert next_.content == [BetaManagedAgentsTextBlock(type="text", text="x")]

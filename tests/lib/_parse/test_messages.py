@@ -1,6 +1,9 @@
+import json
 from typing import Any, List, cast
 
+import httpx2
 import pytest
+from respx import MockRouter
 from pydantic import BaseModel
 from inline_snapshot import external, snapshot
 
@@ -18,6 +21,18 @@ class OrderDetails(BaseModel):
     total: float
 
 
+MESSAGE = {
+    "id": "msg_01Speed",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-5-5",
+    "content": [{"type": "text", "text": "Hello there!"}],
+    "stop_reason": "end_turn",
+    "stop_sequence": None,
+    "usage": {"input_tokens": 10, "output_tokens": 5},
+}
+
+
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 class TestSyncParse:
     @pytest.mark.parametrize(
@@ -30,7 +45,7 @@ class TestSyncParse:
         """Test sync messages.parse() with a Pydantic model output_format."""
 
         response = snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -57,7 +72,7 @@ class TestSyncParse:
         """Test sync messages.parse() with nested Pydantic models."""
 
         response = snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -74,6 +89,21 @@ class TestSyncParse:
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
 
+    def test_parse_forwards_speed(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        """Test sync messages.parse() sends speed in the request body."""
+
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
+
+        client.messages.parse(
+            model="claude-sonnet-5-5",
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            max_tokens=1024,
+            speed="fast",
+        )
+
+        request_body = json.loads(respx_mock.calls.last.request.content)
+        assert request_body["speed"] == "fast"
+
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 class TestAsyncParse:
@@ -87,7 +117,7 @@ class TestAsyncParse:
         """Test async messages.parse() with a Pydantic model output_format."""
 
         response = await async_snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -114,7 +144,7 @@ class TestAsyncParse:
         """Test async messages.parse() with nested Pydantic models."""
 
         response = await async_snapshot_client.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -131,6 +161,21 @@ class TestAsyncParse:
         assert response.parsed_output.items[0].product_name == "Green Tea"
         assert response.parsed_output.total == 14.0
 
+    async def test_parse_forwards_speed(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        """Test async messages.parse() sends speed in the request body."""
+
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
+
+        await async_client.messages.parse(
+            model="claude-sonnet-5-5",
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            max_tokens=1024,
+            speed="fast",
+        )
+
+        request_body = json.loads(respx_mock.calls.last.request.content)
+        assert request_body["speed"] == "fast"
+
 
 @pytest.mark.skipif(_compat.PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
 class TestAsyncStream:
@@ -144,7 +189,7 @@ class TestAsyncStream:
         """Test async messages.stream() with raw JSON schema via output_config."""
 
         async with async_snapshot_client.messages.stream(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",

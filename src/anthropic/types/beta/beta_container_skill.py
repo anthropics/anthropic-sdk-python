@@ -1,0 +1,18 @@
+from typing_extensions import Literal
+
+from ..._models import BaseModel
+
+__all__ = ["BetaContainerSkill"]
+
+
+class BetaContainerSkill(BaseModel):
+    """A skill that was loaded in a container (response model)."""
+
+    skill_id: str
+    """Skill ID"""
+
+    type: Literal["anthropic", "custom"]
+    """Type of skill - either 'anthropic' (built-in) or 'custom' (user-defined)"""
+
+    version: str
+    """The resolved version: a skill version ID for custom skills."""

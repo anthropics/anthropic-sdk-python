@@ -19,7 +19,7 @@ from typing import (
 from contextvars import Token, ContextVar
 from typing_extensions import Literal, override
 
-import httpx2 as httpx
+import httpx2
 
 from ..._utils import is_dict
 from ..._models import BaseModel
@@ -45,6 +45,8 @@ __all__ = [
 log: logging.Logger = logging.getLogger("anthropic.lib.middleware")
 
 _MESSAGES_PATH = "/v1/messages"
+
+CAPACITY_ERROR_STATUSES = (429, 529)
 
 DEFAULT_BETAS: tuple[AnthropicBetaParam, ...] = ("fallback-credit-2026-07-01",)
 """Betas sent by default; override with the `betas` option."""
@@ -115,6 +117,8 @@ class BetaRefusalFallbackMiddleware(Middleware):
     absent field keeps the original value; `output_config` patches its
     subfields the same way one level deep. Hops never compound — every hop
     patches the original params, never the previous hop's patched request.
+    A `between_tools` thinking config is sent to a hop as `disabled` unless
+    the entry sets `thinking` itself.
 
     Non-streaming: when a response comes back with `stop_reason: "refusal"`, the
     request is retried with each entry of `fallbacks` applied as a patch to the
@@ -149,6 +153,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
     `recommended_model` stamped from the final failure (the failed model for
     capacity errors, `null` otherwise). A refusal surfaced to the client rather
     than retried is reported through the `anthropic.lib.middleware` logger.
+
+    A `speed: "fast"` request that falls back to an entry with no `speed`, and
+    is rejected there with a 429 or 529, is retried once on that entry without
+    `speed`. Set `speed: "fast"` on the entry to keep it fast-only.
 
     To keep later requests on the model that accepted, run them inside a shared
     `BetaFallbackState` context; requests sharing that state start directly at
@@ -208,7 +216,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
         initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
-        response = call_next(initial_request)
+        if start_index == -1:
+            response = call_next(initial_request)
+        else:
+            response, _ = send_hop(initial_request, self._fallbacks[start_index], call_next)
         if not response.http_response.is_success:
             return response
 
@@ -241,9 +252,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin(index)
             token = _credit_token(message)
             category = _refusal_category(message)
-            res = call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
+            entry = self._fallbacks[index]
+            res, _ = send_hop(request.copy(body=_merged_body(body, entry, token)), entry, call_next)
             if res.http_response.is_success:
-                to_model = str(self._fallbacks[index]["model"])
+                to_model = str(entry["model"])
                 seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
@@ -277,7 +289,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
         initial_body = body if start_index == -1 else _apply_hop(body, self._fallbacks[start_index])
         initial_request = request.copy(body=initial_body)
 
-        response = await call_next(initial_request)
+        if start_index == -1:
+            response = await call_next(initial_request)
+        else:
+            response, _ = await async_send_hop(initial_request, self._fallbacks[start_index], call_next)
         if not response.http_response.is_success:
             return response
 
@@ -310,9 +325,10 @@ class BetaRefusalFallbackMiddleware(Middleware):
             pin(index)
             token = _credit_token(message)
             category = _refusal_category(message)
-            res = await call_next(request.copy(body=_merged_body(body, self._fallbacks[index], token)))
+            entry = self._fallbacks[index]
+            res, _ = await async_send_hop(request.copy(body=_merged_body(body, entry, token)), entry, call_next)
             if res.http_response.is_success:
-                to_model = str(self._fallbacks[index]["model"])
+                to_model = str(entry["model"])
                 seams.append(_seam_block(from_model, to_model, category))
                 from_model = to_model
 
@@ -328,16 +344,16 @@ class BetaRefusalFallbackMiddleware(Middleware):
     def _applicable_body(self, request: APIRequest) -> dict[str, Any] | None:
         """The request's JSON body when this middleware applies to it, `None` otherwise."""
         body = _as_dict(request.json)
-        url = httpx.URL(request.url)
+        url = httpx2.URL(request.url)
         if (
             # an empty chain disables this middleware
             not self._fallbacks
             # this middleware only applies to the beta messages API
-            # (`client.beta.messages`, marked by the `beta=true` query param) —
+            # (`client.beta.messages`, marked by the `beta` qualifier) —
             # only the beta surface mints fallback credit tokens
             or request.method.lower() != "post"
             or url.path != _MESSAGES_PATH
-            or url.params.get("beta") != "true"
+            or (request.options.qualifiers or {}).get("beta") != "true"
             or body is None
         ):
             return None
@@ -495,7 +511,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
     ) -> Generator[bytes, None, None]:
         fallbacks = self._fallbacks
         # the response whose body is currently being consumed; closed on teardown
-        current: httpx.Response | None = response.http_response
+        current: httpx2.Response | None = response.http_response
 
         try:
             # --- stream A: pass through until a chainable refusal ---
@@ -536,7 +552,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 for attempt in range(2):
                     hop_request = request.copy(body=chain.hop_body(entry, continuation))
                     try:
-                        res_b = call_next(hop_request)
+                        res_b, entry = send_hop(hop_request, entry, call_next)
                     except Exception as err:
                         log.error(
                             "anthropic-sdk: BetaRefusalFallbackMiddleware: fallback request to %s failed: %s",
@@ -619,7 +635,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
     ) -> AsyncGenerator[bytes, None]:
         fallbacks = self._fallbacks
         # the response whose body is currently being consumed; closed on teardown
-        current: httpx.Response | None = response.http_response
+        current: httpx2.Response | None = response.http_response
 
         try:
             # --- stream A: pass through until a chainable refusal ---
@@ -655,7 +671,7 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 for attempt in range(2):
                     hop_request = request.copy(body=chain.hop_body(entry, continuation))
                     try:
-                        res_b = await call_next(hop_request)
+                        res_b, entry = await async_send_hop(hop_request, entry, call_next)
                     except Exception as err:
                         log.error(
                             "anthropic-sdk: BetaRefusalFallbackMiddleware: fallback request to %s failed: %s",
@@ -722,9 +738,6 @@ class BetaRefusalFallbackMiddleware(Middleware):
                 await current.aclose()
 
 
-# --- hop consumption ---------------------------------------------------------
-
-
 class _Refusal(BaseModel):
     token: Optional[str]
     """The minted credit token; `None` for a token-less start-of-stream refusal."""
@@ -737,6 +750,11 @@ class _Refusal(BaseModel):
     event: Dict[str, Any]
     """The suppressed refusal `message_delta` event, verbatim — replayed if every
     remaining entry fails over HTTP."""
+
+    suppressed_start_message: Optional[Dict[str, Any]] = None
+    """The `message` object from a spliced fallback hop's suppressed `message_start`
+    event. Retained so its `input_transformations` field can be forwarded onto the
+    replayed refusal `message_delta` event."""
 
 
 class _SpliceInfo(BaseModel):
@@ -795,7 +813,8 @@ class _HopReader:
 
     A spliced hop has its block indices shifted by `index_base` and its
     terminal message_delta's usage rewritten to the `usage.iterations` chain
-    shape.
+    shape. When its `message_start` was not re-emitted, its
+    `input_transformations` are copied onto that message_delta.
 
     A refusal that can be chained — an entry remains, and either a
     `fallback_credit_token` was minted or nothing has streamed yet — ends the
@@ -907,6 +926,7 @@ class _HopReader:
                             has_prefill_claim=details is not None and details.get("fallback_has_prefill_claim") is True,
                             usage=usage,
                             event=event,
+                            suppressed_start_message=self._suppressed_start_message(),
                         ),
                         model=self._model,
                         start_event=self._start_event,
@@ -948,6 +968,7 @@ class _HopReader:
                     _serving_iteration_entry(usage, splice.model),
                 ]
                 event["usage"] = usage
+                _forward_input_transformations(event, self._suppressed_start_message())
                 return [*frames, _emit("message_delta", event)]
             return [*frames, _passthrough_sse(sse)]
 
@@ -958,6 +979,14 @@ class _HopReader:
         # message_stop, ping, error, unrecognised — and for stream A every
         # event — pass through in their original wire bytes.
         return [_passthrough_sse(sse)]
+
+    def _suppressed_start_message(self) -> dict[str, Any] | None:
+        """`message` from this fallback's `message_start` when it was not
+        re-emitted because the caller already received a `message_start`.
+        `None` for stream A, whose start is always emitted."""
+        if self._splice is None or not self._wire_open or self._start_event is None:
+            return None
+        return _as_dict(self._start_event.get("message"))
 
     def _open(self) -> list[bytes]:
         """Open the wire for this hop: its message_start (raw for stream A;
@@ -1003,7 +1032,7 @@ class _HopReader:
         )
 
 
-def _drive_hop(response: httpx.Response, reader: _HopReader) -> Generator[bytes, None, _HopOutcome]:
+def _drive_hop(response: httpx2.Response, reader: _HopReader) -> Generator[bytes, None, _HopOutcome]:
     """Feed one hop's SSE events through `reader`, yielding the frames to forward."""
     for sse in Stream.raw_events(response):
         for frame in reader.feed(sse):
@@ -1015,7 +1044,7 @@ def _drive_hop(response: httpx.Response, reader: _HopReader) -> Generator[bytes,
     return reader.finish()
 
 
-async def _drive_hop_async(response: httpx.Response, reader: _HopReader) -> AsyncIterator[bytes]:
+async def _drive_hop_async(response: httpx2.Response, reader: _HopReader) -> AsyncIterator[bytes]:
     """Feed one hop's SSE events through `reader`, yielding the frames to forward.
 
     The outcome is read from `reader.finish()` afterwards — async generators
@@ -1162,8 +1191,9 @@ class _ChainState:
         """Degrade to the suppressed refusal when every remaining entry failed
         over HTTP: replay its message_delta verbatim — `recommended_model`
         stamped from the final failure (the failed model for capacity errors,
-        `null` otherwise) and `usage.iterations` carrying the recorded chain —
-        then message_stop.
+        `null` otherwise), `usage.iterations` carrying the recorded chain, and
+        `input_transformations` copied from a `message_start` that was not
+        re-emitted — then message_stop.
         """
         frames: list[bytes] = []
         if not self.wire_open and self.last_start_event is not None:
@@ -1179,13 +1209,24 @@ class _ChainState:
         if delta is not None:
             details = _as_dict(delta.get("stop_details"))
             if details is not None:
-                details["recommended_model"] = failure.model if failure.status in (429, 529) else None
+                details["recommended_model"] = failure.model if failure.status in CAPACITY_ERROR_STATUSES else None
         usage = _as_dict(event.get("usage")) or {}
         usage["iterations"] = _copy.deepcopy(self.iterations)
         event["usage"] = usage
+        _forward_input_transformations(event, self.last_refusal.suppressed_start_message)
         frames.append(_emit("message_delta", event))
         frames.append(_emit("message_stop", {"type": "message_stop"}))
         return frames
+
+
+def _forward_input_transformations(event: dict[str, Any], suppressed_start_message: dict[str, Any] | None) -> None:
+    """Copy `input_transformations` from a fallback's `message_start` that was
+    not re-emitted onto the emitted `message_delta`, matching what a server-side
+    mid-stream fallback sends. A list already on the delta is kept."""
+    if suppressed_start_message is None or "input_transformations" in event:
+        return
+    if "input_transformations" in suppressed_start_message:
+        event["input_transformations"] = _copy.deepcopy(suppressed_start_message["input_transformations"])
 
 
 def _declined_iteration_entries(refusal: _Refusal, model_label: str) -> list[dict[str, Any]]:
@@ -1283,9 +1324,6 @@ class _BlockTracker:
         self._open.clear()
 
 
-# --- block accumulation & prefill conversion -------------------------------
-
-
 def _apply_delta(blocks: list[tuple[int, dict[str, Any]]], index: int, delta: dict[str, Any]) -> None:
     """Apply a content_block_delta to the accumulating block at `index`."""
     block = next((block for block_index, block in blocks if block_index == index), None)
@@ -1338,9 +1376,6 @@ def _to_prefill_blocks(response_blocks: list[dict[str, Any]]) -> list[Any]:
     return out
 
 
-# --- helpers --------------------------------------------------------------
-
-
 def _strip_seam_blocks(body: dict[str, Any]) -> dict[str, Any]:
     """A copy of `body` with `{type: "fallback"}` seam blocks filtered out of the
     replayed message history; `body` itself when there are none.
@@ -1380,7 +1415,7 @@ def _with_middleware_headers(request: APIRequest, betas: tuple[AnthropicBetaPara
     current = build_headers(request.headers)[0].get("anthropic-beta", "")
     existing = {value.strip() for value in current.split(",")}
     additions = dict.fromkeys(str(beta) for beta in betas if str(beta) not in existing)
-    beta_header = {"anthropic-beta": ", ".join(filter(None, [current, *additions]))} if current or additions else {}
+    beta_header = {"anthropic-beta": ",".join(filter(None, [current, *additions]))} if current or additions else {}
     return request.copy(
         headers=merge_headers(request.headers, beta_header, helper_header("fallback-refusal-middleware"))
     )
@@ -1410,7 +1445,7 @@ def _seam_block(from_model: str, to_model: str, category: str | None) -> dict[st
     }
 
 
-def _seamed_http_response(original: httpx.Response, seams: list[dict[str, Any]]) -> httpx.Response | None:
+def _seamed_http_response(original: httpx2.Response, seams: list[dict[str, Any]]) -> httpx2.Response | None:
     """A copy of the served hop's response with `seams` prepended to its
     `content`, or `None` when the body isn't the expected message shape.
 
@@ -1424,7 +1459,7 @@ def _seamed_http_response(original: httpx.Response, seams: list[dict[str, Any]])
     for header in ("content-encoding", "content-length"):
         if header in headers:
             del headers[header]
-    return httpx.Response(
+    return httpx2.Response(
         status_code=original.status_code,
         headers=headers,
         content=body,
@@ -1462,6 +1497,49 @@ def _prepend_seam_blocks_async(response: AsyncAPIResponse[Any], seams: list[dict
     )
 
 
+def send_hop(
+    request: APIRequest, entry: BetaFallbackParam, call_next: CallNext
+) -> tuple[APIResponse[Any], BetaFallbackParam]:
+    """Send a request built from `entry`, resending it once without `speed` when it
+    inherited `fast` and was rejected with a capacity error. Also returns the entry to
+    build any later resend of the same hop from: `entry`, with `speed` unset if dropped."""
+    response = call_next(request)
+    resend = without_rejected_fast_speed(request, entry, response.status_code)
+    if resend is None:
+        return response, entry
+
+    response.close()
+    return call_next(resend), {**entry, "speed": None}
+
+
+async def async_send_hop(
+    request: APIRequest, entry: BetaFallbackParam, call_next: AsyncCallNext
+) -> tuple[AsyncAPIResponse[Any], BetaFallbackParam]:
+    response = await call_next(request)
+    resend = without_rejected_fast_speed(request, entry, response.status_code)
+    if resend is None:
+        return response, entry
+
+    await response.close()
+    return await call_next(resend), {**entry, "speed": None}
+
+
+def without_rejected_fast_speed(request: APIRequest, entry: BetaFallbackParam, status_code: int) -> APIRequest | None:
+    """The hop's `request` to resend, or `None` when its result stands. `speed` is
+    dropped, not set to `standard`: a model without fast mode rejects the parameter."""
+    body = _as_dict(request.json)
+    if status_code not in CAPACITY_ERROR_STATUSES or "speed" in entry or body is None or body.get("speed") != "fast":
+        return None
+
+    log.warning(
+        "anthropic-sdk: BetaRefusalFallbackMiddleware: fast fallback request to %s was rejected "
+        "(HTTP %s); retrying without `speed`",
+        entry["model"],
+        status_code,
+    )
+    return request.copy(body=_patch(body, {"speed": None}))
+
+
 def _apply_hop(body: dict[str, Any], entry: BetaFallbackParam) -> dict[str, Any]:
     """`entry` applied as a patch against `body`: a field set to a value
     overrides it, a field explicitly `None` unsets it (absent from the retried
@@ -1471,8 +1549,14 @@ def _apply_hop(body: dict[str, Any], entry: BetaFallbackParam) -> dict[str, Any]
     set / `None`-unsets / absent-keeps rule against the original request's
     `output_config`; the whole object is dropped when nothing is left.
 
+    A carried `between_tools` thinking config becomes `disabled` unless the
+    entry sets `thinking`: the fallback model may not accept `between_tools`.
+
     Always a fresh dict; `body` is never mutated."""
     patched = _patch(body, cast("Dict[str, Any]", entry))
+    thinking = _as_dict(body.get("thinking"))
+    if "thinking" not in entry and thinking is not None and thinking.get("type") == "between_tools":
+        patched["thinking"] = {"type": "disabled"}
     output_config = _as_dict(entry.get("output_config"))
     if output_config is not None:
         merged = _patch(_as_dict(body.get("output_config")) or {}, output_config)
@@ -1520,14 +1604,14 @@ def _as_dict(value: object) -> dict[str, Any] | None:
     return cast("Dict[str, Any]", value) if is_dict(value) else None
 
 
-def _read_json(response: httpx.Response) -> Any:
+def _read_json(response: httpx2.Response) -> Any:
     try:
         return json.loads(response.read())
     except Exception:
         return None
 
 
-async def _read_json_async(response: httpx.Response) -> Any:
+async def _read_json_async(response: httpx2.Response) -> Any:
     try:
         return json.loads(await response.aread())
     except Exception:
@@ -1588,8 +1672,8 @@ def _backfill(primary: dict[str, Any] | None, fallback: dict[str, Any] | None) -
 
 
 def _spliced_http_response(
-    original: httpx.Response, stream: httpx.SyncByteStream | httpx.AsyncByteStream
-) -> httpx.Response:
+    original: httpx2.Response, stream: httpx2.SyncByteStream | httpx2.AsyncByteStream
+) -> httpx2.Response:
     """A synthetic response standing in for `original`, with `stream` as its body.
 
     The spliced frames are emitted post-decode, so the original's
@@ -1599,7 +1683,7 @@ def _spliced_http_response(
     for header in ("content-encoding", "content-length"):
         if header in headers:
             del headers[header]
-    return httpx.Response(
+    return httpx2.Response(
         status_code=original.status_code,
         headers=headers,
         stream=stream,
@@ -1607,7 +1691,7 @@ def _spliced_http_response(
     )
 
 
-class _FrameByteStream(httpx.SyncByteStream):
+class _FrameByteStream(httpx2.SyncByteStream):
     def __init__(self, frames: Generator[bytes, None, None]) -> None:
         self._frames = frames
 
@@ -1620,7 +1704,7 @@ class _FrameByteStream(httpx.SyncByteStream):
         self._frames.close()
 
 
-class _AsyncFrameByteStream(httpx.AsyncByteStream):
+class _AsyncFrameByteStream(httpx2.AsyncByteStream):
     def __init__(self, frames: AsyncGenerator[bytes, None]) -> None:
         self._frames = frames
 

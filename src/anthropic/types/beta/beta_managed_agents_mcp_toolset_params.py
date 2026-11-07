@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Iterable, Optional
@@ -26,4 +24,4 @@ class BetaManagedAgentsMCPToolsetParams(TypedDict, total=False):
     """Per-tool configuration overrides."""
 
     default_config: Optional[BetaManagedAgentsMCPToolsetDefaultConfigParams]
-    """Default configuration for all tools from an MCP server."""
+    """Default configuration for all tools from this server."""

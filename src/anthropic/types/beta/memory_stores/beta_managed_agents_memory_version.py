@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -12,33 +10,35 @@ __all__ = ["BetaManagedAgentsMemoryVersion"]
 
 
 class BetaManagedAgentsMemoryVersion(BaseModel):
-    """
-    A `memory_version` object: one immutable, attributed row in a memory's append-only history. Every non-no-op mutation to a memory produces a new version. Versions belong to the store (not the individual memory) and persist after the memory is deleted. Retrieving a redacted version returns 200 with `content`, `path`, `content_size_bytes`, and `content_sha256` set to `null`; branch on `redacted_at`, not HTTP status.
+    """One entry in a memory's history, recording a single change and who made it.
+
+    Every change to a memory adds one version. Only redaction can change a version after that. Versions belong to the memory store and stay after the memory is deleted. Each version is retained for at least the version retention period after it was written, unless the store itself is deleted.
+
+    Retrieving a redacted version succeeds, with `content`, `path`, `content_size_bytes`, and `content_sha256` set to `null`. Check `redacted_at` to find out whether a version was redacted.
+
+    See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#audit-memory-changes) to learn more about memory versions.
     """
 
     id: str
     """Unique identifier for this version (a `memver_...` value)."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When this version was written, in RFC 3339 format."""
 
     memory_id: str
-    """ID of the memory this version snapshots (a `mem_...` value).
+    """The ID of the memory that this version belongs to (`mem_...`).
 
-    Remains valid after the memory is deleted; pass it as `memory_id` to
-    [List memory versions](/en/api/beta/memory_stores/memory_versions/list) to
-    retrieve the full lineage including the `deleted` row.
+    The ID stays valid after the memory is deleted. Pass it as `memory_id` to
+    [List Memory Versions](https://platform.claude.com/docs/en/api/beta/memory_stores/memory_versions/list)
+    to get the memory's retained versions, including its `deleted` version while the
+    lineage is retained.
     """
 
     memory_store_id: str
     """ID of the memory store this version belongs to (a `memstore_...` value)."""
 
     operation: BetaManagedAgentsMemoryVersionOperation
-    """The kind of mutation a `memory_version` records.
-
-    Every non-no-op mutation to a memory appends exactly one version row with one of
-    these values.
-    """
+    """The kind of mutation this version records: `created`, `modified`, or `deleted`."""
 
     type: Literal["memory_version"]
 
@@ -64,12 +64,16 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """
 
     created_by: Optional[BetaManagedAgentsActor] = None
-    """Identifies who performed a write or redact operation.
+    """Who made this change to the memory, or `null` if the author wasn't recorded.
 
-    Captured at write time on the `memory_version` row. The API key that created a
-    session is not recorded on agent writes; attribution answers who made the write,
-    not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/sessions-retrieve).
+    Redacting the version doesn't change this field. A `session_actor` here is an
+    agent that wrote through the store's mounted filesystem at `/mnt/memory/`. The
+    version doesn't record the API key that created that session. So the author in
+    `created_by` is who made the change, not who is ultimately responsible for it.
+
+    You can
+    [retrieve the session](https://platform.claude.com/docs/en/api/beta/sessions/retrieve)
+    to learn more about where the change came from.
     """
 
     path: Optional[str] = None
@@ -79,13 +83,19 @@ class BetaManagedAgentsMemoryVersion(BaseModel):
     """
 
     redacted_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the version was redacted, in RFC 3339, or `null` if it hasn't been.
+
+    When set, `content`, `path`, `content_size_bytes`, and `content_sha256` are
+    `null`.
+
+    See the
+    [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#redact-a-version)
+    to learn more about redaction.
+    """
 
     redacted_by: Optional[BetaManagedAgentsActor] = None
-    """Identifies who performed a write or redact operation.
+    """Who redacted this version, or `null` if it has not been redacted.
 
-    Captured at write time on the `memory_version` row. The API key that created a
-    session is not recorded on agent writes; attribution answers who made the write,
-    not who is ultimately responsible. Look up session provenance separately via the
-    [Sessions API](/en/api/sessions-retrieve).
+    In practice always an `api_actor`, `user_actor`, or `service_account_actor`
+    (agents do not have a redact capability).
     """

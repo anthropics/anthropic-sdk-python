@@ -39,9 +39,6 @@ if TYPE_CHECKING:
     def is_literal_type(type_: type[Any]) -> bool:  # noqa: ARG001
         ...
 
-    def is_typeddict(type_: type[Any]) -> bool:  # noqa: ARG001
-        ...
-
 else:
     # v1 re-exports
     if PYDANTIC_V1:
@@ -49,7 +46,6 @@ else:
             get_args as get_args,
             is_union as is_union,
             get_origin as get_origin,
-            is_typeddict as is_typeddict,
             is_literal_type as is_literal_type,
         )
         from pydantic.datetime_parse import parse_date as parse_date, parse_datetime as parse_datetime
@@ -59,7 +55,6 @@ else:
             is_union as is_union,
             get_origin as get_origin,
             parse_date as parse_date,
-            is_typeddict as is_typeddict,
             parse_datetime as parse_datetime,
             is_literal_type as is_literal_type,
         )

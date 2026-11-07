@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -21,10 +19,12 @@ class BetaManagedAgentsMCPOAuthRefreshUpdateParams(TypedDict, total=False):
     """Parameters for updating OAuth refresh token configuration."""
 
     refresh_token: Optional[str]
-    """Updated OAuth refresh token."""
+    """The new OAuth refresh token to replace the stored one."""
 
     scope: Optional[str]
-    """Updated OAuth scope for the refresh request."""
+    """The new OAuth scope for refresh requests.
+
+    Send an empty string to clear the stored scope.
+    """
 
     token_endpoint_auth: TokenEndpointAuth
-    """Updated HTTP Basic authentication parameters for the token endpoint."""

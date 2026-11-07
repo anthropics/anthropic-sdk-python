@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -29,7 +27,8 @@ class BetaLimitedNetworkParams(TypedDict, total=False):
     allow_package_managers: Optional[bool]
     """
     Permits outbound access to public package registries (PyPI, npm, etc.) beyond
-    those listed in the `allowed_hosts` array. Defaults to `false`.
+    those listed in the `allowed_hosts` array. Defaults to `false` on creation. Must
+    be `true` when `packages` are specified.
     """
 
     allowed_hosts: Optional[SequenceNotStr[str]]

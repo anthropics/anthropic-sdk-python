@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -10,12 +8,15 @@ __all__ = ["BetaManagedAgentsSchedule"]
 
 
 class BetaManagedAgentsSchedule(BaseModel):
-    """5-field POSIX cron schedule with computed runtime timestamps."""
+    """A recurring schedule with computed runtime timestamps.
+
+    Discriminated union — only cron is supported currently.
+    """
 
     expression: str
     """
     5-field POSIX cron expression: minute hour day-of-month month day-of-week (e.g.,
-    "0 9 \\** \\** 1-5" for weekdays at 9am). Day-of-week is 0-7 where 0 and 7 both mean
+    "0 9 * * 1-5" for weekdays at 9am). Day-of-week is 0-7 where 0 and 7 both mean
     Sunday. Extended cron syntax - seconds or year fields, and the special
     characters L, W, #, and ? - is not supported, nor are predefined shortcuts
     (@daily).
@@ -27,7 +28,11 @@ class BetaManagedAgentsSchedule(BaseModel):
     type: Literal["cron"]
 
     last_run_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Time the most recent scheduled run actually started.
+
+    Null until one completes; preserved after the deployment is archived. Manual
+    runs do not update this.
+    """
 
     upcoming_runs_at: Optional[List[datetime]] = None
     """Up to 5 timestamps of upcoming cron occurrences.

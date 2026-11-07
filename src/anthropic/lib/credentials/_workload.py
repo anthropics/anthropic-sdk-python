@@ -7,7 +7,7 @@ from types import TracebackType
 from typing import Any, Dict, Type, Union, NoReturn, Optional
 from typing_extensions import override
 
-import httpx2 as httpx
+import httpx2
 
 from ._types import AccessToken, IdentityTokenProvider
 from ._secrets import (
@@ -30,9 +30,6 @@ from ._constants import (
 )
 from ..._exceptions import AnthropicError
 
-# jwt-bearer POSTs require BOTH beta headers — oauth-2025-04-20 unlocks the
-# token endpoint family, and oidc-federation-2026-04-01 routes the POST to the
-# Go userauth handler rather than the Python oauth_server.
 _JWT_BEARER_BETA_HEADER = f"{OAUTH_API_BETA_HEADER},{FEDERATION_BETA_HEADER}"
 
 # Max characters of response body kept on WorkloadIdentityError.body and in
@@ -50,7 +47,7 @@ _MAX_ASSERTION_BYTES = 16 * 1024
 _MAX_TOKEN_RESPONSE_BYTES = 1 << 20
 
 
-def _request_id(resp: httpx.Response) -> Optional[str]:
+def _request_id(resp: httpx2.Response) -> Optional[str]:
     rid: Optional[str] = resp.headers.get("Request-Id") or resp.headers.get("request-id")
     return rid
 
@@ -73,19 +70,19 @@ def _redact_body(body: Any) -> Any:
     return None
 
 
-def _raise_token_endpoint_error(resp: httpx.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
-    """Raise a redacted :class:`WorkloadIdentityError` from a non-200 token-endpoint response.
+def _raise_token_endpoint_error(resp: httpx2.Response, *, message_prefix: str, hint: Optional[str] = None) -> NoReturn:
+    """Raise a redacted `WorkloadIdentityError` from a non-200 token-endpoint response.
 
     Shared between the jwt-bearer exchange path in this module and the
-    refresh_token grant path in :mod:`_providers`.
+    refresh_token grant path in `_providers`.
 
     The raw response body (which token endpoints can echo credential material
     into) is never bound to a local in this frame — only the redaction is —
     so this frame is safe under crash reporters that capture traceback locals.
 
-    ``hint`` is an optional caller-supplied diagnostic appended verbatim to the
+    `hint` is an optional caller-supplied diagnostic appended verbatim to the
     error message (after the redacted body). Callers gate it on the response
-    status and their own state — this helper does not inspect ``resp`` for it.
+    status and their own state — this helper does not inspect `resp` for it.
     """
     try:
         redacted = _redact_body(resp.json())
@@ -108,7 +105,7 @@ log: logging.Logger = logging.getLogger(__name__)
 
 
 class WorkloadIdentityError(AnthropicError):
-    """Raised when the OIDC token exchange (``POST /v1/oauth/token``) fails."""
+    """Raised when the OIDC token exchange (`POST /v1/oauth/token`) fails."""
 
     status_code: Optional[int]
     body: Any
@@ -137,26 +134,26 @@ class WorkloadIdentityError(AnthropicError):
 
 class WorkloadIdentityCredentials:
     """Exchanges an external OIDC JWT for an Anthropic access token via the
-    RFC 7523 ``jwt-bearer`` grant.
+    RFC 7523 `jwt-bearer` grant.
 
-    This is an :class:`AccessTokenProvider`: calling it performs a *fresh* token
-    exchange. Wrap in a :class:`TokenCache` (done automatically when passed as
-    ``credentials=`` to :class:`anthropic.Anthropic`) to avoid exchanging on every
+    This is an `AccessTokenProvider`: calling it performs a *fresh* token
+    exchange. Wrap in a `TokenCache` (done automatically when passed as
+    `credentials=` to `anthropic.Anthropic`) to avoid exchanging on every
     request.
 
     Args:
         organization_id: The organization's raw UUID string (organizations do
             not use tagged IDs).
-        workspace_id: Optional ``wrkspc_*`` tagged ID, or the literal
-            ``"default"`` to scope the token to the organization's default
+        workspace_id: Optional `wrkspc_*` tagged ID, or the literal
+            `"default"` to scope the token to the organization's default
             workspace. When omitted the server picks the rule's sole enabled
             workspace, else the org default if the rule covers it. Required
             when the rule enables more than one non-default workspace, or to
             target a specific workspace other than the one the server would
             pick. The minted token is workspace-scoped: per-request workspace
-            selection (the ``anthropic-workspace-id`` header) is not supported
+            selection (the `anthropic-workspace-id` header) is not supported
             for federation tokens — switching workspaces requires a new token
-            exchange with a different ``workspace_id``.
+            exchange with a different `workspace_id`.
     """
 
     def __init__(
@@ -168,7 +165,7 @@ class WorkloadIdentityCredentials:
         service_account_id: Optional[str] = None,
         workspace_id: Optional[str] = None,
         scope: Optional[str] = None,
-        http_client: Optional[httpx.Client] = None,
+        http_client: Optional[httpx2.Client] = None,
     ) -> None:
         self._identity_token_provider = identity_token_provider
         self._federation_rule_id = federation_rule_id
@@ -176,19 +173,18 @@ class WorkloadIdentityCredentials:
         self._service_account_id = service_account_id
         self._workspace_id = workspace_id
         # Scope is informational only for federation: the server derives the
-        # effective scope from the matching federation rule and the gateway
-        # transform drops unknown body fields, so it is intentionally NOT sent
-        # on the jwt-bearer request.
+        # effective scope from the matching federation rule, so it is
+        # intentionally NOT sent on the jwt-bearer request.
         self._scope = scope
-        # The client passing this object as ``credentials=`` calls
-        # :meth:`for_base_url` to set its own endpoint, so the token exchange
+        # The client passing this object as `credentials=` calls
+        # `for_base_url` to set its own endpoint, so the token exchange
         # and the API calls hit the same deployment. There is intentionally no
         # constructor kwarg for this: a token minted by one deployment is only
         # valid against that deployment, so splitting exchange-base from
         # client-base is always a bug.
         self._bound_base_url: Optional[str] = None
         if http_client is None:
-            self._http_client = httpx.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
+            self._http_client = httpx2.Client(timeout=TOKEN_EXCHANGE_TIMEOUT)
             self._owns_http_client = True
         else:
             self._http_client = http_client
@@ -203,10 +199,10 @@ class WorkloadIdentityCredentials:
         return self._bound_base_url or DEFAULT_BASE_URL
 
     def bind_base_url(self, base_url: str) -> None:
-        """Set the API ``base_url`` the token exchange POSTs to.
+        """Set the API `base_url` the token exchange POSTs to.
 
         For standalone use (no client) or tests. Clients bind through
-        :meth:`for_base_url`, which never rebinds an instance another client
+        `for_base_url`, which never rebinds an instance another client
         is already exchanging through.
         """
         bound = base_url.rstrip("/")
@@ -214,13 +210,13 @@ class WorkloadIdentityCredentials:
         self._bound_base_url = bound
 
     def for_base_url(self, base_url: str) -> "WorkloadIdentityCredentials":
-        """Return the provider a client with ``base_url`` should exchange through.
+        """Return the provider a client with `base_url` should exchange through.
 
         Binds in place, unless another client already bound this instance to a
-        different host (e.g. the parent of ``copy(base_url=...)``). Rebinding
+        different host (e.g. the parent of `copy(base_url=...)`). Rebinding
         would move that client's token exchange too, so a copy bound to
-        ``base_url`` is returned instead; it shares the identity token and
-        borrows (never closes) this instance's ``httpx.Client``.
+        `base_url` is returned instead; it shares the identity token and
+        borrows (never closes) this instance's `httpx2.Client`.
         """
         bound = base_url.rstrip("/")
         provider = self
@@ -231,7 +227,7 @@ class WorkloadIdentityCredentials:
         return provider
 
     def close(self) -> None:
-        """Close the underlying ``httpx.Client`` if we created it."""
+        """Close the underlying `httpx2.Client` if we created it."""
         if self._owns_http_client:
             self._http_client.close()
 
@@ -285,7 +281,7 @@ class WorkloadIdentityCredentials:
                     "User-Agent": _user_agent(),
                 },
             )
-        except httpx.HTTPError as err:
+        except httpx2.HTTPError as err:
             raise WorkloadIdentityError(f"Failed to reach token endpoint {url}: {err}") from _strip_traceback(err)
 
         request_id = _request_id(resp)
@@ -319,7 +315,7 @@ class WorkloadIdentityCredentials:
 
         try:
             # Token values are SecretStr-wrapped in place at the parse
-            # boundary, so every error path below may hold ``data`` in its
+            # boundary, so every error path below may hold `data` in its
             # frame without retaining raw credential material.
             data = _wrap_secret_fields(resp.json())
         except ValueError as err:
@@ -351,9 +347,9 @@ class WorkloadIdentityCredentials:
 
         try:
             token = data["access_token"]
-            # ``expires_in`` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
+            # `expires_in` is a JSON number per RFC 6749 §5.1; coerce to int seconds.
             expires_in = int(data["expires_in"])
-        except (KeyError, TypeError, ValueError) as err:
+        except (KeyError, TypeError, ValueError, OverflowError) as err:
             raise WorkloadIdentityError(
                 "Token endpoint response missing required fields (access_token / expires_in).",
                 status_code=resp.status_code,
@@ -372,17 +368,17 @@ def exchange_federation_assertion(
     service_account_id: Optional[str] = None,
     workspace_id: Optional[str] = None,
     base_url: Optional[str] = None,
-    http_client: Optional[httpx.Client] = None,
+    http_client: Optional[httpx2.Client] = None,
 ) -> AccessToken:
-    """Perform a single RFC 7523 ``jwt-bearer`` exchange and return the resulting
-    :class:`AccessToken`.
+    """Perform a single RFC 7523 `jwt-bearer` exchange and return the resulting
+    `AccessToken`.
 
-    This is a one-shot convenience wrapper around :class:`WorkloadIdentityCredentials`
+    This is a one-shot convenience wrapper around `WorkloadIdentityCredentials`
     for callers that already have the assertion JWT in hand and just want the
     Anthropic access token back (no caching, no provider plumbing).
 
-    ``assertion`` may be a :class:`pydantic.SecretStr` to keep it redacted
-    end-to-end; a plain ``str`` is wrapped on entry.
+    `assertion` may be a `pydantic.SecretStr` to keep it redacted
+    end-to-end; a plain `str` is wrapped on entry.
     """
     if isinstance(assertion, str):
         # Rebind so this frame's local holds the wrapped form — the raw string

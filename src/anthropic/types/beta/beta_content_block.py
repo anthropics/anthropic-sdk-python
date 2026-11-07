@@ -1,9 +1,7 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
+from ..._models import UnionDiscriminator
 from .beta_text_block import BetaTextBlock
 from .beta_fallback_block import BetaFallbackBlock
 from .beta_thinking_block import BetaThinkingBlock
@@ -13,6 +11,7 @@ from .beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
+from .beta_mcp_tool_listing_block import BetaMCPToolListingBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
@@ -43,6 +42,7 @@ BetaContentBlock: TypeAlias = Annotated[
         BetaContainerUploadBlock,
         BetaCompactionBlock,
         BetaFallbackBlock,
+        BetaMCPToolListingBlock,
     ],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]

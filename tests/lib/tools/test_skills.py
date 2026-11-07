@@ -1,8 +1,8 @@
-"""Tests for skill-archive extraction (:mod:`anthropic.lib.tools._skills`).
+"""Tests for skill-archive extraction (`anthropic.lib.tools._skills`).
 
 Skill bundles are packaged wrapped in a single directory named after the skill
-(e.g. ``pdf/SKILL.md``). The extractor must strip that wrapper so files land at
-``<dest>/SKILL.md``, not the doubled ``<dest>/pdf/SKILL.md``. It must also still
+(e.g. `pdf/SKILL.md`). The extractor must strip that wrapper so files land at
+`<dest>/SKILL.md`, not the doubled `<dest>/pdf/SKILL.md`. It must also still
 refuse zip-slip / tar-slip members.
 """
 
@@ -13,17 +13,25 @@ import os
 import stat
 import tarfile
 import zipfile
+from types import SimpleNamespace
+from typing import Any, AsyncIterator, cast
 from pathlib import Path
+from contextlib import asynccontextmanager
 from collections.abc import Callable
 
 ArchiveMaker = Callable[[Path, dict[str, bytes]], None]
-# Maps an entry name to ``(data, unix_mode)`` so a test can pin the mode the
+# Maps an entry name to `(data, unix_mode)` so a test can pin the mode the
 # archive records for that member.
 ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
 import pytest
 
-from anthropic.lib.tools._skills import _strip_top, _archive_top_dir, _extract_skill_archive
+from anthropic.lib.tools._skills import (
+    _strip_top,
+    _archive_top_dir,
+    _extract_skill_archive,
+    download_session_skills,
+)
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -44,7 +52,7 @@ def _make_zip_modes(path: Path, entries: dict[str, tuple[bytes, int]]) -> None:
     with zipfile.ZipFile(path, "w") as zf:
         for name, (data, mode) in entries.items():
             info = zipfile.ZipInfo(name)
-            # The Unix mode lives in the high 16 bits of ``external_attr``.
+            # The Unix mode lives in the high 16 bits of `external_attr`.
             info.external_attr = mode << 16
             zf.writestr(info, data)
 
@@ -186,7 +194,7 @@ def test_zip_preserves_executable_bit(tmp_path: Path) -> None:
 
 
 def test_zip_without_unix_attrs_is_not_executable(tmp_path: Path) -> None:
-    # ``writestr`` with a plain name records no Unix mode (external_attr == 0);
+    # `writestr` with a plain name records no Unix mode (external_attr == 0);
     # the member must extract non-executable rather than inherit a random mode.
     archive = tmp_path / "skill.zip"
     _make_zip(archive, {"SKILL.md": b"# doc", "scripts/run.sh": b"echo hi"})
@@ -289,7 +297,7 @@ def test_zip_unix_special_entries_are_skipped_not_written_as_files(tmp_path: Pat
 
 
 def test_zip_non_unix_host_type_bits_are_plain_data(tmp_path: Path) -> None:
-    """Only a Unix creator host makes ``external_attr`` a mode; the same bits
+    """Only a Unix creator host makes `external_attr` a mode; the same bits
     from a FAT/NTFS archiver describe an ordinary file."""
     archive = tmp_path / "skill.zip"
     _make_zip_infos(
@@ -318,7 +326,7 @@ def test_tar_top_level_special_does_not_defeat_wrapper_stripping(tmp_path: Path)
 
 
 def test_tar_pax_global_header_is_not_extracted(tmp_path: Path) -> None:
-    """``git archive`` tarballs start with a PAX global header; it is metadata,
+    """`git archive` tarballs start with a PAX global header; it is metadata,
     not a member, and must neither appear on disk nor stop wrapper stripping."""
     archive = tmp_path / "skill.tar"
     with tarfile.open(archive, "w", format=tarfile.PAX_FORMAT, pax_headers={"comment": "0123abcd"}) as tf:
@@ -370,3 +378,44 @@ def test_tar_path_screen_applies_to_skipped_members(tmp_path: Path) -> None:
     assert not os.path.lexists(dest.parent / "x")
     assert not os.path.lexists(tmp_path / "sub" / "x")
     assert not os.path.lexists(tmp_path / "x")
+
+
+class _FakeVersions:
+    """Records the version each endpoint was addressed by; `download` streams a real archive."""
+
+    def __init__(self, archive: Path) -> None:
+        self.retrieves: list[str] = []
+        self.downloads: list[str] = []
+        self.with_streaming_response = SimpleNamespace(download=self._download)
+        self._archive = archive
+
+    async def retrieve(self, version: str, *, skill_id: str) -> Any:
+        self.retrieves.append(f"{skill_id}@{version}")
+        return SimpleNamespace(id="skillver_123", name="pdf")
+
+    @asynccontextmanager
+    async def _download(self, version: str, *, skill_id: str) -> AsyncIterator[Any]:
+        self.downloads.append(f"{skill_id}@{version}")
+        archive = self._archive
+
+        async def stream_to_file(dest: str) -> None:
+            Path(dest).write_bytes(archive.read_bytes())
+
+        yield SimpleNamespace(stream_to_file=stream_to_file)
+
+
+async def test_download_retrieves_by_configured_version_and_downloads_by_returned_id(tmp_path: Path) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session = cast(
+        Any, SimpleNamespace(agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]))
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+    created = await download_session_skills(client, workdir=work, session=session)
+    assert versions.retrieves == ["skill_01@latest"]
+    assert versions.downloads == ["skill_01@skillver_123"]
+    assert created == [(work / "skills" / "pdf").resolve()]
+    assert (work / "skills" / "pdf" / "SKILL.md").read_text() == "# PDF"

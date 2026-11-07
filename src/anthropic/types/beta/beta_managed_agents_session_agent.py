@@ -1,28 +1,26 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
-from ..._utils import PropertyInfo
-from ..._models import BaseModel
+from ..._models import BaseModel, UnionDiscriminator
 from .beta_managed_agents_custom_tool import BetaManagedAgentsCustomTool
 from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
 from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_execution_identity import BetaManagedAgentsExecutionIdentity
+from .beta_managed_agents_session_multiagent import BetaManagedAgentsSessionMultiagent
 from .beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
 from .beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
-from .beta_managed_agents_session_multiagent_coordinator import BetaManagedAgentsSessionMultiagentCoordinator
 
 __all__ = ["BetaManagedAgentsSessionAgent", "Skill", "Tool"]
 
 Skill: TypeAlias = Annotated[
-    Union[BetaManagedAgentsAnthropicSkill, BetaManagedAgentsCustomSkill], PropertyInfo(discriminator="type")
+    Union[BetaManagedAgentsAnthropicSkill, BetaManagedAgentsCustomSkill], UnionDiscriminator("type")
 ]
 
 Tool: TypeAlias = Annotated[
     Union[BetaManagedAgentsAgentToolset20260401, BetaManagedAgentsMCPToolset, BetaManagedAgentsCustomTool],
-    PropertyInfo(discriminator="type"),
+    UnionDiscriminator("type"),
 ]
 
 
@@ -36,15 +34,22 @@ class BetaManagedAgentsSessionAgent(BaseModel):
 
     description: Optional[str] = None
 
+    execution_identity: BetaManagedAgentsExecutionIdentity
+    """Execution principal snapshotted from the agent at session creation.
+
+    Always present; `{"type": "service_account"}` when runs carry no customer-named
+    principal.
+    """
+
     mcp_servers: List[BetaManagedAgentsMCPServerURLDefinition]
 
     model: BetaManagedAgentsModelConfig
     """Model identifier and configuration."""
 
-    multiagent: Optional[BetaManagedAgentsSessionMultiagentCoordinator] = None
-    """
-    Resolved coordinator topology with full agent definitions for each roster
-    member.
+    multiagent: Optional[BetaManagedAgentsSessionMultiagent] = None
+    """Resolved multiagent orchestration configuration.
+
+    Null when the agent is single-threaded.
     """
 
     name: str

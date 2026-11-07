@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -31,7 +29,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -45,7 +43,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -60,6 +58,7 @@ class TestMessages:
                     }
                 ],
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -70,6 +69,7 @@ class TestMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -125,6 +125,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -138,7 +139,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -156,7 +157,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -176,7 +177,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
         message_stream.response.close()
@@ -191,7 +192,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
@@ -207,6 +208,7 @@ class TestMessages:
                     }
                 ],
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -217,6 +219,7 @@ class TestMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -271,6 +274,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         message_stream.response.close()
 
@@ -284,7 +288,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
 
@@ -302,7 +306,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -332,7 +336,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -345,7 +349,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -357,6 +361,7 @@ class TestMessages:
                     "type": "json_schema",
                 },
             },
+            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -410,6 +415,7 @@ class TestMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -422,7 +428,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -439,7 +445,7 @@ class TestMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -465,7 +471,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -479,7 +485,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -494,6 +500,7 @@ class TestAsyncMessages:
                     }
                 ],
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -504,6 +511,7 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             stream=False,
             system=[
@@ -559,6 +567,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(Message, message, path=["response"])
 
@@ -572,7 +581,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -590,7 +599,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -610,7 +619,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
         await message_stream.response.aclose()
@@ -625,7 +634,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
             cache_control={
                 "type": "ephemeral",
@@ -641,6 +650,7 @@ class TestAsyncMessages:
                     }
                 ],
             },
+            diagnostics={"previous_message_id": "previous_message_id"},
             inference_geo="inference_geo",
             metadata={"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
             output_config={
@@ -651,6 +661,7 @@ class TestAsyncMessages:
                 },
             },
             service_tier="auto",
+            speed="standard",
             stop_sequences=["string"],
             system=[
                 {
@@ -705,6 +716,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         await message_stream.response.aclose()
 
@@ -718,7 +730,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         )
 
@@ -736,7 +748,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             stream=True,
         ) as response:
             assert not response.is_closed
@@ -766,7 +778,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -779,7 +791,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -791,6 +803,7 @@ class TestAsyncMessages:
                     "type": "json_schema",
                 },
             },
+            speed="standard",
             system=[
                 {
                     "text": "Today's date is 2024-06-01.",
@@ -844,6 +857,7 @@ class TestAsyncMessages:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageTokensCount, message, path=["response"])
 
@@ -856,7 +870,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         )
 
         assert response.is_closed is True
@@ -873,7 +887,7 @@ class TestAsyncMessages:
                     "role": "user",
                 }
             ],
-            model="claude-opus-5",
+            model="claude-opus-5-5",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
