@@ -40,6 +40,41 @@ def test_ref_schema_with_defs():
     )
 
 
+def test_ref_schema_preserves_sibling_description():
+    # Pydantic puts Field(description=...) beside $ref for enum/model fields.
+    schema = {
+        "$ref": "#/$defs/Level",
+        "description": "Always choose low.",
+        "$defs": {
+            "Level": {
+                "type": "string",
+                "enum": ["high", "low"],
+                "title": "Level",
+            }
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "$defs": {
+                "Level": {
+                    "type": "string",
+                    "enum": ["high", "low"],
+                    "title": "Level",
+                }
+            },
+            "$ref": "#/$defs/Level",
+            "description": "Always choose low.",
+        }
+    )
+
+
+def test_ref_schema_preserves_sibling_title():
+    schema = {"$ref": "#/$defs/Level", "title": "confidence"}
+    result = transform_schema(schema)
+    assert result == snapshot({"$ref": "#/$defs/Level", "title": "confidence"})
+
+
 def test_anyof_schema():
     schema = {
         "anyOf": [
