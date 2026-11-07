@@ -17,6 +17,7 @@ from typing_extensions import Protocol
 
 import httpx2
 import pytest
+import time_machine
 from respx import MockRouter
 
 import anthropic
@@ -2401,6 +2402,40 @@ def _send_message(client: Anthropic) -> None:
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestAnthropicCredentials:
     @pytest.mark.respx()
+    @pytest.mark.parametrize("refresh_delay", [59, 60, 61])
+    def test_advisory_failure_checks_expiry_before_sending(self, respx_mock: MockRouter, refresh_delay: int) -> None:
+        _mock_messages_endpoint(respx_mock)
+        calls: List[int] = []
+        failure = WorkloadIdentityError("token service unavailable")
+
+        with time_machine.travel(1000, tick=False) as clock:
+
+            def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+                calls.append(1)
+                if len(calls) == 1:
+                    return AccessToken("cached", expires_at=1600)
+                if len(calls) == 2:
+                    clock.shift(refresh_delay)
+                    raise failure
+                return AccessToken("fresh", expires_at=2200)
+
+            with Anthropic(credentials=provider, max_retries=0) as client:
+                _send_message(client)
+                clock.move_to(1540)
+                if refresh_delay < 60:
+                    _send_message(client)
+                    assert _bearer_tokens(respx_mock) == ["cached", "cached"]
+                else:
+                    with pytest.raises(WorkloadIdentityError) as exc:
+                        _send_message(client)
+                    assert exc.value is failure
+                    assert _bearer_tokens(respx_mock) == ["cached"]
+
+                _send_message(client)
+                assert _bearer_tokens(respx_mock)[-1] == "fresh"
+                assert len(calls) == 3
+
+    @pytest.mark.respx()
     def test_messages_request_has_bearer_and_beta(self, respx_mock: MockRouter) -> None:
         _mock_token_endpoint(respx_mock)
         _mock_messages_endpoint(respx_mock)
@@ -3265,6 +3300,42 @@ async def _send_message_async(client: AsyncAnthropic) -> None:
 
 @pytest.mark.usefixtures("clean_env", "no_default_creds_file")
 class TestAsyncAnthropicCredentials:
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("refresh_delay", [59, 60, 61])
+    async def test_advisory_failure_checks_expiry_before_sending(
+        self, respx_mock: MockRouter, refresh_delay: int
+    ) -> None:
+        _mock_messages_endpoint(respx_mock)
+        calls: List[int] = []
+        failure = WorkloadIdentityError("token service unavailable")
+
+        with time_machine.travel(1000, tick=False) as clock:
+
+            async def provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
+                calls.append(1)
+                if len(calls) == 1:
+                    return AccessToken("cached", expires_at=1600)
+                if len(calls) == 2:
+                    clock.shift(refresh_delay)
+                    raise failure
+                return AccessToken("fresh", expires_at=2200)
+
+            async with AsyncAnthropic(credentials=provider, max_retries=0) as client:
+                await _send_message_async(client)
+                clock.move_to(1540)
+                if refresh_delay < 60:
+                    await _send_message_async(client)
+                    assert _bearer_tokens(respx_mock) == ["cached", "cached"]
+                else:
+                    with pytest.raises(WorkloadIdentityError) as exc:
+                        await _send_message_async(client)
+                    assert exc.value is failure
+                    assert _bearer_tokens(respx_mock) == ["cached"]
+
+                await _send_message_async(client)
+                assert _bearer_tokens(respx_mock)[-1] == "fresh"
+                assert len(calls) == 3
+
     @pytest.mark.respx()
     async def test_workspace_id_header_from_config(
         self, respx_mock: MockRouter, clean_env: pytest.MonkeyPatch, tmp_path: pathlib.Path
