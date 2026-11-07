@@ -174,7 +174,7 @@ class AnthropicAWS(Anthropic):
         self,
         *,
         api_key: str | None = None,
-        auth_mode: AuthMode = "auto",
+        auth_mode: AuthMode | None = None,
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
@@ -221,6 +221,7 @@ class AnthropicAWS(Anthropic):
             set_default_query=set_default_query,
             middleware=middleware,
             _extra_kwargs={
+                "auth_mode": self.auth_mode if auth_mode is None else auth_mode,
                 "aws_access_key": aws_access_key or self.aws_access_key,
                 "aws_secret_key": aws_secret_key or self.aws_secret_key,
                 "aws_region": aws_region or self.aws_region,
@@ -386,7 +387,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
         self,
         *,
         api_key: str | None = None,
-        auth_mode: AuthMode = "auto",
+        auth_mode: AuthMode | None = None,
         aws_access_key: str | None = None,
         aws_secret_key: str | None = None,
         aws_region: str | None = None,
@@ -433,6 +434,7 @@ class AsyncAnthropicAWS(AsyncAnthropic):
             set_default_query=set_default_query,
             middleware=middleware,
             _extra_kwargs={
+                "auth_mode": self.auth_mode if auth_mode is None else auth_mode,
                 "aws_access_key": aws_access_key or self.aws_access_key,
                 "aws_secret_key": aws_secret_key or self.aws_secret_key,
                 "aws_region": aws_region or self.aws_region,

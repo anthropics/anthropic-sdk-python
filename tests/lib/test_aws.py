@@ -400,6 +400,39 @@ def test_copy_overrides_aws_options() -> None:
     assert str(copied2.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
 
 
+def test_copy_preserves_explicit_auth_mode() -> None:
+    # A client built with an explicit mode must keep it when copied without
+    # naming one; falling back to the constructor default would silently switch
+    # the credential source.
+    client = AnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+        auth_mode="sigv4",
+    )
+    copied = client.copy()
+    assert copied.auth_mode == "sigv4"
+    assert copied._use_sigv4 is True
+
+
+def test_copy_forwards_auth_mode() -> None:
+    # `auth_mode` has to reach `__init__`; passing it to `copy()` used to have no
+    # effect because it was missing from `_extra_kwargs`.
+    client = AnthropicAWS(
+        aws_access_key="AKID",
+        aws_secret_key="secret",
+        aws_region="us-east-1",
+        workspace_id="ws-123",
+        auth_mode="api_key",
+    )
+    assert client._use_sigv4 is False
+
+    copied = client.copy(auth_mode="sigv4")
+    assert copied.auth_mode == "sigv4"
+    assert copied._use_sigv4 is True
+
+
 def test_copy_accepts_credentials_none_noop() -> None:
     # `credentials=None` is accepted as a no-op: the AWS client authenticates with
     # SigV4, not a token provider, so there is nothing to clear. The copy stays SigV4.
