@@ -480,6 +480,37 @@ async def test_yields_completed_custom_tool_call() -> None:
 
 
 @pytest.mark.asyncio()
+async def test_a_tool_call_whose_input_is_not_an_object_posts_an_error_and_the_runner_continues() -> None:
+    """A tool call's `input` is model-produced JSON and need not be an object —
+    a custom tool's schema can be an array. The runner must answer that call
+    with an error result and keep dispatching, not let a coercion failure
+    escape the dispatch loop and abort the whole session run."""
+
+    async def weather(input: dict[str, Any]) -> str:
+        if not isinstance(input, dict):
+            raise TypeError("input must be an object")
+        return f"sunny in {input.get('city')}"
+
+    tool = _FakeTool("get_weather", weather)
+    events = FakeAsyncEvents(
+        stream_events=[
+            _custom_tool_use("ctu_1", "get_weather", cast(Any, ["SF"])),
+            _custom_tool_use("ctu_2", "get_weather", {"city": "LA"}),
+            _terminated(),
+        ]
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[tool])]
+
+    assert [item.tool_use_id for item in items] == ["ctu_1", "ctu_2"]
+    assert items[0].is_error is True
+    assert items[0].posted is True
+    assert "TypeError" in _result_text(items[0])
+    assert items[1].is_error is False
+    assert _result_text(items[1]) == "sunny in LA"
+
+
+@pytest.mark.asyncio()
 async def test_dispatches_builtin_and_custom_tools_in_one_stream() -> None:
     """A single stream carrying both an `agent.tool_use` and an
     `agent.custom_tool_use` dispatches both, each answered with its matching
