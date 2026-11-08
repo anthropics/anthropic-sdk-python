@@ -4,6 +4,7 @@ import os
 import sys
 import pathlib
 from typing import Optional
+from urllib.parse import urlsplit
 
 from ..._exceptions import AnthropicError, CredentialsError
 
@@ -109,6 +110,10 @@ def _active_profile() -> str:  # pyright: ignore[reportUnusedFunction] — used 
     return name
 
 
+# Loopback hosts that may be reached over cleartext HTTP for local testing.
+_LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
 def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUnusedFunction] — used by _workload/_providers
     """Reject non-`https://` token-endpoint URLs.
 
@@ -116,11 +121,18 @@ def _require_https(url: str, *, field: str) -> None:  # pyright: ignore[reportUn
     works against a local server; everything else must be
     TLS-encrypted because the body of these POSTs carries the assertion JWT
     or a long-lived refresh token.
+
+    The loopback exemption matches the *parsed* host, not a string prefix: a
+    check like ``url.startswith("http://localhost")`` also accepts
+    ``http://localhost.evil.com`` and ``http://localhost@evil.com`` (whose real
+    host is ``evil.com``), which would POST the secret to an attacker-controlled
+    host in cleartext.
     """
-    lowered = url.lower().rstrip("/")
-    if lowered.startswith("https://"):
+    parts = urlsplit(url)
+    scheme = parts.scheme.lower()
+    if scheme == "https":
         return
-    if lowered.startswith(("http://localhost", "http://127.0.0.1", "http://[::1]")):
+    if scheme == "http" and (parts.hostname or "").lower() in _LOOPBACK_HOSTS:
         return
     raise CredentialsError(
         f"{field} must use https (got {url!r}); the token-exchange endpoint "
