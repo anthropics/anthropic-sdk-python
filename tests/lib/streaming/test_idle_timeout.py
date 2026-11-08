@@ -324,3 +324,90 @@ def test_an_unterminated_line_is_capped_and_counts_as_content() -> None:
     for _ in range(64):
         tracker.has_content(b"y" * 4096)
         assert len(tracker._tail) <= _MAX_PENDING
+
+
+# The idle window is measured between content events, so the deadline has to be tested before a
+# chunk is allowed to reset it. Otherwise a server that goes quiet for five seconds and then sends
+# one content frame is indistinguishable from a healthy stream: every chunk arrives, none is late.
+class _FakeClock:
+    """Stands in for the module's `time` so the guard's clock is driven by the test, not by sleep."""
+
+    def __init__(self) -> None:
+        self.now = 1_000.0
+
+    def monotonic(self) -> float:
+        return self.now
+
+
+class _Timed(httpx2.SyncByteStream):
+    """Yields each chunk after advancing the clock by that chunk's gap."""
+
+    def __init__(self, clock: _FakeClock, steps: list[tuple[float, bytes]]) -> None:
+        self.clock = clock
+        self.steps = steps
+
+    @override
+    def __iter__(self) -> Iterator[bytes]:
+        for gap, chunk in self.steps:
+            self.clock.now += gap
+            yield chunk
+
+
+class _AsyncTimed(httpx2.AsyncByteStream):
+    def __init__(self, clock: _FakeClock, steps: list[tuple[float, bytes]]) -> None:
+        self.clock = clock
+        self.steps = steps
+
+    @override
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        for gap, chunk in self.steps:
+            self.clock.now += gap
+            yield chunk
+
+
+def test_content_arriving_after_the_window_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Two content frames 5s apart must time out with seconds=1; content is not a reset before the check."""
+    import anthropic.lib.streaming._idle_timeout as idle_mod
+
+    clock = _FakeClock()
+    monkeypatch.setattr(idle_mod.time, "monotonic", clock.monotonic)
+
+    stream = _Timed(clock, [(0.0, CONTENT), (5.0, CONTENT)])
+    guard = _GuardedByteStream(stream, _response(stream), 1.0)
+
+    with pytest.raises(APITimeoutError):
+        _drain(guard)
+
+    assert guard.idle_timeouts == 1
+
+
+async def test_async_content_arriving_after_the_window_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Same ordering requirement on the async path."""
+    import anthropic.lib.streaming._idle_timeout as idle_mod
+    from anthropic.lib.streaming._idle_timeout import _GuardedAsyncByteStream
+
+    clock = _FakeClock()
+    monkeypatch.setattr(idle_mod.time, "monotonic", clock.monotonic)
+
+    stream = _AsyncTimed(clock, [(0.0, CONTENT), (5.0, CONTENT)])
+    guard = _GuardedAsyncByteStream(stream, _response(stream), 1.0)
+
+    with pytest.raises(APITimeoutError):
+        async for _ in guard:
+            pass
+
+    assert guard.idle_timeouts == 1
+
+
+def test_content_within_the_window_is_not_a_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The fix must not turn a fast stream into a timeout: 0.5s gaps stay under a 1s window."""
+    import anthropic.lib.streaming._idle_timeout as idle_mod
+
+    clock = _FakeClock()
+    monkeypatch.setattr(idle_mod.time, "monotonic", clock.monotonic)
+
+    stream = _Timed(clock, [(0.0, CONTENT), (0.5, CONTENT), (0.5, CONTENT)])
+    guard = _GuardedByteStream(stream, _response(stream), 1.0)
+
+    assert len(_drain(guard)) == 3
+    assert guard.idle_timeouts == 0

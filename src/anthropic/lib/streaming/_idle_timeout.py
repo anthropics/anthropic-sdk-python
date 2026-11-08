@@ -116,11 +116,13 @@ class _GuardedByteStream(httpx2.SyncByteStream):
         last_content = time.monotonic()
         for chunk in self._stream:
             now = time.monotonic()
-            if self._tracker.has_content(chunk):
-                last_content = now
-            elif now - last_content >= self._seconds:
+            # The deadline is checked before the chunk is classified: a content frame that
+            # arrives after the window must not buy itself a new window just by being content.
+            if now - last_content >= self._seconds:
                 self.idle_timeouts += 1
                 raise APITimeoutError(request=self._request)
+            if self._tracker.has_content(chunk):
+                last_content = now
             yield chunk
 
     @override
@@ -143,11 +145,12 @@ class _GuardedAsyncByteStream(httpx2.AsyncByteStream):
         last_content = time.monotonic()
         async for chunk in self._stream:
             now = time.monotonic()
-            if self._tracker.has_content(chunk):
-                last_content = now
-            elif now - last_content >= self._seconds:
+            # Same ordering as the sync path, for the same reason.
+            if now - last_content >= self._seconds:
                 self.idle_timeouts += 1
                 raise APITimeoutError(request=self._request)
+            if self._tracker.has_content(chunk):
+                last_content = now
             yield chunk
 
     @override
