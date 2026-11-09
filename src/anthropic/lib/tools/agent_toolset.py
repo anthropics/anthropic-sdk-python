@@ -54,7 +54,7 @@ import anyio.abc
 from anyio.to_thread import run_sync
 
 from ._files import read_line_range, read_text_exact, write_text_exact
-from ._skills import _within, download_session_skills
+from ._skills import _within, _skill_lock, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
 from ...types.beta import (
@@ -334,19 +334,16 @@ class AgentToolContext:
             return
         for skill_dir in self._skill_dirs:
             try:
-                leases_dir = anyio.Path(skill_dir) / ".leases"
-                if await leases_dir.is_dir():
-                    context_id = getattr(self, "_context_id", None)
-                    if context_id:
-                        await (leases_dir / context_id).unlink(missing_ok=True)
-                    else:
-                        remaining = [p async for p in leases_dir.iterdir()]
-                        if remaining:
-                            await remaining[0].unlink(missing_ok=True)
-                    if [p async for p in leases_dir.iterdir()]:
-                        continue
-                # `shutil.rmtree` is blocking; keep it off the event loop.
-                await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
+                async with _skill_lock(skill_dir):
+                    leases_dir = anyio.Path(skill_dir) / ".leases"
+                    if await leases_dir.is_dir():
+                        context_id = getattr(self, "_context_id", None)
+                        if context_id:
+                            await (leases_dir / context_id).unlink(missing_ok=True)
+                        if [p async for p in leases_dir.iterdir()]:
+                            continue
+                    # `shutil.rmtree` is blocking; keep it off the event loop.
+                    await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
             except Exception as e:
                 log.warning("failed to remove downloaded skill dir %s: %s", skill_dir, e)
         self._skill_dirs = []

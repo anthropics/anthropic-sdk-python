@@ -11,6 +11,7 @@ from __future__ import annotations
 import io
 import os
 import stat
+import shutil
 import tarfile
 import zipfile
 from types import SimpleNamespace
@@ -510,3 +511,93 @@ async def test_cleanup_skills_respects_leases_and_keep_skills(tmp_path: Path) ->
     assert skill_file.exists()
     await ctx_keep._cleanup_skills()
     assert skill_file.exists(), "keep_skills=True should prevent deletion"
+
+
+async def test_cleanup_and_setup_interleaving_race(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import anthropic.lib.tools.agent_toolset as at_mod
+    from anthropic.lib.tools.agent_toolset import AgentToolContext
+
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session1 = cast(
+        Any,
+        SimpleNamespace(
+            id="sess_1",
+            agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]),
+        ),
+    )
+    session2 = cast(
+        Any,
+        SimpleNamespace(
+            id="sess_2",
+            agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]),
+        ),
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+
+    ctx1 = AgentToolContext(workdir=work, client=client, session=session1, keep_skills=False)
+    ctx2 = AgentToolContext(workdir=work, client=client, session=session2, keep_skills=False)
+
+    await ctx1.setup_skills()
+    assert (work / "skills" / "pdf" / "SKILL.md").exists()
+
+    real_rmtree = shutil.rmtree
+
+    def slow_rmtree(path: Any, *args: Any, **kwargs: Any) -> Any:
+        import time
+
+        time.sleep(0.2)
+        return real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(at_mod.shutil, "rmtree", slow_rmtree)
+
+    import asyncio
+
+    async def run_cleanup() -> None:
+        await ctx1._cleanup_skills()
+
+    async def run_setup() -> None:
+        await asyncio.sleep(0.05)
+        await ctx2.setup_skills()
+
+    await asyncio.gather(run_cleanup(), run_setup())
+
+    skill_file = work / "skills" / "pdf" / "SKILL.md"
+    assert skill_file.exists(), "skill directory was deleted while setup was interleaving"
+    assert len(versions.downloads) == 2
+
+    await ctx2._cleanup_skills()
+    assert not (work / "skills" / "pdf").exists()
+
+
+def test_cross_process_file_lock(tmp_path: Path) -> None:
+    import sys
+    import subprocess
+
+    child_code = """
+import time, sys
+from pathlib import Path
+from anthropic.lib.tools._skills import _FileLock
+
+fl = _FileLock(Path(sys.argv[1]))
+fl.acquire()
+try:
+    with open(sys.argv[2], "a") as f:
+        f.write("enter\\n")
+    time.sleep(0.1)
+    with open(sys.argv[2], "a") as f:
+        f.write("exit\\n")
+finally:
+    fl.release()
+"""
+    lock_file = tmp_path / "test.lock"
+    log_file = tmp_path / "test.log"
+    p1 = subprocess.Popen([sys.executable, "-c", child_code, str(lock_file), str(log_file)])
+    p2 = subprocess.Popen([sys.executable, "-c", child_code, str(lock_file), str(log_file)])
+    p1.wait()
+    p2.wait()
+    lines = [line.strip() for line in log_file.read_text().splitlines() if line.strip()]
+    assert lines == ["enter", "exit", "enter", "exit"]

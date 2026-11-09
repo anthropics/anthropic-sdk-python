@@ -288,6 +288,12 @@ async def download_session_skills(
     memory-store download fetches the session twice. It remains supported for
     callers written before `session` existed.
 
+    Note: Skill directories are keyed by name under `{workdir}/skills/<name>/`.
+    If a session requests a newer version of an already-extracted skill, it will
+    replace the directory under the lock. To prevent version thrashing across
+    concurrent sessions sharing a workdir, ensure concurrent sessions pin
+    matching skill versions or use distinct workdirs.
+
     Returns the list of skill directories that were created, so the caller can
     remove them when the workdir is torn down.
     """
