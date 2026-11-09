@@ -140,6 +140,9 @@ class Rules(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -315,6 +318,9 @@ class Rules(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -459,6 +465,9 @@ class Rules(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -592,6 +601,9 @@ class AsyncRules(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -767,6 +779,9 @@ class AsyncRules(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -911,6 +926,9 @@ class AsyncRules(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")

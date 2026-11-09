@@ -7,12 +7,14 @@ from typing_extensions import Self, override
 
 import httpx2
 
+from .._env import with_environment_headers
 from ._beta import Beta, AsyncBeta
-from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import is_dict, asyncify, is_given
+from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
+from ..._utils import is_dict, asyncify, is_given, get_async_library
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy
 from ..._version import __version__
+from ..aws._auth import get_auth_headers
 from ..._constants import ANTHROPIC_API_VERSION
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError
@@ -65,7 +67,7 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in Bedrock yet")
 
-    if options.url == "/v1/messages/count_tokens":
+    if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"}:
         raise AnthropicError("Token counting is not supported in Bedrock yet")
 
     return options
@@ -170,15 +172,26 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             timeout=timeout,
             max_retries=max_retries,
             open_telemetry=open_telemetry,
-            custom_headers=default_headers,
+            custom_headers=with_environment_headers(default_headers),
             custom_query=default_query,
             http_client=http_client,
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
+        self._default_stream_cls = Stream
+
         self.beta = Beta(self)
         self.messages = Messages(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": "false",
+            **self._custom_headers,
+        }
 
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
@@ -194,8 +207,6 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             request.headers["Authorization"] = f"Bearer {self.api_key}"
             return
 
-        from ._auth import get_auth_headers
-
         data = request.read()
 
         headers = get_auth_headers(
@@ -208,6 +219,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
             region=self.aws_region,
             profile=self.aws_profile,
             data=data,
+            service_name="bedrock",
         )
         request.headers.update(headers)
 
@@ -341,15 +353,26 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             timeout=timeout,
             max_retries=max_retries,
             open_telemetry=open_telemetry,
-            custom_headers=default_headers,
+            custom_headers=with_environment_headers(default_headers),
             custom_query=default_query,
             http_client=http_client,
             middleware=middleware,
             _strict_response_validation=_strict_response_validation,
         )
 
+        self._default_stream_cls = AsyncStream
+
         self.messages = AsyncMessages(self)
         self.beta = AsyncBeta(self)
+
+    @property
+    @override
+    def default_headers(self) -> dict[str, str | Omit]:
+        return {
+            **super().default_headers,
+            "X-Stainless-Async": f"async:{get_async_library()}",
+            **self._custom_headers,
+        }
 
     @override
     def _make_sse_decoder(self) -> AWSEventStreamDecoder:
@@ -365,8 +388,6 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             request.headers["Authorization"] = f"Bearer {self.api_key}"
             return
 
-        from ._auth import get_auth_headers
-
         data = request.read()
 
         headers = await asyncify(get_auth_headers)(
@@ -379,6 +400,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
             region=self.aws_region,
             profile=self.aws_profile,
             data=data,
+            service_name="bedrock",
         )
         request.headers.update(headers)
 

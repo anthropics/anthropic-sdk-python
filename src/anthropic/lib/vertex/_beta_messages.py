@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from ..._compat import cached_property
@@ -78,6 +76,12 @@ class MessagesWithRawResponse:
         self.create = to_raw_response_wrapper(
             messages.create,
         )
+        self.parse = to_raw_response_wrapper(
+            messages.parse,
+        )
+        self.count_tokens = to_raw_response_wrapper(
+            messages.count_tokens,
+        )
 
 
 class AsyncMessagesWithRawResponse:
@@ -86,6 +90,12 @@ class AsyncMessagesWithRawResponse:
 
         self.create = async_to_raw_response_wrapper(
             messages.create,
+        )
+        self.parse = async_to_raw_response_wrapper(
+            messages.parse,
+        )
+        self.count_tokens = async_to_raw_response_wrapper(
+            messages.count_tokens,
         )
 
 
@@ -96,6 +106,9 @@ class MessagesWithStreamingResponse:
         self.create = to_streamed_response_wrapper(
             messages.create,
         )
+        self.count_tokens = to_streamed_response_wrapper(
+            messages.count_tokens,
+        )
 
 
 class AsyncMessagesWithStreamingResponse:
@@ -104,4 +117,7 @@ class AsyncMessagesWithStreamingResponse:
 
         self.create = async_to_streamed_response_wrapper(
             messages.create,
+        )
+        self.count_tokens = async_to_streamed_response_wrapper(
+            messages.count_tokens,
         )

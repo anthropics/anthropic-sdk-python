@@ -18,6 +18,7 @@ from .organization_on_hold_error import OrganizationOnHoldError as OrganizationO
 from .cmek_context_unavailable_error import CMEKContextUnavailableError as CMEKContextUnavailableError
 from .cmek_key_network_blocked_error import CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails
+from .sandbox_egress_restricted_error import SandboxEgressRestrictedError as SandboxEgressRestrictedError
 from .claude_code_version_too_old_error import ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails as RampLimitExceededErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
@@ -35,6 +36,9 @@ from .cmek_key_network_blocked_error_details import (
 )
 from .request_body_encoding_unsupported_error import (
     RequestBodyEncodingUnsupportedError as RequestBodyEncodingUnsupportedError,
+)
+from .sandbox_egress_restricted_error_details import (
+    SandboxEgressRestrictedErrorDetails as SandboxEgressRestrictedErrorDetails,
 )
 from .claude_code_key_creator_not_member_error import (
     ClaudeCodeKeyCreatorNotMemberError as ClaudeCodeKeyCreatorNotMemberError,

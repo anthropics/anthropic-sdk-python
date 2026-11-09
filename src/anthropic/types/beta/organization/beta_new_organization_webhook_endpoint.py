@@ -26,7 +26,13 @@ class BetaNewOrganizationWebhookEndpoint(BaseModel):
     An empty string when the endpoint is enabled, or when you disabled it.
     """
 
-    enabled_events: List[Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]]
+    enabled_events: List[
+        Literal[
+            "user_profile.enforcement_action_opened",
+            "user_profile.enforcement_action_resolved",
+            "user_profile.program_status_updated",
+        ]
+    ]
     """The event types delivered to the endpoint."""
 
     name: str

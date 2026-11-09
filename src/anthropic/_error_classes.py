@@ -30,7 +30,6 @@ from .types.file_not_downloadable_error import FileNotDownloadableError
 from .types.compaction_unavailable_error import CompactionUnavailableError
 from .types.storage_quota_exceeded_error import StorageQuotaExceededError
 from .types.user_profile_not_found_error import UserProfileNotFoundError
-from .types.beta.beta_billing_frozen_error import BetaBillingFrozenError
 from .types.beta_unsupported_charset_error import BetaUnsupportedCharsetError
 from .types.shared.cmek_key_disabled_error import CMEKKeyDisabledError
 from .types.thread_already_continued_error import ThreadAlreadyContinuedError
@@ -57,6 +56,7 @@ from .types.compaction_nothing_to_summarize_error import CompactionNothingToSumm
 from .types.shared.cmek_context_unavailable_error import CMEKContextUnavailableError
 from .types.shared.cmek_key_network_blocked_error import CMEKKeyNetworkBlockedError
 from .types.compaction_tool_changes_mismatch_error import CompactionToolChangesMismatchError
+from .types.shared.sandbox_egress_restricted_error import SandboxEgressRestrictedError
 from .types.skill_read_blocked_undecryptable_error import SkillReadBlockedUndecryptableError
 from .types.organization.external_key_changed_error import ExternalKeyChangedError
 from .types.organization.key_profile_mismatch_error import KeyProfileMismatchError
@@ -189,7 +189,6 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "workspace_member_limit_exceeded"): WorkspaceMemberLimitExceededError,
     (400, "workspace_policy_violation"): WorkspacePolicyViolationError,
     (403, "api_key_scope_missing"): BetaAPIKeyScopeMissingError,
-    (403, "billing_frozen"): BetaBillingFrozenError,
     (403, "cannot_sign_out_managed_member"): BetaCannotSignOutManagedMemberError,
     (403, "cannot_sign_out_membership_admin"): BetaCannotSignOutMembershipAdminError,
     (403, "cannot_sign_out_owner"): BetaCannotSignOutOwnerError,
@@ -199,6 +198,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "environment_create_disabled"): BetaEnvironmentCreateDisabledError,
     (403, "environment_update_disabled"): BetaEnvironmentUpdateDisabledError,
     (403, "organization_level_scoped_api_key_required"): BetaOrganizationLevelScopedAPIKeyRequiredError,
+    (403, "sandbox_egress_restricted"): SandboxEgressRestrictedError,
     (403, "spend_limits_admin_api_writes_not_enabled"): BetaSpendLimitsAdminAPIWritesNotEnabledError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,

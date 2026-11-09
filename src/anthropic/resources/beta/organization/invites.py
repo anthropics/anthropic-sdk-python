@@ -101,6 +101,8 @@ class Invites(SyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         return self._post(
             "/v1/organizations/invites",
@@ -263,6 +265,9 @@ class Invites(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")
@@ -360,6 +365,8 @@ class AsyncInvites(AsyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         return await self._post(
             "/v1/organizations/invites",
@@ -522,6 +529,9 @@ class AsyncInvites(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not invite_id:
             raise ValueError(f"Expected a non-empty value for `invite_id` but received {invite_id!r}")

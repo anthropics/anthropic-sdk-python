@@ -120,6 +120,9 @@ class Users(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -236,6 +239,8 @@ class Users(SyncAPIResource):
         Raises:
           CannotRemoveLastMemberError:
 
+          SandboxEgressRestrictedError:
+
           ConcurrentMembershipChangeError:
         """
         if not user_id:
@@ -289,10 +294,10 @@ class Users(SyncAPIResource):
 
         Every request must include the beta header
         `anthropic-beta: admin-user-sign-out-2026-10-08`. A request without it returns
-        `400`. Sign-out is in beta. Anthropic turns it on for each organization and has
-        turned it on for every Claude Enterprise organization; until yours is on,
-        requests also return `400`. In a Claude Enterprise organization, an API key
-        needs the `write:members` scope; a key without it gets `403`.
+        `400`. Sign-out is in beta for Claude Enterprise organizations. In an
+        organization where it is not enabled, a request returns `400` with `error_code`
+        `organization_not_enrolled_in_beta`. In a Claude Enterprise organization, an API
+        key needs the `write:members` scope; a key without it gets `403`.
 
         Args:
           user_id: ID of the User.
@@ -322,6 +327,8 @@ class Users(SyncAPIResource):
           BetaCannotSignOutOwnerError:
 
           BetaCannotSignOutPrivilegedMemberError:
+
+          SandboxEgressRestrictedError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -447,6 +454,9 @@ class AsyncUsers(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")
@@ -563,6 +573,8 @@ class AsyncUsers(AsyncAPIResource):
         Raises:
           CannotRemoveLastMemberError:
 
+          SandboxEgressRestrictedError:
+
           ConcurrentMembershipChangeError:
         """
         if not user_id:
@@ -616,10 +628,10 @@ class AsyncUsers(AsyncAPIResource):
 
         Every request must include the beta header
         `anthropic-beta: admin-user-sign-out-2026-10-08`. A request without it returns
-        `400`. Sign-out is in beta. Anthropic turns it on for each organization and has
-        turned it on for every Claude Enterprise organization; until yours is on,
-        requests also return `400`. In a Claude Enterprise organization, an API key
-        needs the `write:members` scope; a key without it gets `403`.
+        `400`. Sign-out is in beta for Claude Enterprise organizations. In an
+        organization where it is not enabled, a request returns `400` with `error_code`
+        `organization_not_enrolled_in_beta`. In a Claude Enterprise organization, an API
+        key needs the `write:members` scope; a key without it gets `403`.
 
         Args:
           user_id: ID of the User.
@@ -649,6 +661,8 @@ class AsyncUsers(AsyncAPIResource):
           BetaCannotSignOutOwnerError:
 
           BetaCannotSignOutPrivilegedMemberError:
+
+          SandboxEgressRestrictedError:
         """
         if not user_id:
             raise ValueError(f"Expected a non-empty value for `user_id` but received {user_id!r}")

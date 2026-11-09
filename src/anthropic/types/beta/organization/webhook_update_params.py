@@ -12,7 +12,13 @@ class WebhookUpdateParams(TypedDict, total=False):
     description: str
     """Notes about the endpoint."""
 
-    enabled_events: List[Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]]
+    enabled_events: List[
+        Literal[
+            "user_profile.enforcement_action_opened",
+            "user_profile.enforcement_action_resolved",
+            "user_profile.program_status_updated",
+        ]
+    ]
     """The event types to deliver to the endpoint.
 
     Replaces the whole set; an empty list leaves it unchanged.

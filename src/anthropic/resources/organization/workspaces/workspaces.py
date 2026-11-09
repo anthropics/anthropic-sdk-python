@@ -146,6 +146,8 @@ class Workspaces(SyncAPIResource):
 
           WorkspacePolicyViolationError:
 
+          SandboxEgressRestrictedError:
+
           ExternalKeyChangedError:
         """
         return self._post(
@@ -278,6 +280,8 @@ class Workspaces(SyncAPIResource):
 
           WorkspacePolicyViolationError:
 
+          SandboxEgressRestrictedError:
+
           ExternalKeyChangedError:
         """
         if not workspace_id:
@@ -394,6 +398,9 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -510,6 +517,8 @@ class AsyncWorkspaces(AsyncAPIResource):
           UserProfileNotFoundError:
 
           WorkspacePolicyViolationError:
+
+          SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
         """
@@ -643,6 +652,8 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           WorkspacePolicyViolationError:
 
+          SandboxEgressRestrictedError:
+
           ExternalKeyChangedError:
         """
         if not workspace_id:
@@ -759,6 +770,9 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")

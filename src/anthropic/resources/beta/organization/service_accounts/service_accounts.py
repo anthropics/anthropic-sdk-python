@@ -101,6 +101,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -226,6 +229,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -358,6 +364,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -453,6 +462,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -578,6 +590,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -710,6 +725,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")

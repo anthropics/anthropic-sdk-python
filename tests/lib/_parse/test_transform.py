@@ -1,8 +1,11 @@
 from copy import deepcopy
+from typing import Any, Literal
 
 import pytest
+import pydantic
 from inline_snapshot import snapshot
 
+from anthropic._compat import PYDANTIC_V1
 from anthropic.lib._parse._transform import transform_schema
 
 
@@ -30,7 +33,6 @@ def test_ref_schema_with_defs():
         {
             "$defs": {
                 "Tier": {
-                    "type": "string",
                     "enum": ["free", "pro", "enterprise"],
                     "title": "Tier",
                 }
@@ -70,7 +72,62 @@ def test_enum_schema():
         ],
     }
     result = transform_schema(schema)
-    assert result == snapshot({"type": "string", "enum": ["foo", "bar"]})
+    assert result == snapshot({"enum": ["foo", "bar"]})
+
+
+@pytest.mark.parametrize(
+    ("schema", "expected"),
+    [
+        ({"type": "string", "const": "a"}, {"const": "a"}),
+        ({"type": "null", "const": None}, {"const": None}),
+        ({"type": "integer", "enum": [1, 2]}, {"enum": [1, 2]}),
+        ({"const": "a"}, {"const": "a"}),
+        ({"enum": ["a", 1, None]}, {"enum": ["a", 1, None]}),
+        ({"type": ["string", "null"], "enum": ["a", None]}, {"enum": ["a", None]}),
+    ],
+)
+def test_keeps_const_and_enum_and_drops_type(schema: dict[str, Any], expected: dict[str, Any]) -> None:
+    assert transform_schema(schema) == expected
+
+
+@pytest.mark.parametrize(
+    ("schema", "expected"),
+    [
+        ({"type": "array", "const": [1]}, {"type": "array", "description": "{const: [1]}"}),
+        ({"type": "array", "enum": [[1], [2]]}, {"type": "array", "description": "{enum: [[1], [2]]}"}),
+        ({"type": "string", "enum": []}, {"type": "string", "description": "{enum: []}"}),
+    ],
+)
+def test_moves_unsupported_const_and_enum_into_description(schema: dict[str, Any], expected: dict[str, Any]) -> None:
+    assert transform_schema(schema) == expected
+
+
+@pytest.mark.parametrize(
+    "schema",
+    [
+        {"title": "Untyped"},
+        {"const": [1]},
+        {"enum": [{"x": 1}]},
+        {"enum": []},
+    ],
+)
+def test_raises_without_a_type_or_a_kept_const_or_enum(schema: dict[str, Any]) -> None:
+    with pytest.raises(ValueError):
+        transform_schema(schema)
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
+def test_keeps_pydantic_literals() -> None:
+    class Model(pydantic.BaseModel):
+        one: Literal["a"]
+        two: Literal["a", "b"]
+        mixed: Literal["a", 1]
+
+    assert transform_schema(Model)["properties"] == {
+        "one": {"const": "a", "title": "One"},
+        "two": {"enum": ["a", "b"], "title": "Two"},
+        "mixed": {"enum": ["a", 1], "title": "Mixed"},
+    }
 
 
 def test_allof():

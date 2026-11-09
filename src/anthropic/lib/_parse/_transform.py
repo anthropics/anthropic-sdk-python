@@ -145,21 +145,31 @@ def transform_schema(
     one_of = json_schema.pop("oneOf", None)
     all_of = json_schema.pop("allOf", None)
 
+    enum = json_schema.get("enum")
+    if is_list(enum) and enum and all(is_primitive(value) for value in enum):
+        strict_schema["enum"] = json_schema.pop("enum")
+
+    if "const" in json_schema and is_primitive(json_schema["const"]):
+        strict_schema["const"] = json_schema.pop("const")
+
+    has_literals = "enum" in strict_schema or "const" in strict_schema
+    if has_literals:
+        type_ = None
+
     if is_list(any_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in any_of]
     elif is_list(one_of):
         strict_schema["anyOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in one_of]
     elif is_list(all_of):
         strict_schema["allOf"] = [transform_schema(cast("dict[str, Any]", variant)) for variant in all_of]
-    else:
+    elif not has_literals:
         if type_ is None:
-            raise ValueError("Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field.")
+            raise ValueError(
+                "Schema must have a 'type', 'anyOf', 'oneOf', or 'allOf' field, "
+                "or a 'const' or non-empty 'enum' of strings, numbers, booleans, or null."
+            )
 
         strict_schema["type"] = type_
-
-    enum = json_schema.pop("enum", None)
-    if is_list(enum):
-        strict_schema["enum"] = enum
 
     description = json_schema.pop("description", None)
     if description is not None:
@@ -216,3 +226,7 @@ def transform_schema(
         )
 
     return strict_schema
+
+
+def is_primitive(value: object) -> bool:
+    return value is None or isinstance(value, (str, int, float, bool))

@@ -106,6 +106,12 @@ class BetaAnalyticsUsageGroup(BaseModel):
     not attributed to a specific model, such as code execution.
     """
 
+    organization_id: Optional[str] = None
+    """
+    UUID of the child organization the usage belongs to, on a parent organization's
+    report across its children. Null unless `organization_id` is in `group_by[]`.
+    """
+
     product: Optional[str] = None
     """Product surface that produced the usage or cost.
 

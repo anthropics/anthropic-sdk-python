@@ -148,7 +148,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_FOUNDRY_API_KEY`
-        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`
+        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`, unless `base_url` is provided
         - `base_url` from `ANTHROPIC_FOUNDRY_BASE_URL`
 
         Args:
@@ -157,7 +157,9 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
             open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
-        resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
+        # A `base_url` argument wins over the variable, and `copy()` always passes one.
+        if resource is None and base_url is None:
+            resource = os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
         if api_key is None and azure_ad_token_provider is None:
@@ -358,7 +360,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_FOUNDRY_API_KEY`
-        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`
+        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`, unless `base_url` is provided
         - `base_url` from `ANTHROPIC_FOUNDRY_BASE_URL`
 
         Args:
@@ -367,7 +369,9 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
             open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
-        resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
+        # A `base_url` argument wins over the variable, and `copy()` always passes one.
+        if resource is None and base_url is None:
+            resource = os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
         if api_key is None and azure_ad_token_provider is None:
