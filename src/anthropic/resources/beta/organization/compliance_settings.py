@@ -111,6 +111,9 @@ class ComplianceSettings(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return self._post(
             "/v1/organizations/compliance_settings",
@@ -220,6 +223,9 @@ class AsyncComplianceSettings(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return await self._post(
             "/v1/organizations/compliance_settings",

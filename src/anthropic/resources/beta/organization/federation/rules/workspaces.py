@@ -160,6 +160,9 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -226,6 +229,9 @@ class Workspaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -395,6 +401,9 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")
@@ -461,6 +470,9 @@ class AsyncWorkspaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not federation_rule_id:
             raise ValueError(f"Expected a non-empty value for `federation_rule_id` but received {federation_rule_id!r}")

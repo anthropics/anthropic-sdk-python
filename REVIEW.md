@@ -41,3 +41,38 @@
 The generator writes the rest of this file. Rules for reviewing this
 repository's hand-written code go in this section, and a change anywhere else in
 the file belongs in the generator.
+
+### Report these as Important, as well as functional bugs
+
+- A new public method on `Messages` or `AsyncMessages` in
+  `src/anthropic/resources/beta/messages/messages.py` that
+  `src/anthropic/lib/bedrock/_beta_messages.py` or
+  `src/anthropic/lib/vertex/_beta_messages.py` does not assign. An endpoint the
+  platform does not serve may be left off
+- A hand-written method that repeats a generated method's parameters, as
+  `stream` and `parse` repeat `create`, with no `assert_signatures_in_sync` or
+  `assert_overloads_in_sync` test
+- Code that drops keys a model does not declare from tool input Claude wrote
+- An `isinstance`, `None` or `callable` check for a case the value's type
+  already rules out, where the diff widens the annotation or adds a
+  `reportUnnecessaryIsInstance` or `reportUnnecessaryComparison` suppression to
+  keep it, unless a wrong value would be a security problem
+- A blocking subprocess, request-signing or credential-refresh call in an
+  `async def`, outside `asyncify` (from `_utils`) or `anyio.to_thread.run_sync`
+- A `TypeAlias`, plain assignment or empty `BaseModel` subclass that only
+  renames an existing type, unless it keeps an old public name importable
+- An error exported from `src/anthropic/tools/browser.py` or
+  `src/anthropic/tools/computer.py` that is not specific to that toolset.
+  `src/anthropic/tools/__init__.py` exports shared errors
+- A `*Param(...)` constructor in a Markdown doc or `examples/`, where request
+  params are dict literals
+- Code that `./scripts/format` would change, such as missing blank lines between
+  tests. CI does not check formatting
+
+### Don't report these
+
+- A platform client constructor argument left out of `copy()` when `__init__`
+  only uses it to derive another argument, such as `base_url`
+- `Args:` in an `__init__` docstring that repeats the async twin's `__init__`
+- Keys a parsed model does not declare, which stay on the parsed object
+- `from anthropic` in a docstring's example code

@@ -14,6 +14,7 @@ BetaAnalyticsUsageGroupBy: TypeAlias = Literal[
     "environment_id",
     "inference_geo",
     "model",
+    "organization_id",
     "product",
     "rbac_group_id",
     "service_tier",

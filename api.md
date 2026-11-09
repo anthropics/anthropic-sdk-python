@@ -28,6 +28,7 @@ from anthropic.types import (
     RequestBodyEncodingInvalidErrorDetails,
     RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails,
+    SandboxEgressRestrictedErrorDetails,
     ClaudeCodeKeyCreatorNotMemberError,
     ClaudeCodeVersionTooOldError,
     CMEKKeyDisabledError,
@@ -36,6 +37,7 @@ from anthropic.types import (
     OrganizationTypeNotSupportedError,
     RequestBodyEncodingInvalidError,
     RequestBodyEncodingUnsupportedError,
+    SandboxEgressRestrictedError,
     RequestBodyTooLargeAfterDecodingError,
     EnforcedSpendLimitReachedError,
     RampLimitExceededError,
@@ -2719,6 +2721,7 @@ from anthropic.types.beta import (
     BetaWebhookSessionUpdatedEventData,
     BetaWebhookUserProfileEnforcementActionOpenedEventData,
     BetaWebhookUserProfileEnforcementActionResolvedEventData,
+    BetaWebhookUserProfileProgramStatusUpdatedEventData,
     BetaWebhookVaultArchivedEventData,
     BetaWebhookVaultCreatedEventData,
     BetaWebhookVaultCredentialArchivedEventData,
@@ -2842,12 +2845,7 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import (
-    BetaBillingFrozenErrorDetails,
-    BetaOrganization,
-    BetaOrganizationRole,
-    BetaBillingFrozenError,
-)
+from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
 ```
 
 Methods:

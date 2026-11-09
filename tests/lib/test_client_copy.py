@@ -8,9 +8,19 @@ from typing_extensions import override
 
 import httpx2
 import pytest
+import sniffio
 
 import anthropic
-from anthropic import CallNext, APIRequest, Middleware, APIResponse, AsyncCallNext, AsyncAPIResponse
+from anthropic import (
+    Stream,
+    CallNext,
+    APIRequest,
+    Middleware,
+    APIResponse,
+    AsyncStream,
+    AsyncCallNext,
+    AsyncAPIResponse,
+)
 from anthropic._utils import signature_without_evaluating_annotations
 from anthropic._base_client import BaseClient, AsyncAPIClient
 
@@ -124,6 +134,37 @@ PLATFORM_ARGUMENTS: dict[str, list[dict[str, object]]] = {
     ],
 }
 
+# Variables that each sync client and its async twin can be built from, and the arguments that have no variable.
+PLATFORM_ENVIRONMENT: dict[str, tuple[dict[str, str], dict[str, object]]] = {
+    "Anthropic": ({"ANTHROPIC_API_KEY": "fake-api-key", "ANTHROPIC_WEBHOOK_SIGNING_KEY": "fake-webhook-key"}, {}),
+    "AnthropicAWS": (
+        {
+            "ANTHROPIC_AWS_API_KEY": "fake-api-key",
+            "AWS_REGION": "us-east-1",
+            "ANTHROPIC_AWS_WORKSPACE_ID": "wrkspc_fake",
+        },
+        {},
+    ),
+    "AnthropicBedrock": ({"AWS_BEARER_TOKEN_BEDROCK": "fake-api-key", "AWS_REGION": "us-east-1"}, {}),
+    "AnthropicBedrockMantle": ({"AWS_BEARER_TOKEN_BEDROCK": "fake-api-key", "AWS_REGION": "us-east-1"}, {}),
+    "AnthropicFoundry": (
+        {"ANTHROPIC_FOUNDRY_API_KEY": "fake-api-key", "ANTHROPIC_FOUNDRY_RESOURCE": "fake-resource"},
+        {},
+    ),
+    "AnthropicGoogleCloud": (
+        {
+            "ANTHROPIC_GOOGLE_CLOUD_PROJECT": "fake-project",
+            "ANTHROPIC_GOOGLE_CLOUD_LOCATION": "us-east5",
+            "ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID": "wrkspc_fake",
+        },
+        {"token_provider": provide_token},
+    ),
+    "AnthropicVertex": (
+        {"CLOUD_ML_REGION": "us-east5", "ANTHROPIC_VERTEX_PROJECT_ID": "fake-project"},
+        {"access_token": "fake-access-token"},
+    ),
+}
+
 # Each client builds these for itself, out of arguments that the rest of its state holds.
 BUILT_PER_CLIENT = {"_otel", "_middleware_chain", "_custom_auth", "messages", "beta"}
 
@@ -223,6 +264,20 @@ def test_copy_keeps_every_constructor_argument(
 
 
 @each_client_class
+def test_copy_of_a_client_built_from_the_environment(
+    client_class: ClientClass, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    environment, arguments = PLATFORM_ENVIRONMENT[client_class.__name__.removeprefix("Async")]
+    for name, value in environment.items():
+        monkeypatch.setenv(name, value)
+    client = construct(client_class, arguments)
+
+    copied = client.copy()
+
+    assert stored_state(copied) == stored_state(client)
+
+
+@each_client_class
 async def test_copy_sends_requests_through_the_http_client(client_class: ClientClass) -> None:
     requests: list[httpx2.Request] = []
 
@@ -243,6 +298,81 @@ async def test_copy_sends_requests_through_the_http_client(client_class: ClientC
         await message
 
     assert len(requests) == 1
+
+
+@pytest.mark.parametrize("copied", [False, True], ids=["client", "copy"])
+@each_client_class
+async def test_custom_headers_from_the_environment(
+    client_class: ClientClass, copied: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"id": "msg_fake"})
+
+    monkeypatch.setenv(
+        "ANTHROPIC_CUSTOM_HEADERS",
+        "x-environment: environment\nno colon\n x-spaces :  a b \nx-colons: a:b\nx-argument: environment\nx-request: environment",
+    )
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {
+            "default_headers": {"X-Argument": "argument"},
+            "http_client": http_client(client_class, httpx2.MockTransport(respond)),
+        },
+    )
+    if copied:
+        client = client.with_options(max_retries=0)
+
+    message = client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Hi"}],
+        model="claude-fake",
+        extra_headers={"X-Request": "request"},
+    )
+    if issubclass(client_class, AsyncAPIClient):
+        await message
+
+    expected = {
+        "x-environment": ["environment"],
+        "x-spaces": ["a b"],
+        "x-colons": ["a:b"],
+        "x-argument": ["argument"],
+        "x-request": ["request"],
+    }
+    assert {name: requests[0].headers.get_list(name) for name in expected} == expected
+
+
+@each_client_class
+async def test_list_in_a_query(client_class: ClientClass) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"id": "msg_fake"})
+
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {"http_client": http_client(client_class, httpx2.MockTransport(respond))},
+    )
+
+    message = client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "Hi"}],
+        model="claude-fake",
+        extra_query={"a": [1, 2]},
+    )
+    if issubclass(client_class, AsyncAPIClient):
+        await message
+
+    # These two have the format of the base client.
+    if client_class.__name__.removeprefix("Async") in {"AnthropicBedrock", "AnthropicVertex"}:
+        assert requests[0].url.query == b"a=1&a=2"
+    else:
+        assert requests[0].url.query == b"a%5B%5D=1&a%5B%5D=2"
 
 
 @each_client_class
@@ -285,3 +415,62 @@ def test_with_options_replaces_default_headers_and_query(client_class: ClientCla
         client.with_options(default_headers={}, set_default_headers={})
     with pytest.raises(ValueError, match="`default_query` and `set_default_query` arguments are mutually exclusive"):
         client.with_options(default_query={}, set_default_query={})
+
+
+@each_client_class
+async def test_x_stainless_async_header(client_class: ClientClass) -> None:
+    requests: list[httpx2.Request] = []
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        requests.append(request)
+        return httpx2.Response(200, json={"id": "msg_fake"})
+
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {"http_client": http_client(client_class, httpx2.MockTransport(respond))},
+    )
+
+    message = client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hi"}], model="claude-fake")
+    if issubclass(client_class, AsyncAPIClient):
+        await message
+
+    expected = "async:asyncio" if issubclass(client_class, AsyncAPIClient) else "false"
+    assert requests[0].headers["x-stainless-async"] == expected
+
+
+@pytest.mark.parametrize(
+    "client_class",
+    [client_class for client_class in CLIENT_CLASSES if issubclass(client_class, AsyncAPIClient)],
+    ids=lambda value: value.__name__,
+)
+def test_x_stainless_async_header_names_the_running_library(client_class: ClientClass) -> None:
+    client = construct(client_class, platform_arguments(client_class)[0])
+
+    token = sniffio.current_async_library_cvar.set("trio")
+    try:
+        assert client.default_headers["X-Stainless-Async"] == "async:trio"
+    finally:
+        sniffio.current_async_library_cvar.reset(token)
+
+
+@each_client_class
+async def test_streams_without_a_stream_class(client_class: ClientClass) -> None:
+    def respond(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=b"")
+
+    client = construct(
+        client_class,
+        platform_arguments(client_class)[0],
+        {"http_client": http_client(client_class, httpx2.MockTransport(respond))},
+    )
+    body = {"max_tokens": 16, "messages": [{"role": "user", "content": "Hi"}], "model": "claude-fake", "stream": True}
+
+    stream = client.post("/v1/messages", cast_to=object, body=body, stream=True)
+    if issubclass(client_class, AsyncAPIClient):
+        stream = await stream
+        assert isinstance(stream, AsyncStream)
+        await stream.close()
+    else:
+        assert isinstance(stream, Stream)
+        stream.close()

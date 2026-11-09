@@ -135,6 +135,8 @@ class Members(SyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -191,6 +193,8 @@ class Members(SyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -331,6 +335,8 @@ class AsyncMembers(AsyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -387,6 +393,8 @@ class AsyncMembers(AsyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")

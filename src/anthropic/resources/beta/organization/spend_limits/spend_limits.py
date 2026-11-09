@@ -239,7 +239,7 @@ class SpendLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
+          SandboxEgressRestrictedError:
 
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
@@ -307,7 +307,7 @@ class SpendLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
+          SandboxEgressRestrictedError:
 
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
@@ -532,7 +532,7 @@ class AsyncSpendLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
+          SandboxEgressRestrictedError:
 
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
@@ -600,7 +600,7 @@ class AsyncSpendLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
-          BetaBillingFrozenError:
+          SandboxEgressRestrictedError:
 
           BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """

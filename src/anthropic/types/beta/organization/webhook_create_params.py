@@ -10,7 +10,13 @@ __all__ = ["WebhookCreateParams"]
 
 class WebhookCreateParams(TypedDict, total=False):
     enabled_events: Required[
-        List[Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]]
+        List[
+            Literal[
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
+        ]
     ]
     """The event types to deliver to the endpoint. Must list at least one."""
 

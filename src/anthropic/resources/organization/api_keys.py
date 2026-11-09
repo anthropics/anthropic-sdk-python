@@ -118,6 +118,8 @@ class APIKeys(SyncAPIResource):
           OrgAPIKeyLimitExceededError:
 
           WorkspaceAPIKeyLimitExceededError:
+
+          SandboxEgressRestrictedError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
@@ -302,6 +304,8 @@ class AsyncAPIKeys(AsyncAPIResource):
           OrgAPIKeyLimitExceededError:
 
           WorkspaceAPIKeyLimitExceededError:
+
+          SandboxEgressRestrictedError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")

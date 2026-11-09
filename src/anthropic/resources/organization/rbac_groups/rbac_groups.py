@@ -82,6 +82,9 @@ class RBACGroups(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return self._post(
             "/v1/organizations/rbac_groups",
@@ -173,6 +176,9 @@ class RBACGroups(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -275,6 +281,8 @@ class RBACGroups(SyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -345,6 +353,9 @@ class AsyncRBACGroups(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return await self._post(
             "/v1/organizations/rbac_groups",
@@ -436,6 +447,9 @@ class AsyncRBACGroups(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
@@ -538,6 +552,8 @@ class AsyncRBACGroups(AsyncAPIResource):
           RBACGroupGrantsOwnerAccessError:
 
           RBACGroupOwnerAccessUnconfirmedError:
+
+          SandboxEgressRestrictedError:
         """
         if not rbac_group_id:
             raise ValueError(f"Expected a non-empty value for `rbac_group_id` but received {rbac_group_id!r}")
