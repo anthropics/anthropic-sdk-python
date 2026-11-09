@@ -65,6 +65,48 @@ ORGANIZATION_BASE_URL = (
     "https://claude.googleapis.com/v1/projects/my-project/locations/us-central1/claudeOrganization/invoke"
 )
 
+# (project, location, workspace_id) as passed in, then as they must appear in the requested URL.
+BASE_URL_SEGMENT_CASES = [
+    pytest.param(
+        ("my-project", "global", "wrkspc_01AbCdEf"), ("my-project", "global", "wrkspc_01AbCdEf"), id="unchanged"
+    ),
+    pytest.param(
+        ("example.com:my-project", "us-central1", "wrkspc_01AbCdEf"),
+        ("example.com:my-project", "us-central1", "wrkspc_01AbCdEf"),
+        id="unchanged-domain-scoped-project",
+    ),
+    pytest.param(("a/b?c#d", "e/f?g#h", "i/j?k#l"), ("a%2Fb%3Fc%23d", "e%2Ff%3Fg%23h", "i%2Fj%3Fk%23l"), id="escaped"),
+    pytest.param(
+        ("my-project", "global", "w/../../x"), ("my-project", "global", "w%2F..%2F..%2Fx"), id="escaped-traversal"
+    ),
+    pytest.param(("a;b", "c;d", "e;f"), ("a;b", "c;d", "e;f"), id="semicolon-sent-raw"),
+]
+
+# Some servers drop `;` and the rest of its segment, which would leave these empty, `.` or `..`.
+REFUSED_BEFORE_SEMICOLON_CASES = [(";x", "starting with ';'"), (".;x", "dot-segment"), ("..;x", "dot-segment")]
+
+
+def _client_kwargs(values: dict[str, str], *, deferred: bool, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    """When `deferred`, the project comes from ADC on the first request instead of from the arguments."""
+    if not deferred:
+        return {**values, "token_provider": lambda: "tok"}
+
+    project = values["project"]
+    monkeypatch.setattr(
+        "anthropic.lib.google_cloud._client._load_adc_credentials",
+        lambda: (_FakeCredentials(token="adc-token"), project),
+    )
+    return {name: value for name, value in values.items() if name != "project"}
+
+
+def _expected_urls(segments: tuple[str, str, str]) -> list[str]:
+    project, location, workspace_id = segments
+    location_url = f"https://claude.googleapis.com/v1/projects/{project}/locations/{location}"
+    return [
+        f"{location_url}/workspaces/{workspace_id}/invoke/v1/messages",
+        f"{location_url}/claudeOrganization/invoke/v1/organizations/workspaces",
+    ]
+
 
 # ---------------------------------------------------------------------------
 # Initialization / base URL / workspace
@@ -94,6 +136,150 @@ class TestAnthropicGoogleCloud:
             token_provider=lambda: "tok",
         )
         assert str(client.base_url) == DERIVED_BASE_URL
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("values", "segments"), BASE_URL_SEGMENT_CASES)
+    def test_base_url_values_are_single_path_segments(
+        self,
+        values: tuple[str, str, str],
+        segments: tuple[str, str, str],
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        respx_mock.post(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        named = {"project": values[0], "location": values[1], "workspace_id": values[2]}
+
+        client = AnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+        client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+        client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == _expected_urls(segments)
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize("dot", [".", ".."])
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    def test_dot_segment_in_base_url_is_rejected(
+        self, name: str, dot: str, deferred: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: dot}
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            client = AnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize(
+        ("project", "location"), [(".", "global"), ("..", "global"), ("my-project", "."), ("my-project", "..")]
+    )
+    def test_dot_segment_in_organization_base_url_is_rejected(
+        self, project: str, location: str, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        client = AnthropicGoogleCloud(project=project, location=location, token_provider=lambda: "tok")
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("value", "message"), REFUSED_BEFORE_SEMICOLON_CASES)
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    def test_empty_or_dot_segment_before_semicolon_in_base_url_is_rejected(
+        self,
+        name: str,
+        value: str,
+        message: str,
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: value}
+
+        with pytest.raises(ValueError, match=message):
+            client = AnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("value", "message"), REFUSED_BEFORE_SEMICOLON_CASES)
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    def test_empty_or_dot_segment_before_semicolon_in_organization_base_url_is_rejected(
+        self,
+        name: str,
+        value: str,
+        message: str,
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        # No workspace unless it is the value under test, so that the organization base is what gets derived.
+        named = {"project": "my-project", "location": "global", name: value}
+
+        with pytest.raises(ValueError, match=message):
+            client = AnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    def test_empty_value_in_base_url_is_rejected(
+        self, name: str, deferred: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: ""}
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            client = AnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize(
+        ("name", "project", "location"), [("project", "", "global"), ("location", "my-project", "")]
+    )
+    def test_empty_value_in_organization_base_url_is_rejected(
+        self, name: str, project: str, location: str, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        client = AnthropicGoogleCloud(project=project, location=location, token_provider=lambda: "tok")
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx()
+    def test_empty_values_are_not_checked_with_explicit_base_url(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("https://example.test/v1/messages").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AnthropicGoogleCloud(
+            base_url="https://example.test/", project="", location="", workspace_id="", token_provider=lambda: "tok"
+        )
+
+        client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/messages"]
 
     def test_location_defaults_to_global(self) -> None:
         client = AnthropicGoogleCloud(project="my-project", workspace_id="wrkspc_x", token_provider=lambda: "tok")
@@ -1137,6 +1323,154 @@ class TestAsyncAnthropicGoogleCloud:
             project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
         )
         assert str(client.base_url) == DERIVED_BASE_URL
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("values", "segments"), BASE_URL_SEGMENT_CASES)
+    async def test_base_url_values_are_single_path_segments(
+        self,
+        values: tuple[str, str, str],
+        segments: tuple[str, str, str],
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        respx_mock.post(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        named = {"project": values[0], "location": values[1], "workspace_id": values[2]}
+
+        client = AsyncAnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+        await client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+        )
+        await client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == _expected_urls(segments)
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize("dot", [".", ".."])
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    async def test_dot_segment_in_base_url_is_rejected(
+        self, name: str, dot: str, deferred: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: dot}
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            client = AsyncAnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            await client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize(
+        ("project", "location"), [(".", "global"), ("..", "global"), ("my-project", "."), ("my-project", "..")]
+    )
+    async def test_dot_segment_in_organization_base_url_is_rejected(
+        self, project: str, location: str, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        client = AsyncAnthropicGoogleCloud(project=project, location=location, token_provider=lambda: "tok")
+
+        with pytest.raises(ValueError, match="dot-segment"):
+            await client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("value", "message"), REFUSED_BEFORE_SEMICOLON_CASES)
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    async def test_empty_or_dot_segment_before_semicolon_in_base_url_is_rejected(
+        self,
+        name: str,
+        value: str,
+        message: str,
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: value}
+
+        with pytest.raises(ValueError, match=message):
+            client = AsyncAnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            await client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize(("value", "message"), REFUSED_BEFORE_SEMICOLON_CASES)
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    async def test_empty_or_dot_segment_before_semicolon_in_organization_base_url_is_rejected(
+        self,
+        name: str,
+        value: str,
+        message: str,
+        deferred: bool,
+        respx_mock: MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        # No workspace unless it is the value under test, so that the organization base is what gets derived.
+        named = {"project": "my-project", "location": "global", name: value}
+
+        with pytest.raises(ValueError, match=message):
+            client = AsyncAnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            await client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("deferred", [False, True], ids=["explicit-project", "adc-project"])
+    @pytest.mark.parametrize("name", ["project", "location", "workspace_id"])
+    async def test_empty_value_in_base_url_is_rejected(
+        self, name: str, deferred: bool, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        named = {"project": "my-project", "location": "global", "workspace_id": "wrkspc_x", name: ""}
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            client = AsyncAnthropicGoogleCloud(**_client_kwargs(named, deferred=deferred, monkeypatch=monkeypatch))
+            await client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize(
+        ("name", "project", "location"), [("project", "", "global"), ("location", "my-project", "")]
+    )
+    async def test_empty_value_in_organization_base_url_is_rejected(
+        self, name: str, project: str, location: str, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        client = AsyncAnthropicGoogleCloud(project=project, location=location, token_provider=lambda: "tok")
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            await client.beta.organization.workspaces.list()
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx()
+    async def test_empty_values_are_not_checked_with_explicit_base_url(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("https://example.test/v1/messages").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AsyncAnthropicGoogleCloud(
+            base_url="https://example.test/", project="", location="", workspace_id="", token_provider=lambda: "tok"
+        )
+
+        await client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+        )
+
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/messages"]
 
     async def test_location_defaults_to_global(self) -> None:
         client = AsyncAnthropicGoogleCloud(project="my-project", workspace_id="wrkspc_x", token_provider=lambda: "tok")
