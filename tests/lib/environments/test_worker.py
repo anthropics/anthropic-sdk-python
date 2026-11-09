@@ -1373,3 +1373,12 @@ async def test_environment_worker_leaves_the_span_unset_when_it_is_stopped(monke
     work_span = spans.one("anthropic.environment.work")
     assert work_span.status.status_code == StatusCode.UNSET
     assert "error.type" not in attributes(work_span)
+
+
+async def test_environment_worker_keep_skills() -> None:
+    client = cast(Any, SimpleNamespace())
+    worker_default = EnvironmentWorker(client)
+    assert worker_default._keep_skills is False
+
+    worker_opt_in = EnvironmentWorker(client, keep_skills=True)
+    assert worker_opt_in._keep_skills is True

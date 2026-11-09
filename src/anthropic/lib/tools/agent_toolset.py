@@ -289,6 +289,7 @@ class AgentToolContext:
     # Skill directories downloaded by `setup_skills`; removed again on
     # `__aexit__` so a context doesn't leave downloaded skills behind.
     _skill_dirs: list[Path] = field(default_factory=_empty_skill_dirs, init=False, repr=False)
+    _context_id: str = field(default_factory=lambda: uuid.uuid4().hex, init=False, repr=False)
 
     def __post_init__(self) -> None:
         reject_unrestricted_paths(self.unrestricted_paths)
@@ -313,19 +314,37 @@ class AgentToolContext:
         if self.client is None or (self.session is None and self.session_id is None):
             return
         self._skill_dirs = await download_session_skills(
-            self.client, session=self.session, session_id=self.session_id, workdir=self.workdir
+            self.client,
+            session=self.session,
+            session_id=self.session_id,
+            workdir=self.workdir,
+            lease_id=self._context_id,
         )
 
     async def _cleanup_skills(self) -> None:
         """Remove the skill directories `setup_skills` downloaded.
 
         Only the directories this context created are removed — a pre-existing
-        `{workdir}/skills` tree is left untouched.
+        `{workdir}/skills` tree is left untouched. When multiple sessions share a
+        workdir, on-disk leases prevent one session from removing directories
+        still in use by another session. When `keep_skills` is True, this is a
+        no-op.
         """
         if self.keep_skills:
             return
         for skill_dir in self._skill_dirs:
             try:
+                leases_dir = anyio.Path(skill_dir) / ".leases"
+                if await leases_dir.is_dir():
+                    context_id = getattr(self, "_context_id", None)
+                    if context_id:
+                        await (leases_dir / context_id).unlink(missing_ok=True)
+                    else:
+                        remaining = [p async for p in leases_dir.iterdir()]
+                        if remaining:
+                            await remaining[0].unlink(missing_ok=True)
+                    if [p async for p in leases_dir.iterdir()]:
+                        continue
                 # `shutil.rmtree` is blocking; keep it off the event loop.
                 await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
             except Exception as e:

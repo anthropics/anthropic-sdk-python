@@ -419,3 +419,94 @@ async def test_download_retrieves_by_configured_version_and_downloads_by_returne
     assert versions.downloads == ["skill_01@skillver_123"]
     assert created == [(work / "skills" / "pdf").resolve()]
     assert (work / "skills" / "pdf" / "SKILL.md").read_text() == "# PDF"
+
+
+async def test_download_session_skills_idempotent(tmp_path: Path) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session = cast(
+        Any, SimpleNamespace(agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]))
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+
+    created1 = await download_session_skills(client, workdir=work, session=session)
+    assert len(versions.downloads) == 1
+    assert (work / "skills" / "pdf" / "SKILL.md").read_text() == "# PDF"
+
+    # Second setup on the same workdir skips download
+    created2 = await download_session_skills(client, workdir=work, session=session)
+    assert len(versions.downloads) == 1
+    assert created1 == created2
+
+
+async def test_concurrent_first_setup_downloads_once(tmp_path: Path) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session = cast(
+        Any, SimpleNamespace(agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]))
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+
+    import asyncio
+
+    await asyncio.gather(
+        download_session_skills(client, workdir=work, session=session),
+        download_session_skills(client, workdir=work, session=session),
+    )
+    assert len(versions.downloads) == 1
+
+
+async def test_cleanup_skills_respects_leases_and_keep_skills(tmp_path: Path) -> None:
+    from anthropic.lib.tools.agent_toolset import AgentToolContext
+
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# PDF"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    session1 = cast(
+        Any,
+        SimpleNamespace(
+            id="sess_1",
+            agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]),
+        ),
+    )
+    session2 = cast(
+        Any,
+        SimpleNamespace(
+            id="sess_2",
+            agent=SimpleNamespace(skills=[SimpleNamespace(skill_id="skill_01", version="latest")]),
+        ),
+    )
+    work = tmp_path / "work"
+    work.mkdir()
+
+    # Two concurrent contexts sharing workdir with default keep_skills=False
+    ctx1 = AgentToolContext(workdir=work, client=client, session=session1, keep_skills=False)
+    ctx2 = AgentToolContext(workdir=work, client=client, session=session2, keep_skills=False)
+
+    await ctx1.setup_skills()
+    await ctx2.setup_skills()
+    assert len(versions.downloads) == 1
+    skill_file = work / "skills" / "pdf" / "SKILL.md"
+    assert skill_file.exists()
+
+    # Session 1 exits: Session 2 is still active, so skill_file must survive
+    await ctx1._cleanup_skills()
+    assert skill_file.exists(), "skill directory was prematurely deleted while session 2 is still active"
+
+    # Session 2 exits: no remaining leases, so directory is cleaned up
+    await ctx2._cleanup_skills()
+    assert not (work / "skills" / "pdf").exists(), "skill directory should be cleaned up after all sessions exit"
+
+    # With keep_skills=True, skills survive all exits
+    ctx_keep = AgentToolContext(workdir=work, client=client, session=session1, keep_skills=True)
+    await ctx_keep.setup_skills()
+    assert skill_file.exists()
+    await ctx_keep._cleanup_skills()
+    assert skill_file.exists(), "keep_skills=True should prevent deletion"

@@ -430,6 +430,10 @@ class EnvironmentWorker:
         `default_headers` propagate via their `client.copy()`); a header
         given here overrides a scoped client's same-named default for that
         request, so use it for caller passthrough (e.g. trace ids), not auth.
+      keep_skills: Whether to keep skill directories on disk after each session
+        context exits. When True, ``_cleanup_skills`` is a no-op, allowing the
+        workdir to serve as a persistent skills cache across sessions. Defaults
+        to False.
     """
 
     @overload
@@ -447,6 +451,7 @@ class EnvironmentWorker:
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> None: ...
 
     @overload
@@ -466,6 +471,7 @@ class EnvironmentWorker:
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> None: ...
 
     def __init__(
@@ -483,6 +489,7 @@ class EnvironmentWorker:
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> None:
         reject_unrestricted_paths(unrestricted_paths)
         self._client = client
@@ -501,6 +508,7 @@ class EnvironmentWorker:
         self._memory_sync_deletions: MemoryDeleteMode = memory_sync_deletions
         self._worker_id = worker_id
         self._extra_headers = extra_headers
+        self._keep_skills = keep_skills
 
     def _tools_for(self, env: AgentToolContext) -> Sequence[BetaAnyRunnableTool]:
         if callable(self._tools):
@@ -791,6 +799,7 @@ class EnvironmentWorker:
                     max_file_bytes=self._max_file_bytes,
                     client=worker_client,
                     session=session,
+                    keep_skills=self._keep_skills,
                 )
                 try:
                     await env.__aenter__()
