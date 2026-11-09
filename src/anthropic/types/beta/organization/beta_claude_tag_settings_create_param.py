@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import TypedDict
 
+from .beta_claude_tag_reply_mode_param import BetaClaudeTagReplyModeParam
 from .beta_claude_tag_guest_policy_param import BetaClaudeTagGuestPolicyParam
 
 __all__ = ["BetaClaudeTagSettingsCreateParam"]
@@ -40,4 +41,15 @@ class BetaClaudeTagSettingsCreateParam(TypedDict, total=False):
     """
     The model Claude uses: the identifier of a model, or the name of a model line,
     that the organization is entitled to for Claude Tag. Null clears it.
+    """
+
+    reply_mode: Optional[BetaClaudeTagReplyModeParam]
+    """
+    How Claude takes part in the channel: `automatic`, `mention_only`,
+    `always_awake` or `thread`. Only a channel takes one: an update of a workspace
+    that sends a value is refused, and one that sends null changes nothing. Null
+    never clears it: sent to a channel that stores none it changes nothing, and sent
+    to a channel that stores one it is refused, because a stored reply mode can be
+    changed but never cleared; a caller that wants Claude's default behavior sends
+    `automatic`.
     """

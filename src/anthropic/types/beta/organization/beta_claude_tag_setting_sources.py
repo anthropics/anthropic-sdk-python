@@ -29,3 +29,9 @@ class BetaClaudeTagSettingSources(BaseModel):
 
     model: Optional[BetaClaudeTagSettingSource] = None
     """The settings level `model` comes from."""
+
+    reply_mode: Optional[BetaClaudeTagSettingSource] = None
+    """The settings level `reply_mode` comes from: the channel when it stores one.
+
+    With `include_inherited=true` and no stored mode it is `default`.
+    """
