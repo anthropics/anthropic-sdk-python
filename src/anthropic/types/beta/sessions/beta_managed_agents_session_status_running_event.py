@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -15,6 +13,6 @@ class BetaManagedAgentsSessionStatusRunningEvent(BaseModel):
     """Unique identifier for this event."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp of status change."""
 
     type: Literal["session.status_running"]

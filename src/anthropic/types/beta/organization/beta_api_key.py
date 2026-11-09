@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -68,12 +66,4 @@ class BetaAPIKey(BaseModel):
     """Object type.
 
     For API Keys, this is always `"api_key"`.
-    """
-
-    workspace_id: Optional[str] = None
-    """Deprecated: use `scope` instead.
-
-    ID of the Workspace associated with the API key, or `null` if the API key
-    belongs to the default Workspace. Also `null` for a principal-bound API key that
-    has no Workspace; `scope` tells the two apart.
     """

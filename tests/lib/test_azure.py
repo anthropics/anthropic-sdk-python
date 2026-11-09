@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+from typing import cast
+from typing_extensions import Protocol
+
+import httpx2
 import pytest
+from respx import MockRouter
 
 from anthropic._models import FinalRequestOptions
 from anthropic._exceptions import AnthropicError
 from anthropic.lib.foundry import AnthropicFoundry, AsyncAnthropicFoundry
+
+
+class MockRequestCall(Protocol):
+    request: httpx2.Request
 
 
 class TestAnthropicFoundry:
@@ -184,7 +193,7 @@ class TestAsyncAnthropicFoundry:
 
 class TestFoundryDoesNotLeakAnthropicAPIKey:
     """A stray ANTHROPIC_API_KEY in the environment must never be sent to the
-    Foundry endpoint as X-Api-Key, regardless of which auth mode is in use."""
+    Foundry endpoint, regardless of which auth mode is in use."""
 
     def test_no_x_api_key_with_azure_ad_token_provider(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
@@ -205,6 +214,7 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
 
         assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
+        assert headers.get("authorization") is None
         assert "sk-ant-should-not-leak" not in headers.values()
 
     @pytest.mark.asyncio
@@ -232,6 +242,7 @@ class TestFoundryDoesNotLeakAnthropicAPIKey:
 
         assert headers.get("x-api-key") == "foundry-key"
         assert headers.get("api-key") == "foundry-key"
+        assert headers.get("authorization") is None
         assert "sk-ant-should-not-leak" not in headers.values()
 
 
@@ -282,3 +293,83 @@ class TestFoundryCallerAuthHeaderCasing:
         headers = client._build_request(options).headers
 
         assert headers.get_list("x-api-key") == ["per-request-key"]
+
+
+def respond_to_user_profiles(request: httpx2.Request) -> httpx2.Response:
+    if request.method == "DELETE":
+        return httpx2.Response(200, json={"id": "uprof_test", "type": "user_profile_deleted"})
+    if request.method == "GET" and request.url.path.endswith("/user_profiles"):
+        return httpx2.Response(200, json={"data": [], "next_page": None})
+    return httpx2.Response(200, json={"id": "uprof_test", "type": "user_profile"})
+
+
+class TestFoundryUserProfiles:
+    @pytest.mark.respx()
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+    async def test_requests(self, sync: bool, respx_mock: MockRouter) -> None:
+        user_profiles_url = "https://example-resource.services.ai.azure.com/anthropic/v1/user_profiles"
+        respx_mock.route(url__startswith=user_profiles_url).mock(side_effect=respond_to_user_profiles)
+
+        if sync:
+            client = AnthropicFoundry(api_key="foundry-key", resource="example-resource")
+            client.user_profiles.create()
+            client.user_profiles.retrieve("uprof_test")
+            client.user_profiles.update("uprof_test")
+            client.user_profiles.list()
+            client.user_profiles.delete("uprof_test")
+        else:
+            async_client = AsyncAnthropicFoundry(api_key="foundry-key", resource="example-resource")
+            await async_client.user_profiles.create()
+            await async_client.user_profiles.retrieve("uprof_test")
+            await async_client.user_profiles.update("uprof_test")
+            await async_client.user_profiles.list()
+            await async_client.user_profiles.delete("uprof_test")
+
+        requests = [call.request for call in cast("list[MockRequestCall]", respx_mock.calls)]
+        assert [(request.method, str(request.url)) for request in requests] == [
+            ("POST", user_profiles_url),
+            ("GET", f"{user_profiles_url}/uprof_test"),
+            ("POST", f"{user_profiles_url}/uprof_test"),
+            ("GET", user_profiles_url),
+            ("DELETE", f"{user_profiles_url}/uprof_test"),
+        ]
+        for request in requests:
+            assert request.headers["x-api-key"] == "foundry-key"
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+    async def test_user_profile_id_header(self, sync: bool, respx_mock: MockRouter) -> None:
+        respx_mock.post("https://example-resource.services.ai.azure.com/anthropic/v1/messages").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
+        client_headers = {"anthropic-user-profile-id": "uprof_client"}
+
+        if sync:
+            client = AnthropicFoundry(
+                api_key="foundry-key", resource="example-resource", default_headers=client_headers
+            )
+            client.messages.create(
+                max_tokens=16,
+                messages=[{"role": "user", "content": "Hello"}],
+                model="claude",
+                user_profile_id="uprof_test",
+            )
+            client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude")
+        else:
+            async_client = AsyncAnthropicFoundry(
+                api_key="foundry-key", resource="example-resource", default_headers=client_headers
+            )
+            await async_client.messages.create(
+                max_tokens=16,
+                messages=[{"role": "user", "content": "Hello"}],
+                model="claude",
+                user_profile_id="uprof_test",
+            )
+            await async_client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude"
+            )
+
+        requests = [call.request for call in cast("list[MockRequestCall]", respx_mock.calls)]
+        assert [request.headers["anthropic-user-profile-id"] for request in requests] == ["uprof_test", "uprof_client"]

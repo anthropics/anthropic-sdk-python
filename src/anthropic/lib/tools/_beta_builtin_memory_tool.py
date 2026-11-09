@@ -78,7 +78,7 @@ class BetaAbstractMemoryTool(BetaBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -191,7 +191,7 @@ class BetaAsyncAbstractMemoryTool(BetaAsyncBuiltinFunctionTool):
     client = Anthropic()
     memory_tool = MyMemoryTool()
     message = client.beta.messages.run_tools(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-5-5",
         messages=[{"role": "user", "content": "Remember that I like coffee"}],
         tools=[memory_tool],
     ).until_done()
@@ -305,9 +305,9 @@ def _atomic_write_file(target_path: Path, content: str) -> None:
 
 
 def _secure_mkdir(path: Path, mode: int = _DIR_CREATE_MODE) -> None:
-    """Create ``path`` and any missing parents with ``mode``, regardless of umask.
+    """Create `path` and any missing parents with `mode`, regardless of umask.
 
-    ``Path.mkdir(parents=True, mode=...)`` and ``os.makedirs(mode=...)`` apply the
+    `Path.mkdir(parents=True, mode=...)` and `os.makedirs(mode=...)` apply the
     requested mode only to the final (leaf) directory; intermediate parents are
     created with the process umask default, which can be world-writable under a
     permissive umask. We create each missing component explicitly so the entire
@@ -880,10 +880,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        # AsyncPath.resolve() is a coroutine, so the comparison drops to Path here
-        # the way _validate_path already does. Awaiting it instead would compare an
-        # AsyncPath against a Path and never match.
-        if Path(str(full_path)) == Path(str(self.memory_root)).resolve():
+        if full_path == await self.memory_root.resolve():
             raise ToolError("Cannot delete the /memories directory itself")
 
         try:
@@ -904,9 +901,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         old_full_path = await self._validate_path(command.old_path)
         new_full_path = await self._validate_path(command.new_path)
 
-        # AsyncPath.resolve() is a coroutine, so the comparison drops to Path here
-        # the way _validate_path already does.
-        if Path(str(old_full_path)) == Path(str(self.memory_root)).resolve():
+        if old_full_path == await self.memory_root.resolve():
             raise ToolError("Cannot rename the /memories directory itself")
 
         if await new_full_path.exists():

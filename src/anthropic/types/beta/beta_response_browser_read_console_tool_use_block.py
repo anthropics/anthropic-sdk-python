@@ -1,0 +1,8 @@
+from .beta_browser_read_console_tool_use_block import BetaBrowserReadConsoleToolUseBlock
+
+__all__ = ["BetaResponseBrowserReadConsoleToolUseBlock"]
+
+BetaResponseBrowserReadConsoleToolUseBlock = BetaBrowserReadConsoleToolUseBlock
+"""
+BetaResponseBrowserReadConsoleToolUseBlock has been renamed to BetaBrowserReadConsoleToolUseBlock
+"""

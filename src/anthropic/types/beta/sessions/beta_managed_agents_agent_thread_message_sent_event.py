@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -35,7 +33,7 @@ class BetaManagedAgentsAgentThreadMessageSentEvent(BaseModel):
     """Message content blocks."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the message was sent."""
 
     to_session_thread_id: str
     """Public `sthr_` ID of the thread the message was sent to."""

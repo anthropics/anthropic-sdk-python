@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -18,7 +16,7 @@ class BetaManagedAgentsUserInterruptEvent(BaseModel):
     type: Literal["user.interrupt"]
 
     processed_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the interrupt was processed."""
 
     session_thread_id: Optional[str] = None
     """

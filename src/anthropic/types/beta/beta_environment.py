@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -16,7 +14,7 @@ class BetaEnvironment(BaseModel):
     """Unified Environment resource for both cloud and self-hosted environments."""
 
     id: str
-    """Environment identifier (e.g., 'env\\__...')"""
+    """Environment identifier (e.g., 'env_...')"""
 
     archived_at: Optional[str] = None
     """RFC 3339 timestamp when environment was archived, or null if not archived"""

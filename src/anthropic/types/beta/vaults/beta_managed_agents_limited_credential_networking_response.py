@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List
 from typing_extensions import Literal
 
@@ -12,10 +10,12 @@ class BetaManagedAgentsLimitedCredentialNetworkingResponse(BaseModel):
     """The secret is substituted only on requests to the listed hosts."""
 
     allowed_hosts: List[str]
-    """Hostnames on which the secret will be substituted.
+    """
+    The destination hosts of the outbound requests that the credential's secret is
+    substituted into.
 
-    An entry matches the request host exactly; a `*.`-prefixed entry matches any
-    subdomain of the named domain but not the domain itself.
+    An entry matches the request host exactly. An entry such as `*.example.com`
+    matches any subdomain of `example.com` but not `example.com` itself.
     """
 
     type: Literal["limited"]

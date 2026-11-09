@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Dict, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -25,7 +23,6 @@ class BetaToolUseBlock(BaseModel):
     type: Literal["tool_use"]
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     toolset_name: Optional[str] = None
     """For a toolset member tool_use, the toolset family."""

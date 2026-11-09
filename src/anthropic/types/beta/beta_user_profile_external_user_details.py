@@ -1,0 +1,63 @@
+from typing import Optional
+from datetime import datetime
+from typing_extensions import Literal
+
+from ..._models import BaseModel
+
+__all__ = ["BetaUserProfileExternalUserDetails"]
+
+
+class BetaUserProfileExternalUserDetails(BaseModel):
+    """Details about the entity this profile represents, as the platform states them.
+
+    Anthropic does not verify them. Every field is present, `null` until the platform supplies a value.
+    """
+
+    account_status: Optional[Literal["active", "suspended", "blocked"]] = None
+    """
+    The status of the entity's account on the platform: `active`, `suspended` or
+    `blocked`. `null` until the platform supplies one.
+
+    - `active` - The platform has neither restricted nor barred the account of the
+      entity that the user profile represents.
+    - `suspended` - The platform has restricted the account of the entity that the
+      user profile represents and may restore it.
+    - `blocked` - The platform has barred the account of the entity that the user
+      profile represents.
+    """
+
+    country: Optional[str] = None
+    """
+    The country the platform associates with the entity, as an ISO 3166-1 alpha-2
+    code. `null` until the platform supplies one.
+    """
+
+    email_hash: Optional[str] = None
+    """The platform-computed hash of the entity's email address.
+
+    `null` until the platform supplies one.
+    """
+
+    entity_type: Optional[Literal["individual", "business", "non_profit", "government"]] = None
+    """
+    What kind of entity the profile represents: `individual`, `business`,
+    `non_profit` or `government`. `null` until the platform supplies one.
+    """
+
+    name_hash: Optional[str] = None
+    """The platform-computed hash of the entity's name.
+
+    `null` until the platform supplies one.
+    """
+
+    onboarded_at: Optional[datetime] = None
+    """
+    When the entity opened its account with the platform, as stated by the platform,
+    in RFC 3339 format (UTC). `null` until the platform supplies one.
+    """
+
+    reference_id: Optional[str] = None
+    """The platform's own reference for the entity.
+
+    `null` until the platform supplies one.
+    """

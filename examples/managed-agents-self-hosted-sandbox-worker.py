@@ -2,8 +2,8 @@
 """End-to-end self-hosted environment worker demo.
 
 Creates an agent with the built-in agent_toolset_20260401 plus a custom
-``current_time`` tool, opens a session against your self-hosted environment,
-sends a prompt, runs an ``EnvironmentWorker`` in-process to service the tool
+`current_time` tool, opens a session against your self-hosted environment,
+sends a prompt, runs an `EnvironmentWorker` in-process to service the tool
 calls locally, then prints the resulting transcript and cleans up.
 
 Required env vars:
@@ -32,7 +32,7 @@ from anthropic.lib.environments import MANAGED_AGENTS_BETA
 from anthropic.lib.tools.agent_toolset import beta_agent_toolset_20260401
 
 POLL_TIMEOUT_S = 60
-MODEL_ID = "claude-haiku-4-5"
+MODEL_ID = "claude-haiku-5-5"
 
 
 # A custom tool. Because @beta_async_tool produces the same type that

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing_extensions import Literal
 
 from ...._models import BaseModel
@@ -11,6 +9,6 @@ class BetaManagedAgentsDeletedCredential(BaseModel):
     """Confirmation of a deleted credential."""
 
     id: str
-    """Unique identifier of the deleted credential."""
+    """The unique ID of the deleted credential (`vcrd_...`)."""
 
     type: Literal["vault_credential_deleted"]

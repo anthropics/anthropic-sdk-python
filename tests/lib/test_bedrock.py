@@ -13,9 +13,21 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import AnthropicBedrock, AsyncAnthropicBedrock, beta_tool, beta_async_tool
+from anthropic import (
+    APIStatusError,
+    BadRequestError,
+    OverloadedError,
+    AnthropicBedrock,
+    InternalServerError,
+    AsyncAnthropicBedrock,
+    PreconditionFailedError,
+    beta_tool,
+    beta_async_tool,
+)
+from anthropic.types import ToolNameConflictError
 from anthropic._compat import PYDANTIC_V1
 from anthropic._models import FinalRequestOptions
+from anthropic._constants import ANTHROPIC_API_VERSION
 from anthropic.lib.bedrock._client import _prepare_options
 from anthropic.lib.bedrock._stream_decoder import _chunk_bytes_to_sse
 
@@ -29,6 +41,37 @@ async_client = AsyncAnthropicBedrock(
     aws_access_key="example-access-key",
     aws_secret_key="example-secret-key",
 )
+
+
+INVOKE_URL = re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")
+
+STATUS_ERRORS = [
+    pytest.param(
+        400,
+        {
+            "type": "invalid_request_error",
+            "message": "Tool name is already in use",
+            "details": {"error_code": "tool_name_conflict"},
+        },
+        ToolNameConflictError,
+        BadRequestError,
+        id="error-code",
+    ),
+    pytest.param(
+        412,
+        {"type": "invalid_request_error", "message": "Precondition failed"},
+        PreconditionFailedError,
+        APIStatusError,
+        id="status",
+    ),
+    pytest.param(
+        529,
+        {"type": "overloaded_error", "message": "Overloaded"},
+        OverloadedError,
+        InternalServerError,
+        id="narrowed-status",
+    ),
+]
 
 
 class MockRequestCall(Protocol):
@@ -70,7 +113,6 @@ def mock_aws_config(
         yield
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_messages_retries(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -105,7 +147,6 @@ def test_messages_retries(respx_mock: MockRouter) -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_messages_retries_async(respx_mock: MockRouter) -> None:
@@ -141,7 +182,37 @@ async def test_messages_retries_async(respx_mock: MockRouter) -> None:
     )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+async def test_status_error_class(
+    status: int,
+    error: dict[str, object],
+    error_class: type[APIStatusError],
+    parent_class: type[APIStatusError],
+    sync: bool,
+    respx_mock: MockRouter,
+) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(status, json={"type": "error", "error": error}))
+
+    with pytest.raises(parent_class) as exc_info:
+        if sync:
+            sync_client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            )
+        else:
+            await async_client.with_options(max_retries=0).messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            )
+
+    assert type(exc_info.value) is error_class
+
+
 @pytest.mark.respx()
 def test_application_inference_profile(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -175,6 +246,77 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
     )
 
 
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+@pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
+@pytest.mark.parametrize("model", [".", ".."])
+async def test_dot_segment_model_is_rejected(
+    model: str, stream: bool, beta: bool, sync: bool, respx_mock: MockRouter
+) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    with pytest.raises(ValueError, match="dot-segment"):
+        if sync:
+            messages = sync_client.beta.messages if beta else sync_client.messages
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+        else:
+            async_messages = async_client.beta.messages if beta else async_client.messages
+            await async_messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+
+    assert route.call_count == 0
+
+
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+@pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
+async def test_empty_model_is_rejected(stream: bool, beta: bool, sync: bool, respx_mock: MockRouter) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+
+    with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received ''"):
+        if sync:
+            messages = sync_client.beta.messages if beta else sync_client.messages
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+        else:
+            async_messages = async_client.beta.messages if beta else async_client.messages
+            await async_messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+
+    assert route.call_count == 0
+
+
+@pytest.mark.respx(assert_all_called=False)
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_missing_model_is_rejected(sync: bool, respx_mock: MockRouter) -> None:
+    route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    body = {"max_tokens": 1024, "messages": [{"role": "user", "content": "Say hello there!"}]}
+
+    with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received None"):
+        if sync:
+            sync_client.post("/v1/messages", body=body, cast_to=httpx2.Response)
+        else:
+            await async_client.post("/v1/messages", body=body, cast_to=httpx2.Response)
+
+    assert route.call_count == 0
+
+
 sync_api_key_client = AnthropicBedrock(
     aws_region="us-east-1",
     api_key="test-api-key",
@@ -185,7 +327,41 @@ async_api_key_client = AsyncAnthropicBedrock(
 )
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_extra_body_anthropic_version_wins(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"}),
+    )
+
+    sync_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        extra_body={"anthropic_version": "2000-01-01"},
+    )
+
+    request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+    assert json.loads(request.content)["anthropic_version"] == "2000-01-01"
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_extra_body_anthropic_version_wins_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"}),
+    )
+
+    await async_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        extra_body={"anthropic_version": "2000-01-01"},
+    )
+
+    request = cast("list[MockRequestCall]", respx_mock.calls)[0].request
+    assert json.loads(request.content)["anthropic_version"] == "2000-01-01"
+
+
 @pytest.mark.respx()
 def test_api_key_auth(respx_mock: MockRouter) -> None:
     respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/model/.*/invoke")).mock(
@@ -203,7 +379,6 @@ def test_api_key_auth(respx_mock: MockRouter) -> None:
     assert calls[0].request.headers["Authorization"] == "Bearer test-api-key"
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_api_key_auth_async(respx_mock: MockRouter) -> None:
@@ -226,6 +401,13 @@ def test_api_key_from_env(monkeypatch: t.Any) -> None:
     monkeypatch.setenv("AWS_BEARER_TOKEN_BEDROCK", "env-api-key")
     client = AnthropicBedrock(aws_region="us-east-1")
     assert client.api_key == "env-api-key"
+
+
+@pytest.mark.parametrize("client_class", [AnthropicBedrock, AsyncAnthropicBedrock], ids=["sync", "async"])
+def test_copy_overrides_aws_profile(client_class: "type[AnthropicBedrock] | type[AsyncAnthropicBedrock]") -> None:
+    client = client_class(aws_region="us-east-1", aws_profile="first")
+
+    assert client.copy(aws_profile="second").aws_profile == "second"
 
 
 def test_api_key_mutual_exclusion() -> None:
@@ -355,10 +537,16 @@ def test_chunk_bytes_to_sse_drops_chunk_without_type_or_completion() -> None:
 
 def _eventstream_chunk_frame(payload: t.Mapping[str, object]) -> bytes:
     """Encode `payload` as one `chunk` event in AWS eventstream binary framing."""
-    headers = b""
-    for name, value in ((":message-type", "event"), (":event-type", "chunk"), (":content-type", "application/json")):
-        headers += bytes([len(name)]) + name.encode() + b"\x07" + struct.pack(">H", len(value)) + value.encode()
     body = json.dumps({"bytes": base64.b64encode(json.dumps(payload).encode()).decode()}).encode()
+    return _eventstream_frame(
+        {":message-type": "event", ":event-type": "chunk", ":content-type": "application/json"}, body
+    )
+
+
+def _eventstream_frame(header_values: t.Mapping[str, str], body: bytes) -> bytes:
+    headers = b""
+    for name, value in header_values.items():
+        headers += bytes([len(name)]) + name.encode() + b"\x07" + struct.pack(">H", len(value)) + value.encode()
     prelude = struct.pack(">II", 12 + len(headers) + len(body) + 4, len(headers))
     prelude += struct.pack(">I", binascii.crc32(prelude) & 0xFFFFFFFF)
     message = prelude + headers + body
@@ -421,6 +609,56 @@ async def test_stream_skips_typeless_chunk_async(respx_mock: MockRouter) -> None
     assert [e.type for e in events] == ["message_start", "message_stop"]
     assert events[0].type == "message_start" and events[0].message.id == "msg_1"
     assert events[1].to_dict()["amazon-bedrock-invocationMetrics"] == _INVOCATION_METRICS
+
+
+_THROTTLING_MESSAGE = "Too many requests, please wait before trying again."
+_EXCEPTION_FRAME = _eventstream_frame(
+    {":message-type": "exception", ":exception-type": "throttlingException", ":content-type": "application/json"},
+    json.dumps({"message": _THROTTLING_MESSAGE}).encode(),
+)
+_ERROR_FRAME = _eventstream_frame(
+    {":message-type": "error", ":error-code": "InternalFailure", ":error-message": "Something went wrong."}, b""
+)
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize(
+    "frame, error",
+    [
+        (_EXCEPTION_FRAME, {"type": "throttlingException", "message": _THROTTLING_MESSAGE}),
+        (_ERROR_FRAME, {"type": "InternalFailure", "message": "Something went wrong."}),
+    ],
+    ids=["exception", "error"],
+)
+async def test_stream_raises_api_error_for_error_frame(
+    frame: bytes, error: t.Dict[str, str], sync: bool, respx_mock: MockRouter
+) -> None:
+    respx_mock.post(_STREAM_URL).mock(
+        return_value=httpx2.Response(
+            200,
+            content=_eventstream_chunk_frame(_TYPELESS_CHUNK_STREAM[0]) + frame,
+            headers={"content-type": "application/vnd.amazon.eventstream"},
+        )
+    )
+    received: t.List[str] = []
+
+    with pytest.raises(APIStatusError) as exc_info:
+        if sync:
+            for event in sync_client.messages.create(
+                max_tokens=8, messages=[{"role": "user", "content": "hi"}], model="anthropic.claude-x", stream=True
+            ):
+                received.append(event.type)
+        else:
+            async for event in await async_client.messages.create(
+                max_tokens=8, messages=[{"role": "user", "content": "hi"}], model="anthropic.claude-x", stream=True
+            ):
+                received.append(event.type)
+
+    assert received == ["message_start"]
+    assert exc_info.type is APIStatusError
+    assert exc_info.value.body == {"type": "error", "error": error}
 
 
 @pytest.mark.respx()
@@ -489,9 +727,10 @@ def _assert_tool_runner_calls(calls: t.List[MockRequestCall]) -> None:
         assert call.request.url.path == "/model/anthropic.claude-haiku-4-5-20251001-v1:0/invoke"
         assert call.request.headers["Authorization"].startswith("AWS4-HMAC-SHA256 ")
         assert "x-amz-date" in call.request.headers
+        assert "anthropic-version" not in call.request.headers
         body = json.loads(call.request.content)
         assert "model" not in body and "stream" not in body and "output_format" not in body
-        assert body["anthropic_version"] == "bedrock-2023-05-31"
+        assert body["anthropic_version"] == ANTHROPIC_API_VERSION
     second = json.loads(calls[1].request.content)
     assert [m["role"] for m in second["messages"]] == ["user", "assistant", "user"]
     assert second["messages"][1]["content"][0]["type"] == "tool_use"
@@ -503,7 +742,6 @@ def _assert_tool_runner_calls(calls: t.List[MockRequestCall]) -> None:
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 def test_beta_tool_runner_routes_through_invoke(respx_mock: MockRouter) -> None:
     @beta_tool
@@ -531,7 +769,6 @@ def test_beta_tool_runner_routes_through_invoke(respx_mock: MockRouter) -> None:
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 @pytest.mark.respx()
 @pytest.mark.asyncio()
 async def test_beta_tool_runner_routes_through_invoke_async(respx_mock: MockRouter) -> None:
@@ -559,7 +796,6 @@ async def test_beta_tool_runner_routes_through_invoke_async(respx_mock: MockRout
     _assert_tool_runner_calls(cast("list[MockRequestCall]", respx_mock.calls))
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_beta_messages_helpers_are_bound() -> None:
     for client in (sync_client, async_client):
         for name in ("create", "parse", "stream", "tool_runner"):
@@ -601,7 +837,29 @@ def test_prepare_options_lifts_anthropic_beta_header_case_insensitively() -> Non
     ]
 
 
-@pytest.mark.filterwarnings("ignore::DeprecationWarning")
+@pytest.mark.respx()
+def test_text_completions_path_is_not_rewritten(respx_mock: MockRouter) -> None:
+    route = respx_mock.post("https://bedrock-runtime.us-east-1.amazonaws.com/v1/complete").mock(
+        return_value=httpx2.Response(200, json={})
+    )
+
+    sync_client.post("/v1/complete", body={"model": "anthropic.claude-v2"}, cast_to=httpx2.Response)
+
+    assert route.called
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_text_completions_path_is_not_rewritten_async(respx_mock: MockRouter) -> None:
+    route = respx_mock.post("https://bedrock-runtime.us-east-1.amazonaws.com/v1/complete").mock(
+        return_value=httpx2.Response(200, json={})
+    )
+
+    await async_client.post("/v1/complete", body={"model": "anthropic.claude-v2"}, cast_to=httpx2.Response)
+
+    assert route.called
+
+
 @pytest.mark.respx()
 def test_betas_param_and_extra_headers_case_variant(respx_mock: MockRouter) -> None:
     # `extra_headers` overrides the header written by `betas`, on the wire and in the body
@@ -621,3 +879,179 @@ def test_betas_param_and_extra_headers_case_variant(respx_mock: MockRouter) -> N
     assert len(calls) == 1
     assert calls[0].request.headers.get_list("anthropic-beta") == ["from-extra-headers"]
     assert json.loads(calls[0].request.content)["anthropic_beta"] == ["from-extra-headers"]
+
+
+def test_user_profiles_not_available() -> None:
+    for client in (sync_api_key_client, async_api_key_client):
+        assert not hasattr(client, "user_profiles")
+        assert not hasattr(client.beta, "user_profiles")
+
+
+@pytest.mark.respx()
+def test_user_profile_id_is_sent_in_the_header(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+    sync_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_test",
+    )
+    sync_api_key_client.beta.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_test",
+    )
+    sync_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        extra_headers={"Anthropic-User-Profile-Id": "uprof_test"},
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 3
+    for call in calls:
+        assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(call.request.content)
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_user_profile_id_is_sent_in_the_header_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+    await async_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_test",
+    )
+    await async_api_key_client.beta.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_test",
+    )
+    await async_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        extra_headers={"Anthropic-User-Profile-Id": "uprof_test"},
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 3
+    for call in calls:
+        assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
+        assert "user_profile_id" not in json.loads(call.request.content)
+
+
+@pytest.mark.respx()
+def test_client_user_profile_id_is_kept(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = sync_api_key_client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
+
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_client_user_profile_id_is_kept_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = async_api_key_client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
+
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        user_profile_id="uprof_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+
+
+@pytest.mark.respx()
+def test_client_workspace_id_is_kept(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = sync_api_key_client.with_options(default_headers={"anthropic-workspace-id": "wrkspc_client"})
+
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+async def test_client_workspace_id_is_kept_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+    client = async_api_key_client.with_options(default_headers={"anthropic-workspace-id": "wrkspc_client"})
+
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+    await client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
+def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+    sync_api_key_client.messages.create(
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Say hello there!"}],
+        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert "anthropic-user-profile-id" not in calls[0].request.headers

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from datetime import datetime
 from typing_extensions import Literal
 
@@ -27,6 +25,6 @@ class BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent(BaseModel):
     """The `outc_` ID of the outcome being evaluated."""
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when this heartbeat was emitted."""
 
     type: Literal["span.outcome_evaluation_ongoing"]

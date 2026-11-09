@@ -12,8 +12,61 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      NODE_OPTIONS: --use-openssl-ca
+      UV_NATIVE_TLS: 'true'
+      UV_SYSTEM_CERTS: 'true'
 
     steps:
+      - name: Set up CA certificates
+        shell: sudo /usr/bin/python3 -I {0}
+        run: |
+          import base64, hashlib, pathlib, re, subprocess, sys
+
+          EXCLUDED = set("""
+          86a1ecba089c4a8d3bbe2734c612ba341d813e043cf9e8a862cd5c57a36bbe6b
+          bc4d809b15189d78db3e1d8cf4f9726a795da1643ca5f1358e1ddb0edc0d7eb3
+          40f6af0346a99aa1cd1d555a4e9cce62c7f9634603ee406615833dc8c8d00367
+          125609aa301da0a249b97a8239cb6a34216f44dcac9f3954b14292f2e8c8608f
+          """.split())
+          PEM = re.compile(b"-----BEGIN [A-Z0-9 ]*CERTIFICATE-----(.+?)-----END", re.S)
+          SEQUENCE = bytes.fromhex("3082")
+
+          def stop(what):
+              sys.exit(
+                  what + " The job stops here, before it fetches or publishes anything."
+                  " If a re-run fails too, the runner image has changed and this step has to follow it."
+              )
+
+          def excluded(path):
+              data = path.read_bytes()
+              for blob in [data] + [base64.b64decode(body) for body in PEM.findall(data)]:
+                  for match in re.finditer(SEQUENCE, blob):
+                      end = match.start() + 4 + int.from_bytes(blob[match.start() + 2 : match.start() + 4], "big")
+                      if hashlib.sha256(blob[match.start() : end]).hexdigest() in EXCLUDED:
+                          return True
+              return False
+
+          conf = pathlib.Path("/etc/ca-certificates.conf")
+          source = pathlib.Path("/usr/share/ca-certificates")
+          store = pathlib.Path("/etc/ssl/certs")
+
+          lines = conf.read_text().splitlines(keepends=True)
+          for i, line in enumerate(lines):
+              file = source / line.strip()
+              if line.strip() and line[0] not in "#!" and file.is_file() and excluded(file):
+                  lines[i] = "!" + line
+          conf.write_text("".join(lines))
+          for arguments in ([], ["--fresh"]):
+              run = subprocess.run(["update-ca-certificates", *arguments], capture_output=True)
+              if run.returncode or b"exited with code" in run.stdout + run.stderr:
+                  stop("update-ca-certificates failed.")
+
+          for file in [*store.rglob("*"), pathlib.Path("/etc/ssl/cert.pem")]:
+              if file.is_file() and excluded(file):
+                  stop("A file under /etc/ssl still holds an excluded CA certificate.")
+          print(len(PEM.findall((store / "ca-certificates.crt").read_bytes())), "CA certificates")
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv

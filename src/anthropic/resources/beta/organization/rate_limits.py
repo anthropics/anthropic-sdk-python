@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -8,7 +6,6 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,7 +16,6 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import rate_limit_list_params
 from ....types.beta.organization.beta_organization_rate_limit import BetaOrganizationRateLimit
 
 __all__ = ["RateLimits", "AsyncRateLimits"]
@@ -32,7 +28,7 @@ class RateLimits(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithRawResponse(self)
 
@@ -41,7 +37,7 @@ class RateLimits(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return RateLimitsWithStreamingResponse(self)
 
@@ -64,8 +60,8 @@ class RateLimits(SyncAPIResource):
         List Messages API rate limits for your organization.
 
         Each entry corresponds to one rate-limit group (either a model family or an
-        API-surface category such as the Files API or Message Batches) and contains the
-        set of limiter values that apply to it.
+        API-surface category such as the Message Batches API or the web search tool) and
+        contains the set of limiter values that apply to it.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -93,22 +89,22 @@ class RateLimits(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=SyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )
@@ -121,7 +117,7 @@ class AsyncRateLimits(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithRawResponse(self)
 
@@ -130,7 +126,7 @@ class AsyncRateLimits(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncRateLimitsWithStreamingResponse(self)
 
@@ -153,8 +149,8 @@ class AsyncRateLimits(AsyncAPIResource):
         List Messages API rate limits for your organization.
 
         Each entry corresponds to one rate-limit group (either a model family or an
-        API-surface category such as the Files API or Message Batches) and contains the
-        set of limiter values that apply to it.
+        API-surface category such as the Message Batches API or the web search tool) and
+        contains the set of limiter values that apply to it.
 
         When `limit` is omitted, every matching entry is returned in a single page; when
         `limit` truncates the result, follow `next_page` to fetch the remaining entries.
@@ -182,22 +178,22 @@ class AsyncRateLimits(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/rate_limits?beta=true",
+            "/v1/organizations/rate_limits",
             page=AsyncPageCursor[BetaOrganizationRateLimit],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "group_type": group_type,
-                        "limit": limit,
-                        "model": model,
-                        "page": page,
-                    },
-                    rate_limit_list_params.RateLimitListParams,
-                ),
+                query={
+                    "group_type": group_type,
+                    "limit": limit,
+                    "model": model,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.rate_limits.list",
+                span_route="/v1/organizations/rate_limits",
             ),
             model=BetaOrganizationRateLimit,
         )

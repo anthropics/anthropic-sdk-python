@@ -1,9 +1,19 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 import typing as _t
 
 from . import types
-from ._types import NOT_GIVEN, Omit, NoneType, NotGiven, omit, not_given
+from ._types import (
+    NOT_GIVEN,
+    Omit,
+    NoneType,
+    NotGiven,
+    OpenTelemetryTraces,
+    OpenTelemetryOptions,
+    OpenTelemetryClientOption,
+    ResolvedOpenTelemetryTraces,
+    ResolvedOpenTelemetryOptions,
+    omit,
+    not_given,
+)
 from ._utils import file_from_path
 from ._client import Client, Stream, Timeout, Anthropic, AsyncClient, AsyncStream, AsyncAnthropic, RequestOptions
 from ._models import BaseModel
@@ -22,16 +32,25 @@ from ._exceptions import (
     APITimeoutError,
     BadRequestError,
     OverloadedError,
+    CredentialsError,
     APIConnectionError,
     AuthenticationError,
+    GatewayTimeoutError,
     InternalServerError,
+    RequestTimeoutError,
+    ContentTooLargeError,
     RequestTooLargeError,
     DeadlineExceededError,
     PermissionDeniedError,
+    IdentityTokenFileError,
+    HTTPNotImplementedError,
+    PreconditionFailedError,
     ServiceUnavailableError,
+    ClientClosedRequestError,
     UnprocessableEntityError,
     APIWebhookValidationError,
     APIResponseValidationError,
+    RequestHeaderFieldsTooLargeError,
 )
 from ._middleware import (
     CallNext,
@@ -43,6 +62,21 @@ from ._middleware import (
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
+from .types.shared import (
+    CMEKKeyDisabledError,
+    RampLimitExceededError,
+    CMEKKeyUnreachableError,
+    OrganizationOnHoldError,
+    CMEKKeyNetworkBlockedError,
+    CMEKContextUnavailableError,
+    ClaudeCodeVersionTooOldError,
+    EnforcedSpendLimitReachedError,
+    RequestBodyEncodingInvalidError,
+    OrganizationTypeNotSupportedError,
+    ClaudeCodeKeyCreatorNotMemberError,
+    RequestBodyEncodingUnsupportedError,
+    RequestBodyTooLargeAfterDecodingError,
+)
 from .lib.middleware import BetaFallbackState, BetaRefusalFallbackMiddleware
 from .lib._parse._transform import transform_schema
 
@@ -67,17 +101,44 @@ __all__ = [
     "AuthenticationError",
     "PermissionDeniedError",
     "NotFoundError",
+    "RequestTimeoutError",
     "ConflictError",
+    "PreconditionFailedError",
+    "ContentTooLargeError",
     "RequestTooLargeError",
     "UnprocessableEntityError",
     "RateLimitError",
+    "RequestHeaderFieldsTooLargeError",
+    "ClientClosedRequestError",
     "InternalServerError",
+    "HTTPNotImplementedError",
     "ServiceUnavailableError",
+    "GatewayTimeoutError",
     "OverloadedError",
+    "ClaudeCodeKeyCreatorNotMemberError",
+    "ClaudeCodeVersionTooOldError",
+    "CMEKKeyDisabledError",
+    "CMEKKeyNetworkBlockedError",
+    "OrganizationOnHoldError",
+    "OrganizationTypeNotSupportedError",
+    "RequestBodyEncodingInvalidError",
+    "RequestBodyEncodingUnsupportedError",
+    "RequestBodyTooLargeAfterDecodingError",
+    "EnforcedSpendLimitReachedError",
+    "RampLimitExceededError",
+    "CMEKContextUnavailableError",
+    "CMEKKeyUnreachableError",
     "DeadlineExceededError",
     "RetryableError",
+    "CredentialsError",
+    "IdentityTokenFileError",
     "Timeout",
     "RequestOptions",
+    "OpenTelemetryClientOption",
+    "OpenTelemetryOptions",
+    "OpenTelemetryTraces",
+    "ResolvedOpenTelemetryOptions",
+    "ResolvedOpenTelemetryTraces",
     "Client",
     "AsyncClient",
     "Stream",

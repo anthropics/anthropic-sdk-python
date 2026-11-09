@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -22,6 +20,7 @@ class TestSkills:
     def test_method_create(self, client: Anthropic) -> None:
         skill = client.beta.skills.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -30,7 +29,9 @@ class TestSkills:
         skill = client.beta.skills.create(
             files=[b"Example data"],
             display_name="display_name",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -38,6 +39,7 @@ class TestSkills:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.skills.with_raw_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -49,6 +51,7 @@ class TestSkills:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.skills.with_streaming_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -62,6 +65,7 @@ class TestSkills:
     def test_method_retrieve(self, client: Anthropic) -> None:
         skill = client.beta.skills.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -69,7 +73,9 @@ class TestSkills:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -77,6 +83,7 @@ class TestSkills:
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.skills.with_raw_response.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -88,6 +95,7 @@ class TestSkills:
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.skills.with_streaming_response.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -106,7 +114,9 @@ class TestSkills:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        skill = client.beta.skills.list()
+        skill = client.beta.skills.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaSkill], skill, path=["response"])
 
     @parametrize
@@ -115,13 +125,17 @@ class TestSkills:
             limit=1,
             page="page",
             source="source",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSkill], skill, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.skills.with_raw_response.list()
+        response = client.beta.skills.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -130,7 +144,9 @@ class TestSkills:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.skills.with_streaming_response.list() as response:
+        with client.beta.skills.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -143,6 +159,7 @@ class TestSkills:
     def test_method_delete(self, client: Anthropic) -> None:
         skill = client.beta.skills.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 
@@ -150,7 +167,9 @@ class TestSkills:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 
@@ -158,6 +177,7 @@ class TestSkills:
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.beta.skills.with_raw_response.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -169,6 +189,7 @@ class TestSkills:
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.beta.skills.with_streaming_response.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -195,6 +216,7 @@ class TestAsyncSkills:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -203,7 +225,9 @@ class TestAsyncSkills:
         skill = await async_client.beta.skills.create(
             files=[b"Example data"],
             display_name="display_name",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -211,6 +235,7 @@ class TestAsyncSkills:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.with_raw_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -222,6 +247,7 @@ class TestAsyncSkills:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.with_streaming_response.create(
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -235,6 +261,7 @@ class TestAsyncSkills:
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -242,7 +269,9 @@ class TestAsyncSkills:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkill, skill, path=["response"])
 
@@ -250,6 +279,7 @@ class TestAsyncSkills:
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.with_raw_response.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -261,6 +291,7 @@ class TestAsyncSkills:
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.with_streaming_response.retrieve(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -279,7 +310,9 @@ class TestAsyncSkills:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        skill = await async_client.beta.skills.list()
+        skill = await async_client.beta.skills.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaSkill], skill, path=["response"])
 
     @parametrize
@@ -288,13 +321,17 @@ class TestAsyncSkills:
             limit=1,
             page="page",
             source="source",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSkill], skill, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.skills.with_raw_response.list()
+        response = await async_client.beta.skills.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -303,7 +340,9 @@ class TestAsyncSkills:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.skills.with_streaming_response.list() as response:
+        async with async_client.beta.skills.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -316,6 +355,7 @@ class TestAsyncSkills:
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 
@@ -323,7 +363,9 @@ class TestAsyncSkills:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkill, skill, path=["response"])
 
@@ -331,6 +373,7 @@ class TestAsyncSkills:
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.with_raw_response.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -342,6 +385,7 @@ class TestAsyncSkills:
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.with_streaming_response.delete(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

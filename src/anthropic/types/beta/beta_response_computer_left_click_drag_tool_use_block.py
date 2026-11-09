@@ -1,0 +1,8 @@
+from .beta_computer_left_click_drag_tool_use_block import BetaComputerLeftClickDragToolUseBlock
+
+__all__ = ["BetaResponseComputerLeftClickDragToolUseBlock"]
+
+BetaResponseComputerLeftClickDragToolUseBlock = BetaComputerLeftClickDragToolUseBlock
+"""
+BetaResponseComputerLeftClickDragToolUseBlock has been renamed to BetaComputerLeftClickDragToolUseBlock
+"""

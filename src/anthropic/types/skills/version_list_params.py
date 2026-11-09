@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -17,3 +15,13 @@ class VersionListParams(TypedDict, total=False):
 
     page: Optional[str]
     """Optionally set to the `next_page` token from the previous response."""
+
+    workspace_id: str
+    """Optional header to select the Workspace for this request.
+
+    The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+    Only needed for credentials that can act on more than one Workspace. A
+    credential that belongs to a specific Workspace may omit it; if sent, it must
+    match that Workspace.
+    """

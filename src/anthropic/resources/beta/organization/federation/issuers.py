@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Optional
@@ -7,7 +5,7 @@ from typing import List, Optional
 import httpx2
 
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -19,7 +17,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.anthropic_beta_param import AnthropicBetaParam
-from .....types.beta.organization.federation import issuer_list_params, issuer_create_params, issuer_update_params
+from .....types.beta.organization.federation import issuer_create_params, issuer_update_params
 from .....types.beta.organization.federation.beta_federation_issuer import BetaFederationIssuer
 
 __all__ = ["Issuers", "AsyncIssuers"]
@@ -32,7 +30,7 @@ class Issuers(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return IssuersWithRawResponse(self)
 
@@ -41,7 +39,7 @@ class Issuers(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return IssuersWithStreamingResponse(self)
 
@@ -110,19 +108,23 @@ class Issuers(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._post(
-            "/v1/organizations/federation_issuers?beta=true",
-            body=maybe_transform(
-                {
-                    "issuer_url": issuer_url,
-                    "name": name,
-                    "check_jti": check_jti,
-                    "jwks": jwks,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                },
-                issuer_create_params.IssuerCreateParams,
-            ),
+            "/v1/organizations/federation_issuers",
+            body={
+                "issuer_url": issuer_url,
+                "name": name,
+                "check_jti": check_jti,
+                "jwks": jwks,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.create",
+                span_route="/v1/organizations/federation_issuers",
+                span_created_id="anthropic.organization.federation_issuer.id",
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -170,11 +172,17 @@ class Issuers(SyncAPIResource):
         }
         return self._get(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.retrieve",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -256,22 +264,25 @@ class Issuers(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
-            body=maybe_transform(
-                {
-                    "check_jti": check_jti,
-                    "issuer_url": issuer_url,
-                    "jwks": jwks,
-                    "jwks_polling_disabled": jwks_polling_disabled,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                    "name": name,
-                },
-                issuer_update_params.IssuerUpdateParams,
-            ),
+            body={
+                "check_jti": check_jti,
+                "issuer_url": issuer_url,
+                "jwks": jwks,
+                "jwks_polling_disabled": jwks_polling_disabled,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.update",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -322,21 +333,21 @@ class Issuers(SyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             page=SyncPageCursor[BetaFederationIssuer],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    issuer_list_params.IssuerListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.list",
+                span_route="/v1/organizations/federation_issuers",
             ),
             model=BetaFederationIssuer,
         )
@@ -389,11 +400,18 @@ class Issuers(SyncAPIResource):
         }
         return self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive?beta=true",
+                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.archive",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -406,7 +424,7 @@ class AsyncIssuers(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncIssuersWithRawResponse(self)
 
@@ -415,7 +433,7 @@ class AsyncIssuers(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncIssuersWithStreamingResponse(self)
 
@@ -484,19 +502,23 @@ class AsyncIssuers(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return await self._post(
-            "/v1/organizations/federation_issuers?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "issuer_url": issuer_url,
-                    "name": name,
-                    "check_jti": check_jti,
-                    "jwks": jwks,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                },
-                issuer_create_params.IssuerCreateParams,
-            ),
+            "/v1/organizations/federation_issuers",
+            body={
+                "issuer_url": issuer_url,
+                "name": name,
+                "check_jti": check_jti,
+                "jwks": jwks,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.create",
+                span_route="/v1/organizations/federation_issuers",
+                span_created_id="anthropic.organization.federation_issuer.id",
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -544,11 +566,17 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._get(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.retrieve",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -630,22 +658,25 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}?beta=true",
-                federation_issuer_id=federation_issuer_id,
+                "/v1/organizations/federation_issuers/{federation_issuer_id}", federation_issuer_id=federation_issuer_id
             ),
-            body=await async_maybe_transform(
-                {
-                    "check_jti": check_jti,
-                    "issuer_url": issuer_url,
-                    "jwks": jwks,
-                    "jwks_polling_disabled": jwks_polling_disabled,
-                    "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
-                    "name": name,
-                },
-                issuer_update_params.IssuerUpdateParams,
-            ),
+            body={
+                "check_jti": check_jti,
+                "issuer_url": issuer_url,
+                "jwks": jwks,
+                "jwks_polling_disabled": jwks_polling_disabled,
+                "max_jwt_lifetime_seconds": max_jwt_lifetime_seconds,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.update",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )
@@ -696,21 +727,21 @@ class AsyncIssuers(AsyncAPIResource):
             **(extra_headers or {}),
         }
         return self._get_api_list(
-            "/v1/organizations/federation_issuers?beta=true",
+            "/v1/organizations/federation_issuers",
             page=AsyncPageCursor[BetaFederationIssuer],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    issuer_list_params.IssuerListParams,
-                ),
+                query={
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.list",
+                span_route="/v1/organizations/federation_issuers",
             ),
             model=BetaFederationIssuer,
         )
@@ -763,11 +794,18 @@ class AsyncIssuers(AsyncAPIResource):
         }
         return await self._post(
             path_template(
-                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive?beta=true",
+                "/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
                 federation_issuer_id=federation_issuer_id,
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.federation.issuers.archive",
+                span_route="/v1/organizations/federation_issuers/{federation_issuer_id}/archive",
+                span_attributes={"anthropic.organization.federation_issuer.id": federation_issuer_id},
             ),
             cast_to=BetaFederationIssuer,
         )

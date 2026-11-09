@@ -2,11 +2,13 @@
 
 These helpers reduce boilerplate when converting between MCP types and Anthropic API types.
 
-Usage::
+Usage:
 
-    from anthropic.lib.tools.mcp import mcp_tool, async_mcp_tool, mcp_message
+```py
+from anthropic.lib.tools.mcp import mcp_tool, async_mcp_tool, mcp_message
+```
 
-This module requires the ``mcp`` package to be installed.
+This module requires the `mcp` package to be installed.
 """
 # pyright: reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportMissingImports=false, reportUnknownParameterType=false
 
@@ -64,10 +66,6 @@ __all__ = [
     "UnsupportedMCPValueError",
 ]
 
-# -----------------------------------------------------------------------
-# mcp version compatibility
-# -----------------------------------------------------------------------
-
 # mcp<2 exposes camelCase model fields (`tool.inputSchema`); mcp>=2 exposes
 # snake_case (`tool.input_schema`). Read through this helper to support both.
 
@@ -86,15 +84,11 @@ def _mcp_field_v1_or_v2(obj: Any, name: str) -> Any:
         return getattr(obj, _MCP_V1_NAMES[name])
 
 
-# -----------------------------------------------------------------------
-# Supported MIME types
-# -----------------------------------------------------------------------
-
 _SUPPORTED_IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/gif", "image/webp"})
 
 
 class _TaggedDict(dict):  # type: ignore[type-arg]
-    """A dict subclass that can carry a ``_stainless_helper`` attribute.
+    """A dict subclass that can carry a `_stainless_helper` attribute.
 
     Behaves identically to a regular dict for serialization and isinstance checks,
     but allows attaching tracking metadata that won't appear in JSON output.
@@ -102,7 +96,7 @@ class _TaggedDict(dict):  # type: ignore[type-arg]
 
 
 class _TaggedTuple(tuple):  # type: ignore[type-arg]
-    """A tuple subclass that can carry a ``_stainless_helper`` attribute."""
+    """A tuple subclass that can carry a `_stainless_helper` attribute."""
 
 
 def _is_supported_image_type(mime_type: str) -> bool:
@@ -118,18 +112,8 @@ def _is_supported_resource_mime_type(mime_type: str | None) -> bool:
     )
 
 
-# -----------------------------------------------------------------------
-# Errors
-# -----------------------------------------------------------------------
-
-
 class UnsupportedMCPValueError(Exception):
     """Raised when an MCP value cannot be converted to a format supported by the Claude API."""
-
-
-# -----------------------------------------------------------------------
-# Content conversion
-# -----------------------------------------------------------------------
 
 
 def mcp_content(
@@ -140,7 +124,7 @@ def mcp_content(
     """Convert a single MCP content block to an Anthropic content block.
 
     Handles text, image, and embedded resource content types.
-    Raises :class:`UnsupportedMCPValueError` for audio and resource_link types.
+    Raises `UnsupportedMCPValueError` for audio and resource_link types.
     """
     if isinstance(content, TextContent):
         block = _TaggedDict({"type": "text", "text": content.text})
@@ -184,7 +168,6 @@ def _resource_contents_to_block(
     """Convert MCP resource contents to an Anthropic content block."""
     mime_type = _mcp_field_v1_or_v2(resource, "mime_type")
 
-    # Images
     if mime_type is not None and _is_supported_image_type(mime_type):
         if not isinstance(resource, BlobResourceContents):
             raise UnsupportedMCPValueError(f"Image resource must have blob data, not text. URI: {resource.uri}")
@@ -203,7 +186,6 @@ def _resource_contents_to_block(
         tag_helper(image_block, "mcp_resource_to_content")
         return image_block  # type: ignore[return-value]
 
-    # PDFs
     if mime_type == "application/pdf":
         if not isinstance(resource, BlobResourceContents):
             raise UnsupportedMCPValueError(f"PDF resource must have blob data, not text. URI: {resource.uri}")
@@ -222,7 +204,6 @@ def _resource_contents_to_block(
         tag_helper(pdf_block, "mcp_resource_to_content")
         return pdf_block  # type: ignore[return-value]
 
-    # Text (text/*, or no MIME type)
     if mime_type is None or mime_type.startswith("text/"):
         if isinstance(resource, TextResourceContents):
             data = resource.text
@@ -246,17 +227,12 @@ def _resource_contents_to_block(
     raise UnsupportedMCPValueError(f'Unsupported MIME type "{mime_type}" for resource: {resource.uri}')
 
 
-# -----------------------------------------------------------------------
-# Message conversion
-# -----------------------------------------------------------------------
-
-
 def mcp_message(
     message: PromptMessage,
     *,
     cache_control: BetaCacheControlEphemeralParam | None = None,
 ) -> dict[str, Any]:
-    """Convert an MCP prompt message to an Anthropic ``BetaMessageParam``."""
+    """Convert an MCP prompt message to an Anthropic `BetaMessageParam`."""
     result = _TaggedDict(
         {
             "role": message.role,
@@ -267,11 +243,6 @@ def mcp_message(
     return result
 
 
-# -----------------------------------------------------------------------
-# Resource conversion
-# -----------------------------------------------------------------------
-
-
 def mcp_resource_to_content(
     result: ReadResourceResult,
     *,
@@ -280,14 +251,18 @@ def mcp_resource_to_content(
     """Convert MCP resource contents to an Anthropic content block.
 
     Finds the first resource with a supported MIME type from the result's
-    ``contents`` list.
+    `contents` list.
     """
     if not result.contents:
         raise UnsupportedMCPValueError("Resource contents array must contain at least one item")
 
     mime_types = [_mcp_field_v1_or_v2(c, "mime_type") for c in result.contents]
     supported = next(
-        (c for c, mime_type in zip(result.contents, mime_types) if _is_supported_resource_mime_type(mime_type)),
+        (
+            c
+            for c, mime_type in zip(result.contents, mime_types, strict=True)
+            if _is_supported_resource_mime_type(mime_type)
+        ),
         None,
     )
     if supported is None:
@@ -302,10 +277,10 @@ def mcp_resource_to_content(
 def mcp_resource_to_file(
     result: ReadResourceResult,
 ) -> tuple[str | None, bytes, str | None]:
-    """Convert MCP resource contents to a file tuple for ``files.upload()``.
+    """Convert MCP resource contents to a file tuple for `files.upload()`.
 
-    Returns a ``(filename, content_bytes, mime_type)`` tuple compatible with
-    the SDK's ``FileTypes``.
+    Returns a `(filename, content_bytes, mime_type)` tuple compatible with
+    the SDK's `FileTypes`.
     """
     if not result.contents:
         raise UnsupportedMCPValueError("Resource contents array must contain at least one item")
@@ -313,11 +288,9 @@ def mcp_resource_to_file(
     resource = result.contents[0]
     uri_str = str(resource.uri)
 
-    # Extract filename from URI
     path = urlparse(uri_str).path
     name = path.rsplit("/", 1)[-1] if path else None
 
-    # Get bytes
     if isinstance(resource, BlobResourceContents):
         content_bytes = base64.b64decode(resource.blob)
     else:
@@ -328,27 +301,16 @@ def mcp_resource_to_file(
     return file_tuple
 
 
-# -----------------------------------------------------------------------
-# Tool result conversion (used by tool call handlers)
-# -----------------------------------------------------------------------
-
-
 def _convert_tool_result(result: CallToolResult) -> BetaFunctionToolResultType:
-    """Convert MCP ``CallToolResult`` to a value suitable for returning from ``call()``."""
+    """Convert MCP `CallToolResult` to a value suitable for returning from `call()`."""
     if _mcp_field_v1_or_v2(result, "is_error"):
         raise ToolError([mcp_content(item) for item in result.content])
 
-    # If content is empty but structuredContent is present, JSON-encode it
     structured_content = _mcp_field_v1_or_v2(result, "structured_content")
     if not result.content and structured_content is not None:
         return json.dumps(structured_content)
 
     return [mcp_content(item) for item in result.content]
-
-
-# -----------------------------------------------------------------------
-# Public factory functions
-# -----------------------------------------------------------------------
 
 
 def mcp_tool(
@@ -365,23 +327,25 @@ def mcp_tool(
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
 ) -> BetaFunctionTool[Any]:
-    """Convert an MCP tool to a sync runnable tool for ``tool_runner()``.
+    """Convert an MCP tool to a sync runnable tool for `tool_runner()`.
 
-    Example::
+    Example:
 
-        from anthropic.lib.tools.mcp import mcp_tool
+    ```py
+    from anthropic.lib.tools.mcp import mcp_tool
 
-        tools_result = await mcp_client.list_tools()
-        runner = client.beta.messages.tool_runner(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            tools=[mcp_tool(t, mcp_client) for t in tools_result.tools],
-            messages=[{"role": "user", "content": "Use the available tools"}],
-        )
+    tools_result = await mcp_client.list_tools()
+    runner = client.beta.messages.tool_runner(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        tools=[mcp_tool(t, mcp_client) for t in tools_result.tools],
+        messages=[{"role": "user", "content": "Use the available tools"}],
+    )
+    ```
 
     Args:
-        tool: An MCP tool definition from ``client.list_tools()``.
-        client: The MCP ``ClientSession`` used to call the tool.
+        tool: An MCP tool definition from `client.list_tools()`.
+        client: The MCP `ClientSession` used to call the tool.
         cache_control: Cache control configuration.
         defer_loading: If true, tool will not be included in initial system prompt.
         allowed_callers: Which callers may use this tool.
@@ -427,23 +391,25 @@ def async_mcp_tool(
     input_examples: Iterable[dict[str, object]] | None = None,
     strict: bool | None = None,
 ) -> BetaAsyncFunctionTool[Any]:
-    """Convert an MCP tool to an async runnable tool for ``tool_runner()``.
+    """Convert an MCP tool to an async runnable tool for `tool_runner()`.
 
-    Example::
+    Example:
 
-        from anthropic.lib.tools.mcp import async_mcp_tool
+    ```py
+    from anthropic.lib.tools.mcp import async_mcp_tool
 
-        tools_result = await mcp_client.list_tools()
-        runner = await client.beta.messages.tool_runner(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            tools=[async_mcp_tool(t, mcp_client) for t in tools_result.tools],
-            messages=[{"role": "user", "content": "Use the available tools"}],
-        )
+    tools_result = await mcp_client.list_tools()
+    runner = client.beta.messages.tool_runner(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        tools=[async_mcp_tool(t, mcp_client) for t in tools_result.tools],
+        messages=[{"role": "user", "content": "Use the available tools"}],
+    )
+    ```
 
     Args:
-        tool: An MCP tool definition from ``client.list_tools()``.
-        client: The MCP ``ClientSession`` used to call the tool.
+        tool: An MCP tool definition from `client.list_tools()`.
+        client: The MCP `ClientSession` used to call the tool.
         cache_control: Cache control configuration.
         defer_loading: If true, tool will not be included in initial system prompt.
         allowed_callers: Which callers may use this tool.

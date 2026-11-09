@@ -1,3 +1,4 @@
+import io
 from pathlib import Path
 
 import anyio
@@ -82,6 +83,19 @@ async def test_async_unnamed_file_tuple_uses_base_name() -> None:
 
     result = await async_to_httpx_files({"file": (None, anyio.Path(readme_path))})
     assert result == IsDict({"file": IsTuple("README.md", IsBytes())})
+
+
+def test_file_without_a_name_is_sent_unnamed() -> None:
+    for content in (b"content", io.BytesIO(b"content")):
+        result = to_httpx_files({"file": content})
+        assert result == IsDict({"file": IsTuple(None, content, "application/octet-stream")})
+
+
+@pytest.mark.asyncio
+async def test_async_file_without_a_name_is_sent_unnamed() -> None:
+    for content in (b"content", io.BytesIO(b"content")):
+        result = await async_to_httpx_files({"file": content})
+        assert result == IsDict({"file": IsTuple(None, content, "application/octet-stream")})
 
 
 def test_string_not_allowed() -> None:

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -8,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,7 +17,6 @@ from ...._response import (
 )
 from ....pagination import SyncPage, AsyncPage
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import api_key_list_params, api_key_update_params
 from ....types.beta.organization.beta_api_key import BetaAPIKey
 
 __all__ = ["APIKeys", "AsyncAPIKeys"]
@@ -32,7 +29,7 @@ class APIKeys(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return APIKeysWithRawResponse(self)
 
@@ -41,7 +38,7 @@ class APIKeys(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return APIKeysWithStreamingResponse(self)
 
@@ -73,9 +70,16 @@ class APIKeys(SyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return self._get(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.retrieve",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -110,20 +114,29 @@ class APIKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrgAPIKeyLimitExceededError:
+
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return self._post(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "status": status,
-                },
-                api_key_update_params.APIKeyUpdateParams,
-            ),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
+            body={
+                "name": name,
+                "status": status,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.update",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -173,24 +186,24 @@ class APIKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/api_keys?beta=true",
+            "/v1/organizations/api_keys",
             page=SyncPage[BetaAPIKey],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "created_by_user_id": created_by_user_id,
-                        "limit": limit,
-                        "status": status,
-                        "workspace_id": workspace_id,
-                    },
-                    api_key_list_params.APIKeyListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "created_by_user_id": created_by_user_id,
+                    "limit": limit,
+                    "status": status,
+                    "workspace_id": workspace_id,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.list",
+                span_route="/v1/organizations/api_keys",
             ),
             model=BetaAPIKey,
         )
@@ -203,7 +216,7 @@ class AsyncAPIKeys(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncAPIKeysWithRawResponse(self)
 
@@ -212,7 +225,7 @@ class AsyncAPIKeys(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncAPIKeysWithStreamingResponse(self)
 
@@ -244,9 +257,16 @@ class AsyncAPIKeys(AsyncAPIResource):
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return await self._get(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.retrieve",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -281,20 +301,29 @@ class AsyncAPIKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrgAPIKeyLimitExceededError:
+
+          WorkspaceAPIKeyLimitExceededError:
         """
         if not api_key_id:
             raise ValueError(f"Expected a non-empty value for `api_key_id` but received {api_key_id!r}")
         return await self._post(
-            path_template("/v1/organizations/api_keys/{api_key_id}?beta=true", api_key_id=api_key_id),
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "status": status,
-                },
-                api_key_update_params.APIKeyUpdateParams,
-            ),
+            path_template("/v1/organizations/api_keys/{api_key_id}", api_key_id=api_key_id),
+            body={
+                "name": name,
+                "status": status,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.update",
+                span_route="/v1/organizations/api_keys/{api_key_id}",
+                span_attributes={"anthropic.organization.api_key.id": api_key_id},
             ),
             cast_to=BetaAPIKey,
         )
@@ -344,24 +373,24 @@ class AsyncAPIKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/api_keys?beta=true",
+            "/v1/organizations/api_keys",
             page=AsyncPage[BetaAPIKey],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "created_by_user_id": created_by_user_id,
-                        "limit": limit,
-                        "status": status,
-                        "workspace_id": workspace_id,
-                    },
-                    api_key_list_params.APIKeyListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "created_by_user_id": created_by_user_id,
+                    "limit": limit,
+                    "status": status,
+                    "workspace_id": workspace_id,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.api_keys.list",
+                span_route="/v1/organizations/api_keys",
             ),
             model=BetaAPIKey,
         )

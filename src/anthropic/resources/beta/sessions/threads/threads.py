@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List
@@ -16,7 +14,7 @@ from .events import (
     AsyncEventsWithStreamingResponse,
 )
 from ....._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ....._utils import is_given, path_template, maybe_transform, strip_not_given
+from ....._utils import is_given, path_template, strip_not_given
 from ....._compat import cached_property
 from ....._resource import SyncAPIResource, AsyncAPIResource
 from ....._response import (
@@ -27,9 +25,9 @@ from ....._response import (
 )
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
-from .....types.beta.sessions import thread_list_params
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.sessions.beta_managed_agents_session_thread import BetaManagedAgentsSessionThread
+from .....types.beta.sessions.beta_managed_agents_session_thread_status import BetaManagedAgentsSessionThreadStatus
 
 __all__ = ["Threads", "AsyncThreads"]
 
@@ -45,7 +43,7 @@ class Threads(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ThreadsWithRawResponse(self)
 
@@ -54,7 +52,7 @@ class Threads(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ThreadsWithStreamingResponse(self)
 
@@ -64,6 +62,7 @@ class Threads(SyncAPIResource):
         *,
         session_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -75,7 +74,15 @@ class Threads(SyncAPIResource):
         Get Session Thread
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -94,18 +101,24 @@ class Threads(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get(
-            path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
-            ),
+            path_template("/v1/sessions/{session_id}/threads/{thread_id}", session_id=session_id, thread_id=thread_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -116,7 +129,9 @@ class Threads(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -133,7 +148,20 @@ class Threads(SyncAPIResource):
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -150,27 +178,30 @@ class Threads(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/threads?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/threads", session_id=session_id),
             page=SyncPageCursor[BetaManagedAgentsSessionThread],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -181,6 +212,7 @@ class Threads(SyncAPIResource):
         *,
         session_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -192,7 +224,15 @@ class Threads(SyncAPIResource):
         Archive Session Thread
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -211,7 +251,8 @@ class Threads(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -219,12 +260,17 @@ class Threads(SyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._post(
             path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}/archive?beta=true",
-                session_id=session_id,
-                thread_id=thread_id,
+                "/v1/sessions/{session_id}/threads/{thread_id}/archive", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -241,7 +287,7 @@ class AsyncThreads(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncThreadsWithRawResponse(self)
 
@@ -250,7 +296,7 @@ class AsyncThreads(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncThreadsWithStreamingResponse(self)
 
@@ -260,6 +306,7 @@ class AsyncThreads(AsyncAPIResource):
         *,
         session_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -271,7 +318,15 @@ class AsyncThreads(AsyncAPIResource):
         Get Session Thread
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -290,18 +345,24 @@ class AsyncThreads(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._get(
-            path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}?beta=true", session_id=session_id, thread_id=thread_id
-            ),
+            path_template("/v1/sessions/{session_id}/threads/{thread_id}", session_id=session_id, thread_id=thread_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.retrieve",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )
@@ -312,7 +373,9 @@ class AsyncThreads(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: str | Omit = omit,
+        statuses: List[BetaManagedAgentsSessionThreadStatus] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -329,7 +392,20 @@ class AsyncThreads(AsyncAPIResource):
 
           page: Opaque pagination cursor from a previous response's `next_page`. Forward-only.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          statuses: Return only threads that have one of these statuses.
+
+              Repeat the parameter to give more than one status. Leave it out to return
+              threads of every status.
+
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -346,27 +422,30 @@ class AsyncThreads(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return self._get_api_list(
-            path_template("/v1/sessions/{session_id}/threads?beta=true", session_id=session_id),
+            path_template("/v1/sessions/{session_id}/threads", session_id=session_id),
             page=AsyncPageCursor[BetaManagedAgentsSessionThread],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    thread_list_params.ThreadListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                    "statuses": statuses,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.list",
+                span_route="/v1/sessions/{session_id}/threads",
+                span_attributes={"anthropic.session.id": session_id},
             ),
             model=BetaManagedAgentsSessionThread,
         )
@@ -377,6 +456,7 @@ class AsyncThreads(AsyncAPIResource):
         *,
         session_id: str,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -388,7 +468,15 @@ class AsyncThreads(AsyncAPIResource):
         Archive Session Thread
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this
+              header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -407,7 +495,8 @@ class AsyncThreads(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["managed-agents-2026-04-01"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -415,12 +504,17 @@ class AsyncThreads(AsyncAPIResource):
         extra_headers = {"anthropic-beta": "managed-agents-2026-04-01", **(extra_headers or {})}
         return await self._post(
             path_template(
-                "/v1/sessions/{session_id}/threads/{thread_id}/archive?beta=true",
-                session_id=session_id,
-                thread_id=thread_id,
+                "/v1/sessions/{session_id}/threads/{thread_id}/archive", session_id=session_id, thread_id=thread_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.sessions.threads.archive",
+                span_route="/v1/sessions/{session_id}/threads/{thread_id}/archive",
+                span_attributes={"anthropic.session.id": session_id, "anthropic.session.thread.id": thread_id},
             ),
             cast_to=BetaManagedAgentsSessionThread,
         )

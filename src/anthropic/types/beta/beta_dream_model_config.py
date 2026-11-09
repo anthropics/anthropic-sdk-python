@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -9,17 +7,16 @@ __all__ = ["BetaDreamModelConfig"]
 
 
 class BetaDreamModelConfig(BaseModel):
-    """Model identifier and configuration applied to every pipeline stage.
+    """The model that runs a dream, from the request that created it.
 
-    Same wire shape as the Agents API ModelConfig.
+    The dream uses this model for all of its work. The response always gives the model as an object, even if the request gave only a model ID.
     """
 
     id: str
-    """Model identifier, e.g. "claude-opus-5". 1-256 characters."""
+    """
+    The ID of the model that runs the dream, as given in the request that created
+    it.
+    """
 
     speed: Optional[Literal["standard", "fast"]] = None
-    """Inference speed mode.
-
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
-    """
+    """How fast the model generates output for the dream. Always `standard`."""

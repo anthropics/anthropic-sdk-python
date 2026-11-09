@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -27,4 +25,3 @@ class BetaWebFetchToolResultBlock(BaseModel):
     type: Literal["web_fetch_tool_result"]
 
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""

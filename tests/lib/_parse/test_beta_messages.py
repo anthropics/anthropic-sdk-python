@@ -20,7 +20,7 @@ class TestAsyncMessages:
     async def test_stream_with_raw_schema(self, async_snapshot_client: AsyncAnthropic) -> None:
         async def async_stream_parse(client: AsyncAnthropic) -> ParsedBetaMessage[None]:
             async with client.beta.messages.stream(
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 messages=[
                     {
                         "role": "user",
@@ -58,7 +58,7 @@ class TestAsyncMessages:
             age: int
 
         response = await async_snapshot_client.beta.with_raw_response.messages.parse(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[
                 {
                     "role": "user",
@@ -83,7 +83,7 @@ My name is John Doe and I am 30 years old.\
 """,
                     }
                 ],
-                "model": "claude-sonnet-4-5",
+                "model": "claude-sonnet-5-5",
                 "output_config": {
                     "format": {
                         "schema": {
@@ -109,7 +109,7 @@ My name is John Doe and I am 30 years old.\
 
         with pytest.raises(AnthropicError, match="Both output_format and output_config.format were provided"):
             await async_client.beta.messages.parse(
-                model="claude-sonnet-4-5",
+                model="claude-sonnet-5-5",
                 messages=[
                     {
                         "role": "user",

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -28,7 +26,7 @@ class BetaManagedAgentsDocumentBlock(BaseModel):
     """
 
     source: Source
-    """Union type for document source variants."""
+    """The source of the document data."""
 
     type: Literal["document"]
 

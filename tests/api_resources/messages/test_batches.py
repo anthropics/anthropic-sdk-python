@@ -1,4 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 from __future__ import annotations
 
 import os
@@ -21,6 +20,18 @@ from anthropic.types.messages import (
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
+def mock_results(respx_mock: MockRouter) -> None:
+    # the mock server's example results_url points at the production API
+    respx_mock.get("/v1/messages/batches/message_batch_id").mock(
+        return_value=httpx2.Response(200, json={"results_url": "/v1/messages/batches/message_batch_id/results"})
+    )
+    respx_mock.get("/v1/messages/batches/message_batch_id/results").mock(
+        return_value=httpx2.Response(
+            200, content=json.dumps({"custom_id": "my-custom-id-1", "result": {"type": "canceled"}})
+        )
+    )
+
+
 class TestBatches:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
@@ -38,7 +49,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -59,7 +70,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -74,6 +85,7 @@ class TestBatches:
                                 }
                             ],
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -84,6 +96,7 @@ class TestBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
@@ -142,6 +155,7 @@ class TestBatches:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
@@ -159,7 +173,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -184,7 +198,7 @@ class TestBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -200,14 +214,22 @@ class TestBatches:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         batch = client.messages.batches.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(MessageBatch, batch, path=["response"])
+
+    @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        batch = client.messages.batches.retrieve(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.messages.batches.with_raw_response.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -218,7 +240,7 @@ class TestBatches:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.messages.batches.with_streaming_response.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -232,7 +254,7 @@ class TestBatches:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.messages.batches.with_raw_response.retrieve(
-                "",
+                message_batch_id="",
             )
 
     @parametrize
@@ -246,6 +268,7 @@ class TestBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(SyncPage[MessageBatch], batch, path=["response"])
 
@@ -272,14 +295,22 @@ class TestBatches:
     @parametrize
     def test_method_delete(self, client: Anthropic) -> None:
         batch = client.messages.batches.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    def test_method_delete_with_all_params(self, client: Anthropic) -> None:
+        batch = client.messages.batches.delete(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedMessageBatch, batch, path=["response"])
 
     @parametrize
     def test_raw_response_delete(self, client: Anthropic) -> None:
         response = client.messages.batches.with_raw_response.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -290,7 +321,7 @@ class TestBatches:
     @parametrize
     def test_streaming_response_delete(self, client: Anthropic) -> None:
         with client.messages.batches.with_streaming_response.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -304,20 +335,28 @@ class TestBatches:
     def test_path_params_delete(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.messages.batches.with_raw_response.delete(
-                "",
+                message_batch_id="",
             )
 
     @parametrize
     def test_method_cancel(self, client: Anthropic) -> None:
         batch = client.messages.batches.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(MessageBatch, batch, path=["response"])
+
+    @parametrize
+    def test_method_cancel_with_all_params(self, client: Anthropic) -> None:
+        batch = client.messages.batches.cancel(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
     def test_raw_response_cancel(self, client: Anthropic) -> None:
         response = client.messages.batches.with_raw_response.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -328,7 +367,7 @@ class TestBatches:
     @parametrize
     def test_streaming_response_cancel(self, client: Anthropic) -> None:
         with client.messages.batches.with_streaming_response.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -342,7 +381,7 @@ class TestBatches:
     def test_path_params_cancel(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.messages.batches.with_raw_response.cancel(
-                "",
+                message_batch_id="",
             )
 
     @pytest.mark.respx(base_url=base_url)
@@ -375,11 +414,12 @@ class TestBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_raw_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_raw_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = client.messages.batches.with_raw_response.results(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -387,11 +427,12 @@ class TestBatches:
         for item in stream:
             assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    def test_streaming_response_results(self, client: Anthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("client", [False], indirect=True)
+    def test_streaming_response_results(self, client: Anthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         with client.messages.batches.with_streaming_response.results(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -406,7 +447,7 @@ class TestBatches:
     def test_path_params_results(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             client.messages.batches.with_raw_response.results(
-                "",
+                message_batch_id="",
             )
 
 
@@ -429,7 +470,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -450,7 +491,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                         "cache_control": {
                             "type": "ephemeral",
                             "ttl": "5m",
@@ -465,6 +506,7 @@ class TestAsyncBatches:
                                 }
                             ],
                         },
+                        "diagnostics": {"previous_message_id": "previous_message_id"},
                         "inference_geo": "inference_geo",
                         "metadata": {"user_id": "13803d75-b4b5-4c3e-b2a2-6f21399b021b"},
                         "output_config": {
@@ -475,6 +517,7 @@ class TestAsyncBatches:
                             },
                         },
                         "service_tier": "auto",
+                        "speed": "standard",
                         "stop_sequences": ["string"],
                         "stream": False,
                         "system": [
@@ -533,6 +576,7 @@ class TestAsyncBatches:
                 }
             ],
             user_profile_id="anthropic-user-profile-id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
@@ -550,7 +594,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -575,7 +619,7 @@ class TestAsyncBatches:
                                 "role": "user",
                             }
                         ],
-                        "model": "claude-opus-5",
+                        "model": "claude-opus-5-5",
                     },
                 }
             ],
@@ -591,14 +635,22 @@ class TestAsyncBatches:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.messages.batches.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(MessageBatch, batch, path=["response"])
+
+    @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        batch = await async_client.messages.batches.retrieve(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.messages.batches.with_raw_response.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -609,7 +661,7 @@ class TestAsyncBatches:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.messages.batches.with_streaming_response.retrieve(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -623,7 +675,7 @@ class TestAsyncBatches:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.messages.batches.with_raw_response.retrieve(
-                "",
+                message_batch_id="",
             )
 
     @parametrize
@@ -637,6 +689,7 @@ class TestAsyncBatches:
             after_id="after_id",
             before_id="before_id",
             limit=1,
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(AsyncPage[MessageBatch], batch, path=["response"])
 
@@ -663,14 +716,22 @@ class TestAsyncBatches:
     @parametrize
     async def test_method_delete(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.messages.batches.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(DeletedMessageBatch, batch, path=["response"])
+
+    @parametrize
+    async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        batch = await async_client.messages.batches.delete(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(DeletedMessageBatch, batch, path=["response"])
 
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.messages.batches.with_raw_response.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -681,7 +742,7 @@ class TestAsyncBatches:
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncAnthropic) -> None:
         async with async_client.messages.batches.with_streaming_response.delete(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -695,20 +756,28 @@ class TestAsyncBatches:
     async def test_path_params_delete(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.messages.batches.with_raw_response.delete(
-                "",
+                message_batch_id="",
             )
 
     @parametrize
     async def test_method_cancel(self, async_client: AsyncAnthropic) -> None:
         batch = await async_client.messages.batches.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
+        )
+        assert_matches_type(MessageBatch, batch, path=["response"])
+
+    @parametrize
+    async def test_method_cancel_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        batch = await async_client.messages.batches.cancel(
+            message_batch_id="message_batch_id",
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
         )
         assert_matches_type(MessageBatch, batch, path=["response"])
 
     @parametrize
     async def test_raw_response_cancel(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.messages.batches.with_raw_response.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.is_closed is True
@@ -719,7 +788,7 @@ class TestAsyncBatches:
     @parametrize
     async def test_streaming_response_cancel(self, async_client: AsyncAnthropic) -> None:
         async with async_client.messages.batches.with_streaming_response.cancel(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -733,7 +802,7 @@ class TestAsyncBatches:
     async def test_path_params_cancel(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.messages.batches.with_raw_response.cancel(
-                "",
+                message_batch_id="",
             )
 
     @pytest.mark.respx(base_url=base_url)
@@ -766,11 +835,12 @@ class TestAsyncBatches:
         assert i == 1
         assert results.http_response.is_stream_consumed
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    async def test_raw_response_results(self, async_client: AsyncAnthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_raw_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         response = await async_client.messages.batches.with_raw_response.results(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -778,11 +848,12 @@ class TestAsyncBatches:
         async for item in stream:
             assert_matches_type(MessageBatchIndividualResponse, item, path=["line"])
 
-    @parametrize
-    @pytest.mark.skip(reason="somehow hitting prod endpoint")
-    async def test_streaming_response_results(self, async_client: AsyncAnthropic) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    @pytest.mark.parametrize("async_client", [False], indirect=True)
+    async def test_streaming_response_results(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
+        mock_results(respx_mock)
         async with async_client.messages.batches.with_streaming_response.results(
-            "message_batch_id",
+            message_batch_id="message_batch_id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -797,5 +868,5 @@ class TestAsyncBatches:
     async def test_path_params_results(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received ''"):
             await async_client.messages.batches.with_raw_response.results(
-                "",
+                message_batch_id="",
             )

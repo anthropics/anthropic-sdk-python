@@ -117,7 +117,7 @@ def test_resolve_path_rejects_symlink_loop(tmp_path: Path, p: str) -> None:
 
 @needs_symlinks
 def test_resolve_path_dotdot_is_lexical_before_symlinks(tmp_path: Path) -> None:
-    """``a/../b`` never touches ``a``, so a cycle at ``a`` cannot carry ``b``
+    """`a/../b` never touches `a`, so a cycle at `a` cannot carry `b`
     past the containment check on any interpreter."""
     work = _symlink_fixture(tmp_path)
     env = AgentToolContext(workdir=str(work))
@@ -455,7 +455,7 @@ async def test_read_rejects_directory_even_when_uncapped(tmp_path: Path) -> None
 
 
 def _media_type_literal_values(typed_dict: type, key: str) -> set[str]:
-    """Extract the values of a ``Required[Literal[...]]`` TypedDict field."""
+    """Extract the values of a `Required[Literal[...]]` TypedDict field."""
     hint = get_type_hints(typed_dict, include_extras=True)[key]
     if get_origin(hint) is Required:
         (hint,) = get_args(hint)
@@ -551,7 +551,7 @@ async def test_read_binary_custom_media_caps(tmp_path: Path) -> None:
     with pytest.raises(ToolError, match="exceeds"):
         await beta_read_tool(tight).call({"file_path": "doc.pdf"})
 
-    # A larger cap (or ``None`` to disable) admits the same files.
+    # A larger cap (or `None` to disable) admits the same files.
     loose = AgentToolContext(workdir=str(tmp_path), max_image_base64_bytes=1024 * 1024, max_pdf_bytes=None)
     for name, kind in (("img.png", "image"), ("doc.pdf", "document")):
         result = await beta_read_tool(loose).call({"file_path": name})
@@ -743,8 +743,8 @@ async def test_bash_stdin_redirect(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
 async def test_bash_session_closed_property(tmp_path: Path) -> None:
-    """``closed`` is the inverse of the old ``alive`` (TS parity) and there is
-    no ``alive`` attribute any more."""
+    """`closed` is the inverse of the old `alive` (TS parity) and there is
+    no `alive` attribute any more."""
     s = await BashSession.start(str(tmp_path))
     assert s.closed is False
     assert not hasattr(s, "alive")
@@ -758,12 +758,12 @@ async def test_bash_session_closed_property(tmp_path: Path) -> None:
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
 async def test_bash_outer_cancel_closes_subprocess_no_stale_state(tmp_path: Path) -> None:
     """Regression: a cancellation from an *outer* scope (e.g. the session
-    runner's ``TOOL_TIMEOUT``) during a bash exec must tear the subprocess down,
+    runner's `TOOL_TIMEOUT`) during a bash exec must tear the subprocess down,
     so the next call can't read the cancelled command's stale output/sentinel.
 
-    anyio raises an outer-scope cancel as a plain ``Cancelled`` (not
-    ``TimeoutError``), so the ``except TimeoutError`` cleanup never runs — only
-    the new ``except get_cancelled_exc_class()`` path saves us here.
+    anyio raises an outer-scope cancel as a plain `Cancelled` (not
+    `TimeoutError`), so the `except TimeoutError` cleanup never runs — only
+    the new `except get_cancelled_exc_class()` path saves us here.
     """
     s = await BashSession.start(str(tmp_path))
     try:
@@ -873,7 +873,7 @@ async def test_read_under_unreadable_directory_reports_permission_denied(tmp_pat
 
 @needs_pydantic_v2
 async def test_glob_rejects_dotdot_pattern(tmp_path: Path) -> None:
-    """``Path.glob`` honours literal ``..`` segments — the tool must reject a
+    """`Path.glob` honours literal `..` segments — the tool must reject a
     pattern that would walk out of the workdir before it ever runs."""
     outside = tmp_path / "outside"
     outside.mkdir()

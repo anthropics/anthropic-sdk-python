@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union, Optional
@@ -22,16 +20,21 @@ class BetaManagedAgentsMCPOAuthRefreshParams(TypedDict, total=False):
     """OAuth refresh token parameters for creating a credential with refresh support."""
 
     client_id: Required[str]
-    """OAuth client ID."""
+    """The OAuth client ID to use when refreshing the access token.
+
+    It can't be changed after the credential is created.
+    """
 
     refresh_token: Required[str]
-    """OAuth refresh token."""
+    """
+    The OAuth refresh token that the API uses to get a new access token when the
+    current one expires.
+    """
 
     token_endpoint: Required[str]
     """Token endpoint URL used to refresh the access token."""
 
     token_endpoint_auth: Required[TokenEndpointAuth]
-    """Token endpoint requires no client authentication."""
 
     resource: Optional[str]
     """OAuth resource indicator."""

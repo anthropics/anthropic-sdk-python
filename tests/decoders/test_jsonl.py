@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import gc
 from typing import Any, Iterator, AsyncIterator
-from typing_extensions import TypeVar
+from typing_extensions import TypeVar, override
 
+import anyio
 import httpx2
 import pytest
 
@@ -58,6 +60,63 @@ async def test_multi_byte_character_multiple_chunks(
     iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
 
     assert await iter_next(iterator) == {"content": "известни"}
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_dropped_decoder_lets_go_of_its_iterator_at_once(sync: bool) -> None:
+    closed: list[bool] = []
+
+    def body() -> Iterator[bytes]:
+        try:
+            yield b"1\n2\n"
+        finally:
+            closed.append(True)
+
+    iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
+    assert await iter_next(iterator) == 1
+    assert await iter_next(iterator) == 2
+
+    gc.disable()
+    try:
+        del iterator
+        with anyio.fail_after(10):
+            while not closed:
+                # An event loop closes what was dropped once it gets to run.
+                await anyio.sleep(0)
+    finally:
+        gc.enable()
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+async def test_decoder_has_what_its_subclass_sets_after_init(sync: bool) -> None:
+    class Tagged(JSONLDecoder[object]):
+        def __init__(self, **kwargs: Any) -> None:
+            super().__init__(**kwargs)
+            self.tag = "tag"
+
+        @override
+        def __decode__(self) -> Iterator[object]:
+            for _ in super().__decode__():
+                yield self.tag
+
+    class AsyncTagged(AsyncJSONLDecoder[object]):
+        def __init__(self, **kwargs: Any) -> None:
+            super().__init__(**kwargs)
+            self.tag = "tag"
+
+        @override
+        async def __decode__(self) -> AsyncIterator[object]:
+            async for _ in super().__decode__():
+                yield self.tag
+
+    content = iter([b"1\n"])
+    iterator = (
+        Tagged(line_type=object, raw_iterator=content, http_response=httpx2.Response(200))
+        if sync
+        else AsyncTagged(line_type=object, raw_iterator=to_aiter(content), http_response=httpx2.Response(200))
+    )
+
+    assert await iter_next(iterator) == "tag"
 
 
 async def to_aiter(iter: Iterator[bytes]) -> AsyncIterator[bytes]:

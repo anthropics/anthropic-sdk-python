@@ -325,6 +325,29 @@ def strip_not_given(obj: object | None) -> object:
     return {key: value for key, value in obj.items() if not isinstance(value, NotGiven)}
 
 
+@overload
+def strip_omit(obj: None) -> None: ...
+
+
+@overload
+def strip_omit(obj: Mapping[_K, _V | Omit]) -> dict[_K, _V]: ...
+
+
+@overload
+def strip_omit(obj: object) -> object: ...
+
+
+def strip_omit(obj: object | None) -> object:
+    """Remove all top-level keys where their values are instances of `Omit`"""
+    if obj is None:
+        return None
+
+    if not is_mapping(obj):
+        return obj
+
+    return {key: value for key, value in obj.items() if not isinstance(value, Omit)}
+
+
 def coerce_integer(val: str) -> int:
     return int(val, base=10)
 
@@ -398,6 +421,15 @@ def get_required_header(headers: HeadersLike, header: str) -> str:
             return value
 
     raise ValueError(f"Could not find {header} header")
+
+
+def extract_property(obj: object, *path: str) -> Any:
+    """Follows `path` through nested mappings. Returns `None` once a value is not a mapping or lacks the next key."""
+    for key in path:
+        if not is_mapping(obj):
+            return None
+        obj = obj.get(key)
+    return obj
 
 
 def get_async_library() -> str:

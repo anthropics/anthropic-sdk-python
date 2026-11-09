@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -9,6 +7,7 @@ from .beta_managed_agents_mcp_toolset import BetaManagedAgentsMCPToolset
 from .beta_managed_agents_custom_skill import BetaManagedAgentsCustomSkill
 from .beta_managed_agents_model_config import BetaManagedAgentsModelConfig
 from .beta_managed_agents_anthropic_skill import BetaManagedAgentsAnthropicSkill
+from .beta_managed_agents_execution_identity import BetaManagedAgentsExecutionIdentity
 from .beta_managed_agents_agent_toolset20260401 import BetaManagedAgentsAgentToolset20260401
 from .beta_managed_agents_mcp_server_url_definition import BetaManagedAgentsMCPServerURLDefinition
 
@@ -33,6 +32,13 @@ class BetaManagedAgentsSessionThreadAgent(BaseModel):
     id: str
 
     description: Optional[str] = None
+
+    execution_identity: BetaManagedAgentsExecutionIdentity
+    """Execution principal snapshotted from the agent at session creation.
+
+    Always present; `{"type": "service_account"}` when runs carry no customer-named
+    principal.
+    """
 
     mcp_servers: List[BetaManagedAgentsMCPServerURLDefinition]
 

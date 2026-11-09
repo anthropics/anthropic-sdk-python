@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
@@ -17,7 +15,7 @@ from .memories import (
     AsyncMemoriesWithStreamingResponse,
 )
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -27,7 +25,6 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
-from ....types.beta import memory_store_list_params, memory_store_create_params, memory_store_update_params
 from ...._base_client import AsyncPaginator, make_request_options
 from .memory_versions import (
     MemoryVersions,
@@ -59,7 +56,7 @@ class MemoryStores(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryStoresWithRawResponse(self)
 
@@ -68,7 +65,7 @@ class MemoryStores(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MemoryStoresWithStreamingResponse(self)
 
@@ -79,6 +76,7 @@ class MemoryStores(SyncAPIResource):
         description: str | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -86,25 +84,41 @@ class MemoryStores(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """Create a memory store
+        """
+        Create a Memory Store
 
         Args:
-          name: Human-readable name for the store.
+          name: The name of the memory store, 1 to 255 characters long, without control
+              characters. Names don't have to be unique in a workspace.
 
-        Required; 1–255 characters; no control
-              characters. The mount-path slug under `/mnt/memory/` is derived from this name
-              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
-              unique within a workspace.
+              In a session, the store's directory under `/mnt/memory/` is based on this name.
+              The name is lowercased and every run of characters other than ASCII letters and
+              digits becomes one hyphen. The session's memory store resource gives the exact
+              path in `mount_path`.
 
-          description: Free-text description of what the store contains, up to 1024 characters.
+              See the
+              [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#how-the-agent-accesses-memory)
+              to learn more about how agents access memory stores.
+
+          description: Free-text description of what the store contains, up to 1,024 characters.
               Included in the agent's system prompt when the store is attached, so word it to
               be useful to the agent.
 
-          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-              Not visible to the agent.
+          metadata: Key-value pairs for your own use, such as the end user that the store belongs
+              to. The agent doesn't see them.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              A store has at most 16 pairs. Keys are 1 to 64 characters long and values at
+              most 512 characters.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -119,24 +133,29 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            "/v1/memory_stores?beta=true",
-            body=maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "metadata": metadata,
-                },
-                memory_store_create_params.MemoryStoreCreateParams,
-            ),
+            "/v1/memory_stores",
+            body={
+                "name": name,
+                "description": description,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.create",
+                span_route="/v1/memory_stores",
+                span_created_id="gen_ai.memory.store.id",
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -146,6 +165,7 @@ class MemoryStores(SyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -154,10 +174,20 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Retrieve a memory store
+        Retrieve a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to retrieve (`memstore_...`).
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -174,16 +204,24 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -196,6 +234,7 @@ class MemoryStores(SyncAPIResource):
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -204,21 +243,38 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Update a memory store
+        Update a Memory Store
 
         Args:
-          description: New description for the store, up to 1024 characters. Pass an empty string to
+          memory_store_id: The ID of the memory store to update (`memstore_...`).
+
+              The request fails with HTTP status 400 if the store is archived.
+
+          description: New description for the store, up to 1,024 characters. Pass an empty string to
               clear it.
 
-          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
-              Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
-              each) with values up to 512 chars.
+          metadata: Changes to apply to the memory store's metadata. Keys you leave out keep their
+              values.
 
-          name: New human-readable name for the store. 1–255 characters; no control characters.
-              Renaming changes the slug used for the store's `mount_path` in sessions created
-              after the update.
+              Set a key to a string to add or replace it, or to `null` to remove it. After the
+              change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64
+              characters long and values at most 512 characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          name: The new name of the memory store, 1 to 255 characters long, without control
+              characters.
+
+              Sessions created after the change use the new name for the store's directory
+              under `/mnt/memory/`.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -235,24 +291,29 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
-            body=maybe_transform(
-                {
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                memory_store_update_params.MemoryStoreUpdateParams,
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
+            body={
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.update",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -266,6 +327,7 @@ class MemoryStores(SyncAPIResource):
         limit: int | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -274,14 +336,12 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaManagedAgentsMemoryStore]:
         """
-        List memory stores
+        List Memory Stores
 
         Args:
-          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
-              on the wire as `created_at[gte]`.
+          created_at_gte: Return only memory stores created at or after this time (inclusive).
 
-          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
-              Sent on the wire as `created_at[lte]`.
+          created_at_lte: Return only memory stores created at or before this time (inclusive).
 
           include_archived: When `true`, archived stores are included in the results. Defaults to `false`
               (archived stores are excluded).
@@ -289,10 +349,18 @@ class MemoryStores(SyncAPIResource):
           limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted.
 
-          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
-              previous response to fetch the next page; omit for the first page.
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -307,30 +375,31 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             page=SyncPageCursor[BetaManagedAgentsMemoryStore],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    memory_store_list_params.MemoryStoreListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.list",
+                span_route="/v1/memory_stores",
             ),
             model=BetaManagedAgentsMemoryStore,
         )
@@ -340,6 +409,7 @@ class MemoryStores(SyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -348,10 +418,23 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        Delete a memory store
+        Delete a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to delete (`memstore_...`).
+
+              Deleting a store also deletes all its memories and memory versions. It can't be
+              undone.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -368,16 +451,24 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.delete",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemoryStore,
         )
@@ -387,6 +478,7 @@ class MemoryStores(SyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -395,10 +487,23 @@ class MemoryStores(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Archive a memory store
+        Archive a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to archive (`memstore_...`).
+
+              Archiving can't be undone. Archiving a store that is already archived returns it
+              unchanged.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -415,16 +520,24 @@ class MemoryStores(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._post(
-            path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}/archive", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.archive",
+                span_route="/v1/memory_stores/{memory_store_id}/archive",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -445,7 +558,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryStoresWithRawResponse(self)
 
@@ -454,7 +567,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMemoryStoresWithStreamingResponse(self)
 
@@ -465,6 +578,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         description: str | Omit = omit,
         metadata: Dict[str, str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -472,25 +586,41 @@ class AsyncMemoryStores(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
-        """Create a memory store
+        """
+        Create a Memory Store
 
         Args:
-          name: Human-readable name for the store.
+          name: The name of the memory store, 1 to 255 characters long, without control
+              characters. Names don't have to be unique in a workspace.
 
-        Required; 1–255 characters; no control
-              characters. The mount-path slug under `/mnt/memory/` is derived from this name
-              (lowercased, non-alphanumeric runs collapsed to a hyphen). Names need not be
-              unique within a workspace.
+              In a session, the store's directory under `/mnt/memory/` is based on this name.
+              The name is lowercased and every run of characters other than ASCII letters and
+              digits becomes one hyphen. The session's memory store resource gives the exact
+              path in `mount_path`.
 
-          description: Free-text description of what the store contains, up to 1024 characters.
+              See the
+              [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#how-the-agent-accesses-memory)
+              to learn more about how agents access memory stores.
+
+          description: Free-text description of what the store contains, up to 1,024 characters.
               Included in the agent's system prompt when the store is attached, so word it to
               be useful to the agent.
 
-          metadata: Arbitrary key-value tags for your own bookkeeping (such as the end user a store
-              belongs to). Up to 16 pairs; keys 1–64 characters; values up to 512 characters.
-              Not visible to the agent.
+          metadata: Key-value pairs for your own use, such as the end user that the store belongs
+              to. The agent doesn't see them.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+              A store has at most 16 pairs. Keys are 1 to 64 characters long and values at
+              most 512 characters.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -505,24 +635,29 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            "/v1/memory_stores?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "name": name,
-                    "description": description,
-                    "metadata": metadata,
-                },
-                memory_store_create_params.MemoryStoreCreateParams,
-            ),
+            "/v1/memory_stores",
+            body={
+                "name": name,
+                "description": description,
+                "metadata": metadata,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.create",
+                span_route="/v1/memory_stores",
+                span_created_id="gen_ai.memory.store.id",
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -532,6 +667,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -540,10 +676,20 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Retrieve a memory store
+        Retrieve a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to retrieve (`memstore_...`).
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -560,16 +706,24 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.retrieve",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -582,6 +736,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         metadata: Optional[Dict[str, Optional[str]]] | Omit = omit,
         name: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -590,21 +745,38 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Update a memory store
+        Update a Memory Store
 
         Args:
-          description: New description for the store, up to 1024 characters. Pass an empty string to
+          memory_store_id: The ID of the memory store to update (`memstore_...`).
+
+              The request fails with HTTP status 400 if the store is archived.
+
+          description: New description for the store, up to 1,024 characters. Pass an empty string to
               clear it.
 
-          metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
-              Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars
-              each) with values up to 512 chars.
+          metadata: Changes to apply to the memory store's metadata. Keys you leave out keep their
+              values.
 
-          name: New human-readable name for the store. 1–255 characters; no control characters.
-              Renaming changes the slug used for the store's `mount_path` in sessions created
-              after the update.
+              Set a key to a string to add or replace it, or to `null` to remove it. After the
+              change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64
+              characters long and values at most 512 characters.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          name: The new name of the memory store, 1 to 255 characters long, without control
+              characters.
+
+              Sessions created after the change use the new name for the store's directory
+              under `/mnt/memory/`.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -621,24 +793,29 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
-            body=await async_maybe_transform(
-                {
-                    "description": description,
-                    "metadata": metadata,
-                    "name": name,
-                },
-                memory_store_update_params.MemoryStoreUpdateParams,
-            ),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
+            body={
+                "description": description,
+                "metadata": metadata,
+                "name": name,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.update",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )
@@ -652,6 +829,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         limit: int | Omit = omit,
         page: str | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -660,14 +838,12 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaManagedAgentsMemoryStore, AsyncPageCursor[BetaManagedAgentsMemoryStore]]:
         """
-        List memory stores
+        List Memory Stores
 
         Args:
-          created_at_gte: Return only stores whose `created_at` is at or after this time (inclusive). Sent
-              on the wire as `created_at[gte]`.
+          created_at_gte: Return only memory stores created at or after this time (inclusive).
 
-          created_at_lte: Return only stores whose `created_at` is at or before this time (inclusive).
-              Sent on the wire as `created_at[lte]`.
+          created_at_lte: Return only memory stores created at or before this time (inclusive).
 
           include_archived: When `true`, archived stores are included in the results. Defaults to `false`
               (archived stores are excluded).
@@ -675,10 +851,18 @@ class AsyncMemoryStores(AsyncAPIResource):
           limit: Maximum number of stores to return per page. Must be between 1 and 100. Defaults
               to 20 when omitted.
 
-          page: Opaque pagination cursor (a `page_...` value). Pass the `next_page` value from a
-              previous response to fetch the next page; omit for the first page.
+          page: The `next_page` value from a previous response, to get the next page. Omit it to
+              get the first page.
 
-          betas: Optional header to specify the beta version(s) you want to use.
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -693,30 +877,31 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/memory_stores?beta=true",
+            "/v1/memory_stores",
             page=AsyncPageCursor[BetaManagedAgentsMemoryStore],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "created_at_gte": created_at_gte,
-                        "created_at_lte": created_at_lte,
-                        "include_archived": include_archived,
-                        "limit": limit,
-                        "page": page,
-                    },
-                    memory_store_list_params.MemoryStoreListParams,
-                ),
+                query={
+                    "created_at[gte]": created_at_gte,
+                    "created_at[lte]": created_at_lte,
+                    "include_archived": include_archived,
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.list",
+                span_route="/v1/memory_stores",
             ),
             model=BetaManagedAgentsMemoryStore,
         )
@@ -726,6 +911,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -734,10 +920,23 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsDeletedMemoryStore:
         """
-        Delete a memory store
+        Delete a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to delete (`memstore_...`).
+
+              Deleting a store also deletes all its memories and memory versions. It can't be
+              undone.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -754,16 +953,24 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/memory_stores/{memory_store_id}?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.delete",
+                span_route="/v1/memory_stores/{memory_store_id}",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsDeletedMemoryStore,
         )
@@ -773,6 +980,7 @@ class AsyncMemoryStores(AsyncAPIResource):
         memory_store_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -781,10 +989,23 @@ class AsyncMemoryStores(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaManagedAgentsMemoryStore:
         """
-        Archive a memory store
+        Archive a Memory Store
 
         Args:
-          betas: Optional header to specify the beta version(s) you want to use.
+          memory_store_id: The ID of the memory store to archive (`memstore_...`).
+
+              Archiving can't be undone. Archiving a store that is already archived returns it
+              unchanged.
+
+          betas: This endpoint is in beta: requests must send `agent-memory-2026-07-22` or
+              `managed-agents-2026-04-01` in this header.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -801,16 +1022,24 @@ class AsyncMemoryStores(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["agent-memory-2026-07-22"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "agent-memory-2026-07-22", **(extra_headers or {})}
         return await self._post(
-            path_template("/v1/memory_stores/{memory_store_id}/archive?beta=true", memory_store_id=memory_store_id),
+            path_template("/v1/memory_stores/{memory_store_id}/archive", memory_store_id=memory_store_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.memory_stores.archive",
+                span_route="/v1/memory_stores/{memory_store_id}/archive",
+                span_attributes={"gen_ai.memory.store.id": memory_store_id},
             ),
             cast_to=BetaManagedAgentsMemoryStore,
         )

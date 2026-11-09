@@ -1,10 +1,10 @@
-"""Memory-store sync driven end to end through the real ``EnvironmentWorker``.
+"""Memory-store sync driven end to end through the real `EnvironmentWorker`.
 
-Real: the worker, ``SessionMemoryStores``, ``FileStore``,
-and the filesystem. Faked: the network (an in-memory ``MemoryServer`` plus
+Real: the worker, `SessionMemoryStores`, `FileStore`,
+and the filesystem. Faked: the network (an in-memory `MemoryServer` plus
 stub heartbeat/stop), the session tool-call stream, and the clock. So the
-chain worker → gate on the sessions token → download → ``sync_if_due`` per
-tool call → ``finish`` → ``dispose`` runs for real against a fake
+chain worker → gate on the sessions token → download → `sync_if_due` per
+tool call → `finish` → `dispose` runs for real against a fake
 server; assertions read the server and the disk.
 """
 
@@ -52,10 +52,10 @@ def fake_session(
     sync_deletions: MemoryDeleteMode = "enabled",
     tools: Callable[[Any], list[Any]] | None = None,
 ) -> tuple[EnvironmentWorker, MemoryServer, Path]:
-    """An ``EnvironmentWorker`` pointed at a fake client; one work item queued."""
+    """An `EnvironmentWorker` pointed at a fake client; one work item queued."""
 
     class _FakeWork:
-        """Stub of ``client.beta.environments.work`` — heartbeat and stop are no-ops."""
+        """Stub of `client.beta.environments.work` — heartbeat and stop are no-ops."""
 
         async def heartbeat(self, *_a: Any, **_kw: Any) -> Any:
             return SimpleNamespace(last_heartbeat="hb", ttl_seconds=60, state="running", lease_extended=True)
@@ -455,7 +455,7 @@ async def test_worker_stays_quiet_when_no_memory_store_is_attached(
 
 @pytest.mark.asyncio()
 async def test_worker_can_turn_sync_deletions_off(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """``memory_sync_deletions="disabled"`` reaches the stores: a local deletion
+    """`memory_sync_deletions="disabled"` reaches the stores: a local deletion
     never propagates however many syncs run, while uploads still do."""
     now = 0.0
 

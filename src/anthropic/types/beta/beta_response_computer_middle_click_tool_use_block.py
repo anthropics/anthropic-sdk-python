@@ -1,0 +1,8 @@
+from .beta_computer_middle_click_tool_use_block import BetaComputerMiddleClickToolUseBlock
+
+__all__ = ["BetaResponseComputerMiddleClickToolUseBlock"]
+
+BetaResponseComputerMiddleClickToolUseBlock = BetaComputerMiddleClickToolUseBlock
+"""
+BetaResponseComputerMiddleClickToolUseBlock has been renamed to BetaComputerMiddleClickToolUseBlock
+"""

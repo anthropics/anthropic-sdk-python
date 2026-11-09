@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -38,9 +36,13 @@ class BetaManagedAgentsUserDefineOutcomeEvent(BaseModel):
     """
 
     processed_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Timestamp when the outcome was accepted."""
 
     rubric: Rubric
-    """Rubric for grading the quality of an outcome."""
+    """How to grade the outcome.
+
+    File rubrics are currently resolved to their text content; clients should handle
+    both variants.
+    """
 
     type: Literal["user.define_outcome"]

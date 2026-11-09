@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -8,7 +6,7 @@ from typing_extensions import Literal
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import path_template, maybe_transform, async_maybe_transform
+from ...._utils import path_template
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -19,7 +17,7 @@ from ...._response import (
 )
 from ....pagination import SyncPageCursor, AsyncPageCursor
 from ...._base_client import AsyncPaginator, make_request_options
-from ....types.beta.organization import external_key_list_params, external_key_create_params, external_key_update_params
+from ....types.beta.organization import external_key_create_params, external_key_update_params
 from ....types.beta.organization.beta_external_key import BetaExternalKey
 from ....types.beta.organization.external_key_delete_response import ExternalKeyDeleteResponse
 from ....types.beta.organization.external_key_validate_response import ExternalKeyValidateResponse
@@ -34,7 +32,7 @@ class ExternalKeys(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ExternalKeysWithRawResponse(self)
 
@@ -43,7 +41,7 @@ class ExternalKeys(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ExternalKeysWithStreamingResponse(self)
 
@@ -53,6 +51,7 @@ class ExternalKeys(SyncAPIResource):
         provider_config: external_key_create_params.ProviderConfig,
         display_name: Optional[str] | Omit = omit,
         geo: Literal["us"] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -70,6 +69,11 @@ class ExternalKeys(SyncAPIResource):
 
           geo: Data residency geo. Only `us` is supported.
 
+          user_profile_id: ID of a user profile to bind the key to. Omit this field for a key that isn't
+              bound to a user profile. Such a key can be attached to a Workspace whatever its
+              user profile. The binding cannot be changed later. A key bound to a user profile
+              can only be attached to a Workspace that has the same user profile.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -77,19 +81,27 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError:
         """
         return self._post(
-            "/v1/organizations/external_keys?beta=true",
-            body=maybe_transform(
-                {
-                    "provider_config": provider_config,
-                    "display_name": display_name,
-                    "geo": geo,
-                },
-                external_key_create_params.ExternalKeyCreateParams,
-            ),
+            "/v1/organizations/external_keys",
+            body={
+                "provider_config": provider_config,
+                "display_name": display_name,
+                "geo": geo,
+                "user_profile_id": user_profile_id,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.create",
+                span_route="/v1/organizations/external_keys",
+                span_created_id="anthropic.organization.external_key.id",
             ),
             cast_to=BetaExternalKey,
         )
@@ -122,11 +134,16 @@ class ExternalKeys(SyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._get(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.retrieve",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -169,23 +186,28 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._post(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
-            body=maybe_transform(
-                {
-                    "display_name": display_name,
-                    "geo": geo,
-                    "provider_config": provider_config,
-                },
-                external_key_update_params.ExternalKeyUpdateParams,
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
+            body={
+                "display_name": display_name,
+                "geo": geo,
+                "provider_config": provider_config,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.update",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -222,20 +244,20 @@ class ExternalKeys(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             page=SyncPageCursor[BetaExternalKey],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    external_key_list_params.ExternalKeyListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.list",
+                span_route="/v1/organizations/external_keys",
             ),
             model=BetaExternalKey,
         )
@@ -266,15 +288,23 @@ class ExternalKeys(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._delete(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.delete",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -313,10 +343,17 @@ class ExternalKeys(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return self._post(
             path_template(
-                "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
+                "/v1/organizations/external_keys/{external_key_id}/validate", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.validate",
+                span_route="/v1/organizations/external_keys/{external_key_id}/validate",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyValidateResponse,
         )
@@ -329,7 +366,7 @@ class AsyncExternalKeys(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncExternalKeysWithRawResponse(self)
 
@@ -338,7 +375,7 @@ class AsyncExternalKeys(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncExternalKeysWithStreamingResponse(self)
 
@@ -348,6 +385,7 @@ class AsyncExternalKeys(AsyncAPIResource):
         provider_config: external_key_create_params.ProviderConfig,
         display_name: Optional[str] | Omit = omit,
         geo: Literal["us"] | Omit = omit,
+        user_profile_id: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -365,6 +403,11 @@ class AsyncExternalKeys(AsyncAPIResource):
 
           geo: Data residency geo. Only `us` is supported.
 
+          user_profile_id: ID of a user profile to bind the key to. Omit this field for a key that isn't
+              bound to a user profile. Such a key can be attached to a Workspace whatever its
+              user profile. The binding cannot be changed later. A key bound to a user profile
+              can only be attached to a Workspace that has the same user profile.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -372,19 +415,27 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          UserProfileNotFoundError:
         """
         return await self._post(
-            "/v1/organizations/external_keys?beta=true",
-            body=await async_maybe_transform(
-                {
-                    "provider_config": provider_config,
-                    "display_name": display_name,
-                    "geo": geo,
-                },
-                external_key_create_params.ExternalKeyCreateParams,
-            ),
+            "/v1/organizations/external_keys",
+            body={
+                "provider_config": provider_config,
+                "display_name": display_name,
+                "geo": geo,
+                "user_profile_id": user_profile_id,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.create",
+                span_route="/v1/organizations/external_keys",
+                span_created_id="anthropic.organization.external_key.id",
             ),
             cast_to=BetaExternalKey,
         )
@@ -417,11 +468,16 @@ class AsyncExternalKeys(AsyncAPIResource):
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._get(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.retrieve",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -464,23 +520,28 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._post(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
-            body=await async_maybe_transform(
-                {
-                    "display_name": display_name,
-                    "geo": geo,
-                    "provider_config": provider_config,
-                },
-                external_key_update_params.ExternalKeyUpdateParams,
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
+            body={
+                "display_name": display_name,
+                "geo": geo,
+                "provider_config": provider_config,
+            },
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.update",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=BetaExternalKey,
         )
@@ -517,20 +578,20 @@ class AsyncExternalKeys(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         return self._get_api_list(
-            "/v1/organizations/external_keys?beta=true",
+            "/v1/organizations/external_keys",
             page=AsyncPageCursor[BetaExternalKey],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "limit": limit,
-                        "page": page,
-                    },
-                    external_key_list_params.ExternalKeyListParams,
-                ),
+                query={
+                    "limit": limit,
+                    "page": page,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.list",
+                span_route="/v1/organizations/external_keys",
             ),
             model=BetaExternalKey,
         )
@@ -561,15 +622,23 @@ class AsyncExternalKeys(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ExternalKeyInWorkspacePolicyError:
         """
         if not external_key_id:
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._delete(
-            path_template(
-                "/v1/organizations/external_keys/{external_key_id}?beta=true", external_key_id=external_key_id
-            ),
+            path_template("/v1/organizations/external_keys/{external_key_id}", external_key_id=external_key_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.delete",
+                span_route="/v1/organizations/external_keys/{external_key_id}",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyDeleteResponse,
         )
@@ -608,10 +677,17 @@ class AsyncExternalKeys(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `external_key_id` but received {external_key_id!r}")
         return await self._post(
             path_template(
-                "/v1/organizations/external_keys/{external_key_id}/validate?beta=true", external_key_id=external_key_id
+                "/v1/organizations/external_keys/{external_key_id}/validate", external_key_id=external_key_id
             ),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.external_keys.validate",
+                span_route="/v1/organizations/external_keys/{external_key_id}/validate",
+                span_attributes={"anthropic.organization.external_key.id": external_key_id},
             ),
             cast_to=ExternalKeyValidateResponse,
         )

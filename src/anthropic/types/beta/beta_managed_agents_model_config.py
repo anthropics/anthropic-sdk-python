@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -36,9 +34,10 @@ class BetaManagedAgentsModelConfig(BaseModel):
     """
 
     effort: Optional[Effort] = None
-    """How hard Claude works on each turn.
+    """How hard Claude works on each inference call.
 
-    Sets `output_config.effort` on every Messages call the session makes.
+    One of `low`, `medium`, `high`, `xhigh`, `max`. Always present; resolved to the
+    per-model default at save time when not supplied.
     """
 
     inference_geo: Optional[str] = None
@@ -51,5 +50,6 @@ class BetaManagedAgentsModelConfig(BaseModel):
     """Inference speed mode.
 
     `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
+    Defaults to `standard`. Not all models support `fast`; invalid combinations are
+    rejected at create time.
     """

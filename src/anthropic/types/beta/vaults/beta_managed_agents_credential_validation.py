@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from datetime import datetime
 from typing_extensions import Literal
@@ -22,18 +20,24 @@ class BetaManagedAgentsCredentialValidation(BaseModel):
     """Whether the credential has a refresh token configured."""
 
     mcp_probe: Optional[BetaManagedAgentsMCPProbe] = None
-    """The failing step of an MCP validation probe."""
+    """
+    Details of the MCP probe step that failed, or `null` if the probe succeeded or
+    there was no access token to test.
+    """
 
     refresh: Optional[BetaManagedAgentsRefreshObject] = None
-    """Outcome of a refresh-token exchange attempted during credential validation."""
+    """Details of the refresh-token exchange attempted on a 401.
+
+    Null when no refresh was attempted.
+    """
 
     status: BetaManagedAgentsCredentialValidationStatus
-    """Overall verdict of a credential validation probe."""
+    """Overall verdict of the validation probe."""
 
     type: Literal["vault_credential_validation"]
 
     validated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the validation probe was performed."""
 
     vault_id: str
     """Identifier of the vault containing the credential."""

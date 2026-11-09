@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import Literal, Required, TypedDict
@@ -22,7 +20,7 @@ class BetaManagedAgentsCustomToolParams(TypedDict, total=False):
     """
 
     input_schema: Required[BetaManagedAgentsCustomToolInputSchemaParam]
-    """JSON Schema for custom tool input parameters."""
+    """JSON Schema defining the expected input parameters for the tool."""
 
     name: Required[str]
     """Unique name for the tool.

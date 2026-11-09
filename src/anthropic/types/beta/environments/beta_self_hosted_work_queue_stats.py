@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -9,13 +7,10 @@ __all__ = ["BetaSelfHostedWorkQueueStats"]
 
 
 class BetaSelfHostedWorkQueueStats(BaseModel):
-    """Statistics about the work queue for an environment.
-
-    Uses Redis Stream consumer group metrics for O(1) queries.
-    """
+    """Statistics about the work queue for an environment."""
 
     depth: int
-    """Number of work items waiting to be picked up (lag from consumer group)"""
+    """Number of work items waiting to be picked up"""
 
     oldest_queued_at: Optional[str] = None
     """

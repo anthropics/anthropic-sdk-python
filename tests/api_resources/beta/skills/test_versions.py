@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -34,6 +32,7 @@ class TestVersions:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -42,7 +41,9 @@ class TestVersions:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -51,6 +52,7 @@ class TestVersions:
         response = client.beta.skills.versions.with_raw_response.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -63,6 +65,7 @@ class TestVersions:
         with client.beta.skills.versions.with_streaming_response.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -85,6 +88,7 @@ class TestVersions:
         version = client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -93,7 +97,9 @@ class TestVersions:
         version = client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -102,6 +108,7 @@ class TestVersions:
         response = client.beta.skills.versions.with_raw_response.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -114,6 +121,7 @@ class TestVersions:
         with client.beta.skills.versions.with_streaming_response.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -141,6 +149,7 @@ class TestVersions:
     def test_method_list(self, client: Anthropic) -> None:
         version = client.beta.skills.versions.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -150,7 +159,9 @@ class TestVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -158,6 +169,7 @@ class TestVersions:
     def test_raw_response_list(self, client: Anthropic) -> None:
         response = client.beta.skills.versions.with_raw_response.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -169,6 +181,7 @@ class TestVersions:
     def test_streaming_response_list(self, client: Anthropic) -> None:
         with client.beta.skills.versions.with_streaming_response.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -190,6 +203,7 @@ class TestVersions:
         version = client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -198,7 +212,9 @@ class TestVersions:
         version = client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -207,6 +223,7 @@ class TestVersions:
         response = client.beta.skills.versions.with_raw_response.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -219,6 +236,7 @@ class TestVersions:
         with client.beta.skills.versions.with_streaming_response.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -245,12 +263,13 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert version.json() == {"foo": "bar"}
@@ -260,13 +279,15 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_download_with_all_params(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert version.json() == {"foo": "bar"}
@@ -276,13 +297,14 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         version = client.beta.skills.versions.with_raw_response.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert version.is_closed is True
@@ -293,12 +315,13 @@ class TestVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_streaming_response_download(self, client: Anthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         with client.beta.skills.versions.with_streaming_response.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as version:
             assert not version.is_closed
             assert version.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -335,6 +358,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -343,7 +367,9 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -352,6 +378,7 @@ class TestAsyncVersions:
         response = await async_client.beta.skills.versions.with_raw_response.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -364,6 +391,7 @@ class TestAsyncVersions:
         async with async_client.beta.skills.versions.with_streaming_response.create(
             skill_id="skill_id",
             files=[b"Example data"],
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -386,6 +414,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -394,7 +423,9 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSkillVersion, version, path=["response"])
 
@@ -403,6 +434,7 @@ class TestAsyncVersions:
         response = await async_client.beta.skills.versions.with_raw_response.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -415,6 +447,7 @@ class TestAsyncVersions:
         async with async_client.beta.skills.versions.with_streaming_response.retrieve(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -442,6 +475,7 @@ class TestAsyncVersions:
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
         version = await async_client.beta.skills.versions.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -451,7 +485,9 @@ class TestAsyncVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSkillVersion], version, path=["response"])
 
@@ -459,6 +495,7 @@ class TestAsyncVersions:
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.skills.versions.with_raw_response.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -470,6 +507,7 @@ class TestAsyncVersions:
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.skills.versions.with_streaming_response.list(
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -491,6 +529,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -499,7 +538,9 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["string"],
+            betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedSkillVersion, version, path=["response"])
 
@@ -508,6 +549,7 @@ class TestAsyncVersions:
         response = await async_client.beta.skills.versions.with_raw_response.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert response.is_closed is True
@@ -520,6 +562,7 @@ class TestAsyncVersions:
         async with async_client.beta.skills.versions.with_streaming_response.delete(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -546,12 +589,13 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = await async_client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert await version.json() == {"foo": "bar"}
@@ -561,13 +605,15 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_method_download_with_all_params(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         version = await async_client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
             betas=["message-batches-2024-09-24"],
+            workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
+            extra_query={"beta": "true"},
         )
         assert version.is_closed
         assert await version.json() == {"foo": "bar"}
@@ -577,13 +623,14 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
 
         version = await async_client.beta.skills.versions.with_raw_response.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         )
 
         assert version.is_closed is True
@@ -594,12 +641,13 @@ class TestAsyncVersions:
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_streaming_response_download(self, async_client: AsyncAnthropic, respx_mock: MockRouter) -> None:
-        respx_mock.get("/v1/skills/skill_id/versions/version/content?beta=true").mock(
+        respx_mock.get("/v1/skills/skill_id/versions/version/content").mock(
             return_value=httpx2.Response(200, json={"foo": "bar"})
         )
         async with async_client.beta.skills.versions.with_streaming_response.download(
             version="version",
             skill_id="skill_id",
+            extra_query={"beta": "true"},
         ) as version:
             assert not version.is_closed
             assert version.http_request.headers.get("X-Stainless-Lang") == "python"

@@ -1,11 +1,10 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from ...._models import BaseModel, UnionDiscriminator
 from ..beta_managed_agents_advisor import BetaManagedAgentsAdvisor
+from .beta_managed_agents_inline_agent import BetaManagedAgentsInlineAgent
 from .beta_managed_agents_session_thread_stats import BetaManagedAgentsSessionThreadStats
 from .beta_managed_agents_session_thread_usage import BetaManagedAgentsSessionThreadUsage
 from ..beta_managed_agents_session_thread_agent import BetaManagedAgentsSessionThreadAgent
@@ -14,30 +13,31 @@ from .beta_managed_agents_session_thread_status import BetaManagedAgentsSessionT
 __all__ = ["BetaManagedAgentsSessionThread", "Agent"]
 
 Agent: TypeAlias = Annotated[
-    Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor], UnionDiscriminator("type")
+    Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor, BetaManagedAgentsInlineAgent],
+    UnionDiscriminator("type"),
 ]
 
 
 class BetaManagedAgentsSessionThread(BaseModel):
     """An execution thread within a `session`.
 
-    Each session has one primary thread plus zero or more child threads spawned by the coordinator.
+    Each session has one primary thread plus zero or more child threads.
     """
 
     id: str
     """Unique identifier for this thread."""
 
     agent: Agent
-    """
-    The resolved agent a session thread runs: a saved-agent snapshot, the platform
-    advisor entry, or an inline-defined (ephemeral) agent snapshot.
+    """Resolved agent definition for this thread.
+
+    Snapshot of the agent at thread creation time.
     """
 
     archived_at: Optional[datetime] = None
-    """A timestamp in RFC 3339 format"""
+    """When the thread was archived. Null if not archived."""
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the thread was created."""
 
     parent_thread_id: Optional[str] = None
     """Parent thread that spawned this thread. Null for the primary thread."""
@@ -46,15 +46,27 @@ class BetaManagedAgentsSessionThread(BaseModel):
     """The session this thread belongs to."""
 
     stats: Optional[BetaManagedAgentsSessionThreadStats] = None
-    """Timing statistics for a session thread."""
+    """Timing statistics for this thread.
+
+    Null until the thread's first status transition.
+    """
 
     status: BetaManagedAgentsSessionThreadStatus
-    """SessionThreadStatus enum"""
+    """Current execution status of the thread."""
 
     type: Literal["session_thread"]
 
     updated_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """When the thread was last updated."""
 
     usage: Optional[BetaManagedAgentsSessionThreadUsage] = None
-    """Cumulative token usage for a session thread across all turns."""
+    """Cumulative token usage for this thread.
+
+    Null until the thread's first idle transition.
+    """
+
+    workflow_run_id: Optional[str] = None
+    """
+    Identifier of the workflow run that created the thread, or `null` for any other
+    thread.
+    """

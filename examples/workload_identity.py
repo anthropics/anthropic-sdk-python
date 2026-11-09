@@ -3,9 +3,11 @@
 Workload Identity Federation & Credential Providers — comprehensive examples.
 
 The Anthropic client resolves auth in this precedence order:
-  1. Constructor args: api_key=, auth_token=, or credentials=
-  2. Env vars: ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, then the credential chain below
-  3. Standard defaults: ~/.config/anthropic/credentials.json if it exists
+  1. Constructor args: api_key=, auth_token=, credentials=, config=, or profile=
+  2. ANTHROPIC_API_KEY, then ANTHROPIC_AUTH_TOKEN
+  3. ANTHROPIC_PROFILE: the profile it names
+  4. The workload identity federation env vars (Section 1)
+  5. The active profile on disk: the one <config_dir>/active_config names, otherwise "default"
 
 The `credentials=` arg accepts any AccessTokenProvider — a zero-arg callable returning
 AccessToken(token, expires_at). The client caches the token and proactively refreshes
@@ -138,8 +140,10 @@ client = anthropic.Anthropic(credentials=StaticToken("sk-ant-oat01-..."))
 
 
 # --- 2d. Custom AccessTokenProvider ---------------------------------------
-# Any callable matching AccessTokenProvider works. The optional `force_refresh`
-# kwarg is set after a 401 retry; providers without a cache can ignore it.
+# Any callable matching AccessTokenProvider works. `force_refresh` is True after
+# the API rejected the previous token; providers without a cache can ignore it.
+# If your token source already does its own caching, use expires_at=0 and
+# the client will call your provider before every request instead of caching.
 def my_provider(*, force_refresh: bool = False) -> AccessToken:  # noqa: ARG001
     # call your internal auth service here
     return AccessToken(token="sk-ant-oat01-...", expires_at=1775000000)
@@ -151,13 +155,26 @@ client = anthropic.Anthropic(credentials=my_provider)
 # Section 3: Precedence demonstration
 # =============================================================================
 # Constructor args always win over env vars, which win over default file paths.
-# Within constructor args, passing more than one of api_key/auth_token/credentials
-# is supported but credentials takes the Bearer slot (api_key still sends X-Api-Key
-# if both are set — generally don't do this).
+# Pass at most one of api_key/auth_token/credentials/config/profile. Passing two
+# raises ValueError.
 
 # =============================================================================
 # Section 4: Async
 # =============================================================================
+# AsyncAnthropic accepts the same providers. It also accepts an `async def`
+# provider and awaits it on the event loop.
+
+
+async def fetch_token_from_my_auth_service(*, force_refresh: bool = False) -> str:  # noqa: ARG001
+    return "sk-ant-oat01-..."
+
+
+async def my_async_provider(*, force_refresh: bool = False) -> AccessToken:
+    token = await fetch_token_from_my_auth_service(force_refresh=force_refresh)
+    return AccessToken(token=token, expires_at=1775000000)
+
+
+async_client = anthropic.AsyncAnthropic(credentials=my_async_provider)
 
 
 async def main() -> None:
@@ -169,7 +186,7 @@ async def main() -> None:
         ),
     )
     msg = await aclient.messages.create(
-        model="claude-opus-4-5",
+        model="claude-opus-5-5",
         max_tokens=1024,
         messages=[{"role": "user", "content": "Hello"}],
     )

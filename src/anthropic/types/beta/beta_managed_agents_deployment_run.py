@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
@@ -62,18 +60,21 @@ class BetaManagedAgentsDeploymentRun(BaseModel):
     """Unique identifier for this run (`drun_...`)."""
 
     agent: BetaManagedAgentsAgentReference
-    """A resolved agent reference with a concrete version."""
+    """Snapshot of the agent at fire time.
+
+    Always fully resolved — deployments pin agent + version.
+    """
 
     created_at: datetime
-    """A timestamp in RFC 3339 format"""
+    """Time this run record was persisted."""
 
     deployment_id: str
     """ID of the deployment that produced this run."""
 
     error: Optional[Error] = None
-    """Why the run failed to create a session.
+    """Populated on creation failure.
 
-    The type identifies the failure; message is human-readable detail.
+    Null on success. Exactly one of `session_id` or `error` is non-null.
     """
 
     session_id: Optional[str] = None
@@ -83,6 +84,6 @@ class BetaManagedAgentsDeploymentRun(BaseModel):
     """
 
     trigger_context: BetaManagedAgentsTriggerContext
-    """Describes what triggered a deployment run, with trigger-specific metadata."""
+    """What triggered this run and trigger-specific metadata."""
 
     type: Literal["deployment_run"]

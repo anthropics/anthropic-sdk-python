@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Union
@@ -9,6 +7,9 @@ __all__ = ["BetaManagedAgentsModelParam"]
 
 BetaManagedAgentsModelParam: TypeAlias = Union[
     Literal[
+        "claude-haiku-5-5",
+        "claude-sonnet-5-5",
+        "claude-opus-5-5",
         "claude-fable-5-1",
         "claude-sonnet-5",
         "claude-fable-5",

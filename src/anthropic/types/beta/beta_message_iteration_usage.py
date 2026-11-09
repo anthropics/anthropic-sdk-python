@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -25,7 +23,7 @@ class BetaMessageIterationUsage(BaseModel):
     input_tokens: int
     """The number of input tokens which were used."""
 
-    model: Model
+    model: Optional[Model] = None
     """The model that will complete your prompt.
 
     See [models](https://docs.anthropic.com/en/docs/models-overview) for additional

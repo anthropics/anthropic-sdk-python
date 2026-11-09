@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import os
+import sys
+import types
 import inspect
 import weakref
+import threading
 from typing import (
     IO,
     TYPE_CHECKING,
     Any,
     Type,
+    Tuple,
     Union,
     Generic,
+    Mapping,
     TypeVar,
     Callable,
     Iterable,
@@ -82,6 +87,7 @@ from ._constants import RAW_RESPONSE_HEADER
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler, ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema, core_schema
+    from opentelemetry.util.types import AttributeValue
     from pydantic_core.core_schema import ModelField, ModelSchema, LiteralSchema, ModelFieldsSchema
 else:
     try:
@@ -89,6 +95,9 @@ else:
     except ImportError:
         CoreSchema = None
         core_schema = None
+
+    # pydantic can't resolve the forward reference that this alias can hold, and request options are never validated.
+    AttributeValue = Any
 
 __all__ = ["BaseModel", "GenericModel"]
 
@@ -103,6 +112,41 @@ class _ConfigProtocol(Protocol):
     allow_population_by_field_name: bool
 
 
+# Deferred models build on first use, possibly on several threads at once, and pydantic's model_rebuild() isn't
+# thread-safe before 2.14. The lock is reentrant because building one model can start building another on the
+# same thread, and one lock serves every class because per-class locks taken in opposite orders would deadlock.
+_model_build_lock = threading.RLock()
+
+
+def _reset_model_build_lock() -> None:
+    # Another thread may hold the lock at fork time, and the child would wait for it forever.
+    global _model_build_lock
+    _model_build_lock = threading.RLock()
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_reset_model_build_lock)
+
+
+def _pydantic_locks_model_rebuild() -> bool:
+    import pydantic.main
+
+    if hasattr(pydantic.main, "_rebuild_lock"):
+        return True
+    parts = pydantic.VERSION.split("+")[0].split(".")
+    try:
+        release = (int(parts[0]), int(parts[1]))
+    except (IndexError, ValueError):
+        return False
+    patch = ".".join(parts[2:])
+    return release > (2, 14) or (release == (2, 14) and "a" not in patch and "dev" not in patch)
+
+
+# Pydantic 2.14.0b1 added its own lock around model_rebuild(), so BaseModel overrides it only before that:
+# taking both locks could deadlock, and the override repeats pydantic's private keywords.
+_PYDANTIC_LOCKS_MODEL_REBUILD = _pydantic_locks_model_rebuild()
+
+
 class BaseModel(pydantic.BaseModel):
     if PYDANTIC_V1:
 
@@ -115,6 +159,32 @@ class BaseModel(pydantic.BaseModel):
         class Config(pydantic.BaseConfig):  # pyright: ignore[reportDeprecated]
             extra: Any = pydantic.Extra.allow  # type: ignore
     else:
+        if not _PYDANTIC_LOCKS_MODEL_REBUILD:
+
+            @classmethod
+            @override
+            def model_rebuild(
+                cls,
+                *,
+                force: bool = False,
+                raise_errors: bool = True,
+                _parent_namespace_depth: int = 2,
+                _types_namespace: Any = None,
+            ) -> bool | None:
+                if cls.__pydantic_complete__ and not force:
+                    return None
+                with _model_build_lock:
+                    if cls.__pydantic_complete__ and not force:
+                        # Another thread built cls while this one waited. Return True, not None:
+                        # before 2.5, pydantic's own first-use build call treats None as a failed build.
+                        return True
+                    return super().model_rebuild(
+                        force=force,
+                        raise_errors=raise_errors,
+                        _parent_namespace_depth=_parent_namespace_depth + 1 if _parent_namespace_depth > 0 else 0,
+                        _types_namespace=_types_namespace,
+                    )
+
         model_config: ClassVar[ConfigDict] = ConfigDict(
             extra="allow", defer_build=coerce_boolean(os.environ.get("DEFER_PYDANTIC_BUILD", "true"))
         )
@@ -517,7 +587,7 @@ def _get_extra_fields_type(cls: type[pydantic.BaseModel]) -> type | None:
         # TODO
         return None
 
-    schema = cls.__pydantic_core_schema__
+    schema = _get_own_core_schema(cls)
     if schema["type"] == "model":
         fields = schema["schema"]
         if fields["type"] == "model-fields":
@@ -527,6 +597,14 @@ def _get_extra_fields_type(cls: type[pydantic.BaseModel]) -> type | None:
                 return extras["cls"]  # type: ignore[no-any-return]
 
     return None
+
+
+def _get_own_core_schema(cls: type[pydantic.BaseModel]) -> CoreSchema:
+    # Before pydantic 2.14, while another thread builds cls, pydantic has deleted cls.__pydantic_core_schema__,
+    # so reading it would return a parent class's schema. model_rebuild() waits for that build.
+    if not cls.__pydantic_complete__:
+        cls.model_rebuild(raise_errors=False, _parent_namespace_depth=0)
+    return cls.__pydantic_core_schema__
 
 
 def is_basemodel(type_: type) -> bool:
@@ -578,6 +656,14 @@ def construct_type_unchecked(*, value: object, type_: type[_T]) -> _T:
     given type.
     """
     return cast(_T, construct_type(value=value, type_=type_))
+
+
+def construct_type_or_none(*, value: object, type_: type[_T]) -> _T | None:
+    """Like `construct_type_unchecked()`, but returns `None` instead of raising."""
+    try:
+        return construct_type_unchecked(value=value, type_=type_)
+    except Exception:
+        return None
 
 
 def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]] = None) -> object:
@@ -729,6 +815,14 @@ class CachedDiscriminatorType(Protocol):
 DISCRIMINATOR_CACHE: weakref.WeakKeyDictionary[type, DiscriminatorDetails] = weakref.WeakKeyDictionary()
 
 
+def _discriminator_cache_key(union: type) -> type:
+    if sys.version_info < (3, 14) and isinstance(cast(object, union), types.UnionType):
+        # `X | Y` can't be weakly referenced before Python 3.14, so key on the equal `typing.Union[X, Y]`.
+        # That object may be held only by `typing`'s LRU cache, so the cache entry can be dropped and rebuilt.
+        return cast(type, cast(Any, Union)[get_args(union)])
+    return union
+
+
 class DiscriminatorDetails:
     field_name: str
     """The name of the discriminator field in the variant class, e.g.
@@ -771,7 +865,8 @@ class DiscriminatorDetails:
 
 
 def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any, ...]) -> DiscriminatorDetails | None:
-    cached = DISCRIMINATOR_CACHE.get(union)
+    key = _discriminator_cache_key(union)
+    cached = DISCRIMINATOR_CACHE.get(key)
     if cached is not None:
         return cached
 
@@ -814,7 +909,7 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
                 field_schema = field["schema"]
 
                 if field_schema["type"] == "literal":
-                    for entry in cast("LiteralSchema", field_schema)["expected"]:
+                    for entry in cast("LiteralSchema", field_schema)["expected"]:  # pyright: ignore[reportUnnecessaryCast]
                         if isinstance(entry, str):
                             mapping[entry] = variant
 
@@ -826,24 +921,24 @@ def _build_discriminated_union_meta(*, union: type, meta_annotations: tuple[Any,
         discriminator_field=discriminator_field_name,
         discriminator_alias=discriminator_alias,
     )
-    DISCRIMINATOR_CACHE.setdefault(union, details)
+    DISCRIMINATOR_CACHE.setdefault(key, details)
     return details
 
 
 def _extract_field_schema_pv2(model: type[BaseModel], field_name: str) -> ModelField | None:
-    schema = model.__pydantic_core_schema__
+    schema = _get_own_core_schema(model)
     if schema["type"] == "definitions":
         schema = schema["schema"]
 
     if schema["type"] != "model":
         return None
 
-    schema = cast("ModelSchema", schema)
+    schema = cast("ModelSchema", schema)  # pyright: ignore[reportUnnecessaryCast]
     fields_schema = schema["schema"]
     if fields_schema["type"] != "model-fields":
         return None
 
-    fields_schema = cast("ModelFieldsSchema", fields_schema)
+    fields_schema = cast("ModelFieldsSchema", fields_schema)  # pyright: ignore[reportUnnecessaryCast]
     field = fields_schema["fields"].get(field_name)
     if not field:
         return None
@@ -908,6 +1003,7 @@ if not PYDANTIC_V1:
         return TypeAdapter(type_).validate_python(value)
 
 elif not TYPE_CHECKING:  # TODO: condition is weird
+    from pydantic.typing import display_as_type
 
     class RootModel(GenericModel, Generic[_T]):
         """Used as a placeholder to easily convert runtime types to a Pydantic format
@@ -922,12 +1018,21 @@ elif not TYPE_CHECKING:  # TODO: condition is weird
 
         __root__: _T
 
+    # Pydantic v1 lets other threads use RootModel[X] before it has set the class up. create_model() shares nothing.
+    # The key includes the arguments because Union[A, B] == Union[B, A], but v1 tries members in written order.
+    _root_models: dict[Any, Any] = {}
+
     def _validate_non_model_type(*, type_: type[_T], value: object) -> _T:
         model = _create_pydantic_model(type_).validate(value)
         return cast(_T, model.__root__)
 
     def _create_pydantic_model(type_: _T) -> Type[RootModel[_T]]:
-        return RootModel[type_]  # type: ignore
+        key = (type_, getattr(type_, "__args__", None))
+        model = _root_models.get(key)
+        if model is None:
+            name = f"RootModel[{display_as_type(type_)}]"
+            model = _root_models.setdefault(key, pydantic.create_model(name, __base__=RootModel, __root__=(type_, ...)))
+        return model
 
     def TypeAdapter(*_args: Any, **_kwargs: Any) -> Any:
         raise RuntimeError("attempted to use TypeAdapter in pydantic v1")
@@ -972,6 +1077,17 @@ class FinalRequestOptions(pydantic.BaseModel):
     idempotency_key: Union[str, None] = None
     post_parser: Union[Callable[[Any], Any], NotGiven] = NotGiven()
     follow_redirects: Union[bool, None] = None
+    # The query pairs that tell the operation apart from the others with its path in the OpenAPI
+    # document. Set by the SDK method that makes the API call. Not a public option.
+    qualifiers: Optional[dict[str, str]] = None
+    # Set by the SDK method that makes the API call, for the call's span. Not public options.
+    span_name: Optional[str] = None
+    span_route: Optional[str] = None
+    span_query_params: Tuple[str, ...] = ()
+    # The query parameters that are content on this endpoint only.
+    span_content_query_params: Tuple[str, ...] = ()
+    span_attributes: Union[Mapping[str, AttributeValue], Callable[[object], Mapping[str, AttributeValue]], None] = None
+    span_created_id: Union[str, Tuple[str, str], None] = None
 
     content: Union[bytes, bytearray, IO[bytes], Iterable[bytes], AsyncIterable[bytes], None] = None
     # It should be noted that we cannot use `json` here as that would override

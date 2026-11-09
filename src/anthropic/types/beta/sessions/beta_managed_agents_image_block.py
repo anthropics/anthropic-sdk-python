@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -20,6 +18,6 @@ class BetaManagedAgentsImageBlock(BaseModel):
     """Image content specified directly as base64 data or as a reference via a URL."""
 
     source: Source
-    """Union type for image source variants."""
+    """The source of the image data."""
 
     type: Literal["image"]

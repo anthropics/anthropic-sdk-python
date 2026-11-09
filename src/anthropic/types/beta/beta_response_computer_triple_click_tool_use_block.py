@@ -1,0 +1,8 @@
+from .beta_computer_triple_click_tool_use_block import BetaComputerTripleClickToolUseBlock
+
+__all__ = ["BetaResponseComputerTripleClickToolUseBlock"]
+
+BetaResponseComputerTripleClickToolUseBlock = BetaComputerTripleClickToolUseBlock
+"""
+BetaResponseComputerTripleClickToolUseBlock has been renamed to BetaComputerTripleClickToolUseBlock
+"""

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Optional
 from typing_extensions import Literal
 
@@ -24,7 +22,12 @@ class BetaUsage(BaseModel):
     """The number of input tokens read from the cache."""
 
     fallback_credit: Optional[BetaFallbackCreditUsage] = None
-    """Outcome of the `fallback_credit_token` presented on this request."""
+    """Outcome of the `fallback_credit_token` presented on this request.
+
+    Present on every response to a non-batch request that carried a
+    `fallback_credit_token`, in either redemption mode; absent otherwise (batch
+    items accept and ignore the token and carry no outcome object).
+    """
 
     inference_geo: Optional[str] = None
     """The geographic region where inference was performed for this request."""
@@ -40,7 +43,6 @@ class BetaUsage(BaseModel):
     (model sampling iterations, such as the turns of a server-side tool use loop),
     this allows you to:
 
-    - Determine which iterations exceeded long context thresholds (>=200k tokens)
     - Calculate the context window size from the last `message` entry
     - Understand token accumulation across server-side tool use loops
 
@@ -76,8 +78,4 @@ class BetaUsage(BaseModel):
     """If the request used the priority, standard, or batch tier."""
 
     speed: Optional[Literal["standard", "fast"]] = None
-    """Inference speed mode.
-
-    `fast` provides significantly faster output token generation at premium pricing.
-    Not all models support `fast`; invalid combinations are rejected at create time.
-    """
+    """The inference speed mode used for this request."""

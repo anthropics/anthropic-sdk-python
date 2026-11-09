@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -12,9 +10,8 @@ class BetaAWSExternalKeyConfigParam(TypedDict, total=False):
     kms_arn: Required[str]
     """Full ARN of the AWS KMS key.
 
-    On Claude Platform on AWS the key must be a single-Region key in your
-    organization's own AWS account; cross-account keys, multi-Region keys, and alias
-    ARNs are rejected.
+    On Claude Platform on AWS, alias ARNs are rejected, and your organization's own
+    key must be a single-Region key in your organization's AWS account.
     """
 
     type: Required[Literal["aws"]]
@@ -23,9 +20,4 @@ class BetaAWSExternalKeyConfigParam(TypedDict, total=False):
     """AWS region. Derived from `kms_arn` if omitted."""
 
     role_arn: Optional[str]
-    """IAM role ARN.
-
-    Deprecated — Anthropic reaches the KMS key through its own intermediate role
-    (or, on Claude Platform on AWS, with credentials AWS issues for the Workspace);
-    this field is ignored.
-    """
+    """IAM role ARN. Deprecated; this field is ignored."""

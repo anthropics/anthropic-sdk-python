@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing_extensions import Literal, Required, TypedDict
@@ -15,8 +13,7 @@ class BetaManagedAgentsAdvisorParams(TypedDict, total=False):
     model: Required[str]
     """A Claude model id.
 
-    The model must be permitted as an advisor for this agent's model — see the
-    sessions/threads/advisor spec.
+    The model must be permitted as an advisor for this agent's model.
     """
 
     type: Required[Literal["advisor"]]

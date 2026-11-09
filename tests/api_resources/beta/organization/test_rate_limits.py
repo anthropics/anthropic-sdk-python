@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -20,7 +18,9 @@ class TestRateLimits:
 
     @parametrize
     def test_method_list(self, client: Anthropic) -> None:
-        rate_limit = client.beta.organization.rate_limits.list()
+        rate_limit = client.beta.organization.rate_limits.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(SyncPageCursor[BetaOrganizationRateLimit], rate_limit, path=["response"])
 
     @parametrize
@@ -30,12 +30,15 @@ class TestRateLimits:
             limit=1,
             model="model",
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaOrganizationRateLimit], rate_limit, path=["response"])
 
     @parametrize
     def test_raw_response_list(self, client: Anthropic) -> None:
-        response = client.beta.organization.rate_limits.with_raw_response.list()
+        response = client.beta.organization.rate_limits.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -44,7 +47,9 @@ class TestRateLimits:
 
     @parametrize
     def test_streaming_response_list(self, client: Anthropic) -> None:
-        with client.beta.organization.rate_limits.with_streaming_response.list() as response:
+        with client.beta.organization.rate_limits.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -61,7 +66,9 @@ class TestAsyncRateLimits:
 
     @parametrize
     async def test_method_list(self, async_client: AsyncAnthropic) -> None:
-        rate_limit = await async_client.beta.organization.rate_limits.list()
+        rate_limit = await async_client.beta.organization.rate_limits.list(
+            extra_query={"beta": "true"},
+        )
         assert_matches_type(AsyncPageCursor[BetaOrganizationRateLimit], rate_limit, path=["response"])
 
     @parametrize
@@ -71,12 +78,15 @@ class TestAsyncRateLimits:
             limit=1,
             model="model",
             page="page",
+            extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaOrganizationRateLimit], rate_limit, path=["response"])
 
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncAnthropic) -> None:
-        response = await async_client.beta.organization.rate_limits.with_raw_response.list()
+        response = await async_client.beta.organization.rate_limits.with_raw_response.list(
+            extra_query={"beta": "true"},
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -85,7 +95,9 @@ class TestAsyncRateLimits:
 
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncAnthropic) -> None:
-        async with async_client.beta.organization.rate_limits.with_streaming_response.list() as response:
+        async with async_client.beta.organization.rate_limits.with_streaming_response.list(
+            extra_query={"beta": "true"},
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

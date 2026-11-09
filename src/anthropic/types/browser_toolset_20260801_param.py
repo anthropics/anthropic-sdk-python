@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import Optional
@@ -25,10 +23,8 @@ class BrowserToolset20260801Param(TypedDict, total=False):
     """Create a cache control breakpoint at this content block."""
 
     configs: Optional[BrowserToolsetConfigsParam]
-    """
-    Per-member configuration for `browser_toolset_20260801`: one optional field per
-    member tool, keyed by the member name — the same name the member's `tool_use`
-    blocks carry. Every member is an accepted key, and a member's defaults apply
-    wherever its key is absent. Unknown keys are rejected: the field set is this
-    toolset version's complete member set.
+    """Sparse per-member overrides, keyed by member name.
+
+    Absent, null, and {} are equivalent; a member's defaults apply wherever its key
+    is absent.
     """

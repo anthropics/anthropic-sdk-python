@@ -1,8 +1,8 @@
-"""``flush_writes`` — the push-only shutdown pass.
+"""`flush_writes` — the push-only shutdown pass.
 
 A session that ends on an error or cancel gets no full reconcile, but the
 writes already on disk are the only copy of the agent's edits.
-``flush_writes`` pushes those and does nothing else: no remote deletes, no
+`flush_writes` pushes those and does nothing else: no remote deletes, no
 local removals, no pulls.
 """
 
@@ -26,7 +26,7 @@ LOGGER = "anthropic.lib.tools.agent_toolset"
 async def _downloaded(
     tmp_path: Path, initial: dict[str, str], *, access: str | None = None
 ) -> tuple[Path, MemoryServer, SessionMemoryStores]:
-    """A ``SessionMemoryStores`` with one store already downloaded to disk."""
+    """A `SessionMemoryStores` with one store already downloaded to disk."""
     client, server = fake_anthropic(initial, access=access)
     stores = SessionMemoryStores(client, workdir=tmp_path)
     await stores.download(await client.beta.sessions.retrieve("s1"))

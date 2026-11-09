@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -40,7 +38,6 @@ ContentBlock: TypeAlias = Annotated[
 
 class RawContentBlockStartEvent(BaseModel):
     content_block: ContentBlock
-    """Response model for a file uploaded to the container."""
 
     index: int
 

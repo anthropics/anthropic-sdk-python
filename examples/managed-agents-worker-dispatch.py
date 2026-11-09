@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Service one already-claimed work item — the self-hosted "sandbox process" shape.
 
-Unlike ``managed-agents-self-hosted-sandbox-worker.py`` (which creates an agent +
-session and runs ``EnvironmentWorker.run()`` as a long-running poll loop), this
+Unlike `managed-agents-self-hosted-sandbox-worker.py` (which creates an agent +
+session and runs `EnvironmentWorker.run()` as a long-running poll loop), this
 process does *not* create anything and does *not* poll. Something upstream — an
-``ant worker poll --on-work`` script, or your own orchestrator that spawns a
-sandbox per work item — already claimed a ``session`` work item and handed it to
+`ant worker poll --on-work` script, or your own orchestrator that spawns a
+sandbox per work item — already claimed a `session` work item and handed it to
 this process. Our only job is to run that one item's tool calls to completion,
 then exit.
 
-``EnvironmentWorker.handle_item()`` with no arguments reads the work-item
-identity from the environment variables that ``ant worker poll --on-work`` sets
+`EnvironmentWorker.handle_item()` with no arguments reads the work-item
+identity from the environment variables that `ant worker poll --on-work` sets
 on the process it spawns:
 
   ANTHROPIC_WORK_ID          the claimed work item to service

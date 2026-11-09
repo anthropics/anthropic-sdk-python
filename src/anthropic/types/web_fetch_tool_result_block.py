@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -21,7 +19,6 @@ Content: TypeAlias = Union[WebFetchToolResultErrorBlock, WebFetchBlock]
 
 class WebFetchToolResultBlock(BaseModel):
     caller: Optional[Caller] = None
-    """Tool invocation directly from the model."""
 
     content: Content
 

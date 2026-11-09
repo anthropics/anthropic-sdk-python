@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 from typing import List, Iterable
@@ -8,7 +6,7 @@ from itertools import chain
 import httpx2
 
 from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
-from ...._utils import is_given, path_template, maybe_transform, strip_not_given, async_maybe_transform
+from ...._utils import is_given, path_template, strip_not_given
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
@@ -20,8 +18,9 @@ from ...._response import (
 from ....pagination import SyncPage, AsyncPage
 from ...._exceptions import AnthropicError
 from ...._base_client import AsyncPaginator, make_request_options
+from ....lib._tracing import get, count, attributes
 from ...._decoders.jsonl import JSONLDecoder, AsyncJSONLDecoder
-from ....types.beta.messages import batch_list_params, batch_create_params
+from ....types.beta.messages import batch_create_params
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.messages.beta_message_batch import BetaMessageBatch
 from ....types.beta.messages.beta_deleted_message_batch import BetaDeletedMessageBatch
@@ -37,7 +36,7 @@ class Batches(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithRawResponse(self)
 
@@ -46,7 +45,7 @@ class Batches(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithStreamingResponse(self)
 
@@ -56,6 +55,7 @@ class Batches(SyncAPIResource):
         requests: Iterable[batch_create_params.Request],
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -80,9 +80,16 @@ class Batches(SyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
-              on behalf of a party other than your organization. Requires the `user-profiles`
-              beta header. Applies to every request in the batch; an individual request whose
-              `user_profile_id` body field conflicts with this header is errored.
+              on behalf of a party other than your organization. Applies to every request in
+              the batch; an individual request whose `user_profile_id` body field conflicts
+              with this header is errored.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -91,6 +98,15 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -99,16 +115,27 @@ class Batches(SyncAPIResource):
                     if is_given(betas)
                     else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            "/v1/messages/batches?beta=true",
-            body=maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            "/v1/messages/batches",
+            body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=BetaMessageBatch,
         )
@@ -118,6 +145,7 @@ class Batches(SyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -139,6 +167,13 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -146,6 +181,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -154,16 +194,24 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -175,6 +223,7 @@ class Batches(SyncAPIResource):
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -203,6 +252,13 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -210,34 +266,40 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             page=SyncPage[BetaMessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    batch_list_params.BatchListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=BetaMessageBatch,
         )
@@ -247,6 +309,7 @@ class Batches(SyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -268,6 +331,13 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -275,6 +345,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -283,16 +358,24 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._delete(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaDeletedMessageBatch,
         )
@@ -302,6 +385,7 @@ class Batches(SyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -329,6 +413,13 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -336,6 +427,11 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -344,18 +440,24 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
-            path_template(
-                "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
-            ),
+            path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -365,6 +467,7 @@ class Batches(SyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -387,6 +490,13 @@ class Batches(SyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -394,11 +504,18 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = self.retrieve(message_batch_id=message_batch_id)
+        batch = self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
@@ -410,7 +527,8 @@ class Batches(SyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -419,7 +537,14 @@ class Batches(SyncAPIResource):
         return self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=JSONLDecoder[BetaMessageBatchIndividualResponse],
             stream=True,
@@ -433,7 +558,7 @@ class AsyncBatches(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithRawResponse(self)
 
@@ -442,7 +567,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithStreamingResponse(self)
 
@@ -452,6 +577,7 @@ class AsyncBatches(AsyncAPIResource):
         requests: Iterable[batch_create_params.Request],
         betas: List[AnthropicBetaParam] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -476,9 +602,16 @@ class AsyncBatches(AsyncAPIResource):
           betas: Optional header to specify the beta version(s) you want to use.
 
           user_profile_id: The user profile ID to attribute the requests in this batch to. Use when acting
-              on behalf of a party other than your organization. Requires the `user-profiles`
-              beta header. Applies to every request in the batch; an individual request whose
-              `user_profile_id` body field conflicts with this header is errored.
+              on behalf of a party other than your organization. Applies to every request in
+              the batch; an individual request whose `user_profile_id` body field conflicts
+              with this header is errored.
+
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
 
           extra_headers: Send extra headers
 
@@ -487,6 +620,15 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -495,16 +637,27 @@ class AsyncBatches(AsyncAPIResource):
                     if is_given(betas)
                     else not_given,
                     "anthropic-user-profile-id": user_profile_id,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            "/v1/messages/batches?beta=true",
-            body=await async_maybe_transform({"requests": requests}, batch_create_params.BatchCreateParams),
+            "/v1/messages/batches",
+            body={"requests": requests},
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.create",
+                span_route="/v1/messages/batches",
+                span_attributes=lambda body: attributes(
+                    {"anthropic.message.batch.request_count": count(get(body, "requests"))}
+                ),
+                span_created_id="anthropic.message.batch.id",
             ),
             cast_to=BetaMessageBatch,
         )
@@ -514,6 +667,7 @@ class AsyncBatches(AsyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -535,6 +689,13 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -542,6 +703,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -550,16 +716,24 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.retrieve",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -571,6 +745,7 @@ class AsyncBatches(AsyncAPIResource):
         before_id: str | Omit = omit,
         limit: int | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -599,6 +774,13 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -606,34 +788,40 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
-            "/v1/messages/batches?beta=true",
+            "/v1/messages/batches",
             page=AsyncPage[BetaMessageBatch],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "after_id": after_id,
-                        "before_id": before_id,
-                        "limit": limit,
-                    },
-                    batch_list_params.BatchListParams,
-                ),
+                query={
+                    "after_id": after_id,
+                    "before_id": before_id,
+                    "limit": limit,
+                },
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.list",
+                span_route="/v1/messages/batches",
             ),
             model=BetaMessageBatch,
         )
@@ -643,6 +831,7 @@ class AsyncBatches(AsyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -664,6 +853,13 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -671,6 +867,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -679,16 +880,24 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._delete(
-            path_template("/v1/messages/batches/{message_batch_id}?beta=true", message_batch_id=message_batch_id),
+            path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.delete",
+                span_route="/v1/messages/batches/{message_batch_id}",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaDeletedMessageBatch,
         )
@@ -698,6 +907,7 @@ class AsyncBatches(AsyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -725,6 +935,13 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -732,6 +949,11 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -740,18 +962,24 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
         extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
-            path_template(
-                "/v1/messages/batches/{message_batch_id}/cancel?beta=true", message_batch_id=message_batch_id
-            ),
+            path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.cancel",
+                span_route="/v1/messages/batches/{message_batch_id}/cancel",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=BetaMessageBatch,
         )
@@ -761,6 +989,7 @@ class AsyncBatches(AsyncAPIResource):
         message_batch_id: str,
         *,
         betas: List[AnthropicBetaParam] | Omit = omit,
+        workspace_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -783,6 +1012,13 @@ class AsyncBatches(AsyncAPIResource):
 
           betas: Optional header to specify the beta version(s) you want to use.
 
+          workspace_id: Optional header to select the Workspace for this request. The value is a
+              Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+
+              Only needed for credentials that can act on more than one Workspace. A
+              credential that belongs to a specific Workspace may omit it; if sent, it must
+              match that Workspace.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -790,11 +1026,18 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
 
-        batch = await self.retrieve(message_batch_id=message_batch_id)
+        batch = await self.retrieve(message_batch_id=message_batch_id, workspace_id=workspace_id)
         if not batch.results_url:
             raise AnthropicError(
                 f"No `results_url` for the given batch; Has it finished processing? {batch.processing_status}"
@@ -806,7 +1049,8 @@ class AsyncBatches(AsyncAPIResource):
                 {
                     "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
                     if is_given(betas)
-                    else not_given
+                    else not_given,
+                    "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
@@ -815,7 +1059,14 @@ class AsyncBatches(AsyncAPIResource):
         return await self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.messages.batches.results",
+                span_route="/v1/messages/batches/{message_batch_id}/results",
+                span_attributes={"anthropic.message.batch.id": message_batch_id},
             ),
             cast_to=AsyncJSONLDecoder[BetaMessageBatchIndividualResponse],
             stream=True,

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from __future__ import annotations
 
 import os
@@ -32,6 +30,7 @@ SNAPSHOT_RESPONSE_HEADERS_EXCLUDE = [
 ]
 
 SNAPSHOT_REQUEST_HEADERS_EXCLUDE = [
+    "authorization",
     "x-api-key",
 ]
 
@@ -61,6 +60,19 @@ def pytest_collection_modifyitems(items: list[pytest.Function]) -> None:
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 api_key = "my-anthropic-api-key"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def without_ambient_environment(request: FixtureRequest) -> Iterator[None]:
+    """Removes the variables that the clients read, so that the settings of this machine cannot change a result."""
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        # A live or a recording run sends real requests, which need the real settings.
+        if os.environ.get("ANTHROPIC_LIVE") != "1" and not request.config.getoption("--http-record"):
+            for name in list(os.environ):
+                if name.startswith(("ANTHROPIC_", "AWS_")):
+                    monkeypatch.delenv(name)
+
+        yield
 
 
 @pytest.fixture(scope="session")

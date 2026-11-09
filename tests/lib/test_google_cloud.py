@@ -19,10 +19,10 @@ from anthropic.lib._extras._common import MissingDependencyError
 
 # httpx normalizes the client base URL with a trailing slash.
 DERIVED_BASE_URL = (
-    "https://claude.googleapis.com/v1alpha/projects/my-project/locations/us-central1/workspaces/wrkspc_x/invoke/"
+    "https://claude.googleapis.com/v1/projects/my-project/locations/us-central1/workspaces/wrkspc_x/invoke/"
 )
 GLOBAL_DERIVED_BASE_URL = (
-    "https://claude.googleapis.com/v1alpha/projects/my-project/locations/global/workspaces/wrkspc_x/invoke/"
+    "https://claude.googleapis.com/v1/projects/my-project/locations/global/workspaces/wrkspc_x/invoke/"
 )
 
 
@@ -59,6 +59,11 @@ class _FakeCredentials:
         self.refresh_calls += 1
         self.token = "refreshed-token"
         self.expired = False
+
+
+ORGANIZATION_BASE_URL = (
+    "https://claude.googleapis.com/v1/projects/my-project/locations/us-central1/claudeOrganization/invoke"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -103,11 +108,9 @@ class TestAnthropicGoogleCloud:
         with pytest.raises(ValueError, match="project"):
             AnthropicGoogleCloud(location="us-central1", workspace_id="wrkspc_x", skip_auth=True)
 
-    def test_skip_auth_deriving_base_url_requires_workspace(self) -> None:
-        # The workspace ID is part of the derived URL, so skip_auth alone no longer
-        # waives it — only an explicit base_url does.
-        with pytest.raises(ValueError, match=r"(?s)workspace_id.*ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID"):
-            AnthropicGoogleCloud(project="my-project", skip_auth=True)
+    def test_derived_url_without_workspace_constructs(self) -> None:
+        AnthropicGoogleCloud(project="my-project", token_provider=lambda: "tok")
+        AnthropicGoogleCloud(project="my-project", skip_auth=True)
 
     def test_skip_auth_derives_url_with_workspace(self) -> None:
         client = AnthropicGoogleCloud(project="my-project", workspace_id="wrkspc_x", skip_auth=True)
@@ -153,9 +156,9 @@ class TestAnthropicGoogleCloud:
         assert "/projects/anthropic-env-project/" in str(client.base_url)
         assert "gcp-env-project" not in str(client.base_url)
 
-    def test_workspace_required(self) -> None:
-        with pytest.raises(ValueError, match="workspace ID"):
-            AnthropicGoogleCloud(base_url="https://example.test/", token_provider=lambda: "tok")
+    def test_explicit_base_url_needs_no_workspace(self) -> None:
+        client = AnthropicGoogleCloud(base_url="https://example.test/", token_provider=lambda: "tok")
+        assert client.workspace_id is None
 
     def test_api_key_and_auth_token_rejected(self) -> None:
         with pytest.raises(TypeError):
@@ -199,18 +202,16 @@ class TestAnthropicGoogleCloud:
         assert client.beta is not None
         assert client.messages.batches is not None
 
-    def test_no_spurious_env_shadow_warning(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_no_spurious_env_shadow_warning(
+        self, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
         # The base client's "unset ANTHROPIC_API_KEY" credential-precedence warning
         # is about its auto-discovery chain, which never engages for this subclass.
-        calls: list[Any] = []
-
-        def _record(**kwargs: object) -> None:
-            calls.append(kwargs)
-
-        monkeypatch.setattr("anthropic._client._warn_env_shadow", _record)
+        monkeypatch.setattr("anthropic.lib.credentials._auth._warn_once_seen", set[str]())
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-x")
+        monkeypatch.setenv("ANTHROPIC_PROFILE", "dev")
         AnthropicGoogleCloud(base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok")
-        assert calls == []
+        assert [r.getMessage() for r in caplog.records if r.name == "anthropic.lib.credentials._auth"] == []
 
 
 # ---------------------------------------------------------------------------
@@ -488,6 +489,64 @@ def test_lowercase_authorization_header_respected(respx_mock: MockRouter) -> Non
 
 
 @pytest.mark.respx()
+def test_client_identity_headers_are_kept(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    client = AnthropicGoogleCloud(
+        base_url="https://example.test/",
+        workspace_id="wrkspc_x",
+        token_provider=lambda: "gcp-token",
+        default_headers={"anthropic-user-profile-id": "uprof_client", "anthropic-workspace-id": "wrkspc_client"},
+    )
+
+    client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+    client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "hi"}],
+        model="claude-haiku-4-5",
+        user_profile_id="uprof_request",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[Any]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
+async def test_client_identity_headers_are_kept_async(respx_mock: MockRouter) -> None:
+    respx_mock.post(re.compile(r"https://example\.test/.*")).mock(
+        return_value=httpx2.Response(200, json={"foo": "bar"})
+    )
+    client = AsyncAnthropicGoogleCloud(
+        base_url="https://example.test/",
+        workspace_id="wrkspc_x",
+        token_provider=lambda: "gcp-token",
+        default_headers={"anthropic-user-profile-id": "uprof_client", "anthropic-workspace-id": "wrkspc_client"},
+    )
+
+    await client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+    await client.messages.create(
+        max_tokens=16,
+        messages=[{"role": "user", "content": "hi"}],
+        model="claude-haiku-4-5",
+        user_profile_id="uprof_request",
+        workspace_id="wrkspc_request",
+    )
+
+    calls = cast("list[Any]", respx_mock.calls)
+    assert len(calls) == 2
+    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
+    assert calls[0].request.headers["anthropic-workspace-id"] == "wrkspc_client"
+    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+    assert calls[1].request.headers["anthropic-workspace-id"] == "wrkspc_request"
+
+
+@pytest.mark.respx()
 def test_custom_headers_env_flows_through(respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch) -> None:
     # ANTHROPIC_CUSTOM_HEADERS behaves like it does on other SDK clients.
     monkeypatch.setenv("ANTHROPIC_CUSTOM_HEADERS", "x-custom-header: hello")
@@ -532,7 +591,7 @@ def test_custom_headers_env_authorization_never_conflicts(
 # ---------------------------------------------------------------------------
 
 ADC_DERIVED_BASE_URL = (
-    "https://claude.googleapis.com/v1alpha/projects/adc-project/locations/us-central1/workspaces/wrkspc_x/invoke/"
+    "https://claude.googleapis.com/v1/projects/adc-project/locations/us-central1/workspaces/wrkspc_x/invoke/"
 )
 
 
@@ -782,12 +841,11 @@ class TestCopy:
         assert "Authorization" not in req.headers
         assert "anthropic-workspace-id" not in req.headers
 
-    def test_copy_workspace_required_when_cleared_without_skip_auth(self) -> None:
+    def test_copy_clears_workspace_without_skip_auth(self) -> None:
         client = AnthropicGoogleCloud(
             base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
         )
-        with pytest.raises(ValueError, match="workspace ID"):
-            client.copy(workspace_id=None)
+        assert client.copy(workspace_id=None).workspace_id is None
 
     def test_copy_rejects_first_party_kwargs(self) -> None:
         client = AnthropicGoogleCloud(
@@ -874,6 +932,7 @@ async def test_no_api_key_leak_async(respx_mock: MockRouter, monkeypatch: pytest
     calls = cast("list[Any]", respx_mock.calls)
     req = calls[0].request
     assert "x-api-key" not in {k.lower() for k in req.headers.keys()}
+    assert req.headers["Authorization"] == "Bearer tok"
 
 
 @pytest.mark.respx()
@@ -1059,9 +1118,9 @@ async def test_resolvable_profile_cannot_leak_async(
 
 
 class TestAsyncAnthropicGoogleCloud:
-    async def test_workspace_required(self) -> None:
-        with pytest.raises(ValueError, match="workspace ID"):
-            AsyncAnthropicGoogleCloud(base_url="https://example.test/", token_provider=lambda: "tok")
+    async def test_explicit_base_url_needs_no_workspace(self) -> None:
+        client = AsyncAnthropicGoogleCloud(base_url="https://example.test/", token_provider=lambda: "tok")
+        assert client.workspace_id is None
 
     async def test_api_key_and_auth_token_rejected(self) -> None:
         with pytest.raises(TypeError):
@@ -1090,10 +1149,297 @@ class TestAsyncAnthropicGoogleCloud:
         with pytest.raises(ValueError, match="project"):
             AsyncAnthropicGoogleCloud(location="us-central1", workspace_id="wrkspc_x", skip_auth=True)
 
-    async def test_skip_auth_deriving_base_url_requires_workspace(self) -> None:
-        with pytest.raises(ValueError, match=r"(?s)workspace_id.*ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID"):
-            AsyncAnthropicGoogleCloud(project="my-project", skip_auth=True)
+    async def test_derived_url_without_workspace_constructs(self) -> None:
+        AsyncAnthropicGoogleCloud(project="my-project", token_provider=lambda: "tok")
+        AsyncAnthropicGoogleCloud(project="my-project", skip_auth=True)
 
     async def test_skip_auth_derives_url_with_workspace(self) -> None:
         client = AsyncAnthropicGoogleCloud(project="my-project", workspace_id="wrkspc_x", skip_auth=True)
         assert str(client.base_url) == GLOBAL_DERIVED_BASE_URL
+
+
+# ---------------------------------------------------------------------------
+# Organization-level routes
+# ---------------------------------------------------------------------------
+
+
+_GATEWAY = re.compile(r"https://claude\.googleapis\.com/.*")
+_WORKSPACE_LIST: dict[str, object] = {"data": [], "has_more": False, "first_id": None, "last_id": None}
+
+
+def _requested_urls(respx_mock: MockRouter) -> list[str]:
+    calls = cast("list[Any]", respx_mock.calls)
+    return [str(call.request.url) for call in calls]
+
+
+class TestOrganizationRouting:
+    @pytest.mark.respx()
+    def test_organization_route_uses_organization_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
+        calls = cast("list[Any]", respx_mock.calls)
+        assert calls[0].request.headers["Authorization"] == "Bearer tok"
+
+    @pytest.mark.respx()
+    def test_workspace_route_keeps_workspace_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.messages.create(max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5")
+
+        assert _requested_urls(respx_mock) == [f"{DERIVED_BASE_URL}v1/messages"]
+
+    @pytest.mark.respx()
+    def test_organization_route_needs_no_workspace(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+
+        client = AnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
+
+    @pytest.mark.respx()
+    def test_user_profiles_routes_use_organization_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.user_profiles.create()
+        client.user_profiles.retrieve("uprof_x")
+        client.beta.user_profiles.list()
+        client.beta.user_profiles.retrieve("uprof_x")
+
+        assert _requested_urls(respx_mock) == [
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+        ]
+
+    @pytest.mark.respx()
+    def test_user_profiles_routes_need_no_workspace(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        client.beta.user_profiles.list()
+        client.beta.user_profiles.retrieve("uprof_x")
+
+        assert _requested_urls(respx_mock) == [
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+        ]
+
+    @pytest.mark.respx()
+    def test_path_sharing_user_profiles_prefix_keeps_workspace_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.get("/v1/user_profilesX", cast_to=httpx2.Response)
+
+        assert _requested_urls(respx_mock) == [f"{DERIVED_BASE_URL}v1/user_profilesX"]
+
+    def test_workspace_route_without_workspace_raises(self) -> None:
+        client = AnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        with pytest.raises(AnthropicError, match=r"(?s)workspace_id.*ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID"):
+            client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+    @pytest.mark.respx()
+    def test_explicit_base_url_takes_every_route(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(re.compile(r"https://example\.test/.*")).mock(
+            return_value=httpx2.Response(200, json=_WORKSPACE_LIST)
+        )
+
+        client = AnthropicGoogleCloud(
+            base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.beta.organization.workspaces.list()
+        client.beta.user_profiles.list()
+
+        assert _requested_urls(respx_mock) == [
+            "https://example.test/v1/organizations/workspaces",
+            "https://example.test/v1/user_profiles",
+        ]
+
+    @pytest.mark.respx()
+    def test_assigned_base_url_takes_every_route(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(re.compile(r"https://example\.test/.*")).mock(
+            return_value=httpx2.Response(200, json=_WORKSPACE_LIST)
+        )
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.base_url = "https://example.test/"
+        client.beta.organization.workspaces.list()
+        client.copy().beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"] * 2
+
+    @pytest.mark.respx()
+    def test_copy_of_workspaceless_client_keeps_assigned_base_url(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(re.compile(r"https://example\.test/.*")).mock(
+            return_value=httpx2.Response(200, json=_WORKSPACE_LIST)
+        )
+
+        client = AnthropicGoogleCloud(project="my-project", token_provider=lambda: "tok")
+        client.base_url = "https://example.test/"
+        client.with_options(timeout=30).beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"]
+
+    @pytest.mark.respx()
+    def test_project_backfilled_from_adc_for_organization_route(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+        monkeypatch.setattr(
+            google_cloud_module, "_load_adc_credentials", lambda: (_FakeCredentials("adc-token"), "my-project")
+        )
+
+        client = AnthropicGoogleCloud(location="us-central1")
+        client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
+
+    @pytest.mark.respx()
+    def test_copy_keeps_routing(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+
+        client = AnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        client.copy(location="europe-west4").beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [
+            "https://claude.googleapis.com/v1/projects/my-project/locations/europe-west4"
+            "/claudeOrganization/invoke/v1/organizations/workspaces"
+        ]
+
+
+class TestAsyncOrganizationRouting:
+    @pytest.mark.respx()
+    async def test_organization_route_uses_organization_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+
+        client = AsyncAnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        await client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
+        calls = cast("list[Any]", respx_mock.calls)
+        assert calls[0].request.headers["Authorization"] == "Bearer tok"
+
+    @pytest.mark.respx()
+    async def test_workspace_route_keeps_workspace_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.post(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AsyncAnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        await client.messages.create(
+            max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+        )
+
+        assert _requested_urls(respx_mock) == [f"{DERIVED_BASE_URL}v1/messages"]
+
+    @pytest.mark.respx()
+    async def test_organization_route_needs_no_workspace(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json=_WORKSPACE_LIST))
+
+        client = AsyncAnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        await client.beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == [f"{ORGANIZATION_BASE_URL}/v1/organizations/workspaces"]
+
+    @pytest.mark.respx()
+    async def test_user_profiles_routes_use_organization_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.route(url=_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AsyncAnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        await client.user_profiles.create()
+        await client.user_profiles.retrieve("uprof_x")
+        await client.beta.user_profiles.list()
+        await client.beta.user_profiles.retrieve("uprof_x")
+
+        assert _requested_urls(respx_mock) == [
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+        ]
+
+    @pytest.mark.respx()
+    async def test_user_profiles_routes_need_no_workspace(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AsyncAnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        await client.beta.user_profiles.list()
+        await client.beta.user_profiles.retrieve("uprof_x")
+
+        assert _requested_urls(respx_mock) == [
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles",
+            f"{ORGANIZATION_BASE_URL}/v1/user_profiles/uprof_x",
+        ]
+
+    @pytest.mark.respx()
+    async def test_path_sharing_user_profiles_prefix_keeps_workspace_base(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(_GATEWAY).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+        client = AsyncAnthropicGoogleCloud(
+            project="my-project", location="us-central1", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        await client.get("/v1/user_profilesX", cast_to=httpx2.Response)
+
+        assert _requested_urls(respx_mock) == [f"{DERIVED_BASE_URL}v1/user_profilesX"]
+
+    async def test_workspace_route_without_workspace_raises(self) -> None:
+        client = AsyncAnthropicGoogleCloud(project="my-project", location="us-central1", token_provider=lambda: "tok")
+        with pytest.raises(AnthropicError, match=r"(?s)workspace_id.*ANTHROPIC_GOOGLE_CLOUD_WORKSPACE_ID"):
+            await client.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "hi"}], model="claude-haiku-4-5"
+            )
+
+    @pytest.mark.respx()
+    async def test_explicit_base_url_takes_every_route(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(re.compile(r"https://example\.test/.*")).mock(
+            return_value=httpx2.Response(200, json=_WORKSPACE_LIST)
+        )
+
+        client = AsyncAnthropicGoogleCloud(
+            base_url="https://example.test/", workspace_id="wrkspc_x", token_provider=lambda: "tok"
+        )
+        await client.beta.organization.workspaces.list()
+        await client.beta.user_profiles.list()
+
+        assert _requested_urls(respx_mock) == [
+            "https://example.test/v1/organizations/workspaces",
+            "https://example.test/v1/user_profiles",
+        ]
+
+    @pytest.mark.respx()
+    async def test_copy_of_workspaceless_client_keeps_assigned_base_url(self, respx_mock: MockRouter) -> None:
+        respx_mock.get(re.compile(r"https://example\.test/.*")).mock(
+            return_value=httpx2.Response(200, json=_WORKSPACE_LIST)
+        )
+
+        client = AsyncAnthropicGoogleCloud(project="my-project", token_provider=lambda: "tok")
+        client.base_url = "https://example.test/"
+        await client.with_options(timeout=30).beta.organization.workspaces.list()
+
+        assert _requested_urls(respx_mock) == ["https://example.test/v1/organizations/workspaces"]

@@ -1,5 +1,3 @@
-# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
-
 from typing import Union
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -13,6 +11,7 @@ from .beta_mcp_tool_use_block import BetaMCPToolUseBlock
 from .beta_mcp_tool_result_block import BetaMCPToolResultBlock
 from .beta_server_tool_use_block import BetaServerToolUseBlock
 from .beta_container_upload_block import BetaContainerUploadBlock
+from .beta_mcp_tool_listing_block import BetaMCPToolListingBlock
 from .beta_redacted_thinking_block import BetaRedactedThinkingBlock
 from .beta_advisor_tool_result_block import BetaAdvisorToolResultBlock
 from .beta_web_fetch_tool_result_block import BetaWebFetchToolResultBlock
@@ -43,6 +42,7 @@ ContentBlock: TypeAlias = Annotated[
         BetaContainerUploadBlock,
         BetaCompactionBlock,
         BetaFallbackBlock,
+        BetaMCPToolListingBlock,
     ],
     UnionDiscriminator("type"),
 ]
@@ -50,7 +50,6 @@ ContentBlock: TypeAlias = Annotated[
 
 class BetaRawContentBlockStartEvent(BaseModel):
     content_block: ContentBlock
-    """Response model for a file uploaded to the container."""
 
     index: int
 

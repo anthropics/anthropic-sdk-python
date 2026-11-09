@@ -1,4 +1,4 @@
-"""``FileStore`` — one confined folder; a relative path cannot escape it.
+"""`FileStore` — one confined folder; a relative path cannot escape it.
 
 Beta scope: symlinks are refused or skipped wherever the store meets them, but
 there is no hardening against a process racing the store's own syscalls;
@@ -28,13 +28,13 @@ _OWNER_ONLY_DIR_MODE = 0o700
 _OWNER_ONLY_FILE_MODE = 0o600
 _OWNER_ONLY_EXEC_MODE = 0o700
 
-# 0 where the platform lacks them; ``open`` refuses such platforms.
+# 0 where the platform lacks them; `open` refuses such platforms.
 _O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 _O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
 
 
 class FileStoreError(Exception):
-    """A refused operation — input the store will not act on. OS errors propagate as ``OSError``."""
+    """A refused operation — input the store will not act on. OS errors propagate as `OSError`."""
 
     ESCAPES_ROOT = "escapes the store root"
     IS_A_SYMLINK = "is a symlink"
@@ -50,10 +50,10 @@ class FileStoreError(Exception):
 
 
 class Root(NamedTuple):
-    """The store's resolved root, and what :meth:`FileStore.dispose` will do to it."""
+    """The store's resolved root, and what `FileStore.dispose` will do to it."""
 
     path: Path
-    #: True when ``open`` found no root, so ``dispose`` removes it. A root that
+    #: True when `open` found no root, so `dispose` removes it. A root that
     #: was already there is someone else's — a pre-seeded mount, a caller's
     #: workdir — and is kept.
     removed_on_dispose: bool
@@ -62,7 +62,7 @@ class Root(NamedTuple):
 class _Hashed(NamedTuple):
     mtime_ns: int
     #: userspace cannot set ctime, so writers that preserve mtimes
-    #: (``rsync -t``, ``cp -p``) still miss the cache.
+    #: (`rsync -t`, `cp -p`) still miss the cache.
     ctime_ns: int
     size: int
     sha: str
@@ -71,17 +71,17 @@ class _Hashed(NamedTuple):
 class FileStore:
     """One confined folder of regular files.
 
-    Every ``rel_path`` is relative to the root (a leading ``/`` also means the
-    root) and refused with :class:`FileStoreError` when it escapes. The store
+    Every `rel_path` is relative to the root (a leading `/` also means the
+    root) and refused with `FileStoreError` when it escapes. The store
     holds regular files only: symlinks are refused on read and skipped by
-    listings — :meth:`find_symlinks` reports them. A ``rel_path`` resolving to
-    the root itself is banned by this interface: ``put`` and ``get`` refuse it,
-    ``move`` and ``remove`` do nothing. A store opened with ``utf8_only=True``
-    refuses binary content the same way — on ``put`` of such bytes and on
-    ``get`` of such a file. Only :meth:`create_root` makes the root: writes
+    listings — `find_symlinks` reports them. A `rel_path` resolving to
+    the root itself is banned by this interface: `put` and `get` refuse it,
+    `move` and `remove` do nothing. A store opened with `utf8_only=True`
+    refuses binary content the same way — on `put` of such bytes and on
+    `get` of such a file. Only `create_root` makes the root: writes
     create directories below it, never the root itself, so a root removed
     while the store is open stays removed and the write raises
-    :class:`FileNotFoundError`.
+    `FileNotFoundError`.
     """
 
     def __init__(self, root: Path, removed_on_dispose: bool, utf8_only: bool = False) -> None:
@@ -92,13 +92,13 @@ class FileStore:
 
     @staticmethod
     def is_path_legal(path: str) -> bool:
-        """True for a path usable verbatim as a store location: absolute, no ``..``."""
+        """True for a path usable verbatim as a store location: absolute, no `..`."""
         p = PurePosixPath(path)
         return p.is_absolute() and ".." not in p.parts
 
     @classmethod
     async def open(cls, root: str | os.PathLike[str], *, utf8_only: bool = False) -> FileStore:
-        """Resolve ``root``; creates nothing — only :meth:`create_root` makes the folder."""
+        """Resolve `root`; creates nothing — only `create_root` makes the folder."""
         if not _platform_supported():
             raise RuntimeError("FileStore requires O_NOFOLLOW support on this platform")
         adir = anyio.Path(root)
@@ -120,7 +120,7 @@ class FileStore:
         return Root(path=self._root, removed_on_dispose=self._removed_on_dispose)
 
     async def dispose(self) -> None:
-        """Remove the root iff ``open`` created it; pre-existing roots are kept."""
+        """Remove the root iff `open` created it; pre-existing roots are kept."""
         if not self._removed_on_dispose:
             return
         with suppress(FileNotFoundError):
@@ -133,10 +133,10 @@ class FileStore:
         await self.dispose()
 
     async def put(self, rel_path: str, data: PutData, *, is_executable: bool = False) -> None:
-        """Write ``str`` (UTF-8) or ``bytes`` atomically to the file at ``rel_path``.
+        """Write `str` (UTF-8) or `bytes` atomically to the file at `rel_path`.
 
         Missing directories below the root are created; a missing root is not —
-        the write raises :class:`FileNotFoundError`.
+        the write raises `FileNotFoundError`.
         """
         # "dir/." names a directory just like a trailing "/".
         tail = rel_path.replace("\\", "/")
@@ -149,7 +149,7 @@ class FileStore:
         await run_sync(_replace_via_temp, dest, payload, is_executable)
 
     async def get(self, rel_path: str) -> bytes | None:
-        """The file's bytes; ``None`` when absent."""
+        """The file's bytes; `None` when absent."""
         dest = self._resolve_under_root(rel_path)
 
         def read() -> bytes | None:
@@ -167,7 +167,7 @@ class FileStore:
         return data
 
     async def ls(self, under: str = "/") -> set[str]:
-        """The relative path of every file under the directory ``under``."""
+        """The relative path of every file under the directory `under`."""
         base = self._resolve_under_root(under)
 
         def walk() -> set[str]:
@@ -176,13 +176,13 @@ class FileStore:
         return await run_sync(walk)
 
     async def find_symlinks(self, under: str = "/") -> set[str]:
-        """Every symlink under ``under`` — listings skip them and reads refuse
+        """Every symlink under `under` — listings skip them and reads refuse
         them, so a caller that must know they exist asks here."""
         base = self._resolve_under_root(under)
         return await run_sync(_symlinks_in_dir, self._root, under, base)
 
     async def hashtree(self, under: str = "/") -> dict[str, str]:
-        """``{rel_path: sha256_hex}`` of every file under the directory ``under``.
+        """`{rel_path: sha256_hex}` of every file under the directory `under`.
 
         Unchanged files — same size, mtime, and ctime since the last call —
         reuse their recorded hash instead of being re-read.
@@ -201,7 +201,7 @@ class FileStore:
         return await run_sync(hash_all)
 
     async def hash_file(self, rel_path: str) -> str | None:
-        """One file's sha256; ``None`` when absent. Shares :meth:`hashtree`'s cache."""
+        """One file's sha256; `None` when absent. Shares `hashtree`'s cache."""
         dest = self._resolve_under_root(rel_path)
 
         def one() -> str | None:
@@ -218,7 +218,7 @@ class FileStore:
         return await run_sync(one)
 
     async def move(self, src: str, dst: str) -> None:
-        """Rename ``src`` to ``dst``; an existing ``dst`` is refused. The banned
+        """Rename `src` to `dst`; an existing `dst` is refused. The banned
         store root as either end does nothing."""
         s = self._resolve_under_root(src)
         d = self._resolve_under_root(dst)
@@ -363,8 +363,8 @@ def _raise_unless_vanished(error: OSError) -> None:
 
 
 def _filenames_in_dir(root: Path, under: str, base: Path) -> list[tuple[str, Path]]:
-    """Every regular file under ``base`` as ``(rel_path, path)``; an absent
-    ``base`` is empty, a present non-directory is refused."""
+    """Every regular file under `base` as `(rel_path, path)`; an absent
+    `base` is empty, a present non-directory is refused."""
     try:
         st = base.lstat()
     except (FileNotFoundError, NotADirectoryError):
