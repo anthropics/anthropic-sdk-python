@@ -1055,3 +1055,35 @@ def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     assert len(calls) == 1
     assert "anthropic-user-profile-id" not in calls[0].request.headers
+
+
+def test_missing_aws_credentials_raises_credentials_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Without any resolvable AWS credentials, get_auth_headers must surface a
+    # typed anthropic.CredentialsError rather than a bare RuntimeError, so
+    # callers can classify it as a configuration problem.
+    from anthropic import CredentialsError
+    from anthropic.lib.bedrock import _auth
+
+    class NoCredentialsSession:
+        region_name = "us-east-1"
+
+        def get_credentials(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        "anthropic.lib.bedrock._auth._get_session",
+        lambda **_kwargs: NoCredentialsSession(),
+    )
+
+    with pytest.raises(CredentialsError, match="could not resolve credentials"):
+        _auth.get_auth_headers(
+            method="POST",
+            url="https://bedrock-runtime.us-east-1.amazonaws.com/model/invoke",
+            headers=httpx2.Headers({"connection": "keep-alive"}),
+            aws_access_key=None,
+            aws_secret_key=None,
+            aws_session_token=None,
+            region="us-east-1",
+            profile=None,
+            data="{}",
+        )
