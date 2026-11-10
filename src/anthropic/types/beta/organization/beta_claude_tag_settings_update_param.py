@@ -25,7 +25,9 @@ class BetaClaudeTagSettingsUpdateParam(TypedDict, total=False):
     environment_id: Optional[str]
     """
     The environment Claude's sessions run in: the identifier of an active
-    environment of the organization, starting with `env_`. Null clears it.
+    environment of the organization, starting with `env_`, or of a self-hosted
+    runner pool of the organization that every member may use, starting with
+    `ccpool_`. Null clears it.
     """
 
     guest_policy: Optional[BetaClaudeTagGuestPolicyParam]
