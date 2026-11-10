@@ -12,7 +12,7 @@ from anthropic._compat import model_copy
 from anthropic._models import construct_type_unchecked
 from anthropic.types.beta import BetaFallbackBlock
 from anthropic.types.content_block import ContentBlock
-from anthropic.types.parsed_message import ParsedTextBlock, ParsedContentBlock
+from anthropic.types.parsed_message import ParsedMessage, ParsedTextBlock, ParsedContentBlock
 from anthropic.types.beta.beta_usage import BetaUsage
 from anthropic.lib.streaming._beta_messages import accumulate_event
 from anthropic.types.beta.beta_content_block import BetaContentBlock
@@ -119,3 +119,30 @@ def test_parsed_output_is_readable_but_not_dumped(block_type: Any) -> None:
         assert "parsed_output" not in copied.model_dump()
         assert "parsed_output" not in copied.to_dict()
         assert "parsed_output" not in json.loads(copied.to_json())
+
+
+@pytest.mark.parametrize(
+    "falsy",
+    [0, False, "", [], {}],
+    ids=["zero", "false", "empty_string", "empty_list", "empty_dict"],
+)
+@pytest.mark.parametrize(
+    "message_type",
+    [ParsedMessage, ParsedBetaMessage],
+    ids=["non-beta", "beta"],
+)
+def test_parsed_output_keeps_a_falsy_value(message_type: Any, falsy: Any) -> None:
+    message = message_type.construct(
+        id="msg_123",
+        type="message",
+        role="assistant",
+        model="claude-sonnet-4-5",
+        content=[{"type": "text", "text": "0"}],
+        stop_reason="end_turn",
+        stop_sequence=None,
+        usage={"input_tokens": 1, "output_tokens": 1},
+    )
+    message.content[0].parsed_output = falsy
+
+    # `None` means the block was not parsed; a parsed falsy value is still an output.
+    assert message.parsed_output == falsy
