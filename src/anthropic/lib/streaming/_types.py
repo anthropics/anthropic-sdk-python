@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Union, Generic, cast
+from typing import TYPE_CHECKING, Any, Dict, Union, Generic, Optional, cast
 from typing_extensions import List, Literal, Annotated
 
 import jiter
@@ -28,8 +28,15 @@ class TextEvent(BaseModel):
     snapshot: str
     """The entire accumulated text"""
 
-    def parsed_snapshot(self) -> Dict[str, Any]:
-        return cast(Dict[str, Any], jiter.from_json(self.snapshot.encode("utf-8"), partial_mode="trailing-strings"))
+    def parsed_snapshot(self) -> Optional[Dict[str, Any]]:
+        """Parse the accumulated text as JSON, returning None unless it is a JSON object."""
+        try:
+            parsed = jiter.from_json(self.snapshot.encode("utf-8"), partial_mode="trailing-strings")
+        except ValueError:
+            return None
+        if not isinstance(parsed, dict):
+            return None
+        return cast(Dict[str, Any], parsed)
 
 
 class CitationEvent(BaseModel):
