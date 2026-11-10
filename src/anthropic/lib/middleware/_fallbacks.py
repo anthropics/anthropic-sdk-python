@@ -961,13 +961,16 @@ class _HopReader:
                 entries: list[dict[str, Any]] = []
                 if isinstance(reported, list):
                     entries = cast("list[dict[str, Any]]", reported)
+                for entry in entries:
+                    entry["model"] = entry.get("model") or splice.model
                 for entry in reversed(entries):
                     if entry.get("type") in SAMPLING_ITERATION_TYPES:
                         entry["type"] = "fallback_message"
-                        entry["model"] = entry.get("model") or splice.model
                         break
                 else:
-                    entries.append(_to_iteration_usage("fallback_message", splice.model, usage))
+                    # Without a sampling record, use the hop total alone: it already
+                    # includes any reported compaction or advisor tokens.
+                    entries = [_to_iteration_usage("fallback_message", splice.model, usage)]
                 usage["iterations"] = [*splice.iterations, *entries]
                 event["usage"] = usage
                 _forward_input_transformations(event, self._suppressed_start_message())

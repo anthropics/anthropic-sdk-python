@@ -1136,17 +1136,40 @@ COMPACTION = iteration("compaction", 205_000, 64)
 ADVISOR = iteration("advisor_message", 50, 12, model="claude-sonnet-4-6")
 COMPLETER = {**FINAL, "type": "fallback_message", "model": FALLBACK_MODEL}
 AGGREGATE = {**COMPLETER, "cache_creation": None}
+LABELED_FINAL = {**FINAL, "model": FALLBACK_MODEL}
+LABELED_COMPACTION = {**COMPACTION, "model": FALLBACK_MODEL}
 
 USAGE_CASES = [
     pytest.param(None, [AGGREGATE], id="absent-breakdown"),
     pytest.param([], [AGGREGATE], id="empty-breakdown"),
     pytest.param([FINAL], [COMPLETER], id="single-sampling"),
     pytest.param([COMPLETER], [COMPLETER], id="reported-fallback-sampling"),
-    pytest.param([COMPACTION], [COMPACTION, AGGREGATE], id="compaction-only-breakdown"),
+    # The delta's aggregate already includes these partial records (5 input / 7 output).
+    pytest.param([iteration("compaction", 5, 7)], [AGGREGATE], id="compaction-only-breakdown"),
+    pytest.param([iteration("advisor_message", 5, 7)], [AGGREGATE], id="advisor-only-breakdown"),
+    pytest.param(
+        [iteration("compaction", 5, 7), iteration("advisor_message", 3, 2)],
+        [AGGREGATE],
+        id="non-sampling-breakdown",
+    ),
     pytest.param([FIRST, FINAL], [FIRST, COMPLETER], id="server-tool-loop"),
-    pytest.param([FIRST, FINAL, FINAL], [FIRST, FINAL, COMPLETER], id="multiple-sampling"),
-    pytest.param([FIRST, COMPACTION, ADVISOR, FINAL], [FIRST, COMPACTION, ADVISOR, COMPLETER], id="mixed-breakdown"),
-    pytest.param([FIRST, FINAL, COMPACTION], [FIRST, COMPLETER, COMPACTION], id="trailing-compaction"),
+    pytest.param(
+        [{key: value for key, value in FIRST.items() if key != "model"}, FINAL],
+        [FIRST, COMPLETER],
+        id="unlabeled-first-sampling",
+    ),
+    pytest.param([FIRST, FINAL, FINAL], [FIRST, LABELED_FINAL, COMPLETER], id="multiple-sampling"),
+    pytest.param(
+        [FIRST, COMPACTION, ADVISOR, FINAL],
+        [FIRST, LABELED_COMPACTION, ADVISOR, COMPLETER],
+        id="mixed-breakdown",
+    ),
+    pytest.param([FIRST, FINAL, COMPACTION], [FIRST, COMPLETER, LABELED_COMPACTION], id="trailing-compaction"),
+    pytest.param(
+        [{**ADVISOR, "model": None}, FINAL],
+        [{**ADVISOR, "model": FALLBACK_MODEL}, COMPLETER],
+        id="unlabeled-advisor",
+    ),
     pytest.param(
         [{**FINAL, "model": "claude-opus-4-8-canonical"}],
         [{**COMPLETER, "model": "claude-opus-4-8-canonical"}],
