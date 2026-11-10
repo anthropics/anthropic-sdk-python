@@ -119,6 +119,16 @@ class TestFunctionTool:
         with pytest.raises(expected_error_type, match=expected_error_msg):
             function_tool.call(input_data)
 
+    def test_validation_error_includes_field_detail(self) -> None:
+        def set_temp(city: str, celsius: int) -> str:
+            """Set temperature."""
+            return f"{city} {celsius}"
+
+        function_tool = beta_tool(set_temp)
+        with pytest.raises(ValueError, match=r"Invalid arguments for function set_temp:.*celsius:") as exc_info:
+            function_tool.call({"city": "Paris", "celsius": "hot"})
+        assert "Input should be a valid integer" in str(exc_info.value)
+
     def test_custom_name_and_description(self) -> None:
         def some_function(x: int) -> str:
             """Original description."""
