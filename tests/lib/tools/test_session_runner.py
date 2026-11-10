@@ -116,6 +116,10 @@ def _terminated() -> _StubEvent:
     return _StubEvent("session.status_terminated")
 
 
+def _thread_terminated(session_thread_id: str) -> _StubEvent:
+    return _StubEvent("session.thread_status_terminated", session_thread_id=session_thread_id)
+
+
 def _idle(stop_reason: str) -> _StubEvent:
     return _StubEvent("session.status_idle", stop_reason=_StubEvent(stop_reason))
 
@@ -1354,6 +1358,199 @@ async def test_awaits_async_tool_close_hook() -> None:
     [_ async for _ in _run_with_fakes(events=events, tools=[tool])]
 
     assert closed["count"] == 1
+
+
+# ---------- terminated threads ----------------------------------------------
+
+
+@pytest.mark.asyncio()
+async def test_call_of_terminated_thread_in_history_is_not_run() -> None:
+    """A call that was open when its thread terminated stays in the history
+    without a result. A runner that reads that history must not run it, and the
+    call must not keep the runner from its idle stop."""
+    counter = {"calls": 0}
+
+    async def increment(_input: dict[str, Any]) -> str:
+        counter["calls"] += 1
+        return "done"
+
+    events = FakeAsyncEvents(
+        list_events=[
+            _tool_use("tu_1", "inc", {}, session_thread_id="sthr_ended"),
+            _idle("requires_action"),
+            _thread_terminated("sthr_ended"),
+            _idle_end_turn(),
+        ],
+    )
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [
+            item async for item in _run_with_fakes(events=events, tools=[_FakeTool("inc", increment)], max_idle=0.05)
+        ]
+
+    items = await asyncio.wait_for(consume(), timeout=2)
+
+    assert items == []
+    assert counter["calls"] == 0
+    assert events.send_calls == []
+
+
+@pytest.mark.parametrize("termination_in", ["history", "live_stream"])
+@pytest.mark.asyncio()
+async def test_thread_termination_after_end_turn_idle_does_not_cancel_idle_stop(termination_in: str) -> None:
+    """A client can archive a child thread once the session is idle. Another idle
+    need not follow the thread's terminated event, so the event must leave the
+    idle countdown as it is."""
+    ending = [_idle_end_turn(), _thread_terminated("sthr_ended")]
+    if termination_in == "history":
+        events = FakeAsyncEvents(list_events=[_tool_use("tu_1", "echo", {}, session_thread_id="sthr_ended"), *ending])
+    else:
+        events = FakeAsyncEvents(stream_events=ending)
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+
+    assert await asyncio.wait_for(consume(), timeout=2) == []
+
+
+@pytest.mark.parametrize("termination_in", ["history", "live_stream"])
+@pytest.mark.parametrize(
+    "order",
+    [
+        [_idle("requires_action"), _thread_terminated("sthr_ended")],
+        [_idle_end_turn(), _thread_terminated("sthr_ended"), _StubEvent("session.status_running")],
+    ],
+    ids=["after_requires_action_idle", "before_session_runs_again"],
+)
+@pytest.mark.asyncio()
+async def test_thread_termination_does_not_start_idle_countdown(order: list[_StubEvent], termination_in: str) -> None:
+    """The event neither starts the countdown after an idle that leaves the turn
+    open, nor keeps it going once the session runs again."""
+    events = FakeAsyncEvents(list_events=order) if termination_in == "history" else FakeAsyncEvents(stream_events=order)
+
+    async def drive() -> None:
+        async for _ in _run_with_fakes(events=events, tools=[], max_idle=0.05):
+            pass
+
+    with pytest.raises((asyncio.TimeoutError, TimeoutError)):
+        await asyncio.wait_for(drive(), timeout=0.5)
+
+
+@pytest.mark.parametrize("evaluated_permission", [None, "deny"], ids=["unowned", "denied"])
+@pytest.mark.asyncio()
+async def test_unowned_or_denied_call_of_terminated_thread_is_not_yielded(evaluated_permission: str | None) -> None:
+    """The runner yields an unowned call and a denied call of a live thread so
+    that the caller can observe them. It yields neither for a terminated thread,
+    and the unowned call does not keep it from its idle stop."""
+    events = FakeAsyncEvents(
+        list_events=[
+            _tool_use("tu_1", "other", {}, evaluated_permission=evaluated_permission, session_thread_id="sthr_ended"),
+            _thread_terminated("sthr_ended"),
+            _idle_end_turn(),
+        ],
+    )
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+
+    assert await asyncio.wait_for(consume(), timeout=2) == []
+
+
+@pytest.mark.asyncio()
+async def test_open_calls_of_live_threads_run_beside_the_call_of_a_terminated_thread() -> None:
+    """Only the calls of the terminated thread are left out: the open calls of
+    another child thread and of the primary thread still run and post."""
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    events = FakeAsyncEvents(
+        list_events=[
+            _StubEvent("session.thread_status_running", session_thread_id="sthr_primary"),
+            _tool_use("tu_ended", "echo", {}, session_thread_id="sthr_ended"),
+            _thread_terminated("sthr_ended"),
+            _tool_use("tu_child", "echo", {}, session_thread_id="sthr_live"),
+            _tool_use("tu_primary", "echo", {}),
+        ],
+        stream_events=[_terminated()],
+    )
+
+    items = [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("echo", echo)])]
+
+    assert [(item.tool_use_id, item.posted) for item in items] == [("tu_child", True), ("tu_primary", True)]
+
+
+@pytest.mark.asyncio()
+async def test_result_is_not_posted_when_thread_terminates_while_tool_runs() -> None:
+    """When a thread terminates while its tool runs, the runner posts no result
+    and yields the call with `posted=False`. The approved call of the same thread
+    that waits behind it does not run, and it stops holding the idle countdown."""
+    started = asyncio.Event()
+    thread_terminated = asyncio.Event()
+
+    async def slow(_input: dict[str, Any]) -> str:
+        started.set()
+        await thread_terminated.wait()
+        return "late"
+
+    class _Stream(_FakeStream):
+        @override
+        async def _gen(self) -> Any:
+            yield _tool_use("tu_running", "slow", {}, session_thread_id="sthr_ended")
+            yield _tool_use("tu_queued", "slow", {}, evaluated_permission="ask", session_thread_id="sthr_ended")
+            yield _tool_confirmation("tu_queued", "allow")
+            await started.wait()
+            yield _thread_terminated("sthr_ended")
+            thread_terminated.set()
+            yield _idle_end_turn()
+            await asyncio.Event().wait()
+
+    events = FakeAsyncEvents(streams=[_Stream([])])
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("slow", slow)], max_idle=0.05)]
+
+    items = await asyncio.wait_for(consume(), timeout=2)
+
+    assert [(item.tool_use_id, item.posted) for item in items] == [("tu_running", False)]
+    assert events.send_calls == []
+
+
+@pytest.mark.parametrize(
+    "termination",
+    ["after_the_call", "before_the_call", "in_history_after_reconnect", "in_partial_history_after_reconnect"],
+)
+@pytest.mark.asyncio()
+async def test_ask_call_of_terminated_thread_does_not_block_idle_stop(
+    monkeypatch: pytest.MonkeyPatch, termination: str
+) -> None:
+    """The API takes no result for an ask-gated call once its thread has
+    terminated, so the runner does not hold it and makes its idle stop."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    call = _tool_use("tu_1", "gated", {}, evaluated_permission="ask", session_thread_id="sthr_ended")
+    if termination == "after_the_call":
+        events = FakeAsyncEvents(stream_events=[call, _thread_terminated("sthr_ended"), _idle_end_turn()])
+    elif termination == "before_the_call":
+        events = FakeAsyncEvents(stream_events=[_thread_terminated("sthr_ended"), call, _idle_end_turn()])
+    elif termination == "in_history_after_reconnect":
+        events = FakeAsyncEvents(
+            streams=[_FakeStream([call], raise_after=1, raise_with=httpx2.ReadError("dropped"))],
+            list_events_per_call=[[], [call, _thread_terminated("sthr_ended"), _idle_end_turn()]],
+        )
+    else:
+        events = FakeAsyncEvents(
+            streams=[
+                _FakeStream([call], raise_after=1, raise_with=httpx2.ReadError("dropped")),
+                _FakeStream([_idle_end_turn()]),
+            ],
+            list_events_per_call=[[], [call, _thread_terminated("sthr_ended")]],
+            list_raises=_api_status_error(500),
+        )
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
+
+    assert await asyncio.wait_for(consume(), timeout=2) == []
 
 
 # ---------- send-result failure surfaces to consumer -----------------------
