@@ -10,7 +10,13 @@ from ..._utils import is_dict, is_list
 from ..._models import BaseModel
 from ._attributes import AnthropicSpan
 
-__all__ = ["FINAL_FROM_MESSAGE_DELTA", "without_message_delta_fields", "set_usage_sums", "set_time_to_first_chunk"]
+__all__ = [
+    "FINAL_FROM_MESSAGE_DELTA",
+    "without_message_delta_fields",
+    "set_usage_sums",
+    "set_finish_reasons",
+    "set_time_to_first_chunk",
+]
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -79,6 +85,13 @@ def set_usage_sums(span: AnthropicSpan, message: object, *, complete: bool, iter
         )
     except Exception:
         log.debug("Could not record the usage of the response on its span", exc_info=True)
+
+
+def set_finish_reasons(span: AnthropicSpan, message: object) -> None:
+    """Sets the finish reasons of a complete response, if it has a stop reason."""
+    stop_reason = get(message, "stop_reason")
+    if isinstance(stop_reason, str):
+        span.set_attribute("gen_ai.response.finish_reasons", [stop_reason])
 
 
 def tokens(usage: object, field: str) -> int:
