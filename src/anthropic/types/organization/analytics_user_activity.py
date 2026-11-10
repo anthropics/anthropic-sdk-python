@@ -8,6 +8,7 @@ from .analytics_cowork_metrics import AnalyticsCoworkMetrics
 from .analytics_design_metrics import AnalyticsDesignMetrics
 from .analytics_office_metrics import AnalyticsOfficeMetrics
 from .analytics_science_metrics import AnalyticsScienceMetrics
+from .analytics_claude_tag_metrics import AnalyticsClaudeTagMetrics
 from .analytics_claude_code_metrics import AnalyticsClaudeCodeMetrics
 from .analytics_chat_cowork_unified_metrics import AnalyticsChatCoworkUnifiedMetrics
 
@@ -58,6 +59,14 @@ class AnalyticsUserActivity(BaseModel):
     features inside claude.ai chat) turned on, split into `chat` (chat activity) and
     `sessions` (Cowork activity). Omitted from the response where Chat and Cowork
     unified is not available.
+    """
+
+    claude_tag_metrics: Optional[AnalyticsClaudeTagMetrics] = None
+    """Claude Tag activity in Slack by a user who has linked a Claude account.
+
+    Activity by Slack users who have not linked an account appears only in the
+    `/summaries` Claude Tag counts, so these rows do not add up to those counts.
+    Omitted from the response on deployments that do not offer Claude Tag reporting.
     """
 
     last_activity_date: Optional[date] = None
