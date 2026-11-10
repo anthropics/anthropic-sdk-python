@@ -47,8 +47,24 @@ class TestAgents:
             ],
             metadata={"foo": "bar"},
             multiagent={
-                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
-                "type": "coordinator",
+                "type": "multiagent_20261001",
+                "advisor": {"type": "disabled"},
+                "subagents": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": ["agent_011CZkYqphY8vELVzwCUpqiQ"],
+                },
+                "workflows": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": [
+                        {
+                            "id": "agent_011CZkYqphY8vELVzwCUpqiQ",
+                            "type": "agent",
+                            "version": 1,
+                        }
+                    ],
+                },
             },
             skills=[
                 {
@@ -392,8 +408,24 @@ class TestAsyncAgents:
             ],
             metadata={"foo": "bar"},
             multiagent={
-                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
-                "type": "coordinator",
+                "type": "multiagent_20261001",
+                "advisor": {"type": "disabled"},
+                "subagents": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": ["agent_011CZkYqphY8vELVzwCUpqiQ"],
+                },
+                "workflows": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": [
+                        {
+                            "id": "agent_011CZkYqphY8vELVzwCUpqiQ",
+                            "type": "agent",
+                            "version": 1,
+                        }
+                    ],
+                },
             },
             skills=[
                 {

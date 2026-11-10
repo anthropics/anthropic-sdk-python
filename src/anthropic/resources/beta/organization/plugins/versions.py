@@ -89,11 +89,10 @@ class Versions(SyncAPIResource):
         Only a Plugin in a `manual` marketplace takes uploads; a Plugin synchronized
         from a repository gets its versions from the repository. When the Plugin is in
         the organization's library marketplace, a version that adds a skill with the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai) is refused with a 409: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A 503 with
-        `error_code` `registration_pending` means the version was stored but is not yet
-        usable; a later version create on the Plugin completes it.
+        name of an organization skill that this API does not list is refused with a 409:
+        `error_code` `skill_name_taken`, with that name in `details.skill_name`. A 503
+        with `error_code` `registration_pending` means the version was stored but is not
+        yet usable; a later version create on the Plugin completes it.
 
         For a worked example, see
         [Create a version](/docs/en/manage-claude/plugins-api#create-a-version) in the
@@ -528,11 +527,10 @@ class AsyncVersions(AsyncAPIResource):
         Only a Plugin in a `manual` marketplace takes uploads; a Plugin synchronized
         from a repository gets its versions from the repository. When the Plugin is in
         the organization's library marketplace, a version that adds a skill with the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai) is refused with a 409: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A 503 with
-        `error_code` `registration_pending` means the version was stored but is not yet
-        usable; a later version create on the Plugin completes it.
+        name of an organization skill that this API does not list is refused with a 409:
+        `error_code` `skill_name_taken`, with that name in `details.skill_name`. A 503
+        with `error_code` `registration_pending` means the version was stored but is not
+        yet usable; a later version create on the Plugin completes it.
 
         For a worked example, see
         [Create a version](/docs/en/manage-claude/plugins-api#create-a-version) in the

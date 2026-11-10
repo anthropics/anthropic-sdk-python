@@ -82,6 +82,8 @@ class AnthropicVertex(BaseVertexClient[httpx2.Client, Stream[Any]], SyncAPIClien
             raise ValueError(
                 "No region was given. The client should be instantiated with the `region` argument or the `CLOUD_ML_REGION` environment variable should be set."
             )
+        if region == "":
+            raise ValueError(f"Expected a non-empty value for `region` but received {region!r}")
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
@@ -246,6 +248,8 @@ class AsyncAnthropicVertex(BaseVertexClient[httpx2.AsyncClient, AsyncStream[Any]
             raise ValueError(
                 "No region was given. The client should be instantiated with the `region` argument or the `CLOUD_ML_REGION` environment variable should be set."
             )
+        if region == "":
+            raise ValueError(f"Expected a non-empty value for `region` but received {region!r}")
 
         if base_url is None:
             base_url = os.environ.get("ANTHROPIC_VERTEX_BASE_URL")
@@ -400,7 +404,10 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
         specifier = "streamRawPredict" if stream else "rawPredict"
 
         path = "/projects/{project_id}/locations/{region}/publishers/anthropic/models/{model}:{specifier}"
-        options.url = path_template(path, project_id=project_id, region=region, model=model, specifier=specifier)
+        url = request_path(path, project_id=project_id, region=region, model=model, specifier=specifier)
+        parent, _, model_segment = url.rpartition("/")
+        # A server that drops `;` and the rest of its segment would drop the specifier.
+        options.url = f"{parent}/{model_segment.replace(';', '%3B')}"
 
     if options.url in {"/v1/messages/count_tokens", "/v1/messages/count_tokens?beta=true"} and options.method == "post":
         if project_id is None:
@@ -409,9 +416,17 @@ def _prepare_options(input_options: FinalRequestOptions, *, project_id: str | No
             )
 
         path = "/projects/{project_id}/locations/{region}/publishers/anthropic/models/count-tokens:rawPredict"
-        options.url = path_template(path, project_id=project_id, region=region)
+        options.url = request_path(path, project_id=project_id, region=region)
 
     if options.url.startswith("/v1/messages/batches"):
         raise AnthropicError("The Batch API is not supported in the Vertex client yet")
 
     return options
+
+
+def request_path(template: str, /, **values: object) -> str:
+    for name, value in values.items():
+        if value == "":
+            raise ValueError(f"Expected a non-empty value for `{name}` but received {value!r}")
+
+    return path_template(template, **values)

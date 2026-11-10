@@ -1215,22 +1215,23 @@ async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest
         list_events_per_call=[[], [_tool_confirmation("tu_1", "allow"), _idle_end_turn()]],
     )
 
+    post_times: list[float] = []
+    real_send = events.send
+
+    async def timed_send(*args: Any, **kwargs: Any) -> None:
+        await real_send(*args, **kwargs)
+        post_times.append(time.monotonic())
+
+    monkeypatch.setattr(events, "send", timed_send)
+
     seen: list[DispatchedToolCall] = []
 
-    async def drive() -> None:
+    async def drive() -> float:
         async for call in _run_with_fakes(events=events, tools=[tool], max_idle=max_idle):
             seen.append(call)
+        return time.monotonic()
 
-    async def run_and_time() -> tuple[float, float]:
-        loop = asyncio.get_running_loop()
-        task = asyncio.ensure_future(drive())
-        while not events.send_calls:
-            await asyncio.sleep(0.01)
-        posted_at = loop.time()
-        await task
-        return posted_at, loop.time()
-
-    posted_at, stopped_at = await asyncio.wait_for(run_and_time(), timeout=5.0)
+    stopped_at = await asyncio.wait_for(drive(), timeout=5.0)
 
     assert counter["calls"] == 1
     assert len(seen) == 1
@@ -1241,7 +1242,7 @@ async def test_reconcile_released_call_not_cut_short_by_idle(monkeypatch: pytest
     # stops immediately after posting; the deferred countdown instead starts
     # only once the call is dispatched, so the runner stays up for roughly a
     # full grace window after the post.
-    assert stopped_at - posted_at > max_idle * 0.6
+    assert stopped_at - post_times[0] > max_idle * 0.6
 
 
 @pytest.mark.asyncio()

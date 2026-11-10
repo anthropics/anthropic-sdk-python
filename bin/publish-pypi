@@ -3,7 +3,7 @@
 set -eux
 rm -rf dist
 mkdir -p dist
-uv build
+uv build --build-constraints build-constraints.txt --require-hashes
 if [ -n "${PYPI_TOKEN:-}" ]; then
   uv publish --token=$PYPI_TOKEN
 else

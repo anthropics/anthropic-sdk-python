@@ -124,13 +124,13 @@ class Plugins(SyncAPIResource):
         409 with `error_code` `plugin_name_taken` and, when a Plugin holds it, that
         Plugin's ID in `details.plugin_id`. A Plugin going into the organization's
         library marketplace is also refused with a 409 when one of its skills has the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai): `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`; rename the skill, or remove the organization skill in
-        claude.ai. A 503 with `error_code` `registration_pending` means the Plugin and
-        its version were stored (their IDs are in `details`) but are not yet usable in
-        claude.ai: do not retry the create (the retry would return `plugin_name_taken`);
-        create a version on the stored Plugin instead, which completes it.
+        name of an organization skill that this API does not list: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`; rename the skill, or
+        remove the organization skill in claude.ai. A 503 with `error_code`
+        `registration_pending` means the Plugin and its version were stored (their IDs
+        are in `details`) but are not yet usable in claude.ai: do not retry the create
+        (the retry would return `plugin_name_taken`); create a version on the stored
+        Plugin instead, which completes it.
 
         For a worked example, see
         [Create a plugin](/docs/en/manage-claude/plugins-api#create-a-plugin) in the
@@ -337,10 +337,9 @@ class Plugins(SyncAPIResource):
         accepted. If the scan outcome cannot be read at that moment, the request fails
         with a retryable 503 instead. When the Plugin is in the organization's library
         marketplace, a version other than the one served is also refused with a 409 when
-        one of its skills has a name that an organization skill (one an administrator
-        uploaded for the whole organization in claude.ai) has since taken: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
-        Plugin cannot be updated here (403).
+        an organization skill that this API does not list has since taken the name of
+        one of its skills: `error_code` `skill_name_taken`, with that name in
+        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -548,7 +547,9 @@ class Plugins(SyncAPIResource):
         """
         Permanently delete a Plugin and every version it holds, exactly as when an
         administrator deletes it in claude.ai. The Plugin may belong to the organization
-        or to a member, including a member who has since left the organization.
+        or to a member, including a member who has since left the organization. Do not
+        delete a Plugin only because your pipeline did not create it: a member or an
+        administrator might have added it in claude.ai.
 
         An organization-owned Plugin's installation settings go with it; a member-owned
         Plugin's shares are withdrawn and its owner no longer has it.
@@ -677,13 +678,13 @@ class AsyncPlugins(AsyncAPIResource):
         409 with `error_code` `plugin_name_taken` and, when a Plugin holds it, that
         Plugin's ID in `details.plugin_id`. A Plugin going into the organization's
         library marketplace is also refused with a 409 when one of its skills has the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai): `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`; rename the skill, or remove the organization skill in
-        claude.ai. A 503 with `error_code` `registration_pending` means the Plugin and
-        its version were stored (their IDs are in `details`) but are not yet usable in
-        claude.ai: do not retry the create (the retry would return `plugin_name_taken`);
-        create a version on the stored Plugin instead, which completes it.
+        name of an organization skill that this API does not list: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`; rename the skill, or
+        remove the organization skill in claude.ai. A 503 with `error_code`
+        `registration_pending` means the Plugin and its version were stored (their IDs
+        are in `details`) but are not yet usable in claude.ai: do not retry the create
+        (the retry would return `plugin_name_taken`); create a version on the stored
+        Plugin instead, which completes it.
 
         For a worked example, see
         [Create a plugin](/docs/en/manage-claude/plugins-api#create-a-plugin) in the
@@ -890,10 +891,9 @@ class AsyncPlugins(AsyncAPIResource):
         accepted. If the scan outcome cannot be read at that moment, the request fails
         with a retryable 503 instead. When the Plugin is in the organization's library
         marketplace, a version other than the one served is also refused with a 409 when
-        one of its skills has a name that an organization skill (one an administrator
-        uploaded for the whole organization in claude.ai) has since taken: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
-        Plugin cannot be updated here (403).
+        an organization skill that this API does not list has since taken the name of
+        one of its skills: `error_code` `skill_name_taken`, with that name in
+        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -1101,7 +1101,9 @@ class AsyncPlugins(AsyncAPIResource):
         """
         Permanently delete a Plugin and every version it holds, exactly as when an
         administrator deletes it in claude.ai. The Plugin may belong to the organization
-        or to a member, including a member who has since left the organization.
+        or to a member, including a member who has since left the organization. Do not
+        delete a Plugin only because your pipeline did not create it: a member or an
+        administrator might have added it in claude.ai.
 
         An organization-owned Plugin's installation settings go with it; a member-owned
         Plugin's shares are withdrawn and its owner no longer has it.

@@ -10,7 +10,7 @@ from typing_extensions import Self, override
 import httpx2
 
 from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import asyncify, is_given
+from ..._utils import asyncify, is_given, path_template
 from ..._client import Anthropic, AsyncAnthropic
 from ..._models import FinalRequestOptions
 from ..._streaming import Stream, AsyncStream
@@ -29,13 +29,16 @@ if TYPE_CHECKING:
     from google.auth.credentials import Credentials as GoogleCredentials  # type: ignore
 
 
-_LOCATION_URL_TEMPLATE = "https://claude.googleapis.com/v1/projects/{project}/locations/{location}"
+_ORIGIN = "https://claude.googleapis.com"
+_LOCATION_PATH_TEMPLATE = "/v1/projects/{project}/locations/{location}"
+_WORKSPACE_PATH_TEMPLATE = _LOCATION_PATH_TEMPLATE + "/workspaces/{workspace_id}/invoke"
+_ORGANIZATION_PATH_TEMPLATE = _LOCATION_PATH_TEMPLATE + "/claudeOrganization/invoke"
 
 # The gateway base URL; stays overridable via the `base_url` argument and env var.
-DEFAULT_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/workspaces/{workspace_id}/invoke"
+DEFAULT_URL_TEMPLATE = _ORIGIN + _WORKSPACE_PATH_TEMPLATE
 
 # Organization-level routes are served from a base with no workspace in it.
-ORGANIZATION_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/claudeOrganization/invoke"
+ORGANIZATION_URL_TEMPLATE = _ORIGIN + _ORGANIZATION_PATH_TEMPLATE
 
 USER_PROFILES_PATH = "/v1/user_profiles"
 _ORGANIZATION_PATH_PREFIXES = ("/v1/organizations/", USER_PROFILES_PATH + "/")
@@ -132,7 +135,7 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
             if self._project is None:
                 raise AnthropicError(_MISSING_PROJECT_MESSAGE)
             base = self._enforce_trailing_slash(
-                httpx2.URL(ORGANIZATION_URL_TEMPLATE.format(project=self._project, location=self._location))
+                httpx2.URL(derived_url(_ORGANIZATION_PATH_TEMPLATE, project=self._project, location=self._location))
             )
             return base.copy_with(raw_path=base.raw_path + merge_url.raw_path.lstrip(b"/"))
 
@@ -162,12 +165,23 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if self.workspace_id is not None:
             self._base_url = self._enforce_trailing_slash(
                 httpx2.URL(
-                    DEFAULT_URL_TEMPLATE.format(
-                        project=self._project, location=self._location, workspace_id=self.workspace_id
+                    derived_url(
+                        _WORKSPACE_PATH_TEMPLATE,
+                        project=self._project,
+                        location=self._location,
+                        workspace_id=self.workspace_id,
                     )
                 )
             )
         self._base_url_deferred = False
+
+
+def derived_url(template: str, /, **values: str) -> str:
+    for name, value in values.items():
+        if not value:
+            raise ValueError(f"Expected a non-empty value for `{name}` but received {value!r}")
+
+    return _ORIGIN + path_template(template, **values)
 
 
 def _resolve_base_url(
@@ -197,7 +211,7 @@ def _resolve_base_url(
     if workspace_id is None:
         # Organization-only client: there is no workspace base to derive.
         return None
-    return DEFAULT_URL_TEMPLATE.format(project=project, location=location, workspace_id=workspace_id)
+    return derived_url(_WORKSPACE_PATH_TEMPLATE, project=project, location=location, workspace_id=workspace_id)
 
 
 def _reject_skip_auth_conflict(

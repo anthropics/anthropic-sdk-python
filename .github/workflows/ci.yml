@@ -57,7 +57,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run build
-        run: uv build
+        run: uv build --build-constraints build-constraints.txt --require-hashes
 
   test:
     timeout-minutes: 10

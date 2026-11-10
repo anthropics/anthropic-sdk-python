@@ -45,8 +45,39 @@ PROJECT_ID_AND_REGION_PATHS = [
     ("pro/ject", "region", "/v1/projects/pro%2Fject/locations/region"),
     ("project", "reg/ion", "/v1/projects/project/locations/reg%2Fion"),
     ("a/../b?c#d", "region", "/v1/projects/a%2F..%2Fb%3Fc%23d/locations/region"),
+    ("a;b", "region", "/v1/projects/a;b/locations/region"),
+    ("project", "a;b", "/v1/projects/project/locations/a;b"),
 ]
 DOT_SEGMENT_PROJECT_IDS_AND_REGIONS = [(".", "region"), ("..", "region"), ("project", "."), ("project", "..")]
+# Some servers drop `;` and the rest of its segment, which would leave these empty, `.` or `..`.
+REFUSED_BEFORE_SEMICOLON_PROJECT_IDS_AND_REGIONS = [
+    (";x", "region", "starting with ';'"),
+    (".;x", "region", "dot-segment"),
+    ("..;x", "region", "dot-segment"),
+    ("project", ";x", "starting with ';'"),
+    ("project", ".;x", "dot-segment"),
+    ("project", "..;x", "dot-segment"),
+]
+MODEL_PATH_SEGMENTS = [
+    ("a;b", "a%3Bb"),
+    ("a;b;c", "a%3Bb%3Bc"),
+    ("...;x", "...%3Bx"),
+    ("..x;y", "..x%3By"),
+    ("x;..", "x%3B.."),
+    ("m:otherVerb;x", "m:otherVerb%3Bx"),
+    ("a%3Bb", "a%253Bb"),
+    ("..", ".."),
+    (".", "."),
+    ("../../x", "..%2F..%2Fx"),
+    ("claude-sonnet-4-5@20250929", "claude-sonnet-4-5@20250929"),
+]
+REFUSED_BEFORE_SEMICOLON_MODELS = [
+    (";", "starting with ';'"),
+    (";x", "starting with ';'"),
+    (".;x", "dot-segment"),
+    ("..;", "dot-segment"),
+    ("..;x", "dot-segment"),
+]
 
 STATUS_ERRORS = [
     pytest.param(
@@ -431,6 +462,171 @@ class TestAnthropicVertex:
 
         assert route.call_count == 0
 
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region", "message"), REFUSED_BEFORE_SEMICOLON_PROJECT_IDS_AND_REGIONS)
+    def test_empty_or_dot_segment_before_semicolon_in_project_id_or_region_is_rejected(
+        self, project_id: str, region: str, message: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AnthropicVertex(region=region, project_id=project_id, access_token="my-access-token")
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match=message):
+            messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+        with pytest.raises(ValueError, match=message):
+            messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize(("model", "segment"), MODEL_PATH_SEGMENTS)
+    def test_semicolon_in_model_is_percent_encoded_in_path(
+        self, model: str, segment: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"/v1/projects/project/locations/region/publishers/anthropic/models/{segment}:{'streamRawPredict' if stream else 'rawPredict'}"
+        ]
+
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    def test_semicolon_in_project_id_and_region_is_kept_beside_one_in_model(
+        self, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id="a;b", region="c;d")
+        messages = client.beta.messages if beta else client.messages
+
+        messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="e;f", stream=stream
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"/v1/projects/a;b/locations/c;d/publishers/anthropic/models/e%3Bf:{'streamRawPredict' if stream else 'rawPredict'}"
+        ]
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize(("model", "message"), REFUSED_BEFORE_SEMICOLON_MODELS)
+    def test_empty_or_dot_segment_before_semicolon_in_model_is_rejected(
+        self, model: str, message: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        with pytest.raises(ValueError, match=message):
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    def test_empty_model_is_rejected(self, stream: bool, beta: bool, respx_mock: MockRouter) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received ''"):
+            messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize("name", ["project_id", "region"])
+    def test_empty_project_id_or_region_is_rejected_on_request(
+        self, name: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.copy()
+        setattr(client, name, "")
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+                stream=stream,
+            )
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    def test_empty_project_id_argument_is_rejected(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AnthropicVertex(region="region", project_id="", access_token="my-access-token")
+
+        with pytest.raises(ValueError, match="Expected a non-empty value for `project_id` but received ''"):
+            client.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.parametrize(
+        "base_url", [None, "https://example.test/v1"], ids=["derived-base-url", "explicit-base-url"]
+    )
+    @pytest.mark.parametrize("from_env", [False, True], ids=["argument", "environment"])
+    def test_empty_region_is_rejected_at_construction(
+        self, from_env: bool, base_url: str | None, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        with pytest.raises(ValueError, match="Expected a non-empty value for `region` but received ''"):
+            if from_env:
+                monkeypatch.setenv("CLOUD_ML_REGION", "")
+                AnthropicVertex(project_id="project", access_token="my-access-token", base_url=base_url)
+            else:
+                AnthropicVertex(region="", project_id="project", access_token="my-access-token", base_url=base_url)
+
+    @pytest.mark.respx(assert_all_called=False)
+    def test_empty_project_id_environment_variable_is_unset(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        monkeypatch.setenv("ANTHROPIC_VERTEX_PROJECT_ID", "")
+        client = AnthropicVertex(region="region", access_token="my-access-token")
+
+        with pytest.raises(RuntimeError, match="No project_id was given"):
+            client.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
     @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")
     @pytest.mark.respx()
     def test_beta_tool_runner_routes_through_raw_predict(self, respx_mock: MockRouter) -> None:
@@ -786,6 +982,179 @@ class TestAsyncAnthropicVertex:
             )
         with pytest.raises(ValueError, match="dot-segment"):
             await messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize(("project_id", "region", "message"), REFUSED_BEFORE_SEMICOLON_PROJECT_IDS_AND_REGIONS)
+    async def test_empty_or_dot_segment_before_semicolon_in_project_id_or_region_is_rejected(
+        self, project_id: str, region: str, message: str, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AsyncAnthropicVertex(region=region, project_id=project_id, access_token="my-access-token")
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match=message):
+            await messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+        with pytest.raises(ValueError, match=message):
+            await messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize(("model", "segment"), MODEL_PATH_SEGMENTS)
+    async def test_semicolon_in_model_is_percent_encoded_in_path(
+        self, model: str, segment: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        await messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"/v1/projects/project/locations/region/publishers/anthropic/models/{segment}:{'streamRawPredict' if stream else 'rawPredict'}"
+        ]
+
+    @pytest.mark.respx()
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    async def test_semicolon_in_project_id_and_region_is_kept_beside_one_in_model(
+        self, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.with_options(project_id="a;b", region="c;d")
+        messages = client.beta.messages if beta else client.messages
+
+        await messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="e;f", stream=stream
+        )
+
+        calls = cast("list[MockRequestCall]", respx_mock.calls)
+        assert [call.request.url.raw_path.decode() for call in calls] == [
+            f"/v1/projects/a;b/locations/c;d/publishers/anthropic/models/e%3Bf:{'streamRawPredict' if stream else 'rawPredict'}"
+        ]
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize(("model", "message"), REFUSED_BEFORE_SEMICOLON_MODELS)
+    async def test_empty_or_dot_segment_before_semicolon_in_model_is_rejected(
+        self, model: str, message: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        with pytest.raises(ValueError, match=message):
+            await messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    async def test_empty_model_is_rejected(self, stream: bool, beta: bool, respx_mock: MockRouter) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        messages = self.client.beta.messages if beta else self.client.messages
+
+        with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received ''"):
+            await messages.create(
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+    @pytest.mark.parametrize("stream", [False, True], ids=["rawPredict", "streamRawPredict"])
+    @pytest.mark.parametrize("name", ["project_id", "region"])
+    async def test_empty_project_id_or_region_is_rejected_on_request(
+        self, name: str, stream: bool, beta: bool, respx_mock: MockRouter
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = self.client.copy()
+        setattr(client, name, "")
+        messages = client.beta.messages if beta else client.messages
+
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            await messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+                stream=stream,
+            )
+        with pytest.raises(ValueError, match=f"Expected a non-empty value for `{name}` but received ''"):
+            await messages.count_tokens(
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    async def test_empty_project_id_argument_is_rejected(self, respx_mock: MockRouter) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        client = AsyncAnthropicVertex(region="region", project_id="", access_token="my-access-token")
+
+        with pytest.raises(ValueError, match="Expected a non-empty value for `project_id` but received ''"):
+            await client.messages.create(
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Say hello there!"}],
+                model="claude-sonnet-4-5@20250929",
+            )
+
+        assert route.call_count == 0
+
+    @pytest.mark.parametrize(
+        "base_url", [None, "https://example.test/v1"], ids=["derived-base-url", "explicit-base-url"]
+    )
+    @pytest.mark.parametrize("from_env", [False, True], ids=["argument", "environment"])
+    def test_empty_region_is_rejected_at_construction(
+        self, from_env: bool, base_url: str | None, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        with pytest.raises(ValueError, match="Expected a non-empty value for `region` but received ''"):
+            if from_env:
+                monkeypatch.setenv("CLOUD_ML_REGION", "")
+                AsyncAnthropicVertex(project_id="project", access_token="my-access-token", base_url=base_url)
+            else:
+                AsyncAnthropicVertex(region="", project_id="project", access_token="my-access-token", base_url=base_url)
+
+    @pytest.mark.respx(assert_all_called=False)
+    @pytest.mark.asyncio()
+    async def test_empty_project_id_environment_variable_is_unset(
+        self, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        route = respx_mock.post(url__regex=r".*").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+        monkeypatch.setenv("ANTHROPIC_VERTEX_PROJECT_ID", "")
+        client = AsyncAnthropicVertex(region="region", access_token="my-access-token")
+
+        with pytest.raises(RuntimeError, match="No project_id was given"):
+            await client.messages.create(
+                max_tokens=1024,
                 messages=[{"role": "user", "content": "Say hello there!"}],
                 model="claude-sonnet-4-5@20250929",
             )

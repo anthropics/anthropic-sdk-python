@@ -51,17 +51,19 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
             raise RuntimeError("Expected dictionary json_data for post /v1/messages endpoint")
 
         model = options.json_data.pop("model", None)
-        if not model:
+        # A server that drops ";params" from a segment before routing sees only what precedes the first ";".
+        before_params = str(model or "").partition(";")[0]
+        if not before_params:
             raise ValueError(f"Expected a non-empty value for `model` but received {model!r}")
 
-        model = urllib.parse.quote(str(model), safe=":")
+        model = urllib.parse.quote(str(model), safe=":;")
         stream = options.json_data.pop("stream", False)
         if stream:
             options.url = f"/model/{model}/invoke-with-response-stream"
         else:
             options.url = f"/model/{model}/invoke"
 
-        if model in (".", ".."):
+        if before_params in (".", ".."):
             raise ValueError(f"Constructed path {options.url!r} contains dot-segment {model!r} which is not allowed")
 
     if options.url.startswith("/v1/messages/batches"):

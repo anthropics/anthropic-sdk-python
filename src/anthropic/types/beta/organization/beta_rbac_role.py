@@ -16,9 +16,9 @@ class BetaRBACRole(BaseModel):
     display_name: str
     """Name of the RBAC Role.
 
-    For a role created by Anthropic, this name can differ from the label claude.ai
-    shows, and Anthropic may change the name. To keep a lasting reference to a role,
-    store its `id`.
+    For a role created by Anthropic, this is Anthropic's name for the access that
+    the role grants. Anthropic may change this name, so to keep a lasting reference
+    to a role, store its `id`.
     """
 
     type: Literal["rbac_role"]

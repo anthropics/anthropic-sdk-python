@@ -255,7 +255,7 @@ def test_application_inference_profile(respx_mock: MockRouter) -> None:
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
 @pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
-@pytest.mark.parametrize("model", [".", ".."])
+@pytest.mark.parametrize("model", [".", "..", "..;x", ".;x", "..;", ".;a=b", "..;x;y"])
 async def test_dot_segment_model_is_rejected(
     model: str, stream: bool, beta: bool, sync: bool, respx_mock: MockRouter
 ) -> None:
@@ -278,26 +278,63 @@ async def test_dot_segment_model_is_rejected(
     assert route.call_count == 0
 
 
+@pytest.mark.respx()
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+@pytest.mark.parametrize(
+    ("model", "segment"),
+    [
+        ("a;b", b"a;b"),
+        ("...;x", b"...;x"),
+        ("..x;y", b"..x;y"),
+        ("x;..", b"x;.."),
+        ("a;b/c d", b"a;b%2Fc%20d"),
+        ("..%3Bx", b"..%253Bx"),
+    ],
+)
+async def test_model_with_semicolon_that_is_not_a_dot_segment_is_sent_raw(
+    model: str, segment: bytes, beta: bool, sync: bool, respx_mock: MockRouter
+) -> None:
+    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
+
+    if sync:
+        messages = sync_client.beta.messages if beta else sync_client.messages
+        messages.create(max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model)
+    else:
+        async_messages = async_client.beta.messages if beta else async_client.messages
+        await async_messages.create(
+            max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model
+        )
+
+    calls = cast("list[MockRequestCall]", respx_mock.calls)
+    assert len(calls) == 1
+    assert calls[0].request.url.raw_path == b"/model/" + segment + b"/invoke"
+
+
 @pytest.mark.respx(assert_all_called=False)
 @pytest.mark.asyncio()
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
 @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
 @pytest.mark.parametrize("stream", [False, True], ids=["invoke", "stream"])
-async def test_empty_model_is_rejected(stream: bool, beta: bool, sync: bool, respx_mock: MockRouter) -> None:
+@pytest.mark.parametrize("model", ["", ";", ";x", ";a=b", ";.."])
+async def test_empty_model_is_rejected(
+    model: str, stream: bool, beta: bool, sync: bool, respx_mock: MockRouter
+) -> None:
     route = respx_mock.post(re.compile(r"https://bedrock-runtime\.us-east-1\.amazonaws\.com/.*")).mock(
         return_value=httpx2.Response(200, json={"foo": "bar"})
     )
 
-    with pytest.raises(ValueError, match="Expected a non-empty value for `model` but received ''"):
+    with pytest.raises(ValueError, match=re.escape(f"Expected a non-empty value for `model` but received {model!r}")):
         if sync:
             messages = sync_client.beta.messages if beta else sync_client.messages
             messages.create(
-                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
             )
         else:
             async_messages = async_client.beta.messages if beta else async_client.messages
             await async_messages.create(
-                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model="", stream=stream
+                max_tokens=1024, messages=[{"role": "user", "content": "Say hello there!"}], model=model, stream=stream
             )
 
     assert route.call_count == 0
