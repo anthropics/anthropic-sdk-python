@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.8.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.7.0...v2.8.0) (2026-11-10)
+
+### Features
+
+* **api:** add Claude Tag metrics to the analytics summaries and users reports
+* **api:** add reply_mode to Claude Tag Slack channel settings
+
+
+### Bug Fixes
+
+* **bedrock:** send ";" in a model ID as is, and refuse a model ID whose part before the first ";" is empty, "." or ".."
+* **google-cloud:** percent-encode the project, location and workspace ID in the workspace and organization base URL paths
+* **google-cloud:** refuse an empty project, location or workspace ID that would be written into a derived base URL
+* **vertex:** refuse an empty model, project ID or region instead of writing it into the request path
+* **vertex:** send ";" in the model as %3B in the request path
+
+
+### Chores
+
+* **docs:** clarify display_name for RBAC Roles created by Anthropic
+* **docs:** clarify plugin delete and skill name conflict descriptions
+* **docs:** clarify when to omit user_profile_id on external keys
+* **docs:** note that Claude Tag settings accept self-hosted runner pools
+* **internal:** make three timing tests tolerate slow test machines
+* **internal:** remove a redundant import from the message types
+
+
+### Documentation
+
+* **examples:** show multiagent when creating a Managed Agents agent
+
 ## [2.7.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.6.0...v2.7.0) (2026-11-09)
 
 ### Features
