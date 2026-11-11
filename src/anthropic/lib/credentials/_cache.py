@@ -88,9 +88,9 @@ class TokenCache:
     * More than `advisory_refresh_seconds` remaining → return cached.
     * Between `mandatory_refresh_seconds` and `advisory_refresh_seconds`
       remaining (advisory window) → try provider; on success swap cache; on
-      failure log a warning and return the stale cached token. If another
-      caller is already refreshing, the advisory caller just returns the
-      cached token — no second refresh, no waiting.
+      failure log a warning and return the cached token if it has not expired.
+      If another caller is already refreshing, the advisory caller just returns
+      the cached token — no second refresh, no waiting.
     * Less than `mandatory_refresh_seconds` remaining or already expired
       (mandatory window) → call provider; on failure RAISE. Concurrent
       mandatory callers wait on a shared `Event` so exactly one provider
@@ -311,6 +311,9 @@ class TokenCache:
                 self._refresh_event = None
             refresh.owned_event.set()
         if refresh.advisory_fallback is None or not isinstance(err, (AnthropicError, httpx2.HTTPError)):
+            return None
+        expires_at = refresh.advisory_fallback.expires_at
+        if expires_at is not None and expires_at <= self._time_source():
             return None
         log.warning(
             "Advisory token refresh failed (%ds remaining); serving cached token: %s",
