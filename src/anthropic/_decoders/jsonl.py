@@ -48,16 +48,16 @@ class JSONLDecoder(Generic[_T]):
         self.http_response.close()
 
     def __decode__(self) -> Iterator[_T]:
-        buf = b""
+        buf = bytearray()
         for chunk in self._raw_iterator:
             for line in chunk.splitlines(keepends=True):
-                buf += line
+                buf.extend(line)
                 if buf.endswith((b"\r", b"\n", b"\r\n")):
                     yield construct_type_unchecked(
                         value=json.loads(buf),
                         type_=self._line_type,
                     )
-                    buf = b""
+                    buf.clear()
 
         # flush
         if buf:
@@ -109,16 +109,16 @@ class AsyncJSONLDecoder(Generic[_T]):
         await self.http_response.aclose()
 
     async def __decode__(self) -> AsyncIterator[_T]:
-        buf = b""
+        buf = bytearray()
         async for chunk in self._raw_iterator:
             for line in chunk.splitlines(keepends=True):
-                buf += line
+                buf.extend(line)
                 if buf.endswith((b"\r", b"\n", b"\r\n")):
                     yield construct_type_unchecked(
                         value=json.loads(buf),
                         type_=self._line_type,
                     )
-                    buf = b""
+                    buf.clear()
 
         # flush
         if buf:

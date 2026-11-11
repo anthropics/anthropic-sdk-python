@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gc
+import json
 from typing import Any, Iterator, AsyncIterator
 from typing_extensions import TypeVar, override
 
@@ -60,6 +61,24 @@ async def test_multi_byte_character_multiple_chunks(
     iterator = make_jsonl_iterator(content=body(), sync=sync, line_type=object)
 
     assert await iter_next(iterator) == {"content": "известни"}
+
+
+@pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+@pytest.mark.parametrize("chunk_size", [1, 64, 4096])
+@pytest.mark.parametrize("trailing_newline", [True, False])
+async def test_large_fragmented_record(sync: bool, chunk_size: int, trailing_newline: bool) -> None:
+    # A large batch result spans many of the 64-byte chunks used by APIResponse.
+    # The following record checks that no bytes from the first record survive.
+    records = [{"text": "известни\n" * 4096}, {"text": "next"}]
+    body = "\n".join(json.dumps(record, ensure_ascii=False) for record in records).encode("utf-8")
+    if trailing_newline:
+        body += b"\n"
+    chunks = (body[i : i + chunk_size] for i in range(0, len(body), chunk_size))
+    iterator = make_jsonl_iterator(content=chunks, sync=sync, line_type=object)
+
+    for record in records:
+        assert await iter_next(iterator) == record
+    await assert_empty_iter(iterator)
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
