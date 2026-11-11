@@ -29,6 +29,11 @@ api_key = "my-anthropic-api-key"
 sync_client = Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 async_client = AsyncAnthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
+# a `message_start` without `usage` fails strict response validation, so the regression tests
+# for streams that omit it use default clients, which is what streaming users get
+nonstrict_sync_client = Anthropic(base_url=base_url, api_key=api_key)
+nonstrict_async_client = AsyncAnthropic(base_url=base_url, api_key=api_key)
+
 _T = TypeVar("_T")
 
 # the accumulator must wrap the raw parser error with context and echo the offending JSON
@@ -251,6 +256,23 @@ def assert_message_delta_omitted_usage_response(message: Message) -> None:
     assert message.usage.cache_creation is not None
     assert message.usage.cache_creation.ephemeral_5m_input_tokens == 10
     assert message.container is None
+
+
+def assert_message_start_omitted_usage_seeded_from_delta(message: Message) -> None:
+    # `message_start` omitted `usage`, so the first delta that carries it seeds the snapshot;
+    # counts the stream never reported stay unset instead of being invented as zero
+    assert message.usage.output_tokens == 7
+    assert message.to_dict()["usage"] == {"output_tokens": 7}
+
+
+def assert_message_start_omitted_usage_never_supplied(message: Message) -> None:
+    # the streaming docs' thinking sequence omits `usage` from both events: the stream must
+    # finish without raising and leave `usage` unset
+    assert "usage" not in message.to_dict()
+    assert message.stop_reason == "end_turn"
+    content = message.content[0]
+    assert content.type == "text"
+    assert content.text == "Hello there!"
 
 
 class TestSyncMessages:
@@ -507,6 +529,34 @@ class TestSyncMessages:
 
         request_body = json.loads(route.calls.last.request.content)
         assert request_body["speed"] == "fast"
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_start_omitted_usage_seeded_from_delta(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(
+                200, content=get_response("message_start_omitted_usage_delta_usage_response.txt")
+            )
+        )
+
+        with nonstrict_sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            assert_message_start_omitted_usage_seeded_from_delta(stream.get_final_message())
+
+    @pytest.mark.respx(base_url=base_url)
+    def test_message_start_omitted_usage_never_supplied(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("message_start_omitted_usage_no_usage_response.txt"))
+        )
+
+        with nonstrict_sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            assert_message_start_omitted_usage_never_supplied(stream.get_final_message())
 
 
 class TestAsyncMessages:
@@ -787,6 +837,38 @@ class TestAsyncMessages:
 
         request_body = json.loads(route.calls.last.request.content)
         assert request_body["speed"] == "fast"
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_start_omitted_usage_seeded_from_delta(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(
+                200, content=to_async_iter(get_response("message_start_omitted_usage_delta_usage_response.txt"))
+            )
+        )
+
+        async with nonstrict_async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            assert_message_start_omitted_usage_seeded_from_delta(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.respx(base_url=base_url)
+    async def test_message_start_omitted_usage_never_supplied(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(
+                200, content=to_async_iter(get_response("message_start_omitted_usage_no_usage_response.txt"))
+            )
+        )
+
+        async with nonstrict_async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Say hello there!"}],
+            model="claude-sonnet-5-5",
+        ) as stream:
+            assert_message_start_omitted_usage_never_supplied(await stream.get_final_message())
 
 
 def test_message_delta_fields_are_all_accumulated() -> None:
