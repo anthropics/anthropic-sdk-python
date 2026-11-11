@@ -7,6 +7,7 @@ from typing import Any
 
 import anyio
 import pytest
+import anyio.to_thread
 
 mcp = pytest.importorskip("mcp")
 
@@ -55,17 +56,20 @@ def _read_result(contents: list[Any]) -> ReadResourceResult:
 class FakeClientSession:
     """Quacks like the `call_tool` part of `mcp.ClientSession`, recording each call."""
 
-    def __init__(self, result: CallToolResult | None = None) -> None:
+    def __init__(self, result: CallToolResult | None = None, error: BaseException | None = None) -> None:
         self.result = result or CallToolResult(content=[TextContent(type="text", text="tool output")], isError=False)
+        self.error = error
         self.calls: list[dict[str, Any]] = []
 
     async def call_tool(self, name: str, arguments: dict[str, Any] | None = None) -> CallToolResult:
         self.calls.append({"name": name, "arguments": arguments})
+        if self.error is not None:
+            raise self.error
         return self.result
 
 
-def _mock_client(result: CallToolResult | None = None) -> Any:
-    return FakeClientSession(result)
+def _mock_client(result: CallToolResult | None = None, error: BaseException | None = None) -> Any:
+    return FakeClientSession(result, error)
 
 
 # -----------------------------------------------------------------------
@@ -321,6 +325,70 @@ class TestMCPToolFactory:
         assert len(result) == 2
         assert result[0].name == "t1"
         assert result[1].name == "t2"
+
+
+class TestMCPToolCall:
+    def test_call_from_worker_thread(self) -> None:
+        async def _test() -> None:
+            tool = Tool(name="calc", inputSchema={"type": "object"})
+            call_result = CallToolResult(content=[TextContent(type="text", text="42")], isError=False)
+            client = _mock_client(result=call_result)
+            runnable = mcp_tool(tool, client)
+
+            result = await anyio.to_thread.run_sync(runnable.call, {"x": 1})
+            assert isinstance(result, list)
+            block: Any = result[0]
+            assert block["type"] == "text"
+            assert block["text"] == "42"
+
+            assert client.calls == [{"name": "calc", "arguments": {"x": 1}}]
+
+        anyio.run(_test)
+
+    def test_call_outside_worker_thread_raises_actionable_error(self) -> None:
+        # a plain sync program: `anyio.from_thread.run()` has no event loop to call back into
+        tool = Tool(name="calc", inputSchema={"type": "object"})
+        runnable = mcp_tool(tool, _mock_client())
+
+        with pytest.raises(RuntimeError, match="async_mcp_tool") as exc_info:
+            runnable.call({"x": 1})
+        assert "'calc'" in str(exc_info.value)
+
+    def test_call_from_event_loop_thread_raises_actionable_error(self) -> None:
+        # the sync `tool_runner()` calls tools inline, so driving it from an async
+        # function lands here rather than on an AnyIO worker thread
+        async def _test() -> None:
+            tool = Tool(name="calc", inputSchema={"type": "object"})
+            runnable = mcp_tool(tool, _mock_client())
+
+            with pytest.raises(RuntimeError, match="async_mcp_tool"):
+                runnable.call({"x": 1})
+
+        anyio.run(_test)
+
+    def test_runtime_error_from_the_session_is_left_alone(self) -> None:
+        async def _test() -> None:
+            tool = Tool(name="calc", inputSchema={"type": "object"})
+            runnable = mcp_tool(tool, _mock_client(error=RuntimeError("session is closed")))
+
+            with pytest.raises(RuntimeError, match="session is closed"):
+                await anyio.to_thread.run_sync(runnable.call, {"x": 1})
+
+        anyio.run(_test)
+
+    def test_call_error(self) -> None:
+        async def _test() -> None:
+            tool = Tool(name="fail_tool", inputSchema={"type": "object"})
+            call_result = CallToolResult(
+                content=[TextContent(type="text", text="something went wrong")],
+                isError=True,
+            )
+            runnable = mcp_tool(tool, _mock_client(result=call_result))
+
+            with pytest.raises(ToolError, match="something went wrong"):
+                await anyio.to_thread.run_sync(runnable.call, {})
+
+        anyio.run(_test)
 
 
 class TestAsyncMCPToolFactory:
