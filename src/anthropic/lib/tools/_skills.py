@@ -8,12 +8,17 @@ tool implementations themselves.
 from __future__ import annotations
 
 import os
+import sys
 import stat
+import time
+import uuid
 import shutil
+import asyncio
 import logging
 import tarfile
 import zipfile
 import tempfile
+import contextlib
 from typing import TYPE_CHECKING
 from pathlib import Path, PurePosixPath
 from functools import partial
@@ -33,6 +38,66 @@ __all__ = ["download_session_skills"]
 _SKILL_DIR_MODE = 0o700
 
 log = logging.getLogger("anthropic.lib.tools.agent_toolset")
+
+_ASYNC_LOCKS: dict[Path, asyncio.Lock] = {}
+
+
+class _FileLock:
+    def __init__(self, path: Path):
+        self.path = path
+        self.fd: int | None = None
+
+    def acquire(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.fd = os.open(str(self.path), os.O_CREAT | os.O_RDWR)
+        if sys.platform == "win32":
+            import msvcrt
+
+            while True:
+                try:
+                    msvcrt.locking(self.fd, msvcrt.LK_NBLCK, 1)
+                    break
+                except (BlockingIOError, OSError):
+                    time.sleep(0.02)
+        else:
+            import fcntl
+
+            fcntl.flock(self.fd, fcntl.LOCK_EX)
+
+    def release(self) -> None:
+        if self.fd is not None:
+            try:
+                if sys.platform == "win32":
+                    import msvcrt
+
+                    try:
+                        msvcrt.locking(self.fd, msvcrt.LK_UNLCK, 1)
+                    except OSError:
+                        pass
+                else:
+                    import fcntl
+
+                    try:
+                        fcntl.flock(self.fd, fcntl.LOCK_UN)
+                    except OSError:
+                        pass
+            finally:
+                os.close(self.fd)
+                self.fd = None
+
+
+@contextlib.asynccontextmanager
+async def _skill_lock(dest: Path):
+    if dest not in _ASYNC_LOCKS:
+        _ASYNC_LOCKS[dest] = asyncio.Lock()
+    async with _ASYNC_LOCKS[dest]:
+        lock_path = dest.parent / f".{dest.name}.lock"
+        fl = _FileLock(lock_path)
+        await run_sync(fl.acquire)
+        try:
+            yield
+        finally:
+            await run_sync(fl.release)
 
 
 def _within(child: Path, root: Path) -> bool:
@@ -204,6 +269,7 @@ async def download_session_skills(
     workdir: str | os.PathLike[str],
     session: BetaManagedAgentsSession | None = None,
     session_id: str | None = None,
+    lease_id: str | None = None,
 ) -> list[Path]:
     """Download the session agent's skills into `{workdir}/skills/<name>/`.
 
@@ -221,6 +287,12 @@ async def download_session_skills(
     trip on every call, and a caller that uses it for both this and the
     memory-store download fetches the session twice. It remains supported for
     callers written before `session` existed.
+
+    Note: Skill directories are keyed by name under `{workdir}/skills/<name>/`.
+    If a session requests a newer version of an already-extracted skill, it will
+    replace the directory under the lock. To prevent version thrashing across
+    concurrent sessions sharing a workdir, ensure concurrent sessions pin
+    matching skill versions or use distinct workdirs.
 
     Returns the list of skill directories that were created, so the caller can
     remove them when the workdir is torn down.
@@ -251,16 +323,46 @@ async def download_session_skills(
             if not _within(dest, skills_root):
                 log.warning("skill name %r escapes the skills dir; skipping", version.name)
                 continue
-            adest = anyio.Path(dest)
-            if await adest.is_symlink():
-                await adest.unlink()
-            # `shutil.rmtree` is blocking; keep it off the event loop.
-            await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
-            # `skill.version` may be the alias `"latest"`, which only the
-            # retrieve endpoint resolves; download by the concrete id it returned.
-            await _download_and_extract(client, skill.skill_id, version.id, dest)
-            downloaded.append(dest)
-            log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version.id, dest)
+
+            async with _skill_lock(dest):
+                adest = anyio.Path(dest)
+                if await adest.is_symlink():
+                    await adest.unlink()
+
+                version_file = anyio.Path(dest) / ".version"
+                leases_dir = anyio.Path(dest) / ".leases"
+                resolved_lease_id = lease_id or (
+                    session.id if session and getattr(session, "id", None) else (session_id or uuid.uuid4().hex)
+                )
+
+                # If the skill directory already exists and contains the expected version,
+                # skip downloading and register this session's lease.
+                if await adest.is_dir() and await version_file.exists():
+                    try:
+                        if (await version_file.read_text()).strip() == version.id:
+                            log.info(
+                                "skill skill_id=%s version=%s already exists at %s; skipping",
+                                skill.skill_id,
+                                version.id,
+                                dest,
+                            )
+                            await leases_dir.mkdir(parents=True, exist_ok=True)
+                            await (leases_dir / resolved_lease_id).write_text(resolved_lease_id)
+                            downloaded.append(dest)
+                            continue
+                    except Exception:
+                        pass
+
+                # `shutil.rmtree` is blocking; keep it off the event loop.
+                await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
+                # `skill.version` may be the alias `"latest"`, which only the
+                # retrieve endpoint resolves; download by the concrete id it returned.
+                await _download_and_extract(client, skill.skill_id, version.id, dest)
+                await version_file.write_text(version.id)
+                await leases_dir.mkdir(parents=True, exist_ok=True)
+                await (leases_dir / resolved_lease_id).write_text(resolved_lease_id)
+                downloaded.append(dest)
+                log.info("downloaded skill skill_id=%s version=%s -> %s", skill.skill_id, version.id, dest)
         except Exception as e:
             log.warning("failed to download skill skill_id=%s: %s", skill.skill_id, e)
     return downloaded

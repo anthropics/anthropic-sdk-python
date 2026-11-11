@@ -54,7 +54,7 @@ import anyio.abc
 from anyio.to_thread import run_sync
 
 from ._files import read_line_range, read_text_exact, write_text_exact
-from ._skills import _within, download_session_skills
+from ._skills import _within, _skill_lock, download_session_skills
 from ..._types import NotGiven, not_given
 from ..._utils import is_given
 from ...types.beta import (
@@ -276,6 +276,10 @@ class AgentToolContext:
     max_file_bytes: int | None | NotGiven = not_given
     max_image_base64_bytes: int | None | NotGiven = not_given
     max_pdf_bytes: int | None | NotGiven = not_given
+    # Whether to keep skill directories on disk after the context exits.
+    # When True, ``_cleanup_skills`` is a no-op, allowing the workdir to
+    # serve as a persistent skills cache across sessions.
+    keep_skills: bool = False
     # Resolved directories the write and edit tools refuse to modify. The
     # worker sets this to the roots of read-only memory stores so the agent
     # sees the error at write time instead of the change silently never
@@ -285,6 +289,7 @@ class AgentToolContext:
     # Skill directories downloaded by `setup_skills`; removed again on
     # `__aexit__` so a context doesn't leave downloaded skills behind.
     _skill_dirs: list[Path] = field(default_factory=_empty_skill_dirs, init=False, repr=False)
+    _context_id: str = field(default_factory=lambda: uuid.uuid4().hex, init=False, repr=False)
 
     def __post_init__(self) -> None:
         reject_unrestricted_paths(self.unrestricted_paths)
@@ -309,19 +314,36 @@ class AgentToolContext:
         if self.client is None or (self.session is None and self.session_id is None):
             return
         self._skill_dirs = await download_session_skills(
-            self.client, session=self.session, session_id=self.session_id, workdir=self.workdir
+            self.client,
+            session=self.session,
+            session_id=self.session_id,
+            workdir=self.workdir,
+            lease_id=self._context_id,
         )
 
     async def _cleanup_skills(self) -> None:
         """Remove the skill directories `setup_skills` downloaded.
 
         Only the directories this context created are removed — a pre-existing
-        `{workdir}/skills` tree is left untouched.
+        `{workdir}/skills` tree is left untouched. When multiple sessions share a
+        workdir, on-disk leases prevent one session from removing directories
+        still in use by another session. When `keep_skills` is True, this is a
+        no-op.
         """
+        if self.keep_skills:
+            return
         for skill_dir in self._skill_dirs:
             try:
-                # `shutil.rmtree` is blocking; keep it off the event loop.
-                await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
+                async with _skill_lock(skill_dir):
+                    leases_dir = anyio.Path(skill_dir) / ".leases"
+                    if await leases_dir.is_dir():
+                        context_id = getattr(self, "_context_id", None)
+                        if context_id:
+                            await (leases_dir / context_id).unlink(missing_ok=True)
+                        if [p async for p in leases_dir.iterdir()]:
+                            continue
+                    # `shutil.rmtree` is blocking; keep it off the event loop.
+                    await run_sync(partial(shutil.rmtree, skill_dir, ignore_errors=True))
             except Exception as e:
                 log.warning("failed to remove downloaded skill dir %s: %s", skill_dir, e)
         self._skill_dirs = []

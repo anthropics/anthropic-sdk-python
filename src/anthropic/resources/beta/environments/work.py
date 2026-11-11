@@ -1390,6 +1390,7 @@ class AsyncWork(AsyncAPIResource):
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> EnvironmentWorker: ...
 
     @overload
@@ -1408,6 +1409,7 @@ class AsyncWork(AsyncAPIResource):
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> EnvironmentWorker: ...
 
     def worker(
@@ -1424,6 +1426,7 @@ class AsyncWork(AsyncAPIResource):
         memory_sync_deletions: MemoryDeleteMode = "enabled",
         worker_id: str | None = None,
         extra_headers: Headers | None = None,
+        keep_skills: bool = False,
     ) -> EnvironmentWorker:
         """Build an `anthropic.lib.environments.EnvironmentWorker` bound to this async client.
 
@@ -1506,6 +1509,7 @@ class AsyncWork(AsyncAPIResource):
             memory_sync_deletions=memory_sync_deletions,
             worker_id=worker_id,
             extra_headers=extra_headers,
+            keep_skills=keep_skills,
         )
 
 
