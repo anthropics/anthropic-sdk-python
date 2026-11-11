@@ -1,0 +1,17 @@
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_beta_usage_omitted_optional","type":"message","role":"assistant","content":[],"model":"claude-test","stop_reason":null,"stop_sequence":null}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":12,"cache_creation_input_tokens":4,"cache_read_input_tokens":3,"output_tokens":6,"output_tokens_details":{"thinking_tokens":2},"server_tool_use":{"web_search_requests":1,"web_fetch_requests":0},"iterations":[{"type":"message","model":"claude-test","input_tokens":12,"cache_creation_input_tokens":4,"cache_read_input_tokens":3,"output_tokens":6}],"fallback_credit":{"status":{"type":"redeemed"}}}}
+
+event: message_stop
+data: {"type":"message_stop"}
