@@ -24,6 +24,7 @@ from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails as 
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
 from .enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails
+from .parent_organization_required_error import ParentOrganizationRequiredError as ParentOrganizationRequiredError
 from .request_body_encoding_invalid_error import RequestBodyEncodingInvalidError as RequestBodyEncodingInvalidError
 from .organization_type_not_supported_error import (
     OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
@@ -48,6 +49,9 @@ from .claude_code_version_too_old_error_details import (
 )
 from .enforced_spend_limit_reached_error_details import (
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
+)
+from .parent_organization_required_error_details import (
+    ParentOrganizationRequiredErrorDetails as ParentOrganizationRequiredErrorDetails,
 )
 from .request_body_encoding_invalid_error_details import (
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,

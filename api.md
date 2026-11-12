@@ -22,6 +22,7 @@ from anthropic.types import (
     OrganizationOnHoldErrorDetails,
     OrganizationTypeNotSupportedErrorDetails,
     OverloadedError,
+    ParentOrganizationRequiredErrorDetails,
     PermissionError,
     RampLimitExceededErrorDetails,
     RateLimitError,
@@ -35,6 +36,7 @@ from anthropic.types import (
     CMEKKeyNetworkBlockedError,
     OrganizationOnHoldError,
     OrganizationTypeNotSupportedError,
+    ParentOrganizationRequiredError,
     RequestBodyEncodingInvalidError,
     RequestBodyEncodingUnsupportedError,
     SandboxEgressRestrictedError,
@@ -692,7 +694,9 @@ from anthropic.types import (
     OrgMemberLimitExceededErrorDetails,
     OrganizationInfo,
     OrganizationRole,
+    RBACRoleNotFoundErrorDetails,
     OrgMemberLimitExceededError,
+    RBACRoleNotFoundError,
     ConcurrentMembershipChangeError,
 )
 ```
@@ -1223,7 +1227,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import RBACRole
+from anthropic.types.organization import (
+    RBACRole,
+    RBACRoleSource,
+    RBACRoleSourceBuiltIn,
+    RBACRoleSourceCustom,
+)
 ```
 
 Methods:
@@ -3457,7 +3466,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaRBACRole
+from anthropic.types.beta.organization import (
+    BetaRBACRole,
+    BetaRBACRoleSource,
+    BetaRBACRoleSourceBuiltIn,
+    BetaRBACRoleSourceCustom,
+)
 ```
 
 Methods:

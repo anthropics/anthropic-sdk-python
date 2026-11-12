@@ -29,6 +29,7 @@ from .user_remove_response import UserRemoveResponse as UserRemoveResponse
 from .api_key_update_params import APIKeyUpdateParams as APIKeyUpdateParams
 from .beta_plugin_api_actor import BetaPluginAPIActor as BetaPluginAPIActor
 from .beta_plugin_component import BetaPluginComponent as BetaPluginComponent
+from .beta_rbac_role_source import BetaRBACRoleSource as BetaRBACRoleSource
 from .beta_workspace_member import BetaWorkspaceMember as BetaWorkspaceMember
 from .rbac_role_list_params import RBACRoleListParams as RBACRoleListParams
 from .webhook_create_params import WebhookCreateParams as WebhookCreateParams
@@ -86,6 +87,7 @@ from .beta_claude_tag_guest_policy import BetaClaudeTagGuestPolicy as BetaClaude
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig as BetaGCPExternalKeyConfig
 from .beta_organization_rate_limit import BetaOrganizationRateLimit as BetaOrganizationRateLimit
 from .beta_plugin_name_taken_error import BetaPluginNameTakenError as BetaPluginNameTakenError
+from .beta_rbac_role_source_custom import BetaRBACRoleSourceCustom as BetaRBACRoleSourceCustom
 from .external_key_delete_response import ExternalKeyDeleteResponse as ExternalKeyDeleteResponse
 from .beta_analytics_context_window import BetaAnalyticsContextWindow as BetaAnalyticsContextWindow
 from .beta_analytics_cowork_metrics import BetaAnalyticsCoworkMetrics as BetaAnalyticsCoworkMetrics
@@ -108,6 +110,7 @@ from .beta_claude_tag_setting_source import BetaClaudeTagSettingSource as BetaCl
 from .beta_compliance_settings_state import BetaComplianceSettingsState as BetaComplianceSettingsState
 from .beta_no_billing_workspace_role import BetaNoBillingWorkspaceRole as BetaNoBillingWorkspaceRole
 from .beta_plugin_owner_organization import BetaPluginOwnerOrganization as BetaPluginOwnerOrganization
+from .beta_rbac_role_source_built_in import BetaRBACRoleSourceBuiltIn as BetaRBACRoleSourceBuiltIn
 from .beta_scan_failed_error_details import BetaScanFailedErrorDetails as BetaScanFailedErrorDetails
 from .external_key_validate_response import ExternalKeyValidateResponse as ExternalKeyValidateResponse
 from .plugin_marketplace_list_params import PluginMarketplaceListParams as PluginMarketplaceListParams

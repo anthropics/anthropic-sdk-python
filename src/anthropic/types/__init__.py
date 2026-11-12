@@ -30,6 +30,7 @@ from .shared import (
     CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails,
     EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError,
     OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails,
+    ParentOrganizationRequiredError as ParentOrganizationRequiredError,
     RequestBodyEncodingInvalidError as RequestBodyEncodingInvalidError,
     CMEKKeyNetworkBlockedErrorDetails as CMEKKeyNetworkBlockedErrorDetails,
     OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
@@ -40,6 +41,7 @@ from .shared import (
     SandboxEgressRestrictedErrorDetails as SandboxEgressRestrictedErrorDetails,
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
     RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
+    ParentOrganizationRequiredErrorDetails as ParentOrganizationRequiredErrorDetails,
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
     ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
@@ -245,6 +247,7 @@ from .computer_screenshot_input import ComputerScreenshotInput as ComputerScreen
 from .computer_scroll_direction import ComputerScrollDirection as ComputerScrollDirection
 from .content_block_delta_event import ContentBlockDeltaEvent as ContentBlockDeltaEvent
 from .content_block_start_event import ContentBlockStartEvent as ContentBlockStartEvent
+from .rbac_role_not_found_error import RBACRoleNotFoundError as RBACRoleNotFoundError
 from .search_result_block_param import SearchResultBlockParam as SearchResultBlockParam
 from .beta_gateway_timeout_error import BetaGatewayTimeoutError as BetaGatewayTimeoutError
 from .beta_invalid_request_error import BetaInvalidRequestError as BetaInvalidRequestError
@@ -410,6 +413,7 @@ from .code_execution_output_block_param import CodeExecutionOutputBlockParam as 
 from .code_execution_result_block_param import CodeExecutionResultBlockParam as CodeExecutionResultBlockParam
 from .compaction_content_mismatch_error import CompactionContentMismatchError as CompactionContentMismatchError
 from .computer_right_click_config_param import ComputerRightClickConfigParam as ComputerRightClickConfigParam
+from .rbac_role_not_found_error_details import RBACRoleNotFoundErrorDetails as RBACRoleNotFoundErrorDetails
 from .server_tool_caller_20260120_param import ServerToolCaller20260120Param as ServerToolCaller20260120Param
 from .thread_fingerprint_mismatch_error import ThreadFingerprintMismatchError as ThreadFingerprintMismatchError
 from .web_fetch_tool_result_block_param import WebFetchToolResultBlockParam as WebFetchToolResultBlockParam

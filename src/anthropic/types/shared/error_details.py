@@ -7,6 +7,7 @@ from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails
+from ..rbac_role_not_found_error_details import RBACRoleNotFoundErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
@@ -31,6 +32,7 @@ from ..compaction_content_mismatch_error_details import CompactionContentMismatc
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
 from .enforced_spend_limit_reached_error_details import EnforcedSpendLimitReachedErrorDetails
+from .parent_organization_required_error_details import ParentOrganizationRequiredErrorDetails
 from ..compaction_signature_invalid_error_details import CompactionSignatureInvalidErrorDetails
 from ..concurrent_membership_change_error_details import ConcurrentMembershipChangeErrorDetails
 from .request_body_encoding_invalid_error_details import RequestBodyEncodingInvalidErrorDetails
@@ -169,6 +171,8 @@ ErrorDetails: TypeAlias = Annotated[
         ExternalKeyChangedErrorDetails,
         WorkspaceMemberLimitExceededErrorDetails,
         OrganizationTypeNotSupportedErrorDetails,
+        ParentOrganizationRequiredErrorDetails,
+        RBACRoleNotFoundErrorDetails,
         BetaEnvironmentCreateDisabledErrorDetails,
         BetaEnvironmentArchivedErrorDetails,
         BetaInvalidConfigTypeChangeErrorDetails,
