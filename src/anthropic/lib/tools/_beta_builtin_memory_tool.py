@@ -434,6 +434,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
                         continue
                     item_relative_path = f"{relative_path}/{item.name}" if relative_path else item.name
                     try:
+                        _validate_no_symlink_escape(item, self.memory_root)
                         stat = item.stat()
                     except Exception:
                         continue
@@ -728,6 +729,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
                         continue
                     item_relative_path = f"{relative_path}/{item.name}" if relative_path else item.name
                     try:
+                        await _async_validate_no_symlink_escape(item, self.memory_root)
                         sync_item = Path(str(item))
                         stat = await run_sync(sync_item.stat)
                     except Exception:

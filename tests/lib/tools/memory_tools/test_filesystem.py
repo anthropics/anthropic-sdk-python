@@ -557,6 +557,32 @@ class TestBetaLocalFilesystemMemoryTool:
                     BetaMemoryTool20250818ViewCommand(command="view", path="/memories/escape_link/secret.txt")
                 )
 
+    def test_view_lists_symlinks_only_when_they_stay_inside_memories(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        with tempfile.TemporaryDirectory() as outside_dir:
+            secret_path = Path(outside_dir, "secret.txt")
+            secret_path.write_text("sensitive data", encoding="utf-8")
+
+            memories_path = sync_local_filesystem_tool.memory_root
+            sub_path = memories_path / "sub"
+            sub_path.mkdir()
+            (sub_path / "notes.txt").write_text("hello", encoding="utf-8")
+            os.symlink(Path("sub", "notes.txt"), memories_path / "inside_file")
+            os.symlink(outside_dir, memories_path / "outside_dir", target_is_directory=True)
+            os.symlink(secret_path, memories_path / "outside_file")
+            os.symlink(outside_dir, sub_path / "nested_outside_dir", target_is_directory=True)
+
+            result = sync_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories")
+            )
+
+            assert [line.split("\t")[1] for line in result.splitlines()[2:]] == [
+                "/memories/inside_file",
+                "/memories/sub/",
+                "/memories/sub/notes.txt",
+            ]
+
     def test_symlink_validation_reject_creating_files_through_symlink_pointing_outside(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
     ) -> None:
@@ -1139,6 +1165,32 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 await async_local_filesystem_tool.view(
                     BetaMemoryTool20250818ViewCommand(command="view", path="/memories/escape_link/secret.txt")
                 )
+
+    async def test_view_lists_symlinks_only_when_they_stay_inside_memories(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        with tempfile.TemporaryDirectory() as outside_dir:
+            secret_path = Path(outside_dir, "secret.txt")
+            secret_path.write_text("sensitive data", encoding="utf-8")
+
+            memories_path = Path(str(async_local_filesystem_tool.memory_root))
+            sub_path = memories_path / "sub"
+            sub_path.mkdir(parents=True)
+            (sub_path / "notes.txt").write_text("hello", encoding="utf-8")
+            os.symlink(Path("sub", "notes.txt"), memories_path / "inside_file")
+            os.symlink(outside_dir, memories_path / "outside_dir", target_is_directory=True)
+            os.symlink(secret_path, memories_path / "outside_file")
+            os.symlink(outside_dir, sub_path / "nested_outside_dir", target_is_directory=True)
+
+            result = await async_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories")
+            )
+
+            assert [line.split("\t")[1] for line in result.splitlines()[2:]] == [
+                "/memories/inside_file",
+                "/memories/sub/",
+                "/memories/sub/notes.txt",
+            ]
 
     async def test_symlink_validation_reject_creating_files_through_symlink_pointing_outside(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
