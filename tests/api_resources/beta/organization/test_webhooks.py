@@ -24,8 +24,8 @@ class TestWebhooks:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -33,10 +33,10 @@ class TestWebhooks:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             description="description",
-            name="name",
+            name="Enforcement actions",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -45,8 +45,8 @@ class TestWebhooks:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.webhooks.with_raw_response.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         )
 
@@ -58,8 +58,8 @@ class TestWebhooks:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.webhooks.with_streaming_response.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -327,8 +327,8 @@ class TestAsyncWebhooks:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -336,10 +336,10 @@ class TestAsyncWebhooks:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             description="description",
-            name="name",
+            name="Enforcement actions",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -348,8 +348,8 @@ class TestAsyncWebhooks:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.webhooks.with_raw_response.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         )
 
@@ -361,8 +361,8 @@ class TestAsyncWebhooks:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.webhooks.with_streaming_response.create(
-            enabled_events=["user_profile.enforcement_action_opened"],
-            url="x",
+            enabled_events=["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"],
+            url="https://example.com/anthropic-webhooks",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
