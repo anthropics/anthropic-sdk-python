@@ -201,7 +201,7 @@ class TestUsers:
     def test_method_sign_out_with_all_params(self, client: Anthropic) -> None:
         user = client.beta.organization.users.sign_out(
             user_id="user_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])
@@ -427,7 +427,7 @@ class TestAsyncUsers:
     async def test_method_sign_out_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user = await async_client.beta.organization.users.sign_out(
             user_id="user_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationUser, user, path=["response"])

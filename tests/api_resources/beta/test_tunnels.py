@@ -30,7 +30,7 @@ class TestTunnels:
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.create(
             display_name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -72,7 +72,7 @@ class TestTunnels:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -124,7 +124,7 @@ class TestTunnels:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -166,7 +166,7 @@ class TestTunnels:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -217,7 +217,7 @@ class TestTunnels:
     def test_method_reveal_token_with_all_params(self, client: Anthropic) -> None:
         tunnel = client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -269,7 +269,7 @@ class TestTunnels:
         tunnel = client.beta.tunnels.rotate_token(
             tunnel_id="tunnel_id",
             reason="reason",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -325,7 +325,7 @@ class TestAsyncTunnels:
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.create(
             display_name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -367,7 +367,7 @@ class TestAsyncTunnels:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.retrieve(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -419,7 +419,7 @@ class TestAsyncTunnels:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -461,7 +461,7 @@ class TestAsyncTunnels:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.archive(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -512,7 +512,7 @@ class TestAsyncTunnels:
     async def test_method_reveal_token_with_all_params(self, async_client: AsyncAnthropic) -> None:
         tunnel = await async_client.beta.tunnels.reveal_token(
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -564,7 +564,7 @@ class TestAsyncTunnels:
         tunnel = await async_client.beta.tunnels.rotate_token(
             tunnel_id="tunnel_id",
             reason="reason",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

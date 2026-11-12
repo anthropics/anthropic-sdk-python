@@ -45,7 +45,7 @@ class TestSlackChannels:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -95,7 +95,7 @@ class TestSlackChannels:
         slack_channel = client.beta.organization.claude_tag.slack_channels.retrieve(
             id="slch_01SvpyRQK3nN6eH9uhRA7n1q",
             include_inherited=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -154,7 +154,7 @@ class TestSlackChannels:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -211,7 +211,7 @@ class TestSlackChannels:
             limit=0,
             page="page",
             slack_channel_id="slack_channel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaClaudeTagSlackChannel], slack_channel, path=["response"])
@@ -254,7 +254,7 @@ class TestSlackChannels:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         slack_channel = client.beta.organization.claude_tag.slack_channels.delete(
             id="slch_01SvpyRQK3nN6eH9uhRA7n1q",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagDeletedSlackChannel, slack_channel, path=["response"])
@@ -324,7 +324,7 @@ class TestAsyncSlackChannels:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -374,7 +374,7 @@ class TestAsyncSlackChannels:
         slack_channel = await async_client.beta.organization.claude_tag.slack_channels.retrieve(
             id="slch_01SvpyRQK3nN6eH9uhRA7n1q",
             include_inherited=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -433,7 +433,7 @@ class TestAsyncSlackChannels:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackChannel, slack_channel, path=["response"])
@@ -490,7 +490,7 @@ class TestAsyncSlackChannels:
             limit=0,
             page="page",
             slack_channel_id="slack_channel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaClaudeTagSlackChannel], slack_channel, path=["response"])
@@ -533,7 +533,7 @@ class TestAsyncSlackChannels:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         slack_channel = await async_client.beta.organization.claude_tag.slack_channels.delete(
             id="slch_01SvpyRQK3nN6eH9uhRA7n1q",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagDeletedSlackChannel, slack_channel, path=["response"])

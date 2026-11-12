@@ -28,7 +28,7 @@ class TestBundles:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         bundle = client.beta.organization.claude_tag.bundles.retrieve(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
@@ -78,7 +78,7 @@ class TestBundles:
         bundle = client.beta.organization.claude_tag.bundles.list(
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaClaudeTagBundle], bundle, path=["response"])
@@ -125,7 +125,7 @@ class TestAsyncBundles:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         bundle = await async_client.beta.organization.claude_tag.bundles.retrieve(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
@@ -175,7 +175,7 @@ class TestAsyncBundles:
         bundle = await async_client.beta.organization.claude_tag.bundles.list(
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaClaudeTagBundle], bundle, path=["response"])

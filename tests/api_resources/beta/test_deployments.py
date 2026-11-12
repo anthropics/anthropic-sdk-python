@@ -80,7 +80,7 @@ class TestDeployments:
                 "type": "cron",
             },
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -150,7 +150,7 @@ class TestDeployments:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.retrieve(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -237,7 +237,7 @@ class TestDeployments:
                 "type": "cron",
             },
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -293,7 +293,7 @@ class TestDeployments:
             limit=0,
             page="page",
             status="active",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -335,7 +335,7 @@ class TestDeployments:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.archive(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -386,7 +386,7 @@ class TestDeployments:
     def test_method_pause_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.pause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -437,7 +437,7 @@ class TestDeployments:
     def test_method_run_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.run(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -488,7 +488,7 @@ class TestDeployments:
     def test_method_unpause_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.unpause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -593,7 +593,7 @@ class TestAsyncDeployments:
                 "type": "cron",
             },
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -663,7 +663,7 @@ class TestAsyncDeployments:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.retrieve(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -750,7 +750,7 @@ class TestAsyncDeployments:
                 "type": "cron",
             },
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -806,7 +806,7 @@ class TestAsyncDeployments:
             limit=0,
             page="page",
             status="active",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -848,7 +848,7 @@ class TestAsyncDeployments:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.archive(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -899,7 +899,7 @@ class TestAsyncDeployments:
     async def test_method_pause_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.pause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -950,7 +950,7 @@ class TestAsyncDeployments:
     async def test_method_run_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.run(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -1001,7 +1001,7 @@ class TestAsyncDeployments:
     async def test_method_unpause_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.unpause(
             deployment_id="depl_011CZkZcDH3vPqd7xnEfwTai",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

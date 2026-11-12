@@ -37,7 +37,7 @@ class TestWebhooks:
             url="x",
             description="description",
             name="name",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -82,7 +82,7 @@ class TestWebhooks:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -137,7 +137,7 @@ class TestWebhooks:
             name="name",
             state="disabled",
             url="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -189,7 +189,7 @@ class TestWebhooks:
             before_id="before_id",
             limit=0,
             order="asc",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
@@ -230,7 +230,7 @@ class TestWebhooks:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -280,7 +280,7 @@ class TestWebhooks:
     def test_method_regenerate_signing_secret_with_all_params(self, client: Anthropic) -> None:
         webhook = client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])
@@ -340,7 +340,7 @@ class TestAsyncWebhooks:
             url="x",
             description="description",
             name="name",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaNewOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -385,7 +385,7 @@ class TestAsyncWebhooks:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.retrieve(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -440,7 +440,7 @@ class TestAsyncWebhooks:
             name="name",
             state="disabled",
             url="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -492,7 +492,7 @@ class TestAsyncWebhooks:
             before_id="before_id",
             limit=0,
             order="asc",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaOrganizationWebhookEndpoint], webhook, path=["response"])
@@ -533,7 +533,7 @@ class TestAsyncWebhooks:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.delete(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedOrganizationWebhookEndpoint, webhook, path=["response"])
@@ -583,7 +583,7 @@ class TestAsyncWebhooks:
     async def test_method_regenerate_signing_secret_with_all_params(self, async_client: AsyncAnthropic) -> None:
         webhook = await async_client.beta.organization.webhooks.regenerate_signing_secret(
             webhook_endpoint_id="webhook_endpoint_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaOrganizationWebhookEndpointSigningSecret, webhook, path=["response"])

@@ -8,7 +8,6 @@ __all__ = ["AnthropicBetaParam"]
 AnthropicBetaParam: TypeAlias = Union[
     str,
     Literal[
-        "message-batches-2024-09-24",
         "computer-use-2024-10-22",
         "computer-use-2025-01-24",
         "output-128k-2025-02-19",
@@ -55,6 +54,7 @@ AnthropicBetaParam: TypeAlias = Union[
         "message-threads-2026-08-12",
         "analytics-usage-cost-2026-08-24",
         "experimental-claude-tag-2026-10-21",
+        "message-batches-2024-09-24",
         "prompt-caching-2024-07-31",
         "pdfs-2024-09-25",
         "token-counting-2024-11-01",

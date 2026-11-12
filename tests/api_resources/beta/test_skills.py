@@ -29,7 +29,7 @@ class TestSkills:
         skill = client.beta.skills.create(
             files=[b"Example data"],
             display_name="display_name",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -73,7 +73,7 @@ class TestSkills:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -125,7 +125,7 @@ class TestSkills:
             limit=1,
             page="page",
             source="source",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -167,7 +167,7 @@ class TestSkills:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         skill = client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -225,7 +225,7 @@ class TestAsyncSkills:
         skill = await async_client.beta.skills.create(
             files=[b"Example data"],
             display_name="display_name",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -269,7 +269,7 @@ class TestAsyncSkills:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.retrieve(
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -321,7 +321,7 @@ class TestAsyncSkills:
             limit=1,
             page="page",
             source="source",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -363,7 +363,7 @@ class TestAsyncSkills:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         skill = await async_client.beta.skills.delete(
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

@@ -31,7 +31,7 @@ class TestDeploymentRuns:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         deployment_run = client.beta.deployment_runs.retrieve(
             deployment_run_id="deployment_run_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -89,7 +89,7 @@ class TestDeploymentRuns:
             limit=0,
             page="page",
             trigger_type="schedule",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -137,7 +137,7 @@ class TestAsyncDeploymentRuns:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment_run = await async_client.beta.deployment_runs.retrieve(
             deployment_run_id="deployment_run_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -195,7 +195,7 @@ class TestAsyncDeploymentRuns:
             limit=0,
             page="page",
             trigger_type="schedule",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

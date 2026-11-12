@@ -32,7 +32,7 @@ class TestServiceAccounts:
             name="ci-deploy-bot",
             description="description",
             organization_role="admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -75,7 +75,7 @@ class TestServiceAccounts:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -127,7 +127,7 @@ class TestServiceAccounts:
             service_account_id="service_account_id",
             description="description",
             organization_role="admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -178,7 +178,7 @@ class TestServiceAccounts:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaServiceAccount], service_account, path=["response"])
@@ -219,7 +219,7 @@ class TestServiceAccounts:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         service_account = client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -277,7 +277,7 @@ class TestAsyncServiceAccounts:
             name="ci-deploy-bot",
             description="description",
             organization_role="admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -320,7 +320,7 @@ class TestAsyncServiceAccounts:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.retrieve(
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -372,7 +372,7 @@ class TestAsyncServiceAccounts:
             service_account_id="service_account_id",
             description="description",
             organization_role="admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])
@@ -423,7 +423,7 @@ class TestAsyncServiceAccounts:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaServiceAccount], service_account, path=["response"])
@@ -464,7 +464,7 @@ class TestAsyncServiceAccounts:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.service_accounts.archive(
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccount, service_account, path=["response"])

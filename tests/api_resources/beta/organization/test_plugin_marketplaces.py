@@ -32,7 +32,7 @@ class TestPluginMarketplaces:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.retrieve(
             marketplace_id="marketplace_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
@@ -84,7 +84,7 @@ class TestPluginMarketplaces:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
@@ -140,7 +140,7 @@ class TestPluginMarketplaces:
             owner_type="organization",
             page="page",
             source="directory",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
@@ -181,7 +181,7 @@ class TestPluginMarketplaces:
     def test_method_validate_archive_with_all_params(self, client: Anthropic) -> None:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
@@ -225,7 +225,7 @@ class TestPluginMarketplaces:
         plugin_marketplace = client.beta.organization.plugin_marketplaces.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
             ref="main",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
@@ -275,7 +275,7 @@ class TestAsyncPluginMarketplaces:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.retrieve(
             marketplace_id="marketplace_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
@@ -327,7 +327,7 @@ class TestAsyncPluginMarketplaces:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.update(
             marketplace_id="marketplace_id",
             default_installation_preference="available",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplace, plugin_marketplace, path=["response"])
@@ -383,7 +383,7 @@ class TestAsyncPluginMarketplaces:
             owner_type="organization",
             page="page",
             source="directory",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginMarketplace], plugin_marketplace, path=["response"])
@@ -424,7 +424,7 @@ class TestAsyncPluginMarketplaces:
     async def test_method_validate_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.validate_archive(
             archive=b"Example data",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])
@@ -468,7 +468,7 @@ class TestAsyncPluginMarketplaces:
         plugin_marketplace = await async_client.beta.organization.plugin_marketplaces.validate_repository(
             repository_url="https://github.com/example-org/example-marketplace",
             ref="main",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginMarketplaceValidationReport, plugin_marketplace, path=["response"])

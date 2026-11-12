@@ -91,7 +91,7 @@ class TestAgents:
                     },
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -138,7 +138,7 @@ class TestAgents:
         agent = client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -239,7 +239,7 @@ class TestAgents:
                 }
             ],
             version=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -293,7 +293,7 @@ class TestAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -335,7 +335,7 @@ class TestAgents:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         agent = client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -452,7 +452,7 @@ class TestAsyncAgents:
                     },
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -499,7 +499,7 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -600,7 +600,7 @@ class TestAsyncAgents:
                 }
             ],
             version=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -654,7 +654,7 @@ class TestAsyncAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -696,7 +696,7 @@ class TestAsyncAgents:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

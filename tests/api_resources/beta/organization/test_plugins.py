@@ -34,7 +34,7 @@ class TestPlugins:
             files=[b"Example data"],
             marketplace_id="marketplace_id",
             release_notes="release_notes",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -78,7 +78,7 @@ class TestPlugins:
         plugin = client.beta.organization.plugins.retrieve(
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -130,7 +130,7 @@ class TestPlugins:
         plugin = client.beta.organization.plugins.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -191,7 +191,7 @@ class TestPlugins:
             owner_type="organization",
             owner_user_id="owner_user_id",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPlugin], plugin, path=["response"])
@@ -232,7 +232,7 @@ class TestPlugins:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         plugin = client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
@@ -290,7 +290,7 @@ class TestAsyncPlugins:
             files=[b"Example data"],
             marketplace_id="marketplace_id",
             release_notes="release_notes",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -334,7 +334,7 @@ class TestAsyncPlugins:
         plugin = await async_client.beta.organization.plugins.retrieve(
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -386,7 +386,7 @@ class TestAsyncPlugins:
         plugin = await async_client.beta.organization.plugins.update(
             plugin_id="plugin_id",
             served_version_id="pluginver_01KaZmQpRsTuVwXyZ2b4c6d8",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPlugin, plugin, path=["response"])
@@ -447,7 +447,7 @@ class TestAsyncPlugins:
             owner_type="organization",
             owner_user_id="owner_user_id",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPlugin], plugin, path=["response"])
@@ -488,7 +488,7 @@ class TestAsyncPlugins:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         plugin = await async_client.beta.organization.plugins.delete(
             plugin_id="plugin_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPlugin, plugin, path=["response"])
