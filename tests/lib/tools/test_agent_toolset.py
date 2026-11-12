@@ -926,6 +926,34 @@ async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.Mo
 
 
 @needs_pydantic_v2
+@needs_symlinks
+async def test_grep_ignores_the_ripgrep_config_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("TOPSECRET")
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "leak").symlink_to(secret)
+    config = tmp_path / "ripgreprc"
+    config.write_text("--follow\n")
+    monkeypatch.setenv("RIPGREP_CONFIG_PATH", str(config))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "TOPSECRET"})
+    assert res == "no matches"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+async def test_grep_passes_no_config_to_rg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    rg = tmp_path / "bin" / "rg"
+    rg.parent.mkdir()
+    rg.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\"\n")
+    rg.chmod(0o755)
+    monkeypatch.setenv("PATH", str(rg.parent))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "x"})
+    args = str(res).splitlines()
+    assert "--no-config" in args[: args.index("-e")]
+
+
+@needs_pydantic_v2
 async def test_file_tools_confinement_matrix(tmp_path: Path) -> None:
     """The full path policy through the real tools: the workdir works, a memory
     folder mounted outside it works, a read-only memory folder reads but

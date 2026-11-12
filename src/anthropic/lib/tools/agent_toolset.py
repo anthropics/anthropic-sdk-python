@@ -850,7 +850,7 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             # `check=False` because ripgrep exits 1 on "no matches", which
             # isn't an error for us — we surface it as a friendly string.
             result = await anyio.run_process(
-                [rg, "-n", "--no-heading", "-e", pattern, "--", str(search)],
+                [rg, "--no-config", "-n", "--no-heading", "-e", pattern, "--", str(search)],
                 check=False,
             )
             if result.returncode == 1:
