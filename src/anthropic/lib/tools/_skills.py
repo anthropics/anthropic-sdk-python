@@ -17,6 +17,7 @@ import tempfile
 from typing import TYPE_CHECKING
 from pathlib import Path, PurePath, PurePosixPath
 from functools import partial
+from contextlib import suppress
 from collections.abc import Iterable
 
 import anyio
@@ -208,8 +209,9 @@ async def download_session_skills(
     Reads the resolved agent off `session`, and for each skill fetches its
     files via `client.beta.skills.versions.download` and extracts the archive
     under a directory named after the skill. The archive is streamed to a temp
-    file rather than buffered whole in memory. A failure on one skill is logged
-    and does not block the others.
+    file rather than buffered whole in memory. A failure on one skill is logged,
+    leaves a directory already at its destination as it was, and does not block
+    the others.
 
     Pass `session`. A session's resources cannot change while it runs, so the
     caller fetches it once and shares that snapshot with the memory-store
@@ -249,11 +251,6 @@ async def download_session_skills(
             if not _within(dest, skills_root):
                 log.warning("skill name %r escapes the skills dir; skipping", version.name)
                 continue
-            adest = anyio.Path(dest)
-            if await adest.is_symlink():
-                await adest.unlink()
-            # `shutil.rmtree` is blocking; keep it off the event loop.
-            await run_sync(partial(shutil.rmtree, dest, ignore_errors=True))
             # `skill.version` may be the alias `"latest"`, which only the
             # retrieve endpoint resolves; download by the concrete id it returned.
             await _download_and_extract(client, skill.skill_id, version.id, dest)
@@ -265,17 +262,20 @@ async def download_session_skills(
 
 
 async def _download_and_extract(client: AsyncAnthropic, skill_id: str, version_id: str, dest: Path) -> None:
-    """Stream the skill archive to a temp file, then extract it into `dest`."""
+    """Download and extract the skill archive in an owner-only directory beside `dest`, then replace `dest`."""
     await anyio.Path(dest.parent).mkdir(parents=True, exist_ok=True, mode=_SKILL_DIR_MODE)
-    fd, tmp_name = await run_sync(partial(tempfile.mkstemp, prefix=".skill-", suffix=".archive", dir=dest.parent))
-    os.close(fd)
-    tmp = anyio.Path(tmp_name)
+    work = Path(await run_sync(partial(tempfile.mkdtemp, prefix=".skill-", dir=dest.parent)))
     try:
         async with client.beta.skills.versions.with_streaming_response.download(
             version_id, skill_id=skill_id
         ) as archive:
-            await archive.stream_to_file(tmp_name)
+            await archive.stream_to_file(work / "archive")
         # zipfile / tarfile are blocking; keep them off the event loop.
-        await run_sync(_extract_skill_archive, Path(tmp_name), dest)
+        await run_sync(_extract_skill_archive, work / "archive", work / "stage")
+        with suppress(FileNotFoundError):
+            await anyio.Path(dest).rename(work / "replaced")
+        await anyio.Path(work / "stage").rename(dest)
     finally:
-        await tmp.unlink(missing_ok=True)
+        with anyio.CancelScope(shield=True):
+            # `shutil.rmtree` is blocking; keep it off the event loop.
+            await run_sync(partial(shutil.rmtree, work, ignore_errors=True))
