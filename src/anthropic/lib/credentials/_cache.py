@@ -78,7 +78,8 @@ class TokenCache:
     single-flight semantics.
 
     `async_get_token` applies the same policy as `get_token`: an async
-    provider is awaited on the event loop, a sync one runs `get_token` in a
+    provider is awaited on the event loop. For a sync provider, fresh cached
+    tokens are returned directly; lookups that may call the provider run in a
     worker thread.
 
     Refresh policy on each `get_token` call:
@@ -210,11 +211,20 @@ class TokenCache:
     async def async_get_token(self) -> str:
         """Async version of `get_token`.
 
-        An async provider is awaited on the event loop. A sync provider runs
-        `get_token` in a worker thread.
+        An async provider is awaited on the event loop. For a sync provider,
+        only lookups that may refresh the token run in a worker thread.
         """
         provider = self._async_provider
         if provider is None:
+            # Cache hits must not queue behind unrelated blocking work in the
+            # shared executor. Refreshes still run off the event loop.
+            with self._lock:
+                cached = self._cached
+                if cached is not None and (
+                    cached.expires_at is None
+                    or (cached.expires_at != 0 and cached.expires_at - self._time_source() > self._advisory)
+                ):
+                    return cached.token
             return await asyncify(self.get_token)()
         while True:
             step = self._next_step(anyio.Event)
