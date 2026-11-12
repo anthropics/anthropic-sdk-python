@@ -15,7 +15,7 @@ import tarfile
 import zipfile
 from types import SimpleNamespace
 from typing import Any, AsyncIterator, cast
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from contextlib import asynccontextmanager
 from collections.abc import Callable
 
@@ -27,11 +27,29 @@ ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 import pytest
 
 from anthropic.lib.tools._skills import (
+    _within,
     _strip_top,
     _archive_top_dir,
     _extract_skill_archive,
     download_session_skills,
 )
+
+
+@pytest.mark.parametrize(
+    ("root", "child", "expected"),
+    [
+        ("C:\\w", "C:\\w", True),
+        ("C:\\w", "C:\\w\\x\\y", True),
+        ("C:\\", "C:\\w", True),
+        ("C:\\w", "C:\\w2", False),
+        ("C:\\w", "C:\\", False),
+        ("C:\\w", "D:\\w\\x", False),
+        ("C:\\w\\k", "C:\\w\\\u212a\\x", False),
+        ("C:\\w\\i\u0307", "C:\\w\\\u0130\\x", False),
+    ],
+)
+def test_within_compares_windows_names_exactly(root: str, child: str, expected: bool) -> None:
+    assert _within(PureWindowsPath(child), PureWindowsPath(root)) is expected
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:

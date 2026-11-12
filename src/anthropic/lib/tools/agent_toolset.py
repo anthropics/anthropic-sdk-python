@@ -423,7 +423,8 @@ def _reject_read_only(ctx: AgentToolContext, target: Path, *, op: str, file_path
     side while its write protection misses on the other.
     """
     for root in ctx.read_only_roots:
-        if _within(target, Path(root).resolve()):
+        # Not `_within`: a refusal must not depend on letter case on Windows, and `is_relative_to` ignores it there.
+        if target.is_relative_to(Path(root).resolve()):
             raise ToolError(f"{op}: {file_path} is inside read-only directory {root}")
 
 

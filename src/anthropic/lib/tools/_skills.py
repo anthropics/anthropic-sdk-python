@@ -15,7 +15,7 @@ import tarfile
 import zipfile
 import tempfile
 from typing import TYPE_CHECKING
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePath, PurePosixPath
 from functools import partial
 from collections.abc import Iterable
 
@@ -35,13 +35,11 @@ _SKILL_DIR_MODE = 0o700
 log = logging.getLogger("anthropic.lib.tools.agent_toolset")
 
 
-def _within(child: Path, root: Path) -> bool:
-    """True if `child` is `root` or a path inside it (both already resolved)."""
-    try:
-        child.relative_to(root)
-    except ValueError:
-        return False
-    return True
+def _within(child: PurePath, root: PurePath) -> bool:
+    """True if `child` is `root` or a path inside it (both already resolved).
+    Names compare exactly: on Windows `relative_to` lowercases them first,
+    which equates some names that the file system keeps apart."""
+    return child.parts[: len(root.parts)] == root.parts
 
 
 def _safe_member_name(name: str) -> str:
