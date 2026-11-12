@@ -833,6 +833,76 @@ async def test_write_through_dangling_symlink_inside_workdir(tmp_path: Path) -> 
     assert (tmp_path / "newdir" / "f.txt").read_text() == "via link"
 
 
+def _missing_target_fixture(tmp_path: Path) -> Path:
+    """Workdir with two links to `deep/t`, which doesn't exist. With `..`
+    collapsed by name, both targets read as `t`, whose entries link outside."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("SECRET")
+    work = tmp_path / "work"
+    (work / "deep" / "dir").mkdir(parents=True)
+    (work / "s").symlink_to("deep/dir")
+    (work / "deep" / "dir" / "relative").symlink_to("../t")
+    (work / "spelled").symlink_to("s/../t")
+    (work / "t").mkdir()
+    (work / "t" / "leaf").symlink_to(outside / "secret.txt")
+    (work / "t" / "d").symlink_to(outside)
+    return work
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize(
+    ("make_tool", "tool_input"),
+    [
+        (beta_read_tool, {"file_path": "spelled/leaf"}),
+        (beta_read_tool, {"file_path": "spelled/d/secret.txt"}),
+        (beta_edit_tool, {"file_path": "spelled/leaf", "old_string": "SECRET", "new_string": "x"}),
+        (beta_edit_tool, {"file_path": "spelled/d/secret.txt", "old_string": "SECRET", "new_string": "x"}),
+        (beta_write_tool, {"file_path": "spelled/leaf", "content": "x"}),
+        (beta_write_tool, {"file_path": "spelled/d/new.txt", "content": "x"}),
+        (beta_write_tool, {"file_path": "spelled/d/missing/new.txt", "content": "x"}),
+        (beta_grep_tool, {"pattern": "SECRET", "path": "spelled/leaf"}),
+        (beta_grep_tool, {"pattern": "SECRET", "path": "spelled/d"}),
+        (beta_glob_tool, {"pattern": "*", "path": "spelled/d"}),
+    ],
+)
+async def test_symlink_escape_after_dangling_symlink_is_rejected(
+    tmp_path: Path, make_tool: Any, tool_input: dict[str, str]
+) -> None:
+    env = AgentToolContext(workdir=str(_missing_target_fixture(tmp_path)))
+
+    with pytest.raises(ToolError, match="outside the session's working directory"):
+        await make_tool(env).call(tool_input)
+
+    assert os.listdir(tmp_path / "outside") == ["secret.txt"]
+    assert (tmp_path / "outside" / "secret.txt").read_text() == "SECRET"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize("rest", ["leaf", "d/new.txt"])
+async def test_write_resolves_dangling_symlink_from_its_real_directory(tmp_path: Path, rest: str) -> None:
+    work = _missing_target_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+
+    await beta_write_tool(env).call({"file_path": f"s/relative/{rest}", "content": "x"})
+
+    assert (work / "deep" / "t" / rest).read_text() == "x"
+    assert os.listdir(tmp_path / "outside") == ["secret.txt"]
+    assert (tmp_path / "outside" / "secret.txt").read_text() == "SECRET"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize("rest", ["leaf", "d/secret.txt"])
+async def test_read_resolves_dangling_symlink_from_its_real_directory(tmp_path: Path, rest: str) -> None:
+    env = AgentToolContext(workdir=str(_missing_target_fixture(tmp_path)))
+
+    with pytest.raises(ToolError, match="no such file or directory"):
+        await beta_read_tool(env).call({"file_path": f"s/relative/{rest}"})
+
+
 @needs_pydantic_v2
 @needs_symlinks
 async def test_read_follows_symlink_chain_inside_workdir(tmp_path: Path) -> None:

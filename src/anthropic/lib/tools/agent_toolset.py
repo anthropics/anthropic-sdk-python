@@ -382,7 +382,9 @@ def _canonicalize(path: Path) -> Path:
         hops += 1
         if hops > _MAX_SYMLINK_HOPS:
             raise _symlink_loop_error()
-        prefix = Path(os.path.normpath(os.path.join(prefix.parent, os.readlink(prefix))))
+        parent = os.path.realpath(prefix.parent, strict=True)
+        prefix = Path(os.path.normpath(os.path.join(parent, os.readlink(prefix), *reversed(missing_tail))))
+        missing_tail.clear()
 
 
 def resolve_path(ctx: AgentToolContext, p: str) -> Path:
