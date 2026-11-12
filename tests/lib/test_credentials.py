@@ -14,6 +14,7 @@ import threading
 from typing import Any, Dict, List, Callable, Optional, NamedTuple, cast
 from unittest.mock import MagicMock
 from typing_extensions import Protocol
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx2
 import pytest
@@ -3558,6 +3559,81 @@ class TestAsyncAccessTokenProvider:
 
         await _send_message_async(AsyncAnthropic(credentials=provider))
         assert provider_threads and provider_threads != [threading.get_ident()]
+
+    @pytest.mark.parametrize("expires_at", [None, 2**40])
+    def test_cached_sync_credentials_do_not_wait_for_busy_workers(self, expires_at: Optional[int]) -> None:
+        # Own the loop so replacing its default executor cannot affect other tests.
+        async def run() -> None:
+            loop = asyncio.get_running_loop()
+            loop.set_default_executor(ThreadPoolExecutor(max_workers=1))
+            provider = CountingProvider([AccessToken("cached-token", expires_at=expires_at)])
+            headers: List[str] = []
+
+            def respond(request: httpx2.Request) -> httpx2.Response:
+                headers.append(request.headers["authorization"])
+                return httpx2.Response(200, json={"data": [], "has_more": False})
+
+            async with AsyncAnthropic(
+                api_key=None,
+                credentials=provider,
+                http_client=httpx2.AsyncClient(transport=httpx2.MockTransport(respond)),
+            ) as client:
+                await client.models.list()  # Populate the cache before occupying the worker.
+                started = asyncio.Event()
+                release = threading.Event()
+
+                def occupy_worker() -> None:
+                    loop.call_soon_threadsafe(started.set)
+                    release.wait()
+
+                occupied = loop.run_in_executor(None, occupy_worker)
+                try:
+                    await asyncio.wait_for(started.wait(), timeout=5)
+                    # An unrelated blocking task must not hold up a cache hit.
+                    await asyncio.wait_for(client.models.list(), timeout=5)
+                finally:
+                    release.set()
+                    await occupied
+
+            assert provider.calls == 1
+            assert headers == ["Bearer cached-token", "Bearer cached-token"]
+
+        asyncio.run(run())
+
+    @pytest.mark.parametrize("remaining", [121, 120, 60, 30, 0, -1])
+    async def test_sync_provider_refresh_boundary_still_runs_off_loop(self, remaining: int) -> None:
+        clock = FakeClock(1000)
+        calls: List[tuple[bool, int]] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            calls.append((force_refresh, threading.get_ident()))
+            return AccessToken(f"tok-{len(calls)}", expires_at=int(clock.now) + 600)
+
+        cache = TokenCache(provider, time_source=clock)
+        assert await cache.async_get_token() == "tok-1"
+        clock.now = 1600 - remaining
+        assert await cache.async_get_token() == ("tok-1" if remaining > 120 else "tok-2")
+        expected_calls = 1 if remaining > 120 else 2
+        assert len(calls) == expected_calls
+        cache.invalidate()
+        assert await cache.async_get_token() == f"tok-{expected_calls + 1}"
+        assert calls[-1][0] is True
+        assert all(thread != threading.get_ident() for _, thread in calls)
+
+    async def test_sync_per_request_provider_is_never_served_from_cache(self) -> None:
+        calls: List[tuple[bool, int]] = []
+
+        def provider(*, force_refresh: bool = False) -> AccessToken:
+            calls.append((force_refresh, threading.get_ident()))
+            return AccessToken(f"tok-{len(calls)}", expires_at=0)
+
+        cache = TokenCache(provider)
+        assert await cache.async_get_token() == "tok-1"
+        assert await cache.async_get_token() == "tok-2"
+        cache.invalidate()
+        assert await cache.async_get_token() == "tok-3"
+        assert [force for force, _ in calls] == [False, False, True]
+        assert all(thread != threading.get_ident() for _, thread in calls)
 
     async def test_sync_callable_returning_a_coroutine_is_rejected(self) -> None:
         """`lambda: fetch()` is a sync provider that hands back a coroutine. It fails before any request is sent."""
