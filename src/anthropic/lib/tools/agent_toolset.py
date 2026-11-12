@@ -40,9 +40,10 @@ import base64
 import shutil
 import logging
 import subprocess
+import unicodedata
 from stat import S_ISLNK, S_ISREG
 from typing import TYPE_CHECKING, Any, List, Optional, NamedTuple, cast
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePath, PurePosixPath
 from functools import partial
 from itertools import islice
 from contextlib import asynccontextmanager
@@ -142,8 +143,8 @@ log = logging.getLogger("anthropic.lib.tools.agent_toolset")
 
 
 def _default_bash_env() -> dict[str, str]:
-    """The environment for the bash subprocess, with the runner's own
-    credentials scrubbed.
+    """The default environment of the bash subprocess, and the environment of
+    `rg`, with the runner's own credentials scrubbed.
 
     The bash tool runs model-issued commands, so it must never inherit the
     runner's `ANTHROPIC_*` variables (API key, environment key, per-work
@@ -426,6 +427,20 @@ def _reject_read_only(ctx: AgentToolContext, target: Path, *, op: str, file_path
         # Not `_within`: a refusal must not depend on letter case on Windows, and `is_relative_to` ignores it there.
         if target.is_relative_to(Path(root).resolve()):
             raise ToolError(f"{op}: {file_path} is inside read-only directory {root}")
+
+
+def _file_tools_may_reach(ctx: AgentToolContext, path: str) -> bool:
+    """True when `path` resolves to somewhere inside `workdir` or `allowed_roots`,
+    and when it or one of those directories cannot be resolved."""
+    try:
+        real = Path(os.path.realpath(path, strict=True))
+        # `realpath` is what `resolve_path` compares with; `_canonicalize` raises where `realpath` gave up.
+        roots = [_canonicalize(Path(os.path.realpath(root))) for root in (ctx.workdir, *ctx.allowed_roots)]
+    except OSError:
+        return True
+    # A macOS disk usually ignores letter case and the Unicode form of a name, so this refusal ignores them everywhere.
+    real, *roots = (PurePath(unicodedata.normalize("NFC", str(p).casefold())) for p in (real, *roots))
+    return any(real.is_relative_to(root) for root in roots)
 
 
 class BashResult(NamedTuple):
@@ -841,6 +856,11 @@ def beta_glob_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
 
 
 def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
+    """Searches with the first `rg` on `PATH` that resolves to somewhere outside
+    `workdir` and `allowed_roots`, or with a built-in search when there is none.
+    `rg` does not get the `ANTHROPIC_*` variables of the process.
+    """
+
     @beta_async_tool(name="grep", input_schema=BetaManagedAgentsAgentToolset20260401GrepInput)
     async def grep(pattern: str, path: Optional[str] = None) -> str:
         """Search file contents for a regular expression."""
@@ -854,12 +874,13 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         candidates = (
             shutil.which(os.path.join(entry, rg_name)) for entry in os.get_exec_path() if Path(entry).is_absolute()
         )
-        if rg := next(filter(None, candidates), None):
+        if rg := next((rg for rg in candidates if rg and not _file_tools_may_reach(ctx, rg)), None):
             # `check=False` because ripgrep exits 1 on "no matches", which
             # isn't an error for us — we surface it as a friendly string.
             result = await anyio.run_process(
                 [rg, "--no-config", "-n", "--no-heading", "-e", pattern, "--", str(search)],
                 check=False,
+                env=_default_bash_env(),
             )
             if result.returncode == 1:
                 return "no matches"
@@ -925,7 +946,8 @@ def _walk_grep(rx: re.Pattern[str], search: Path) -> str:
                 full = Path(dirpath) / name
                 # Likewise skip symlinked files — a symlink to /etc/shadow must
                 # not be read through just because it lives inside the workdir.
-                if full.is_symlink():
+                # A FIFO or a device can block a read forever.
+                if full.is_symlink() or not full.is_file():
                     continue
                 seen += 1
                 if seen > WALK_MAX_ENTRIES or not scan(full):

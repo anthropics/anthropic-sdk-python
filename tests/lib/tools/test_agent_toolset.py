@@ -711,10 +711,74 @@ async def test_grep_runs_the_rg_named_for_the_platform(
         rg = tmp_path / name
         rg.write_text(f"#!/bin/sh\necho {name}\n")
         rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
     monkeypatch.setenv("PATH", str(tmp_path))
     monkeypatch.setattr("anthropic.lib.tools.agent_toolset.os", SimpleNamespace(**{**vars(os), "name": os_name}))
-    res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "x"})
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"})
     assert res == f"{expected}\n"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize(
+    "entry", ["work/bin", "WORK/bin", "allowed/bin", "cafe\u0301/bin", "linked-dir", "linked-file"]
+)
+async def test_grep_passes_over_an_rg_inside_the_workdir_or_an_allowed_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, entry: str
+) -> None:
+    for directory in ("work/bin", "WORK/bin", "allowed/bin", "cafe\u0301/bin", "system"):
+        rg = tmp_path / directory / "rg"
+        rg.parent.mkdir(parents=True, exist_ok=True)
+        rg.write_text(f"#!/bin/sh\necho {rg.parent.name}\n")
+        rg.chmod(0o755)
+    work = tmp_path / "work"
+    (work / "x.txt").write_text("needle\n")
+    (tmp_path / "linked-dir").symlink_to(work / "bin")
+    (tmp_path / "linked-file").mkdir()
+    (tmp_path / "linked-file" / "rg").symlink_to(work / "bin" / "rg")
+    (tmp_path / "allowed-link").symlink_to(tmp_path / "allowed")
+    allowed_roots = [tmp_path / "allowed-link", tmp_path / "caf\u00e9"]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work), allowed_roots=allowed_roots))
+
+    monkeypatch.setenv("PATH", str(tmp_path / entry))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+    monkeypatch.setenv("PATH", os.pathsep.join([str(tmp_path / entry), str(tmp_path / "system")]))
+    assert await grep.call({"pattern": "needle"}) == "system\n"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_grep_runs_no_rg_when_an_allowed_root_cannot_be_resolved(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    rg = tmp_path / "system" / "rg"
+    rg.parent.mkdir()
+    rg.write_text("#!/bin/sh\necho outside\n")
+    rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "x.txt").write_text("needle\n")
+    (tmp_path / "loop").symlink_to("loop")
+    monkeypatch.setenv("PATH", str(rg.parent))
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work), allowed_roots=[tmp_path / "loop"]))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+async def test_grep_does_not_pass_anthropic_variables_to_rg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    rg = tmp_path / "system" / "rg"
+    rg.parent.mkdir()
+    rg.write_text('#!/bin/sh\necho "[$ANTHROPIC_API_KEY] [$KEPT]"\n')
+    rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.setenv("PATH", str(rg.parent))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "fake-key")
+    monkeypatch.setenv("KEPT", "kept")
+    assert await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"}) == "[] [kept]\n"
 
 
 @needs_pydantic_v2
@@ -1037,6 +1101,23 @@ async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.Mo
 
 
 @needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="needs FIFOs")
+async def test_grep_without_rg_reads_only_regular_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("needle\n")
+    os.mkfifo(tmp_path / "pipe")
+    monkeypatch.setenv("PATH", "")
+    # Holding both ends open lets a reader in, so reading the FIFO fails this test rather than hanging it.
+    pipe = os.open(tmp_path / "pipe", os.O_RDWR | os.O_NONBLOCK)
+    try:
+        os.write(pipe, b"needle\n" * 100)
+        res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "needle"})
+        assert res == f"{tmp_path.resolve() / 'x.txt'}:1:needle"
+        assert os.read(pipe, 1024) == b"needle\n" * 100
+    finally:
+        os.close(pipe)
+
+
+@needs_pydantic_v2
 @needs_symlinks
 async def test_grep_ignores_the_ripgrep_config_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     secret = tmp_path / "secret.txt"
@@ -1058,8 +1139,10 @@ async def test_grep_passes_no_config_to_rg(tmp_path: Path, monkeypatch: pytest.M
     rg.parent.mkdir()
     rg.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\"\n")
     rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
     monkeypatch.setenv("PATH", str(rg.parent))
-    res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "x"})
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"})
     args = str(res).splitlines()
     assert "--no-config" in args[: args.index("-e")]
 
