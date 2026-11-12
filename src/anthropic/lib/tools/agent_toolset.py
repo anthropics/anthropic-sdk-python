@@ -849,7 +849,12 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
         except ValueError as e:
             raise ToolError(f"grep: {e}") from e
 
-        if rg := shutil.which("rg"):
+        # Given a bare name, `shutil.which` looks in the current directory first on Windows.
+        rg_name = "rg.exe" if os.name == "nt" else "rg"
+        candidates = (
+            shutil.which(os.path.join(entry, rg_name)) for entry in os.get_exec_path() if Path(entry).is_absolute()
+        )
+        if rg := next(filter(None, candidates), None):
             # `check=False` because ripgrep exits 1 on "no matches", which
             # isn't an error for us — we surface it as a friendly string.
             result = await anyio.run_process(

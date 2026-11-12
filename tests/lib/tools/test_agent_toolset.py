@@ -5,6 +5,7 @@ import re
 import sys
 import time
 import base64
+from types import SimpleNamespace
 from typing import Any, cast
 from pathlib import Path
 from typing_extensions import Required, get_args, get_origin, get_type_hints
@@ -674,6 +675,46 @@ async def test_glob_with_path(tmp_path: Path) -> None:
     assert isinstance(res, str)
     assert res.endswith("a.txt")
     assert "b.txt" not in res
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+@pytest.mark.parametrize("relative_entry", [".", "", "bin"])
+async def test_grep_ignores_relative_path_entries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, relative_entry: str
+) -> None:
+    for directory, output in [("cwd", "relative"), ("cwd/bin", "relative"), ("system", "absolute")]:
+        rg = tmp_path / directory / "rg"
+        rg.parent.mkdir()
+        rg.write_text(f"#!/bin/sh\necho {output}\n")
+        rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "x.txt").write_text("needle\n")
+    monkeypatch.chdir(tmp_path / "cwd")
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work)))
+
+    monkeypatch.setenv("PATH", os.pathsep.join([relative_entry, str(tmp_path / "no-rg")]))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+    monkeypatch.setenv("PATH", os.pathsep.join([relative_entry, str(tmp_path / "system")]))
+    assert await grep.call({"pattern": "needle"}) == "absolute\n"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+@pytest.mark.parametrize(("os_name", "expected"), [("posix", "rg"), ("nt", "rg.exe")])
+async def test_grep_runs_the_rg_named_for_the_platform(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, os_name: str, expected: str
+) -> None:
+    for name in ("rg", "rg.exe", "rg.cmd"):
+        rg = tmp_path / name
+        rg.write_text(f"#!/bin/sh\necho {name}\n")
+        rg.chmod(0o755)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setattr("anthropic.lib.tools.agent_toolset.os", SimpleNamespace(**{**vars(os), "name": os_name}))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "x"})
+    assert res == f"{expected}\n"
 
 
 @needs_pydantic_v2
