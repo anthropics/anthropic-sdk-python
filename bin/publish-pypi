@@ -8,6 +8,7 @@ files=("$package-py3-none-any.whl" "$package.tar.gz")
 
 # fails for a missing file and for a directory, both of which uv publish skips
 wc -c "${files[@]}"
+python3 -I ./scripts/utils/check-dist.py "${files[@]}"
 
 if [ -n "${PYPI_TOKEN:-}" ]; then
   uv publish --token=$PYPI_TOKEN "${files[@]}"

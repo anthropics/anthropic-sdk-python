@@ -46,11 +46,11 @@ jobs:
         with:
           version: '0.10.2'
 
-      - name: Install dependencies
-        run: uv sync --all-extras
-
       - name: Run build
         run: uv build --build-constraints build-constraints.txt --require-hashes
+
+      - name: Check the wheel and the sdist
+        run: python3 -I ./scripts/utils/check-dist.py dist/*.whl dist/*.tar.gz
 
   test:
     timeout-minutes: 10
