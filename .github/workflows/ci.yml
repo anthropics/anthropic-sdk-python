@@ -166,7 +166,7 @@ jobs:
     name: ci
     needs: [lint, build, test]
     if: always()
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ github.event.repository.private && 'ubuntu-latest-16-core' || 'ubuntu-latest' }}
     permissions: {}
     steps:
       - name: Check that lint, build and test passed
