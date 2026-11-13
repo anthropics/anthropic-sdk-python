@@ -1,0 +1,85 @@
+name: Release lock
+on:
+  pull_request:
+    branches:
+      - main
+      - synced/published
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, closed]
+  # Makes up for an event that started no run, such as one on a pull request with conflicts.
+  schedule:
+    - cron: '7,37 * * * *'
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  update:
+    name: update-release-lock
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 10
+    if: |-
+      github.repository_owner == 'anthropics' && github.repository != 'anthropics/anthropic-sdk-python' &&
+      (github.event.action != 'edited' || github.event.changes.base != null)
+
+    steps:
+      # Runs can overlap, and each reads the labels again after it posts.
+      - name: Update the status of every open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUERY: |-
+            query($owner: String!, $name: String!, $endCursor: String) {
+              repository(owner: $owner, name: $name) {
+                releases: pullRequests(states: OPEN, baseRefName: "main", labels: ["lock-release"], first: 1) {
+                  nodes { number url }
+                }
+                changes: pullRequests(states: OPEN, baseRefName: "synced/published", first: 100, after: $endCursor) {
+                  nodes {
+                    url
+                    isDraft
+                    labels(first: 100) { nodes { name } }
+                    headRef {
+                      target {
+                        ... on Commit { oid status { context(name: "sdk-release/merge-lock") { state description } } }
+                      }
+                    }
+                  }
+                  pageInfo { hasNextPage endCursor }
+                }
+              }
+            }
+          # Prints one line for each status that is out of date, drafts last.
+          OUTDATED_STATUSES: |-
+            [.[].data.repository]
+            | (.[0].releases.nodes[0]) as $locked
+            | map(.changes.nodes[] | select(.headRef))
+            | map({sha: .headRef.target.oid, draft: .isDraft, context: "sdk-release/merge-lock",
+                current: (.headRef.target.status.context | "\(.state) \(.description)")}
+                + if $locked == null then
+                    {state: "SUCCESS", description: "Not locked for a release", target_url: .url}
+                  elif any(.labels.nodes[]; .name == "skip-release-lock") then
+                    {state: "SUCCESS", target_url: $locked.url,
+                      description: "Locked for a release (lock-release on #\($locked.number)), but this has skip-release-lock"}
+                  else
+                    {state: "FAILURE", target_url: $locked.url,
+                      description: "Do not merge right now: a release is in progress (lock-release on #\($locked.number)). Nothing to fix. To merge anyway, add the label skip-release-lock."}
+                  end)
+            | group_by(.sha) | map(min_by(.state)) | sort_by(.draft)
+            | .[] | select(.current != "\(.state) \(.description)")
+        run: |
+          set -o pipefail
+          for _ in 1 2 3; do
+            statuses="$(
+              gh api graphql --paginate -f query="$QUERY" -f owner="$GITHUB_REPOSITORY_OWNER" -f name="${GITHUB_REPOSITORY#*/}" |
+                jq -sc "$OUTDATED_STATUSES"
+            )"
+            [ -n "$statuses" ] || exit 0
+            while IFS= read -r status; do
+              echo "$status"
+              jq '{state: (.state | ascii_downcase), context, description, target_url}' <<<"$status" |
+                gh api --silent --method POST "repos/$GITHUB_REPOSITORY/statuses/$(jq -r .sha <<<"$status")" --input -
+              # GitHub asks for a second between writes.
+              sleep 1
+            done <<<"$statuses"
+          done
