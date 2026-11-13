@@ -194,7 +194,7 @@ class FakeAsyncEvents:
         streams: list[_FakeStream | BaseException] | None = None,
         stream_events: list[_StubEvent] | None = None,
         list_events: list[_StubEvent] | None = None,
-        list_events_per_call: list[list[_StubEvent]] | None = None,
+        list_events_per_call: list[list[_StubEvent | BaseException]] | None = None,
         list_raises: BaseException | None = None,
         send_failures: Sequence[BaseException | None] | None = None,
     ) -> None:
@@ -207,7 +207,7 @@ class FakeAsyncEvents:
         self._list_events = list(list_events or [])
         # When set, each `list()` call consumes the next entry (falling back
         # to `list_events` once exhausted) so reconnect tests can script a
-        # different history per reconcile pass.
+        # different history per reconcile pass. An exception in an entry is raised at that point.
         self._list_events_per_call = [list(evs) for evs in (list_events_per_call or [])]
         self._list_raises = list_raises
         self._send_failures: list[BaseException | None] = list(send_failures or [])
@@ -233,6 +233,8 @@ class FakeAsyncEvents:
 
         async def _gen() -> Any:
             for ev in list_events:
+                if isinstance(ev, BaseException):
+                    raise ev
                 yield ev
             if list_raises is not None:
                 raise list_raises
@@ -1551,6 +1553,222 @@ async def test_ask_call_of_terminated_thread_does_not_block_idle_stop(
         return [item async for item in _run_with_fakes(events=events, tools=[], max_idle=0.05)]
 
     assert await asyncio.wait_for(consume(), timeout=2) == []
+
+
+@pytest.mark.parametrize(
+    ("in_history", "on_stream"),
+    [
+        ([_thread_terminated("sthr_ended")], []),
+        ([_StubEvent("session.status_running"), _thread_terminated("sthr_ended")], []),
+        ([_thread_terminated("sthr_ended"), _StubEvent("session.status_running")], []),
+        ([_StubEvent("session.status_running")], [_thread_terminated("sthr_ended")]),
+    ],
+    ids=["last_in_history", "in_history_after_running", "in_history_before_running", "on_live_stream"],
+)
+@pytest.mark.asyncio()
+async def test_thread_termination_after_failed_history_read_does_not_start_idle_countdown(
+    monkeypatch: pytest.MonkeyPatch, in_history: list[_StubEvent], on_stream: list[_StubEvent]
+) -> None:
+    """An ask-gated call defers the countdown of an idle, the stream drops, and
+    the history read fails. The session may have run since that idle, so dropping
+    the call must not start the countdown: a later call still runs."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    call = _tool_use("tu_1", "gated", {}, evaluated_permission="ask", session_thread_id="sthr_ended")
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    class _Stream(_FakeStream):
+        @override
+        async def _gen(self) -> Any:
+            for ev in on_stream:
+                yield ev
+            await asyncio.sleep(0.3)
+            yield _tool_use("tu_later", "echo", {})
+            yield _terminated()
+
+    events = FakeAsyncEvents(
+        streams=[
+            _FakeStream([call, _idle_end_turn()], raise_after=2, raise_with=httpx2.ReadError("dropped")),
+            _Stream([]),
+        ],
+        list_events_per_call=[[], [call, _idle_end_turn(), *in_history, _api_status_error(500)]],
+    )
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("echo", echo)], max_idle=0.05)]
+
+    items = await asyncio.wait_for(consume(), timeout=5)
+
+    assert [(item.tool_use_id, item.posted) for item in items] == [("tu_later", True)]
+
+
+@pytest.mark.parametrize("countdown", ["running", "deferred_then_deny", "started_by_deny", "started_by_allowed_call"])
+@pytest.mark.asyncio()
+async def test_termination_on_live_stream_after_failed_history_read_cancels_idle_countdown(
+    monkeypatch: pytest.MonkeyPatch, countdown: str
+) -> None:
+    """After a failed history read, the countdown may come from an idle that the
+    session has left. A termination on the live stream cancels it, running or
+    deferred: the runner stays until the next whole read shows the idle."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    call = _tool_use("tu_1", "echo", {}, evaluated_permission="ask", session_thread_id="sthr_1")
+    before_drop = [_idle_end_turn()] if countdown == "running" else [call, _idle_end_turn()]
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    class _Stream(_FakeStream):
+        @override
+        async def _gen(self) -> Any:
+            if countdown == "started_by_allowed_call":
+                yield _tool_confirmation("tu_1", "allow")
+                await asyncio.sleep(0.02)  # Lets the call end, which starts the countdown.
+            elif countdown == "started_by_deny":
+                yield _tool_confirmation("tu_1", "deny")
+            if countdown == "deferred_then_deny":
+                yield _thread_terminated("sthr_other")
+                yield _tool_confirmation("tu_1", "deny")
+            else:
+                yield _thread_terminated("sthr_1")
+            await asyncio.sleep(2.5)
+            raise httpx2.ReadError("dropped")
+
+    events = FakeAsyncEvents(
+        streams=[
+            _FakeStream(before_drop, raise_after=len(before_drop), raise_with=httpx2.ReadError("dropped")),
+            _Stream([]),
+        ],
+        list_events_per_call=[[], [_api_status_error(500)], [*before_drop]],
+    )
+
+    async def drive() -> None:
+        async for _ in _run_with_fakes(events=events, tools=[_FakeTool("echo", echo)], max_idle=2):
+            pass
+
+    await asyncio.wait_for(drive(), timeout=20)
+
+    assert events.stream_calls == 3
+
+
+@pytest.mark.parametrize(
+    ("allowed", "terminated"),
+    [
+        ("before_the_drop", "on_live_stream"),
+        ("after_the_failed_read", "on_live_stream"),
+        ("before_the_drop", "before_the_drop"),
+        ("before_the_drop", "during_the_failed_read"),
+    ],
+)
+@pytest.mark.parametrize("state", ["running", "queued"])
+@pytest.mark.asyncio()
+async def test_allowed_call_of_terminated_thread_does_not_start_idle_countdown_after_failed_history_read(
+    monkeypatch: pytest.MonkeyPatch, state: str, allowed: str, terminated: str
+) -> None:
+    """An allowed call is running or queued when its thread terminates, and the
+    history read fails. The end of the call must not start the countdown that it
+    deferred: a later call still runs, and the runner stops on the next idle."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    started = asyncio.Event()
+    finish = asyncio.Event()
+    ahead = [_tool_use("tu_ahead", "slow", {}, session_thread_id="sthr_ended")] if state == "queued" else []
+    call = _tool_use("tu_1", "slow", {}, evaluated_permission="ask", session_thread_id="sthr_ended")
+    allow = _tool_confirmation("tu_1", "allow")
+    before_drop = [*ahead, call, _idle_end_turn(), *([allow] if allowed == "before_the_drop" else [])]
+
+    async def slow(_input: dict[str, Any]) -> str:
+        started.set()
+        await finish.wait()
+        return "late"
+
+    async def echo(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    class _DroppedStream(_FakeStream):
+        @override
+        async def _gen(self) -> Any:
+            for ev in before_drop:
+                yield ev
+            if terminated == "before_the_drop":
+                await started.wait()
+                yield _thread_terminated("sthr_ended")
+            raise httpx2.ReadError("dropped")
+
+    class _Stream(_FakeStream):
+        @override
+        async def _gen(self) -> Any:
+            if allowed == "after_the_failed_read":
+                yield allow
+            if terminated == "on_live_stream":
+                await started.wait()
+                yield _thread_terminated("sthr_ended")
+            finish.set()
+            await asyncio.sleep(0.3)
+            yield _tool_use("tu_later", "echo", {})
+            yield _idle_end_turn()
+            await asyncio.Event().wait()
+
+    class _Events(FakeAsyncEvents):
+        @override
+        async def list(self, _session_id: str, *, limit: int = 1000, extra_headers: Any = None) -> Any:
+            if self.stream_calls == 1:
+                return
+            if terminated == "during_the_failed_read":
+                await started.wait()
+                yield _thread_terminated("sthr_ended")
+                finish.set()
+                await asyncio.sleep(0.02)  # Gives the call time to end before the read fails.
+            raise _api_status_error(500)
+
+    events = _Events(streams=[_DroppedStream([]), _Stream([])])
+    tools = [_FakeTool("slow", slow), _FakeTool("echo", echo)]
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=tools, max_idle=0.05)]
+
+    items = await asyncio.wait_for(consume(), timeout=5)
+
+    assert (items[-1].tool_use_id, items[-1].posted) == ("tu_later", True)
+
+
+@pytest.mark.parametrize(
+    "then",
+    ["new_idle_then_termination", "whole_read_then_termination", "termination_then_whole_read", "allow", "deny"],
+)
+@pytest.mark.asyncio()
+async def test_idle_stop_after_failed_history_read(monkeypatch: pytest.MonkeyPatch, then: str) -> None:
+    """After a failed history read, the runner drops the call of a terminated
+    thread and stops on the idle countdown once a new idle or a whole read shows
+    that the session is idle. After a verdict it stops without either."""
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0.01)
+    call = _tool_use("tu_1", "gated", {}, evaluated_permission="ask", session_thread_id="sthr_ended")
+    dropped = httpx2.ReadError("dropped")
+    streams: list[_FakeStream | BaseException] = [
+        _FakeStream([call, _idle_end_turn()], raise_after=2, raise_with=dropped)
+    ]
+    if then == "new_idle_then_termination":
+        streams.append(_FakeStream([_idle_end_turn(), _thread_terminated("sthr_ended")]))
+    elif then == "whole_read_then_termination":
+        streams.append(_FakeStream([_thread_terminated("sthr_other")], raise_after=1, raise_with=dropped))
+        streams.append(_FakeStream([_thread_terminated("sthr_ended")]))
+    elif then == "termination_then_whole_read":
+        streams.append(_FakeStream([_thread_terminated("sthr_ended")], raise_after=1, raise_with=dropped))
+    else:
+        streams.append(_FakeStream([_tool_confirmation("tu_1", then)]))
+    events = FakeAsyncEvents(
+        streams=streams,
+        list_events_per_call=[[], [_api_status_error(500)], [call, _idle_end_turn()]],
+    )
+
+    async def gated(_input: dict[str, Any]) -> str:
+        return "ok"
+
+    async def consume() -> list[DispatchedToolCall]:
+        return [item async for item in _run_with_fakes(events=events, tools=[_FakeTool("gated", gated)], max_idle=0.05)]
+
+    items = await asyncio.wait_for(consume(), timeout=2)
+
+    assert [item.confirmation for item in items] == ([then] if then in ("allow", "deny") else [])
 
 
 # ---------- send-result failure surfaces to consumer -----------------------
