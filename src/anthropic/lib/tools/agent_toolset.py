@@ -38,15 +38,17 @@ import uuid
 import errno
 import base64
 import shutil
+import signal
 import logging
 import subprocess
 import unicodedata
 from stat import S_ISLNK, S_ISREG
+from types import FrameType
 from typing import TYPE_CHECKING, Any, List, Optional, NamedTuple, cast
 from pathlib import Path, PurePath, PurePosixPath
 from functools import partial
 from itertools import islice
-from contextlib import asynccontextmanager
+from contextlib import suppress, contextmanager, asynccontextmanager
 from dataclasses import field, dataclass
 from collections.abc import Mapping, Callable, Iterable, Iterator, Awaitable, AsyncIterator
 
@@ -124,6 +126,7 @@ _BINARY_MEDIA_TYPES = {
 }
 GREP_OUTPUT_LIMIT = 100 * 1024
 GREP_MAX_LINE_LENGTH = 2000
+_GREP_CPU_SECONDS = 30
 GLOB_RESULT_LIMIT = 200
 WALK_MAX_ENTRIES = 50_000
 _ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
@@ -895,9 +898,36 @@ def beta_grep_tool(ctx: AgentToolContext) -> BetaAsyncFunctionTool[Any]:
             rx = re.compile(pattern)
         except re.error as e:
             raise ToolError(f"grep: invalid regex: {e}") from e
-        return _walk_grep(rx, search)
+        with _walk_deadline():
+            return _walk_grep(rx, search)
 
     return grep
+
+
+@contextmanager
+def _walk_deadline() -> Iterator[None]:
+    """Stop a walk that uses `_GREP_CPU_SECONDS`, if this thread can take a signal that the host leaves unused."""
+
+    def expire(_signum: int, frame: FrameType | None) -> None:
+        # Raised elsewhere, it could be swallowed, skip the disarm, or crash `os.walk` on Python 3.12. Wait for a tick.
+        if frame and frame.f_code in _walk_grep.__code__.co_consts:
+            raise ToolError(f"grep: timed out after {_GREP_CPU_SECONDS}s")
+
+    armed = False
+    with suppress(AttributeError, ValueError, getattr(signal, "ItimerError", OSError)):  # no timer, or off main thread
+        if signal.getsignal(signal.SIGVTALRM) is signal.SIG_DFL and not any(signal.getitimer(signal.ITIMER_VIRTUAL)):
+            signal.signal(signal.SIGVTALRM, expire)
+            armed = signal.getsignal(signal.SIGVTALRM) is expire
+    try:
+        if armed:
+            signal.setitimer(signal.ITIMER_VIRTUAL, _GREP_CPU_SECONDS, 0.1)
+        yield
+    finally:
+        if armed:
+            signal.setitimer(signal.ITIMER_VIRTUAL, 0)
+            # A pending tick would kill the process under SIG_DFL. SIG_IGN discards it.
+            signal.signal(signal.SIGVTALRM, signal.SIG_IGN)
+            signal.signal(signal.SIGVTALRM, signal.SIG_DFL)
 
 
 def _walk_grep(rx: re.Pattern[str], search: Path) -> str:

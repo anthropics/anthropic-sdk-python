@@ -5,6 +5,7 @@ import re
 import sys
 import time
 import base64
+import signal
 from types import SimpleNamespace
 from typing import Any, cast
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing_extensions import Required, get_args, get_origin, get_type_hints
 
 import anyio
 import pytest
+import anyio.to_thread
 
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
@@ -800,6 +802,68 @@ async def test_grep_single_file_path(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert isinstance(res, str)
     assert "beta" in res
     assert res != "no matches"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs interval timers")
+async def test_grep_walk_stops_a_backtracking_pattern(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("a" * 28 + "b\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    monkeypatch.setattr("anthropic.lib.tools.agent_toolset._GREP_CPU_SECONDS", 0.2)
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+
+    for _ in range(2):
+        with pytest.raises(ToolError, match="grep: timed out after 0.2s"):
+            await grep.call({"pattern": "^(a+)+$"})
+        assert signal.getsignal(signal.SIGVTALRM) is signal.SIG_DFL
+        assert signal.getitimer(signal.ITIMER_VIRTUAL) == (0, 0)
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs interval timers")
+async def test_grep_walk_leaves_the_hosts_signal_alone(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+
+    def handler(_signum: int, _frame: object) -> None: ...
+
+    signal.setitimer(signal.ITIMER_VIRTUAL, 1000)
+    try:
+        assert "beta" in str(await grep.call({"pattern": "beta"}))
+        assert signal.getitimer(signal.ITIMER_VIRTUAL)[0] > 900
+
+        signal.setitimer(signal.ITIMER_VIRTUAL, 0)
+        signal.signal(signal.SIGVTALRM, handler)
+        assert "beta" in str(await grep.call({"pattern": "beta"}))
+        assert signal.getsignal(signal.SIGVTALRM) is handler
+    finally:
+        signal.setitimer(signal.ITIMER_VIRTUAL, 0)
+        signal.signal(signal.SIGVTALRM, signal.SIG_DFL)
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize("error", [AttributeError, getattr(signal, "ItimerError", OSError)], ids=["windows", "refused"])
+async def test_grep_walk_works_without_interval_timers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: type[Exception]
+) -> None:
+    def getitimer(_which: int) -> None:
+        raise error
+
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    monkeypatch.setattr(signal, "getitimer", getitimer, raising=False)
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+    assert "beta" in str(await grep.call({"pattern": "beta"}))
+
+
+@needs_pydantic_v2
+async def test_grep_walk_works_off_the_main_thread(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+    result = await anyio.to_thread.run_sync(lambda: anyio.run(grep.call, {"pattern": "beta"}))
+    assert "beta" in str(result)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
