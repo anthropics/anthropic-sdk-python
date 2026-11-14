@@ -65,6 +65,7 @@ from .rbac_group_update_params import RBACGroupUpdateParams as RBACGroupUpdatePa
 from .beta_analytics_actor_type import BetaAnalyticsActorType as BetaAnalyticsActorType
 from .beta_analytics_token_type import BetaAnalyticsTokenType as BetaAnalyticsTokenType
 from .beta_analytics_user_actor import BetaAnalyticsUserActor as BetaAnalyticsUserActor
+from .beta_bundle_on_call_error import BetaBundleOnCallError as BetaBundleOnCallError
 from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedInferenceGeo
 from .beta_claude_tag_reply_mode import BetaClaudeTagReplyMode as BetaClaudeTagReplyMode
 from .beta_telemetry_destination import BetaTelemetryDestination as BetaTelemetryDestination
@@ -142,6 +143,7 @@ from .beta_analytics_connector_activity import BetaAnalyticsConnectorActivity as
 from .beta_analytics_connector_group_by import BetaAnalyticsConnectorGroupBy as BetaAnalyticsConnectorGroupBy
 from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics as BetaAnalyticsSkillChatMetrics
 from .beta_analytics_tool_action_counts import BetaAnalyticsToolActionCounts as BetaAnalyticsToolActionCounts
+from .beta_bundle_on_call_error_details import BetaBundleOnCallErrorDetails as BetaBundleOnCallErrorDetails
 from .beta_claude_tag_reply_mode_thread import BetaClaudeTagReplyModeThread as BetaClaudeTagReplyModeThread
 from .beta_spend_limit_rbac_group_scope import BetaSpendLimitRBACGroupScope as BetaSpendLimitRBACGroupScope
 from .beta_spend_limit_usage_tier_scope import BetaSpendLimitUsageTierScope as BetaSpendLimitUsageTierScope
@@ -344,6 +346,9 @@ from .beta_analytics_chat_cowork_unified_metrics import (
 from .beta_analytics_single_day_activity_summary import (
     BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
 )
+from .beta_bundle_attachment_not_supported_error import (
+    BetaBundleAttachmentNotSupportedError as BetaBundleAttachmentNotSupportedError,
+)
 from .beta_claude_tag_reply_mode_automatic_param import (
     BetaClaudeTagReplyModeAutomaticParam as BetaClaudeTagReplyModeAutomaticParam,
 )
@@ -490,6 +495,9 @@ from .beta_slack_channel_set_up_settings_conflict_error import (
 )
 from .beta_telemetry_destination_disabled_reason_caller import (
     BetaTelemetryDestinationDisabledReasonCaller as BetaTelemetryDestinationDisabledReasonCaller,
+)
+from .beta_bundle_attachment_not_supported_error_details import (
+    BetaBundleAttachmentNotSupportedErrorDetails as BetaBundleAttachmentNotSupportedErrorDetails,
 )
 from .beta_plugin_marketplace_validation_plugin_warnings import (
     BetaPluginMarketplaceValidationPluginWarnings as BetaPluginMarketplaceValidationPluginWarnings,

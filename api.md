@@ -3696,6 +3696,8 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaAPIKeyScopeMissingErrorDetails,
+    BetaBundleAttachmentNotSupportedErrorDetails,
+    BetaBundleOnCallErrorDetails,
     BetaClaudeTagDefaultSettingSource,
     BetaClaudeTagGuestPolicy,
     BetaClaudeTagGuestPolicyParam,
@@ -3734,6 +3736,8 @@ from anthropic.types.beta.organization import (
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
     BetaSlackChannelSetUpSettingsConflictErrorDetails,
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+    BetaBundleAttachmentNotSupportedError,
+    BetaBundleOnCallError,
     BetaSlackChannelSetUpSettingsRefusedError,
     BetaAPIKeyScopeMissingError,
     BetaClaudeTagWritesNotEnabledError,
@@ -3788,6 +3792,7 @@ from anthropic.types.beta.organization.claude_tag import BetaClaudeTagBundle
 Methods:
 
 - <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">retrieve</a>(bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
+- <code title="post /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">update</a>(bundle_id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
 - <code title="get /v1/organizations/claude_tag/bundles">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">SyncPageCursor[BetaClaudeTagBundle]</a></code>
 
 ##### Targets

@@ -72,6 +72,7 @@ from .types.beta.beta_invalid_config_type_change_error import BetaInvalidConfigT
 from .types.shared.request_body_encoding_invalid_error import RequestBodyEncodingInvalidError
 from .types.beta.beta_environment_create_disabled_error import BetaEnvironmentCreateDisabledError
 from .types.beta.beta_environment_update_disabled_error import BetaEnvironmentUpdateDisabledError
+from .types.beta.organization.beta_bundle_on_call_error import BetaBundleOnCallError
 from .types.organization.email_domain_not_allowed_error import EmailDomainNotAllowedError
 from .types.beta_organization_not_enrolled_in_beta_error import BetaOrganizationNotEnrolledInBetaError
 from .types.organization.cannot_remove_last_member_error import CannotRemoveLastMemberError
@@ -98,6 +99,7 @@ from .types.beta.environments.beta_heartbeat_precondition_failed_error import Be
 from .types.beta.organization.beta_cannot_sign_out_primary_owner_error import BetaCannotSignOutPrimaryOwnerError
 from .types.beta.organization.beta_claude_tag_writes_not_enabled_error import BetaClaudeTagWritesNotEnabledError
 from .types.beta.organization.beta_cannot_sign_out_managed_member_error import BetaCannotSignOutManagedMemberError
+from .types.beta.organization.beta_bundle_attachment_not_supported_error import BetaBundleAttachmentNotSupportedError
 from .types.beta.organization.beta_cannot_sign_out_membership_admin_error import BetaCannotSignOutMembershipAdminError
 from .types.beta.organization.beta_cannot_sign_out_privileged_member_error import BetaCannotSignOutPrivilegedMemberError
 from .types.organization.cannot_invite_emails_with_unverified_domains_error import (
@@ -141,6 +143,8 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (529, None): OverloadedError,
     (400, "already_member"): AlreadyMemberError,
     (400, "available_tools_limit_exceeded"): AvailableToolsLimitExceededError,
+    (400, "bundle_attachment_not_supported"): BetaBundleAttachmentNotSupportedError,
+    (400, "bundle_on_call"): BetaBundleOnCallError,
     (400, "cannot_invite_emails_with_unverified_domains"): CannotInviteEmailsWithUnverifiedDomainsError,
     (400, "cannot_remove_last_member"): CannotRemoveLastMemberError,
     (400, "cannot_sign_out_primary_owner"): BetaCannotSignOutPrimaryOwnerError,

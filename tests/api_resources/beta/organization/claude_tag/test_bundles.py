@@ -67,6 +67,57 @@ class TestBundles:
             )
 
     @parametrize
+    def test_method_update(self, client: Anthropic) -> None:
+        bundle = client.beta.organization.claude_tag.bundles.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    def test_method_update_with_all_params(self, client: Anthropic) -> None:
+        bundle = client.beta.organization.claude_tag.bundles.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            instructions="instructions",
+            betas=["computer-use-2024-10-22"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    def test_raw_response_update(self, client: Anthropic) -> None:
+        response = client.beta.organization.claude_tag.bundles.with_raw_response.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        bundle = response.parse()
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    def test_streaming_response_update(self, client: Anthropic) -> None:
+        with client.beta.organization.claude_tag.bundles.with_streaming_response.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            bundle = response.parse()
+            assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    def test_path_params_update(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `bundle_id` but received ''"):
+            client.beta.organization.claude_tag.bundles.with_raw_response.update(
+                bundle_id="",
+            )
+
+    @parametrize
     def test_method_list(self, client: Anthropic) -> None:
         bundle = client.beta.organization.claude_tag.bundles.list(
             extra_query={"beta": "true"},
@@ -160,6 +211,57 @@ class TestAsyncBundles:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `bundle_id` but received ''"):
             await async_client.beta.organization.claude_tag.bundles.with_raw_response.retrieve(
+                bundle_id="",
+            )
+
+    @parametrize
+    async def test_method_update(self, async_client: AsyncAnthropic) -> None:
+        bundle = await async_client.beta.organization.claude_tag.bundles.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        bundle = await async_client.beta.organization.claude_tag.bundles.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            instructions="instructions",
+            betas=["computer-use-2024-10-22"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    async def test_raw_response_update(self, async_client: AsyncAnthropic) -> None:
+        response = await async_client.beta.organization.claude_tag.bundles.with_raw_response.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        bundle = await response.parse()
+        assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+    @parametrize
+    async def test_streaming_response_update(self, async_client: AsyncAnthropic) -> None:
+        async with async_client.beta.organization.claude_tag.bundles.with_streaming_response.update(
+            bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
+            extra_query={"beta": "true"},
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            bundle = await response.parse()
+            assert_matches_type(BetaClaudeTagBundle, bundle, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @parametrize
+    async def test_path_params_update(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `bundle_id` but received ''"):
+            await async_client.beta.organization.claude_tag.bundles.with_raw_response.update(
                 bundle_id="",
             )
 
