@@ -286,3 +286,69 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+def test_schema_keyword_dropped():
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+            },
+            "additionalProperties": False,
+        }
+    )
+    assert "description" not in result
+
+
+def test_schema_keyword_dropped_with_existing_description():
+    schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "description": "User profile",
+        "properties": {
+            "id": {"type": "string"},
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "type": "object",
+            "description": "User profile",
+            "properties": {
+                "id": {"type": "string"},
+            },
+            "additionalProperties": False,
+        }
+    )
+
+
+def test_schema_keyword_with_ref():
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$ref": "#/$defs/Item",
+        "$defs": {
+            "Item": {
+                "type": "string",
+            }
+        },
+    }
+    result = transform_schema(schema)
+    assert result == snapshot(
+        {
+            "$defs": {
+                "Item": {
+                    "type": "string",
+                }
+            },
+            "$ref": "#/$defs/Item",
+        }
+    )

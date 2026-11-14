@@ -124,6 +124,9 @@ def transform_schema(
     strict_schema: dict[str, Any] = {}
     json_schema = {**json_schema}
 
+    # Discard schema dialect metadata keyword so it does not leak into description.
+    json_schema.pop("$schema", None)
+
     # $defs must be processed before the $ref early-return below, so that a
     # root-level `{"$ref": "#/$defs/X", "$defs": {...}}` (valid JSON Schema,
     # and what pydantic RootModel emits) keeps its definitions.
