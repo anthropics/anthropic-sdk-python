@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
@@ -585,7 +586,7 @@ class AsyncAnthropic(AsyncAPIClient):
 
     # client options
     api_key: str | None
-    auth_token: str | None
+    _auth_token_getter: Callable[[], Awaitable[str]] | None
     webhook_key: str | None
     credentials: AccessTokenProvider | AsyncAccessTokenProvider | None
     _token_cache: TokenCache | None
@@ -597,7 +598,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: str | Callable[[], Awaitable[str]] | None = None,
         credentials: AccessTokenProvider | AsyncAccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
