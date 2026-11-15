@@ -202,6 +202,97 @@ A list of strings
     )
 
 
+def test_array_tuple_prefix_items_and_boolean_items() -> None:
+    closed_tuple = {
+        "type": "array",
+        "prefixItems": [{"type": "integer", "minimum": 0}, {"type": "string"}],
+        "items": False,
+    }
+    assert transform_schema(closed_tuple) == {
+        "type": "array",
+        "items": {
+            "anyOf": [
+                {"type": "integer", "description": "{minimum: 0}"},
+                {"type": "string"},
+            ]
+        },
+        "description": "{prefixItems: [{'type': 'integer', 'minimum': 0}, {'type': 'string'}], items: False}",
+    }
+
+    open_typed_tuple = {
+        "type": "array",
+        "prefixItems": [{"type": "integer"}],
+        "items": {"type": "string"},
+        "minItems": 2,
+    }
+    assert transform_schema(open_typed_tuple) == {
+        "type": "array",
+        "items": {
+            "anyOf": [
+                {"type": "integer"},
+                {"type": "string"},
+            ]
+        },
+        "description": "{prefixItems: [{'type': 'integer'}], items: {'type': 'string'}, minItems: 2}",
+    }
+
+    open_untyped_tuple = {
+        "type": "array",
+        "prefixItems": [{"type": "integer"}],
+    }
+    assert transform_schema(open_untyped_tuple) == {
+        "type": "array",
+        "description": "{prefixItems: [{'type': 'integer'}]}",
+    }
+
+    draft07_tuple = {
+        "type": "array",
+        "items": [{"type": "integer"}, {"type": "boolean"}],
+        "additionalItems": False,
+    }
+    assert transform_schema(draft07_tuple) == {
+        "type": "array",
+        "items": {
+            "anyOf": [
+                {"type": "integer"},
+                {"type": "boolean"},
+            ]
+        },
+        "description": "{additionalItems: False, items: [{'type': 'integer'}, {'type': 'boolean'}]}",
+    }
+
+    assert transform_schema({"type": "array", "items": False}) == {
+        "type": "array",
+        "description": "{items: False}",
+    }
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
+def test_pydantic_tuple_schema() -> None:
+    class Step(pydantic.BaseModel):
+        action: str
+
+    class Plan(pydantic.BaseModel):
+        pair: tuple[Step, int]
+        homogeneous: tuple[int, int]
+
+    result = transform_schema(Plan)
+    assert result["$defs"]["Step"] == {
+        "type": "object",
+        "title": "Step",
+        "properties": {"action": {"type": "string", "title": "Action"}},
+        "additionalProperties": False,
+        "required": ["action"],
+    }
+    assert result["properties"]["pair"]["items"] == {
+        "anyOf": [
+            {"$ref": "#/$defs/Step"},
+            {"type": "integer"},
+        ]
+    }
+    assert result["properties"]["homogeneous"]["items"] == {"type": "integer"}
+
+
 def test_string_schema_with_format_and_default():
     schema = {
         "type": "string",

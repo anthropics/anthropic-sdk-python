@@ -7,7 +7,7 @@ from typing_extensions import assert_never
 import pydantic
 
 from ..._types import Omit
-from ..._utils import is_list, is_given
+from ..._utils import is_dict, is_list, is_given
 from ..._models import TypeAdapter
 from ..._exceptions import AnthropicError
 from ...types.beta.beta_output_config_param import BetaOutputConfigParam
@@ -198,12 +198,26 @@ def transform_schema(
             # add it back so its treated as an extra property and appended to the description
             json_schema["format"] = format
     elif type_ == "array":
+        prefix_items = json_schema.get("prefixItems")
         items = json_schema.pop("items", None)
-        if items is not None:
-            strict_schema["items"] = transform_schema(items)
+        if is_list(prefix_items):
+            tuple_items = transform_tuple_items(prefix_items, items, json_schema.get("maxItems"))
+            if tuple_items is not None:
+                strict_schema["items"] = tuple_items
+            if items is not None:
+                json_schema["items"] = items
+        elif is_dict(items):
+            strict_schema["items"] = transform_schema(cast("dict[str, Any]", items))
+        elif is_list(items):
+            tuple_items = transform_tuple_items(items, json_schema.get("additionalItems"), json_schema.get("maxItems"))
+            if tuple_items is not None:
+                strict_schema["items"] = tuple_items
+            json_schema["items"] = items
+        elif items is not None:
+            json_schema["items"] = items
 
         min_items = json_schema.pop("minItems", None)
-        if min_items is not None and min_items == 0 or min_items == 1:
+        if not isinstance(min_items, bool) and (min_items == 0 or min_items == 1):
             strict_schema["minItems"] = min_items
         elif min_items is not None:
             # add it back so its treated as an extra property and appended to the description
@@ -226,6 +240,37 @@ def transform_schema(
         )
 
     return strict_schema
+
+
+def transform_tuple_items(
+    positional_items: list[object],
+    tail_items: object,
+    max_items: object,
+) -> dict[str, Any] | None:
+    closed_by_max_items = (
+        isinstance(max_items, int) and not isinstance(max_items, bool) and max_items <= len(positional_items)
+    )
+    if not (tail_items is False or is_dict(tail_items) or (tail_items is None and closed_by_max_items)):
+        return None
+
+    candidates: list[dict[str, Any]] = []
+    for entry in positional_items:
+        if entry is True:
+            return None
+        if is_dict(entry):
+            transformed = transform_schema(cast("dict[str, Any]", entry))
+            if transformed not in candidates:
+                candidates.append(transformed)
+    if is_dict(tail_items):
+        transformed_tail = transform_schema(cast("dict[str, Any]", tail_items))
+        if transformed_tail not in candidates:
+            candidates.append(transformed_tail)
+
+    if len(candidates) == 1:
+        return candidates[0]
+    if len(candidates) > 1:
+        return {"anyOf": candidates}
+    return None
 
 
 def is_primitive(value: object) -> bool:
