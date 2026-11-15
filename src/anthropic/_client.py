@@ -160,7 +160,7 @@ class Anthropic(SyncAPIClient):
     webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
-    _custom_auth: AccessTokenAuth | None
+    _custom_auth: httpx2.Auth | None
     _credential_headers: Mapping[str, str]
     _unchosen_base_url: httpx2.URL | None
 
@@ -297,7 +297,12 @@ class Anthropic(SyncAPIClient):
             self._token_cache = _token_cache
         else:
             self._token_cache = TokenCache(credentials) if credentials is not None else None
-        self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
+        if self._auth_token_getter is not None:
+            self._custom_auth = BearerTokenAuth(self._auth_token_getter)
+        elif self._token_cache is not None:
+            self._custom_auth = AccessTokenAuth(self._token_cache)
+        else:
+            self._custom_auth = None
 
         super().__init__(
             version=__version__,
