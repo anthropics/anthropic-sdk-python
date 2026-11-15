@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import threading
 from typing import Generator, AsyncGenerator
+from collections.abc import Awaitable, Callable
 from typing_extensions import override
 
 import httpx2
@@ -10,7 +11,7 @@ import httpx2
 from ._cache import TokenCache
 from ._constants import OAUTH_API_BETA_HEADER
 
-__all__ = ["AccessTokenAuth"]
+__all__ = ["AccessTokenAuth", "BearerTokenAuth", "AsyncBearerTokenAuth"]
 
 log: logging.Logger = logging.getLogger(__name__)
 
