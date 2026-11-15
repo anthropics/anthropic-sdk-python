@@ -517,7 +517,11 @@ class Anthropic(SyncAPIClient):
             keeps_credential = isinstance(credentials, NotGiven)
             # The attributes can be assigned to, so inherit only the credential this client sends.
             api_key = self.api_key
-            auth_token = self.auth_token if api_key is None else None
+            auth_token = (
+                       self._auth_token_getter
+                       if api_key is None and self._auth_token_getter is not None
+                       else self.auth_token if api_key is None else None
+            )
             if isinstance(credentials, NotGiven) and api_key is None and auth_token is None and _is_base_client(self):
                 resolved_credentials = self.credentials
         inherits_provider = isinstance(credentials, NotGiven) and resolved_credentials is not None
