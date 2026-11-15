@@ -417,8 +417,11 @@ class Anthropic(SyncAPIClient):
         # the static-header check below — if a static api_key or auth_token
         # is set it will already be on default_headers; otherwise custom_auth
         # will fill in Authorization at request time.
-        if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
-            return
+        if (
+            (self._token_cache is not None or self._auth_token_getter is not None)
+             and not headers.get("X-Api-Key")
+             and not headers.get("Authorization")
+         ):
         # --- end credentials support ---
         if headers.get("Authorization") or headers.get("X-Api-Key"):
             # valid
