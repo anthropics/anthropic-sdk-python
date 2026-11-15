@@ -169,7 +169,6 @@ class Anthropic(SyncAPIClient):
         self,
         *,
         auth_token: str | Callable[[], str] | None = None,
-        auth_token: str | None = None,
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
