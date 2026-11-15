@@ -107,3 +107,45 @@ class AccessTokenAuth(httpx2.Auth):
         token = await self._token_cache.async_get_token()
         self._apply(request, token)
         yield request
+
+
+class BearerTokenAuth(httpx2.Auth):
+    """Authentication using a synchronous bearer token callback."""
+
+    requires_response_body = False
+
+    def __init__(self, token_getter: Callable[[], str]) -> None:
+        self._token_getter = token_getter
+
+    @override
+    def sync_auth_flow(
+        self, request: httpx2.Request
+    ) -> Generator[httpx2.Request, httpx2.Response, None]:
+        if request.headers.get("Authorization") or request.headers.get("X-Api-Key"):
+            yield request
+            return
+
+        token = self._token_getter()
+        request.headers["Authorization"] = f"Bearer {token}"
+        yield request
+
+
+class AsyncBearerTokenAuth(httpx2.Auth):
+    """Authentication using an asynchronous bearer token callback."""
+
+    requires_response_body = False
+
+    def __init__(self, token_getter: Callable[[], Awaitable[str]]) -> None:
+        self._token_getter = token_getter
+
+    @override
+    async def async_auth_flow(
+        self, request: httpx2.Request
+    ) -> AsyncGenerator[httpx2.Request, httpx2.Response]:
+        if request.headers.get("Authorization") or request.headers.get("X-Api-Key"):
+            yield request
+            return
+
+        token = await self._token_getter()
+        request.headers["Authorization"] = f"Bearer {token}"
+        yield request
