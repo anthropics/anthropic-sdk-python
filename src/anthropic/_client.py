@@ -43,6 +43,8 @@ from .lib.credentials import (
     default_credentials,
 )
 from .lib.credentials._auth import (
+    BearerTokenAuth,
+    AsyncBearerTokenAuth,
     warn_env_static_shadows_auto_discovery,
     warn_env_api_key_shadows_env_auth_token,
 )
