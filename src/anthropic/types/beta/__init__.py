@@ -1107,6 +1107,9 @@ from .beta_webhook_environment_deleted_event_data import (
 from .beta_webhook_environment_updated_event_data import (
     BetaWebhookEnvironmentUpdatedEventData as BetaWebhookEnvironmentUpdatedEventData,
 )
+from .beta_webhook_external_key_failed_event_data import (
+    BetaWebhookExternalKeyFailedEventData as BetaWebhookExternalKeyFailedEventData,
+)
 from .beta_computer_cursor_position_tool_use_block import (
     BetaComputerCursorPositionToolUseBlock as BetaComputerCursorPositionToolUseBlock,
 )
@@ -1280,6 +1283,9 @@ from .beta_web_fetch_url_source_tool_reference_param import (
 )
 from .beta_webhook_deployment_run_started_event_data import (
     BetaWebhookDeploymentRunStartedEventData as BetaWebhookDeploymentRunStartedEventData,
+)
+from .beta_webhook_external_key_recovered_event_data import (
+    BetaWebhookExternalKeyRecoveredEventData as BetaWebhookExternalKeyRecoveredEventData,
 )
 from .beta_webhook_session_budget_reached_event_data import (
     BetaWebhookSessionBudgetReachedEventData as BetaWebhookSessionBudgetReachedEventData,
