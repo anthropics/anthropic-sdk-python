@@ -1341,6 +1341,8 @@ from anthropic.types.beta import (
     BetaBashCodeExecutionToolResultBlockParam,
     BetaBashCodeExecutionToolResultError,
     BetaBashCodeExecutionToolResultErrorParam,
+    BetaBillTo,
+    BetaBillingPolicyParam,
     BetaBrowserClickTarget,
     BetaBrowserCloseTabConfig,
     BetaBrowserCloseTabConfigParam,

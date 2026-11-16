@@ -420,6 +420,7 @@ class TestSyncMessages:
 
         with sync_client.beta.messages.stream(
             max_tokens=1024,
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             messages=[
                 {
                     "role": "user",
@@ -432,6 +433,8 @@ class TestSyncMessages:
 
             assert_basic_response([event for event in stream], stream.get_final_message())
 
+        sent = json.loads(respx_mock.calls.last.request.content)
+        assert sent["billing_policy"] == {"type": "billing_policy", "bill_to": "user_profile"}
         assert respx_mock.calls.last.request.url.query == b""
 
     @pytest.mark.parametrize("client", [False], indirect=True)
@@ -737,6 +740,7 @@ class TestAsyncMessages:
 
         async with async_client.beta.messages.stream(
             max_tokens=1024,
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             messages=[
                 {
                     "role": "user",
@@ -749,6 +753,8 @@ class TestAsyncMessages:
 
             assert_basic_response([event async for event in stream], await stream.get_final_message())
 
+        sent = json.loads(respx_mock.calls.last.request.content)
+        assert sent["billing_policy"] == {"type": "billing_policy", "bill_to": "user_profile"}
         assert respx_mock.calls.last.request.url.query == b""
 
     @pytest.mark.parametrize("async_client", [False], indirect=True)
