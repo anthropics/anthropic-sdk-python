@@ -15,7 +15,7 @@ jobs:
   lint:
     timeout-minutes: 10
     name: lint
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -37,7 +37,7 @@ jobs:
     name: build
     permissions:
       contents: read
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -55,7 +55,7 @@ jobs:
   test:
     timeout-minutes: 10
     name: test
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     strategy:
       fail-fast: false
@@ -88,7 +88,7 @@ jobs:
   detect_breaking_changes:
     timeout-minutes: 10
     name: detect-breaking-changes
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: |-
       (github.event_name == 'push' &&
        !startsWith(github.ref, 'refs/heads/release-please--')) ||
