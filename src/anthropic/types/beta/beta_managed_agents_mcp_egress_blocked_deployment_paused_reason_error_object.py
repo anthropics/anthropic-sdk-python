@@ -1,0 +1,13 @@
+from typing_extensions import Literal
+
+from ..._models import BaseModel
+
+__all__ = ["BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject"]
+
+
+class BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject(BaseModel):
+    """
+    An MCP server host used by the deployment's agent is blocked by the environment's network policy.
+    """
+
+    type: Literal["mcp_egress_blocked_error"]

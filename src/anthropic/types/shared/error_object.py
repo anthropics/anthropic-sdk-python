@@ -2,29 +2,29 @@ from typing import Union
 from typing_extensions import Annotated, TypeAlias
 
 from ..._models import UnionDiscriminator
-from .billing_error import BillingError
-from .not_found_error import NotFoundError
 from .api_error_object import APIErrorObject
-from .overloaded_error import OverloadedError
-from .permission_error import PermissionError
-from .rate_limit_error import RateLimitError
-from .authentication_error import AuthenticationError
-from .gateway_timeout_error import GatewayTimeoutError
-from .invalid_request_error import InvalidRequestError
+from .billing_error_object import BillingErrorObject
+from .not_found_error_object import NotFoundErrorObject
+from .overloaded_error_object import OverloadedErrorObject
+from .permission_error_object import PermissionErrorObject
+from .rate_limit_error_object import RateLimitErrorObject
+from .authentication_error_object import AuthenticationErrorObject
+from .gateway_timeout_error_object import GatewayTimeoutErrorObject
+from .invalid_request_error_object import InvalidRequestErrorObject
 
 __all__ = ["ErrorObject"]
 
 ErrorObject: TypeAlias = Annotated[
     Union[
-        InvalidRequestError,
-        AuthenticationError,
-        BillingError,
-        PermissionError,
-        NotFoundError,
-        RateLimitError,
-        GatewayTimeoutError,
+        InvalidRequestErrorObject,
+        AuthenticationErrorObject,
+        BillingErrorObject,
+        PermissionErrorObject,
+        NotFoundErrorObject,
+        RateLimitErrorObject,
+        GatewayTimeoutErrorObject,
         APIErrorObject,
-        OverloadedError,
+        OverloadedErrorObject,
     ],
     UnionDiscriminator("type"),
 ]

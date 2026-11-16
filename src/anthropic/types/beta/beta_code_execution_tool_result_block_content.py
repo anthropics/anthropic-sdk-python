@@ -2,11 +2,11 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 from .beta_code_execution_result_block import BetaCodeExecutionResultBlock
-from .beta_code_execution_tool_result_error import BetaCodeExecutionToolResultError
 from .beta_encrypted_code_execution_result_block import BetaEncryptedCodeExecutionResultBlock
+from .beta_code_execution_tool_result_error_object import BetaCodeExecutionToolResultErrorObject
 
 __all__ = ["BetaCodeExecutionToolResultBlockContent"]
 
 BetaCodeExecutionToolResultBlockContent: TypeAlias = Union[
-    BetaCodeExecutionToolResultError, BetaCodeExecutionResultBlock, BetaEncryptedCodeExecutionResultBlock
+    BetaCodeExecutionToolResultErrorObject, BetaCodeExecutionResultBlock, BetaEncryptedCodeExecutionResultBlock
 ]
