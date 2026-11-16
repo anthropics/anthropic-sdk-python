@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsRepositoryNotFoundError", "RetryStatus"]
 
 BetaManagedAgentsRepositoryNotFoundError = BetaManagedAgentsRepositoryNotFoundErrorObject
 """
-BetaManagedAgentsRepositoryNotFoundError has been renamed to BetaManagedAgentsRepositoryNotFoundErrorObject
+Deprecated: BetaManagedAgentsRepositoryNotFoundError has been renamed to BetaManagedAgentsRepositoryNotFoundErrorObject
 """

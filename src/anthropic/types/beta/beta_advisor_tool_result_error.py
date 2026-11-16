@@ -3,4 +3,6 @@ from .beta_advisor_tool_result_error_object import BetaAdvisorToolResultErrorObj
 __all__ = ["BetaAdvisorToolResultError"]
 
 BetaAdvisorToolResultError = BetaAdvisorToolResultErrorObject
-"""BetaAdvisorToolResultError has been renamed to BetaAdvisorToolResultErrorObject"""
+"""
+Deprecated: BetaAdvisorToolResultError has been renamed to BetaAdvisorToolResultErrorObject
+"""

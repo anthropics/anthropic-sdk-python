@@ -8,5 +8,5 @@ BetaManagedAgentsFileNotFoundDeploymentPausedReasonError = (
     BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsFileNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsFileNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject
 """

@@ -4,5 +4,5 @@ __all__ = ["BetaResponseBrowserDoubleClickToolUseBlock"]
 
 BetaResponseBrowserDoubleClickToolUseBlock = BetaBrowserDoubleClickToolUseBlock
 """
-BetaResponseBrowserDoubleClickToolUseBlock has been renamed to BetaBrowserDoubleClickToolUseBlock
+Deprecated: BetaResponseBrowserDoubleClickToolUseBlock has been renamed to BetaBrowserDoubleClickToolUseBlock
 """

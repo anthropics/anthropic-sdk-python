@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsThreadLimitWorkflowRunError"]
 
 BetaManagedAgentsThreadLimitWorkflowRunError = BetaManagedAgentsThreadLimitWorkflowRunErrorObject
 """
-BetaManagedAgentsThreadLimitWorkflowRunError has been renamed to BetaManagedAgentsThreadLimitWorkflowRunErrorObject
+Deprecated: BetaManagedAgentsThreadLimitWorkflowRunError has been renamed to BetaManagedAgentsThreadLimitWorkflowRunErrorObject
 """

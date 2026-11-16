@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsVaultNotFoundRunError"]
 
 BetaManagedAgentsVaultNotFoundRunError = BetaManagedAgentsVaultNotFoundRunErrorObject
 """
-BetaManagedAgentsVaultNotFoundRunError has been renamed to BetaManagedAgentsVaultNotFoundRunErrorObject
+Deprecated: BetaManagedAgentsVaultNotFoundRunError has been renamed to BetaManagedAgentsVaultNotFoundRunErrorObject
 """

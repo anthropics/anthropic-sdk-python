@@ -8,5 +8,5 @@ BetaManagedAgentsVaultArchivedDeploymentPausedReasonError = (
     BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsVaultArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsVaultArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject
 """

@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsSessionResourceNotFoundRunError"]
 
 BetaManagedAgentsSessionResourceNotFoundRunError = BetaManagedAgentsSessionResourceNotFoundRunErrorObject
 """
-BetaManagedAgentsSessionResourceNotFoundRunError has been renamed to BetaManagedAgentsSessionResourceNotFoundRunErrorObject
+Deprecated: BetaManagedAgentsSessionResourceNotFoundRunError has been renamed to BetaManagedAgentsSessionResourceNotFoundRunErrorObject
 """

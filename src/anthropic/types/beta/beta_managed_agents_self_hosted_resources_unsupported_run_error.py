@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsSelfHostedResourcesUnsupportedRunError"]
 
 BetaManagedAgentsSelfHostedResourcesUnsupportedRunError = BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject
 """
-BetaManagedAgentsSelfHostedResourcesUnsupportedRunError has been renamed to BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject
+Deprecated: BetaManagedAgentsSelfHostedResourcesUnsupportedRunError has been renamed to BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject
 """

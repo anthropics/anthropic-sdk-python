@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsEnvironmentNotFoundRunError"]
 
 BetaManagedAgentsEnvironmentNotFoundRunError = BetaManagedAgentsEnvironmentNotFoundRunErrorObject
 """
-BetaManagedAgentsEnvironmentNotFoundRunError has been renamed to BetaManagedAgentsEnvironmentNotFoundRunErrorObject
+Deprecated: BetaManagedAgentsEnvironmentNotFoundRunError has been renamed to BetaManagedAgentsEnvironmentNotFoundRunErrorObject
 """

@@ -4,5 +4,5 @@ __all__ = ["BashCodeExecutionToolResultError"]
 
 BashCodeExecutionToolResultError = BashCodeExecutionToolResultErrorObject
 """
-BashCodeExecutionToolResultError has been renamed to BashCodeExecutionToolResultErrorObject
+Deprecated: BashCodeExecutionToolResultError has been renamed to BashCodeExecutionToolResultErrorObject
 """

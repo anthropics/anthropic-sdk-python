@@ -3,4 +3,4 @@ from .overloaded_error_object import OverloadedErrorObject
 __all__ = ["OverloadedError"]
 
 OverloadedError = OverloadedErrorObject
-"""OverloadedError has been renamed to OverloadedErrorObject"""
+"""Deprecated: OverloadedError has been renamed to OverloadedErrorObject"""

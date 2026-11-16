@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsRepositoryForbiddenError", "RetryStatus"]
 
 BetaManagedAgentsRepositoryForbiddenError = BetaManagedAgentsRepositoryForbiddenErrorObject
 """
-BetaManagedAgentsRepositoryForbiddenError has been renamed to BetaManagedAgentsRepositoryForbiddenErrorObject
+Deprecated: BetaManagedAgentsRepositoryForbiddenError has been renamed to BetaManagedAgentsRepositoryForbiddenErrorObject
 """

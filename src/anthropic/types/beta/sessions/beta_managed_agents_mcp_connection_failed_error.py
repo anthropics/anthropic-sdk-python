@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsMCPConnectionFailedError", "RetryStatus"]
 
 BetaManagedAgentsMCPConnectionFailedError = BetaManagedAgentsMCPConnectionFailedErrorObject
 """
-BetaManagedAgentsMCPConnectionFailedError has been renamed to BetaManagedAgentsMCPConnectionFailedErrorObject
+Deprecated: BetaManagedAgentsMCPConnectionFailedError has been renamed to BetaManagedAgentsMCPConnectionFailedErrorObject
 """

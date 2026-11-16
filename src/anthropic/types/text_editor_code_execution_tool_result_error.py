@@ -4,5 +4,5 @@ __all__ = ["TextEditorCodeExecutionToolResultError"]
 
 TextEditorCodeExecutionToolResultError = TextEditorCodeExecutionToolResultErrorObject
 """
-TextEditorCodeExecutionToolResultError has been renamed to TextEditorCodeExecutionToolResultErrorObject
+Deprecated: TextEditorCodeExecutionToolResultError has been renamed to TextEditorCodeExecutionToolResultErrorObject
 """

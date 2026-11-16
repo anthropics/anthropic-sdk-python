@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsSessionRateLimitedRunError"]
 
 BetaManagedAgentsSessionRateLimitedRunError = BetaManagedAgentsSessionRateLimitedRunErrorObject
 """
-BetaManagedAgentsSessionRateLimitedRunError has been renamed to BetaManagedAgentsSessionRateLimitedRunErrorObject
+Deprecated: BetaManagedAgentsSessionRateLimitedRunError has been renamed to BetaManagedAgentsSessionRateLimitedRunErrorObject
 """

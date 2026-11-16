@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserLeftMouseUpToolUseBlock"]
 
 ResponseBrowserLeftMouseUpToolUseBlock = BrowserLeftMouseUpToolUseBlock
 """
-ResponseBrowserLeftMouseUpToolUseBlock has been renamed to BrowserLeftMouseUpToolUseBlock
+Deprecated: ResponseBrowserLeftMouseUpToolUseBlock has been renamed to BrowserLeftMouseUpToolUseBlock
 """

@@ -8,5 +8,5 @@ BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError = (
     BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject
 """

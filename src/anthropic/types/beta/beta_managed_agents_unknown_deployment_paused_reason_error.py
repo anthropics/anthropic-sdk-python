@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsUnknownDeploymentPausedReasonError"]
 
 BetaManagedAgentsUnknownDeploymentPausedReasonError = BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject
 """
-BetaManagedAgentsUnknownDeploymentPausedReasonError has been renamed to BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsUnknownDeploymentPausedReasonError has been renamed to BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject
 """

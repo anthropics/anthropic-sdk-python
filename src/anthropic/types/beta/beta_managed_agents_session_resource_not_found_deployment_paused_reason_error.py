@@ -8,5 +8,5 @@ BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError = (
     BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject
 """

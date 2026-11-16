@@ -8,5 +8,5 @@ BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError = (
     BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError has been renamed to BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError has been renamed to BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonErrorObject
 """

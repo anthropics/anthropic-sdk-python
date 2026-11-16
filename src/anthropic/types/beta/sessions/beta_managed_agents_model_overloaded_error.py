@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsModelOverloadedError", "RetryStatus"]
 
 BetaManagedAgentsModelOverloadedError = BetaManagedAgentsModelOverloadedErrorObject
 """
-BetaManagedAgentsModelOverloadedError has been renamed to BetaManagedAgentsModelOverloadedErrorObject
+Deprecated: BetaManagedAgentsModelOverloadedError has been renamed to BetaManagedAgentsModelOverloadedErrorObject
 """

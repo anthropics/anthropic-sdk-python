@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserJavascriptExecToolUseBlock"]
 
 ResponseBrowserJavascriptExecToolUseBlock = BrowserJavascriptExecToolUseBlock
 """
-ResponseBrowserJavascriptExecToolUseBlock has been renamed to BrowserJavascriptExecToolUseBlock
+Deprecated: ResponseBrowserJavascriptExecToolUseBlock has been renamed to BrowserJavascriptExecToolUseBlock
 """

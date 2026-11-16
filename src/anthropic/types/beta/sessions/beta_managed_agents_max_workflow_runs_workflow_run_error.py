@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsMaxWorkflowRunsWorkflowRunError"]
 
 BetaManagedAgentsMaxWorkflowRunsWorkflowRunError = BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject
 """
-BetaManagedAgentsMaxWorkflowRunsWorkflowRunError has been renamed to BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject
+Deprecated: BetaManagedAgentsMaxWorkflowRunsWorkflowRunError has been renamed to BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject
 """

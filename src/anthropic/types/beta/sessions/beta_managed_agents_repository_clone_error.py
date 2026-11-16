@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsRepositoryCloneError", "RetryStatus"]
 
 BetaManagedAgentsRepositoryCloneError = BetaManagedAgentsRepositoryCloneErrorObject
 """
-BetaManagedAgentsRepositoryCloneError has been renamed to BetaManagedAgentsRepositoryCloneErrorObject
+Deprecated: BetaManagedAgentsRepositoryCloneError has been renamed to BetaManagedAgentsRepositoryCloneErrorObject
 """

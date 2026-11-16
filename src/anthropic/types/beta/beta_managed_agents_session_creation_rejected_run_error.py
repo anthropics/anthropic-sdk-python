@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsSessionCreationRejectedRunError"]
 
 BetaManagedAgentsSessionCreationRejectedRunError = BetaManagedAgentsSessionCreationRejectedRunErrorObject
 """
-BetaManagedAgentsSessionCreationRejectedRunError has been renamed to BetaManagedAgentsSessionCreationRejectedRunErrorObject
+Deprecated: BetaManagedAgentsSessionCreationRejectedRunError has been renamed to BetaManagedAgentsSessionCreationRejectedRunErrorObject
 """

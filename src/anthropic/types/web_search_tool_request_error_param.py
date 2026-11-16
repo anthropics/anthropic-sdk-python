@@ -5,3 +5,6 @@ from .web_search_tool_request_error_object_param import WebSearchToolRequestErro
 __all__ = ["WebSearchToolRequestErrorParam"]
 
 WebSearchToolRequestErrorParam = WebSearchToolRequestErrorObjectParam
+"""
+Deprecated: WebSearchToolRequestErrorParam has been renamed to WebSearchToolRequestErrorObjectParam
+"""

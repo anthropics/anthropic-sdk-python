@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsMCPEgressBlockedRunError"]
 
 BetaManagedAgentsMCPEgressBlockedRunError = BetaManagedAgentsMCPEgressBlockedRunErrorObject
 """
-BetaManagedAgentsMCPEgressBlockedRunError has been renamed to BetaManagedAgentsMCPEgressBlockedRunErrorObject
+Deprecated: BetaManagedAgentsMCPEgressBlockedRunError has been renamed to BetaManagedAgentsMCPEgressBlockedRunErrorObject
 """

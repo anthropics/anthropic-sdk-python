@@ -8,5 +8,5 @@ BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError = (
     BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject
 """

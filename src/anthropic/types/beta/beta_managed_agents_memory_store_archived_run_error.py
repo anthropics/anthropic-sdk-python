@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsMemoryStoreArchivedRunError"]
 
 BetaManagedAgentsMemoryStoreArchivedRunError = BetaManagedAgentsMemoryStoreArchivedRunErrorObject
 """
-BetaManagedAgentsMemoryStoreArchivedRunError has been renamed to BetaManagedAgentsMemoryStoreArchivedRunErrorObject
+Deprecated: BetaManagedAgentsMemoryStoreArchivedRunError has been renamed to BetaManagedAgentsMemoryStoreArchivedRunErrorObject
 """

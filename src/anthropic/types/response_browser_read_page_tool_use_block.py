@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserReadPageToolUseBlock"]
 
 ResponseBrowserReadPageToolUseBlock = BrowserReadPageToolUseBlock
 """
-ResponseBrowserReadPageToolUseBlock has been renamed to BrowserReadPageToolUseBlock
+Deprecated: ResponseBrowserReadPageToolUseBlock has been renamed to BrowserReadPageToolUseBlock
 """

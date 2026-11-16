@@ -6,5 +6,5 @@ __all__ = ["BetaManagedAgentsEnvironmentArchivedRunError"]
 
 BetaManagedAgentsEnvironmentArchivedRunError = BetaManagedAgentsEnvironmentArchivedRunErrorObject
 """
-BetaManagedAgentsEnvironmentArchivedRunError has been renamed to BetaManagedAgentsEnvironmentArchivedRunErrorObject
+Deprecated: BetaManagedAgentsEnvironmentArchivedRunError has been renamed to BetaManagedAgentsEnvironmentArchivedRunErrorObject
 """

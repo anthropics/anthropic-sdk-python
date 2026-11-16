@@ -4,5 +4,5 @@ __all__ = ["BetaPluginMarketplaceValidationPluginError"]
 
 BetaPluginMarketplaceValidationPluginError = BetaPluginMarketplaceValidationPluginErrorObject
 """
-BetaPluginMarketplaceValidationPluginError has been renamed to BetaPluginMarketplaceValidationPluginErrorObject
+Deprecated: BetaPluginMarketplaceValidationPluginError has been renamed to BetaPluginMarketplaceValidationPluginErrorObject
 """

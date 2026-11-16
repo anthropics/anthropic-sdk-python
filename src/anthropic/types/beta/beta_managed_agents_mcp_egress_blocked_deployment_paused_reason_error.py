@@ -8,5 +8,5 @@ BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError = (
     BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError has been renamed to BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError has been renamed to BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject
 """

@@ -8,5 +8,5 @@ BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError = (
     BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject
 )
 """
-BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject
+Deprecated: BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject
 """

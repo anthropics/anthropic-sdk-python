@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsSkillNotFoundRunError"]
 
 BetaManagedAgentsSkillNotFoundRunError = BetaManagedAgentsSkillNotFoundRunErrorObject
 """
-BetaManagedAgentsSkillNotFoundRunError has been renamed to BetaManagedAgentsSkillNotFoundRunErrorObject
+Deprecated: BetaManagedAgentsSkillNotFoundRunError has been renamed to BetaManagedAgentsSkillNotFoundRunErrorObject
 """

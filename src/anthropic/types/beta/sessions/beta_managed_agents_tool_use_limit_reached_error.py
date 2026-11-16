@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsToolUseLimitReachedError", "RetryStatus"]
 
 BetaManagedAgentsToolUseLimitReachedError = BetaManagedAgentsToolUseLimitReachedErrorObject
 """
-BetaManagedAgentsToolUseLimitReachedError has been renamed to BetaManagedAgentsToolUseLimitReachedErrorObject
+Deprecated: BetaManagedAgentsToolUseLimitReachedError has been renamed to BetaManagedAgentsToolUseLimitReachedErrorObject
 """

@@ -4,5 +4,5 @@ __all__ = ["BetaBashCodeExecutionToolResultError"]
 
 BetaBashCodeExecutionToolResultError = BetaBashCodeExecutionToolResultErrorObject
 """
-BetaBashCodeExecutionToolResultError has been renamed to BetaBashCodeExecutionToolResultErrorObject
+Deprecated: BetaBashCodeExecutionToolResultError has been renamed to BetaBashCodeExecutionToolResultErrorObject
 """

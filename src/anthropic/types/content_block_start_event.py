@@ -3,4 +3,4 @@ from .raw_content_block_start_event import ContentBlock, RawContentBlockStartEve
 __all__ = ["ContentBlockStartEvent", "ContentBlock"]
 
 ContentBlockStartEvent = RawContentBlockStartEvent
-"""The RawContentBlockStartEvent type should be used instead"""
+"""Deprecated: The RawContentBlockStartEvent type should be used instead"""

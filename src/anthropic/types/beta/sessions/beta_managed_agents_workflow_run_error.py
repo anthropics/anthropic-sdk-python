@@ -4,5 +4,5 @@ __all__ = ["BetaManagedAgentsWorkflowRunError"]
 
 BetaManagedAgentsWorkflowRunError = BetaManagedAgentsWorkflowRunErrorObject
 """
-BetaManagedAgentsWorkflowRunError has been renamed to BetaManagedAgentsWorkflowRunErrorObject
+Deprecated: BetaManagedAgentsWorkflowRunError has been renamed to BetaManagedAgentsWorkflowRunErrorObject
 """

@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsModelRequestFailedError", "RetryStatus"]
 
 BetaManagedAgentsModelRequestFailedError = BetaManagedAgentsModelRequestFailedErrorObject
 """
-BetaManagedAgentsModelRequestFailedError has been renamed to BetaManagedAgentsModelRequestFailedErrorObject
+Deprecated: BetaManagedAgentsModelRequestFailedError has been renamed to BetaManagedAgentsModelRequestFailedErrorObject
 """

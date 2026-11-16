@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserFileUploadToolUseBlock"]
 
 ResponseBrowserFileUploadToolUseBlock = BrowserFileUploadToolUseBlock
 """
-ResponseBrowserFileUploadToolUseBlock has been renamed to BrowserFileUploadToolUseBlock
+Deprecated: ResponseBrowserFileUploadToolUseBlock has been renamed to BrowserFileUploadToolUseBlock
 """

@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsCredentialHostUnreachableError", "RetryStatus"]
 
 BetaManagedAgentsCredentialHostUnreachableError = BetaManagedAgentsCredentialHostUnreachableErrorObject
 """
-BetaManagedAgentsCredentialHostUnreachableError has been renamed to BetaManagedAgentsCredentialHostUnreachableErrorObject
+Deprecated: BetaManagedAgentsCredentialHostUnreachableError has been renamed to BetaManagedAgentsCredentialHostUnreachableErrorObject
 """

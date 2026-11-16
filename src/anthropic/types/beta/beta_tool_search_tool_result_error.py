@@ -4,5 +4,5 @@ __all__ = ["BetaToolSearchToolResultError"]
 
 BetaToolSearchToolResultError = BetaToolSearchToolResultErrorObject
 """
-BetaToolSearchToolResultError has been renamed to BetaToolSearchToolResultErrorObject
+Deprecated: BetaToolSearchToolResultError has been renamed to BetaToolSearchToolResultErrorObject
 """

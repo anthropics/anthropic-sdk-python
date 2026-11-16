@@ -7,5 +7,5 @@ __all__ = ["BetaManagedAgentsRepositoryCheckoutError", "RetryStatus"]
 
 BetaManagedAgentsRepositoryCheckoutError = BetaManagedAgentsRepositoryCheckoutErrorObject
 """
-BetaManagedAgentsRepositoryCheckoutError has been renamed to BetaManagedAgentsRepositoryCheckoutErrorObject
+Deprecated: BetaManagedAgentsRepositoryCheckoutError has been renamed to BetaManagedAgentsRepositoryCheckoutErrorObject
 """
