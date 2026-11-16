@@ -128,6 +128,14 @@ jobs:
           fi
           echo "Comparing against $BASE_REF"
           BASE_SHA=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "")
+          # A commit already on synced/published is its own merge-base, and comparing it with itself
+          # would always pass, so it keeps the comparison above. Any other branch fails only for what
+          # it changed after it left synced/published.
+          FORK_SHA=$(git merge-base HEAD 'origin/synced/published' 2>/dev/null || echo "")
+          if [ -n "$FORK_SHA" ] && [ "$FORK_SHA" != "$(git rev-parse HEAD)" ]; then
+            echo "Comparing against $FORK_SHA instead, where this branch left synced/published"
+            BASE_SHA=$FORK_SHA
+          fi
           echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
 
       - name: Download the base commit's files
