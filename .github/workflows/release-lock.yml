@@ -75,11 +75,15 @@ jobs:
                 jq -sc "$OUTDATED_STATUSES"
             )"
             [ -n "$statuses" ] || exit 0
+            failed=0
             while IFS= read -r status; do
               echo "$status"
+              # The next pass reads what is out of date again, and so retries a failed post.
               jq '{state: (.state | ascii_downcase), context, description, target_url}' <<<"$status" |
-                gh api --silent --method POST "repos/$GITHUB_REPOSITORY/statuses/$(jq -r .sha <<<"$status")" --input -
+                gh api --silent --method POST "repos/$GITHUB_REPOSITORY/statuses/$(jq -r .sha <<<"$status")" --input - ||
+                failed=1
               # GitHub asks for a second between writes.
               sleep 1
             done <<<"$statuses"
           done
+          exit "$failed"
