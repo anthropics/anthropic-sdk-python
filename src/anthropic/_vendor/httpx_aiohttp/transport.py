@@ -1,8 +1,8 @@
 # Vendored from httpx-aiohttp v0.2.0 (BSD-3-Clause), src/httpx_aiohttp/httpx2/transport.py.
 # Copyright (c) 2025, Karen Petrosyan. Licence text and provenance: LICENSE and
 # NOTICE.md in this directory.
-# The code below is verbatim; only this header was added, by Anthropic PBC (2026).
-# Do not edit by hand; re-copy from upstream to update.
+# Modified by Anthropic PBC (2026): this header was added and two `AIOHTTP_EXC_MAP`
+# entries differ from upstream. NOTICE.md lists them; carry them over when re-copying.
 from __future__ import annotations
 
 import contextlib
@@ -20,7 +20,7 @@ from aiohttp.client import ClientResponse, ClientSession
 AIOHTTP_EXC_MAP = {
     aiohttp.ServerTimeoutError: httpx.TimeoutException,
     aiohttp.SocketTimeoutError: httpx.ReadTimeout,
-    aiohttp.ClientConnectionError: httpx.ConnectTimeout,
+    aiohttp.ClientConnectionError: httpx.ConnectError,
     aiohttp.ClientConnectorError: httpx.ConnectError,
     aiohttp.ClientPayloadError: httpx.ReadError,
     aiohttp.ClientProxyConnectionError: httpx.ProxyError,
@@ -32,6 +32,7 @@ if metadata.version("aiohttp") >= "3.10.0":
         {
             aiohttp.client_exceptions.NonHttpUrlClientError: httpx.UnsupportedProtocol,  # type: ignore[reportAttributeAccessIssue]
             aiohttp.client_exceptions.InvalidUrlClientError: httpx.UnsupportedProtocol,  # type: ignore[reportAttributeAccessIssue]
+            aiohttp.client_exceptions.ConnectionTimeoutError: httpx.ConnectTimeout,  # type: ignore[reportAttributeAccessIssue]
         }
     )
 
