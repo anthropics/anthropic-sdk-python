@@ -21,7 +21,7 @@ class TestWorkspaces:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -29,7 +29,7 @@ class TestWorkspaces:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.create(
-            name="x",
+            name="Workspace Name",
             data_residency={
                 "allowed_inference_geos": "unrestricted",
                 "default_inference_geo": "global",
@@ -42,7 +42,7 @@ class TestWorkspaces:
                 "team": "platform",
             },
             user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -50,7 +50,7 @@ class TestWorkspaces:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         )
 
@@ -62,7 +62,7 @@ class TestWorkspaces:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -132,7 +132,7 @@ class TestWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
-            name="x",
+            name="Workspace Name",
             tags={
                 "env": "prod",
                 "team": "platform",
@@ -269,7 +269,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -277,7 +277,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.create(
-            name="x",
+            name="Workspace Name",
             data_residency={
                 "allowed_inference_geos": "unrestricted",
                 "default_inference_geo": "global",
@@ -290,7 +290,7 @@ class TestAsyncWorkspaces:
                 "team": "platform",
             },
             user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -298,7 +298,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         )
 
@@ -310,7 +310,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.create(
-            name="x",
+            name="Workspace Name",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -380,7 +380,7 @@ class TestAsyncWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
-            name="x",
+            name="Workspace Name",
             tags={
                 "env": "prod",
                 "team": "platform",

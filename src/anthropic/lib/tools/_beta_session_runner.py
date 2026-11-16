@@ -136,8 +136,12 @@ SEND_BACKOFF_CAP = 30.0
 SEND_RETRY_WINDOW = 300.0
 # Grace period, in seconds, that the runner keeps running after the session goes
 # idle with any stop_reason but `requires_action` before it stops; any new event
-# in that window resets it. `max_idle=None` disables it (run until the session ends).
+# in that window but one of `IDLE_NEUTRAL_EVENTS` cancels it. `max_idle=None`
+# disables it (run until the session ends).
 DEFAULT_MAX_IDLE = 60.0
+# Events that leave the idle countdown as it is: they are neither agent activity
+# nor an idle. The exception is a termination that follows a failed history read.
+IDLE_NEUTRAL_EVENTS = ("user.tool_confirmation", "session.thread_status_terminated")
 
 log = logging.getLogger(__name__)
 
@@ -146,9 +150,10 @@ class _IdleClock:
     """Tracks how long the session has been idle since its turn ended.
 
     `turn_ended_at` is the monotonic timestamp of the most recent event that
-    `ends_turn` and that no newer event has followed; `None` whenever the
-    session is not in that state. `SessionToolRunner._idle_watchdog` stops the
-    runner once it has been set for `max_idle` seconds.
+    `ends_turn` and that no newer event but one of `IDLE_NEUTRAL_EVENTS` has
+    followed; `None` whenever the session is not in that state.
+    `SessionToolRunner._idle_watchdog` stops the runner once it has been set for
+    `max_idle` seconds.
 
     Confirmation-gated calls pause the clock while they are unresolved:
     `hold` / `release` count them — from the moment a call is held
@@ -179,14 +184,17 @@ class _IdleClock:
         self.wake = anyio.Event()
 
     def note_event(self, ev: object) -> None:
-        """Arm the clock on an idle that ends the turn, disarm it on anything else.
+        """Arm the clock on an idle that ends the turn, disarm it on any other event that is not neutral.
 
         `user.tool_confirmation` events are neutral: they signal neither agent
         activity nor an idle, and their effect on the clock flows through
         `hold` / `release` instead — disarming here would discard
         the deferred arm the verdict is about to settle.
+        `session.thread_status_terminated` events are neutral too: a client can
+        archive a child thread after the session goes idle, and another idle need
+        not follow.
         """
-        if getattr(ev, "type", None) == "user.tool_confirmation":
+        if getattr(ev, "type", None) in IDLE_NEUTRAL_EVENTS:
             return
         if ends_turn(ev):
             self.arm()
@@ -282,7 +290,9 @@ class DispatchedToolCall:
     `result` left `None`, when the tool name is not one this runner owns and
     it deliberately posted nothing, leaving the `tool_use_id` pending for its
     owner (the split-client partial-fulfillment behavior), or when the call was
-    denied and never executed (see `confirmation`)."""
+    denied and never executed (see `confirmation`). It is also `False`, with
+    `result` set, when the call's thread terminated while the tool ran: the
+    runner sent nothing, because the API takes no result for such a call."""
 
     confirmation: Literal["allow", "deny"] | None = None
     """The confirmation verdict that gated this call, if any.
@@ -389,9 +399,12 @@ class SessionToolRunner:
     Iteration ends when the session terminates (`session.status_terminated` /
     `session.deleted`), when the consumer breaks out of the loop, or — once
     the session has gone idle with any `stop_reason` but `requires_action` — when
-    `max_idle` seconds elapse with no new event (any new event resets the
-    countdown; it re-arms on the next such idle). `max_idle=None`
-    disables that last condition. On exit it runs each tool's optional cleanup:
+    `max_idle` seconds elapse with no new event (any new event but a tool
+    confirmation or a thread's termination cancels the countdown; it re-arms on
+    the next such idle). `max_idle=None` disables that last condition. If the
+    runner fails to read the session's event history after a reconnect, a
+    termination that then arrives on the event stream cancels the countdown too,
+    until the next idle or successful read. On exit the runner runs each tool's optional cleanup:
     the `close` hook and, for tools defined as an (async) context manager, its
     `__exit__` / `__aexit__`. It does **not** touch the work-item lease —
     wrap it in an
@@ -436,6 +449,13 @@ class SessionToolRunner:
     executed and nothing is posted for it (the denial itself resolves the call
     server-side), but it is still yielded (`confirmation="deny"`,
     `posted=False`, `result=None`) so the caller can observe it.
+
+    A thread that has terminated accepts no further input, so its open tool
+    calls can never get a result. A workflow run's threads terminate when the
+    run ends, for example. The runner does not execute the open calls of a
+    thread that a `session.thread_status_terminated` event has named, and it
+    neither posts nor yields anything for them. A call whose thread terminates
+    while its tool runs is yielded with `posted=False`.
 
     Usage:
 
@@ -534,6 +554,12 @@ class SessionToolRunner:
         # recorded verdicts persist for the life of the run.
         self._confirmations: dict[str, Literal["allow", "deny"]] = {}
         self._awaiting_confirmation: dict[str, DispatchedToolUseEvent] = {}
+        # Threads named by a `session.thread_status_terminated` event. The API
+        # takes no result for their calls.
+        self._terminated_threads: set[str] = set()
+        # True from the start of a history read until a read succeeds or a live event outside `IDLE_NEUTRAL_EVENTS`
+        # arrives. While True, the countdown may come from an idle that the session has since left.
+        self._idle_may_be_stale = False
         self._stop = anyio.Event()
         self._idle_clock = _IdleClock()
 
@@ -600,10 +626,12 @@ class SessionToolRunner:
         result appears later in the same history is not re-dispatched. Pairs
         `agent.tool_use` with `user.tool_result` and `agent.custom_tool_use`
         with `user.custom_tool_result` when computing which calls are answered.
+        Leaves out the calls of terminated threads.
         """
         pending: list[DispatchedToolUseEvent] = []
         last_ended_turn = False
         list_failed = False
+        self._idle_may_be_stale = True
         try:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
                 self._note_primary_thread(ev)
@@ -628,19 +656,22 @@ class SessionToolRunner:
                     # their verdict on every reconcile.
                     if ev.tool_use_id not in self._answered:
                         self._confirmations[ev.tool_use_id] = ev.result
-                # Neutral here as in `_IdleClock.note_event`: a verdict is neither
-                # agent activity nor an idle.
-                if ev.type != "user.tool_confirmation":
+                elif ev.type == "session.thread_status_terminated":
+                    self._terminated_threads.add(ev.session_thread_id)
+                if ev.type not in IDLE_NEUTRAL_EVENTS:
                     last_ended_turn = ends_turn(ev)
         except Exception as e:
             # Pagination may have failed partway through; the `_answered` set
             # could be incomplete, so dispatching `pending` now would risk
             # re-running a tool whose result was on a page we never reached.
-            # The next reconnect will retry the reconcile. Leave `_idle_clock`
-            # untouched since the history we read may be incomplete.
+            # The next reconnect will retry the reconcile. Do not arm `_idle_clock`
+            # from the history we read, since it may be incomplete.
             log.warning("reconcile list failed; skipping pending enqueue error=%s", e)
             list_failed = True
         self._history_read = not list_failed
+        self._idle_may_be_stale = list_failed
+        # A termination that the list gave before it failed still stands.
+        self._release_terminated_holds()
         if list_failed:
             # Roll back the ids we added to `_seen` so the live stream can
             # re-process them rather than silently dedup what we never finished
@@ -672,6 +703,7 @@ class SessionToolRunner:
             ev
             for ev in unanswered
             if ev.id not in self._answered
+            and not self._in_terminated_thread(ev)
             and ev.id not in self._awaiting_confirmation
             and not (ev.id in self._confirmations and ev.name in self._tools_by_name)
         ]
@@ -691,16 +723,24 @@ class SessionToolRunner:
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
                         # Arm/disarm the idle clock: an idle that ends the turn starts
-                        # the grace countdown, any other event cancels it. The
+                        # the grace countdown, any other event but a neutral one cancels it. The
                         # clock itself defers the countdown while gated calls
                         # are held or in flight (see `_IdleClock.hold`).
                         self._idle_clock.note_event(ev)
+                        if ev.type not in IDLE_NEUTRAL_EVENTS:
+                            self._idle_may_be_stale = False
                         if self._history_read:
                             self._note_primary_thread(ev)
                         if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                             if ev.id not in self._seen:
                                 self._seen.add(ev.id)
                                 await self._route_tool_event(ev)
+                        elif ev.type == "session.thread_status_terminated":
+                            self._terminated_threads.add(ev.session_thread_id)
+                            if self._idle_may_be_stale:
+                                # The session may have run since the idle, so the event is not neutral here.
+                                self._idle_clock.disarm()
+                            self._release_terminated_holds()
                         elif ev.type == "user.tool_result":
                             self._answered.add(ev.tool_use_id)
                         elif ev.type == "user.custom_tool_result":
@@ -740,8 +780,30 @@ class SessionToolRunner:
         ) and ev.session_thread_id:
             self._primary_thread_id = ev.session_thread_id
 
+    def _in_terminated_thread(self, ev: DispatchedToolUseEvent) -> bool:
+        """Whether `ev` names a thread that has terminated."""
+        return ev.session_thread_id in self._terminated_threads
+
+    def _release_terminated_holds(self) -> None:
+        """Drops the held calls of terminated threads and their idle-clock holds: the API takes no result for them."""
+        for held in [ev for ev in self._awaiting_confirmation.values() if self._in_terminated_thread(ev)]:
+            log.info("thread terminated; not executing tool=%s tool_use_id=%s", held.name, held.id)
+            del self._awaiting_confirmation[held.id]
+            self._release_hold(held)
+
+    def _release_hold(self, ev: DispatchedToolUseEvent) -> None:
+        """Drops the idle-clock hold of `ev`.
+
+        While `_idle_may_be_stale` is True, a call of a terminated thread drops the deferred countdown with its hold.
+        """
+        if self._idle_may_be_stale and self._in_terminated_thread(ev):
+            self._idle_clock.disarm()
+        self._idle_clock.release()
+
     async def _route_tool_event(self, ev: DispatchedToolUseEvent) -> None:
         """Enqueue `ev` for dispatch, honoring its evaluated permission.
+
+        A call of a terminated thread is not enqueued.
 
         A builtin call the server gated behind user confirmation
         (`evaluated_permission == "ask"`, e.g. the `always_ask` policy) is
@@ -755,6 +817,9 @@ class SessionToolRunner:
         unrecognised permission is held like `ask` and an unrecognised
         verdict is treated as a denial, never dispatched.
         """
+        if self._in_terminated_thread(ev):
+            log.debug("thread terminated; not executing tool=%s tool_use_id=%s", ev.name, ev.id)
+            return
         # `getattr` rather than an event-type check: today only
         # `agent.tool_use` carries `evaluated_permission`, but if the field
         # ever lands on `agent.custom_tool_use` the gate must keep failing
@@ -864,7 +929,9 @@ class SessionToolRunner:
                     # (the idle watchdog or stream loop signalled it).
                     return
                 try:
-                    if ev.id not in self._answered:
+                    if self._in_terminated_thread(ev):
+                        log.info("thread terminated; not executing tool=%s tool_use_id=%s", ev.name, ev.id)
+                    elif ev.id not in self._answered:
                         # Shielded execute so consumer-side cancellation can't
                         # interrupt an in-flight tool. The result will still be
                         # posted and the DispatchedToolCall enqueued before the
@@ -874,9 +941,9 @@ class SessionToolRunner:
                 finally:
                     if confirmation == "allow":
                         # The user-approved call is fully disposed of (executed,
-                        # or moot because it was answered elsewhere); drop the
-                        # idle-clock hold `_apply_verdict` kept on it.
-                        self._idle_clock.release()
+                        # or moot because it was answered elsewhere or its thread
+                        # terminated); drop the idle-clock hold `_apply_verdict` kept on it.
+                        self._release_hold(ev)
         finally:
             # Closing the results stream signals the iterator that no more
             # results will arrive. Wrapped in a shield because we're often in a
@@ -942,7 +1009,11 @@ class SessionToolRunner:
                 run.result = result_event
             tool_result = result_event
             is_error = result_event.get("is_error") is True
-            sent = await self._send_result(result_event, ev.id, conversation_id)
+            if self._in_terminated_thread(ev):
+                log.info("thread terminated; not posting the result tool=%s tool_use_id=%s", ev.name, ev.id)
+                sent = False
+            else:
+                sent = await self._send_result(result_event, ev.id, conversation_id)
         await self._surface_call(
             DispatchedToolCall(
                 event=ev,

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 import re
-from pathlib import Path
+import ntpath
+from types import SimpleNamespace
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -239,6 +241,42 @@ def test_elsewhere_a_device_named_file_is_an_ordinary_file(tmp_path: Path, monke
 
     monkeypatch.setattr(_security, "ON_WINDOWS", True)
     assert policy.is_path_visible(os.path.join(root, "nul.bin")) is False
+
+
+@pytest.fixture
+def windows_path_rules(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Runs `_security` on `ntpath` and `PureWindowsPath`. Off Windows, `ntpath.realpath` only normalises the text."""
+    windows_os = SimpleNamespace(path=ntpath, sep=ntpath.sep, fspath=os.fspath, PathLike=os.PathLike)
+    monkeypatch.setattr(_security, "os", windows_os)
+    monkeypatch.setattr(_security, "Path", PureWindowsPath)
+    monkeypatch.setattr(_security, "PurePath", PureWindowsPath)
+    monkeypatch.setattr(_security, "ON_WINDOWS", True)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="on Windows `ntpath.realpath` needs the root to exist")
+@pytest.mark.usefixtures("windows_path_rules")
+@pytest.mark.parametrize("strict_roots", [True, False])
+@pytest.mark.parametrize(
+    ("root", "candidate"),
+    [
+        ("C:\\up\\k", "C:\\up\\\u212a\\f.txt"),
+        ("C:\\up\\i\u0307", "C:\\up\\\u0130\\f.txt"),
+    ],
+)
+def test_a_look_alike_sibling_of_an_upload_root_is_refused_under_windows_path_rules(
+    root: str, candidate: str, strict_roots: bool
+) -> None:
+    with pytest.raises(ToolError) as info:
+        beta_check_upload_path(candidate, [root], strict_roots=strict_roots)
+
+    assert info.value.content == UPLOAD_OUTSIDE_ROOTS
+
+
+@pytest.mark.skipif(os.name == "nt", reason="on Windows `ntpath.realpath` needs the root to exist")
+@pytest.mark.usefixtures("windows_path_rules")
+@pytest.mark.parametrize("candidate", ["C:\\up\\k", "C:\\up\\k\\sub\\f.txt"])
+def test_a_path_under_an_upload_root_is_granted_under_windows_path_rules(candidate: str) -> None:
+    assert beta_check_upload_path(candidate, ["C:\\up\\k"]) == candidate
 
 
 def test_upload_root_that_does_not_exist_grants_nothing(tmp_path: Path) -> None:

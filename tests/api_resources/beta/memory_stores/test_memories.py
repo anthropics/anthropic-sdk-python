@@ -37,7 +37,7 @@ class TestMemories:
             content="content",
             path="/P",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -97,7 +97,7 @@ class TestMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -166,7 +166,7 @@ class TestMemories:
                 "type": "content_sha256",
                 "content_sha256": "210b9798eb53baa4e69d31c1071cf03d212b8ad0ca30cf321e0ea82e120aac26",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -231,7 +231,7 @@ class TestMemories:
             page="page",
             path_prefix="path_prefix",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -285,7 +285,7 @@ class TestMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -356,7 +356,7 @@ class TestAsyncMemories:
             content="content",
             path="/P",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -416,7 +416,7 @@ class TestAsyncMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -485,7 +485,7 @@ class TestAsyncMemories:
                 "type": "content_sha256",
                 "content_sha256": "210b9798eb53baa4e69d31c1071cf03d212b8ad0ca30cf321e0ea82e120aac26",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -550,7 +550,7 @@ class TestAsyncMemories:
             page="page",
             path_prefix="path_prefix",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -604,7 +604,7 @@ class TestAsyncMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

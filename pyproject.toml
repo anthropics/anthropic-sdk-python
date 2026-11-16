@@ -137,7 +137,7 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short -n auto -p tests._alias_httpx"
+addopts = "--tb=short -n auto --dist worksteal -p tests._alias_httpx"
 pythonpath = ["."]
 xfail_strict = true
 asyncio_mode = "auto"

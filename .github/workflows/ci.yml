@@ -3,16 +3,9 @@ on:
   push:
     branches:
       - '**'
-      - '!integrated/**'
-      - '!stl-preview-head/**'
-      - '!stl-preview-base/**'
-      - '!generated'
-      - '!codegen/**'
-      - 'codegen/stl/**'
-  pull_request:
-    branches-ignore:
-      - 'stl-preview-head/**'
-      - 'stl-preview-base/**'
+  # No pull_request trigger: pushes to the branches above run this workflow. A pull request from a
+  # fork pushes nothing to this repo, so ci-forks.yml calls this workflow for it.
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
@@ -53,11 +46,11 @@ jobs:
         with:
           version: '0.10.2'
 
-      - name: Install dependencies
-        run: uv sync --all-extras
-
       - name: Run build
         run: uv build --build-constraints build-constraints.txt --require-hashes
+
+      - name: Check the wheel and the sdist
+        run: python3 -I ./scripts/utils/check-dist.py dist/*.whl dist/*.tar.gz
 
   test:
     timeout-minutes: 10
@@ -165,3 +158,32 @@ jobs:
           # we still detect breaking changes when entire files and their tests are removed.
           git checkout "$BASE_SHA" -- ./scripts/detect-breaking-changes 2>/dev/null || true
           ./scripts/detect-breaking-changes "$BASE_SHA"
+
+  # The one check for branch rules to require. `if: always()` runs it even after a job it needs fails,
+  # so that it fails too: if it were skipped, GitHub would count it as passing.
+  ci:
+    timeout-minutes: 5
+    name: ci
+    needs: [lint, build, test]
+    if: always()
+    runs-on: ${{ github.event.repository.private && 'ubuntu-latest-16-core' || 'ubuntu-latest' }}
+    permissions: {}
+    steps:
+      - name: Check that lint, build and test passed
+        env:
+          RESULTS: lint=${{ needs.lint.result }} build=${{ needs.build.result }} test=${{ needs.test.result }}
+        run: |
+          status=0
+          passed=0
+          for result in $RESULTS; do
+            case "$result" in
+              *=success) echo "$result"; passed=1 ;;
+              *=skipped) echo "$result" ;;
+              *) echo "::error::The ${result%%=*} job's result was '${result#*=}', so this check fails. Open that job to see why."; status=1 ;;
+            esac
+          done
+          if [ "$status" = 0 ] && [ "$passed" = 0 ]; then
+            echo "::error::Every job this check needs was skipped, so nothing was tested and this check fails."
+            status=1
+          fi
+          exit "$status"

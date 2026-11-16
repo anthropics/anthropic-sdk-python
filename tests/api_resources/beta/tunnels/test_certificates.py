@@ -30,7 +30,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -86,7 +86,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -149,7 +149,7 @@ class TestCertificates:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -202,7 +202,7 @@ class TestCertificates:
         certificate = client.beta.tunnels.certificates.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -270,7 +270,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.create(
             tunnel_id="tunnel_id",
             ca_certificate_pem="ca_certificate_pem",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -326,7 +326,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.retrieve(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -389,7 +389,7 @@ class TestAsyncCertificates:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -442,7 +442,7 @@ class TestAsyncCertificates:
         certificate = await async_client.beta.tunnels.certificates.archive(
             certificate_id="certificate_id",
             tunnel_id="tunnel_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

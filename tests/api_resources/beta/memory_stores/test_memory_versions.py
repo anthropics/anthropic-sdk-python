@@ -34,7 +34,7 @@ class TestMemoryVersions:
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -104,7 +104,7 @@ class TestMemoryVersions:
             service_account_id="service_account_id",
             session_id="session_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -157,7 +157,7 @@ class TestMemoryVersions:
         memory_version = client.beta.memory_stores.memory_versions.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -226,7 +226,7 @@ class TestAsyncMemoryVersions:
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -296,7 +296,7 @@ class TestAsyncMemoryVersions:
             service_account_id="service_account_id",
             session_id="session_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -349,7 +349,7 @@ class TestAsyncMemoryVersions:
         memory_version = await async_client.beta.memory_stores.memory_versions.redact(
             memory_version_id="memory_version_id",
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

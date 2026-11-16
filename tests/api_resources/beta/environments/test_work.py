@@ -34,7 +34,7 @@ class TestWork:
         work = client.beta.environments.work.retrieve(
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -98,7 +98,7 @@ class TestWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -164,7 +164,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSelfHostedWork], work, path=["response"])
@@ -216,7 +216,7 @@ class TestWork:
         work = client.beta.environments.work.ack(
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
@@ -279,7 +279,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             desired_ttl_seconds=0,
             expected_last_heartbeat="expected_last_heartbeat",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSelfHostedWorkHeartbeatResponse, work, path=["response"])
@@ -340,7 +340,7 @@ class TestWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             block_ms=1,
             reclaim_older_than_ms=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             anthropic_worker_id="Anthropic-Worker-ID",
             extra_query={"beta": "true"},
         )
@@ -391,7 +391,7 @@ class TestWork:
     def test_method_stats_with_all_params(self, client: Anthropic) -> None:
         work = client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -445,7 +445,7 @@ class TestWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -513,7 +513,7 @@ class TestAsyncWork:
         work = await async_client.beta.environments.work.retrieve(
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -577,7 +577,7 @@ class TestAsyncWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             metadata={"foo": "string"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -643,7 +643,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSelfHostedWork], work, path=["response"])
@@ -695,7 +695,7 @@ class TestAsyncWork:
         work = await async_client.beta.environments.work.ack(
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSelfHostedWork, work, path=["response"])
@@ -758,7 +758,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             desired_ttl_seconds=0,
             expected_last_heartbeat="expected_last_heartbeat",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSelfHostedWorkHeartbeatResponse, work, path=["response"])
@@ -819,7 +819,7 @@ class TestAsyncWork:
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             block_ms=1,
             reclaim_older_than_ms=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             anthropic_worker_id="Anthropic-Worker-ID",
             extra_query={"beta": "true"},
         )
@@ -870,7 +870,7 @@ class TestAsyncWork:
     async def test_method_stats_with_all_params(self, async_client: AsyncAnthropic) -> None:
         work = await async_client.beta.environments.work.stats(
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -924,7 +924,7 @@ class TestAsyncWork:
             work_id="work_id",
             environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             force=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

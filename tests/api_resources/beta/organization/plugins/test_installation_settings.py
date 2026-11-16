@@ -35,7 +35,7 @@ class TestInstallationSettings:
             organization_id="organization_id",
             page="page",
             target_type="organization",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
@@ -87,7 +87,7 @@ class TestInstallationSettings:
         installation_setting = client.beta.organization.plugins.installation_settings.remove(
             target="target",
             plugin_id="plugin_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
@@ -150,7 +150,7 @@ class TestInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])
@@ -223,7 +223,7 @@ class TestAsyncInstallationSettings:
             organization_id="organization_id",
             page="page",
             target_type="organization",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginInstallationSetting], installation_setting, path=["response"])
@@ -275,7 +275,7 @@ class TestAsyncInstallationSettings:
         installation_setting = await async_client.beta.organization.plugins.installation_settings.remove(
             target="target",
             plugin_id="plugin_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedPluginInstallationSetting, installation_setting, path=["response"])
@@ -338,7 +338,7 @@ class TestAsyncInstallationSettings:
             target="target",
             plugin_id="plugin_id",
             installation_preference="required",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginInstallationSetting, installation_setting, path=["response"])

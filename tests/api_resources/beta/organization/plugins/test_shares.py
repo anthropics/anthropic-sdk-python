@@ -32,7 +32,7 @@ class TestShares:
             organization_id="organization_id",
             page="page",
             target_type="organization",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginShare], share, path=["response"])
@@ -92,7 +92,7 @@ class TestAsyncShares:
             organization_id="organization_id",
             page="page",
             target_type="organization",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginShare], share, path=["response"])

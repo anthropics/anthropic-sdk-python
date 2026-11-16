@@ -41,7 +41,7 @@ class TestVersions:
             plugin_id="plugin_id",
             files=[b"Example data"],
             release_notes="release_notes",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
@@ -97,7 +97,7 @@ class TestVersions:
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
@@ -159,7 +159,7 @@ class TestVersions:
             limit=1,
             organization_id="organization_id",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaPluginVersion], version, path=["response"])
@@ -223,7 +223,7 @@ class TestVersions:
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert version.is_closed
@@ -305,7 +305,7 @@ class TestAsyncVersions:
             plugin_id="plugin_id",
             files=[b"Example data"],
             release_notes="release_notes",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
@@ -361,7 +361,7 @@ class TestAsyncVersions:
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaPluginVersion, version, path=["response"])
@@ -423,7 +423,7 @@ class TestAsyncVersions:
             limit=1,
             organization_id="organization_id",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaPluginVersion], version, path=["response"])
@@ -487,7 +487,7 @@ class TestAsyncVersions:
             version="version",
             plugin_id="plugin_id",
             organization_id="organization_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert version.is_closed

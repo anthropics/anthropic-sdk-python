@@ -40,7 +40,7 @@ class TestEvents:
             order="asc",
             page="page",
             types=["user.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -113,7 +113,7 @@ class TestEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -198,7 +198,7 @@ class TestEvents:
         event_stream = client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -262,7 +262,7 @@ class TestAsyncEvents:
             order="asc",
             page="page",
             types=["user.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -335,7 +335,7 @@ class TestAsyncEvents:
                     "type": "user.message",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -420,7 +420,7 @@ class TestAsyncEvents:
         event_stream = await async_client.beta.sessions.events.stream(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

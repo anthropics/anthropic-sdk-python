@@ -36,7 +36,7 @@ class TestResources:
         resource = client.beta.sessions.resources.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -100,7 +100,7 @@ class TestResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -166,7 +166,7 @@ class TestResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -219,7 +219,7 @@ class TestResources:
         resource = client.beta.sessions.resources.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -284,7 +284,7 @@ class TestResources:
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
             mount_path="/uploads/receipt.pdf",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -349,7 +349,7 @@ class TestAsyncResources:
         resource = await async_client.beta.sessions.resources.retrieve(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -413,7 +413,7 @@ class TestAsyncResources:
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             authorization_token="ghp_exampletoken",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -479,7 +479,7 @@ class TestAsyncResources:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -532,7 +532,7 @@ class TestAsyncResources:
         resource = await async_client.beta.sessions.resources.delete(
             resource_id="sesrsc_011CZkZBJq5dWxk9fVLNcPht",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -597,7 +597,7 @@ class TestAsyncResources:
             file_id="file_011CNha8iCJcU1wXNR6q4V8w",
             type="file",
             mount_path="/uploads/receipt.pdf",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

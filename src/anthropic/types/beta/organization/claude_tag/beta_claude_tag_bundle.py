@@ -9,7 +9,7 @@ __all__ = ["BetaClaudeTagBundle"]
 
 class BetaClaudeTagBundle(BaseModel):
     """
-    A named set of access that Claude can use in a Slack channel or a Slack workspace: connectors, repositories and credentials. Created and edited in claude.ai.
+    A named set of access that Claude can use in a Slack channel or a Slack workspace: connectors, repositories and credentials. Created and edited in claude.ai; Update Bundle also changes its instructions.
     """
 
     id: str
@@ -23,6 +23,12 @@ class BetaClaudeTagBundle(BaseModel):
 
     display_name: str
     """The Bundle's name. Always set. Read-only."""
+
+    instructions: Optional[str] = None
+    """
+    Instructions for Claude, added to the instructions of every session that can use
+    the Bundle. Null when it has none.
+    """
 
     type: Literal["bundle"]
 

@@ -74,7 +74,7 @@ class TestSpendLimits:
             page="page",
             scope_type=["organization"],
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
@@ -165,7 +165,7 @@ class TestSpendLimits:
                 "user_id": "user_01WxYzAbCdEfGhJkMnPqRsTu",
             },
             period="monthly",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])
@@ -265,7 +265,7 @@ class TestAsyncSpendLimits:
             page="page",
             scope_type=["organization"],
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaSpendLimit], spend_limit, path=["response"])
@@ -356,7 +356,7 @@ class TestAsyncSpendLimits:
                 "user_id": "user_01WxYzAbCdEfGhJkMnPqRsTu",
             },
             period="monthly",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaSpendLimit, spend_limit, path=["response"])

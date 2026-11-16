@@ -225,7 +225,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -319,7 +320,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
@@ -424,7 +426,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -663,7 +666,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -757,7 +761,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
@@ -862,7 +867,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.

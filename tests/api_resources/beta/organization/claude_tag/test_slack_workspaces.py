@@ -31,7 +31,7 @@ class TestSlackWorkspaces:
         slack_workspace = client.beta.organization.claude_tag.slack_workspaces.retrieve(
             id="slws_01Hq8TzW5mKc2YbX7vNd4RfJ",
             include_inherited=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackWorkspace, slack_workspace, path=["response"])
@@ -90,7 +90,7 @@ class TestSlackWorkspaces:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackWorkspace, slack_workspace, path=["response"])
@@ -145,7 +145,7 @@ class TestSlackWorkspaces:
             limit=0,
             page="page",
             slack_workspace_id="slack_workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaClaudeTagSlackWorkspace], slack_workspace, path=["response"])
@@ -193,7 +193,7 @@ class TestAsyncSlackWorkspaces:
         slack_workspace = await async_client.beta.organization.claude_tag.slack_workspaces.retrieve(
             id="slws_01Hq8TzW5mKc2YbX7vNd4RfJ",
             include_inherited=True,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackWorkspace, slack_workspace, path=["response"])
@@ -252,7 +252,7 @@ class TestAsyncSlackWorkspaces:
                 "model": "x",
                 "reply_mode": {"type": "automatic"},
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagSlackWorkspace, slack_workspace, path=["response"])
@@ -307,7 +307,7 @@ class TestAsyncSlackWorkspaces:
             limit=0,
             page="page",
             slack_workspace_id="slack_workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaClaudeTagSlackWorkspace], slack_workspace, path=["response"])

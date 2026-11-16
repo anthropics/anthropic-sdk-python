@@ -140,12 +140,14 @@ class _FakeWorkResource:
 
 
 class _FakeSessions:
-    def __init__(self) -> None:
+    def __init__(self, *, status: str = "running", resources: list[Any] | None = None) -> None:
+        self._status = status
+        self._resources = resources or []
         self.retrieve_calls: list[str] = []
 
     async def retrieve(self, session_id: str, *, betas: Any = None) -> Any:  # noqa: ARG002
         self.retrieve_calls.append(session_id)
-        return SimpleNamespace(agent=SimpleNamespace(skills=[]), resources=[])
+        return SimpleNamespace(status=self._status, agent=SimpleNamespace(skills=[]), resources=self._resources)
 
 
 def _fake_client(work: _FakeWorkResource, sessions: _FakeSessions) -> Any:
@@ -655,6 +657,32 @@ async def test_handle_item_services_a_single_claimed_item(monkeypatch: pytest.Mo
     # `handle_item` doesn't poll, so only the heartbeat/force-stop scoped
     # client is built — tagged `environments-worker`.
     assert scoped_calls == [{"auth_token": "env_key", "helper": "environments-worker"}]
+
+
+@pytest.mark.parametrize("resources", [[], [SimpleNamespace(type="memory_store")]], ids=["no_memory", "memory_store"])
+@pytest.mark.asyncio()
+async def test_handle_item_stops_the_item_of_a_terminated_session(
+    monkeypatch: pytest.MonkeyPatch, resources: list[Any]
+) -> None:
+    """A terminated session accepts no tool result, so the worker starts no tool
+    runner for it and force-stops the work item. It does so even when the session
+    has a memory store and the work item has no sessions token, which makes the
+    worker fail a live session's item."""
+    work = _FakeWorkResource(heartbeat_state="running")
+    sessions = _FakeSessions(status="terminated", resources=resources)
+    _install_scoped_client(monkeypatch, work, sessions)
+    record: dict[str, Any] = {}
+    _install_run_session_tools(monkeypatch, record)
+    monkeypatch.delenv("ANTHROPIC_WORK_SECRET", raising=False)
+
+    worker = EnvironmentWorker(_fake_client(work, sessions), workdir=".")
+    await asyncio.wait_for(
+        worker.handle_item(work_id="w_1", environment_id="e_1", session_id="s_1", environment_key="env_key"),
+        timeout=5,
+    )
+
+    assert "run" not in record
+    assert [(call["work_id"], call["force"]) for call in work.stop_calls] == [("w_1", True)]
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")

@@ -269,7 +269,8 @@ class Workspaces(SyncAPIResource):
               the Workspace must then name this user profile; the API rejects a request that
               names none or a different one. Once set, it can't be replaced or removed
               (sending the same ID again changes nothing); only deleting the user profile
-              clears it. The default Workspace can't have a user profile.
+              clears it. It can't be set on a Workspace whose External Key isn't bound to this
+              user profile. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 
@@ -653,7 +654,8 @@ class AsyncWorkspaces(AsyncAPIResource):
               the Workspace must then name this user profile; the API rejects a request that
               names none or a different one. Once set, it can't be replaced or removed
               (sending the same ID again changes nothing); only deleting the user profile
-              clears it. The default Workspace can't have a user profile.
+              clears it. It can't be set on a Workspace whose External Key isn't bound to this
+              user profile. The default Workspace can't have a user profile.
 
           extra_headers: Send extra headers
 

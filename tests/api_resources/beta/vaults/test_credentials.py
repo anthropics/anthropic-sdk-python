@@ -45,7 +45,7 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -113,7 +113,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -190,7 +190,7 @@ class TestCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -253,7 +253,7 @@ class TestCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -306,7 +306,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -368,7 +368,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -430,7 +430,7 @@ class TestCredentials:
         credential = client.beta.vaults.credentials.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -508,7 +508,7 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -576,7 +576,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.retrieve(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -653,7 +653,7 @@ class TestAsyncCredentials:
             },
             display_name="Example credential",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -716,7 +716,7 @@ class TestAsyncCredentials:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -769,7 +769,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.delete(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -831,7 +831,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.archive(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -893,7 +893,7 @@ class TestAsyncCredentials:
         credential = await async_client.beta.vaults.credentials.mcp_oauth_validate(
             credential_id="vcrd_011CZkZEMt8gZan2iYPQfSkw",
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

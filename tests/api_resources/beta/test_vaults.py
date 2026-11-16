@@ -32,7 +32,7 @@ class TestVaults:
         vault = client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -76,7 +76,7 @@ class TestVaults:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -129,7 +129,7 @@ class TestVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -181,7 +181,7 @@ class TestVaults:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -223,7 +223,7 @@ class TestVaults:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -274,7 +274,7 @@ class TestVaults:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         vault = client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -332,7 +332,7 @@ class TestAsyncVaults:
         vault = await async_client.beta.vaults.create(
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -376,7 +376,7 @@ class TestAsyncVaults:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.retrieve(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -429,7 +429,7 @@ class TestAsyncVaults:
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
             display_name="Example vault",
             metadata={"environment": "production"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -481,7 +481,7 @@ class TestAsyncVaults:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -523,7 +523,7 @@ class TestAsyncVaults:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.delete(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -574,7 +574,7 @@ class TestAsyncVaults:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         vault = await async_client.beta.vaults.archive(
             vault_id="vlt_011CZkZDLs7fYzm1hXNPeRjv",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

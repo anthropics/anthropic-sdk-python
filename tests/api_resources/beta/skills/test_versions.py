@@ -41,7 +41,7 @@ class TestVersions:
         version = client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -97,7 +97,7 @@ class TestVersions:
         version = client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -159,7 +159,7 @@ class TestVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -212,7 +212,7 @@ class TestVersions:
         version = client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -285,7 +285,7 @@ class TestVersions:
         version = client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -367,7 +367,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.create(
             skill_id="skill_id",
             files=[b"Example data"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -423,7 +423,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.retrieve(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -485,7 +485,7 @@ class TestAsyncVersions:
             skill_id="skill_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -538,7 +538,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.delete(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -611,7 +611,7 @@ class TestAsyncVersions:
         version = await async_client.beta.skills.versions.download(
             version="version",
             skill_id="skill_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

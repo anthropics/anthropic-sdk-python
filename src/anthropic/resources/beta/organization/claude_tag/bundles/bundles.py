@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 from itertools import chain
 
 import httpx2
@@ -117,6 +117,88 @@ class Bundles(SyncAPIResource):
                 timeout=timeout,
                 qualifiers={"beta": "true"},
                 span_name="anthropic.organization.claude_tag.bundles.retrieve",
+                span_route="/v1/organizations/claude_tag/bundles/{bundle_id}",
+                span_attributes={"anthropic.organization.claude_tag.bundle.id": bundle_id},
+            ),
+            cast_to=BetaClaudeTagBundle,
+        )
+
+    def update(
+        self,
+        bundle_id: str,
+        *,
+        instructions: Optional[str] | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaClaudeTagBundle:
+        """Change a Bundle's instructions.
+
+        The update is partial: a field left out is
+        unchanged, and `instructions` sent as null or as an empty string clears them.
+        The later of two updates wins. Sessions that start after the change use the new
+        instructions; sessions already running keep the ones they started with. Some
+        Bundles are managed in claude.ai, and an update of one returns 400.
+
+        Args:
+          bundle_id: The Bundle's identifier, starting with `capp_`.
+
+          instructions: Instructions for Claude, up to 10,000 bytes (UTF-8), added to the instructions
+              of every session that can use the Bundle. Null or an empty string clears them.
+
+          betas: This endpoint is in beta: requests must send
+              `experimental-claude-tag-2026-10-21` in this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBundleAttachmentNotSupportedError:
+
+          BetaBundleOnCallError:
+
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
+        """
+        if not bundle_id:
+            raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["experimental-claude-tag-2026-10-21"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "experimental-claude-tag-2026-10-21", **(extra_headers or {})}
+        return self._post(
+            path_template("/v1/organizations/claude_tag/bundles/{bundle_id}", bundle_id=bundle_id),
+            body={"instructions": instructions},
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.claude_tag.bundles.update",
                 span_route="/v1/organizations/claude_tag/bundles/{bundle_id}",
                 span_attributes={"anthropic.organization.claude_tag.bundle.id": bundle_id},
             ),
@@ -289,6 +371,88 @@ class AsyncBundles(AsyncAPIResource):
             cast_to=BetaClaudeTagBundle,
         )
 
+    async def update(
+        self,
+        bundle_id: str,
+        *,
+        instructions: Optional[str] | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx2.Timeout | None | NotGiven = not_given,
+    ) -> BetaClaudeTagBundle:
+        """Change a Bundle's instructions.
+
+        The update is partial: a field left out is
+        unchanged, and `instructions` sent as null or as an empty string clears them.
+        The later of two updates wins. Sessions that start after the change use the new
+        instructions; sessions already running keep the ones they started with. Some
+        Bundles are managed in claude.ai, and an update of one returns 400.
+
+        Args:
+          bundle_id: The Bundle's identifier, starting with `capp_`.
+
+          instructions: Instructions for Claude, up to 10,000 bytes (UTF-8), added to the instructions
+              of every session that can use the Bundle. Null or an empty string clears them.
+
+          betas: This endpoint is in beta: requests must send
+              `experimental-claude-tag-2026-10-21` in this header.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaBundleAttachmentNotSupportedError:
+
+          BetaBundleOnCallError:
+
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
+        """
+        if not bundle_id:
+            raise ValueError(f"Expected a non-empty value for `bundle_id` but received {bundle_id!r}")
+        extra_headers = {
+            **strip_not_given(
+                {
+                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["experimental-claude-tag-2026-10-21"]))
+                    if is_given(betas)
+                    else not_given
+                }
+            ),
+            **(extra_headers or {}),
+        }
+        extra_headers = {"anthropic-beta": "experimental-claude-tag-2026-10-21", **(extra_headers or {})}
+        return await self._post(
+            path_template("/v1/organizations/claude_tag/bundles/{bundle_id}", bundle_id=bundle_id),
+            body={"instructions": instructions},
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                qualifiers={"beta": "true"},
+                span_name="anthropic.organization.claude_tag.bundles.update",
+                span_route="/v1/organizations/claude_tag/bundles/{bundle_id}",
+                span_attributes={"anthropic.organization.claude_tag.bundle.id": bundle_id},
+            ),
+            cast_to=BetaClaudeTagBundle,
+        )
+
     def list(
         self,
         *,
@@ -370,6 +534,9 @@ class BundlesWithRawResponse:
         self.retrieve = to_raw_response_wrapper(
             bundles.retrieve,
         )
+        self.update = to_raw_response_wrapper(
+            bundles.update,
+        )
         self.list = to_raw_response_wrapper(
             bundles.list,
         )
@@ -385,6 +552,9 @@ class AsyncBundlesWithRawResponse:
 
         self.retrieve = async_to_raw_response_wrapper(
             bundles.retrieve,
+        )
+        self.update = async_to_raw_response_wrapper(
+            bundles.update,
         )
         self.list = async_to_raw_response_wrapper(
             bundles.list,
@@ -402,6 +572,9 @@ class BundlesWithStreamingResponse:
         self.retrieve = to_streamed_response_wrapper(
             bundles.retrieve,
         )
+        self.update = to_streamed_response_wrapper(
+            bundles.update,
+        )
         self.list = to_streamed_response_wrapper(
             bundles.list,
         )
@@ -417,6 +590,9 @@ class AsyncBundlesWithStreamingResponse:
 
         self.retrieve = async_to_streamed_response_wrapper(
             bundles.retrieve,
+        )
+        self.update = async_to_streamed_response_wrapper(
+            bundles.update,
         )
         self.list = async_to_streamed_response_wrapper(
             bundles.list,

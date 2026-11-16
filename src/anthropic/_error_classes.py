@@ -26,6 +26,7 @@ from ._exceptions import (
 from .types.file_expired_error import FileExpiredError
 from .types.thread_not_found_error import ThreadNotFoundError
 from .types.tool_name_conflict_error import ToolNameConflictError
+from .types.rbac_role_not_found_error import RBACRoleNotFoundError
 from .types.file_not_downloadable_error import FileNotDownloadableError
 from .types.compaction_unavailable_error import CompactionUnavailableError
 from .types.storage_quota_exceeded_error import StorageQuotaExceededError
@@ -66,10 +67,12 @@ from .types.shared.claude_code_version_too_old_error import ClaudeCodeVersionToo
 from .types.beta.organization.beta_scan_pending_error import BetaScanPendingError
 from .types.compaction_too_many_tool_references_error import CompactionTooManyToolReferencesError
 from .types.shared.enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError
+from .types.shared.parent_organization_required_error import ParentOrganizationRequiredError
 from .types.beta.beta_invalid_config_type_change_error import BetaInvalidConfigTypeChangeError
 from .types.shared.request_body_encoding_invalid_error import RequestBodyEncodingInvalidError
 from .types.beta.beta_environment_create_disabled_error import BetaEnvironmentCreateDisabledError
 from .types.beta.beta_environment_update_disabled_error import BetaEnvironmentUpdateDisabledError
+from .types.beta.organization.beta_bundle_on_call_error import BetaBundleOnCallError
 from .types.organization.email_domain_not_allowed_error import EmailDomainNotAllowedError
 from .types.beta_organization_not_enrolled_in_beta_error import BetaOrganizationNotEnrolledInBetaError
 from .types.organization.cannot_remove_last_member_error import CannotRemoveLastMemberError
@@ -96,6 +99,7 @@ from .types.beta.environments.beta_heartbeat_precondition_failed_error import Be
 from .types.beta.organization.beta_cannot_sign_out_primary_owner_error import BetaCannotSignOutPrimaryOwnerError
 from .types.beta.organization.beta_claude_tag_writes_not_enabled_error import BetaClaudeTagWritesNotEnabledError
 from .types.beta.organization.beta_cannot_sign_out_managed_member_error import BetaCannotSignOutManagedMemberError
+from .types.beta.organization.beta_bundle_attachment_not_supported_error import BetaBundleAttachmentNotSupportedError
 from .types.beta.organization.beta_cannot_sign_out_membership_admin_error import BetaCannotSignOutMembershipAdminError
 from .types.beta.organization.beta_cannot_sign_out_privileged_member_error import BetaCannotSignOutPrivilegedMemberError
 from .types.organization.cannot_invite_emails_with_unverified_domains_error import (
@@ -139,6 +143,8 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (529, None): OverloadedError,
     (400, "already_member"): AlreadyMemberError,
     (400, "available_tools_limit_exceeded"): AvailableToolsLimitExceededError,
+    (400, "bundle_attachment_not_supported"): BetaBundleAttachmentNotSupportedError,
+    (400, "bundle_on_call"): BetaBundleOnCallError,
     (400, "cannot_invite_emails_with_unverified_domains"): CannotInviteEmailsWithUnverifiedDomainsError,
     (400, "cannot_remove_last_member"): CannotRemoveLastMemberError,
     (400, "cannot_sign_out_primary_owner"): BetaCannotSignOutPrimaryOwnerError,
@@ -170,6 +176,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "organization_not_enrolled_in_beta"): BetaOrganizationNotEnrolledInBetaError,
     (400, "organization_on_hold"): OrganizationOnHoldError,
     (400, "organization_type_not_supported"): OrganizationTypeNotSupportedError,
+    (400, "parent_organization_required"): ParentOrganizationRequiredError,
     (400, "rbac_group_grants_owner_access"): RBACGroupGrantsOwnerAccessError,
     (400, "rbac_group_owner_access_unconfirmed"): RBACGroupOwnerAccessUnconfirmedError,
     (400, "request_body_encoding_invalid"): RequestBodyEncodingInvalidError,
@@ -202,6 +209,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "spend_limits_admin_api_writes_not_enabled"): BetaSpendLimitsAdminAPIWritesNotEnabledError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,
+    (404, "rbac_role_not_found"): RBACRoleNotFoundError,
     (404, "slack_channel_set_up_environment_not_found"): BetaSlackChannelSetUpEnvironmentNotFoundError,
     (404, "thread_not_found"): ThreadNotFoundError,
     (409, "concurrent_membership_change"): ConcurrentMembershipChangeError,
