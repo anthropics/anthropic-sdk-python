@@ -180,6 +180,8 @@ class Plugins(SyncAPIResource):
 
           BetaUnsupportedCharsetError:
 
+          SandboxEgressRestrictedError:
+
           BetaPluginNameTakenError:
 
           BetaSkillNameTakenError:
@@ -381,6 +383,8 @@ class Plugins(SyncAPIResource):
           CMEKKeyNetworkBlockedError:
 
           BetaScanFailedError:
+
+          SandboxEgressRestrictedError:
 
           BetaScanPendingError:
 
@@ -591,6 +595,8 @@ class Plugins(SyncAPIResource):
 
         Raises:
           CMEKKeyDisabledError:
+
+          SandboxEgressRestrictedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -739,6 +745,8 @@ class AsyncPlugins(AsyncAPIResource):
           CMEKKeyNetworkBlockedError:
 
           BetaUnsupportedCharsetError:
+
+          SandboxEgressRestrictedError:
 
           BetaPluginNameTakenError:
 
@@ -941,6 +949,8 @@ class AsyncPlugins(AsyncAPIResource):
           CMEKKeyNetworkBlockedError:
 
           BetaScanFailedError:
+
+          SandboxEgressRestrictedError:
 
           BetaScanPendingError:
 
@@ -1151,6 +1161,8 @@ class AsyncPlugins(AsyncAPIResource):
 
         Raises:
           CMEKKeyDisabledError:
+
+          SandboxEgressRestrictedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

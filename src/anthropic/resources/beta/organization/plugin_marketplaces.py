@@ -172,6 +172,9 @@ class PluginMarketplaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not marketplace_id:
             raise ValueError(f"Expected a non-empty value for `marketplace_id` but received {marketplace_id!r}")
@@ -371,6 +374,8 @@ class PluginMarketplaces(SyncAPIResource):
 
         Raises:
           BetaUnsupportedCharsetError:
+
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -477,6 +482,9 @@ class PluginMarketplaces(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -654,6 +662,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not marketplace_id:
             raise ValueError(f"Expected a non-empty value for `marketplace_id` but received {marketplace_id!r}")
@@ -853,6 +864,8 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
 
         Raises:
           BetaUnsupportedCharsetError:
+
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -959,6 +972,9 @@ class AsyncPluginMarketplaces(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         extra_headers = {
             **strip_not_given(
