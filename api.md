@@ -18,6 +18,8 @@ from anthropic.types import (
     ErrorType,
     GatewayTimeoutErrorObject,
     InvalidRequestErrorObject,
+    LinkedOrganizationBillingUnavailableErrorDetails,
+    LinkedOrganizationSpendLimitReachedErrorDetails,
     NotFoundErrorObject,
     OrganizationOnHoldErrorDetails,
     OrganizationTypeNotSupportedErrorDetails,
@@ -47,6 +49,8 @@ from anthropic.types import (
     ParentOrganizationRequiredError,
     RequestBodyEncodingInvalidError,
     RequestBodyEncodingUnsupportedError,
+    LinkedOrganizationBillingUnavailableError,
+    LinkedOrganizationSpendLimitReachedError,
     SandboxEgressRestrictedError,
     RequestBodyTooLargeAfterDecodingError,
     EnforcedSpendLimitReachedError,
@@ -671,10 +675,14 @@ from anthropic.types import (
     UserProfileExternalUserEntityType,
     UserProfileListOrder,
     UserProfileListOrderBy,
+    UserProfileNotBillableErrorDetails,
     UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
+    UserProfileRequiredErrorDetails,
     UserProfileNotFoundError,
+    UserProfileRequiredError,
+    UserProfileNotBillableError,
 )
 ```
 

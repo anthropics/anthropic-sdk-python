@@ -51,10 +51,14 @@ from .shared import (
     RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
     ParentOrganizationRequiredErrorDetails as ParentOrganizationRequiredErrorDetails,
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
+    LinkedOrganizationSpendLimitReachedError as LinkedOrganizationSpendLimitReachedError,
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
     ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    LinkedOrganizationBillingUnavailableError as LinkedOrganizationBillingUnavailableError,
     RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
+    LinkedOrganizationSpendLimitReachedErrorDetails as LinkedOrganizationSpendLimitReachedErrorDetails,
+    LinkedOrganizationBillingUnavailableErrorDetails as LinkedOrganizationBillingUnavailableErrorDetails,
 )
 from .message import Message as Message
 from .container import Container as Container
@@ -305,6 +309,7 @@ from .message_count_tokens_params import MessageCountTokensParams as MessageCoun
 from .server_tool_caller_20260120 import ServerToolCaller20260120 as ServerToolCaller20260120
 from .server_tool_use_block_param import ServerToolUseBlockParam as ServerToolUseBlockParam
 from .user_profile_program_status import UserProfileProgramStatus as UserProfileProgramStatus
+from .user_profile_required_error import UserProfileRequiredError as UserProfileRequiredError
 from .web_fetch_tool_result_block import WebFetchToolResultBlock as WebFetchToolResultBlock
 from .web_fetch_url_sources_param import WebFetchURLSourcesParam as WebFetchURLSourcesParam
 from .beta_overloaded_error_object import BetaOverloadedErrorObject as BetaOverloadedErrorObject
@@ -390,6 +395,7 @@ from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as Tool
 from .user_profile_cyber_requirements import UserProfileCyberRequirements as UserProfileCyberRequirements
 from .user_profile_enforcement_action import UserProfileEnforcementAction as UserProfileEnforcementAction
 from .user_profile_enforcement_status import UserProfileEnforcementStatus as UserProfileEnforcementStatus
+from .user_profile_not_billable_error import UserProfileNotBillableError as UserProfileNotBillableError
 from .web_fetch_url_source_none_param import WebFetchURLSourceNoneParam as WebFetchURLSourceNoneParam
 from .web_fetch_url_source_only_param import WebFetchURLSourceOnlyParam as WebFetchURLSourceOnlyParam
 from .bash_code_execution_output_block import BashCodeExecutionOutputBlock as BashCodeExecutionOutputBlock
@@ -471,6 +477,7 @@ from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
 from .user_profile_enforcement_action_ban import UserProfileEnforcementActionBan as UserProfileEnforcementActionBan
+from .user_profile_required_error_details import UserProfileRequiredErrorDetails as UserProfileRequiredErrorDetails
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
 from .web_search_tool_result_error_object import WebSearchToolResultErrorObject as WebSearchToolResultErrorObject
 from .available_tools_limit_exceeded_error import AvailableToolsLimitExceededError as AvailableToolsLimitExceededError
@@ -590,6 +597,9 @@ from .thread_continue_in_flight_error_details import (
 )
 from .tool_reference_unresolved_error_details import (
     ToolReferenceUnresolvedErrorDetails as ToolReferenceUnresolvedErrorDetails,
+)
+from .user_profile_not_billable_error_details import (
+    UserProfileNotBillableErrorDetails as UserProfileNotBillableErrorDetails,
 )
 from .web_fetch_tool_result_error_block_param import (
     WebFetchToolResultErrorBlockParam as WebFetchToolResultErrorBlockParam,

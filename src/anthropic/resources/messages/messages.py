@@ -458,6 +458,14 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
@@ -814,6 +822,14 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
@@ -1169,6 +1185,14 @@ class Messages(SyncAPIResource):
           ToolNameConflictError:
 
           ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
 
           ThreadNotFoundError:
 
@@ -2222,6 +2246,14 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
@@ -2578,6 +2610,14 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
@@ -2933,6 +2973,14 @@ class AsyncMessages(AsyncAPIResource):
           ToolNameConflictError:
 
           ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileNotBillableError:
 
           ThreadNotFoundError:
 

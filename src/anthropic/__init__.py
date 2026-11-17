@@ -39,6 +39,7 @@ from ._exceptions import (
     InternalServerError,
     RequestTimeoutError,
     ContentTooLargeError,
+    PaymentRequiredError,
     RequestTooLargeError,
     DeadlineExceededError,
     PermissionDeniedError,
@@ -78,6 +79,8 @@ from .types.shared import (
     ClaudeCodeKeyCreatorNotMemberError,
     RequestBodyEncodingUnsupportedError,
     RequestBodyTooLargeAfterDecodingError,
+    LinkedOrganizationSpendLimitReachedError,
+    LinkedOrganizationBillingUnavailableError,
 )
 from .lib.middleware import BetaFallbackState, BetaRefusalFallbackMiddleware
 from .lib._parse._transform import transform_schema
@@ -101,6 +104,7 @@ __all__ = [
     "APIWebhookValidationError",
     "BadRequestError",
     "AuthenticationError",
+    "PaymentRequiredError",
     "PermissionDeniedError",
     "NotFoundError",
     "RequestTimeoutError",
@@ -126,6 +130,8 @@ __all__ = [
     "ParentOrganizationRequiredError",
     "RequestBodyEncodingInvalidError",
     "RequestBodyEncodingUnsupportedError",
+    "LinkedOrganizationBillingUnavailableError",
+    "LinkedOrganizationSpendLimitReachedError",
     "SandboxEgressRestrictedError",
     "RequestBodyTooLargeAfterDecodingError",
     "EnforcedSpendLimitReachedError",

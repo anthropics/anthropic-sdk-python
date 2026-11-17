@@ -67,6 +67,12 @@ from .request_body_encoding_invalid_error_details import (
 from .request_body_too_large_after_decoding_error import (
     RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
 )
+from .linked_organization_billing_unavailable_error import (
+    LinkedOrganizationBillingUnavailableError as LinkedOrganizationBillingUnavailableError,
+)
+from .linked_organization_spend_limit_reached_error import (
+    LinkedOrganizationSpendLimitReachedError as LinkedOrganizationSpendLimitReachedError,
+)
 from .organization_type_not_supported_error_details import (
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
 )
@@ -78,4 +84,10 @@ from .claude_code_key_creator_not_member_error_details import (
 )
 from .request_body_too_large_after_decoding_error_details import (
     RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
+)
+from .linked_organization_billing_unavailable_error_details import (
+    LinkedOrganizationBillingUnavailableErrorDetails as LinkedOrganizationBillingUnavailableErrorDetails,
+)
+from .linked_organization_spend_limit_reached_error_details import (
+    LinkedOrganizationSpendLimitReachedErrorDetails as LinkedOrganizationSpendLimitReachedErrorDetails,
 )
