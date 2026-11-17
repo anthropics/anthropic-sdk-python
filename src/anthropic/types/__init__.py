@@ -652,6 +652,9 @@ from .response_computer_hold_key_tool_use_block import (
 from .thread_fingerprint_mismatch_error_details import (
     ThreadFingerprintMismatchErrorDetails as ThreadFingerprintMismatchErrorDetails,
 )
+from .user_profile_billing_not_authorized_error import (
+    UserProfileBillingNotAuthorizedError as UserProfileBillingNotAuthorizedError,
+)
 from .user_profile_enforcement_action_next_step import (
     UserProfileEnforcementActionNextStep as UserProfileEnforcementActionNextStep,
 )
@@ -822,6 +825,9 @@ from .compaction_too_many_tool_references_error_details import (
 )
 from .text_editor_code_execution_tool_result_error_code import (
     TextEditorCodeExecutionToolResultErrorCode as TextEditorCodeExecutionToolResultErrorCode,
+)
+from .user_profile_billing_not_authorized_error_details import (
+    UserProfileBillingNotAuthorizedErrorDetails as UserProfileBillingNotAuthorizedErrorDetails,
 )
 from .text_editor_code_execution_tool_result_block_param import (
     TextEditorCodeExecutionToolResultBlockParam as TextEditorCodeExecutionToolResultBlockParam,

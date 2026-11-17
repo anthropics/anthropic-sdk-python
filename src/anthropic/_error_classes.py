@@ -71,6 +71,7 @@ from .types.beta.organization.beta_scan_pending_error import BetaScanPendingErro
 from .types.compaction_too_many_tool_references_error import CompactionTooManyToolReferencesError
 from .types.shared.enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError
 from .types.shared.parent_organization_required_error import ParentOrganizationRequiredError
+from .types.user_profile_billing_not_authorized_error import UserProfileBillingNotAuthorizedError
 from .types.beta.beta_invalid_config_type_change_error import BetaInvalidConfigTypeChangeError
 from .types.shared.request_body_encoding_invalid_error import RequestBodyEncodingInvalidError
 from .types.beta.beta_environment_create_disabled_error import BetaEnvironmentCreateDisabledError
@@ -216,6 +217,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "organization_level_scoped_api_key_required"): BetaOrganizationLevelScopedAPIKeyRequiredError,
     (403, "sandbox_egress_restricted"): SandboxEgressRestrictedError,
     (403, "spend_limits_admin_api_writes_not_enabled"): BetaSpendLimitsAdminAPIWritesNotEnabledError,
+    (403, "user_profile_billing_not_authorized"): UserProfileBillingNotAuthorizedError,
     (403, "user_profile_not_billable"): UserProfileNotBillableError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,

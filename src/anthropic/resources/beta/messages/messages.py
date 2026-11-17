@@ -538,6 +538,8 @@ class Messages(SyncAPIResource):
 
           LinkedOrganizationSpendLimitReachedError:
 
+          UserProfileBillingNotAuthorizedError:
+
           UserProfileNotBillableError:
 
           ThreadNotFoundError:
@@ -972,6 +974,8 @@ class Messages(SyncAPIResource):
 
           LinkedOrganizationSpendLimitReachedError:
 
+          UserProfileBillingNotAuthorizedError:
+
           UserProfileNotBillableError:
 
           ThreadNotFoundError:
@@ -1405,6 +1409,8 @@ class Messages(SyncAPIResource):
           LinkedOrganizationBillingUnavailableError:
 
           LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
 
           UserProfileNotBillableError:
 
@@ -2858,6 +2864,8 @@ class AsyncMessages(AsyncAPIResource):
 
           LinkedOrganizationSpendLimitReachedError:
 
+          UserProfileBillingNotAuthorizedError:
+
           UserProfileNotBillableError:
 
           ThreadNotFoundError:
@@ -3292,6 +3300,8 @@ class AsyncMessages(AsyncAPIResource):
 
           LinkedOrganizationSpendLimitReachedError:
 
+          UserProfileBillingNotAuthorizedError:
+
           UserProfileNotBillableError:
 
           ThreadNotFoundError:
@@ -3725,6 +3735,8 @@ class AsyncMessages(AsyncAPIResource):
           LinkedOrganizationBillingUnavailableError:
 
           LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
 
           UserProfileNotBillableError:
 

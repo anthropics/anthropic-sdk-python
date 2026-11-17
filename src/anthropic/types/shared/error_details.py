@@ -53,6 +53,7 @@ from ..beta.organization.beta_scan_failed_error_details import BetaScanFailedErr
 from ..organization.invite_already_exists_error_details import InviteAlreadyExistsErrorDetails
 from ..beta.organization.beta_scan_pending_error_details import BetaScanPendingErrorDetails
 from ..compaction_too_many_tool_references_error_details import CompactionTooManyToolReferencesErrorDetails
+from ..user_profile_billing_not_authorized_error_details import UserProfileBillingNotAuthorizedErrorDetails
 from ..beta.beta_invalid_config_type_change_error_details import BetaInvalidConfigTypeChangeErrorDetails
 from .request_body_too_large_after_decoding_error_details import RequestBodyTooLargeAfterDecodingErrorDetails
 from ..beta.beta_environment_create_disabled_error_details import BetaEnvironmentCreateDisabledErrorDetails
@@ -150,6 +151,7 @@ ErrorDetails: TypeAlias = Annotated[
         UserProfileRequiredErrorDetails,
         LinkedOrganizationBillingUnavailableErrorDetails,
         LinkedOrganizationSpendLimitReachedErrorDetails,
+        UserProfileBillingNotAuthorizedErrorDetails,
         UserProfileNotBillableErrorDetails,
         ThreadNotFoundErrorDetails,
         SkillReadBlockedUndecryptableErrorDetails,

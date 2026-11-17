@@ -658,6 +658,7 @@ from anthropic.types import (
     DeletedUserProfile,
     UserProfile,
     UserProfileAccessType,
+    UserProfileBillingNotAuthorizedErrorDetails,
     UserProfileCyberProgram,
     UserProfileCyberRequirements,
     UserProfileCyberTier,
@@ -682,6 +683,7 @@ from anthropic.types import (
     UserProfileRequiredErrorDetails,
     UserProfileNotFoundError,
     UserProfileRequiredError,
+    UserProfileBillingNotAuthorizedError,
     UserProfileNotBillableError,
 )
 ```
