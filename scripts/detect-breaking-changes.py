@@ -32,11 +32,24 @@ def resolve_assignment_alias(obj: griffe.Object | griffe.Alias) -> griffe.Object
     return target if isinstance(target, griffe.Class) else obj
 
 
+def resolve_import(obj: griffe.Object | griffe.Alias) -> griffe.Object | griffe.Alias:
+    if not isinstance(obj, griffe.Alias) or not obj.runtime:  # `if TYPE_CHECKING:` imports are gone at runtime
+        return obj
+
+    try:
+        target = obj.final_target
+    except griffe.GriffeError:
+        return obj
+
+    # `import pkg.name` stops working when a module is replaced by an import of another module
+    return obj if isinstance(target, griffe.Module) else target
+
+
 def public_members(obj: griffe.Object | griffe.Alias) -> dict[str, griffe.Object | griffe.Alias]:
     obj = resolve_assignment_alias(obj)
     if isinstance(obj, griffe.Alias):
-        # ignore imports for now, they're technically part of the public API
-        # but we don't have good preventative measures in place to prevent
+        # an import we didn't follow has no members to compare. Imports are technically part
+        # of the public API, but we don't have good preventative measures in place to prevent
         # changing them
         return {}
 
@@ -49,7 +62,9 @@ def find_breaking_changes(
     *,
     path: list[str],
 ) -> Iterator[Text | str]:
-    new_members = public_members(new_obj)
+    # a class that moved and is imported from its new module is still public. Old-side
+    # imports aren't followed, so a class imported at the baseline has no members checked
+    new_members = public_members(resolve_import(new_obj))
     old_members = public_members(old_obj)
 
     for name, old_member in old_members.items():
