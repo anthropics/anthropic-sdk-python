@@ -3,6 +3,7 @@ from __future__ import annotations
 import builtins
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Type, Generic, Callable, cast
+from inspect import isawaitable
 from typing_extensions import Self, Iterator, Awaitable, AsyncIterator, assert_never
 
 import httpx2
@@ -357,7 +358,8 @@ class BetaAsyncMessageStreamManager(Generic[ResponseFormatT]):
 
     def __init__(
         self,
-        api_request: Awaitable[AsyncStream[BetaRawMessageStreamEvent]],
+        api_request: Awaitable[AsyncStream[BetaRawMessageStreamEvent]]
+        | Callable[[], Awaitable[AsyncStream[BetaRawMessageStreamEvent]]],
         *,
         output_format: ResponseFormatT | NotGiven = not_given,
     ) -> None:
@@ -366,7 +368,10 @@ class BetaAsyncMessageStreamManager(Generic[ResponseFormatT]):
         self.__output_format = output_format
 
     async def __aenter__(self) -> BetaAsyncMessageStream[ResponseFormatT]:
-        raw_stream = await self.__api_request
+        request = self.__api_request
+        if not isawaitable(request):
+            request = request()
+        raw_stream = await request
         self.__stream = BetaAsyncMessageStream(raw_stream, output_format=self.__output_format)
         return self.__stream
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 import json
 import asyncio
 from typing import Any, Callable, cast
@@ -859,6 +860,53 @@ class TestAsyncMessageThread:
         assert request_threads(respx_mock) == [CREATE, continue_from("msg_a")]
         assert request_bodies(respx_mock)[1]["messages"] == [user("Again")]
         assert thread.previous_message_id == "msg_b"
+
+    async def test_a_stream_manager_that_is_never_entered_starts_nothing(
+        self, respx_mock: MockRouter, recwarn: pytest.WarningsRecorder
+    ) -> None:
+        thread = make_async_thread()
+        manager = thread.stream(user("Never sent"))
+
+        del manager
+        gc.collect()
+        await asyncio.sleep(0)  # let an unawaited-coroutine warning surface
+
+        assert not [
+            warning
+            for warning in recwarn
+            if issubclass(warning.category, RuntimeWarning) and "was never awaited" in str(warning.message)
+        ]
+        assert respx_mock.calls.call_count == 0
+        assert thread.messages == ()
+
+    @pytest.mark.parametrize("first_block", ["reads_to_message_stop", "leaves_early", "reads_nothing"])
+    async def test_a_stream_manager_entered_again_streams_another_turn_and_frees_the_thread(
+        self, respx_mock: MockRouter, first_block: str
+    ) -> None:
+        queue_responses(
+            respx_mock,
+            async_stream_response("msg_a"),
+            async_stream_response("msg_b"),
+            message_response("msg_c"),
+        )
+        thread = make_async_thread()
+        manager = thread.stream(user("Hello"))
+
+        async with manager as first_stream:
+            if first_block == "reads_to_message_stop":
+                await first_stream.until_done()
+            elif first_block == "leaves_early":
+                await anext(first_stream.text_stream)
+        async with manager as stream:
+            # Finalizing the previous stream must not end the new turn.
+            await cast(Any, first_stream._iterator).aclose()
+            await stream.until_done()
+        previous_message_id_after_the_second_block = thread.previous_message_id
+        await thread.send(user("Again"))
+
+        later = request_bodies(respx_mock)[2]
+        assert previous_message_id_after_the_second_block == "msg_b"
+        assert (later["thread"], later["messages"]) == (continue_from("msg_b"), [user("Again")])
 
     @pytest.mark.parametrize("how", ["leave", "close", "error_event"])
     async def test_a_stream_that_ends_before_message_start_takes_the_turn_back(
