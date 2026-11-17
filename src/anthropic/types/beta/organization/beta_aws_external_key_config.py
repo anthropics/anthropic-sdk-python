@@ -11,7 +11,7 @@ class BetaAWSExternalKeyConfig(BaseModel):
     """Full ARN of the AWS KMS key.
 
     On Claude Platform on AWS, alias ARNs are rejected, and your organization's own
-    key must be a single-Region key in your organization's AWS account.
+    key must be a single-Region key.
     """
 
     type: Literal["aws"]
