@@ -160,7 +160,7 @@ jobs:
           uv run python scripts/detect-breaking-changes.py "$BASE_SHA"
 
       - name: Detect breaking changes
-        if: env.BASE_SHA != ''
+        if: ${{ !cancelled() && env.BASE_SHA != '' }}
         run: |
           # Try to check out previous versions of the breaking change detection script. This ensures that
           # we still detect breaking changes when entire files and their tests are removed.
