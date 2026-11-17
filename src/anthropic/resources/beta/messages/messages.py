@@ -548,6 +548,8 @@ class Messages(SyncAPIResource):
 
           RequestBodyTooLargeAfterDecodingError:
 
+          ContractSpendLimitReachedError:
+
           EnforcedSpendLimitReachedError:
 
           RampLimitExceededError:
@@ -984,6 +986,8 @@ class Messages(SyncAPIResource):
 
           RequestBodyTooLargeAfterDecodingError:
 
+          ContractSpendLimitReachedError:
+
           EnforcedSpendLimitReachedError:
 
           RampLimitExceededError:
@@ -1419,6 +1423,8 @@ class Messages(SyncAPIResource):
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -2874,6 +2880,8 @@ class AsyncMessages(AsyncAPIResource):
 
           RequestBodyTooLargeAfterDecodingError:
 
+          ContractSpendLimitReachedError:
+
           EnforcedSpendLimitReachedError:
 
           RampLimitExceededError:
@@ -3310,6 +3318,8 @@ class AsyncMessages(AsyncAPIResource):
 
           RequestBodyTooLargeAfterDecodingError:
 
+          ContractSpendLimitReachedError:
+
           EnforcedSpendLimitReachedError:
 
           RampLimitExceededError:
@@ -3745,6 +3755,8 @@ class AsyncMessages(AsyncAPIResource):
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 

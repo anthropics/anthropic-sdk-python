@@ -33,6 +33,7 @@ from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldEr
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
+from .contract_spend_limit_reached_error_details import ContractSpendLimitReachedErrorDetails
 from .enforced_spend_limit_reached_error_details import EnforcedSpendLimitReachedErrorDetails
 from .parent_organization_required_error_details import ParentOrganizationRequiredErrorDetails
 from ..compaction_signature_invalid_error_details import CompactionSignatureInvalidErrorDetails
@@ -156,6 +157,7 @@ ErrorDetails: TypeAlias = Annotated[
         ThreadNotFoundErrorDetails,
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
+        ContractSpendLimitReachedErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
         RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,

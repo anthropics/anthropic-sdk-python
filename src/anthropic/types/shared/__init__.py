@@ -30,6 +30,7 @@ from .sandbox_egress_restricted_error import SandboxEgressRestrictedError as San
 from .claude_code_version_too_old_error import ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails as RampLimitExceededErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
+from .contract_spend_limit_reached_error import ContractSpendLimitReachedError as ContractSpendLimitReachedError
 from .enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails
 from .parent_organization_required_error import ParentOrganizationRequiredError as ParentOrganizationRequiredError
@@ -54,6 +55,9 @@ from .claude_code_key_creator_not_member_error import (
 )
 from .claude_code_version_too_old_error_details import (
     ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
+)
+from .contract_spend_limit_reached_error_details import (
+    ContractSpendLimitReachedErrorDetails as ContractSpendLimitReachedErrorDetails,
 )
 from .enforced_spend_limit_reached_error_details import (
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,

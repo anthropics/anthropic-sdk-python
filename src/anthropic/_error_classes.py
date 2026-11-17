@@ -69,6 +69,7 @@ from .types.organization.invite_already_exists_error import InviteAlreadyExistsE
 from .types.shared.claude_code_version_too_old_error import ClaudeCodeVersionTooOldError
 from .types.beta.organization.beta_scan_pending_error import BetaScanPendingError
 from .types.compaction_too_many_tool_references_error import CompactionTooManyToolReferencesError
+from .types.shared.contract_spend_limit_reached_error import ContractSpendLimitReachedError
 from .types.shared.enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError
 from .types.shared.parent_organization_required_error import ParentOrganizationRequiredError
 from .types.user_profile_billing_not_authorized_error import UserProfileBillingNotAuthorizedError
@@ -233,6 +234,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (409, "slack_channel_set_up_settings_conflict"): BetaSlackChannelSetUpSettingsConflictError,
     (412, "heartbeat_precondition_failed"): BetaHeartbeatPreconditionFailedError,
     (413, "request_body_too_large_after_decoding"): RequestBodyTooLargeAfterDecodingError,
+    (429, "contract_spend_limit_reached"): ContractSpendLimitReachedError,
     (429, "enforced_spend_limit_reached"): EnforcedSpendLimitReachedError,
     (429, "ramp_limit_exceeded"): RampLimitExceededError,
     (503, "cmek_context_unavailable"): CMEKContextUnavailableError,
