@@ -336,8 +336,10 @@ async def aiter_work(
         try:
             yield item
         finally:
+            interruption: BaseException | None = None
             try:
-                with as_current_span(work_span.span):
+                # Once acknowledged, the item needs a stop even when its consumer is cancelled.
+                with anyio.CancelScope(shield=True), as_current_span(work_span.span):
                     await work.stop(
                         item.id,
                         environment_id=environment_id,
@@ -346,7 +348,11 @@ async def aiter_work(
             except Exception as e:
                 if not _is_status(e, 409):
                     log.warning("stop failed work_id=%s error=%s", item.id, e)
-            work_span.end()
+            except BaseException as e:
+                interruption = e
+                raise
+            finally:
+                work_span.end(interruption)
 
 
 async def _aforce_stop_quietly(
