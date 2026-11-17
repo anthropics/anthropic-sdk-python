@@ -1423,14 +1423,14 @@ def _with_middleware_headers(request: APIRequest, betas: tuple[AnthropicBetaPara
 
 def _credit_token(message: Message | BetaMessage) -> str | None:
     """The refusal's minted credit token; only the beta surface carries one."""
-    if isinstance(message, BetaMessage) and message.stop_details is not None:
+    if isinstance(message, BetaMessage) and message.stop_details is not None and message.stop_details.type == "refusal":
         return message.stop_details.fallback_credit_token
     return None
 
 
 def _refusal_category(message: Message | BetaMessage) -> str | None:
     """The policy category that caused the refusal; only the beta surface carries one."""
-    if isinstance(message, BetaMessage) and message.stop_details is not None:
+    if isinstance(message, BetaMessage) and message.stop_details is not None and message.stop_details.type == "refusal":
         return message.stop_details.category
     return None
 
