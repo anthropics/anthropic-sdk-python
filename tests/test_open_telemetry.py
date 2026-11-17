@@ -3388,12 +3388,12 @@ class TestHttpAttributes:
         [request] = requests(route)
         assert (
             request.url.query
-            == b"tenant=t1&ids%5B%5D=file+1&ids%5B%5D=file_2&limit=5&trace=on&scope_id=a%26b&limit%5Bx%5D=1"
+            == b"tenant=t1&ids%5B%5D=file%201&ids%5B%5D=file_2&limit=5&trace=on&scope_id=a%26b&limit%5Bx%5D=1"
         )
         span = spans.one("anthropic.files.list")
         # What is left is as it was sent, in the order it was sent. A defined parameter stays however the caller set it.
         # `limit[x]` is no parameter of the endpoint, though `limit` is.
-        assert attributes(span)["url.query"] == "ids%5B%5D=file+1&ids%5B%5D=file_2&limit=5&scope_id=a%26b"
+        assert attributes(span)["url.query"] == "ids%5B%5D=file%201&ids%5B%5D=file_2&limit=5&scope_id=a%26b"
         assert attributes(span)["url.full"] == f"{base_url}/v1/files?" + attributes(span)["url.query"]
 
     @SYNC_AND_ASYNC
