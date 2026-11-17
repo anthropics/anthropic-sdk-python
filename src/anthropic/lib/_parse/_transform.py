@@ -7,7 +7,7 @@ from typing_extensions import assert_never
 import pydantic
 
 from ..._types import Omit
-from ..._utils import is_list, is_given
+from ..._utils import is_list, is_given, lru_cache
 from ..._models import TypeAdapter
 from ..._exceptions import AnthropicError
 from ...types.beta.beta_output_config_param import BetaOutputConfigParam
@@ -32,7 +32,7 @@ def to_json_output_format(output_format: type[_T]) -> BetaJSONOutputFormatParam:
         raise TypeError("`output_format` must be a type; pass a schema dict as `output_config={'format': ...}` instead")
     adapted_type: TypeAdapter[_T] = TypeAdapter(output_format)
     try:
-        schema = adapted_type.json_schema()
+        schema = cached_json_schema(adapted_type)
     except pydantic.errors.PydanticSchemaGenerationError as e:
         raise TypeError(
             "Could not generate JSON schema for the given `output_format` type. "
@@ -95,6 +95,12 @@ def get_transformed_string(
     return schema
 
 
+@lru_cache(maxsize=512)
+def cached_json_schema(adapter: pydantic.TypeAdapter[Any]) -> dict[str, Any]:
+    """`adapter.json_schema()`, cached. Callers share the dict, so `transform_schema()` copies from it."""
+    return adapter.json_schema()
+
+
 def transform_schema(
     json_schema: type[pydantic.BaseModel] | dict[str, Any],
 ) -> dict[str, Any]:
@@ -147,7 +153,7 @@ def transform_schema(
 
     enum = json_schema.get("enum")
     if is_list(enum) and enum and all(is_primitive(value) for value in enum):
-        strict_schema["enum"] = json_schema.pop("enum")
+        strict_schema["enum"] = list(json_schema.pop("enum"))
 
     if "const" in json_schema and is_primitive(json_schema["const"]):
         strict_schema["const"] = json_schema.pop("const")
@@ -188,7 +194,7 @@ def transform_schema(
 
         required = json_schema.pop("required", None)
         if required is not None:
-            strict_schema["required"] = required
+            strict_schema["required"] = list(required) if is_list(required) else required
 
     elif type_ == "string":
         format = json_schema.pop("format", None)
