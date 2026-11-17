@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_memory_store_archived_run_error_object import (
+    BetaManagedAgentsMemoryStoreArchivedRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsMemoryStoreArchivedRunError"]
 
-
-class BetaManagedAgentsMemoryStoreArchivedRunError(BaseModel):
-    """A memory store referenced by the deployment is archived."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["memory_store_archived_error"]
+BetaManagedAgentsMemoryStoreArchivedRunError = BetaManagedAgentsMemoryStoreArchivedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsMemoryStoreArchivedRunError has been renamed to BetaManagedAgentsMemoryStoreArchivedRunErrorObject
+"""

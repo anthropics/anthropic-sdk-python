@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 __all__ = [
     "BadRequestError",
     "AuthenticationError",
+    "PaymentRequiredError",
     "PermissionDeniedError",
     "NotFoundError",
     "RequestTimeoutError",
@@ -184,6 +185,10 @@ class BadRequestError(APIStatusError):
 
 class AuthenticationError(APIStatusError):
     status_code: Literal[401] = 401  # pyright: ignore[reportIncompatibleVariableOverride]
+
+
+class PaymentRequiredError(APIStatusError):
+    status_code: Literal[402] = 402  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class PermissionDeniedError(APIStatusError):

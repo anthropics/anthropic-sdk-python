@@ -1,30 +1,11 @@
-from typing import Union
-from typing_extensions import Literal, Annotated, TypeAlias
-
-from ...._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_retry_status_retrying import BetaManagedAgentsRetryStatusRetrying
-from .beta_managed_agents_retry_status_terminal import BetaManagedAgentsRetryStatusTerminal
-from .beta_managed_agents_retry_status_exhausted import BetaManagedAgentsRetryStatusExhausted
+from .beta_managed_agents_model_rate_limited_error_object import (
+    RetryStatus,
+    BetaManagedAgentsModelRateLimitedErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsModelRateLimitedError", "RetryStatus"]
 
-RetryStatus: TypeAlias = Annotated[
-    Union[
-        BetaManagedAgentsRetryStatusRetrying,
-        BetaManagedAgentsRetryStatusExhausted,
-        BetaManagedAgentsRetryStatusTerminal,
-    ],
-    UnionDiscriminator("type"),
-]
-
-
-class BetaManagedAgentsModelRateLimitedError(BaseModel):
-    """The model request was rate-limited."""
-
-    message: str
-    """Human-readable error description."""
-
-    retry_status: RetryStatus
-    """What the client should do next."""
-
-    type: Literal["model_rate_limited_error"]
+BetaManagedAgentsModelRateLimitedError = BetaManagedAgentsModelRateLimitedErrorObject
+"""
+Deprecated: BetaManagedAgentsModelRateLimitedError has been renamed to BetaManagedAgentsModelRateLimitedErrorObject
+"""

@@ -1,16 +1,6 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_api_error_object import BetaAPIErrorObject
 
 __all__ = ["BetaAPIError"]
 
-
-class BetaAPIError(BaseModel):
-    message: str
-    """A human-readable explanation of the error.
-
-    Its wording can change, so don't match on it.
-    """
-
-    type: Literal["api_error"]
-    """The broad category of the error."""
+BetaAPIError = BetaAPIErrorObject
+"""Deprecated: BetaAPIError has been renamed to BetaAPIErrorObject"""

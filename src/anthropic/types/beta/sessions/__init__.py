@@ -75,6 +75,9 @@ from .beta_managed_agents_agent_thinking_event import (
 from .beta_managed_agents_agent_tool_use_event import (
     BetaManagedAgentsAgentToolUseEvent as BetaManagedAgentsAgentToolUseEvent,
 )
+from .beta_managed_agents_billing_error_object import (
+    BetaManagedAgentsBillingErrorObject as BetaManagedAgentsBillingErrorObject,
+)
 from .beta_managed_agents_document_block_param import (
     BetaManagedAgentsDocumentBlockParam as BetaManagedAgentsDocumentBlockParam,
 )
@@ -89,6 +92,9 @@ from .beta_managed_agents_session_thread_stats import (
 )
 from .beta_managed_agents_session_thread_usage import (
     BetaManagedAgentsSessionThreadUsage as BetaManagedAgentsSessionThreadUsage,
+)
+from .beta_managed_agents_unknown_error_object import (
+    BetaManagedAgentsUnknownErrorObject as BetaManagedAgentsUnknownErrorObject,
 )
 from .beta_managed_agents_user_interrupt_event import (
     BetaManagedAgentsUserInterruptEvent as BetaManagedAgentsUserInterruptEvent,
@@ -186,6 +192,9 @@ from .beta_managed_agents_user_define_outcome_event import (
 from .beta_managed_agents_user_message_event_params import (
     BetaManagedAgentsUserMessageEventParams as BetaManagedAgentsUserMessageEventParams,
 )
+from .beta_managed_agents_workflow_run_error_object import (
+    BetaManagedAgentsWorkflowRunErrorObject as BetaManagedAgentsWorkflowRunErrorObject,
+)
 from .beta_managed_agents_workflow_run_result_error import (
     BetaManagedAgentsWorkflowRunResultError as BetaManagedAgentsWorkflowRunResultError,
 )
@@ -270,6 +279,12 @@ from .beta_managed_agents_tool_use_limit_reached_error import (
 from .beta_managed_agents_user_tool_confirmation_event import (
     BetaManagedAgentsUserToolConfirmationEvent as BetaManagedAgentsUserToolConfirmationEvent,
 )
+from .beta_managed_agents_model_overloaded_error_object import (
+    BetaManagedAgentsModelOverloadedErrorObject as BetaManagedAgentsModelOverloadedErrorObject,
+)
+from .beta_managed_agents_repository_clone_error_object import (
+    BetaManagedAgentsRepositoryCloneErrorObject as BetaManagedAgentsRepositoryCloneErrorObject,
+)
 from .beta_managed_agents_search_result_citations_param import (
     BetaManagedAgentsSearchResultCitationsParam as BetaManagedAgentsSearchResultCitationsParam,
 )
@@ -303,6 +318,9 @@ from .beta_managed_agents_agent_thread_message_sent_event import (
 from .beta_managed_agents_mcp_authentication_failed_error import (
     BetaManagedAgentsMCPAuthenticationFailedError as BetaManagedAgentsMCPAuthenticationFailedError,
 )
+from .beta_managed_agents_model_rate_limited_error_object import (
+    BetaManagedAgentsModelRateLimitedErrorObject as BetaManagedAgentsModelRateLimitedErrorObject,
+)
 from .beta_managed_agents_repository_authentication_error import (
     BetaManagedAgentsRepositoryAuthenticationError as BetaManagedAgentsRepositoryAuthenticationError,
 )
@@ -321,6 +339,9 @@ from .beta_managed_agents_agent_tool_evaluation_always_ask import (
 from .beta_managed_agents_plain_text_document_source_param import (
     BetaManagedAgentsPlainTextDocumentSourceParam as BetaManagedAgentsPlainTextDocumentSourceParam,
 )
+from .beta_managed_agents_repository_checkout_error_object import (
+    BetaManagedAgentsRepositoryCheckoutErrorObject as BetaManagedAgentsRepositoryCheckoutErrorObject,
+)
 from .beta_managed_agents_session_status_rescheduled_event import (
     BetaManagedAgentsSessionStatusRescheduledEvent as BetaManagedAgentsSessionStatusRescheduledEvent,
 )
@@ -333,17 +354,41 @@ from .beta_managed_agents_user_define_outcome_event_params import (
 from .beta_managed_agents_workflow_run_phase_started_event import (
     BetaManagedAgentsWorkflowRunPhaseStartedEvent as BetaManagedAgentsWorkflowRunPhaseStartedEvent,
 )
+from .beta_managed_agents_workflow_run_result_error_object import (
+    BetaManagedAgentsWorkflowRunResultErrorObject as BetaManagedAgentsWorkflowRunResultErrorObject,
+)
 from .beta_managed_agents_credential_host_unreachable_error import (
     BetaManagedAgentsCredentialHostUnreachableError as BetaManagedAgentsCredentialHostUnreachableError,
 )
+from .beta_managed_agents_model_request_failed_error_object import (
+    BetaManagedAgentsModelRequestFailedErrorObject as BetaManagedAgentsModelRequestFailedErrorObject,
+)
+from .beta_managed_agents_program_workflow_run_error_object import (
+    BetaManagedAgentsProgramWorkflowRunErrorObject as BetaManagedAgentsProgramWorkflowRunErrorObject,
+)
+from .beta_managed_agents_repository_forbidden_error_object import (
+    BetaManagedAgentsRepositoryForbiddenErrorObject as BetaManagedAgentsRepositoryForbiddenErrorObject,
+)
+from .beta_managed_agents_repository_not_found_error_object import (
+    BetaManagedAgentsRepositoryNotFoundErrorObject as BetaManagedAgentsRepositoryNotFoundErrorObject,
+)
 from .beta_managed_agents_span_outcome_evaluation_end_event import (
     BetaManagedAgentsSpanOutcomeEvaluationEndEvent as BetaManagedAgentsSpanOutcomeEvaluationEndEvent,
+)
+from .beta_managed_agents_timeout_workflow_run_error_object import (
+    BetaManagedAgentsTimeoutWorkflowRunErrorObject as BetaManagedAgentsTimeoutWorkflowRunErrorObject,
+)
+from .beta_managed_agents_unknown_workflow_run_error_object import (
+    BetaManagedAgentsUnknownWorkflowRunErrorObject as BetaManagedAgentsUnknownWorkflowRunErrorObject,
 )
 from .beta_managed_agents_workflow_run_status_running_event import (
     BetaManagedAgentsWorkflowRunStatusRunningEvent as BetaManagedAgentsWorkflowRunStatusRunningEvent,
 )
 from .beta_managed_agents_agent_tool_evaluation_always_allow import (
     BetaManagedAgentsAgentToolEvaluationAlwaysAllow as BetaManagedAgentsAgentToolEvaluationAlwaysAllow,
+)
+from .beta_managed_agents_mcp_connection_failed_error_object import (
+    BetaManagedAgentsMCPConnectionFailedErrorObject as BetaManagedAgentsMCPConnectionFailedErrorObject,
 )
 from .beta_managed_agents_agent_auto_evaluated_permission_ask import (
     BetaManagedAgentsAgentAutoEvaluatedPermissionAsk as BetaManagedAgentsAgentAutoEvaluatedPermissionAsk,
@@ -356,6 +401,9 @@ from .beta_managed_agents_session_thread_status_running_event import (
 )
 from .beta_managed_agents_span_outcome_evaluation_start_event import (
     BetaManagedAgentsSpanOutcomeEvaluationStartEvent as BetaManagedAgentsSpanOutcomeEvaluationStartEvent,
+)
+from .beta_managed_agents_tool_use_limit_reached_error_object import (
+    BetaManagedAgentsToolUseLimitReachedErrorObject as BetaManagedAgentsToolUseLimitReachedErrorObject,
 )
 from .beta_managed_agents_user_tool_confirmation_event_params import (
     BetaManagedAgentsUserToolConfirmationEventParams as BetaManagedAgentsUserToolConfirmationEventParams,
@@ -375,12 +423,30 @@ from .beta_managed_agents_user_custom_tool_result_event_params import (
 from .beta_managed_agents_agent_auto_evaluated_permission_allow import (
     BetaManagedAgentsAgentAutoEvaluatedPermissionAllow as BetaManagedAgentsAgentAutoEvaluatedPermissionAllow,
 )
+from .beta_managed_agents_compaction_limit_reached_error_object import (
+    BetaManagedAgentsCompactionLimitReachedErrorObject as BetaManagedAgentsCompactionLimitReachedErrorObject,
+)
 from .beta_managed_agents_span_outcome_evaluation_ongoing_event import (
     BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent as BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent,
+)
+from .beta_managed_agents_mcp_authentication_failed_error_object import (
+    BetaManagedAgentsMCPAuthenticationFailedErrorObject as BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+)
+from .beta_managed_agents_repository_authentication_error_object import (
+    BetaManagedAgentsRepositoryAuthenticationErrorObject as BetaManagedAgentsRepositoryAuthenticationErrorObject,
 )
 from .beta_managed_agents_session_thread_status_terminated_event import (
     BetaManagedAgentsSessionThreadStatusTerminatedEvent as BetaManagedAgentsSessionThreadStatusTerminatedEvent,
 )
+from .beta_managed_agents_thread_limit_workflow_run_error_object import (
+    BetaManagedAgentsThreadLimitWorkflowRunErrorObject as BetaManagedAgentsThreadLimitWorkflowRunErrorObject,
+)
 from .beta_managed_agents_session_thread_status_rescheduled_event import (
     BetaManagedAgentsSessionThreadStatusRescheduledEvent as BetaManagedAgentsSessionThreadStatusRescheduledEvent,
+)
+from .beta_managed_agents_credential_host_unreachable_error_object import (
+    BetaManagedAgentsCredentialHostUnreachableErrorObject as BetaManagedAgentsCredentialHostUnreachableErrorObject,
+)
+from .beta_managed_agents_max_workflow_runs_workflow_run_error_object import (
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject as BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject,
 )

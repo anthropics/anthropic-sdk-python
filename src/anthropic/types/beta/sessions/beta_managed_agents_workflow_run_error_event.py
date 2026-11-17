@@ -3,7 +3,7 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ...._models import BaseModel
-from .beta_managed_agents_workflow_run_error import BetaManagedAgentsWorkflowRunError
+from .beta_managed_agents_workflow_run_error_object import BetaManagedAgentsWorkflowRunErrorObject
 
 __all__ = ["BetaManagedAgentsWorkflowRunErrorEvent"]
 
@@ -17,7 +17,7 @@ class BetaManagedAgentsWorkflowRunErrorEvent(BaseModel):
     id: str
     """Unique identifier for this event."""
 
-    error: BetaManagedAgentsWorkflowRunError
+    error: BetaManagedAgentsWorkflowRunErrorObject
     """Why the run did not finish, or was not created."""
 
     processed_at: datetime

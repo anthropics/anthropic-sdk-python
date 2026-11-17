@@ -14,6 +14,7 @@ from ._exceptions import (
     InternalServerError,
     RequestTimeoutError,
     ContentTooLargeError,
+    PaymentRequiredError,
     PermissionDeniedError,
     HTTPNotImplementedError,
     PreconditionFailedError,
@@ -28,6 +29,7 @@ from .types.thread_not_found_error import ThreadNotFoundError
 from .types.tool_name_conflict_error import ToolNameConflictError
 from .types.rbac_role_not_found_error import RBACRoleNotFoundError
 from .types.file_not_downloadable_error import FileNotDownloadableError
+from .types.user_profile_required_error import UserProfileRequiredError
 from .types.compaction_unavailable_error import CompactionUnavailableError
 from .types.storage_quota_exceeded_error import StorageQuotaExceededError
 from .types.user_profile_not_found_error import UserProfileNotFoundError
@@ -37,6 +39,7 @@ from .types.thread_already_continued_error import ThreadAlreadyContinuedError
 from .types.org_member_limit_exceeded_error import OrgMemberLimitExceededError
 from .types.thread_continue_in_flight_error import ThreadContinueInFlightError
 from .types.tool_reference_unresolved_error import ToolReferenceUnresolvedError
+from .types.user_profile_not_billable_error import UserProfileNotBillableError
 from .types.beta.beta_invalid_metadata_error import BetaInvalidMetadataError
 from .types.compaction_block_ambiguous_error import CompactionBlockAmbiguousError
 from .types.compaction_block_misplaced_error import CompactionBlockMisplacedError
@@ -66,8 +69,10 @@ from .types.organization.invite_already_exists_error import InviteAlreadyExistsE
 from .types.shared.claude_code_version_too_old_error import ClaudeCodeVersionTooOldError
 from .types.beta.organization.beta_scan_pending_error import BetaScanPendingError
 from .types.compaction_too_many_tool_references_error import CompactionTooManyToolReferencesError
+from .types.shared.contract_spend_limit_reached_error import ContractSpendLimitReachedError
 from .types.shared.enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError
 from .types.shared.parent_organization_required_error import ParentOrganizationRequiredError
+from .types.user_profile_billing_not_authorized_error import UserProfileBillingNotAuthorizedError
 from .types.beta.beta_invalid_config_type_change_error import BetaInvalidConfigTypeChangeError
 from .types.shared.request_body_encoding_invalid_error import RequestBodyEncodingInvalidError
 from .types.beta.beta_environment_create_disabled_error import BetaEnvironmentCreateDisabledError
@@ -94,6 +99,8 @@ from .types.shared.request_body_too_large_after_decoding_error import RequestBod
 from .types.organization.external_key_in_workspace_policy_error import ExternalKeyInWorkspacePolicyError
 from .types.organization.workspace_api_key_limit_exceeded_error import WorkspaceAPIKeyLimitExceededError
 from .types.organization.external_key_validation_timed_out_error import ExternalKeyValidationTimedOutError
+from .types.shared.linked_organization_billing_unavailable_error import LinkedOrganizationBillingUnavailableError
+from .types.shared.linked_organization_spend_limit_reached_error import LinkedOrganizationSpendLimitReachedError
 from .types.organization.rbac_group_owner_access_unconfirmed_error import RBACGroupOwnerAccessUnconfirmedError
 from .types.beta.environments.beta_heartbeat_precondition_failed_error import BetaHeartbeatPreconditionFailedError
 from .types.beta.organization.beta_cannot_sign_out_primary_owner_error import BetaCannotSignOutPrimaryOwnerError
@@ -127,6 +134,7 @@ from .types.beta.organization.beta_slack_channel_set_up_environment_not_found_er
 ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, None): BadRequestError,
     (401, None): AuthenticationError,
+    (402, None): PaymentRequiredError,
     (403, None): PermissionDeniedError,
     (404, None): NotFoundError,
     (408, None): RequestTimeoutError,
@@ -192,9 +200,12 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "tool_reference_unresolved"): ToolReferenceUnresolvedError,
     (400, "unsupported_charset"): BetaUnsupportedCharsetError,
     (400, "user_profile_not_found"): UserProfileNotFoundError,
+    (400, "user_profile_required"): UserProfileRequiredError,
     (400, "workspace_api_key_limit_exceeded"): WorkspaceAPIKeyLimitExceededError,
     (400, "workspace_member_limit_exceeded"): WorkspaceMemberLimitExceededError,
     (400, "workspace_policy_violation"): WorkspacePolicyViolationError,
+    (402, "linked_organization_billing_unavailable"): LinkedOrganizationBillingUnavailableError,
+    (402, "linked_organization_spend_limit_reached"): LinkedOrganizationSpendLimitReachedError,
     (403, "api_key_scope_missing"): BetaAPIKeyScopeMissingError,
     (403, "cannot_sign_out_managed_member"): BetaCannotSignOutManagedMemberError,
     (403, "cannot_sign_out_membership_admin"): BetaCannotSignOutMembershipAdminError,
@@ -207,6 +218,8 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "organization_level_scoped_api_key_required"): BetaOrganizationLevelScopedAPIKeyRequiredError,
     (403, "sandbox_egress_restricted"): SandboxEgressRestrictedError,
     (403, "spend_limits_admin_api_writes_not_enabled"): BetaSpendLimitsAdminAPIWritesNotEnabledError,
+    (403, "user_profile_billing_not_authorized"): UserProfileBillingNotAuthorizedError,
+    (403, "user_profile_not_billable"): UserProfileNotBillableError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,
     (404, "rbac_role_not_found"): RBACRoleNotFoundError,
@@ -221,6 +234,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (409, "slack_channel_set_up_settings_conflict"): BetaSlackChannelSetUpSettingsConflictError,
     (412, "heartbeat_precondition_failed"): BetaHeartbeatPreconditionFailedError,
     (413, "request_body_too_large_after_decoding"): RequestBodyTooLargeAfterDecodingError,
+    (429, "contract_spend_limit_reached"): ContractSpendLimitReachedError,
     (429, "enforced_spend_limit_reached"): EnforcedSpendLimitReachedError,
     (429, "ramp_limit_exceeded"): RampLimitExceededError,
     (503, "cmek_context_unavailable"): CMEKContextUnavailableError,

@@ -1,16 +1,6 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_not_found_error_object import BetaNotFoundErrorObject
 
 __all__ = ["BetaNotFoundError"]
 
-
-class BetaNotFoundError(BaseModel):
-    message: str
-    """A human-readable explanation of the error.
-
-    Its wording can change, so don't match on it.
-    """
-
-    type: Literal["not_found_error"]
-    """The broad category of the error."""
+BetaNotFoundError = BetaNotFoundErrorObject
+"""Deprecated: BetaNotFoundError has been renamed to BetaNotFoundErrorObject"""

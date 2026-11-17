@@ -101,12 +101,14 @@ class TestSyncWireHeaders:
 
         client.beta.messages.parse(
             model="claude-sonnet-5-5",
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
         )
 
         request = respx_mock.calls.last.request
+        assert json.loads(request.content)["billing_policy"] == {"type": "billing_policy", "bill_to": "user_profile"}
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
         assert json.loads(request.content)["tools"] == [_Tool().to_dict()]
@@ -200,12 +202,14 @@ class TestAsyncWireHeaders:
 
         await async_client.beta.messages.parse(
             model="claude-sonnet-5-5",
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             max_tokens=16,
             messages=[{"role": "user", "content": "hello"}],
             tools=[_Tool()],
         )
 
         request = respx_mock.calls.last.request
+        assert json.loads(request.content)["billing_policy"] == {"type": "billing_policy", "bill_to": "user_profile"}
         values = request.headers.get_list(STAINLESS_HELPER_HEADER)
         assert values == ["beta.messages.parse"]
         assert json.loads(request.content)["tools"] == [_Tool().to_dict()]

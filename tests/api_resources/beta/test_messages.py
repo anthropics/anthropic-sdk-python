@@ -44,6 +44,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -245,6 +249,10 @@ class TestMessages:
             ],
             model="claude-opus-5-5",
             stream=True,
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -442,6 +450,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -625,6 +637,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -826,6 +842,10 @@ class TestAsyncMessages:
             ],
             model="claude-opus-5-5",
             stream=True,
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -1023,6 +1043,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",

@@ -11,6 +11,7 @@ from ..rbac_role_not_found_error_details import RBACRoleNotFoundErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
+from ..user_profile_required_error_details import UserProfileRequiredErrorDetails
 from ..compaction_unavailable_error_details import CompactionUnavailableErrorDetails
 from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails
 from ..user_profile_not_found_error_details import UserProfileNotFoundErrorDetails
@@ -22,6 +23,7 @@ from .sandbox_egress_restricted_error_details import SandboxEgressRestrictedErro
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
 from ..thread_continue_in_flight_error_details import ThreadContinueInFlightErrorDetails
 from ..tool_reference_unresolved_error_details import ToolReferenceUnresolvedErrorDetails
+from ..user_profile_not_billable_error_details import UserProfileNotBillableErrorDetails
 from ..beta.beta_invalid_metadata_error_details import BetaInvalidMetadataErrorDetails
 from ..compaction_block_ambiguous_error_details import CompactionBlockAmbiguousErrorDetails
 from ..compaction_block_misplaced_error_details import CompactionBlockMisplacedErrorDetails
@@ -31,6 +33,7 @@ from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldEr
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
+from .contract_spend_limit_reached_error_details import ContractSpendLimitReachedErrorDetails
 from .enforced_spend_limit_reached_error_details import EnforcedSpendLimitReachedErrorDetails
 from .parent_organization_required_error_details import ParentOrganizationRequiredErrorDetails
 from ..compaction_signature_invalid_error_details import CompactionSignatureInvalidErrorDetails
@@ -51,6 +54,7 @@ from ..beta.organization.beta_scan_failed_error_details import BetaScanFailedErr
 from ..organization.invite_already_exists_error_details import InviteAlreadyExistsErrorDetails
 from ..beta.organization.beta_scan_pending_error_details import BetaScanPendingErrorDetails
 from ..compaction_too_many_tool_references_error_details import CompactionTooManyToolReferencesErrorDetails
+from ..user_profile_billing_not_authorized_error_details import UserProfileBillingNotAuthorizedErrorDetails
 from ..beta.beta_invalid_config_type_change_error_details import BetaInvalidConfigTypeChangeErrorDetails
 from .request_body_too_large_after_decoding_error_details import RequestBodyTooLargeAfterDecodingErrorDetails
 from ..beta.beta_environment_create_disabled_error_details import BetaEnvironmentCreateDisabledErrorDetails
@@ -59,6 +63,8 @@ from ..beta.organization.beta_bundle_on_call_error_details import BetaBundleOnCa
 from ..organization.email_domain_not_allowed_error_details import EmailDomainNotAllowedErrorDetails
 from ..beta_organization_not_enrolled_in_beta_error_details import BetaOrganizationNotEnrolledInBetaErrorDetails
 from ..organization.cannot_remove_last_member_error_details import CannotRemoveLastMemberErrorDetails
+from .linked_organization_billing_unavailable_error_details import LinkedOrganizationBillingUnavailableErrorDetails
+from .linked_organization_spend_limit_reached_error_details import LinkedOrganizationSpendLimitReachedErrorDetails
 from ..beta.organization.beta_skill_name_taken_error_details import BetaSkillNameTakenErrorDetails
 from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLimitExceededErrorDetails
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
@@ -143,9 +149,15 @@ ErrorDetails: TypeAlias = Annotated[
         ThreadUnsupportedRequestErrorDetails,
         ToolNameConflictErrorDetails,
         ToolReferenceUnresolvedErrorDetails,
+        UserProfileRequiredErrorDetails,
+        LinkedOrganizationBillingUnavailableErrorDetails,
+        LinkedOrganizationSpendLimitReachedErrorDetails,
+        UserProfileBillingNotAuthorizedErrorDetails,
+        UserProfileNotBillableErrorDetails,
         ThreadNotFoundErrorDetails,
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
+        ContractSpendLimitReachedErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
         RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,

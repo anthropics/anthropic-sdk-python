@@ -1,16 +1,6 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_overloaded_error_object import BetaOverloadedErrorObject
 
 __all__ = ["BetaOverloadedError"]
 
-
-class BetaOverloadedError(BaseModel):
-    message: str
-    """A human-readable explanation of the error.
-
-    Its wording can change, so don't match on it.
-    """
-
-    type: Literal["overloaded_error"]
-    """The broad category of the error."""
+BetaOverloadedError = BetaOverloadedErrorObject
+"""Deprecated: BetaOverloadedError has been renamed to BetaOverloadedErrorObject"""

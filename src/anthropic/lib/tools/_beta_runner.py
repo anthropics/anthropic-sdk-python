@@ -291,10 +291,11 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         `run_tools_eagerly`, a tool call of the reply that has run doesn't run again.
 
         The new params replace the old ones, so a field they leave out is no longer sent, except `betas`,
-        `user_profile_id` and `workspace_id`, which stay as they are. `system` and the `tools` sent cannot change during
-        a run: use `add_tools()` and `remove_tools()`, or create the runner with `thread=False`. A function tool or
-        toolset taken out of `tools` is no longer run, and a function tool added to them is never run. Params without
-        `tools` send none and leave what is run as it is.
+        `user_profile_id` and `workspace_id`, which stay as they are. A `user_profile_id` left out together with the
+        `billing_policy` isn't kept. `system` and the `tools` sent cannot change during a run: use `add_tools()` and
+        `remove_tools()`, or create the runner with `thread=False`. A function tool or toolset taken out of `tools` is
+        no longer run, and a function tool added to them is never run. Params without `tools` send none and leave what
+        is run as it is.
 
         Args:
             params (ParsedMessageCreateParamsBase[ResponseFormatT] | Callable): Either new parameters or a function to mutate existing parameters
@@ -303,6 +304,8 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         if callable(params):
             params = params(current_params)
         kept = {k: v for k, v in current_params.items() if k in ("betas", "user_profile_id", "workspace_id")}
+        if "billing_policy" in self._params and "billing_policy" not in params:
+            kept.pop("user_profile_id", None)
         params = cast("ParseMessageCreateParamsBase[ResponseFormatT]", {**kept, **params})
         _reject_compaction_param(params)
         reject_thread_param(params.get("thread"))

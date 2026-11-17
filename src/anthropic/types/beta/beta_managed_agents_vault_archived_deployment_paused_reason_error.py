@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_vault_archived_deployment_paused_reason_error_object import (
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsVaultArchivedDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsVaultArchivedDeploymentPausedReasonError(BaseModel):
-    """A vault referenced by the deployment is archived."""
-
-    type: Literal["vault_archived_error"]
+BetaManagedAgentsVaultArchivedDeploymentPausedReasonError = (
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsVaultArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject
+"""

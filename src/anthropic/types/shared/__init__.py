@@ -9,12 +9,20 @@ from .overloaded_error import OverloadedError as OverloadedError
 from .permission_error import PermissionError as PermissionError
 from .rate_limit_error import RateLimitError as RateLimitError
 from .authentication_error import AuthenticationError as AuthenticationError
+from .billing_error_object import BillingErrorObject as BillingErrorObject
 from .gateway_timeout_error import GatewayTimeoutError as GatewayTimeoutError
 from .invalid_request_error import InvalidRequestError as InvalidRequestError
+from .not_found_error_object import NotFoundErrorObject as NotFoundErrorObject
 from .cmek_key_disabled_error import CMEKKeyDisabledError as CMEKKeyDisabledError
+from .overloaded_error_object import OverloadedErrorObject as OverloadedErrorObject
+from .permission_error_object import PermissionErrorObject as PermissionErrorObject
+from .rate_limit_error_object import RateLimitErrorObject as RateLimitErrorObject
 from .ramp_limit_exceeded_error import RampLimitExceededError as RampLimitExceededError
 from .cmek_key_unreachable_error import CMEKKeyUnreachableError as CMEKKeyUnreachableError
 from .organization_on_hold_error import OrganizationOnHoldError as OrganizationOnHoldError
+from .authentication_error_object import AuthenticationErrorObject as AuthenticationErrorObject
+from .gateway_timeout_error_object import GatewayTimeoutErrorObject as GatewayTimeoutErrorObject
+from .invalid_request_error_object import InvalidRequestErrorObject as InvalidRequestErrorObject
 from .cmek_context_unavailable_error import CMEKContextUnavailableError as CMEKContextUnavailableError
 from .cmek_key_network_blocked_error import CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails
@@ -22,6 +30,7 @@ from .sandbox_egress_restricted_error import SandboxEgressRestrictedError as San
 from .claude_code_version_too_old_error import ClaudeCodeVersionTooOldError as ClaudeCodeVersionTooOldError
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails as RampLimitExceededErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails
+from .contract_spend_limit_reached_error import ContractSpendLimitReachedError as ContractSpendLimitReachedError
 from .enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails
 from .parent_organization_required_error import ParentOrganizationRequiredError as ParentOrganizationRequiredError
@@ -47,6 +56,9 @@ from .claude_code_key_creator_not_member_error import (
 from .claude_code_version_too_old_error_details import (
     ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
 )
+from .contract_spend_limit_reached_error_details import (
+    ContractSpendLimitReachedErrorDetails as ContractSpendLimitReachedErrorDetails,
+)
 from .enforced_spend_limit_reached_error_details import (
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
 )
@@ -59,6 +71,12 @@ from .request_body_encoding_invalid_error_details import (
 from .request_body_too_large_after_decoding_error import (
     RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
 )
+from .linked_organization_billing_unavailable_error import (
+    LinkedOrganizationBillingUnavailableError as LinkedOrganizationBillingUnavailableError,
+)
+from .linked_organization_spend_limit_reached_error import (
+    LinkedOrganizationSpendLimitReachedError as LinkedOrganizationSpendLimitReachedError,
+)
 from .organization_type_not_supported_error_details import (
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
 )
@@ -70,4 +88,10 @@ from .claude_code_key_creator_not_member_error_details import (
 )
 from .request_body_too_large_after_decoding_error_details import (
     RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
+)
+from .linked_organization_billing_unavailable_error_details import (
+    LinkedOrganizationBillingUnavailableErrorDetails as LinkedOrganizationBillingUnavailableErrorDetails,
+)
+from .linked_organization_spend_limit_reached_error_details import (
+    LinkedOrganizationSpendLimitReachedErrorDetails as LinkedOrganizationSpendLimitReachedErrorDetails,
 )

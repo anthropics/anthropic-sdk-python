@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_skill_not_found_deployment_paused_reason_error_object import (
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError(BaseModel):
-    """A skill referenced by the deployment's agent no longer exists."""
-
-    type: Literal["skill_not_found_error"]
+BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError = (
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject
+"""

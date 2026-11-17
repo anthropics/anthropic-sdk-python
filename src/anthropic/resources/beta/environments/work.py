@@ -70,12 +70,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Retrieve detailed information about a specific work item.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -149,12 +151,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Update work item metadata with merge semantics.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
@@ -233,12 +237,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaSelfHostedWork]:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         List work items in an environment.
+
+        This endpoint accepts the environment key as a bearer token. It rejects a Claude
+        API key. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           limit: Maximum number of work items to return
@@ -597,11 +603,6 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Stop a work item, initiating graceful or forced shutdown.
 
         Args:
@@ -699,12 +700,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Retrieve detailed information about a specific work item.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -778,12 +781,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Update work item metadata with merge semantics.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
@@ -862,12 +867,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaSelfHostedWork, AsyncPageCursor[BetaSelfHostedWork]]:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         List work items in an environment.
+
+        This endpoint accepts the environment key as a bearer token. It rejects a Claude
+        API key. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           limit: Maximum number of work items to return
@@ -1226,11 +1233,6 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Stop a work item, initiating graceful or forced shutdown.
 
         Args:

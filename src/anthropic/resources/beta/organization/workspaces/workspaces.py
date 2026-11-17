@@ -114,12 +114,13 @@ class Workspaces(SyncAPIResource):
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
               the value for an AWS KMS key is the key's ARN, and your organization's own key
-              must be a single-Region key in the same AWS account and Region as the Workspace.
-              On that platform the key is validated against this Workspace when it is
-              attached, so a key-policy problem is reported as an error on this request. This
-              field is write-once: once a key is attached to a Workspace it cannot be detached
-              or replaced. To rotate key material, rotate the underlying key on your cloud
-              KMS; the `external_key_id` stays the same.
+              must be a single-Region key in the same Region as the Workspace. If that key is
+              outside the Workspace's AWS account, it can be attached only by updating an
+              active Workspace. On that platform the key is validated against this Workspace
+              when it is attached, so a key-policy problem is reported as an error on this
+              request. This field is write-once: once a key is attached to a Workspace it
+              cannot be detached or replaced. To rotate key material, rotate the underlying
+              key on your cloud KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
@@ -253,12 +254,13 @@ class Workspaces(SyncAPIResource):
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
               the value for an AWS KMS key is the key's ARN, and your organization's own key
-              must be a single-Region key in the same AWS account and Region as the Workspace.
-              On that platform the key is validated against this Workspace when it is
-              attached, so a key-policy problem is reported as an error on this request. This
-              field is write-once: once a key is attached to a Workspace it cannot be detached
-              or replaced. To rotate key material, rotate the underlying key on your cloud
-              KMS; the `external_key_id` stays the same.
+              must be a single-Region key in the same Region as the Workspace. If that key is
+              outside the Workspace's AWS account, it can be attached only by updating an
+              active Workspace. On that platform the key is validated against this Workspace
+              when it is attached, so a key-policy problem is reported as an error on this
+              request. This field is write-once: once a key is attached to a Workspace it
+              cannot be detached or replaced. To rotate key material, rotate the underlying
+              key on your cloud KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 
@@ -499,12 +501,13 @@ class AsyncWorkspaces(AsyncAPIResource):
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
               the value for an AWS KMS key is the key's ARN, and your organization's own key
-              must be a single-Region key in the same AWS account and Region as the Workspace.
-              On that platform the key is validated against this Workspace when it is
-              attached, so a key-policy problem is reported as an error on this request. This
-              field is write-once: once a key is attached to a Workspace it cannot be detached
-              or replaced. To rotate key material, rotate the underlying key on your cloud
-              KMS; the `external_key_id` stays the same.
+              must be a single-Region key in the same Region as the Workspace. If that key is
+              outside the Workspace's AWS account, it can be attached only by updating an
+              active Workspace. On that platform the key is validated against this Workspace
+              when it is attached, so a key-policy problem is reported as an error on this
+              request. This field is write-once: once a key is attached to a Workspace it
+              cannot be detached or replaced. To rotate key material, rotate the underlying
+              key on your cloud KMS; the `external_key_id` stays the same.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
@@ -638,12 +641,13 @@ class AsyncWorkspaces(AsyncAPIResource):
               When set, data stored for this Workspace is encrypted with the referenced key.
               Create key configurations with the External Keys API. On Claude Platform on AWS
               the value for an AWS KMS key is the key's ARN, and your organization's own key
-              must be a single-Region key in the same AWS account and Region as the Workspace.
-              On that platform the key is validated against this Workspace when it is
-              attached, so a key-policy problem is reported as an error on this request. This
-              field is write-once: once a key is attached to a Workspace it cannot be detached
-              or replaced. To rotate key material, rotate the underlying key on your cloud
-              KMS; the `external_key_id` stays the same.
+              must be a single-Region key in the same Region as the Workspace. If that key is
+              outside the Workspace's AWS account, it can be attached only by updating an
+              active Workspace. On that platform the key is validated against this Workspace
+              when it is attached, so a key-policy problem is reported as an error on this
+              request. This field is write-once: once a key is attached to a Workspace it
+              cannot be detached or replaced. To rotate key material, rotate the underlying
+              key on your cloud KMS; the `external_key_id` stays the same.
 
           name: Name of the Workspace.
 

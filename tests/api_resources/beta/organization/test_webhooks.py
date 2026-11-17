@@ -133,7 +133,7 @@ class TestWebhooks:
         webhook = client.beta.organization.webhooks.update(
             webhook_endpoint_id="webhook_endpoint_id",
             description="description",
-            enabled_events=["user_profile.enforcement_action_opened"],
+            enabled_events=["external_key.failed"],
             name="name",
             state="disabled",
             url="x",
@@ -436,7 +436,7 @@ class TestAsyncWebhooks:
         webhook = await async_client.beta.organization.webhooks.update(
             webhook_endpoint_id="webhook_endpoint_id",
             description="description",
-            enabled_events=["user_profile.enforcement_action_opened"],
+            enabled_events=["external_key.failed"],
             name="name",
             state="disabled",
             url="x",

@@ -701,6 +701,7 @@ def test_pause_turn_resumes_runner_sync(respx_mock: MockRouter) -> None:
     ) as client:
         message = client.beta.messages.tool_runner(
             thread=False,
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather, {"type": "web_search_20250305", "name": "web_search"}],
@@ -709,6 +710,9 @@ def test_pause_turn_resumes_runner_sync(respx_mock: MockRouter) -> None:
 
     assert message.stop_reason == "end_turn"
     assert len(respx_mock.calls) == 2
+    assert [body["billing_policy"] for body in _sent_request_bodies(respx_mock)] == [
+        {"type": "billing_policy", "bill_to": "user_profile"},
+    ] * 2
     assert json.loads(respx_mock.calls.last.request.content)["messages"][-1] == _PAUSED_ASSISTANT_TURN
 
 
@@ -732,6 +736,7 @@ async def test_pause_turn_resumes_runner_async(respx_mock: MockRouter) -> None:
     ) as client:
         message = await client.beta.messages.tool_runner(
             thread=False,
+            billing_policy={"type": "billing_policy", "bill_to": "user_profile"},
             max_tokens=1024,
             model="claude-haiku-4-5",
             tools=[get_weather, {"type": "web_search_20250305", "name": "web_search"}],
@@ -740,6 +745,9 @@ async def test_pause_turn_resumes_runner_async(respx_mock: MockRouter) -> None:
 
     assert message.stop_reason == "end_turn"
     assert len(respx_mock.calls) == 2
+    assert [body["billing_policy"] for body in _sent_request_bodies(respx_mock)] == [
+        {"type": "billing_policy", "bill_to": "user_profile"},
+    ] * 2
     assert json.loads(respx_mock.calls.last.request.content)["messages"][-1] == _PAUSED_ASSISTANT_TURN
 
 

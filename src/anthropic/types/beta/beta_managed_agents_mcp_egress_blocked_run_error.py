@@ -1,16 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_mcp_egress_blocked_run_error_object import BetaManagedAgentsMCPEgressBlockedRunErrorObject
 
 __all__ = ["BetaManagedAgentsMCPEgressBlockedRunError"]
 
-
-class BetaManagedAgentsMCPEgressBlockedRunError(BaseModel):
-    """
-    An MCP server host used by the deployment's agent is blocked by the environment's network policy.
-    """
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["mcp_egress_blocked_error"]
+BetaManagedAgentsMCPEgressBlockedRunError = BetaManagedAgentsMCPEgressBlockedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsMCPEgressBlockedRunError has been renamed to BetaManagedAgentsMCPEgressBlockedRunErrorObject
+"""

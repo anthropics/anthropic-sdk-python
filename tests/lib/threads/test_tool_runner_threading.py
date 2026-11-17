@@ -12,7 +12,7 @@ from respx import MockRouter
 from anthropic import AnthropicError, AnthropicVertex, AnthropicBedrock, AnthropicFoundry, AnthropicBedrockMantle
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import beta_tool
-from anthropic.types.beta import BetaMessageParam
+from anthropic.types.beta import BetaMessageParam, BetaBillingPolicyParam
 from anthropic.lib.threads import BetaMessageThread
 
 from .helpers import (
@@ -617,6 +617,106 @@ class TestToolRunnerThreading:
         assert CONTEXT_MANAGEMENT_BETA in request_betas(respx_mock)[1]
         assert second.headers["anthropic-user-profile-id"] == "uprof_a"
         assert second.headers["anthropic-workspace-id"] == "wrkspc_a"
+
+    @pytest.mark.parametrize(
+        "billing_policy",
+        [{"type": "billing_policy", "bill_to": "user_profile"}, {"type": "billing_policy", "bill_to": "self"}, None],
+        ids=["user_profile", "self", "none"],
+    )
+    @pytest.mark.parametrize("replacement", ["params", "callback", "callback_changing_its_argument"])
+    @RUNNER_MODES
+    @RESPONSE_KINDS
+    def test_runner_drops_the_user_profile_with_the_billing_policy_that_set_messages_params_leaves_out(
+        self,
+        respx_mock: MockRouter,
+        respond: Any,
+        stream: bool,
+        mode: dict[str, Any],
+        replacement: str,
+        billing_policy: BetaBillingPolicyParam | None,
+    ) -> None:
+        queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
+        tool = beta_tool(get_weather)
+        runner = make_runner(
+            stream=stream,
+            tools=[tool],
+            user_profile_id="uprof_a",
+            workspace_id="wrkspc_a",
+            billing_policy=billing_policy,
+            **mode,
+        )
+
+        params: Any = {"model": MODEL, "max_tokens": 2048, "tools": [tool.to_dict()], "messages": [WEATHER_QUESTION]}
+
+        def callback(old_params: Any) -> Any:
+            if replacement == "callback_changing_its_argument":
+                del old_params["billing_policy"]
+            return params
+
+        next(runner)
+        runner.set_messages_params(params if replacement == "params" else callback)
+        runner.until_done()
+
+        first, second = sent_requests(respx_mock)
+        assert first.headers["anthropic-user-profile-id"] == "uprof_a"
+        assert "billing_policy" in json.loads(first.content)
+        assert "anthropic-user-profile-id" not in second.headers
+        assert "billing_policy" not in json.loads(second.content)
+        assert second.headers["anthropic-workspace-id"] == "wrkspc_a"
+
+    @RUNNER_MODES
+    def test_runner_keeps_the_user_profile_for_a_billing_policy_that_set_messages_params_gives(
+        self, respx_mock: MockRouter, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b"))
+        tool = beta_tool(get_weather)
+        billing_policy = {"type": "billing_policy", "bill_to": "user_profile"}
+        runner = make_runner(tools=[tool], user_profile_id="uprof_a", billing_policy=billing_policy, **mode)
+
+        params: Any = {"model": MODEL, "max_tokens": 2048, "tools": [tool.to_dict()], "messages": [WEATHER_QUESTION]}
+        params["billing_policy"] = billing_policy
+
+        next(runner)
+        runner.set_messages_params(params)
+        runner.until_done()
+
+        assert sent_requests(respx_mock)[1].headers["anthropic-user-profile-id"] == "uprof_a"
+        assert request_bodies(respx_mock)[1]["billing_policy"] == billing_policy
+
+    @RUNNER_MODES
+    def test_runner_sends_the_user_profile_that_set_messages_params_gives_without_the_billing_policy(
+        self, respx_mock: MockRouter, mode: dict[str, Any]
+    ) -> None:
+        queue_responses(respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b"))
+        billing_policy = {"type": "billing_policy", "bill_to": "user_profile"}
+        runner = make_runner(user_profile_id="uprof_a", billing_policy=billing_policy, **mode)
+
+        def without_the_billing_policy(params: Any) -> Any:
+            return {name: value for name, value in params.items() if name != "billing_policy"}
+
+        next(runner)
+        runner.set_messages_params(without_the_billing_policy)
+        runner.until_done()
+
+        assert sent_requests(respx_mock)[1].headers["anthropic-user-profile-id"] == "uprof_a"
+        assert "billing_policy" not in request_bodies(respx_mock)[1]
+
+    @pytest.mark.parametrize(
+        "billing_policy", [{"type": "billing_policy", "bill_to": "self"}, None], ids=["changed", "cleared"]
+    )
+    @RUNNER_MODES
+    def test_runner_sends_the_billing_policy_that_set_messages_params_gives(
+        self, respx_mock: MockRouter, mode: dict[str, Any], billing_policy: BetaBillingPolicyParam | None
+    ) -> None:
+        queue_responses(respx_mock, message_response("msg_a", tool_use_id="toolu_a"), message_response("msg_b"))
+        first = {"type": "billing_policy", "bill_to": "user_profile"}
+        runner = make_runner(billing_policy=first, **mode)
+
+        next(runner)
+        runner.set_messages_params(lambda params: {**params, "billing_policy": billing_policy})
+        runner.until_done()
+
+        assert [body["billing_policy"] for body in request_bodies(respx_mock)] == [first, billing_policy]
 
     @RUNNER_MODES
     def test_runner_sends_the_betas_that_set_messages_params_gives(

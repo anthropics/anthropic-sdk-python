@@ -11,6 +11,7 @@ from .beta_text_block_param import BetaTextBlockParam
 from .beta_mcp_toolset_param import BetaMCPToolsetParam
 from .beta_tool_choice_param import BetaToolChoiceParam
 from .beta_output_config_param import BetaOutputConfigParam
+from .beta_billing_policy_param import BetaBillingPolicyParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_tool_bash_20241022_param import BetaToolBash20241022Param
@@ -124,6 +125,14 @@ class MessageCountTokensParams(TypedDict, total=False):
 
     See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    billing_policy: Optional[BetaBillingPolicyParam]
+    """Declares which organization is billed when this body is sent to `/v1/messages`.
+
+    Accepted here so that you can count the tokens of the exact body you will send,
+    and otherwise ignored: counting tokens bills nobody, so no user profile is
+    required.
     """
 
     cache_control: Optional[BetaCacheControlEphemeralParam]

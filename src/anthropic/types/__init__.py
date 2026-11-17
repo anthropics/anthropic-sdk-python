@@ -14,13 +14,21 @@ from .shared import (
     RateLimitError as RateLimitError,
     OverloadedError as OverloadedError,
     PermissionError as PermissionError,
+    BillingErrorObject as BillingErrorObject,
     AuthenticationError as AuthenticationError,
     GatewayTimeoutError as GatewayTimeoutError,
     InvalidRequestError as InvalidRequestError,
+    NotFoundErrorObject as NotFoundErrorObject,
     CMEKKeyDisabledError as CMEKKeyDisabledError,
+    RateLimitErrorObject as RateLimitErrorObject,
+    OverloadedErrorObject as OverloadedErrorObject,
+    PermissionErrorObject as PermissionErrorObject,
     RampLimitExceededError as RampLimitExceededError,
     CMEKKeyUnreachableError as CMEKKeyUnreachableError,
     OrganizationOnHoldError as OrganizationOnHoldError,
+    AuthenticationErrorObject as AuthenticationErrorObject,
+    GatewayTimeoutErrorObject as GatewayTimeoutErrorObject,
+    InvalidRequestErrorObject as InvalidRequestErrorObject,
     CMEKKeyNetworkBlockedError as CMEKKeyNetworkBlockedError,
     CMEKContextUnavailableError as CMEKContextUnavailableError,
     CMEKKeyDisabledErrorDetails as CMEKKeyDisabledErrorDetails,
@@ -28,6 +36,7 @@ from .shared import (
     SandboxEgressRestrictedError as SandboxEgressRestrictedError,
     RampLimitExceededErrorDetails as RampLimitExceededErrorDetails,
     CMEKKeyUnreachableErrorDetails as CMEKKeyUnreachableErrorDetails,
+    ContractSpendLimitReachedError as ContractSpendLimitReachedError,
     EnforcedSpendLimitReachedError as EnforcedSpendLimitReachedError,
     OrganizationOnHoldErrorDetails as OrganizationOnHoldErrorDetails,
     ParentOrganizationRequiredError as ParentOrganizationRequiredError,
@@ -39,14 +48,19 @@ from .shared import (
     ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
     RequestBodyEncodingUnsupportedError as RequestBodyEncodingUnsupportedError,
     SandboxEgressRestrictedErrorDetails as SandboxEgressRestrictedErrorDetails,
+    ContractSpendLimitReachedErrorDetails as ContractSpendLimitReachedErrorDetails,
     EnforcedSpendLimitReachedErrorDetails as EnforcedSpendLimitReachedErrorDetails,
     RequestBodyTooLargeAfterDecodingError as RequestBodyTooLargeAfterDecodingError,
     ParentOrganizationRequiredErrorDetails as ParentOrganizationRequiredErrorDetails,
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
+    LinkedOrganizationSpendLimitReachedError as LinkedOrganizationSpendLimitReachedError,
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
     ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    LinkedOrganizationBillingUnavailableError as LinkedOrganizationBillingUnavailableError,
     RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails as RequestBodyTooLargeAfterDecodingErrorDetails,
+    LinkedOrganizationSpendLimitReachedErrorDetails as LinkedOrganizationSpendLimitReachedErrorDetails,
+    LinkedOrganizationBillingUnavailableErrorDetails as LinkedOrganizationBillingUnavailableErrorDetails,
 )
 from .message import Message as Message
 from .container import Container as Container
@@ -95,6 +109,7 @@ from .input_json_delta import InputJSONDelta as InputJSONDelta
 from .text_block_param import TextBlockParam as TextBlockParam
 from .tool_union_param import ToolUnionParam as ToolUnionParam
 from .base64_pdf_source import Base64PDFSource as Base64PDFSource
+from .beta_error_object import BetaErrorObject as BetaErrorObject
 from .browser_key_input import BrowserKeyInput as BrowserKeyInput
 from .cache_miss_reason import CacheMissReason as CacheMissReason
 from .diagnostics_param import DiagnosticsParam as DiagnosticsParam
@@ -160,6 +175,7 @@ from .thinking_block_param import ThinkingBlockParam as ThinkingBlockParam
 from .tool_reference_block import ToolReferenceBlock as ToolReferenceBlock
 from .tool_use_block_param import ToolUseBlockParam as ToolUseBlockParam
 from .url_pdf_source_param import URLPDFSourceParam as URLPDFSourceParam
+from .beta_api_error_object import BetaAPIErrorObject as BetaAPIErrorObject
 from .beta_overloaded_error import BetaOverloadedError as BetaOverloadedError
 from .beta_permission_error import BetaPermissionError as BetaPermissionError
 from .beta_rate_limit_error import BetaRateLimitError as BetaRateLimitError
@@ -231,6 +247,7 @@ from .user_profile_efs_program import UserProfileEfsProgram as UserProfileEfsPro
 from .user_profile_list_params import UserProfileListParams as UserProfileListParams
 from .base64_image_source_param import Base64ImageSourceParam as Base64ImageSourceParam
 from .beta_authentication_error import BetaAuthenticationError as BetaAuthenticationError
+from .beta_billing_error_object import BetaBillingErrorObject as BetaBillingErrorObject
 from .browser_coordinate_target import BrowserCoordinateTarget as BrowserCoordinateTarget
 from .browser_file_upload_input import BrowserFileUploadInput as BrowserFileUploadInput
 from .browser_find_config_param import BrowserFindConfigParam as BrowserFindConfigParam
@@ -273,6 +290,7 @@ from .user_profile_create_params import UserProfileCreateParams as UserProfileCr
 from .user_profile_cyber_program import UserProfileCyberProgram as UserProfileCyberProgram
 from .user_profile_list_order_by import UserProfileListOrderBy as UserProfileListOrderBy
 from .user_profile_update_params import UserProfileUpdateParams as UserProfileUpdateParams
+from .beta_not_found_error_object import BetaNotFoundErrorObject as BetaNotFoundErrorObject
 from .browser_find_tool_use_block import BrowserFindToolUseBlock as BrowserFindToolUseBlock
 from .browser_get_page_text_input import BrowserGetPageTextInput as BrowserGetPageTextInput
 from .browser_left_mouse_up_input import BrowserLeftMouseUpInput as BrowserLeftMouseUpInput
@@ -293,8 +311,12 @@ from .message_count_tokens_params import MessageCountTokensParams as MessageCoun
 from .server_tool_caller_20260120 import ServerToolCaller20260120 as ServerToolCaller20260120
 from .server_tool_use_block_param import ServerToolUseBlockParam as ServerToolUseBlockParam
 from .user_profile_program_status import UserProfileProgramStatus as UserProfileProgramStatus
+from .user_profile_required_error import UserProfileRequiredError as UserProfileRequiredError
 from .web_fetch_tool_result_block import WebFetchToolResultBlock as WebFetchToolResultBlock
 from .web_fetch_url_sources_param import WebFetchURLSourcesParam as WebFetchURLSourcesParam
+from .beta_overloaded_error_object import BetaOverloadedErrorObject as BetaOverloadedErrorObject
+from .beta_permission_error_object import BetaPermissionErrorObject as BetaPermissionErrorObject
+from .beta_rate_limit_error_object import BetaRateLimitErrorObject as BetaRateLimitErrorObject
 from .browser_hover_tool_use_block import BrowserHoverToolUseBlock as BrowserHoverToolUseBlock
 from .browser_new_tab_config_param import BrowserNewTabConfigParam as BrowserNewTabConfigParam
 from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
@@ -375,10 +397,12 @@ from .tool_text_editor_20250728_param import ToolTextEditor20250728Param as Tool
 from .user_profile_cyber_requirements import UserProfileCyberRequirements as UserProfileCyberRequirements
 from .user_profile_enforcement_action import UserProfileEnforcementAction as UserProfileEnforcementAction
 from .user_profile_enforcement_status import UserProfileEnforcementStatus as UserProfileEnforcementStatus
+from .user_profile_not_billable_error import UserProfileNotBillableError as UserProfileNotBillableError
 from .web_fetch_url_source_none_param import WebFetchURLSourceNoneParam as WebFetchURLSourceNoneParam
 from .web_fetch_url_source_only_param import WebFetchURLSourceOnlyParam as WebFetchURLSourceOnlyParam
 from .bash_code_execution_output_block import BashCodeExecutionOutputBlock as BashCodeExecutionOutputBlock
 from .bash_code_execution_result_block import BashCodeExecutionResultBlock as BashCodeExecutionResultBlock
+from .beta_authentication_error_object import BetaAuthenticationErrorObject as BetaAuthenticationErrorObject
 from .browser_close_tab_tool_use_block import BrowserCloseTabToolUseBlock as BrowserCloseTabToolUseBlock
 from .browser_file_upload_config_param import BrowserFileUploadConfigParam as BrowserFileUploadConfigParam
 from .browser_list_tabs_tool_use_block import BrowserListTabsToolUseBlock as BrowserListTabsToolUseBlock
@@ -399,6 +423,8 @@ from .response_computer_tool_use_block import ResponseComputerToolUseBlock as Re
 from .thread_unsupported_request_error import ThreadUnsupportedRequestError as ThreadUnsupportedRequestError
 from .tool_name_conflict_error_details import ToolNameConflictErrorDetails as ToolNameConflictErrorDetails
 from .web_fetch_tool_result_error_code import WebFetchToolResultErrorCode as WebFetchToolResultErrorCode
+from .beta_gateway_timeout_error_object import BetaGatewayTimeoutErrorObject as BetaGatewayTimeoutErrorObject
+from .beta_invalid_request_error_object import BetaInvalidRequestErrorObject as BetaInvalidRequestErrorObject
 from .browser_double_click_config_param import BrowserDoubleClickConfigParam as BrowserDoubleClickConfigParam
 from .browser_form_input_tool_use_block import BrowserFormInputToolUseBlock as BrowserFormInputToolUseBlock
 from .browser_left_click_tool_use_block import BrowserLeftClickToolUseBlock as BrowserLeftClickToolUseBlock
@@ -453,7 +479,9 @@ from .thinking_config_between_tools_param import ThinkingConfigBetweenToolsParam
 from .tool_search_tool_result_block_param import ToolSearchToolResultBlockParam as ToolSearchToolResultBlockParam
 from .tool_search_tool_result_error_param import ToolSearchToolResultErrorParam as ToolSearchToolResultErrorParam
 from .user_profile_enforcement_action_ban import UserProfileEnforcementActionBan as UserProfileEnforcementActionBan
+from .user_profile_required_error_details import UserProfileRequiredErrorDetails as UserProfileRequiredErrorDetails
 from .web_search_tool_request_error_param import WebSearchToolRequestErrorParam as WebSearchToolRequestErrorParam
+from .web_search_tool_result_error_object import WebSearchToolResultErrorObject as WebSearchToolResultErrorObject
 from .available_tools_limit_exceeded_error import AvailableToolsLimitExceededError as AvailableToolsLimitExceededError
 from .browser_get_page_text_tool_use_block import BrowserGetPageTextToolUseBlock as BrowserGetPageTextToolUseBlock
 from .browser_javascript_exec_config_param import BrowserJavascriptExecConfigParam as BrowserJavascriptExecConfigParam
@@ -472,6 +500,7 @@ from .response_browser_zoom_tool_use_block import ResponseBrowserZoomToolUseBloc
 from .response_computer_key_tool_use_block import ResponseComputerKeyToolUseBlock as ResponseComputerKeyToolUseBlock
 from .storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails as StorageQuotaExceededErrorDetails
 from .tool_search_tool_bm25_20251119_param import ToolSearchToolBm25_20251119Param as ToolSearchToolBm25_20251119Param
+from .tool_search_tool_result_error_object import ToolSearchToolResultErrorObject as ToolSearchToolResultErrorObject
 from .tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock as ToolSearchToolSearchResultBlock
 from .user_profile_not_found_error_details import UserProfileNotFoundErrorDetails as UserProfileNotFoundErrorDetails
 from .web_search_tool_result_block_content import WebSearchToolResultBlockContent as WebSearchToolResultBlockContent
@@ -544,6 +573,9 @@ from .user_profile_enforcement_action_reason import (
 from .user_profile_external_user_entity_type import (
     UserProfileExternalUserEntityType as UserProfileExternalUserEntityType,
 )
+from .code_execution_tool_result_error_object import (
+    CodeExecutionToolResultErrorObject as CodeExecutionToolResultErrorObject,
+)
 from .computer_cursor_position_tool_use_block import (
     ComputerCursorPositionToolUseBlock as ComputerCursorPositionToolUseBlock,
 )
@@ -567,6 +599,9 @@ from .thread_continue_in_flight_error_details import (
 )
 from .tool_reference_unresolved_error_details import (
     ToolReferenceUnresolvedErrorDetails as ToolReferenceUnresolvedErrorDetails,
+)
+from .user_profile_not_billable_error_details import (
+    UserProfileNotBillableErrorDetails as UserProfileNotBillableErrorDetails,
 )
 from .web_fetch_tool_result_error_block_param import (
     WebFetchToolResultErrorBlockParam as WebFetchToolResultErrorBlockParam,
@@ -619,6 +654,9 @@ from .response_computer_hold_key_tool_use_block import (
 from .thread_fingerprint_mismatch_error_details import (
     ThreadFingerprintMismatchErrorDetails as ThreadFingerprintMismatchErrorDetails,
 )
+from .user_profile_billing_not_authorized_error import (
+    UserProfileBillingNotAuthorizedError as UserProfileBillingNotAuthorizedError,
+)
 from .user_profile_enforcement_action_next_step import (
     UserProfileEnforcementActionNextStep as UserProfileEnforcementActionNextStep,
 )
@@ -661,6 +699,9 @@ from .response_browser_switch_tab_tool_use_block import (
 from .tool_search_tool_search_result_block_param import (
     ToolSearchToolSearchResultBlockParam as ToolSearchToolSearchResultBlockParam,
 )
+from .web_search_tool_request_error_object_param import (
+    WebSearchToolRequestErrorObjectParam as WebSearchToolRequestErrorObjectParam,
+)
 from .bash_code_execution_tool_result_block_param import (
     BashCodeExecutionToolResultBlockParam as BashCodeExecutionToolResultBlockParam,
 )
@@ -693,6 +734,9 @@ from .user_profile_enforcement_action_restriction import (
 )
 from .available_tools_limit_exceeded_error_details import (
     AvailableToolsLimitExceededErrorDetails as AvailableToolsLimitExceededErrorDetails,
+)
+from .bash_code_execution_tool_result_error_object import (
+    BashCodeExecutionToolResultErrorObject as BashCodeExecutionToolResultErrorObject,
 )
 from .beta_organization_not_enrolled_in_beta_error import (
     BetaOrganizationNotEnrolledInBetaError as BetaOrganizationNotEnrolledInBetaError,
@@ -784,6 +828,9 @@ from .compaction_too_many_tool_references_error_details import (
 from .text_editor_code_execution_tool_result_error_code import (
     TextEditorCodeExecutionToolResultErrorCode as TextEditorCodeExecutionToolResultErrorCode,
 )
+from .user_profile_billing_not_authorized_error_details import (
+    UserProfileBillingNotAuthorizedErrorDetails as UserProfileBillingNotAuthorizedErrorDetails,
+)
 from .text_editor_code_execution_tool_result_block_param import (
     TextEditorCodeExecutionToolResultBlockParam as TextEditorCodeExecutionToolResultBlockParam,
 )
@@ -795,6 +842,9 @@ from .text_editor_code_execution_view_result_block_param import (
 )
 from .text_editor_code_execution_str_replace_result_block import (
     TextEditorCodeExecutionStrReplaceResultBlock as TextEditorCodeExecutionStrReplaceResultBlock,
+)
+from .text_editor_code_execution_tool_result_error_object import (
+    TextEditorCodeExecutionToolResultErrorObject as TextEditorCodeExecutionToolResultErrorObject,
 )
 from .beta_organization_not_enrolled_in_beta_error_details import (
     BetaOrganizationNotEnrolledInBetaErrorDetails as BetaOrganizationNotEnrolledInBetaErrorDetails,

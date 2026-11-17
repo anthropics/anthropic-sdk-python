@@ -1,16 +1,8 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_invalid_request_error_object import BetaInvalidRequestErrorObject
 
 __all__ = ["BetaInvalidRequestError"]
 
-
-class BetaInvalidRequestError(BaseModel):
-    message: str
-    """A human-readable explanation of the error.
-
-    Its wording can change, so don't match on it.
-    """
-
-    type: Literal["invalid_request_error"]
-    """The broad category of the error."""
+BetaInvalidRequestError = BetaInvalidRequestErrorObject
+"""
+Deprecated: BetaInvalidRequestError has been renamed to BetaInvalidRequestErrorObject
+"""

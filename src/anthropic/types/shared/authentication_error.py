@@ -1,16 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .authentication_error_object import AuthenticationErrorObject
 
 __all__ = ["AuthenticationError"]
 
-
-class AuthenticationError(BaseModel):
-    message: str
-    """A human-readable explanation of the error.
-
-    Its wording can change, so don't match on it.
-    """
-
-    type: Literal["authentication_error"]
-    """The broad category of the error."""
+AuthenticationError = AuthenticationErrorObject
+"""Deprecated: AuthenticationError has been renamed to AuthenticationErrorObject"""

@@ -3,41 +3,49 @@ from datetime import datetime
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from ...._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_billing_error import BetaManagedAgentsBillingError
-from .beta_managed_agents_unknown_error import BetaManagedAgentsUnknownError
-from .beta_managed_agents_model_overloaded_error import BetaManagedAgentsModelOverloadedError
-from .beta_managed_agents_repository_clone_error import BetaManagedAgentsRepositoryCloneError
-from .beta_managed_agents_model_rate_limited_error import BetaManagedAgentsModelRateLimitedError
-from .beta_managed_agents_repository_checkout_error import BetaManagedAgentsRepositoryCheckoutError
-from .beta_managed_agents_model_request_failed_error import BetaManagedAgentsModelRequestFailedError
-from .beta_managed_agents_repository_forbidden_error import BetaManagedAgentsRepositoryForbiddenError
-from .beta_managed_agents_repository_not_found_error import BetaManagedAgentsRepositoryNotFoundError
-from .beta_managed_agents_mcp_connection_failed_error import BetaManagedAgentsMCPConnectionFailedError
-from .beta_managed_agents_tool_use_limit_reached_error import BetaManagedAgentsToolUseLimitReachedError
-from .beta_managed_agents_compaction_limit_reached_error import BetaManagedAgentsCompactionLimitReachedError
-from .beta_managed_agents_mcp_authentication_failed_error import BetaManagedAgentsMCPAuthenticationFailedError
-from .beta_managed_agents_repository_authentication_error import BetaManagedAgentsRepositoryAuthenticationError
-from .beta_managed_agents_credential_host_unreachable_error import BetaManagedAgentsCredentialHostUnreachableError
+from .beta_managed_agents_billing_error_object import BetaManagedAgentsBillingErrorObject
+from .beta_managed_agents_unknown_error_object import BetaManagedAgentsUnknownErrorObject
+from .beta_managed_agents_model_overloaded_error_object import BetaManagedAgentsModelOverloadedErrorObject
+from .beta_managed_agents_repository_clone_error_object import BetaManagedAgentsRepositoryCloneErrorObject
+from .beta_managed_agents_model_rate_limited_error_object import BetaManagedAgentsModelRateLimitedErrorObject
+from .beta_managed_agents_repository_checkout_error_object import BetaManagedAgentsRepositoryCheckoutErrorObject
+from .beta_managed_agents_model_request_failed_error_object import BetaManagedAgentsModelRequestFailedErrorObject
+from .beta_managed_agents_repository_forbidden_error_object import BetaManagedAgentsRepositoryForbiddenErrorObject
+from .beta_managed_agents_repository_not_found_error_object import BetaManagedAgentsRepositoryNotFoundErrorObject
+from .beta_managed_agents_mcp_connection_failed_error_object import BetaManagedAgentsMCPConnectionFailedErrorObject
+from .beta_managed_agents_tool_use_limit_reached_error_object import BetaManagedAgentsToolUseLimitReachedErrorObject
+from .beta_managed_agents_compaction_limit_reached_error_object import (
+    BetaManagedAgentsCompactionLimitReachedErrorObject,
+)
+from .beta_managed_agents_mcp_authentication_failed_error_object import (
+    BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+)
+from .beta_managed_agents_repository_authentication_error_object import (
+    BetaManagedAgentsRepositoryAuthenticationErrorObject,
+)
+from .beta_managed_agents_credential_host_unreachable_error_object import (
+    BetaManagedAgentsCredentialHostUnreachableErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSessionErrorEvent", "Error"]
 
 Error: TypeAlias = Annotated[
     Union[
-        BetaManagedAgentsUnknownError,
-        BetaManagedAgentsModelOverloadedError,
-        BetaManagedAgentsModelRateLimitedError,
-        BetaManagedAgentsModelRequestFailedError,
-        BetaManagedAgentsMCPConnectionFailedError,
-        BetaManagedAgentsMCPAuthenticationFailedError,
-        BetaManagedAgentsBillingError,
-        BetaManagedAgentsCredentialHostUnreachableError,
-        BetaManagedAgentsToolUseLimitReachedError,
-        BetaManagedAgentsCompactionLimitReachedError,
-        BetaManagedAgentsRepositoryAuthenticationError,
-        BetaManagedAgentsRepositoryForbiddenError,
-        BetaManagedAgentsRepositoryNotFoundError,
-        BetaManagedAgentsRepositoryCheckoutError,
-        BetaManagedAgentsRepositoryCloneError,
+        BetaManagedAgentsUnknownErrorObject,
+        BetaManagedAgentsModelOverloadedErrorObject,
+        BetaManagedAgentsModelRateLimitedErrorObject,
+        BetaManagedAgentsModelRequestFailedErrorObject,
+        BetaManagedAgentsMCPConnectionFailedErrorObject,
+        BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+        BetaManagedAgentsBillingErrorObject,
+        BetaManagedAgentsCredentialHostUnreachableErrorObject,
+        BetaManagedAgentsToolUseLimitReachedErrorObject,
+        BetaManagedAgentsCompactionLimitReachedErrorObject,
+        BetaManagedAgentsRepositoryAuthenticationErrorObject,
+        BetaManagedAgentsRepositoryForbiddenErrorObject,
+        BetaManagedAgentsRepositoryNotFoundErrorObject,
+        BetaManagedAgentsRepositoryCheckoutErrorObject,
+        BetaManagedAgentsRepositoryCloneErrorObject,
     ],
     UnionDiscriminator("type"),
 ]

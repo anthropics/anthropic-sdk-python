@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_vault_not_found_deployment_paused_reason_error_object import (
+    BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError(BaseModel):
-    """A vault referenced by the deployment no longer exists."""
-
-    type: Literal["vault_not_found_error"]
+BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError = (
+    BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject
+"""

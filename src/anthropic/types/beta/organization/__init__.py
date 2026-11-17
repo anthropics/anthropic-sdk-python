@@ -541,6 +541,9 @@ from .beta_slack_channel_set_up_environment_not_found_error import (
 from .beta_compliance_configuration_restricted_error_details import (
     BetaComplianceConfigurationRestrictedErrorDetails as BetaComplianceConfigurationRestrictedErrorDetails,
 )
+from .beta_plugin_marketplace_validation_plugin_error_object import (
+    BetaPluginMarketplaceValidationPluginErrorObject as BetaPluginMarketplaceValidationPluginErrorObject,
+)
 from .beta_slack_channel_set_up_settings_refused_error_details import (
     BetaSlackChannelSetUpSettingsRefusedErrorDetails as BetaSlackChannelSetUpSettingsRefusedErrorDetails,
 )

@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_file_not_found_deployment_paused_reason_error_object import (
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsFileNotFoundDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsFileNotFoundDeploymentPausedReasonError(BaseModel):
-    """A file resource referenced by the deployment no longer exists."""
-
-    type: Literal["file_not_found_error"]
+BetaManagedAgentsFileNotFoundDeploymentPausedReasonError = (
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsFileNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject
+"""

@@ -25,6 +25,7 @@ from .beta_webhook_deployment_unpaused_event_data import BetaWebhookDeploymentUn
 from .beta_webhook_environment_created_event_data import BetaWebhookEnvironmentCreatedEventData
 from .beta_webhook_environment_deleted_event_data import BetaWebhookEnvironmentDeletedEventData
 from .beta_webhook_environment_updated_event_data import BetaWebhookEnvironmentUpdatedEventData
+from .beta_webhook_external_key_failed_event_data import BetaWebhookExternalKeyFailedEventData
 from .beta_webhook_environment_archived_event_data import BetaWebhookEnvironmentArchivedEventData
 from .beta_webhook_memory_store_created_event_data import BetaWebhookMemoryStoreCreatedEventData
 from .beta_webhook_memory_store_deleted_event_data import BetaWebhookMemoryStoreDeletedEventData
@@ -33,6 +34,7 @@ from .beta_webhook_session_thread_idled_event_data import BetaWebhookSessionThre
 from .beta_webhook_deployment_run_failed_event_data import BetaWebhookDeploymentRunFailedEventData
 from .beta_webhook_memory_store_archived_event_data import BetaWebhookMemoryStoreArchivedEventData
 from .beta_webhook_deployment_run_started_event_data import BetaWebhookDeploymentRunStartedEventData
+from .beta_webhook_external_key_recovered_event_data import BetaWebhookExternalKeyRecoveredEventData
 from .beta_webhook_session_budget_reached_event_data import BetaWebhookSessionBudgetReachedEventData
 from .beta_webhook_session_thread_created_event_data import BetaWebhookSessionThreadCreatedEventData
 from .beta_webhook_session_requires_action_event_data import BetaWebhookSessionRequiresActionEventData
@@ -107,6 +109,8 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookUserProfileEnforcementActionOpenedEventData,
         BetaWebhookUserProfileEnforcementActionResolvedEventData,
         BetaWebhookUserProfileProgramStatusUpdatedEventData,
+        BetaWebhookExternalKeyFailedEventData,
+        BetaWebhookExternalKeyRecoveredEventData,
     ],
     UnionDiscriminator("type"),
 ]

@@ -458,11 +458,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -814,11 +826,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -1170,11 +1194,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -2222,11 +2258,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -2578,11 +2626,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -2934,11 +2994,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
