@@ -293,6 +293,37 @@ class TestAsyncMessageThread:
         assert thread.previous_message_id is None
 
     @ANSWERED_TURN_METHODS
+    @pytest.mark.parametrize("from_iterator", [False, True], ids=["list", "iterator"])
+    @pytest.mark.parametrize("lost_thread", [False, True], ids=["unthreaded", "replay"])
+    async def test_turn_recovery_keeps_the_given_tools(
+        self, respx_mock: MockRouter, method: str, from_iterator: bool, lost_thread: bool
+    ) -> None:
+        tools: list[BetaToolParam] = [{"name": "noop", "input_schema": {"type": "object"}}]
+        respond = async_stream_response if method == "stream" else message_response
+        starting_responses = (
+            [message_response("msg_a"), THREAD_NOT_FOUND] if lost_thread else [unsupported_response("inference_hooks")]
+        )
+        queue_responses(respx_mock, *starting_responses, respond("msg_b"), message_response("msg_c"))
+        thread = (
+            make_async_thread(tools=tools)
+            if lost_thread
+            else make_async_thread(unsupported_request_behavior="continue_unthreaded")
+        )
+        if lost_thread:
+            await thread.send(user("Hello"))
+
+        await run_turn(thread, method, user("Again"), tools=iter(tools) if from_iterator else tools)
+        await thread.send(user("One more"))
+
+        assert request_threads(respx_mock) == (
+            [CREATE, continue_from("msg_a"), CREATE, continue_from("msg_b")] if lost_thread else [CREATE, None, None]
+        )
+        assert [body.get("tools") for body in request_bodies(respx_mock)] == (
+            [tools, None, tools, None] if lost_thread else [tools, tools, None]
+        )
+        assert thread.params.get("tools") == (tools if lost_thread else None)
+
+    @ANSWERED_TURN_METHODS
     async def test_continue_unthreaded_stops_threading_when_the_thread_is_lost_again_right_after_a_replay(
         self, respx_mock: MockRouter, method: str
     ) -> None:
