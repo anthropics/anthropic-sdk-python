@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import functools
-from typing import Dict, Callable, Optional, Protocol
+from typing import Dict, Callable, Optional, Protocol, Awaitable
 from dataclasses import field, dataclass
 from typing_extensions import TypeIs, override, runtime_checkable
 
@@ -17,6 +17,8 @@ __all__ = [
     "AsyncAccessTokenProvider",
     "BaseURLBoundProvider",
     "IdentityTokenProvider",
+    "AsyncIdentityTokenProvider",
+    "is_async_identity_token_provider",
     "CredentialResult",
 ]
 
@@ -110,7 +112,28 @@ class BaseURLBoundProvider(AccessTokenProvider, Protocol):
 
 # Innermost layer: returns the raw external JWT string (used as the
 # `identity_token_provider` argument to `WorkloadIdentityCredentials`).
+# Strictly sync: a `Callable[[], str]`. The async twin class
+# `AsyncWorkloadIdentityCredentials` accepts the wider `Callable[[], str | Awaitable[str]]`
+# (declared inline on its constructor) so the sync class keeps its tight
+# contract and the async class can take either a sync or async provider.
 IdentityTokenProvider = Callable[[], str]
+
+
+# `AsyncIdentityTokenProvider` is the narrow async-flavored alias. Used by
+# `is_async_identity_token_provider` (and exported for downstream typing).
+AsyncIdentityTokenProvider = Callable[[], Awaitable[str]]
+
+
+def is_async_identity_token_provider(provider: object) -> TypeIs[AsyncIdentityTokenProvider]:
+    """True if `provider` is an `async def` function, a callable whose `__call__`
+    is one, or a `functools.partial` of either.
+
+    Mirror of `is_async_token_provider` for the `IdentityTokenProvider` layer.
+    Used by `AsyncWorkloadIdentityCredentials.__call__` to decide whether to
+    `await` the result or read it synchronously.
+    """
+    provider = unwrap_partial(provider)
+    return inspect.iscoroutinefunction(provider) or inspect.iscoroutinefunction(getattr(provider, "__call__", None))  # noqa: B004
 
 
 @dataclass(frozen=True)
