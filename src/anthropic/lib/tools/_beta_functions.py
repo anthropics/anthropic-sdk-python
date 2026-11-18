@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import sys
 import logging
+import functools
 from abc import ABC, abstractmethod
 from typing import Any, Union, Generic, TypeVar, Callable, Iterable, Coroutine, cast, overload
-from inspect import isawaitable, isasyncgenfunction, iscoroutinefunction, isgeneratorfunction
+from inspect import isawaitable, isasyncgenfunction, iscoroutinefunction, isgeneratorfunction, signature
 from collections.abc import Awaitable
 from typing_extensions import Literal, TypeAlias, override
 
@@ -68,6 +69,105 @@ FunctionT = TypeVar("FunctionT", bound=Function)
 
 AsyncFunction = Callable[..., Coroutine[Any, Any, BetaFunctionToolResultType]]
 AsyncFunctionT = TypeVar("AsyncFunctionT", bound=AsyncFunction)
+
+
+def _is_async_callable(func: object) -> bool:
+    if isinstance(func, functools.partial):
+        return _is_async_callable(func.func)
+    return iscoroutinefunction(func) or iscoroutinefunction(getattr(func, "__call__", None))
+
+
+def _get_callable_name(func: object) -> str:
+    if isinstance(func, functools.partial):
+        return _get_callable_name(func.func)
+    return cast(str, getattr(func, "__name__", type(func).__name__))
+
+
+def _get_callable_docstring(func: object) -> str | None:
+    if isinstance(func, functools.partial):
+        return _get_callable_docstring(func.func)
+    if not hasattr(func, "__annotations__"):
+        func = getattr(func, "__call__", func)
+    return getattr(func, "__doc__", None)
+
+
+class _ToolBodyValidationError(Exception):
+    """Marker for a `ValidationError` raised by the tool body, not by argument validation.
+
+    `pydantic.validate_call` validates the arguments and then calls the function in one step, so a
+    `ValidationError` raised inside the body (for example while constructing a model from bad data) is
+    indistinguishable from one raised because the model's arguments were wrong. Wrapping the body lets us tell
+    them apart and re-raise the body's error unchanged instead of reporting it as a bad tool call.
+    """
+
+    def __init__(self, error: pydantic.ValidationError) -> None:
+        super().__init__(str(error))
+        self.error = error
+
+
+def _wrap_body_validation_errors(func: FunctionT) -> FunctionT:
+    """Re-raise a `ValidationError` from inside `func` as `_ToolBodyValidationError` so argument validation (which
+    `validate_call` runs before calling `func`) stays distinguishable from it."""
+    # A partial's signature and annotations come from its underlying function.
+    # Keep a regular wrapper (rather than passing the partial to validate_call),
+    # since Pydantic reads annotations from the wrapper and partial objects do
+    # not expose them. Its signature still reflects the bound arguments.
+    if isinstance(func, functools.partial):
+        wrapped_func = _wrap_body_validation_errors(func.func)
+        wrapped_partial = functools.partial(wrapped_func, *func.args, **(func.keywords or {}))
+        if _is_async_callable(func):
+
+            @functools.wraps(wrapped_func)
+            async def async_partial_wrapper(*args: Any, **kwargs: Any) -> Any:
+                return await wrapped_partial(*args, **kwargs)
+
+            async_partial_wrapper.__signature__ = signature(func)  # type: ignore[attr-defined]
+            return cast(FunctionT, async_partial_wrapper)
+
+        @functools.wraps(wrapped_func)
+        def partial_wrapper(*args: Any, **kwargs: Any) -> Any:
+            return wrapped_partial(*args, **kwargs)
+
+        partial_wrapper.__signature__ = signature(func)  # type: ignore[attr-defined]
+        return cast(FunctionT, partial_wrapper)
+
+    # `functools.wraps` must use the callable method for callable instances:
+    # the instance itself has no function annotations or globals for pydantic
+    # to resolve (and the wrapper's `Any` annotations may then raise NameError).
+    wrapped_func = func if hasattr(func, "__annotations__") else getattr(func, "__call__", func)
+    if iscoroutinefunction(wrapped_func):
+
+        @functools.wraps(wrapped_func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            try:
+                return await func(*args, **kwargs)
+            except pydantic.ValidationError as e:
+                raise _ToolBodyValidationError(e) from e
+
+        return cast(FunctionT, async_wrapper)
+
+    @functools.wraps(wrapped_func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return func(*args, **kwargs)
+        except pydantic.ValidationError as e:
+            raise _ToolBodyValidationError(e) from e
+
+    return cast(FunctionT, wrapper)
+
+
+def _validation_error_summary(exc: pydantic.ValidationError) -> str:
+    """The field errors of `exc` as one short line, e.g. `celsius: Input should be a valid integer`.
+
+    Only the location and message are included: the input values pydantic reports alongside them are model-supplied
+    and can be large or contain characters that don't belong in a tool result.
+    """
+    parts: list[str] = []
+    for error in exc.errors():
+        loc = ".".join(str(part) for part in error["loc"])
+        message = error["msg"]
+        parts.append(f"{loc}: {message}" if loc else message)
+    return "; ".join(parts)
 
 
 class BetaBuiltinFunctionTool(ABC):
@@ -165,8 +265,8 @@ class BaseFunctionTool(Generic[CallableT]):
             raise RuntimeError("Tool functions are only supported with Pydantic v2")
 
         self.func = func
-        self._func_with_validate = pydantic.validate_call(func)
-        self.name = name or func.__name__
+        self._func_with_validate = pydantic.validate_call(_wrap_body_validation_errors(func))
+        self.name = name or _get_callable_name(func)
         self._defer_loading = defer_loading
         self._cache_control = cache_control
         self._allowed_callers = allowed_callers
@@ -210,7 +310,7 @@ class BaseFunctionTool(Generic[CallableT]):
 
     @cached_property
     def _parsed_docstring(self) -> docstring_parser.Docstring:
-        return docstring_parser.parse(self.func.__doc__ or "")
+        return docstring_parser.parse(_get_callable_docstring(self.func) or "")
 
     def _get_description_from_docstring(self) -> str:
         """Extract description from parsed docstring."""
@@ -271,7 +371,7 @@ class BaseFunctionTool(Generic[CallableT]):
 
 class BetaFunctionTool(BaseFunctionTool[FunctionT]):
     def call(self, input: object) -> BetaFunctionToolResultType:
-        if iscoroutinefunction(self.func):
+        if _is_async_callable(self.func):
             raise RuntimeError("Cannot call a coroutine function synchronously. Use `@async_tool` instead.")
 
         if not is_dict(input):
@@ -279,13 +379,15 @@ class BetaFunctionTool(BaseFunctionTool[FunctionT]):
 
         try:
             return self._func_with_validate(**cast(Any, input))
+        except _ToolBodyValidationError as e:
+            raise e.error from None
         except pydantic.ValidationError as e:
-            raise ValueError(f"Invalid arguments for function {self.name}") from e
+            raise ValueError(f"Invalid arguments for function {self.name}: {_validation_error_summary(e)}") from e
 
 
 class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
     async def call(self, input: object) -> BetaFunctionToolResultType:
-        if not iscoroutinefunction(self.func):
+        if not _is_async_callable(self.func):
             raise RuntimeError("Cannot call a synchronous function asynchronously. Use `@tool` instead.")
 
         if not is_dict(input):
@@ -293,8 +395,10 @@ class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
 
         try:
             return await self._func_with_validate(**cast(Any, input))
+        except _ToolBodyValidationError as e:
+            raise e.error from None
         except pydantic.ValidationError as e:
-            raise ValueError(f"Invalid arguments for function {self.name}") from e
+            raise ValueError(f"Invalid arguments for function {self.name}: {_validation_error_summary(e)}") from e
 
 
 def _is_sync_cm_factory(fn: object) -> bool:
