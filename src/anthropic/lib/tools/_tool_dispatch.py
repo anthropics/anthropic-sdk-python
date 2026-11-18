@@ -283,7 +283,7 @@ def tool_result_content(content: BetaFunctionToolResultType | None) -> BetaFunct
     return blocks
 
 
-async def run_runnable_tool(tool: _CallableTool, input: dict[str, object]) -> BetaFunctionToolResultType:
+async def run_runnable_tool(tool: _CallableTool, input: object) -> BetaFunctionToolResultType:
     """Call `tool` with `input`, awaiting the result if the tool is async.
 
     Sync tools run on a worker thread. If the caller cancels (for example on a
