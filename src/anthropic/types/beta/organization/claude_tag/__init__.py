@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .bundle_list_params import BundleListParams as BundleListParams
+from .bundle_update_params import BundleUpdateParams as BundleUpdateParams
 from .beta_claude_tag_bundle import BetaClaudeTagBundle as BetaClaudeTagBundle
 from .slack_channel_list_params import SlackChannelListParams as SlackChannelListParams
 from .slack_channel_create_params import SlackChannelCreateParams as SlackChannelCreateParams

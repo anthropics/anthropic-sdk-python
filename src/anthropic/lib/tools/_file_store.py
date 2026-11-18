@@ -154,7 +154,7 @@ class FileStore:
 
         def read() -> bytes | None:
             try:
-                f = _open_regular_file(rel_path, dest)
+                f = open_regular_file(rel_path, dest)
             except FileNotFoundError:
                 return None
             with f:
@@ -330,7 +330,7 @@ def _replace_via_temp(dest: Path, data: bytes, is_executable: bool) -> None:
         raise
 
 
-def _open_regular_file(rel_path: str, dest: Path) -> IO[bytes]:
+def open_regular_file(rel_path: str, dest: Path) -> IO[bytes]:
     # O_NONBLOCK: a FIFO fails the fstat check below instead of blocking the open.
     try:
         fd = os.open(dest, os.O_RDONLY | _O_NOFOLLOW | _O_NONBLOCK)
@@ -350,7 +350,7 @@ def _open_regular_file(rel_path: str, dest: Path) -> IO[bytes]:
 
 def _hash_file(path: Path) -> str:
     digest = hashlib.sha256()
-    with _open_regular_file(path.name, path) as f:
+    with open_regular_file(path.name, path) as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()

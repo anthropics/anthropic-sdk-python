@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_unknown_deployment_paused_reason_error_object import (
+    BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsUnknownDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsUnknownDeploymentPausedReasonError(BaseModel):
-    """An unrecognized error auto-paused the deployment.
-
-    A fallback variant; matches a run whose `error.type` is `unknown_error`.
-    """
-
-    type: Literal["unknown_error"]
+BetaManagedAgentsUnknownDeploymentPausedReasonError = BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject
+"""
+Deprecated: BetaManagedAgentsUnknownDeploymentPausedReasonError has been renamed to BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject
+"""

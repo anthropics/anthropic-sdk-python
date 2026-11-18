@@ -1,6 +1,7 @@
 from typing import Optional
 
 from ...._models import BaseModel
+from .beta_claude_tag_reply_mode import BetaClaudeTagReplyMode
 from .beta_claude_tag_guest_policy import BetaClaudeTagGuestPolicy
 
 __all__ = ["BetaClaudeTagSettings"]
@@ -9,7 +10,7 @@ __all__ = ["BetaClaudeTagSettings"]
 class BetaClaudeTagSettings(BaseModel):
     """Claude Tag settings.
 
-    Without `include_inherited`, a setting that is null is not set on the settings level and is inherited. With it, `enabled` and `guest_policy` are never null, and `instructions`, `model` and `environment_id` are null when no settings level sets them.
+    Without `include_inherited`, a setting that is null is not set on the settings level and is inherited. With it, `enabled` and `guest_policy` are never null, `instructions`, `model` and `environment_id` are null when no settings level sets them, and `reply_mode` is null unless the channel itself stores one.
     """
 
     enabled: Optional[bool] = None
@@ -40,4 +41,13 @@ class BetaClaudeTagSettings(BaseModel):
 
     The nearest settings level that sets it decides. When none does, Claude uses the
     product's default model.
+    """
+
+    reply_mode: Optional[BetaClaudeTagReplyMode] = None
+    """How Claude takes part in the channel.
+
+    Only a channel stores one, and no settings level passes one on, so it is always
+    null on a workspace. Null on a channel means the channel stores none yet: Claude
+    then follows the reply mode chosen in Slack, if one was, else `automatic`. A
+    stored reply mode can be changed but never cleared.
     """

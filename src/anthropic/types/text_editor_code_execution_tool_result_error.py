@@ -1,15 +1,8 @@
-from typing import Optional
-from typing_extensions import Literal
-
-from .._models import BaseModel
-from .text_editor_code_execution_tool_result_error_code import TextEditorCodeExecutionToolResultErrorCode
+from .text_editor_code_execution_tool_result_error_object import TextEditorCodeExecutionToolResultErrorObject
 
 __all__ = ["TextEditorCodeExecutionToolResultError"]
 
-
-class TextEditorCodeExecutionToolResultError(BaseModel):
-    error_code: TextEditorCodeExecutionToolResultErrorCode
-
-    error_message: Optional[str] = None
-
-    type: Literal["text_editor_code_execution_tool_result_error"]
+TextEditorCodeExecutionToolResultError = TextEditorCodeExecutionToolResultErrorObject
+"""
+Deprecated: TextEditorCodeExecutionToolResultError has been renamed to TextEditorCodeExecutionToolResultErrorObject
+"""

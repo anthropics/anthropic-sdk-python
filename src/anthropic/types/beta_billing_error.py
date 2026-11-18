@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_billing_error_object import BetaBillingErrorObject
 
 __all__ = ["BetaBillingError"]
 
-
-class BetaBillingError(BaseModel):
-    message: str
-
-    type: Literal["billing_error"]
+BetaBillingError = BetaBillingErrorObject
+"""Deprecated: BetaBillingError has been renamed to BetaBillingErrorObject"""

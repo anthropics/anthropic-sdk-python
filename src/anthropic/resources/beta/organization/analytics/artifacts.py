@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import List, Union, Optional
 from datetime import date
-from typing_extensions import Literal
 
 import httpx2
 
@@ -18,6 +17,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity
+from .....types.beta.organization.beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy
 
 __all__ = ["Artifacts", "AsyncArtifacts"]
 
@@ -29,7 +29,7 @@ class Artifacts(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ArtifactsWithRawResponse(self)
 
@@ -38,7 +38,7 @@ class Artifacts(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ArtifactsWithStreamingResponse(self)
 
@@ -47,7 +47,7 @@ class Artifacts(SyncAPIResource):
         *,
         date: Union[str, date],
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsArtifactGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -82,8 +82,8 @@ class Artifacts(SyncAPIResource):
               bare group UUID, and matches users who held the group at any point during each
               covered UTC day (time-of-usage attribution); `user_id` takes a tagged user id
               (`user_...`), as emitted in responses. An unsupported dimension returns 400. At
-              most 100 entries. `chat_cowork_unified` is accepted as a `product` value only on
-              deployments that offer Chat and Cowork unified.
+              most 100 entries. `chat_cowork_unified` is accepted as a `product` value only
+              where Chat and Cowork unified is available.
 
           group_by: Dimensions to break results out by: `product`, `user_id` and/or `rbac_group_id`.
               The ungrouped artifact-type cube is finite and returned in full; grouped queries
@@ -138,7 +138,7 @@ class AsyncArtifacts(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncArtifactsWithRawResponse(self)
 
@@ -147,7 +147,7 @@ class AsyncArtifacts(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncArtifactsWithStreamingResponse(self)
 
@@ -156,7 +156,7 @@ class AsyncArtifacts(AsyncAPIResource):
         *,
         date: Union[str, date],
         filter: Optional[SequenceNotStr[str]] | Omit = omit,
-        group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]] | Omit = omit,
+        group_by: Optional[List[BetaAnalyticsArtifactGroupBy]] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         page: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -191,8 +191,8 @@ class AsyncArtifacts(AsyncAPIResource):
               bare group UUID, and matches users who held the group at any point during each
               covered UTC day (time-of-usage attribution); `user_id` takes a tagged user id
               (`user_...`), as emitted in responses. An unsupported dimension returns 400. At
-              most 100 entries. `chat_cowork_unified` is accepted as a `product` value only on
-              deployments that offer Chat and Cowork unified.
+              most 100 entries. `chat_cowork_unified` is accepted as a `product` value only
+              where Chat and Cowork unified is available.
 
           group_by: Dimensions to break results out by: `product`, `user_id` and/or `rbac_group_id`.
               The ungrouped artifact-type cube is finite and returned in full; grouped queries

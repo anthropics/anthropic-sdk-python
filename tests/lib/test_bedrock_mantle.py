@@ -10,12 +10,52 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import Omit, Anthropic, AnthropicBedrockMantle, AsyncAnthropicBedrockMantle, omit
+from anthropic import (
+    Omit,
+    Anthropic,
+    APIStatusError,
+    BadRequestError,
+    InternalServerError,
+    AnthropicBedrockMantle,
+    PreconditionFailedError,
+    ServiceUnavailableError,
+    AsyncAnthropicBedrockMantle,
+    omit,
+)
+from anthropic.types import ToolNameConflictError
 from anthropic._compat import PYDANTIC_V1
 
 MANTLE_MESSAGES_URL = "https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages"
 
 MODEL = "anthropic.claude-sonnet-4-5"
+
+STATUS_ERRORS = [
+    pytest.param(
+        400,
+        {
+            "type": "invalid_request_error",
+            "message": "Tool name is already in use",
+            "details": {"error_code": "tool_name_conflict"},
+        },
+        ToolNameConflictError,
+        BadRequestError,
+        id="error-code",
+    ),
+    pytest.param(
+        412,
+        {"type": "invalid_request_error", "message": "Precondition failed"},
+        PreconditionFailedError,
+        APIStatusError,
+        id="status",
+    ),
+    pytest.param(
+        503,
+        {"type": "api_error", "message": "Service unavailable"},
+        ServiceUnavailableError,
+        InternalServerError,
+        id="narrowed-status",
+    ),
+]
 
 
 class GetAuthHeadersRecorder:
@@ -240,6 +280,42 @@ class TestSkipAuth:
 
         assert get_auth_headers_recorder.calls == []
         assert "Authorization" not in request.headers
+
+
+class TestStatusErrors:
+    @pytest.mark.respx()
+    @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+    @pytest.mark.parametrize(("status", "error", "error_class", "parent_class"), STATUS_ERRORS)
+    async def test_status_error_class(
+        self,
+        status: int,
+        error: dict[str, object],
+        error_class: type[APIStatusError],
+        parent_class: type[APIStatusError],
+        sync: bool,
+        respx_mock: MockRouter,
+    ) -> None:
+        respx_mock.post(MANTLE_MESSAGES_URL).mock(
+            return_value=httpx2.Response(status, json={"type": "error", "error": error})
+        )
+
+        with pytest.raises(parent_class) as exc_info:
+            if sync:
+                AnthropicBedrockMantle(api_key="test-key", aws_region="us-east-1", max_retries=0).messages.create(
+                    max_tokens=16,
+                    messages=[{"role": "user", "content": "Hi"}],
+                    model=MODEL,
+                )
+            else:
+                await AsyncAnthropicBedrockMantle(
+                    api_key="test-key", aws_region="us-east-1", max_retries=0
+                ).messages.create(
+                    max_tokens=16,
+                    messages=[{"role": "user", "content": "Hi"}],
+                    model=MODEL,
+                )
+
+        assert type(exc_info.value) is error_class
 
 
 class TestPartialCredentials:

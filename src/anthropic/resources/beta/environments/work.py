@@ -42,7 +42,7 @@ class Work(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkWithRawResponse(self)
 
@@ -51,7 +51,7 @@ class Work(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WorkWithStreamingResponse(self)
 
@@ -70,12 +70,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Retrieve detailed information about a specific work item.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -94,6 +96,11 @@ class Work(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -144,12 +151,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Update work item metadata with merge semantics.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
@@ -171,6 +180,13 @@ class Work(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          BetaInvalidMetadataError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -221,12 +237,14 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> SyncPageCursor[BetaSelfHostedWork]:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         List work items in an environment.
+
+        This endpoint accepts the environment key as a bearer token. It rejects a Claude
+        API key. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           limit: Maximum number of work items to return
@@ -370,7 +388,8 @@ class Work(SyncAPIResource):
           expected_last_heartbeat: Expected last_heartbeat for conditional update (optimistic concurrency). Use
               literal 'NO_HEARTBEAT' to claim an unclaimed lease (first heartbeat). For
               subsequent heartbeats, echo the server's previous last_heartbeat value exactly.
-              Returns 412 Precondition Failed if the actual value doesn't match.
+              Returns 412 Precondition Failed if the actual value doesn't match. The server
+              does not compare the value when the work item is 'stopping' or 'stopped'.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -381,6 +400,9 @@ class Work(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaHeartbeatPreconditionFailedError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -530,6 +552,11 @@ class Work(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -576,11 +603,6 @@ class Work(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Stop a work item, initiating graceful or forced shutdown.
 
         Args:
@@ -602,6 +624,11 @@ class Work(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -645,7 +672,7 @@ class AsyncWork(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkWithRawResponse(self)
 
@@ -654,7 +681,7 @@ class AsyncWork(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWorkWithStreamingResponse(self)
 
@@ -673,12 +700,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Retrieve detailed information about a specific work item.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           betas: Optional header to specify the beta version(s) you want to use.
@@ -697,6 +726,11 @@ class AsyncWork(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -747,12 +781,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Update work item metadata with merge semantics.
+
+        This endpoint accepts a Claude API key. It rejects the environment key and the
+        work item's `secret`. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           metadata: Metadata patch. Set a key to a string to upsert it, or to null to delete it.
@@ -774,6 +810,13 @@ class AsyncWork(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          BetaInvalidMetadataError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -824,12 +867,14 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[BetaSelfHostedWork, AsyncPageCursor[BetaSelfHostedWork]]:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         List work items in an environment.
+
+        This endpoint accepts the environment key as a bearer token. It rejects a Claude
+        API key. On
+        [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws)
+        or
+        [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed),
+        use that platform's credentials instead.
 
         Args:
           limit: Maximum number of work items to return
@@ -973,7 +1018,8 @@ class AsyncWork(AsyncAPIResource):
           expected_last_heartbeat: Expected last_heartbeat for conditional update (optimistic concurrency). Use
               literal 'NO_HEARTBEAT' to claim an unclaimed lease (first heartbeat). For
               subsequent heartbeats, echo the server's previous last_heartbeat value exactly.
-              Returns 412 Precondition Failed if the actual value doesn't match.
+              Returns 412 Precondition Failed if the actual value doesn't match. The server
+              does not compare the value when the work item is 'stopping' or 'stopped'.
 
           betas: Optional header to specify the beta version(s) you want to use.
 
@@ -984,6 +1030,9 @@ class AsyncWork(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaHeartbeatPreconditionFailedError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -1133,6 +1182,11 @@ class AsyncWork(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -1179,11 +1233,6 @@ class AsyncWork(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaSelfHostedWork:
         """
-        Note: these endpoints are called automatically by the pre-built environment
-        worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted
-        sandbox environments. They are included here as a reference; you do not need to
-        invoke them directly.
-
         Stop a work item, initiating graceful or forced shutdown.
 
         Args:
@@ -1205,6 +1254,11 @@ class AsyncWork(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not environment_id:
             raise ValueError(f"Expected a non-empty value for `environment_id` but received {environment_id!r}")
@@ -1394,7 +1448,7 @@ class AsyncWork(AsyncAPIResource):
             by `EnvironmentWorker.run`; not used by
             `EnvironmentWorker.handle_item`.
           environment_key: The environment key — the worker's single credential,
-            used as Bearer auth on the control-plane and session-level calls.
+            used as Bearer auth on the polling and session-level calls.
           tools: Tools to expose to each claimed session. Either a fixed list or
             a factory invoked once per session with that session's
             `AgentToolContext`. Defaults to `beta_agent_toolset_20260401(env)`.

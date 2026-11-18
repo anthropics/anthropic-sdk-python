@@ -8,26 +8,11 @@ from .beta_analytics_cowork_metrics import BetaAnalyticsCoworkMetrics
 from .beta_analytics_design_metrics import BetaAnalyticsDesignMetrics
 from .beta_analytics_office_metrics import BetaAnalyticsOfficeMetrics
 from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics
+from .beta_analytics_claude_tag_metrics import BetaAnalyticsClaudeTagMetrics
 from .beta_analytics_claude_code_metrics import BetaAnalyticsClaudeCodeMetrics
-from .beta_analytics_chat_cowork_unified_chat_metrics import BetaAnalyticsChatCoworkUnifiedChatMetrics
-from .beta_analytics_chat_cowork_unified_sessions_metrics import BetaAnalyticsChatCoworkUnifiedSessionsMetrics
+from .beta_analytics_chat_cowork_unified_metrics import BetaAnalyticsChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsUserActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Activity recorded while the member had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into `chat` (chat activity) and `sessions` (Cowork activity). Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    chat: BetaAnalyticsChatCoworkUnifiedChatMetrics
-    """Chat activity recorded while members had Chat and Cowork unified turned on."""
-
-    sessions: BetaAnalyticsChatCoworkUnifiedSessionsMetrics
-    """
-    Cowork session activity recorded while members had Chat and Cowork unified
-    turned on.
-    """
+__all__ = ["BetaAnalyticsUserActivity"]
 
 
 class BetaAnalyticsUserActivity(BaseModel):
@@ -45,6 +30,14 @@ class BetaAnalyticsUserActivity(BaseModel):
     design_metrics: BetaAnalyticsDesignMetrics
     """Claude Design activity metrics for a single user on a given day."""
 
+    distinct_user_count: Optional[int] = None
+    """Number of distinct active users represented by this row.
+
+    Only set for grouped rollups (`group_by[]`); null for per-user rows. In
+    date-range mode, recomputed as an exact distinct count of the group's active
+    members over the requested window, never a sum of per-day values.
+    """
+
     office_metrics: BetaAnalyticsOfficeMetrics
     """
     Office Agent activity metrics for a single user on a given day, broken out by
@@ -54,23 +47,26 @@ class BetaAnalyticsUserActivity(BaseModel):
     science_metrics: BetaAnalyticsScienceMetrics
     """Claude Science activity metrics for a single user on a given day."""
 
+    user: Optional[BetaAnalyticsUser] = None
+    """The user this row describes. Null on rows aggregated across users."""
+
     web_search_count: int
     """Number of web searches performed"""
 
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsChatCoworkUnifiedMetrics] = None
     """
     Activity recorded while the member had Chat and Cowork unified (Cowork's
     features inside claude.ai chat) turned on, split into `chat` (chat activity) and
-    `sessions` (Cowork activity). Omitted from the response on deployments that do
-    not offer Chat and Cowork unified.
+    `sessions` (Cowork activity). Omitted from the response where Chat and Cowork
+    unified is not available.
     """
 
-    distinct_user_count: Optional[int] = None
-    """Number of distinct active users represented by this row.
+    claude_tag_metrics: Optional[BetaAnalyticsClaudeTagMetrics] = None
+    """Claude Tag activity in Slack by a user who has linked a Claude account.
 
-    Only set for grouped rollups (`group_by[]`); null for per-user rows. In
-    date-range mode, recomputed as an exact distinct count of the group's active
-    members over the requested window, never a sum of per-day values.
+    Activity by Slack users who have not linked an account appears only in the
+    `/summaries` Claude Tag counts, so these rows do not add up to those counts.
+    Omitted from the response on deployments that do not offer Claude Tag reporting.
     """
 
     last_activity_date: Optional[date] = None
@@ -99,6 +95,3 @@ class BetaAnalyticsUserActivity(BaseModel):
     is available. Null if the group has been deleted or its name could not be
     resolved; `rbac_group_id` remains the stable key.
     """
-
-    user: Optional[BetaAnalyticsUser] = None
-    """The user this row describes. Null on rows aggregated across users."""

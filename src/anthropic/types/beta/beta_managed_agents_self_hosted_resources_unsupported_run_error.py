@@ -1,16 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_self_hosted_resources_unsupported_run_error_object import (
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSelfHostedResourcesUnsupportedRunError"]
 
-
-class BetaManagedAgentsSelfHostedResourcesUnsupportedRunError(BaseModel):
-    """
-    The deployment configures resources, but its environment is self-hosted and cannot mount them.
-    """
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["self_hosted_resources_unsupported_error"]
+BetaManagedAgentsSelfHostedResourcesUnsupportedRunError = BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsSelfHostedResourcesUnsupportedRunError has been renamed to BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject
+"""

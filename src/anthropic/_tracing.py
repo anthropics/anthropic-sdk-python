@@ -13,23 +13,26 @@ from typing import cast
 from datetime import timedelta
 from dataclasses import dataclass
 from urllib.parse import unquote
-from collections.abc import Mapping, Callable, Iterator, Collection, AsyncIterator, AsyncGenerator
-from typing_extensions import Literal, Protocol, override
+from collections.abc import Mapping, Callable, Iterator, Sequence, Collection, AsyncIterator, AsyncGenerator
+from typing_extensions import Literal, Protocol, TypedDict, override
 
 import httpx2
+import pydantic
 from opentelemetry import trace
 from opentelemetry.trace import Span, Status, Tracer, SpanKind, StatusCode
 from opentelemetry.context import Context
 from opentelemetry.util.types import AttributeValue
 
 from ._types import (
+    Omit,
     OpenTelemetryTraces,
     OpenTelemetryOptions,
     OpenTelemetryClientOption,
     ResolvedOpenTelemetryOptions,
 )
-from ._utils import lru_cache
+from ._utils import is_list, is_given, lru_cache, is_mapping
 from ._models import FinalRequestOptions
+from ._response import BaseAPIResponse
 from ._streaming import Stream, AsyncStream
 from ._exceptions import APIStatusError, APITimeoutError, APIConnectionError, APIResponseValidationError
 
@@ -55,6 +58,97 @@ SESSION_THREAD_ID = "anthropic.session.thread.id"
 
 DEFAULT_MAX_CONTENT_BYTES = 750_000
 """The default `traces.max_content_bytes`."""
+
+CLIENT_ATTRIBUTES: Mapping[str, AttributeValue] = {
+    "gen_ai.provider.name": "anthropic",
+}
+"""The attributes that the span of every API call starts with."""
+
+RESPONSE_HEADER_ATTRIBUTES: Mapping[str, str] = {
+    "anthropic.request.id": "request-id",
+    "anthropic.organization.id": "anthropic-organization-id",
+    "anthropic.workspace.id": "anthropic-workspace-id",
+}
+"""Each attribute with the response header that it comes from."""
+
+
+class SpanAttributes(TypedDict, total=False):
+    """The attributes that the spans with one span name have, each with where its value comes from.
+
+    A field of a body is the path to it and the type of its value: `string`, `integer`, `number`, `boolean`, one of
+    those and `[]` for a list, or `any`. A value of another type sets no attribute.
+    """
+
+    constants: Mapping[str, AttributeValue]
+
+    request: Mapping[str, tuple[tuple[str, ...], str]]
+    """Fields of the body of the request."""
+
+    request_headers: Mapping[str, tuple[str, str]]
+    """Headers of the request, by their names in lowercase. The type `string[]` splits the value at its commas."""
+
+    stream: str
+    """The attribute that is `True` on the span of a call that streams its response."""
+
+    response: Mapping[str, tuple[tuple[str, ...], str]]
+    """Fields of the body of the response."""
+
+
+SPAN_ATTRIBUTES: Mapping[str, SpanAttributes] = {
+    "anthropic.messages.create": {
+        "constants": {
+            "gen_ai.operation.name": "chat",
+        },
+        "request": {
+            "gen_ai.request.model": (("model",), "string"),
+            "gen_ai.request.max_tokens": (("max_tokens",), "integer"),
+            "gen_ai.request.reasoning.level": (("output_config", "effort"), "string"),
+            "anthropic.request.service_tier": (("service_tier",), "string"),
+            "anthropic.thinking.type": (("thinking", "type"), "string"),
+            "anthropic.thinking.budget_tokens": (("thinking", "budget_tokens"), "integer"),
+        },
+        "request_headers": {
+            "anthropic.beta": ("anthropic-beta", "string[]"),
+        },
+        "response": {
+            "gen_ai.response.id": (("id",), "string"),
+            "gen_ai.response.model": (("model",), "string"),
+            "gen_ai.usage.cache_write.input_tokens": (("usage", "cache_creation_input_tokens"), "integer"),
+            "gen_ai.usage.cache_read.input_tokens": (("usage", "cache_read_input_tokens"), "integer"),
+            "anthropic.usage.cache_creation.ephemeral_5m_input_tokens": (
+                ("usage", "cache_creation", "ephemeral_5m_input_tokens"),
+                "integer",
+            ),
+            "anthropic.usage.cache_creation.ephemeral_1h_input_tokens": (
+                ("usage", "cache_creation", "ephemeral_1h_input_tokens"),
+                "integer",
+            ),
+            "anthropic.response.service_tier": (("usage", "service_tier"), "string"),
+            "gen_ai.usage.output_tokens": (("usage", "output_tokens"), "integer"),
+            "gen_ai.usage.reasoning.output_tokens": (("usage", "output_tokens_details", "thinking_tokens"), "integer"),
+            "anthropic.message.stop_reason": (("stop_reason",), "string"),
+        },
+        "stream": "gen_ai.request.stream",
+    },
+    "anthropic.messages.count_tokens": {
+        "request": {
+            "gen_ai.request.model": (("model",), "string"),
+        },
+        "response": {
+            "anthropic.message.count_tokens.input_tokens": (("input_tokens",), "integer"),
+        },
+    },
+    "anthropic.sessions.create": {
+        "request": {
+            "anthropic.session.environment.id": (("environment_id",), "string"),
+        },
+        "response": {
+            "gen_ai.agent.name": (("agent", "name"), "string"),
+            "gen_ai.request.model": (("agent", "model", "id"), "string"),
+        },
+    },
+}
+"""By span name."""
 
 
 def resolve_open_telemetry(option: OpenTelemetryClientOption) -> ResolvedOpenTelemetryOptions:
@@ -273,8 +367,13 @@ def start_api_call_span(
     attributes: Mapping[str, AttributeValue],
     *,
     propagation: bool = True,
+    stream: bool = False,
+    default_headers: Callable[[], Mapping[str, object]] | None = None,
 ) -> Span | None:
     """Starts the call span of the API call that the prepared `options` describe.
+
+    `stream` is whether the call streams its response, and `default_headers` gives the headers that the client sends
+    with every request, both for `span_request_attributes`.
 
     Returns `None` for a request that no SDK method made, which has no span name, and for a span
     that neither records nor propagates a trace context. Without `propagation`, a valid span context
@@ -292,6 +391,8 @@ def start_api_call_span(
             kind=SpanKind.CLIENT,
             attributes={
                 **server_attributes(base_url),
+                **CLIENT_ATTRIBUTES,
+                **span_request_attributes(options, default_headers, stream=stream),
                 **request_attributes(options),
                 # Before `attributes`, whose conversation ID is the one that the application set.
                 **conversation_attributes(method_attributes),
@@ -326,6 +427,7 @@ def end_api_call_span(span: Span, result: ApiCallResult) -> None:
         return
     set_response_status_code(span, result)
     set_resend_count(span, result)
+    record_response(span, result)
     if result.error is not None:
         set_error_status(span, result.error)
     else:
@@ -350,7 +452,19 @@ def end_api_call_span_when_body_ends(
         return
     set_response_status_code(span, result)
     set_resend_count(span, result)
+    record_response(span, result)
     response.stream = span_ending_stream(response.stream, FirstEnd(observer or StreamedBodyObserver(span)))
+
+
+def set_created_id_attribute(span: Span, result: ApiCallResult) -> None:
+    """Sets the ID of the object that the call created, from the response field that `span_created_id` names."""
+    created = result.options.span_created_id
+    if created is None or result.error is not None:
+        return
+    attribute, field = (created, "id") if isinstance(created, str) else created
+    created_id = dig(response_data(result), (field,))
+    if isinstance(created_id, str):
+        span.set_attribute(attribute, created_id)
 
 
 StreamEnd = Literal["read", "closed", "failed"]
@@ -533,6 +647,59 @@ def set_resend_count(span: Span, result: ApiCallResult) -> None:
         span.set_attribute(HTTP_REQUEST_RESEND_COUNT, result.resend_count)
 
 
+def record_response(span: Span, result: ApiCallResult) -> None:
+    """Sets what the call's response gives its span. Never raises.
+
+    That is the `RESPONSE_HEADER_ATTRIBUTES` and, for a call that succeeded, the `response` of its `SPAN_ATTRIBUTES`.
+    The body of a stream, and one that the application has yet to read, sets nothing here.
+    """
+    try:
+        response = result.final_attempt
+        if response is not None:
+            for attribute, header in RESPONSE_HEADER_ATTRIBUTES.items():
+                if value := response.headers.get(header):
+                    span.set_attribute(attribute, value)
+        span_name = result.options.span_name
+        if result.error is None and SPAN_ATTRIBUTES.get(span_name or "", {}).get("response"):
+            set_response_attributes(span, span_name, response_data(result))
+    except Exception:
+        log.debug("Could not record the response of an API call on its span", exc_info=True)
+
+
+def set_response_attributes(span: Span, span_name: str | None, data: object) -> None:
+    """Sets the `response` attributes that `SPAN_ATTRIBUTES` gives the spans named `span_name`, from `data`.
+
+    `data` is the body of a response, as a model or decoded. A field that it lacks, or whose type is not the
+    attribute's, sets nothing.
+    """
+    for attribute, (path, type) in SPAN_ATTRIBUTES.get(span_name or "", {}).get("response", {}).items():
+        if (value := attribute_value(dig(data, path), type)) is not None:
+            span.set_attribute(attribute, value)
+
+
+def response_data(result: ApiCallResult) -> object:
+    """What the call's response gave: the parsed body or the stream, or the decoded body of a raw response.
+
+    A raw response whose body the application has yet to read gives `None`.
+    """
+    data = result.data
+    if isinstance(data, BaseAPIResponse):
+        raw = cast("BaseAPIResponse[object]", data)
+        return json_body(raw.http_response) if raw.http_response.is_closed else None
+    return data
+
+
+def json_body(response: httpx2.Response) -> object:
+    media_type = response.headers.get("content-type", "").split(";")[0].strip().lower()
+    if media_type != "application/json":
+        return None
+    try:
+        return response.json()
+    except Exception:
+        log.debug("Could not decode the response body for its span", exc_info=True)
+        return None
+
+
 def set_url_attributes(
     span: Span, url: httpx2.URL, query_params: Collection[str], content_query_params: Collection[str], *, content: bool
 ) -> None:
@@ -608,6 +775,86 @@ def error_type(error: BaseException) -> str:
         if error.status_code >= 400:
             return str(error.status_code)
     return "client_error"
+
+
+def span_request_attributes(
+    options: FinalRequestOptions, default_headers: Callable[[], Mapping[str, object]] | None, *, stream: bool
+) -> dict[str, AttributeValue]:
+    """What `SPAN_ATTRIBUTES` gives the span of the call from its request, for the span to start with. Never raises.
+
+    A header has the value that the call's requests send: the call's own, or else the client's default.
+    """
+    table = SPAN_ATTRIBUTES.get(options.span_name or "", {})
+    attributes: dict[str, AttributeValue] = {**table.get("constants", {})}
+    try:
+        for attribute, (path, type) in table.get("request", {}).items():
+            if (value := attribute_value(dig(options.json_data, path), type)) is not None:
+                attributes[attribute] = value
+        if request_headers := table.get("request_headers"):
+            headers: list[Mapping[str, object]] = [default_headers()] if default_headers else []
+            if is_given(options.headers):
+                headers.append(options.headers)
+            for attribute, (header, type) in request_headers.items():
+                if (value := header_value(request_header(headers, header), type)) is not None:
+                    attributes[attribute] = value
+        if stream and (stream_attribute := table.get("stream")) is not None:
+            attributes[stream_attribute] = True
+    except Exception:
+        log.debug("Could not read the request of an API call for its span", exc_info=True)
+    return attributes
+
+
+def dig(data: object, path: Sequence[str]) -> object:
+    """The value at `path` in `data`, whose every level is a dict or a model. `None` where a level lacks its name."""
+    for name in path:
+        if is_mapping(data):
+            data = data.get(name)
+        elif isinstance(data, pydantic.BaseModel):
+            data = getattr(data, name, None)
+        else:
+            return None
+    return data
+
+
+def attribute_value(value: object, type: str) -> AttributeValue | None:
+    """`value` as an attribute of `type`, and `None` for a value of another type.
+
+    So a body that this version of the SDK does not know sets no attribute rather than a wrong one. A `number` is a
+    float, whatever number the body has.
+    """
+    if type.endswith("[]"):
+        if not is_list(value):
+            return None
+        items = [attribute_value(item, type[:-2]) for item in value]
+        return None if any(item is None for item in items) else cast(AttributeValue, items)
+    # A `bool` is an `int` too.
+    if isinstance(value, bool):
+        return value if type in ("boolean", "any") else None
+    if isinstance(value, str):
+        return value if type in ("string", "any") else None
+    if isinstance(value, int):
+        return float(value) if type == "number" else value if type in ("integer", "any") else None
+    if isinstance(value, float):
+        return value if type in ("number", "any") else None
+    return None
+
+
+def request_header(layers: Sequence[Mapping[str, object]], name: str) -> str | None:
+    """The value that the last of `layers` to set the header `name` gives it. An `Omit` there leaves the header out."""
+    value: str | None = None
+    for layer in layers:
+        for key, header in layer.items():
+            if key.lower() == name:
+                value = None if isinstance(header, Omit) else str(header)
+    return value
+
+
+def header_value(value: str | None, type: str) -> AttributeValue | None:
+    """The header `value` as an attribute of `type`: its parts between commas for a list. `None` for an empty one."""
+    parts = [part.strip() for part in (value or "").split(",") if part.strip()]
+    if not parts:
+        return None
+    return parts if type.endswith("[]") else value
 
 
 def request_attributes(options: FinalRequestOptions) -> dict[str, AttributeValue]:

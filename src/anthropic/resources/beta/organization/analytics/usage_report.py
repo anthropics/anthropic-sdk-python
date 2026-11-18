@@ -33,7 +33,7 @@ class UsageReport(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsageReportWithRawResponse(self)
 
@@ -42,7 +42,7 @@ class UsageReport(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return UsageReportWithStreamingResponse(self)
 
@@ -109,10 +109,8 @@ class UsageReport(SyncAPIResource):
           bucket_width: Time bucket granularity.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that
@@ -207,7 +205,7 @@ class AsyncUsageReport(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsageReportWithRawResponse(self)
 
@@ -216,7 +214,7 @@ class AsyncUsageReport(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncUsageReportWithStreamingResponse(self)
 
@@ -283,10 +281,8 @@ class AsyncUsageReport(AsyncAPIResource):
           bucket_width: Time bucket granularity.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
-              with no category never matches. `dm` usage is reported under the user's product
-              rather than `claude-tag`, so combining this filter with `products[]=claude-tag`
-              excludes it. Use `group_by[]=claude_tag_category` to break out per-category
-              values.
+              with no category never matches. Use `group_by[]=claude_tag_category` to break
+              out per-category values.
 
           claude_tag_user_ids: Filter to Claude Tag (Claude in Slack) usage attributed to specific Slack users,
               by Slack user ID (for example `U0123ABCDEF`), not claude.ai user ID. Usage that

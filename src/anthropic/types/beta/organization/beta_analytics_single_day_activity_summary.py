@@ -76,22 +76,21 @@ class BetaAnalyticsSingleDayActivitySummary(BaseModel):
     chat_cowork_unified_daily_active_user_count: Optional[int] = None
     """Number of users with activity in Chat and Cowork unified on the requested day.
 
-    Omitted from the response on deployments that do not offer Chat and Cowork
-    unified.
+    Omitted from the response where Chat and Cowork unified is not available.
     """
 
     chat_cowork_unified_monthly_active_user_count: Optional[int] = None
     """
     Number of users with activity in Chat and Cowork unified in the 28-day rolling
     window (30 days when the request filters by `rbac_group_id`). Omitted from the
-    response on deployments that do not offer Chat and Cowork unified.
+    response where Chat and Cowork unified is not available.
     """
 
     chat_cowork_unified_weekly_active_user_count: Optional[int] = None
     """
     Number of users with activity in Chat and Cowork unified in the 7-day rolling
-    window. Omitted from the response on deployments that do not offer Chat and
-    Cowork unified.
+    window. Omitted from the response where Chat and Cowork unified is not
+    available.
     """
 
     chat_daily_active_user_count: Optional[int] = None
@@ -155,6 +154,39 @@ class BetaAnalyticsSingleDayActivitySummary(BaseModel):
 
     Omitted from the response while the per-product breakdown is not enabled for
     this organization.
+    """
+
+    claude_tag_daily_active_user_count: Optional[int] = None
+    """Number of Slack users active in Claude Tag on the requested day.
+
+    Counts distinct Slack users, including users who have not linked a Claude
+    account, so it can exceed `daily_active_user_count` and `assigned_seat_count`.
+    Null on a day with no measured value, when Claude Tag data cannot be read for
+    the request, and when the response is scoped to an RBAC group, because an
+    unlinked user belongs to no group. Omitted from the response on deployments that
+    do not offer Claude Tag reporting.
+    """
+
+    claude_tag_monthly_active_user_count: Optional[int] = None
+    """Number of Slack users active in Claude Tag in the 28-day rolling window.
+
+    Counts distinct Slack users, including users who have not linked a Claude
+    account, so it can exceed `daily_active_user_count` and `assigned_seat_count`.
+    Null on a day with no measured value, when Claude Tag data cannot be read for
+    the request, and when the response is scoped to an RBAC group, because an
+    unlinked user belongs to no group. Omitted from the response on deployments that
+    do not offer Claude Tag reporting.
+    """
+
+    claude_tag_weekly_active_user_count: Optional[int] = None
+    """Number of Slack users active in Claude Tag in the 7-day rolling window.
+
+    Counts distinct Slack users, including users who have not linked a Claude
+    account, so it can exceed `daily_active_user_count` and `assigned_seat_count`.
+    Null on a day with no measured value, when Claude Tag data cannot be read for
+    the request, and when the response is scoped to an RBAC group, because an
+    unlinked user belongs to no group. Omitted from the response on deployments that
+    do not offer Claude Tag reporting.
     """
 
     office_agent_daily_active_user_count: Optional[int] = None

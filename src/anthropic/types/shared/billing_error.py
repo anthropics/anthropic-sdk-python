@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .billing_error_object import BillingErrorObject
 
 __all__ = ["BillingError"]
 
-
-class BillingError(BaseModel):
-    message: str
-
-    type: Literal["billing_error"]
+BillingError = BillingErrorObject
+"""Deprecated: BillingError has been renamed to BillingErrorObject"""

@@ -191,6 +191,54 @@ class TestAsyncAnthropicFoundry:
         assert copied.default_headers.get("x-stainless-helper") == "parent, child"
 
 
+class TestFoundryResourceFromEnvironment:
+    @pytest.mark.respx()
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["copy", "with_options", "with_middleware"])
+    @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
+    async def test_copy_sends_requests_to_the_resource(
+        self, sync: bool, method: str, respx_mock: MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_RESOURCE", "env-resource")
+        route = respx_mock.post("https://env-resource.services.ai.azure.com/anthropic/v1/messages").mock(
+            return_value=httpx2.Response(200, json={"foo": "bar"})
+        )
+
+        if sync:
+            copied: AnthropicFoundry = getattr(AnthropicFoundry(api_key="foundry-key"), method)()
+            copied.messages.create(max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude")
+        else:
+            async_copied: AsyncAnthropicFoundry = getattr(AsyncAnthropicFoundry(api_key="foundry-key"), method)()
+            await async_copied.messages.create(
+                max_tokens=16, messages=[{"role": "user", "content": "Hello"}], model="claude"
+            )
+
+        assert route.call_count == 1
+
+    @pytest.mark.parametrize("client_class", [AnthropicFoundry, AsyncAnthropicFoundry])
+    def test_base_url_argument_wins(
+        self, client_class: type[AnthropicFoundry | AsyncAnthropicFoundry], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_RESOURCE", "env-resource")
+
+        client = client_class(api_key="foundry-key", base_url="https://example.com/anthropic/")
+
+        assert str(client.base_url) == "https://example.com/anthropic/"
+        assert str(client.copy(base_url="https://other.example.com/").base_url) == "https://other.example.com/"
+
+    @pytest.mark.parametrize("client_class", [AnthropicFoundry, AsyncAnthropicFoundry])
+    def test_conflicts_still_raise(
+        self, client_class: type[AnthropicFoundry | AsyncAnthropicFoundry], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_BASE_URL", "https://example.com/anthropic/")
+        with pytest.raises(ValueError, match="base_url and resource are mutually exclusive"):
+            client_class(api_key="foundry-key", resource="example-resource")
+
+        monkeypatch.setenv("ANTHROPIC_FOUNDRY_RESOURCE", "env-resource")
+        with pytest.raises(ValueError, match="base_url and resource are mutually exclusive"):
+            client_class(api_key="foundry-key")
+
+
 class TestFoundryDoesNotLeakAnthropicAPIKey:
     """A stray ANTHROPIC_API_KEY in the environment must never be sent to the
     Foundry endpoint, regardless of which auth mode is in use."""

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import List, Iterable
-from itertools import chain
 
 import httpx2
 
@@ -36,7 +35,7 @@ class Batches(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithRawResponse(self)
 
@@ -45,7 +44,7 @@ class Batches(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return BatchesWithStreamingResponse(self)
 
@@ -98,20 +97,26 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             "/v1/messages/batches",
             body={"requests": requests},
@@ -172,21 +177,23 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -252,19 +259,21 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches",
             page=SyncPage[BetaMessageBatch],
@@ -326,21 +335,23 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -403,21 +414,23 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -475,6 +488,13 @@ class Batches(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -489,15 +509,12 @@ class Batches(SyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(
@@ -522,7 +539,7 @@ class AsyncBatches(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithRawResponse(self)
 
@@ -531,7 +548,7 @@ class AsyncBatches(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncBatchesWithStreamingResponse(self)
 
@@ -584,20 +601,26 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
+
+          EnforcedSpendLimitReachedError:
         """
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-user-profile-id": user_profile_id,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             "/v1/messages/batches",
             body={"requests": requests},
@@ -658,21 +681,23 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -738,19 +763,21 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return self._get_api_list(
             "/v1/messages/batches",
             page=AsyncPage[BetaMessageBatch],
@@ -812,21 +839,23 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._delete(
             path_template("/v1/messages/batches/{message_batch_id}", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -889,21 +918,23 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._post(
             path_template("/v1/messages/batches/{message_batch_id}/cancel", message_batch_id=message_batch_id),
             options=make_request_options(
@@ -961,6 +992,13 @@ class AsyncBatches(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CMEKKeyDisabledError:
+
+          OrganizationOnHoldError:
         """
         if not message_batch_id:
             raise ValueError(f"Expected a non-empty value for `message_batch_id` but received {message_batch_id!r}")
@@ -975,15 +1013,12 @@ class AsyncBatches(AsyncAPIResource):
         extra_headers = {
             **strip_not_given(
                 {
-                    "anthropic-beta": ",".join(chain((str(e) for e in betas), ["message-batches-2024-09-24"]))
-                    if is_given(betas)
-                    else not_given,
+                    "anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given,
                     "anthropic-workspace-id": workspace_id,
                 }
             ),
             **(extra_headers or {}),
         }
-        extra_headers = {"anthropic-beta": "message-batches-2024-09-24", **(extra_headers or {})}
         return await self._get(
             path_template(batch.results_url, message_batch_id=message_batch_id),
             options=make_request_options(

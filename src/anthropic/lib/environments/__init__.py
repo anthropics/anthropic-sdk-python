@@ -1,7 +1,7 @@
 """Self-hosted environment runner helpers.
 
 - `anthropic.resources.beta.environments.work.AsyncWork.poller`
-  (`client.beta.environments.work.poller(...)`) — control-plane only: claims
+  (`client.beta.environments.work.poller(...)`) — polling only: claims
   work items, ack's each one, and hands back the work item. Async only (lives on
   `AsyncWork`, not the sync `Work`). The underlying generators are
   `iter_work` / `aiter_work`.

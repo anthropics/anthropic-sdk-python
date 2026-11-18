@@ -35,7 +35,7 @@ class TestAgents:
             name="My First Agent",
             description="A general-purpose starter agent.",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -47,8 +47,24 @@ class TestAgents:
             ],
             metadata={"foo": "bar"},
             multiagent={
-                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
-                "type": "coordinator",
+                "type": "multiagent_20261001",
+                "advisor": {"type": "disabled"},
+                "subagents": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": ["agent_011CZkYqphY8vELVzwCUpqiQ"],
+                },
+                "workflows": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": [
+                        {
+                            "id": "agent_011CZkYqphY8vELVzwCUpqiQ",
+                            "type": "agent",
+                            "version": 1,
+                        }
+                    ],
+                },
             },
             skills=[
                 {
@@ -75,7 +91,7 @@ class TestAgents:
                     },
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -122,7 +138,7 @@ class TestAgents:
         agent = client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -175,7 +191,7 @@ class TestAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -223,7 +239,7 @@ class TestAgents:
                 }
             ],
             version=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -277,7 +293,7 @@ class TestAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -319,7 +335,7 @@ class TestAgents:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         agent = client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -380,7 +396,7 @@ class TestAsyncAgents:
             name="My First Agent",
             description="A general-purpose starter agent.",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -392,8 +408,24 @@ class TestAsyncAgents:
             ],
             metadata={"foo": "bar"},
             multiagent={
-                "agents": ["agent_011CZkYqphY8vELVzwCUpqiQ", {"type": "self"}],
-                "type": "coordinator",
+                "type": "multiagent_20261001",
+                "advisor": {"type": "disabled"},
+                "subagents": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": ["agent_011CZkYqphY8vELVzwCUpqiQ"],
+                },
+                "workflows": {
+                    "type": "enabled",
+                    "inline_agents": {"type": "disabled"},
+                    "predefined_agents": [
+                        {
+                            "id": "agent_011CZkYqphY8vELVzwCUpqiQ",
+                            "type": "agent",
+                            "version": 1,
+                        }
+                    ],
+                },
             },
             skills=[
                 {
@@ -420,7 +452,7 @@ class TestAsyncAgents:
                     },
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -467,7 +499,7 @@ class TestAsyncAgents:
         agent = await async_client.beta.agents.retrieve(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             version=0,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -520,7 +552,7 @@ class TestAsyncAgents:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             description="updated",
             execution_identity={
-                "role_arn": "role_arn",
+                "role_arn": "arn:aws:iam::228601553692:role/T",
                 "type": "aws_role",
             },
             mcp_servers=[
@@ -568,7 +600,7 @@ class TestAsyncAgents:
                 }
             ],
             version=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -622,7 +654,7 @@ class TestAsyncAgents:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -664,7 +696,7 @@ class TestAsyncAgents:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         agent = await async_client.beta.agents.archive(
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

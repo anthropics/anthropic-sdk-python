@@ -7,7 +7,7 @@ from .._models import BaseModel
 from .container import Container
 from .diagnostics import Diagnostics
 from .stop_reason import StopReason
-from .content_block import ContentBlock, ContentBlock as ContentBlock
+from .content_block import ContentBlock
 from .refusal_stop_details import RefusalStopDetails
 from .assistant_message_param import AssistantMessageParam
 

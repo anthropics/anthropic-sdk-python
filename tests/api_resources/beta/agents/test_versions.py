@@ -30,7 +30,7 @@ class TestVersions:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -89,7 +89,7 @@ class TestAsyncVersions:
             agent_id="agent_011CZkYpogX7uDKUyvBTophP",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

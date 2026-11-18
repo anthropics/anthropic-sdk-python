@@ -145,7 +145,7 @@ async def test_filestore_get_refuses_a_non_regular_file(store: FileStore) -> Non
     from anthropic.lib.tools import _file_store as mod
 
     with pytest.raises(FileStoreError, match="not a regular file"):
-        mod._open_regular_file("pipe.md", store.root().path / "pipe.md")
+        mod.open_regular_file("pipe.md", store.root().path / "pipe.md")
 
 
 @pytest.mark.asyncio()

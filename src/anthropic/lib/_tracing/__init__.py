@@ -13,7 +13,6 @@ from ._api_call import (
     finish_api_call_span as finish_api_call_span,
     messages_create_request_attributes as messages_create_request_attributes,
     sessions_create_request_attributes as sessions_create_request_attributes,
-    messages_count_tokens_request_attributes as messages_count_tokens_request_attributes,
 )
 from ._streaming import (
     share_message_snapshot as share_message_snapshot,

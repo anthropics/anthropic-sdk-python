@@ -80,7 +80,7 @@ class Plugins(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginsWithRawResponse(self)
 
@@ -89,7 +89,7 @@ class Plugins(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PluginsWithStreamingResponse(self)
 
@@ -124,13 +124,13 @@ class Plugins(SyncAPIResource):
         409 with `error_code` `plugin_name_taken` and, when a Plugin holds it, that
         Plugin's ID in `details.plugin_id`. A Plugin going into the organization's
         library marketplace is also refused with a 409 when one of its skills has the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai): `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`; rename the skill, or remove the organization skill in
-        claude.ai. A 503 with `error_code` `registration_pending` means the Plugin and
-        its version were stored (their IDs are in `details`) but are not yet usable in
-        claude.ai: do not retry the create (the retry would return `plugin_name_taken`);
-        create a version on the stored Plugin instead, which completes it.
+        name of an organization skill that this API does not list: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`; rename the skill, or
+        remove the organization skill in claude.ai. A 503 with `error_code`
+        `registration_pending` means the Plugin and its version were stored (their IDs
+        are in `details`) but are not yet usable in claude.ai: do not retry the create
+        (the retry would return `plugin_name_taken`); create a version on the stored
+        Plugin instead, which completes it.
 
         For a worked example, see
         [Create a plugin](/docs/en/manage-claude/plugins-api#create-a-plugin) in the
@@ -172,6 +172,19 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaPluginNameTakenError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         extra_headers = {
             **strip_not_given(
@@ -250,7 +263,8 @@ class Plugins(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -308,8 +322,12 @@ class Plugins(SyncAPIResource):
         """
         Change which stored version of an organization-owned Plugin is served to
         members, for example to roll back to an earlier one. This pins the served
-        version: later uploads are stored but no longer change what is served, and
-        pinning cannot currently be undone, here or in claude.ai.
+        version: later uploads through this API are stored but no longer change what is
+        served, and pinning cannot currently be undone, here or in claude.ai.
+
+        A version from claude.ai might still change what is served: see
+        [Versions and the served version](/docs/en/manage-claude/plugins-api#versions-and-the-served-version)
+        in the Plugins API guide.
 
         Pass the version as `served_version_id`: an earlier one to roll back, a later
         one to start serving a version that was stored without being served, or the one
@@ -324,10 +342,9 @@ class Plugins(SyncAPIResource):
         accepted. If the scan outcome cannot be read at that moment, the request fails
         with a retryable 503 instead. When the Plugin is in the organization's library
         marketplace, a version other than the one served is also refused with a 409 when
-        one of its skills has a name that an organization skill (one an administrator
-        uploaded for the whole organization in claude.ai) has since taken: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
-        Plugin cannot be updated here (403).
+        an organization skill that this API does not list has since taken the name of
+        one of its skills: `error_code` `skill_name_taken`, with that name in
+        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -357,6 +374,17 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaScanFailedError:
+
+          BetaScanPendingError:
+
+          BetaSkillNameTakenError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -450,7 +478,8 @@ class Plugins(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           owner_type: `organization` for Plugins in the organization's plugin marketplaces, `user` for
               Plugins in members' personal plugin marketplaces.
@@ -524,7 +553,9 @@ class Plugins(SyncAPIResource):
         """
         Permanently delete a Plugin and every version it holds, exactly as when an
         administrator deletes it in claude.ai. The Plugin may belong to the organization
-        or to a member, including a member who has since left the organization.
+        or to a member, including a member who has since left the organization. Do not
+        delete a Plugin only because your pipeline did not create it: a member or an
+        administrator might have added it in claude.ai.
 
         An organization-owned Plugin's installation settings go with it; a member-owned
         Plugin's shares are withdrawn and its owner no longer has it.
@@ -557,6 +588,9 @@ class Plugins(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -606,7 +640,7 @@ class AsyncPlugins(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginsWithRawResponse(self)
 
@@ -615,7 +649,7 @@ class AsyncPlugins(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPluginsWithStreamingResponse(self)
 
@@ -650,13 +684,13 @@ class AsyncPlugins(AsyncAPIResource):
         409 with `error_code` `plugin_name_taken` and, when a Plugin holds it, that
         Plugin's ID in `details.plugin_id`. A Plugin going into the organization's
         library marketplace is also refused with a 409 when one of its skills has the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai): `error_code` `skill_name_taken`, with that name in
-        `details.skill_name`; rename the skill, or remove the organization skill in
-        claude.ai. A 503 with `error_code` `registration_pending` means the Plugin and
-        its version were stored (their IDs are in `details`) but are not yet usable in
-        claude.ai: do not retry the create (the retry would return `plugin_name_taken`);
-        create a version on the stored Plugin instead, which completes it.
+        name of an organization skill that this API does not list: `error_code`
+        `skill_name_taken`, with that name in `details.skill_name`; rename the skill, or
+        remove the organization skill in claude.ai. A 503 with `error_code`
+        `registration_pending` means the Plugin and its version were stored (their IDs
+        are in `details`) but are not yet usable in claude.ai: do not retry the create
+        (the retry would return `plugin_name_taken`); create a version on the stored
+        Plugin instead, which completes it.
 
         For a worked example, see
         [Create a plugin](/docs/en/manage-claude/plugins-api#create-a-plugin) in the
@@ -698,6 +732,19 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaPluginNameTakenError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         extra_headers = {
             **strip_not_given(
@@ -776,7 +823,8 @@ class AsyncPlugins(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -834,8 +882,12 @@ class AsyncPlugins(AsyncAPIResource):
         """
         Change which stored version of an organization-owned Plugin is served to
         members, for example to roll back to an earlier one. This pins the served
-        version: later uploads are stored but no longer change what is served, and
-        pinning cannot currently be undone, here or in claude.ai.
+        version: later uploads through this API are stored but no longer change what is
+        served, and pinning cannot currently be undone, here or in claude.ai.
+
+        A version from claude.ai might still change what is served: see
+        [Versions and the served version](/docs/en/manage-claude/plugins-api#versions-and-the-served-version)
+        in the Plugins API guide.
 
         Pass the version as `served_version_id`: an earlier one to roll back, a later
         one to start serving a version that was stored without being served, or the one
@@ -850,10 +902,9 @@ class AsyncPlugins(AsyncAPIResource):
         accepted. If the scan outcome cannot be read at that moment, the request fails
         with a retryable 503 instead. When the Plugin is in the organization's library
         marketplace, a version other than the one served is also refused with a 409 when
-        one of its skills has a name that an organization skill (one an administrator
-        uploaded for the whole organization in claude.ai) has since taken: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A member-owned
-        Plugin cannot be updated here (403).
+        an organization skill that this API does not list has since taken the name of
+        one of its skills: `error_code` `skill_name_taken`, with that name in
+        `details.skill_name`. A member-owned Plugin cannot be updated here (403).
 
         This endpoint does not write installation settings; they are written at
         `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
@@ -883,6 +934,17 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaScanFailedError:
+
+          BetaScanPendingError:
+
+          BetaSkillNameTakenError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -976,7 +1038,8 @@ class AsyncPlugins(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           owner_type: `organization` for Plugins in the organization's plugin marketplaces, `user` for
               Plugins in members' personal plugin marketplaces.
@@ -1050,7 +1113,9 @@ class AsyncPlugins(AsyncAPIResource):
         """
         Permanently delete a Plugin and every version it holds, exactly as when an
         administrator deletes it in claude.ai. The Plugin may belong to the organization
-        or to a member, including a member who has since left the organization.
+        or to a member, including a member who has since left the organization. Do not
+        delete a Plugin only because your pipeline did not create it: a member or an
+        administrator might have added it in claude.ai.
 
         An organization-owned Plugin's installation settings go with it; a member-owned
         Plugin's shares are withdrawn and its owner no longer has it.
@@ -1083,6 +1148,9 @@ class AsyncPlugins(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

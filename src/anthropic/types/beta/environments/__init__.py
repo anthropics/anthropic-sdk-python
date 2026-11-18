@@ -5,10 +5,17 @@ from .work_poll_params import WorkPollParams as WorkPollParams
 from .work_stop_params import WorkStopParams as WorkStopParams
 from .work_update_params import WorkUpdateParams as WorkUpdateParams
 from .beta_self_hosted_work import BetaSelfHostedWork as BetaSelfHostedWork
+from .beta_work_lease_state import BetaWorkLeaseState as BetaWorkLeaseState
 from .work_heartbeat_params import WorkHeartbeatParams as WorkHeartbeatParams
 from .beta_session_work_data import BetaSessionWorkData as BetaSessionWorkData
 from .beta_self_hosted_work_queue_stats import BetaSelfHostedWorkQueueStats as BetaSelfHostedWorkQueueStats
 from .beta_self_hosted_work_list_response import BetaSelfHostedWorkListResponse as BetaSelfHostedWorkListResponse
+from .beta_heartbeat_precondition_failed_error import (
+    BetaHeartbeatPreconditionFailedError as BetaHeartbeatPreconditionFailedError,
+)
 from .beta_self_hosted_work_heartbeat_response import (
     BetaSelfHostedWorkHeartbeatResponse as BetaSelfHostedWorkHeartbeatResponse,
+)
+from .beta_heartbeat_precondition_failed_error_details import (
+    BetaHeartbeatPreconditionFailedErrorDetails as BetaHeartbeatPreconditionFailedErrorDetails,
 )

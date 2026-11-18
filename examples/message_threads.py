@@ -17,7 +17,7 @@ def lookup_order(order_id: str) -> str:
 
 def main() -> None:
     thread = client.beta.messages.thread(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         system="You are a support agent for Acme. Keep replies short.",
         tools=[lookup_order],
@@ -57,9 +57,9 @@ def main() -> None:
 
     # `model`, `system`, `tools`, ... are fixed for a thread's lifetime; start a new one from the history to change them.
     escalation = client.beta.messages.thread(
-        model="claude-sonnet-5",
+        model="claude-opus-5-5",
         max_tokens=1024,
-        system="You are a senior support agent for Acme. Decide whether to refund, and say why in one sentence.",
+        system="You are a support agent for Acme. Keep replies short.",
         tools=[lookup_order],
         messages=cancellation.messages,
     )

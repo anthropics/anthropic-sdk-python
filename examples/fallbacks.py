@@ -10,7 +10,7 @@ def main() -> None:
     client = Anthropic()
     message = client.beta.messages.create(
         max_tokens=1024,
-        model="claude-fable-5",
+        model="claude-fable-5-1",
         messages=[{"role": "user", "content": "Some prompt that triggers a refusal"}],
         fallbacks=[{"model": "claude-opus-4-8"}],
         betas=["server-side-fallback-2026-07-01"],
@@ -30,7 +30,7 @@ def main() -> None:
     messages: list[BetaMessageParam] = [{"role": "user", "content": "Some prompt that triggers a refusal"}]
     with state, fallback_client.beta.messages.stream(
         max_tokens=1024,
-        model="claude-fable-5",
+        model="claude-fable-5-1",
         messages=messages,
     ) as stream:
         for event in stream:
@@ -48,7 +48,7 @@ def main() -> None:
     with state:
         follow_up = fallback_client.beta.messages.create(
             max_tokens=1024,
-            model="claude-fable-5",
+            model="claude-fable-5-1",
             messages=messages,
         )
     print("non-streaming:", follow_up.model)

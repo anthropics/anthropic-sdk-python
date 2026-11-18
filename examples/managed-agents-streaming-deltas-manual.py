@@ -29,7 +29,7 @@ def main() -> None:
 
     agent = client.beta.agents.create(
         name="streaming-deltas-manual-example",
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5-5",
     )
     print("Created agent:", agent.id)
 

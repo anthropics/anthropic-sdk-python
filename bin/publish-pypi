@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
 set -eux
-rm -rf dist
-mkdir -p dist
-uv build
+
+read -r name version < <(uv version)
+package="dist/${name//-/_}-$version"
+files=("$package-py3-none-any.whl" "$package.tar.gz")
+
+# fails for a missing file and for a directory, both of which uv publish skips
+wc -c "${files[@]}"
+python3 -I ./scripts/utils/check-dist.py "${files[@]}"
+
 if [ -n "${PYPI_TOKEN:-}" ]; then
-  uv publish --token=$PYPI_TOKEN
+  uv publish --token=$PYPI_TOKEN "${files[@]}"
 else
-  uv publish
+  uv publish "${files[@]}"
 fi

@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_workspace_archived_deployment_paused_reason_error_object import (
+    BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError(BaseModel):
-    """The deployment's workspace was archived."""
-
-    type: Literal["workspace_archived_error"]
+BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError = (
+    BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonErrorObject
+"""

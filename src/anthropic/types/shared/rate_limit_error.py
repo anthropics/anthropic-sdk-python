@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .rate_limit_error_object import RateLimitErrorObject
 
 __all__ = ["RateLimitError"]
 
-
-class RateLimitError(BaseModel):
-    message: str
-
-    type: Literal["rate_limit_error"]
+RateLimitError = RateLimitErrorObject
+"""Deprecated: RateLimitError has been renamed to RateLimitErrorObject"""

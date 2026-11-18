@@ -1,6 +1,6 @@
 """Tests for `EnvironmentWorker`.
 
-The worker composes the control-plane poller, the per-session
+The worker composes the work poller, the per-session
 `AgentToolContext` / skill download, the lease heartbeat, and the session tool
 runner. We stub `aiter_work`, the session tool runner, and the worker's
 `_copy_client_with_bearer_auth` helper so each test can drive a single
@@ -55,7 +55,7 @@ from ..tools.test_session_runner import _SyncTool
 
 
 def _encode_secret(payload: dict[str, Any]) -> str:
-    """Build a work-item `secret` the way the control plane does: URL-safe
+    """Build a work-item `secret` the way the API does: URL-safe
     base64 of a JSON payload, without padding."""
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
 
@@ -67,7 +67,7 @@ def _api_status_error(code: int, body: object = None) -> APIStatusError:
 
 
 def _lease_lost_error() -> APIStatusError:
-    """The 412 the control plane answers a heartbeat with once the item's lease
+    """The 412 the API answers a heartbeat with once the item's lease
     was cleared (re-queued) or is held by another worker."""
     return _api_status_error(
         412,
@@ -140,12 +140,14 @@ class _FakeWorkResource:
 
 
 class _FakeSessions:
-    def __init__(self) -> None:
+    def __init__(self, *, status: str = "running", resources: list[Any] | None = None) -> None:
+        self._status = status
+        self._resources = resources or []
         self.retrieve_calls: list[str] = []
 
     async def retrieve(self, session_id: str, *, betas: Any = None) -> Any:  # noqa: ARG002
         self.retrieve_calls.append(session_id)
-        return SimpleNamespace(agent=SimpleNamespace(skills=[]), resources=[])
+        return SimpleNamespace(status=self._status, agent=SimpleNamespace(skills=[]), resources=self._resources)
 
 
 def _fake_client(work: _FakeWorkResource, sessions: _FakeSessions) -> Any:
@@ -524,7 +526,7 @@ async def test_heartbeat_412_releases_item_without_stopping_it(
 
 
 @pytest.mark.asyncio()
-async def test_control_plane_stop_still_force_stops(
+async def test_heartbeat_stop_still_force_stops(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     """A heartbeat reporting `state == "stopped"` ends the run and the item
@@ -590,7 +592,7 @@ async def test_lease_lost_classification() -> None:
     for reason, lost in [
         (_LeaseEndReason.LEASE_LOST, True),
         (_LeaseEndReason.ASSUMED_LOST, True),
-        (_LeaseEndReason.CONTROL_PLANE_STOP, False),
+        (_LeaseEndReason.HEARTBEAT_STOP, False),
         (_LeaseEndReason.HEARTBEAT_REJECTED, False),
         (_LeaseEndReason.RUNNER_DONE, False),
     ]:
@@ -655,6 +657,32 @@ async def test_handle_item_services_a_single_claimed_item(monkeypatch: pytest.Mo
     # `handle_item` doesn't poll, so only the heartbeat/force-stop scoped
     # client is built — tagged `environments-worker`.
     assert scoped_calls == [{"auth_token": "env_key", "helper": "environments-worker"}]
+
+
+@pytest.mark.parametrize("resources", [[], [SimpleNamespace(type="memory_store")]], ids=["no_memory", "memory_store"])
+@pytest.mark.asyncio()
+async def test_handle_item_stops_the_item_of_a_terminated_session(
+    monkeypatch: pytest.MonkeyPatch, resources: list[Any]
+) -> None:
+    """A terminated session accepts no tool result, so the worker starts no tool
+    runner for it and force-stops the work item. It does so even when the session
+    has a memory store and the work item has no sessions token, which makes the
+    worker fail a live session's item."""
+    work = _FakeWorkResource(heartbeat_state="running")
+    sessions = _FakeSessions(status="terminated", resources=resources)
+    _install_scoped_client(monkeypatch, work, sessions)
+    record: dict[str, Any] = {}
+    _install_run_session_tools(monkeypatch, record)
+    monkeypatch.delenv("ANTHROPIC_WORK_SECRET", raising=False)
+
+    worker = EnvironmentWorker(_fake_client(work, sessions), workdir=".")
+    await asyncio.wait_for(
+        worker.handle_item(work_id="w_1", environment_id="e_1", session_id="s_1", environment_key="env_key"),
+        timeout=5,
+    )
+
+    assert "run" not in record
+    assert [(call["work_id"], call["force"]) for call in work.stop_calls] == [("w_1", True)]
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="tool functions are only supported with pydantic v2")

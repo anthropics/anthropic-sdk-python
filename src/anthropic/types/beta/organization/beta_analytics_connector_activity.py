@@ -5,32 +5,9 @@ from .beta_analytics_connector_chat_metrics import BetaAnalyticsConnectorChatMet
 from .beta_analytics_connector_cowork_metrics import BetaAnalyticsConnectorCoworkMetrics
 from .beta_analytics_connector_office_metrics import BetaAnalyticsConnectorOfficeMetrics
 from .beta_analytics_connector_claude_code_metrics import BetaAnalyticsConnectorClaudeCodeMetrics
-from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
-    BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
-)
-from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
-    BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
-)
+from .beta_analytics_connector_chat_cowork_unified_metrics import BetaAnalyticsConnectorChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsConnectorActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Connector use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on, split into chat conversations and Cowork sessions. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    chat: BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics
-    """
-    A connector's use in chat conversations recorded while members had Chat and
-    Cowork unified turned on.
-    """
-
-    sessions: BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics
-    """
-    A connector's use in Cowork sessions recorded while members had Chat and Cowork
-    unified turned on.
-    """
+__all__ = ["BetaAnalyticsConnectorActivity"]
 
 
 class BetaAnalyticsConnectorActivity(BaseModel):
@@ -41,6 +18,20 @@ class BetaAnalyticsConnectorActivity(BaseModel):
 
     claude_code_metrics: BetaAnalyticsConnectorClaudeCodeMetrics
     """Claude Code activity metrics for a single connector on a given day."""
+
+    connector_display_name: Optional[str] = None
+    """
+    Human-readable display name for rows whose `connector_name` is an opaque
+    connector id rather than a readable name, resolved at request time from the
+    organization's connectors (including connectors that have since been removed).
+    `connector_name` remains the row's stable key for sorting and pagination, and
+    `filter[]=connector_name:{value}` also matches these rows by display name.
+    Display names are not unique, and the same connector's claude.ai usage can
+    appear under a separate row with a readable `connector_name`. Null when
+    `connector_name` is already a readable name, when the id cannot be resolved to
+    one of the organization's connectors, or when display-name resolution is not
+    enabled for this organization.
+    """
 
     connector_name: str
     """Name of the connector.
@@ -57,35 +48,6 @@ class BetaAnalyticsConnectorActivity(BaseModel):
     Number of distinct users who used the connector on the requested day, or, in
     date-range mode, over the requested window — recomputed as an exact distinct
     count over the window's per-member daily rows, never a sum of per-day values.
-    """
-
-    office_metrics: BetaAnalyticsConnectorOfficeMetrics
-    """
-    Office Agent activity metrics for a single connector on a given day, broken out
-    by Office product.
-    """
-
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
-    """
-    Connector use recorded while members had Chat and Cowork unified (Cowork's
-    features inside claude.ai chat) turned on, split into chat conversations and
-    Cowork sessions. A count is null in date-range mode where it cannot be computed.
-    Omitted from the response on deployments that do not offer Chat and Cowork
-    unified.
-    """
-
-    connector_display_name: Optional[str] = None
-    """
-    Human-readable display name for rows whose `connector_name` is an opaque
-    connector id rather than a readable name, resolved at request time from the
-    organization's connectors (including connectors that have since been removed).
-    `connector_name` remains the row's stable key for sorting and pagination, and
-    `filter[]=connector_name:{value}` also matches these rows by display name.
-    Display names are not unique, and the same connector's claude.ai usage can
-    appear under a separate row with a readable `connector_name`. Null when
-    `connector_name` is already a readable name, when the id cannot be resolved to
-    one of the organization's connectors, or when display-name resolution is not
-    enabled for this organization.
     """
 
     individual_auth_distinct_user_count: Optional[int] = None
@@ -122,31 +84,10 @@ class BetaAnalyticsConnectorActivity(BaseModel):
     partial-window value.
     """
 
-    product: Optional[str] = None
+    office_metrics: BetaAnalyticsConnectorOfficeMetrics
     """
-    Product that produced this row's activity: one of `chat`, `claude_code`,
-    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
-    These are the canonical Cost & Usage product names; an `office_agent` row's
-    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
-    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
-    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
-    `chat_cowork_unified` occur (the surfaces that create artifacts);
-    `/apps/chat/projects` does not support the product dimension (a `product` entry
-    in `group_by[]` or `filter[]` there is rejected). Present only when the request
-    grouped by `product`.
-    """
-
-    rbac_group_id: Optional[str] = None
-    """
-    Tagged RBAC group identifier (`rbac_group_...`), matching the spend-limits API
-    spelling. Present only when the request grouped by `rbac_group_id`.
-    """
-
-    rbac_group_name: Optional[str] = None
-    """
-    Resolved RBAC group display name, alongside `rbac_group_id` when name resolution
-    is available. Null if the group has been deleted or its name could not be
-    resolved; `rbac_group_id` remains the stable key.
+    Office Agent activity metrics for a single connector on a given day, broken out
+    by Office product.
     """
 
     read_call_count: Optional[int] = None
@@ -177,16 +118,51 @@ class BetaAnalyticsConnectorActivity(BaseModel):
     data-start dates, null conditions, and date-range guidance.
     """
 
-    user_id: Optional[str] = None
-    """Tagged user identifier (e.g.
-
-    `user_...`). Present only when the request grouped by `user_id`.
-    """
-
     write_call_count: Optional[int] = None
     """
     Number of connector tool calls on the requested day whose trusted read-only
     annotation marked them not read-only. Call count, not distinct users. One of the
     three call-classification buckets; see `read_call_count` for the per-surface
     data-start dates, null conditions, and date-range guidance.
+    """
+
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsConnectorChatCoworkUnifiedMetrics] = None
+    """
+    Connector use recorded while members had Chat and Cowork unified (Cowork's
+    features inside claude.ai chat) turned on, split into chat conversations and
+    Cowork sessions. A count is null in date-range mode where it cannot be computed.
+    Omitted from the response where Chat and Cowork unified is not available.
+    """
+
+    product: Optional[str] = None
+    """
+    Product that produced this row's activity: one of `chat`, `claude_code`,
+    `cowork`, `office_agent`, or `chat_cowork_unified` (Chat and Cowork unified).
+    These are the canonical Cost & Usage product names; an `office_agent` row's
+    per-surface breakdown is in its `office_metrics`. On `/plugins` only `cowork`,
+    `claude_code` and `chat_cowork_unified` occur (the only surfaces with plugin
+    attribution); on `/artifacts` only `chat`, `claude_code`, `cowork` and
+    `chat_cowork_unified` occur (the surfaces that create artifacts);
+    `/apps/chat/projects` does not support the product dimension (a `product` entry
+    in `group_by[]` or `filter[]` there is rejected). Present only when the request
+    grouped by `product`.
+    """
+
+    rbac_group_id: Optional[str] = None
+    """
+    Tagged RBAC group identifier (`rbac_group_...`), matching the spend-limits API
+    spelling. Present only when the request grouped by `rbac_group_id`.
+    """
+
+    rbac_group_name: Optional[str] = None
+    """
+    Resolved RBAC group display name, alongside `rbac_group_id` when name resolution
+    is available. Null if the group has been deleted or its name could not be
+    resolved; `rbac_group_id` remains the stable key.
+    """
+
+    user_id: Optional[str] = None
+    """Tagged user identifier (e.g.
+
+    `user_...`). Present only when the request grouped by `user_id`.
     """

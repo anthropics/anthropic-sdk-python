@@ -54,7 +54,7 @@ class TelemetryDestinations(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return TelemetryDestinationsWithRawResponse(self)
 
@@ -63,7 +63,7 @@ class TelemetryDestinations(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return TelemetryDestinationsWithStreamingResponse(self)
 
@@ -112,8 +112,7 @@ class TelemetryDestinations(SyncAPIResource):
           headers: Request headers that the API sends with every delivery, typically your
               collector's authentication header (for example `authorization`).
 
-              The API stores the values encrypted and never returns them. Reads show only
-              `header_names`.
+              The API never returns the values. Reads show only `header_names`.
 
               At most 20 headers. Names are at most 128 characters. Two names can't differ
               only in case. Values are printable ASCII, at most 4,096 characters, and can't
@@ -579,7 +578,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncTelemetryDestinationsWithRawResponse(self)
 
@@ -588,7 +587,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncTelemetryDestinationsWithStreamingResponse(self)
 
@@ -637,8 +636,7 @@ class AsyncTelemetryDestinations(AsyncAPIResource):
           headers: Request headers that the API sends with every delivery, typically your
               collector's authentication header (for example `authorization`).
 
-              The API stores the values encrypted and never returns them. Reads show only
-              `header_names`.
+              The API never returns the values. Reads show only `header_names`.
 
               At most 20 headers. Names are at most 128 characters. Two names can't differ
               only in case. Values are printable ASCII, at most 4,096 characters, and can't

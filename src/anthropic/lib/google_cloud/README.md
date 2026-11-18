@@ -54,7 +54,7 @@ client = AnthropicGoogleCloud(
 )
 
 message = client.messages.create(
-    model="claude-haiku-4-5",
+    model="claude-haiku-5-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
@@ -118,7 +118,7 @@ On `AsyncAnthropicGoogleCloud` the provider may also be `async`.
 
 ```python
 with client.messages.stream(
-    model="claude-haiku-4-5",
+    model="claude-haiku-5-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 ) as stream:
@@ -136,13 +136,13 @@ client = AsyncAnthropicGoogleCloud(
 )
 
 message = await client.messages.create(
-    model="claude-haiku-4-5",
+    model="claude-haiku-5-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )
 
 async with client.messages.stream(
-    model="claude-haiku-4-5",
+    model="claude-haiku-5-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 ) as stream:

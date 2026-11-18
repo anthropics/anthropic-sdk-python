@@ -1,12 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
-from .beta_web_search_tool_result_error_code import BetaWebSearchToolResultErrorCode
+from .beta_web_search_tool_result_error_object import BetaWebSearchToolResultErrorObject
 
 __all__ = ["BetaWebSearchToolResultError"]
 
-
-class BetaWebSearchToolResultError(BaseModel):
-    error_code: BetaWebSearchToolResultErrorCode
-
-    type: Literal["web_search_tool_result_error"]
+BetaWebSearchToolResultError = BetaWebSearchToolResultErrorObject
+"""
+Deprecated: BetaWebSearchToolResultError has been renamed to BetaWebSearchToolResultErrorObject
+"""

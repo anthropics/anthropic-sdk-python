@@ -41,7 +41,7 @@ class ServiceAccounts(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ServiceAccountsWithRawResponse(self)
 
@@ -50,7 +50,7 @@ class ServiceAccounts(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return ServiceAccountsWithStreamingResponse(self)
 
@@ -97,6 +97,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return self._post(
             "/v1/organizations/service_accounts",
@@ -206,6 +209,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -322,6 +328,9 @@ class ServiceAccounts(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -353,7 +362,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncServiceAccountsWithRawResponse(self)
 
@@ -362,7 +371,7 @@ class AsyncServiceAccounts(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncServiceAccountsWithStreamingResponse(self)
 
@@ -409,6 +418,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         return await self._post(
             "/v1/organizations/service_accounts",
@@ -518,6 +530,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")
@@ -634,6 +649,9 @@ class AsyncServiceAccounts(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not service_account_id:
             raise ValueError(f"Expected a non-empty value for `service_account_id` but received {service_account_id!r}")

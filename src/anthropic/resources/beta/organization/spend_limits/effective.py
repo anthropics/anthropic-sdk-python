@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal
 
 import httpx2
 
@@ -17,6 +16,7 @@ from ....._response import (
 from .....pagination import SyncPageCursor, AsyncPageCursor
 from ....._base_client import AsyncPaginator, make_request_options
 from .....types.beta.organization.beta_spend_summary import BetaSpendSummary
+from .....types.beta.organization.beta_spend_limit_period import BetaSpendLimitPeriod
 
 __all__ = ["Effective", "AsyncEffective"]
 
@@ -28,7 +28,7 @@ class Effective(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EffectiveWithRawResponse(self)
 
@@ -37,7 +37,7 @@ class Effective(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EffectiveWithStreamingResponse(self)
 
@@ -46,7 +46,7 @@ class Effective(SyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
-        period: Optional[List[Literal["daily", "monthly", "weekly"]]] | Omit = omit,
+        period: Optional[List[BetaSpendLimitPeriod]] | Omit = omit,
         user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -82,6 +82,9 @@ class Effective(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",
@@ -112,7 +115,7 @@ class AsyncEffective(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEffectiveWithRawResponse(self)
 
@@ -121,7 +124,7 @@ class AsyncEffective(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEffectiveWithStreamingResponse(self)
 
@@ -130,7 +133,7 @@ class AsyncEffective(AsyncAPIResource):
         *,
         limit: int | Omit = omit,
         page: Optional[str] | Omit = omit,
-        period: Optional[List[Literal["daily", "monthly", "weekly"]]] | Omit = omit,
+        period: Optional[List[BetaSpendLimitPeriod]] | Omit = omit,
         user_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -166,6 +169,9 @@ class AsyncEffective(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         return self._get_api_list(
             "/v1/organizations/spend_limits/effective",

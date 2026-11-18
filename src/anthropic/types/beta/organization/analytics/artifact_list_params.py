@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Union, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Required, TypedDict
 
 from ....._types import SequenceNotStr
+from ..beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy
 
 __all__ = ["ArtifactListParams"]
 
@@ -33,11 +34,11 @@ class ArtifactListParams(TypedDict, total=False):
     matches users who held the group at any point during each covered UTC day
     (time-of-usage attribution); `user_id` takes a tagged user id (`user_...`), as
     emitted in responses. An unsupported dimension returns 400. At most 100 entries.
-    `chat_cowork_unified` is accepted as a `product` value only on deployments that
-    offer Chat and Cowork unified.
+    `chat_cowork_unified` is accepted as a `product` value only where Chat and
+    Cowork unified is available.
     """
 
-    group_by: Optional[List[Literal["product", "rbac_group_id", "user_id"]]]
+    group_by: Optional[List[BetaAnalyticsArtifactGroupBy]]
     """Dimensions to break results out by: `product`, `user_id` and/or `rbac_group_id`.
 
     The ungrouped artifact-type cube is finite and returned in full; grouped queries

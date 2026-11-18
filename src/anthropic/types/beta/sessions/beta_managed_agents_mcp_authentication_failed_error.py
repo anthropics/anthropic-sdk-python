@@ -1,33 +1,11 @@
-from typing import Union
-from typing_extensions import Literal, Annotated, TypeAlias
-
-from ...._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_retry_status_retrying import BetaManagedAgentsRetryStatusRetrying
-from .beta_managed_agents_retry_status_terminal import BetaManagedAgentsRetryStatusTerminal
-from .beta_managed_agents_retry_status_exhausted import BetaManagedAgentsRetryStatusExhausted
+from .beta_managed_agents_mcp_authentication_failed_error_object import (
+    RetryStatus,
+    BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsMCPAuthenticationFailedError", "RetryStatus"]
 
-RetryStatus: TypeAlias = Annotated[
-    Union[
-        BetaManagedAgentsRetryStatusRetrying,
-        BetaManagedAgentsRetryStatusExhausted,
-        BetaManagedAgentsRetryStatusTerminal,
-    ],
-    UnionDiscriminator("type"),
-]
-
-
-class BetaManagedAgentsMCPAuthenticationFailedError(BaseModel):
-    """Authentication to an MCP server failed."""
-
-    mcp_server_name: str
-    """Name of the MCP server that failed authentication."""
-
-    message: str
-    """Human-readable error description."""
-
-    retry_status: RetryStatus
-    """What the client should do next."""
-
-    type: Literal["mcp_authentication_failed_error"]
+BetaManagedAgentsMCPAuthenticationFailedError = BetaManagedAgentsMCPAuthenticationFailedErrorObject
+"""
+Deprecated: BetaManagedAgentsMCPAuthenticationFailedError has been renamed to BetaManagedAgentsMCPAuthenticationFailedErrorObject
+"""

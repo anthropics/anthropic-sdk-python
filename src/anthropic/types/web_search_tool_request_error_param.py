@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from typing_extensions import Literal, Required, TypedDict
-
-from .web_search_tool_result_error_code import WebSearchToolResultErrorCode
+from .web_search_tool_request_error_object_param import WebSearchToolRequestErrorObjectParam
 
 __all__ = ["WebSearchToolRequestErrorParam"]
 
-
-class WebSearchToolRequestErrorParam(TypedDict, total=False):
-    error_code: Required[WebSearchToolResultErrorCode]
-
-    type: Required[Literal["web_search_tool_result_error"]]
+WebSearchToolRequestErrorParam = WebSearchToolRequestErrorObjectParam
+"""
+Deprecated: WebSearchToolRequestErrorParam has been renamed to WebSearchToolRequestErrorObjectParam
+"""

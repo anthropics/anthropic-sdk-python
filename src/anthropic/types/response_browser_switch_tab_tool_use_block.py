@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserSwitchTabToolUseBlock"]
 
 ResponseBrowserSwitchTabToolUseBlock = BrowserSwitchTabToolUseBlock
 """
-ResponseBrowserSwitchTabToolUseBlock has been renamed to BrowserSwitchTabToolUseBlock
+Deprecated: ResponseBrowserSwitchTabToolUseBlock has been renamed to BrowserSwitchTabToolUseBlock
 """

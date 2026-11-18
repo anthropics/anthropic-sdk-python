@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .overloaded_error_object import OverloadedErrorObject
 
 __all__ = ["OverloadedError"]
 
-
-class OverloadedError(BaseModel):
-    message: str
-
-    type: Literal["overloaded_error"]
+OverloadedError = OverloadedErrorObject
+"""Deprecated: OverloadedError has been renamed to OverloadedErrorObject"""

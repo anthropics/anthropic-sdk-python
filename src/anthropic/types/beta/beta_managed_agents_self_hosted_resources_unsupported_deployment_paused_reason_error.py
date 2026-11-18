@@ -1,13 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_self_hosted_resources_unsupported_deployment_paused_reason_error_object import (
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError(BaseModel):
-    """
-    The deployment configures resources, but its environment is self-hosted and cannot mount them.
-    """
-
-    type: Literal["self_hosted_resources_unsupported_error"]
+BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError = (
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError has been renamed to BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonErrorObject
+"""

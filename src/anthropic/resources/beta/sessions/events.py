@@ -44,7 +44,7 @@ class Events(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EventsWithRawResponse(self)
 
@@ -53,7 +53,7 @@ class Events(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return EventsWithStreamingResponse(self)
 
@@ -319,7 +319,7 @@ class AsyncEvents(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEventsWithRawResponse(self)
 
@@ -328,7 +328,7 @@ class AsyncEvents(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncEventsWithStreamingResponse(self)
 
@@ -618,9 +618,13 @@ class AsyncEvents(AsyncAPIResource):
         Iteration ends when the session terminates (`session.status_terminated`
         / `session.deleted`), when the consumer breaks out of the loop, or —
         once the session has gone idle with `stop_reason` `end_turn` —
-        `max_idle` seconds elapse with no new event (any new event resets that
-        countdown; it re-arms on the next `end_turn` idle). `max_idle=None`
-        disables that last condition. It does **not** touch the work-item lease —
+        `max_idle` seconds elapse with no new event (any new event but a tool
+        confirmation or a thread's termination cancels that countdown; it re-arms
+        on the next `end_turn` idle). `max_idle=None` disables that last
+        condition. If the runner fails to read the session's event history after
+        a reconnect, a termination that then arrives on the event stream cancels
+        the countdown too, until the next idle or successful read.
+        The runner does **not** touch the work-item lease —
         wrap it in an `anthropic.lib.environments.EnvironmentWorker` if
         you need heartbeating / force-stop.
 
@@ -646,9 +650,12 @@ class AsyncEvents(AsyncAPIResource):
             events — the same `anthropic.lib.tools.BetaAsyncFunctionTool`
             shape `client.beta.messages.tool_runner` accepts.
           max_idle: Seconds to keep running after the session goes idle with
-            `stop_reason` `end_turn` before stopping; any new event resets
-            the countdown. Defaults to `DEFAULT_MAX_IDLE` (60s) when not
-            given. `None` disables it.
+            `stop_reason` `end_turn` before stopping; any new event but a tool
+            confirmation or a thread's termination cancels the countdown. If
+            the runner fails to read the session's event history after a reconnect,
+            a termination that then arrives on the event stream cancels it too,
+            until the next idle or successful read.
+            Defaults to `DEFAULT_MAX_IDLE` (60s) when not given. `None` disables it.
           environment_key: The self-hosted environment key. When set, the
             runner builds a Bearer-only scoped sub-client keyed to that
             environment for the event stream / list / send calls; leave it

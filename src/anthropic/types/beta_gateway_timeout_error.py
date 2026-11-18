@@ -1,11 +1,8 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_gateway_timeout_error_object import BetaGatewayTimeoutErrorObject
 
 __all__ = ["BetaGatewayTimeoutError"]
 
-
-class BetaGatewayTimeoutError(BaseModel):
-    message: str
-
-    type: Literal["timeout_error"]
+BetaGatewayTimeoutError = BetaGatewayTimeoutErrorObject
+"""
+Deprecated: BetaGatewayTimeoutError has been renamed to BetaGatewayTimeoutErrorObject
+"""

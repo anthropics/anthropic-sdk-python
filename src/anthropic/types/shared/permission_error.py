@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .permission_error_object import PermissionErrorObject
 
 __all__ = ["PermissionError"]
 
-
-class PermissionError(BaseModel):
-    message: str
-
-    type: Literal["permission_error"]
+PermissionError = PermissionErrorObject
+"""Deprecated: PermissionError has been renamed to PermissionErrorObject"""

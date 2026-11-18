@@ -38,7 +38,7 @@ class TestFiles:
             limit=1,
             page="page",
             scope_id="scope_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -80,7 +80,7 @@ class TestFiles:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.delete(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -138,7 +138,7 @@ class TestFiles:
         respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         file = client.beta.files.download(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -199,7 +199,7 @@ class TestFiles:
     def test_method_retrieve_metadata_with_all_params(self, client: Anthropic) -> None:
         file = client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -251,7 +251,7 @@ class TestFiles:
         file = client.beta.files.upload(
             file=b"Example data",
             expires_in_seconds=3600,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -303,7 +303,7 @@ class TestAsyncFiles:
             limit=1,
             page="page",
             scope_id="scope_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -345,7 +345,7 @@ class TestAsyncFiles:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.delete(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -403,7 +403,7 @@ class TestAsyncFiles:
         respx_mock.get("/v1/files/file_id/content").mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
         file = await async_client.beta.files.download(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -464,7 +464,7 @@ class TestAsyncFiles:
     async def test_method_retrieve_metadata_with_all_params(self, async_client: AsyncAnthropic) -> None:
         file = await async_client.beta.files.retrieve_metadata(
             file_id="file_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -516,7 +516,7 @@ class TestAsyncFiles:
         file = await async_client.beta.files.upload(
             file=b"Example data",
             expires_in_seconds=3600,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

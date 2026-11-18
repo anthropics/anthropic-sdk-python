@@ -32,7 +32,7 @@ class TestEvents:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -95,7 +95,7 @@ class TestEvents:
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -164,7 +164,7 @@ class TestAsyncEvents:
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -227,7 +227,7 @@ class TestAsyncEvents:
             thread_id="sthr_011CZkZVWa6oJjw1rgXZpnBt",
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
             event_deltas=["agent.message"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

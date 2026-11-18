@@ -58,7 +58,7 @@ class SpendLimits(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SpendLimitsWithRawResponse(self)
 
@@ -67,7 +67,7 @@ class SpendLimits(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SpendLimitsWithStreamingResponse(self)
 
@@ -95,6 +95,9 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -167,6 +170,9 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -231,6 +237,11 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -294,6 +305,11 @@ class SpendLimits(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -335,7 +351,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSpendLimitsWithRawResponse(self)
 
@@ -344,7 +360,7 @@ class AsyncSpendLimits(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSpendLimitsWithStreamingResponse(self)
 
@@ -372,6 +388,9 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -444,6 +463,9 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
         """
         extra_headers = {
             **strip_not_given(
@@ -508,6 +530,11 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         if not spend_limit_id:
             raise ValueError(f"Expected a non-empty value for `spend_limit_id` but received {spend_limit_id!r}")
@@ -571,6 +598,11 @@ class AsyncSpendLimits(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
+
+          BetaSpendLimitsAdminAPIWritesNotEnabledError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),

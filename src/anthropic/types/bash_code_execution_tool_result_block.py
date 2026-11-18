@@ -3,11 +3,11 @@ from typing_extensions import Literal, TypeAlias
 
 from .._models import BaseModel
 from .bash_code_execution_result_block import BashCodeExecutionResultBlock
-from .bash_code_execution_tool_result_error import BashCodeExecutionToolResultError
+from .bash_code_execution_tool_result_error_object import BashCodeExecutionToolResultErrorObject
 
 __all__ = ["BashCodeExecutionToolResultBlock", "Content"]
 
-Content: TypeAlias = Union[BashCodeExecutionToolResultError, BashCodeExecutionResultBlock]
+Content: TypeAlias = Union[BashCodeExecutionToolResultErrorObject, BashCodeExecutionResultBlock]
 
 
 class BashCodeExecutionToolResultBlock(BaseModel):

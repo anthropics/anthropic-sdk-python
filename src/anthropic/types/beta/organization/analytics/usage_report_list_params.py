@@ -27,9 +27,7 @@ class UsageReportListParams(TypedDict, total=False):
     claude_tag_categories: Optional[List[BetaAnalyticsClaudeTagCategory]]
     """Filter to Claude Tag (Claude in Slack) usage in specific spend categories.
 
-    Usage with no category never matches. `dm` usage is reported under the user's
-    product rather than `claude-tag`, so combining this filter with
-    `products[]=claude-tag` excludes it. Use `group_by[]=claude_tag_category` to
+    Usage with no category never matches. Use `group_by[]=claude_tag_category` to
     break out per-category values.
     """
 

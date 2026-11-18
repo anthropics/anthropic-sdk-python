@@ -3,17 +3,62 @@
 ```python
 from anthropic.types import (
     APIErrorObject,
-    AuthenticationError,
-    BillingError,
+    AuthenticationErrorObject,
+    BillingErrorObject,
+    ClaudeCodeKeyCreatorNotMemberErrorDetails,
+    ClaudeCodeVersionTooOldErrorDetails,
+    CMEKContextUnavailableErrorDetails,
+    CMEKKeyDisabledErrorDetails,
+    CMEKKeyNetworkBlockedErrorDetails,
+    CMEKKeyUnreachableErrorDetails,
+    ContractSpendLimitReachedErrorDetails,
+    EnforcedSpendLimitReachedErrorDetails,
+    ErrorDetails,
     ErrorObject,
     ErrorResponse,
     ErrorType,
-    GatewayTimeoutError,
+    GatewayTimeoutErrorObject,
+    InvalidRequestErrorObject,
+    LinkedOrganizationBillingUnavailableErrorDetails,
+    LinkedOrganizationSpendLimitReachedErrorDetails,
+    NotFoundErrorObject,
+    OrganizationOnHoldErrorDetails,
+    OrganizationTypeNotSupportedErrorDetails,
+    OverloadedErrorObject,
+    ParentOrganizationRequiredErrorDetails,
+    PermissionErrorObject,
+    RampLimitExceededErrorDetails,
+    RateLimitErrorObject,
+    RequestBodyEncodingInvalidErrorDetails,
+    RequestBodyEncodingUnsupportedErrorDetails,
+    RequestBodyTooLargeAfterDecodingErrorDetails,
+    SandboxEgressRestrictedErrorDetails,
+    AuthenticationError,
     InvalidRequestError,
+    BillingError,
+    GatewayTimeoutError,
     NotFoundError,
     OverloadedError,
     PermissionError,
     RateLimitError,
+    ClaudeCodeKeyCreatorNotMemberError,
+    ClaudeCodeVersionTooOldError,
+    CMEKKeyDisabledError,
+    CMEKKeyNetworkBlockedError,
+    OrganizationOnHoldError,
+    OrganizationTypeNotSupportedError,
+    ParentOrganizationRequiredError,
+    RequestBodyEncodingInvalidError,
+    RequestBodyEncodingUnsupportedError,
+    LinkedOrganizationBillingUnavailableError,
+    LinkedOrganizationSpendLimitReachedError,
+    SandboxEgressRestrictedError,
+    RequestBodyTooLargeAfterDecodingError,
+    ContractSpendLimitReachedError,
+    EnforcedSpendLimitReachedError,
+    RampLimitExceededError,
+    CMEKContextUnavailableError,
+    CMEKKeyUnreachableError,
 )
 ```
 
@@ -24,6 +69,7 @@ Types:
 ```python
 from anthropic.types import (
     AssistantMessageParam,
+    AvailableToolsLimitExceededErrorDetails,
     Base64ImageSourceParam,
     Base64PDFSource,
     Base64PDFSourceParam,
@@ -33,8 +79,8 @@ from anthropic.types import (
     BashCodeExecutionResultBlockParam,
     BashCodeExecutionToolResultBlock,
     BashCodeExecutionToolResultBlockParam,
-    BashCodeExecutionToolResultError,
     BashCodeExecutionToolResultErrorCode,
+    BashCodeExecutionToolResultErrorObject,
     BashCodeExecutionToolResultErrorParam,
     BrowserClickTarget,
     BrowserCloseTabConfigParam,
@@ -181,9 +227,18 @@ from anthropic.types import (
     CodeExecutionToolResultBlockContent,
     CodeExecutionToolResultBlockParam,
     CodeExecutionToolResultBlockParamContentParam,
-    CodeExecutionToolResultError,
     CodeExecutionToolResultErrorCode,
+    CodeExecutionToolResultErrorObject,
     CodeExecutionToolResultErrorParam,
+    CompactionBlockAmbiguousErrorDetails,
+    CompactionBlockMisplacedErrorDetails,
+    CompactionContentMismatchErrorDetails,
+    CompactionIncompleteTurnErrorDetails,
+    CompactionNothingToSummarizeErrorDetails,
+    CompactionSignatureInvalidErrorDetails,
+    CompactionTooManyToolReferencesErrorDetails,
+    CompactionToolChangesMismatchErrorDetails,
+    CompactionUnavailableErrorDetails,
     ComputerCursorPositionConfigParam,
     ComputerCursorPositionInput,
     ComputerCursorPositionToolUseBlock,
@@ -313,8 +368,8 @@ from anthropic.types import (
     TextEditorCodeExecutionStrReplaceResultBlockParam,
     TextEditorCodeExecutionToolResultBlock,
     TextEditorCodeExecutionToolResultBlockParam,
-    TextEditorCodeExecutionToolResultError,
     TextEditorCodeExecutionToolResultErrorCode,
+    TextEditorCodeExecutionToolResultErrorObject,
     TextEditorCodeExecutionToolResultErrorParam,
     TextEditorCodeExecutionViewResultBlock,
     TextEditorCodeExecutionViewResultBlockParam,
@@ -326,6 +381,12 @@ from anthropic.types import (
     ThinkingConfigEnabledParam,
     ThinkingConfigParam,
     ThinkingDelta,
+    ThreadAlreadyContinuedErrorDetails,
+    ThreadContinueInFlightErrorDetails,
+    ThreadFingerprintMismatchErrorDetails,
+    ThreadNotFoundErrorDetails,
+    ThreadUnsupportedFeatureName,
+    ThreadUnsupportedRequestErrorDetails,
     ToolParam,
     ToolBash20250124Param,
     ToolChoiceParam,
@@ -333,15 +394,17 @@ from anthropic.types import (
     ToolChoiceAutoParam,
     ToolChoiceNoneParam,
     ToolChoiceToolParam,
+    ToolNameConflictErrorDetails,
     ToolReferenceBlock,
     ToolReferenceBlockParam,
+    ToolReferenceUnresolvedErrorDetails,
     ToolResultBlockParam,
     ToolSearchToolBm25_20251119Param,
     ToolSearchToolRegex20251119Param,
     ToolSearchToolResultBlock,
     ToolSearchToolResultBlockParam,
-    ToolSearchToolResultError,
     ToolSearchToolResultErrorCode,
+    ToolSearchToolResultErrorObject,
     ToolSearchToolResultErrorParam,
     ToolSearchToolSearchResultBlock,
     ToolSearchToolSearchResultBlockParam,
@@ -380,13 +443,13 @@ from anthropic.types import (
     WebSearchTool20250305Param,
     WebSearchTool20260209Param,
     WebSearchTool20260318Param,
-    WebSearchToolRequestErrorParam,
+    WebSearchToolRequestErrorObjectParam,
     WebSearchToolResultBlock,
     WebSearchToolResultBlockContent,
     WebSearchToolResultBlockParam,
     WebSearchToolResultBlockParamContentParam,
-    WebSearchToolResultError,
     WebSearchToolResultErrorCode,
+    WebSearchToolResultErrorObject,
     MessageStreamEvent,
     MessageStartEvent,
     MessageDeltaEvent,
@@ -394,6 +457,12 @@ from anthropic.types import (
     ContentBlockStartEvent,
     ContentBlockDeltaEvent,
     ContentBlockStopEvent,
+    WebSearchToolResultError,
+    WebSearchToolRequestErrorParam,
+    CodeExecutionToolResultError,
+    BashCodeExecutionToolResultError,
+    TextEditorCodeExecutionToolResultError,
+    ToolSearchToolResultError,
     ResponseToolUseBlockUnion,
     ResponseBrowserToolUseBlock,
     ResponseBrowserCloseTabToolUseBlock,
@@ -445,6 +514,23 @@ from anthropic.types import (
     ResponseComputerTypeToolUseBlock,
     ResponseComputerWaitToolUseBlock,
     ResponseComputerZoomToolUseBlock,
+    AvailableToolsLimitExceededError,
+    CompactionBlockAmbiguousError,
+    CompactionBlockMisplacedError,
+    CompactionContentMismatchError,
+    CompactionIncompleteTurnError,
+    CompactionNothingToSummarizeError,
+    CompactionSignatureInvalidError,
+    CompactionTooManyToolReferencesError,
+    CompactionToolChangesMismatchError,
+    ThreadAlreadyContinuedError,
+    ThreadContinueInFlightError,
+    ThreadFingerprintMismatchError,
+    ThreadUnsupportedRequestError,
+    ToolNameConflictError,
+    ToolReferenceUnresolvedError,
+    ThreadNotFoundError,
+    CompactionUnavailableError,
 )
 ```
 
@@ -509,7 +595,16 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedFile, FileMetadata
+from anthropic.types import (
+    DeletedFile,
+    FileExpiredErrorDetails,
+    FileMetadata,
+    FileNotDownloadableErrorDetails,
+    StorageQuotaExceededErrorDetails,
+    FileNotDownloadableError,
+    StorageQuotaExceededError,
+    FileExpiredError,
+)
 ```
 
 Methods:
@@ -525,7 +620,13 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import DeletedSkill, Skill, SkillSource
+from anthropic.types import (
+    DeletedSkill,
+    Skill,
+    SkillReadBlockedUndecryptableErrorDetails,
+    SkillSource,
+    SkillReadBlockedUndecryptableError,
+)
 ```
 
 Methods:
@@ -559,6 +660,7 @@ from anthropic.types import (
     DeletedUserProfile,
     UserProfile,
     UserProfileAccessType,
+    UserProfileBillingNotAuthorizedErrorDetails,
     UserProfileCyberProgram,
     UserProfileCyberRequirements,
     UserProfileCyberTier,
@@ -576,8 +678,15 @@ from anthropic.types import (
     UserProfileExternalUserEntityType,
     UserProfileListOrder,
     UserProfileListOrderBy,
+    UserProfileNotBillableErrorDetails,
+    UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
+    UserProfileRequiredErrorDetails,
+    UserProfileNotFoundError,
+    UserProfileRequiredError,
+    UserProfileBillingNotAuthorizedError,
+    UserProfileNotBillableError,
 )
 ```
 
@@ -606,7 +715,16 @@ Methods:
 Types:
 
 ```python
-from anthropic.types import OrganizationInfo, OrganizationRole
+from anthropic.types import (
+    ConcurrentMembershipChangeErrorDetails,
+    OrgMemberLimitExceededErrorDetails,
+    OrganizationInfo,
+    OrganizationRole,
+    RBACRoleNotFoundErrorDetails,
+    OrgMemberLimitExceededError,
+    RBACRoleNotFoundError,
+    ConcurrentMembershipChangeError,
+)
 ```
 
 Methods:
@@ -625,6 +743,10 @@ from anthropic.types.organization import (
     APIKeyServiceAccountActor,
     APIKeyUserActor,
     APIKeyWorkspaceScope,
+    OrgAPIKeyLimitExceededErrorDetails,
+    WorkspaceAPIKeyLimitExceededErrorDetails,
+    OrgAPIKeyLimitExceededError,
+    WorkspaceAPIKeyLimitExceededError,
 )
 ```
 
@@ -646,11 +768,19 @@ from anthropic.types.organization import (
     AzureExternalKeyConfigParam,
     ExternalKey,
     ExternalKeyAttachedAttachment,
+    ExternalKeyChangedErrorDetails,
+    ExternalKeyInWorkspacePolicyErrorDetails,
     ExternalKeyUnattachedAttachment,
+    ExternalKeyValidationFailedErrorDetails,
+    ExternalKeyValidationTimedOutErrorDetails,
     GCPExternalKeyConfig,
     GCPExternalKeyConfigParam,
     ExternalKeyDeleteResponse,
     ExternalKeyValidateResponse,
+    ExternalKeyInWorkspacePolicyError,
+    ExternalKeyValidationFailedError,
+    ExternalKeyValidationTimedOutError,
+    ExternalKeyChangedError,
 )
 ```
 
@@ -732,7 +862,18 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationInvite, InviteDeleteResponse
+from anthropic.types.organization import (
+    AlreadyMemberErrorDetails,
+    CannotInviteEmailsWithUnverifiedDomainsErrorDetails,
+    EmailDomainNotAllowedErrorDetails,
+    InviteAlreadyExistsErrorDetails,
+    OrganizationInvite,
+    InviteDeleteResponse,
+    AlreadyMemberError,
+    CannotInviteEmailsWithUnverifiedDomainsError,
+    EmailDomainNotAllowedError,
+    InviteAlreadyExistsError,
+)
 ```
 
 Methods:
@@ -777,7 +918,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import OrganizationUser, UserRemoveResponse
+from anthropic.types.organization import (
+    CannotRemoveLastMemberErrorDetails,
+    OrganizationUser,
+    UserRemoveResponse,
+    CannotRemoveLastMemberError,
+)
 ```
 
 Methods:
@@ -797,10 +943,17 @@ from anthropic.types.organization import (
     DataResidency,
     DataResidencyCreateConfigParam,
     DataResidencyUpdateConfigParam,
+    KeyProfileMismatchErrorDetails,
     NoBillingWorkspaceRole,
     Workspace,
     WorkspaceMember,
+    WorkspaceMemberLimitExceededErrorDetails,
+    WorkspacePolicyField,
+    WorkspacePolicyViolationErrorDetails,
     WorkspaceRole,
+    KeyProfileMismatchError,
+    WorkspaceMemberLimitExceededError,
+    WorkspacePolicyViolationError,
 )
 ```
 
@@ -906,6 +1059,232 @@ Methods:
 - <code title="get /v1/organizations/compliance_settings">client.organization.compliance_settings.<a href="./src/anthropic/resources/organization/compliance_settings.py">retrieve</a>() -> <a href="./src/anthropic/types/organization/organization_compliance_settings.py">OrganizationComplianceSettings</a></code>
 - <code title="post /v1/organizations/compliance_settings">client.organization.compliance_settings.<a href="./src/anthropic/resources/organization/compliance_settings.py">update</a>(\*\*<a href="src/anthropic/types/organization/compliance_setting_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/organization_compliance_settings.py">OrganizationComplianceSettings</a></code>
 
+## Analytics
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    AnalyticsArtifactActivity,
+    AnalyticsArtifactGroupBy,
+    AnalyticsChatCoworkUnifiedChatMetrics,
+    AnalyticsChatCoworkUnifiedMetrics,
+    AnalyticsChatCoworkUnifiedSessionsMetrics,
+    AnalyticsChatMetrics,
+    AnalyticsClaudeCodeMetrics,
+    AnalyticsClaudeTagMetrics,
+    AnalyticsConnectorActivity,
+    AnalyticsConnectorChatCoworkUnifiedChatMetrics,
+    AnalyticsConnectorChatCoworkUnifiedMetrics,
+    AnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
+    AnalyticsConnectorChatMetrics,
+    AnalyticsConnectorClaudeCodeMetrics,
+    AnalyticsConnectorCoworkMetrics,
+    AnalyticsConnectorGroupBy,
+    AnalyticsConnectorOfficeMetrics,
+    AnalyticsConnectorOfficeProductMetrics,
+    AnalyticsCoreCodeMetrics,
+    AnalyticsCoworkMetrics,
+    AnalyticsDesignMetrics,
+    AnalyticsLinesOfCode,
+    AnalyticsOfficeMetrics,
+    AnalyticsOfficeProductMetrics,
+    AnalyticsOrder,
+    AnalyticsPluginActivity,
+    AnalyticsPluginChatCoworkUnifiedMetrics,
+    AnalyticsPluginClaudeCodeMetrics,
+    AnalyticsPluginCoworkMetrics,
+    AnalyticsPluginGroupBy,
+    AnalyticsProjectActivity,
+    AnalyticsProjectGroupBy,
+    AnalyticsScienceMetrics,
+    AnalyticsSingleDayActivitySummary,
+    AnalyticsSkillActivity,
+    AnalyticsSkillChatCoworkUnifiedChatMetrics,
+    AnalyticsSkillChatCoworkUnifiedMetrics,
+    AnalyticsSkillChatCoworkUnifiedSessionsMetrics,
+    AnalyticsSkillChatMetrics,
+    AnalyticsSkillClaudeCodeMetrics,
+    AnalyticsSkillCoworkMetrics,
+    AnalyticsSkillGroupBy,
+    AnalyticsSkillOfficeMetrics,
+    AnalyticsSkillOfficeProductMetrics,
+    AnalyticsToolActionCounts,
+    AnalyticsToolActions,
+    AnalyticsUser,
+    AnalyticsUserActivity,
+    AnalyticsUserGroupBy,
+)
+```
+
+### Summaries
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/summaries">client.organization.analytics.summaries.<a href="./src/anthropic/resources/organization/analytics/summaries.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/summary_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_single_day_activity_summary.py">SyncPageCursor[AnalyticsSingleDayActivitySummary]</a></code>
+
+### Users
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/users">client.organization.analytics.users.<a href="./src/anthropic/resources/organization/analytics/users.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_user_activity.py">SyncPageCursor[AnalyticsUserActivity]</a></code>
+
+### Apps
+
+#### Chat
+
+##### Projects
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/apps/chat/projects">client.organization.analytics.apps.chat.projects.<a href="./src/anthropic/resources/organization/analytics/apps/chat/projects.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/apps/chat/project_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_project_activity.py">SyncPageCursor[AnalyticsProjectActivity]</a></code>
+
+### Connectors
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/connectors">client.organization.analytics.connectors.<a href="./src/anthropic/resources/organization/analytics/connectors.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/connector_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_connector_activity.py">SyncPageCursor[AnalyticsConnectorActivity]</a></code>
+
+### Plugins
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/plugins">client.organization.analytics.plugins.<a href="./src/anthropic/resources/organization/analytics/plugins.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/plugin_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_plugin_activity.py">SyncPageCursor[AnalyticsPluginActivity]</a></code>
+
+### Skills
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/skills">client.organization.analytics.skills.<a href="./src/anthropic/resources/organization/analytics/skills.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/skill_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_skill_activity.py">SyncPageCursor[AnalyticsSkillActivity]</a></code>
+
+### Artifacts
+
+Methods:
+
+- <code title="get /v1/organizations/analytics/artifacts">client.organization.analytics.artifacts.<a href="./src/anthropic/resources/organization/analytics/artifacts.py">list</a>(\*\*<a href="src/anthropic/types/organization/analytics/artifact_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/analytics_artifact_activity.py">SyncPageCursor[AnalyticsArtifactActivity]</a></code>
+
+## SpendLimits
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    SpendLimit,
+    SpendLimitOrganizationScope,
+    SpendLimitOrganizationServiceScope,
+    SpendLimitPeriod,
+    SpendLimitRBACGroupScope,
+    SpendLimitScopedAPIKeyActor,
+    SpendLimitSeatTierScope,
+    SpendLimitUsageTierScope,
+    SpendLimitUserActor,
+    SpendLimitUserScope,
+    SpendLimitWorkspaceScope,
+    SpendSummary,
+)
+```
+
+### Effective
+
+Methods:
+
+- <code title="get /v1/organizations/spend_limits/effective">client.organization.spend_limits.effective.<a href="./src/anthropic/resources/organization/spend_limits/effective.py">list</a>(\*\*<a href="src/anthropic/types/organization/spend_limits/effective_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/spend_summary.py">SyncPageCursor[SpendSummary]</a></code>
+
+### IncreaseRequests
+
+Types:
+
+```python
+from anthropic.types.organization.spend_limits import (
+    SpendLimitIncreaseRequest,
+    SpendLimitIncreaseRequestActor,
+    SpendLimitIncreaseRequestResolvedBy,
+    SpendLimitIncreaseRequestStatus,
+    IncreaseRequestApproveResponse,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}">client.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/organization/spend_limits/increase_requests.py">retrieve</a>(spend_limit_increase_request_id) -> <a href="./src/anthropic/types/organization/spend_limits/spend_limit_increase_request.py">SpendLimitIncreaseRequest</a></code>
+- <code title="get /v1/organizations/spend_limit_increase_requests">client.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/organization/spend_limits/increase_requests.py">list</a>(\*\*<a href="src/anthropic/types/organization/spend_limits/increase_request_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/spend_limits/spend_limit_increase_request.py">SyncPageCursor[SpendLimitIncreaseRequest]</a></code>
+- <code title="post /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/approve">client.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/organization/spend_limits/increase_requests.py">approve</a>(spend_limit_increase_request_id, \*\*<a href="src/anthropic/types/organization/spend_limits/increase_request_approve_params.py">params</a>) -> <a href="./src/anthropic/types/organization/spend_limits/increase_request_approve_response.py">IncreaseRequestApproveResponse</a></code>
+- <code title="post /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}/deny">client.organization.spend_limits.increase_requests.<a href="./src/anthropic/resources/organization/spend_limits/increase_requests.py">deny</a>(spend_limit_increase_request_id, \*\*<a href="src/anthropic/types/organization/spend_limits/increase_request_deny_params.py">params</a>) -> <a href="./src/anthropic/types/organization/spend_limits/spend_limit_increase_request.py">SpendLimitIncreaseRequest</a></code>
+
+## RBACGroups
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    DeletedRBACGroup,
+    RBACGroup,
+    RBACGroupGrantsOwnerAccessErrorDetails,
+    RBACGroupOwnerAccessUnconfirmedErrorDetails,
+    RBACGroupGrantsOwnerAccessError,
+    RBACGroupOwnerAccessUnconfirmedError,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/rbac_groups">client.organization.rbac_groups.<a href="./src/anthropic/resources/organization/rbac_groups/rbac_groups.py">create</a>(\*\*<a href="src/anthropic/types/organization/rbac_group_create_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_group.py">RBACGroup</a></code>
+- <code title="get /v1/organizations/rbac_groups/{rbac_group_id}">client.organization.rbac_groups.<a href="./src/anthropic/resources/organization/rbac_groups/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/organization/rbac_group.py">RBACGroup</a></code>
+- <code title="post /v1/organizations/rbac_groups/{rbac_group_id}">client.organization.rbac_groups.<a href="./src/anthropic/resources/organization/rbac_groups/rbac_groups.py">update</a>(rbac_group_id, \*\*<a href="src/anthropic/types/organization/rbac_group_update_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_group.py">RBACGroup</a></code>
+- <code title="get /v1/organizations/rbac_groups">client.organization.rbac_groups.<a href="./src/anthropic/resources/organization/rbac_groups/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/organization/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_group.py">SyncPageCursor[RBACGroup]</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}">client.organization.rbac_groups.<a href="./src/anthropic/resources/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/organization/deleted_rbac_group.py">DeletedRBACGroup</a></code>
+
+### Members
+
+Types:
+
+```python
+from anthropic.types.organization.rbac_groups import DeletedRBACGroupMember, RBACGroupMember
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_groups/{rbac_group_id}/members">client.organization.rbac_groups.members.<a href="./src/anthropic/resources/organization/rbac_groups/members.py">list</a>(rbac_group_id, \*\*<a href="src/anthropic/types/organization/rbac_groups/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_groups/rbac_group_member.py">SyncPageCursor[RBACGroupMember]</a></code>
+- <code title="post /v1/organizations/rbac_groups/{rbac_group_id}/members">client.organization.rbac_groups.members.<a href="./src/anthropic/resources/organization/rbac_groups/members.py">add</a>(rbac_group_id, \*\*<a href="src/anthropic/types/organization/rbac_groups/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_groups/rbac_group_member.py">RBACGroupMember</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}">client.organization.rbac_groups.members.<a href="./src/anthropic/resources/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/organization/rbac_groups/deleted_rbac_group_member.py">DeletedRBACGroupMember</a></code>
+
+## RBACRoles
+
+Types:
+
+```python
+from anthropic.types.organization import (
+    RBACRole,
+    RBACRoleSource,
+    RBACRoleSourceBuiltIn,
+    RBACRoleSourceCustom,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_roles/{rbac_role_id}">client.organization.rbac_roles.<a href="./src/anthropic/resources/organization/rbac_roles/rbac_roles.py">retrieve</a>(rbac_role_id) -> <a href="./src/anthropic/types/organization/rbac_role.py">RBACRole</a></code>
+- <code title="get /v1/organizations/rbac_roles">client.organization.rbac_roles.<a href="./src/anthropic/resources/organization/rbac_roles/rbac_roles.py">list</a>(\*\*<a href="src/anthropic/types/organization/rbac_role_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_role.py">SyncPageCursor[RBACRole]</a></code>
+
+### Permissions
+
+Types:
+
+```python
+from anthropic.types.organization.rbac_roles import (
+    RBACAllConnectorsPermissionResource,
+    RBACConnectorPermissionResource,
+    RBACConnectorScopePermissionResource,
+    RBACConnectorToolPermissionResource,
+    RBACOrganizationPermissionResource,
+    RBACRolePermission,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/rbac_roles/{rbac_role_id}/permissions">client.organization.rbac_roles.permissions.<a href="./src/anthropic/resources/organization/rbac_roles/permissions.py">list</a>(rbac_role_id, \*\*<a href="src/anthropic/types/organization/rbac_roles/permission_list_params.py">params</a>) -> <a href="./src/anthropic/types/organization/rbac_roles/rbac_role_permission.py">SyncPageCursor[RBACRolePermission]</a></code>
+
 # Beta
 
 Types:
@@ -913,20 +1292,34 @@ Types:
 ```python
 from anthropic.types import (
     AnthropicBetaParam,
-    BetaAPIError,
-    BetaAuthenticationError,
-    BetaBillingError,
+    BetaAPIErrorObject,
+    BetaAuthenticationErrorObject,
+    BetaBillingErrorObject,
     BetaCurrency,
-    BetaError,
+    BetaErrorObject,
     BetaErrorResponse,
-    BetaGatewayTimeoutError,
-    BetaInvalidRequestError,
+    BetaGatewayTimeoutErrorObject,
+    BetaInvalidRequestErrorObject,
     BetaMonetaryAmount,
     BetaMonetaryAmountParam,
+    BetaNotFoundErrorObject,
+    BetaOrganizationNotEnrolledInBetaErrorDetails,
+    BetaOverloadedErrorObject,
+    BetaPermissionErrorObject,
+    BetaRateLimitErrorObject,
+    BetaUnsupportedCharsetErrorDetails,
+    BetaError,
+    BetaAPIError,
+    BetaAuthenticationError,
+    BetaInvalidRequestError,
+    BetaBillingError,
+    BetaGatewayTimeoutError,
     BetaNotFoundError,
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
+    BetaOrganizationNotEnrolledInBetaError,
+    BetaUnsupportedCharsetError,
 )
 ```
 
@@ -969,7 +1362,7 @@ from anthropic.types.beta import (
     BetaAdvisorTool20260301Param,
     BetaAdvisorToolResultBlock,
     BetaAdvisorToolResultBlockParam,
-    BetaAdvisorToolResultError,
+    BetaAdvisorToolResultErrorObject,
     BetaAdvisorToolResultErrorParam,
     BetaAllThinkingTurnsParam,
     BetaAssistantMessageParam,
@@ -982,8 +1375,10 @@ from anthropic.types.beta import (
     BetaBashCodeExecutionResultBlockParam,
     BetaBashCodeExecutionToolResultBlock,
     BetaBashCodeExecutionToolResultBlockParam,
-    BetaBashCodeExecutionToolResultError,
+    BetaBashCodeExecutionToolResultErrorObject,
     BetaBashCodeExecutionToolResultErrorParam,
+    BetaBillTo,
+    BetaBillingPolicyParam,
     BetaBrowserClickTarget,
     BetaBrowserCloseTabConfig,
     BetaBrowserCloseTabConfigParam,
@@ -1172,8 +1567,8 @@ from anthropic.types.beta import (
     BetaCodeExecutionToolResultBlockContent,
     BetaCodeExecutionToolResultBlockParam,
     BetaCodeExecutionToolResultBlockParamContentParam,
-    BetaCodeExecutionToolResultError,
     BetaCodeExecutionToolResultErrorCode,
+    BetaCodeExecutionToolResultErrorObject,
     BetaCodeExecutionToolResultErrorParam,
     BetaCompact20260112EditParam,
     BetaCompactionBlock,
@@ -1382,7 +1777,7 @@ from anthropic.types.beta import (
     BetaTextEditorCodeExecutionStrReplaceResultBlockParam,
     BetaTextEditorCodeExecutionToolResultBlock,
     BetaTextEditorCodeExecutionToolResultBlockParam,
-    BetaTextEditorCodeExecutionToolResultError,
+    BetaTextEditorCodeExecutionToolResultErrorObject,
     BetaTextEditorCodeExecutionToolResultErrorParam,
     BetaTextEditorCodeExecutionViewResultBlock,
     BetaTextEditorCodeExecutionViewResultBlockParam,
@@ -1432,7 +1827,7 @@ from anthropic.types.beta import (
     BetaToolSearchToolRegex20251119Param,
     BetaToolSearchToolResultBlock,
     BetaToolSearchToolResultBlockParam,
-    BetaToolSearchToolResultError,
+    BetaToolSearchToolResultErrorObject,
     BetaToolSearchToolResultErrorParam,
     BetaToolSearchToolSearchResultBlock,
     BetaToolSearchToolSearchResultBlockParam,
@@ -1492,13 +1887,20 @@ from anthropic.types.beta import (
     BetaWebSearchTool20260209Param,
     BetaWebSearchTool20260318,
     BetaWebSearchTool20260318Param,
-    BetaWebSearchToolRequestErrorParam,
+    BetaWebSearchToolRequestErrorObjectParam,
     BetaWebSearchToolResultBlock,
     BetaWebSearchToolResultBlockContent,
     BetaWebSearchToolResultBlockParam,
     BetaWebSearchToolResultBlockParamContentParam,
-    BetaWebSearchToolResultError,
     BetaWebSearchToolResultErrorCode,
+    BetaWebSearchToolResultErrorObject,
+    BetaWebSearchToolResultError,
+    BetaWebSearchToolRequestErrorParam,
+    BetaCodeExecutionToolResultError,
+    BetaBashCodeExecutionToolResultError,
+    BetaTextEditorCodeExecutionToolResultError,
+    BetaToolSearchToolResultError,
+    BetaAdvisorToolResultError,
     BetaResponseToolUseBlockUnion,
     BetaResponseBrowserToolUseBlock,
     BetaResponseBrowserCloseTabToolUseBlock,
@@ -1743,7 +2145,13 @@ from anthropic.types.beta import (
     BetaCloudConfig,
     BetaCloudConfigParams,
     BetaEnvironment,
+    BetaEnvironmentArchivedErrorDetails,
+    BetaEnvironmentCreateDisabledErrorDetails,
     BetaEnvironmentDeleteResponse,
+    BetaEnvironmentNotFoundErrorDetails,
+    BetaEnvironmentUpdateDisabledErrorDetails,
+    BetaInvalidConfigTypeChangeErrorDetails,
+    BetaInvalidMetadataErrorDetails,
     BetaLimitedNetwork,
     BetaLimitedNetworkParams,
     BetaPackages,
@@ -1752,6 +2160,12 @@ from anthropic.types.beta import (
     BetaSelfHostedConfigParams,
     BetaUnrestrictedNetwork,
     BetaUnrestrictedNetworkParam,
+    BetaEnvironmentArchivedError,
+    BetaInvalidConfigTypeChangeError,
+    BetaInvalidMetadataError,
+    BetaEnvironmentCreateDisabledError,
+    BetaEnvironmentUpdateDisabledError,
+    BetaEnvironmentNotFoundError,
 )
 ```
 
@@ -1770,11 +2184,14 @@ Types:
 
 ```python
 from anthropic.types.beta.environments import (
+    BetaHeartbeatPreconditionFailedErrorDetails,
     BetaSelfHostedWork,
     BetaSelfHostedWorkHeartbeatResponse,
     BetaSelfHostedWorkListResponse,
     BetaSelfHostedWorkQueueStats,
     BetaSessionWorkData,
+    BetaWorkLeaseState,
+    BetaHeartbeatPreconditionFailedError,
 )
 ```
 
@@ -1880,8 +2297,9 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsBase64DocumentSourceParam,
     BetaManagedAgentsBase64ImageSource,
     BetaManagedAgentsBase64ImageSourceParam,
-    BetaManagedAgentsBillingError,
-    BetaManagedAgentsCredentialHostUnreachableError,
+    BetaManagedAgentsBillingErrorObject,
+    BetaManagedAgentsCompactionLimitReachedErrorObject,
+    BetaManagedAgentsCredentialHostUnreachableErrorObject,
     BetaManagedAgentsDocumentBlock,
     BetaManagedAgentsDocumentBlockParam,
     BetaManagedAgentsEventParams,
@@ -1893,22 +2311,22 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsFileRubricParams,
     BetaManagedAgentsImageBlock,
     BetaManagedAgentsImageBlockParam,
-    BetaManagedAgentsMaxWorkflowRunsWorkflowRunError,
-    BetaManagedAgentsMCPAuthenticationFailedError,
-    BetaManagedAgentsMCPConnectionFailedError,
-    BetaManagedAgentsModelOverloadedError,
-    BetaManagedAgentsModelRateLimitedError,
-    BetaManagedAgentsModelRequestFailedError,
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject,
+    BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+    BetaManagedAgentsMCPConnectionFailedErrorObject,
+    BetaManagedAgentsModelOverloadedErrorObject,
+    BetaManagedAgentsModelRateLimitedErrorObject,
+    BetaManagedAgentsModelRequestFailedErrorObject,
     BetaManagedAgentsPlainTextDocumentSource,
     BetaManagedAgentsPlainTextDocumentSourceParam,
-    BetaManagedAgentsProgramWorkflowRunError,
+    BetaManagedAgentsProgramWorkflowRunErrorObject,
     BetaManagedAgentsRedactedBlock,
     BetaManagedAgentsRedactedBlockParam,
-    BetaManagedAgentsRepositoryAuthenticationError,
-    BetaManagedAgentsRepositoryCheckoutError,
-    BetaManagedAgentsRepositoryCloneError,
-    BetaManagedAgentsRepositoryForbiddenError,
-    BetaManagedAgentsRepositoryNotFoundError,
+    BetaManagedAgentsRepositoryAuthenticationErrorObject,
+    BetaManagedAgentsRepositoryCheckoutErrorObject,
+    BetaManagedAgentsRepositoryCloneErrorObject,
+    BetaManagedAgentsRepositoryForbiddenErrorObject,
+    BetaManagedAgentsRepositoryNotFoundErrorObject,
     BetaManagedAgentsRetryStatusExhausted,
     BetaManagedAgentsRetryStatusRetrying,
     BetaManagedAgentsRetryStatusTerminal,
@@ -1951,10 +2369,11 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsTextBlockParam,
     BetaManagedAgentsTextRubric,
     BetaManagedAgentsTextRubricParams,
-    BetaManagedAgentsThreadLimitWorkflowRunError,
-    BetaManagedAgentsTimeoutWorkflowRunError,
-    BetaManagedAgentsUnknownError,
-    BetaManagedAgentsUnknownWorkflowRunError,
+    BetaManagedAgentsThreadLimitWorkflowRunErrorObject,
+    BetaManagedAgentsTimeoutWorkflowRunErrorObject,
+    BetaManagedAgentsToolUseLimitReachedErrorObject,
+    BetaManagedAgentsUnknownErrorObject,
+    BetaManagedAgentsUnknownWorkflowRunErrorObject,
     BetaManagedAgentsURLDocumentSource,
     BetaManagedAgentsURLDocumentSourceParam,
     BetaManagedAgentsURLImageSource,
@@ -1971,18 +2390,40 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsUserToolConfirmationEventParams,
     BetaManagedAgentsUserToolResultEventParams,
     BetaManagedAgentsWorkflowRunCreatedEvent,
-    BetaManagedAgentsWorkflowRunError,
     BetaManagedAgentsWorkflowRunErrorEvent,
+    BetaManagedAgentsWorkflowRunErrorObject,
     BetaManagedAgentsWorkflowRunPhase,
     BetaManagedAgentsWorkflowRunPhaseEndedEvent,
     BetaManagedAgentsWorkflowRunPhaseStartedEvent,
     BetaManagedAgentsWorkflowRunResult,
     BetaManagedAgentsWorkflowRunResultCompleted,
-    BetaManagedAgentsWorkflowRunResultError,
+    BetaManagedAgentsWorkflowRunResultErrorObject,
     BetaManagedAgentsWorkflowRunResultStopped,
     BetaManagedAgentsWorkflowRunStatusEndedEvent,
     BetaManagedAgentsWorkflowRunStatusIdleEvent,
     BetaManagedAgentsWorkflowRunStatusRunningEvent,
+    BetaManagedAgentsUnknownError,
+    BetaManagedAgentsModelOverloadedError,
+    BetaManagedAgentsModelRateLimitedError,
+    BetaManagedAgentsModelRequestFailedError,
+    BetaManagedAgentsMCPConnectionFailedError,
+    BetaManagedAgentsMCPAuthenticationFailedError,
+    BetaManagedAgentsBillingError,
+    BetaManagedAgentsToolUseLimitReachedError,
+    BetaManagedAgentsCompactionLimitReachedError,
+    BetaManagedAgentsCredentialHostUnreachableError,
+    BetaManagedAgentsRepositoryAuthenticationError,
+    BetaManagedAgentsRepositoryForbiddenError,
+    BetaManagedAgentsRepositoryNotFoundError,
+    BetaManagedAgentsRepositoryCheckoutError,
+    BetaManagedAgentsRepositoryCloneError,
+    BetaManagedAgentsWorkflowRunResultError,
+    BetaManagedAgentsWorkflowRunError,
+    BetaManagedAgentsTimeoutWorkflowRunError,
+    BetaManagedAgentsProgramWorkflowRunError,
+    BetaManagedAgentsUnknownWorkflowRunError,
+    BetaManagedAgentsThreadLimitWorkflowRunError,
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunError,
 )
 ```
 
@@ -2050,37 +2491,52 @@ Types:
 
 ```python
 from anthropic.types.beta import (
-    BetaManagedAgentsAgentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsDeployment,
     BetaManagedAgentsDeploymentInitialEvent,
     BetaManagedAgentsDeploymentInitialEventParams,
     BetaManagedAgentsDeploymentPausedReason,
-    BetaManagedAgentsDeploymentPausedReasonError,
+    BetaManagedAgentsDeploymentPausedReasonErrorObject,
     BetaManagedAgentsDeploymentStatus,
     BetaManagedAgentsDeploymentSystemMessageEvent,
     BetaManagedAgentsDeploymentUserDefineOutcomeEvent,
     BetaManagedAgentsDeploymentUserMessageEvent,
-    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError,
-    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject,
     BetaManagedAgentsErrorDeploymentPausedReason,
-    BetaManagedAgentsFileNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject,
     BetaManagedAgentsFileResourceConfig,
     BetaManagedAgentsGitHubRepositoryResourceConfig,
     BetaManagedAgentsManualDeploymentPausedReason,
-    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
-    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsMemoryStoreResourceConfig,
-    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError,
+    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonErrorObject,
     BetaManagedAgentsSchedule,
     BetaManagedAgentsScheduleParams,
-    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsSessionResourceConfig,
-    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError,
-    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError,
-    BetaManagedAgentsUnknownDeploymentPausedReasonError,
-    BetaManagedAgentsVaultArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
+    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
     BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError,
     BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError,
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsUnknownDeploymentPausedReasonError,
+    BetaManagedAgentsDeploymentPausedReasonError,
 )
 ```
 
@@ -2101,27 +2557,43 @@ Types:
 
 ```python
 from anthropic.types.beta import (
-    BetaManagedAgentsAgentArchivedRunError,
+    BetaManagedAgentsAgentArchivedRunErrorObject,
     BetaManagedAgentsDeploymentRun,
-    BetaManagedAgentsEnvironmentArchivedRunError,
-    BetaManagedAgentsEnvironmentNotFoundRunError,
-    BetaManagedAgentsFileNotFoundRunError,
+    BetaManagedAgentsEnvironmentArchivedRunErrorObject,
+    BetaManagedAgentsEnvironmentNotFoundRunErrorObject,
+    BetaManagedAgentsFileNotFoundRunErrorObject,
     BetaManagedAgentsManualTriggerContext,
-    BetaManagedAgentsMCPEgressBlockedRunError,
-    BetaManagedAgentsMemoryStoreArchivedRunError,
-    BetaManagedAgentsOrganizationDisabledRunError,
+    BetaManagedAgentsMCPEgressBlockedRunErrorObject,
+    BetaManagedAgentsMemoryStoreArchivedRunErrorObject,
+    BetaManagedAgentsOrganizationDisabledRunErrorObject,
     BetaManagedAgentsScheduleTriggerContext,
-    BetaManagedAgentsSelfHostedResourcesUnsupportedRunError,
-    BetaManagedAgentsSessionCreationRejectedRunError,
-    BetaManagedAgentsSessionRateLimitedRunError,
-    BetaManagedAgentsSessionResourceNotFoundRunError,
-    BetaManagedAgentsSkillNotFoundRunError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject,
+    BetaManagedAgentsSessionCreationRejectedRunErrorObject,
+    BetaManagedAgentsSessionRateLimitedRunErrorObject,
+    BetaManagedAgentsSessionResourceNotFoundRunErrorObject,
+    BetaManagedAgentsSkillNotFoundRunErrorObject,
     BetaManagedAgentsTriggerContext,
     BetaManagedAgentsTriggerType,
-    BetaManagedAgentsUnknownRunError,
-    BetaManagedAgentsVaultArchivedRunError,
+    BetaManagedAgentsUnknownRunErrorObject,
+    BetaManagedAgentsVaultArchivedRunErrorObject,
+    BetaManagedAgentsVaultNotFoundRunErrorObject,
+    BetaManagedAgentsWorkspaceArchivedRunErrorObject,
+    BetaManagedAgentsEnvironmentArchivedRunError,
+    BetaManagedAgentsAgentArchivedRunError,
+    BetaManagedAgentsEnvironmentNotFoundRunError,
     BetaManagedAgentsVaultNotFoundRunError,
+    BetaManagedAgentsVaultArchivedRunError,
+    BetaManagedAgentsFileNotFoundRunError,
+    BetaManagedAgentsMemoryStoreArchivedRunError,
+    BetaManagedAgentsSkillNotFoundRunError,
+    BetaManagedAgentsSessionResourceNotFoundRunError,
     BetaManagedAgentsWorkspaceArchivedRunError,
+    BetaManagedAgentsOrganizationDisabledRunError,
+    BetaManagedAgentsSessionRateLimitedRunError,
+    BetaManagedAgentsSessionCreationRejectedRunError,
+    BetaManagedAgentsUnknownRunError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunError,
+    BetaManagedAgentsMCPEgressBlockedRunError,
 )
 ```
 
@@ -2335,6 +2807,8 @@ from anthropic.types.beta import (
     BetaWebhookEnvironmentUpdatedEventData,
     BetaWebhookEvent,
     BetaWebhookEventData,
+    BetaWebhookExternalKeyFailedEventData,
+    BetaWebhookExternalKeyRecoveredEventData,
     BetaWebhookMemoryStoreArchivedEventData,
     BetaWebhookMemoryStoreCreatedEventData,
     BetaWebhookMemoryStoreDeletedEventData,
@@ -2357,6 +2831,7 @@ from anthropic.types.beta import (
     BetaWebhookSessionUpdatedEventData,
     BetaWebhookUserProfileEnforcementActionOpenedEventData,
     BetaWebhookUserProfileEnforcementActionResolvedEventData,
+    BetaWebhookUserProfileProgramStatusUpdatedEventData,
     BetaWebhookVaultArchivedEventData,
     BetaWebhookVaultCreatedEventData,
     BetaWebhookVaultCredentialArchivedEventData,
@@ -2414,7 +2889,7 @@ Types:
 ```python
 from anthropic.types.beta import (
     BetaDream,
-    BetaDreamError,
+    BetaDreamErrorObject,
     BetaDreamInput,
     BetaDreamInputParam,
     BetaDreamMemoryStoreInput,
@@ -2432,6 +2907,7 @@ from anthropic.types.beta import (
     BetaOutputBehaviorCreateNewParam,
     BetaOutputBehaviorUpdateExisting,
     BetaOutputBehaviorUpdateExistingParam,
+    BetaDreamError,
 )
 ```
 
@@ -2651,7 +3127,22 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaOrganizationUser, UserRemoveResponse
+from anthropic.types.beta.organization import (
+    BetaCannotSignOutManagedMemberErrorDetails,
+    BetaCannotSignOutMembershipAdminErrorDetails,
+    BetaCannotSignOutOwnerErrorDetails,
+    BetaCannotSignOutPrimaryOwnerErrorDetails,
+    BetaCannotSignOutPrivilegedMemberErrorDetails,
+    BetaCannotSignOutSelfErrorDetails,
+    BetaOrganizationUser,
+    UserRemoveResponse,
+    BetaCannotSignOutPrimaryOwnerError,
+    BetaCannotSignOutSelfError,
+    BetaCannotSignOutManagedMemberError,
+    BetaCannotSignOutMembershipAdminError,
+    BetaCannotSignOutOwnerError,
+    BetaCannotSignOutPrivilegedMemberError,
+)
 ```
 
 Methods:
@@ -2660,6 +3151,7 @@ Methods:
 - <code title="post /v1/organizations/users/{user_id}">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">update</a>(user_id, \*\*<a href="src/anthropic/types/beta/organization/user_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
 - <code title="get /v1/organizations/users">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/user_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">SyncPage[BetaOrganizationUser]</a></code>
 - <code title="delete /v1/organizations/users/{user_id}">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">remove</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/user_remove_response.py">UserRemoveResponse</a></code>
+- <code title="post /v1/organizations/users/{user_id}/sign_out">client.beta.organization.users.<a href="./src/anthropic/resources/beta/organization/users.py">sign_out</a>(user_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_user.py">BetaOrganizationUser</a></code>
 
 ### Workspaces
 
@@ -2790,17 +3282,22 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsActorType,
     BetaAnalyticsAPIActor,
     BetaAnalyticsArtifactActivity,
+    BetaAnalyticsArtifactGroupBy,
     BetaAnalyticsChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsChatCoworkUnifiedMetrics,
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsChatMetrics,
     BetaAnalyticsClaudeCodeMetrics,
     BetaAnalyticsClaudeTagCategory,
+    BetaAnalyticsClaudeTagMetrics,
     BetaAnalyticsConnectorActivity,
     BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
     BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsConnectorChatMetrics,
     BetaAnalyticsConnectorClaudeCodeMetrics,
     BetaAnalyticsConnectorCoworkMetrics,
+    BetaAnalyticsConnectorGroupBy,
     BetaAnalyticsConnectorOfficeMetrics,
     BetaAnalyticsConnectorOfficeProductMetrics,
     BetaAnalyticsContextWindow,
@@ -2822,11 +3319,15 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsLinesOfCode,
     BetaAnalyticsOfficeMetrics,
     BetaAnalyticsOfficeProductMetrics,
+    BetaAnalyticsOrder,
     BetaAnalyticsPluginActivity,
+    BetaAnalyticsPluginChatCoworkUnifiedMetrics,
     BetaAnalyticsPluginClaudeCodeMetrics,
     BetaAnalyticsPluginCoworkMetrics,
+    BetaAnalyticsPluginGroupBy,
     BetaAnalyticsProductFilter,
     BetaAnalyticsProjectActivity,
+    BetaAnalyticsProjectGroupBy,
     BetaAnalyticsReportUserActor,
     BetaAnalyticsScienceMetrics,
     BetaAnalyticsServerToolUse,
@@ -2835,10 +3336,12 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsSingleDayActivitySummary,
     BetaAnalyticsSkillActivity,
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
+    BetaAnalyticsSkillChatCoworkUnifiedMetrics,
     BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
     BetaAnalyticsSkillChatMetrics,
     BetaAnalyticsSkillClaudeCodeMetrics,
     BetaAnalyticsSkillCoworkMetrics,
+    BetaAnalyticsSkillGroupBy,
     BetaAnalyticsSkillOfficeMetrics,
     BetaAnalyticsSkillOfficeProductMetrics,
     BetaAnalyticsSpeed,
@@ -2855,6 +3358,7 @@ from anthropic.types.beta.organization import (
     BetaAnalyticsUser,
     BetaAnalyticsUserActivity,
     BetaAnalyticsUserActor,
+    BetaAnalyticsUserGroupBy,
 )
 ```
 
@@ -2984,8 +3488,10 @@ from anthropic.types.beta.organization import (
     BetaSpendLimitUserScopeParam,
     BetaSpendLimitWorkspaceScope,
     BetaSpendLimitWorkspaceScopeParam,
+    BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
     BetaSpendSummary,
     SpendLimitDeleteResponse,
+    BetaSpendLimitsAdminAPIWritesNotEnabledError,
 )
 ```
 
@@ -3009,6 +3515,8 @@ Types:
 ```python
 from anthropic.types.beta.organization.spend_limits import (
     BetaSpendLimitIncreaseRequest,
+    BetaSpendLimitIncreaseRequestActor,
+    BetaSpendLimitIncreaseRequestResolvedBy,
     BetaSpendLimitIncreaseRequestStatus,
     IncreaseRequestApproveResponse,
 )
@@ -3026,7 +3534,7 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaRBACGroup, RBACGroupDeleteResponse
+from anthropic.types.beta.organization import BetaDeletedRBACGroup, BetaRBACGroup
 ```
 
 Methods:
@@ -3035,28 +3543,36 @@ Methods:
 - <code title="get /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
 - <code title="post /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">update</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_group_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">BetaRBACGroup</a></code>
 - <code title="get /v1/organizations/rbac_groups">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_rbac_group.py">SyncPageCursor[BetaRBACGroup]</a></code>
-- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_group_delete_response.py">RBACGroupDeleteResponse</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}">client.beta.organization.rbac_groups.<a href="./src/anthropic/resources/beta/organization/rbac_groups/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_rbac_group.py">BetaDeletedRBACGroup</a></code>
 
 #### Members
 
 Types:
 
 ```python
-from anthropic.types.beta.organization.rbac_groups import BetaRBACGroupMember, MemberRemoveResponse
+from anthropic.types.beta.organization.rbac_groups import (
+    BetaDeletedRBACGroupMember,
+    BetaRBACGroupMember,
+)
 ```
 
 Methods:
 
 - <code title="get /v1/organizations/rbac_groups/{rbac_group_id}/members">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">list</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">SyncPageCursor[BetaRBACGroupMember]</a></code>
 - <code title="post /v1/organizations/rbac_groups/{rbac_group_id}/members">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">add</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/rbac_groups/member_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_rbac_group_member.py">BetaRBACGroupMember</a></code>
-- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/member_remove_response.py">MemberRemoveResponse</a></code>
+- <code title="delete /v1/organizations/rbac_groups/{rbac_group_id}/members/{user_id}">client.beta.organization.rbac_groups.members.<a href="./src/anthropic/resources/beta/organization/rbac_groups/members.py">remove</a>(user_id, \*, rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/rbac_groups/beta_deleted_rbac_group_member.py">BetaDeletedRBACGroupMember</a></code>
 
 ### RBACRoles
 
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaRBACRole
+from anthropic.types.beta.organization import (
+    BetaRBACRole,
+    BetaRBACRoleSource,
+    BetaRBACRoleSourceBuiltIn,
+    BetaRBACRoleSourceCustom,
+)
 ```
 
 Methods:
@@ -3094,12 +3610,22 @@ from anthropic.types.beta.organization import (
     BetaPluginAPIActor,
     BetaPluginComponent,
     BetaPluginContentScan,
+    BetaPluginNameTakenErrorDetails,
     BetaPluginOwnerOrganization,
     BetaPluginOwnerUser,
     BetaPluginTargetOrganization,
     BetaPluginTargetOrganizationMember,
     BetaPluginTargetRBACGroup,
     BetaPluginUserActor,
+    BetaRegistrationPendingErrorDetails,
+    BetaScanFailedErrorDetails,
+    BetaScanPendingErrorDetails,
+    BetaSkillNameTakenErrorDetails,
+    BetaScanFailedError,
+    BetaPluginNameTakenError,
+    BetaScanPendingError,
+    BetaSkillNameTakenError,
+    BetaRegistrationPendingError,
 )
 ```
 
@@ -3162,10 +3688,11 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaPluginMarketplace,
-    BetaPluginMarketplaceValidationPluginError,
+    BetaPluginMarketplaceValidationPluginErrorObject,
     BetaPluginMarketplaceValidationPluginWarning,
     BetaPluginMarketplaceValidationPluginWarnings,
     BetaPluginMarketplaceValidationReport,
+    BetaPluginMarketplaceValidationPluginError,
 )
 ```
 
@@ -3270,6 +3797,9 @@ Types:
 
 ```python
 from anthropic.types.beta.organization import (
+    BetaAPIKeyScopeMissingErrorDetails,
+    BetaBundleAttachmentNotSupportedErrorDetails,
+    BetaBundleOnCallErrorDetails,
     BetaClaudeTagDefaultSettingSource,
     BetaClaudeTagGuestPolicy,
     BetaClaudeTagGuestPolicyParam,
@@ -3279,6 +3809,16 @@ from anthropic.types.beta.organization import (
     BetaClaudeTagGuestPolicyChannelOnlyParam,
     BetaClaudeTagGuestPolicyRestrict,
     BetaClaudeTagGuestPolicyRestrictParam,
+    BetaClaudeTagReplyMode,
+    BetaClaudeTagReplyModeParam,
+    BetaClaudeTagReplyModeAlwaysAwake,
+    BetaClaudeTagReplyModeAlwaysAwakeParam,
+    BetaClaudeTagReplyModeAutomatic,
+    BetaClaudeTagReplyModeAutomaticParam,
+    BetaClaudeTagReplyModeMentionOnly,
+    BetaClaudeTagReplyModeMentionOnlyParam,
+    BetaClaudeTagReplyModeThread,
+    BetaClaudeTagReplyModeThreadParam,
     BetaClaudeTagSettingSource,
     BetaClaudeTagSettingSources,
     BetaClaudeTagSettings,
@@ -3292,6 +3832,21 @@ from anthropic.types.beta.organization import (
     BetaClaudeTagSlackParentChannelSettingSource,
     BetaClaudeTagSlackWorkspaceIdentifiers,
     BetaClaudeTagSlackWorkspaceSettingSource,
+    BetaClaudeTagWritesNotEnabledErrorDetails,
+    BetaComplianceConfigurationRestrictedErrorDetails,
+    BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails,
+    BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
+    BetaSlackChannelSetUpSettingsConflictErrorDetails,
+    BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+    BetaBundleAttachmentNotSupportedError,
+    BetaBundleOnCallError,
+    BetaSlackChannelSetUpSettingsRefusedError,
+    BetaAPIKeyScopeMissingError,
+    BetaClaudeTagWritesNotEnabledError,
+    BetaComplianceConfigurationRestrictedError,
+    BetaOrganizationLevelScopedAPIKeyRequiredError,
+    BetaSlackChannelSetUpEnvironmentNotFoundError,
+    BetaSlackChannelSetUpSettingsConflictError,
 )
 ```
 
@@ -3339,6 +3894,7 @@ from anthropic.types.beta.organization.claude_tag import BetaClaudeTagBundle
 Methods:
 
 - <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">retrieve</a>(bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
+- <code title="post /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">update</a>(bundle_id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
 - <code title="get /v1/organizations/claude_tag/bundles">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">SyncPageCursor[BetaClaudeTagBundle]</a></code>
 
 ##### Targets

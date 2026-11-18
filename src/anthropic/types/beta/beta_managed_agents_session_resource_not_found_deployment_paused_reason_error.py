@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_session_resource_not_found_deployment_paused_reason_error_object import (
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError(BaseModel):
-    """A referenced resource no longer exists and its kind was not reported."""
-
-    type: Literal["session_resource_not_found_error"]
+BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError = (
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject
+"""

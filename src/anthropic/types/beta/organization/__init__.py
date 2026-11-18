@@ -19,6 +19,7 @@ from .beta_deleted_plugin import BetaDeletedPlugin as BetaDeletedPlugin
 from .beta_workspace_role import BetaWorkspaceRole as BetaWorkspaceRole
 from .webhook_list_params import WebhookListParams as WebhookListParams
 from .beta_analytics_actor import BetaAnalyticsActor as BetaAnalyticsActor
+from .beta_analytics_order import BetaAnalyticsOrder as BetaAnalyticsOrder
 from .beta_analytics_speed import BetaAnalyticsSpeed as BetaAnalyticsSpeed
 from .beta_service_account import BetaServiceAccount as BetaServiceAccount
 from .invite_create_params import InviteCreateParams as InviteCreateParams
@@ -28,6 +29,7 @@ from .user_remove_response import UserRemoveResponse as UserRemoveResponse
 from .api_key_update_params import APIKeyUpdateParams as APIKeyUpdateParams
 from .beta_plugin_api_actor import BetaPluginAPIActor as BetaPluginAPIActor
 from .beta_plugin_component import BetaPluginComponent as BetaPluginComponent
+from .beta_rbac_role_source import BetaRBACRoleSource as BetaRBACRoleSource
 from .beta_workspace_member import BetaWorkspaceMember as BetaWorkspaceMember
 from .rbac_role_list_params import RBACRoleListParams as RBACRoleListParams
 from .webhook_create_params import WebhookCreateParams as WebhookCreateParams
@@ -36,6 +38,7 @@ from .workspace_list_params import WorkspaceListParams as WorkspaceListParams
 from .beta_organization_user import BetaOrganizationUser as BetaOrganizationUser
 from .beta_plugin_owner_user import BetaPluginOwnerUser as BetaPluginOwnerUser
 from .beta_plugin_user_actor import BetaPluginUserActor as BetaPluginUserActor
+from .beta_scan_failed_error import BetaScanFailedError as BetaScanFailedError
 from .invite_delete_response import InviteDeleteResponse as InviteDeleteResponse
 from .plugin_retrieve_params import PluginRetrieveParams as PluginRetrieveParams
 from .rate_limit_list_params import RateLimitListParams as RateLimitListParams
@@ -43,7 +46,9 @@ from .rbac_group_list_params import RBACGroupListParams as RBACGroupListParams
 from .spend_limit_set_params import SpendLimitSetParams as SpendLimitSetParams
 from .beta_api_key_created_by import BetaAPIKeyCreatedBy as BetaAPIKeyCreatedBy
 from .beta_api_key_user_actor import BetaAPIKeyUserActor as BetaAPIKeyUserActor
+from .beta_deleted_rbac_group import BetaDeletedRBACGroup as BetaDeletedRBACGroup
 from .beta_plugin_marketplace import BetaPluginMarketplace as BetaPluginMarketplace
+from .beta_scan_pending_error import BetaScanPendingError as BetaScanPendingError
 from .beta_spend_limit_period import BetaSpendLimitPeriod as BetaSpendLimitPeriod
 from .spend_limit_list_params import SpendLimitListParams as SpendLimitListParams
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
@@ -60,25 +65,30 @@ from .rbac_group_update_params import RBACGroupUpdateParams as RBACGroupUpdatePa
 from .beta_analytics_actor_type import BetaAnalyticsActorType as BetaAnalyticsActorType
 from .beta_analytics_token_type import BetaAnalyticsTokenType as BetaAnalyticsTokenType
 from .beta_analytics_user_actor import BetaAnalyticsUserActor as BetaAnalyticsUserActor
+from .beta_bundle_on_call_error import BetaBundleOnCallError as BetaBundleOnCallError
 from .beta_allowed_inference_geo import BetaAllowedInferenceGeo as BetaAllowedInferenceGeo
+from .beta_claude_tag_reply_mode import BetaClaudeTagReplyMode as BetaClaudeTagReplyMode
 from .beta_telemetry_destination import BetaTelemetryDestination as BetaTelemetryDestination
 from .external_key_create_params import ExternalKeyCreateParams as ExternalKeyCreateParams
 from .external_key_update_params import ExternalKeyUpdateParams as ExternalKeyUpdateParams
-from .rbac_group_delete_response import RBACGroupDeleteResponse as RBACGroupDeleteResponse
 from .beta_analytics_chat_metrics import BetaAnalyticsChatMetrics as BetaAnalyticsChatMetrics
 from .beta_analytics_service_tier import BetaAnalyticsServiceTier as BetaAnalyticsServiceTier
 from .beta_analytics_tool_actions import BetaAnalyticsToolActions as BetaAnalyticsToolActions
+from .beta_skill_name_taken_error import BetaSkillNameTakenError as BetaSkillNameTakenError
 from .beta_spend_limit_user_actor import BetaSpendLimitUserActor as BetaSpendLimitUserActor
 from .beta_spend_limit_user_scope import BetaSpendLimitUserScope as BetaSpendLimitUserScope
 from .service_account_list_params import ServiceAccountListParams as ServiceAccountListParams
 from .spend_limit_delete_response import SpendLimitDeleteResponse as SpendLimitDeleteResponse
 from .beta_analytics_lines_of_code import BetaAnalyticsLinesOfCode as BetaAnalyticsLinesOfCode
 from .beta_analytics_user_activity import BetaAnalyticsUserActivity as BetaAnalyticsUserActivity
+from .beta_analytics_user_group_by import BetaAnalyticsUserGroupBy as BetaAnalyticsUserGroupBy
 from .beta_api_key_workspace_scope import BetaAPIKeyWorkspaceScope as BetaAPIKeyWorkspaceScope
 from .beta_aws_external_key_config import BetaAWSExternalKeyConfig as BetaAWSExternalKeyConfig
 from .beta_claude_tag_guest_policy import BetaClaudeTagGuestPolicy as BetaClaudeTagGuestPolicy
 from .beta_gcp_external_key_config import BetaGCPExternalKeyConfig as BetaGCPExternalKeyConfig
 from .beta_organization_rate_limit import BetaOrganizationRateLimit as BetaOrganizationRateLimit
+from .beta_plugin_name_taken_error import BetaPluginNameTakenError as BetaPluginNameTakenError
+from .beta_rbac_role_source_custom import BetaRBACRoleSourceCustom as BetaRBACRoleSourceCustom
 from .external_key_delete_response import ExternalKeyDeleteResponse as ExternalKeyDeleteResponse
 from .beta_analytics_context_window import BetaAnalyticsContextWindow as BetaAnalyticsContextWindow
 from .beta_analytics_cowork_metrics import BetaAnalyticsCoworkMetrics as BetaAnalyticsCoworkMetrics
@@ -86,12 +96,14 @@ from .beta_analytics_design_metrics import BetaAnalyticsDesignMetrics as BetaAna
 from .beta_analytics_office_metrics import BetaAnalyticsOfficeMetrics as BetaAnalyticsOfficeMetrics
 from .beta_analytics_product_filter import BetaAnalyticsProductFilter as BetaAnalyticsProductFilter
 from .beta_analytics_skill_activity import BetaAnalyticsSkillActivity as BetaAnalyticsSkillActivity
+from .beta_analytics_skill_group_by import BetaAnalyticsSkillGroupBy as BetaAnalyticsSkillGroupBy
 from .beta_plugin_target_rbac_group import BetaPluginTargetRBACGroup as BetaPluginTargetRBACGroup
 from .service_account_create_params import ServiceAccountCreateParams as ServiceAccountCreateParams
 from .service_account_update_params import ServiceAccountUpdateParams as ServiceAccountUpdateParams
 from .beta_analytics_cost_users_item import BetaAnalyticsCostUsersItem as BetaAnalyticsCostUsersItem
 from .beta_analytics_federated_actor import BetaAnalyticsFederatedActor as BetaAnalyticsFederatedActor
 from .beta_analytics_plugin_activity import BetaAnalyticsPluginActivity as BetaAnalyticsPluginActivity
+from .beta_analytics_plugin_group_by import BetaAnalyticsPluginGroupBy as BetaAnalyticsPluginGroupBy
 from .beta_analytics_science_metrics import BetaAnalyticsScienceMetrics as BetaAnalyticsScienceMetrics
 from .beta_analytics_server_tool_use import BetaAnalyticsServerToolUse as BetaAnalyticsServerToolUse
 from .beta_azure_external_key_config import BetaAzureExternalKeyConfig as BetaAzureExternalKeyConfig
@@ -99,26 +111,40 @@ from .beta_claude_tag_setting_source import BetaClaudeTagSettingSource as BetaCl
 from .beta_compliance_settings_state import BetaComplianceSettingsState as BetaComplianceSettingsState
 from .beta_no_billing_workspace_role import BetaNoBillingWorkspaceRole as BetaNoBillingWorkspaceRole
 from .beta_plugin_owner_organization import BetaPluginOwnerOrganization as BetaPluginOwnerOrganization
+from .beta_rbac_role_source_built_in import BetaRBACRoleSourceBuiltIn as BetaRBACRoleSourceBuiltIn
+from .beta_scan_failed_error_details import BetaScanFailedErrorDetails as BetaScanFailedErrorDetails
 from .external_key_validate_response import ExternalKeyValidateResponse as ExternalKeyValidateResponse
 from .plugin_marketplace_list_params import PluginMarketplaceListParams as PluginMarketplaceListParams
 from .beta_analytics_project_activity import BetaAnalyticsProjectActivity as BetaAnalyticsProjectActivity
+from .beta_analytics_project_group_by import BetaAnalyticsProjectGroupBy as BetaAnalyticsProjectGroupBy
 from .beta_analytics_usage_users_item import BetaAnalyticsUsageUsersItem as BetaAnalyticsUsageUsersItem
 from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as BetaAPIKeyOrganizationScope
+from .beta_cannot_sign_out_self_error import BetaCannotSignOutSelfError as BetaCannotSignOutSelfError
 from .beta_claude_tag_setting_sources import BetaClaudeTagSettingSources as BetaClaudeTagSettingSources
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
+from .beta_registration_pending_error import BetaRegistrationPendingError as BetaRegistrationPendingError
+from .beta_scan_pending_error_details import BetaScanPendingErrorDetails as BetaScanPendingErrorDetails
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
+from .beta_analytics_artifact_group_by import BetaAnalyticsArtifactGroupBy as BetaAnalyticsArtifactGroupBy
 from .beta_analytics_core_code_metrics import BetaAnalyticsCoreCodeMetrics as BetaAnalyticsCoreCodeMetrics
 from .beta_analytics_grouped_cost_type import BetaAnalyticsGroupedCostType as BetaAnalyticsGroupedCostType
 from .beta_analytics_report_user_actor import BetaAnalyticsReportUserActor as BetaAnalyticsReportUserActor
 from .beta_analytics_time_bucket_width import BetaAnalyticsTimeBucketWidth as BetaAnalyticsTimeBucketWidth
+from .beta_api_key_scope_missing_error import BetaAPIKeyScopeMissingError as BetaAPIKeyScopeMissingError
+from .beta_cannot_sign_out_owner_error import BetaCannotSignOutOwnerError as BetaCannotSignOutOwnerError
+from .beta_claude_tag_reply_mode_param import BetaClaudeTagReplyModeParam as BetaClaudeTagReplyModeParam
 from .beta_spend_limit_seat_tier_scope import BetaSpendLimitSeatTierScope as BetaSpendLimitSeatTierScope
 from .beta_spend_limit_workspace_scope import BetaSpendLimitWorkspaceScope as BetaSpendLimitWorkspaceScope
 from .beta_telemetry_destination_state import BetaTelemetryDestinationState as BetaTelemetryDestinationState
 from .compliance_setting_update_params import ComplianceSettingUpdateParams as ComplianceSettingUpdateParams
 from .plugin_marketplace_update_params import PluginMarketplaceUpdateParams as PluginMarketplaceUpdateParams
+from .beta_analytics_claude_tag_metrics import BetaAnalyticsClaudeTagMetrics as BetaAnalyticsClaudeTagMetrics
 from .beta_analytics_connector_activity import BetaAnalyticsConnectorActivity as BetaAnalyticsConnectorActivity
+from .beta_analytics_connector_group_by import BetaAnalyticsConnectorGroupBy as BetaAnalyticsConnectorGroupBy
 from .beta_analytics_skill_chat_metrics import BetaAnalyticsSkillChatMetrics as BetaAnalyticsSkillChatMetrics
 from .beta_analytics_tool_action_counts import BetaAnalyticsToolActionCounts as BetaAnalyticsToolActionCounts
+from .beta_bundle_on_call_error_details import BetaBundleOnCallErrorDetails as BetaBundleOnCallErrorDetails
+from .beta_claude_tag_reply_mode_thread import BetaClaudeTagReplyModeThread as BetaClaudeTagReplyModeThread
 from .beta_spend_limit_rbac_group_scope import BetaSpendLimitRBACGroupScope as BetaSpendLimitRBACGroupScope
 from .beta_spend_limit_usage_tier_scope import BetaSpendLimitUsageTierScope as BetaSpendLimitUsageTierScope
 from .beta_spend_limit_user_scope_param import BetaSpendLimitUserScopeParam as BetaSpendLimitUserScopeParam
@@ -139,6 +165,7 @@ from .beta_analytics_cost_bucketed_result import BetaAnalyticsCostBucketedResult
 from .beta_analytics_inference_geo_filter import BetaAnalyticsInferenceGeoFilter as BetaAnalyticsInferenceGeoFilter
 from .beta_analytics_skill_cowork_metrics import BetaAnalyticsSkillCoworkMetrics as BetaAnalyticsSkillCoworkMetrics
 from .beta_analytics_skill_office_metrics import BetaAnalyticsSkillOfficeMetrics as BetaAnalyticsSkillOfficeMetrics
+from .beta_skill_name_taken_error_details import BetaSkillNameTakenErrorDetails as BetaSkillNameTakenErrorDetails
 from .beta_spend_limit_organization_scope import BetaSpendLimitOrganizationScope as BetaSpendLimitOrganizationScope
 from .telemetry_destination_create_params import TelemetryDestinationCreateParams as TelemetryDestinationCreateParams
 from .telemetry_destination_update_params import TelemetryDestinationUpdateParams as TelemetryDestinationUpdateParams
@@ -147,7 +174,9 @@ from .beta_analytics_service_account_actor import BetaAnalyticsServiceAccountAct
 from .beta_analytics_usage_bucketed_result import BetaAnalyticsUsageBucketedResult as BetaAnalyticsUsageBucketedResult
 from .beta_analytics_usage_cost_sort_order import BetaAnalyticsUsageCostSortOrder as BetaAnalyticsUsageCostSortOrder
 from .beta_azure_external_key_config_param import BetaAzureExternalKeyConfigParam as BetaAzureExternalKeyConfigParam
+from .beta_claude_tag_reply_mode_automatic import BetaClaudeTagReplyModeAutomatic as BetaClaudeTagReplyModeAutomatic
 from .beta_compliance_settings_state_param import BetaComplianceSettingsStateParam as BetaComplianceSettingsStateParam
+from .beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails as BetaPluginNameTakenErrorDetails
 from .beta_analytics_connector_chat_metrics import (
     BetaAnalyticsConnectorChatMetrics as BetaAnalyticsConnectorChatMetrics,
 )
@@ -203,6 +232,18 @@ from .beta_analytics_usage_cost_inference_geo import (
 from .beta_analytics_usage_report_time_bucket import (
     BetaAnalyticsUsageReportTimeBucket as BetaAnalyticsUsageReportTimeBucket,
 )
+from .beta_cannot_sign_out_self_error_details import (
+    BetaCannotSignOutSelfErrorDetails as BetaCannotSignOutSelfErrorDetails,
+)
+from .beta_claude_tag_reply_mode_always_awake import (
+    BetaClaudeTagReplyModeAlwaysAwake as BetaClaudeTagReplyModeAlwaysAwake,
+)
+from .beta_claude_tag_reply_mode_mention_only import (
+    BetaClaudeTagReplyModeMentionOnly as BetaClaudeTagReplyModeMentionOnly,
+)
+from .beta_claude_tag_reply_mode_thread_param import (
+    BetaClaudeTagReplyModeThreadParam as BetaClaudeTagReplyModeThreadParam,
+)
 from .beta_compliance_settings_state_disabled import (
     BetaComplianceSettingsStateDisabled as BetaComplianceSettingsStateDisabled,
 )
@@ -214,6 +255,9 @@ from .beta_data_residency_update_config_param import (
 )
 from .beta_external_key_unattached_attachment import (
     BetaExternalKeyUnattachedAttachment as BetaExternalKeyUnattachedAttachment,
+)
+from .beta_registration_pending_error_details import (
+    BetaRegistrationPendingErrorDetails as BetaRegistrationPendingErrorDetails,
 )
 from .beta_telemetry_destination_content_mode import (
     BetaTelemetryDestinationContentMode as BetaTelemetryDestinationContentMode,
@@ -233,8 +277,20 @@ from .beta_analytics_skill_claude_code_metrics import (
 from .beta_analytics_usage_cost_product_filter import (
     BetaAnalyticsUsageCostProductFilter as BetaAnalyticsUsageCostProductFilter,
 )
+from .beta_api_key_scope_missing_error_details import (
+    BetaAPIKeyScopeMissingErrorDetails as BetaAPIKeyScopeMissingErrorDetails,
+)
+from .beta_cannot_sign_out_owner_error_details import (
+    BetaCannotSignOutOwnerErrorDetails as BetaCannotSignOutOwnerErrorDetails,
+)
+from .beta_cannot_sign_out_primary_owner_error import (
+    BetaCannotSignOutPrimaryOwnerError as BetaCannotSignOutPrimaryOwnerError,
+)
 from .beta_claude_tag_guest_policy_allow_param import (
     BetaClaudeTagGuestPolicyAllowParam as BetaClaudeTagGuestPolicyAllowParam,
+)
+from .beta_claude_tag_writes_not_enabled_error import (
+    BetaClaudeTagWritesNotEnabledError as BetaClaudeTagWritesNotEnabledError,
 )
 from .beta_organization_rate_limit_batch_group import (
     BetaOrganizationRateLimitBatchGroup as BetaOrganizationRateLimitBatchGroup,
@@ -260,6 +316,9 @@ from .beta_telemetry_destination_traces_params import (
 from .beta_analytics_plugin_claude_code_metrics import (
     BetaAnalyticsPluginClaudeCodeMetrics as BetaAnalyticsPluginClaudeCodeMetrics,
 )
+from .beta_cannot_sign_out_managed_member_error import (
+    BetaCannotSignOutManagedMemberError as BetaCannotSignOutManagedMemberError,
+)
 from .beta_claude_tag_guest_policy_channel_only import (
     BetaClaudeTagGuestPolicyChannelOnly as BetaClaudeTagGuestPolicyChannelOnly,
 )
@@ -281,8 +340,17 @@ from .beta_telemetry_destination_state_disabled import (
 from .beta_telemetry_destination_workspaces_all import (
     BetaTelemetryDestinationWorkspacesAll as BetaTelemetryDestinationWorkspacesAll,
 )
+from .beta_analytics_chat_cowork_unified_metrics import (
+    BetaAnalyticsChatCoworkUnifiedMetrics as BetaAnalyticsChatCoworkUnifiedMetrics,
+)
 from .beta_analytics_single_day_activity_summary import (
     BetaAnalyticsSingleDayActivitySummary as BetaAnalyticsSingleDayActivitySummary,
+)
+from .beta_bundle_attachment_not_supported_error import (
+    BetaBundleAttachmentNotSupportedError as BetaBundleAttachmentNotSupportedError,
+)
+from .beta_claude_tag_reply_mode_automatic_param import (
+    BetaClaudeTagReplyModeAutomaticParam as BetaClaudeTagReplyModeAutomaticParam,
 )
 from .beta_deleted_organization_webhook_endpoint import (
     BetaDeletedOrganizationWebhookEndpoint as BetaDeletedOrganizationWebhookEndpoint,
@@ -305,6 +373,9 @@ from .beta_analytics_federated_actor_gcp_provider import (
 from .beta_analytics_skill_office_product_metrics import (
     BetaAnalyticsSkillOfficeProductMetrics as BetaAnalyticsSkillOfficeProductMetrics,
 )
+from .beta_cannot_sign_out_membership_admin_error import (
+    BetaCannotSignOutMembershipAdminError as BetaCannotSignOutMembershipAdminError,
+)
 from .beta_claude_tag_guest_policy_restrict_param import (
     BetaClaudeTagGuestPolicyRestrictParam as BetaClaudeTagGuestPolicyRestrictParam,
 )
@@ -320,6 +391,9 @@ from .beta_analytics_connector_claude_code_metrics import (
 from .beta_analytics_federated_actor_oidc_provider import (
     BetaAnalyticsFederatedActorOIDCProvider as BetaAnalyticsFederatedActorOIDCProvider,
 )
+from .beta_cannot_sign_out_privileged_member_error import (
+    BetaCannotSignOutPrivilegedMemberError as BetaCannotSignOutPrivilegedMemberError,
+)
 from .beta_claude_tag_slack_channel_setting_source import (
     BetaClaudeTagSlackChannelSettingSource as BetaClaudeTagSlackChannelSettingSource,
 )
@@ -334,6 +408,12 @@ from .beta_telemetry_destination_workspaces_params import (
 )
 from .beta_analytics_federated_actor_azure_provider import (
     BetaAnalyticsFederatedActorAzureProvider as BetaAnalyticsFederatedActorAzureProvider,
+)
+from .beta_claude_tag_reply_mode_always_awake_param import (
+    BetaClaudeTagReplyModeAlwaysAwakeParam as BetaClaudeTagReplyModeAlwaysAwakeParam,
+)
+from .beta_claude_tag_reply_mode_mention_only_param import (
+    BetaClaudeTagReplyModeMentionOnlyParam as BetaClaudeTagReplyModeMentionOnlyParam,
 )
 from .beta_compliance_settings_state_disabled_param import (
     BetaComplianceSettingsStateDisabledParam as BetaComplianceSettingsStateDisabledParam,
@@ -352,6 +432,9 @@ from .plugin_marketplace_validate_repository_params import (
 )
 from .beta_claude_tag_slack_workspace_setting_source import (
     BetaClaudeTagSlackWorkspaceSettingSource as BetaClaudeTagSlackWorkspaceSettingSource,
+)
+from .beta_compliance_configuration_restricted_error import (
+    BetaComplianceConfigurationRestrictedError as BetaComplianceConfigurationRestrictedError,
 )
 from .beta_organization_rate_limit_token_count_group import (
     BetaOrganizationRateLimitTokenCountGroup as BetaOrganizationRateLimitTokenCountGroup,
@@ -374,11 +457,29 @@ from .beta_plugin_marketplace_validation_plugin_error import (
 from .beta_telemetry_destination_state_enabled_params import (
     BetaTelemetryDestinationStateEnabledParams as BetaTelemetryDestinationStateEnabledParams,
 )
+from .beta_analytics_skill_chat_cowork_unified_metrics import (
+    BetaAnalyticsSkillChatCoworkUnifiedMetrics as BetaAnalyticsSkillChatCoworkUnifiedMetrics,
+)
+from .beta_cannot_sign_out_primary_owner_error_details import (
+    BetaCannotSignOutPrimaryOwnerErrorDetails as BetaCannotSignOutPrimaryOwnerErrorDetails,
+)
+from .beta_claude_tag_writes_not_enabled_error_details import (
+    BetaClaudeTagWritesNotEnabledErrorDetails as BetaClaudeTagWritesNotEnabledErrorDetails,
+)
+from .beta_slack_channel_set_up_settings_refused_error import (
+    BetaSlackChannelSetUpSettingsRefusedError as BetaSlackChannelSetUpSettingsRefusedError,
+)
 from .beta_telemetry_destination_state_disabled_params import (
     BetaTelemetryDestinationStateDisabledParams as BetaTelemetryDestinationStateDisabledParams,
 )
 from .beta_telemetry_destination_workspaces_all_params import (
     BetaTelemetryDestinationWorkspacesAllParams as BetaTelemetryDestinationWorkspacesAllParams,
+)
+from .beta_analytics_plugin_chat_cowork_unified_metrics import (
+    BetaAnalyticsPluginChatCoworkUnifiedMetrics as BetaAnalyticsPluginChatCoworkUnifiedMetrics,
+)
+from .beta_cannot_sign_out_managed_member_error_details import (
+    BetaCannotSignOutManagedMemberErrorDetails as BetaCannotSignOutManagedMemberErrorDetails,
 )
 from .beta_claude_tag_slack_grid_channel_setting_source import (
     BetaClaudeTagSlackGridChannelSettingSource as BetaClaudeTagSlackGridChannelSettingSource,
@@ -389,8 +490,14 @@ from .beta_organization_webhook_endpoint_signing_secret import (
 from .beta_plugin_marketplace_validation_plugin_warning import (
     BetaPluginMarketplaceValidationPluginWarning as BetaPluginMarketplaceValidationPluginWarning,
 )
+from .beta_slack_channel_set_up_settings_conflict_error import (
+    BetaSlackChannelSetUpSettingsConflictError as BetaSlackChannelSetUpSettingsConflictError,
+)
 from .beta_telemetry_destination_disabled_reason_caller import (
     BetaTelemetryDestinationDisabledReasonCaller as BetaTelemetryDestinationDisabledReasonCaller,
+)
+from .beta_bundle_attachment_not_supported_error_details import (
+    BetaBundleAttachmentNotSupportedErrorDetails as BetaBundleAttachmentNotSupportedErrorDetails,
 )
 from .beta_plugin_marketplace_validation_plugin_warnings import (
     BetaPluginMarketplaceValidationPluginWarnings as BetaPluginMarketplaceValidationPluginWarnings,
@@ -398,11 +505,23 @@ from .beta_plugin_marketplace_validation_plugin_warnings import (
 from .beta_analytics_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsChatCoworkUnifiedSessionsMetrics as BetaAnalyticsChatCoworkUnifiedSessionsMetrics,
 )
+from .beta_cannot_sign_out_membership_admin_error_details import (
+    BetaCannotSignOutMembershipAdminErrorDetails as BetaCannotSignOutMembershipAdminErrorDetails,
+)
 from .beta_claude_tag_slack_parent_channel_setting_source import (
     BetaClaudeTagSlackParentChannelSettingSource as BetaClaudeTagSlackParentChannelSettingSource,
 )
 from .beta_telemetry_destination_disabled_reason_redirect import (
     BetaTelemetryDestinationDisabledReasonRedirect as BetaTelemetryDestinationDisabledReasonRedirect,
+)
+from .beta_analytics_connector_chat_cowork_unified_metrics import (
+    BetaAnalyticsConnectorChatCoworkUnifiedMetrics as BetaAnalyticsConnectorChatCoworkUnifiedMetrics,
+)
+from .beta_cannot_sign_out_privileged_member_error_details import (
+    BetaCannotSignOutPrivilegedMemberErrorDetails as BetaCannotSignOutPrivilegedMemberErrorDetails,
+)
+from .beta_spend_limits_admin_api_writes_not_enabled_error import (
+    BetaSpendLimitsAdminAPIWritesNotEnabledError as BetaSpendLimitsAdminAPIWritesNotEnabledError,
 )
 from .beta_telemetry_destination_workspaces_exclude_params import (
     BetaTelemetryDestinationWorkspacesExcludeParams as BetaTelemetryDestinationWorkspacesExcludeParams,
@@ -413,18 +532,45 @@ from .beta_telemetry_destination_workspaces_include_params import (
 from .beta_analytics_skill_chat_cowork_unified_chat_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedChatMetrics as BetaAnalyticsSkillChatCoworkUnifiedChatMetrics,
 )
+from .beta_organization_level_scoped_api_key_required_error import (
+    BetaOrganizationLevelScopedAPIKeyRequiredError as BetaOrganizationLevelScopedAPIKeyRequiredError,
+)
+from .beta_slack_channel_set_up_environment_not_found_error import (
+    BetaSlackChannelSetUpEnvironmentNotFoundError as BetaSlackChannelSetUpEnvironmentNotFoundError,
+)
+from .beta_compliance_configuration_restricted_error_details import (
+    BetaComplianceConfigurationRestrictedErrorDetails as BetaComplianceConfigurationRestrictedErrorDetails,
+)
+from .beta_plugin_marketplace_validation_plugin_error_object import (
+    BetaPluginMarketplaceValidationPluginErrorObject as BetaPluginMarketplaceValidationPluginErrorObject,
+)
+from .beta_slack_channel_set_up_settings_refused_error_details import (
+    BetaSlackChannelSetUpSettingsRefusedErrorDetails as BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+)
 from .beta_analytics_connector_chat_cowork_unified_chat_metrics import (
     BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics as BetaAnalyticsConnectorChatCoworkUnifiedChatMetrics,
 )
 from .beta_analytics_skill_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics as BetaAnalyticsSkillChatCoworkUnifiedSessionsMetrics,
 )
+from .beta_slack_channel_set_up_settings_conflict_error_details import (
+    BetaSlackChannelSetUpSettingsConflictErrorDetails as BetaSlackChannelSetUpSettingsConflictErrorDetails,
+)
 from .beta_telemetry_destination_disabled_reason_invalid_address import (
     BetaTelemetryDestinationDisabledReasonInvalidAddress as BetaTelemetryDestinationDisabledReasonInvalidAddress,
+)
+from .beta_spend_limits_admin_api_writes_not_enabled_error_details import (
+    BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails as BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
 )
 from .beta_telemetry_destination_disabled_reason_sustained_failure import (
     BetaTelemetryDestinationDisabledReasonSustainedFailure as BetaTelemetryDestinationDisabledReasonSustainedFailure,
 )
 from .beta_analytics_connector_chat_cowork_unified_sessions_metrics import (
     BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics as BetaAnalyticsConnectorChatCoworkUnifiedSessionsMetrics,
+)
+from .beta_organization_level_scoped_api_key_required_error_details import (
+    BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails as BetaOrganizationLevelScopedAPIKeyRequiredErrorDetails,
+)
+from .beta_slack_channel_set_up_environment_not_found_error_details import (
+    BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails as BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
 )

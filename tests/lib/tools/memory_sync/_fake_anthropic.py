@@ -231,7 +231,7 @@ def fake_anthropic(
 
     async def _retrieve(session_id: str) -> Any:
         server.retrieves.append(session_id)
-        return SimpleNamespace(agent=SimpleNamespace(skills=[]), resources=resources)
+        return SimpleNamespace(status="running", agent=SimpleNamespace(skills=[]), resources=resources)
 
     client = SimpleNamespace(
         beta=SimpleNamespace(

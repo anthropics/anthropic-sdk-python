@@ -47,7 +47,7 @@ from ...._base_client import (
     merge_headers,
     make_request_options,
 )
-from ....lib._tracing import messages_create_request_attributes, messages_count_tokens_request_attributes
+from ....lib._tracing import messages_create_request_attributes
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
 from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
@@ -80,6 +80,7 @@ from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
+from ....types.beta.beta_billing_policy_param import BetaBillingPolicyParam
 from ....types.beta.beta_message_thread_param import BetaMessageThreadParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
@@ -108,7 +109,7 @@ class Messages(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MessagesWithRawResponse(self)
 
@@ -117,7 +118,7 @@ class Messages(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return MessagesWithStreamingResponse(self)
 
@@ -128,6 +129,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -256,6 +258,14 @@ class Messages(SyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -476,6 +486,77 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -487,6 +568,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -624,6 +706,14 @@ class Messages(SyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -834,6 +924,77 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -845,6 +1006,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -982,6 +1144,14 @@ class Messages(SyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -1192,6 +1362,77 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -1202,6 +1443,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1269,6 +1511,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -1298,7 +1541,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -1311,6 +1554,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1396,6 +1640,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -1426,7 +1671,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -1440,6 +1685,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1479,6 +1725,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -1522,6 +1769,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1560,6 +1808,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1635,6 +1884,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "billing_policy": billing_policy,
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
@@ -1720,6 +1970,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1796,6 +2047,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "metadata": metadata,
@@ -1826,7 +2078,7 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -1842,6 +2094,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1946,6 +2199,11 @@ class Messages(SyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed when this body is sent to `/v1/messages`.
+              Accepted here so that you can count the tokens of the exact body you will send,
+              and otherwise ignored: counting tokens bills nobody, so no user profile is
+              required.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -2094,6 +2352,39 @@ class Messages(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          CompactionUnavailableError:
         """
         tools = _to_tool_params(tools)
         extra_headers = {
@@ -2114,6 +2405,7 @@ class Messages(SyncAPIResource):
             body={
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "context_management": context_management,
@@ -2133,7 +2425,6 @@ class Messages(SyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )
@@ -2150,7 +2441,7 @@ class AsyncMessages(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMessagesWithRawResponse(self)
 
@@ -2159,7 +2450,7 @@ class AsyncMessages(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncMessagesWithStreamingResponse(self)
 
@@ -2170,6 +2461,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2299,6 +2591,14 @@ class AsyncMessages(AsyncAPIResource):
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -2518,6 +2818,77 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -2529,6 +2900,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2666,6 +3038,14 @@ class AsyncMessages(AsyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -2876,6 +3256,77 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -2887,6 +3338,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3024,6 +3476,14 @@ class AsyncMessages(AsyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -3234,6 +3694,77 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          ClaudeCodeVersionTooOldError:
+
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionIncompleteTurnError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionTooManyToolReferencesError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ThreadAlreadyContinuedError:
+
+          ThreadContinueInFlightError:
+
+          ThreadFingerprintMismatchError:
+
+          ThreadUnsupportedRequestError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
+          ThreadNotFoundError:
+
+          SkillReadBlockedUndecryptableError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
+
+          EnforcedSpendLimitReachedError:
+
+          RampLimitExceededError:
+
+          CMEKKeyUnreachableError:
+
+          CompactionUnavailableError:
         """
         ...
 
@@ -3244,6 +3775,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3311,6 +3843,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -3340,7 +3873,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=stream or False,
@@ -3353,6 +3886,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3438,6 +3972,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -3468,7 +4003,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=cast(Type[ParsedBetaMessage[ResponseFormatT]], BetaMessage),
             stream=False,
@@ -3482,6 +4017,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3524,6 +4060,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3564,6 +4101,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3602,6 +4140,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3677,6 +4216,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "billing_policy": billing_policy,
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
@@ -3764,6 +4304,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -3838,6 +4379,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "metadata": metadata,
@@ -3868,7 +4410,7 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.create",
                 span_route="/v1/messages",
-                span_attributes=lambda body: messages_create_request_attributes(self._client, body, extra_headers),
+                span_attributes=messages_create_request_attributes,
             ),
             cast_to=BetaMessage,
             stream=True,
@@ -3884,6 +4426,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3988,6 +4531,11 @@ class AsyncMessages(AsyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed when this body is sent to `/v1/messages`.
+              Accepted here so that you can count the tokens of the exact body you will send,
+              and otherwise ignored: counting tokens bills nobody, so no user profile is
+              required.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -4136,6 +4684,39 @@ class AsyncMessages(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          AvailableToolsLimitExceededError:
+
+          ClaudeCodeKeyCreatorNotMemberError:
+
+          CompactionBlockAmbiguousError:
+
+          CompactionBlockMisplacedError:
+
+          CompactionContentMismatchError:
+
+          CompactionNothingToSummarizeError:
+
+          CompactionSignatureInvalidError:
+
+          CompactionToolChangesMismatchError:
+
+          OrganizationOnHoldError:
+
+          RequestBodyEncodingInvalidError:
+
+          RequestBodyEncodingUnsupportedError:
+
+          ToolNameConflictError:
+
+          ToolReferenceUnresolvedError:
+
+          RequestBodyTooLargeAfterDecodingError:
+
+          EnforcedSpendLimitReachedError:
+
+          CompactionUnavailableError:
         """
         tools = _to_tool_params(tools)
         extra_headers = {
@@ -4156,6 +4737,7 @@ class AsyncMessages(AsyncAPIResource):
             body={
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "context_management": context_management,
@@ -4175,7 +4757,6 @@ class AsyncMessages(AsyncAPIResource):
                 qualifiers={"beta": "true"},
                 span_name="anthropic.messages.count_tokens",
                 span_route="/v1/messages/count_tokens",
-                span_attributes=lambda body: messages_count_tokens_request_attributes(self._client, body),
             ),
             cast_to=BetaMessageTokensCount,
         )

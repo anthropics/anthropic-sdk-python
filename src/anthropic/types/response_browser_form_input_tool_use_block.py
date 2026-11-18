@@ -4,5 +4,5 @@ __all__ = ["ResponseBrowserFormInputToolUseBlock"]
 
 ResponseBrowserFormInputToolUseBlock = BrowserFormInputToolUseBlock
 """
-ResponseBrowserFormInputToolUseBlock has been renamed to BrowserFormInputToolUseBlock
+Deprecated: ResponseBrowserFormInputToolUseBlock has been renamed to BrowserFormInputToolUseBlock
 """

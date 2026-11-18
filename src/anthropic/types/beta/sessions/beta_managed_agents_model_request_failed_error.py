@@ -1,30 +1,11 @@
-from typing import Union
-from typing_extensions import Literal, Annotated, TypeAlias
-
-from ...._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_retry_status_retrying import BetaManagedAgentsRetryStatusRetrying
-from .beta_managed_agents_retry_status_terminal import BetaManagedAgentsRetryStatusTerminal
-from .beta_managed_agents_retry_status_exhausted import BetaManagedAgentsRetryStatusExhausted
+from .beta_managed_agents_model_request_failed_error_object import (
+    RetryStatus,
+    BetaManagedAgentsModelRequestFailedErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsModelRequestFailedError", "RetryStatus"]
 
-RetryStatus: TypeAlias = Annotated[
-    Union[
-        BetaManagedAgentsRetryStatusRetrying,
-        BetaManagedAgentsRetryStatusExhausted,
-        BetaManagedAgentsRetryStatusTerminal,
-    ],
-    UnionDiscriminator("type"),
-]
-
-
-class BetaManagedAgentsModelRequestFailedError(BaseModel):
-    """A model request failed for a reason other than overload or rate-limiting."""
-
-    message: str
-    """Human-readable error description."""
-
-    retry_status: RetryStatus
-    """What the client should do next."""
-
-    type: Literal["model_request_failed_error"]
+BetaManagedAgentsModelRequestFailedError = BetaManagedAgentsModelRequestFailedErrorObject
+"""
+Deprecated: BetaManagedAgentsModelRequestFailedError has been renamed to BetaManagedAgentsModelRequestFailedErrorObject
+"""

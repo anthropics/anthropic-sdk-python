@@ -11,6 +11,7 @@ import pathlib
 import functools
 import itertools
 import threading
+from types import SimpleNamespace
 from typing import Any, Dict, List, Callable, Optional, NamedTuple, cast
 from unittest.mock import MagicMock
 from typing_extensions import Protocol
@@ -262,6 +263,13 @@ class TestCredentialsFile:
             monkeypatch.delenv(var, raising=False)
         monkeypatch.setenv("ANTHROPIC_CONFIG_DIR", str(tmp_path))
 
+    @pytest.fixture
+    def windows_without_fchmod(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """`os.fchmod` doesn't exist on Windows before Python 3.13."""
+        windows_os = SimpleNamespace(**{name: value for name, value in vars(os).items() if name != "fchmod"})
+        windows_os.name = "nt"
+        monkeypatch.setattr("anthropic.lib.credentials._providers.os", windows_os)
+
     # -- "type": "external" ------------------------------------------------
 
     def test_external(self, tmp_path: pathlib.Path) -> None:
@@ -504,6 +512,29 @@ class TestCredentialsFile:
         assert oauth.for_base_url(OTHER_BASE_URL) is oauth
 
     @pytest.mark.respx(base_url=BASE_URL)
+    @pytest.mark.usefixtures("windows_without_fchmod")
+    def test_workload_identity_disk_cache_without_fchmod(self, respx_mock: MockRouter, tmp_path: pathlib.Path) -> None:
+        jwt_path = tmp_path / "jwt"
+        jwt_path.write_text("j")
+        _write_profile(
+            tmp_path,
+            "default",
+            config={
+                "type": "workload_identity",
+                "identity_token": {"source": "file", "path": str(jwt_path)},
+                "federation_rule_id": "fdrl_x",
+                "organization_id": "org",
+            },
+        )
+        token_route = respx_mock.post(TOKEN_ENDPOINT).mock(
+            return_value=httpx2.Response(200, json={"access_token": "exch_tok", "expires_in": 3600})
+        )
+
+        assert CredentialsFile()().token == "exch_tok"
+        assert CredentialsFile()().token == "exch_tok"
+        assert token_route.call_count == 1
+
+    @pytest.mark.respx(base_url=BASE_URL)
     def test_workload_identity_disk_cache_stale_reexchange(
         self, respx_mock: MockRouter, tmp_path: pathlib.Path
     ) -> None:
@@ -680,6 +711,34 @@ class TestCredentialsFile:
                 "scope": "x:y",
             }
         }
+
+    @pytest.mark.respx(base_url=BASE_URL)
+    @pytest.mark.usefixtures("windows_without_fchmod")
+    def test_authorized_user_refresh_writeback_without_fchmod(
+        self, respx_mock: MockRouter, tmp_path: pathlib.Path
+    ) -> None:
+        _write_profile(
+            tmp_path,
+            "default",
+            config={"type": "authorized_user", "client_id": "cid"},
+            credentials={
+                "access_token": "old-tok",
+                "expires_at": int(time.time()) - 1,
+                "refresh_token": "refresh-old",
+            },
+        )
+        respx_mock.post(TOKEN_ENDPOINT).mock(
+            return_value=httpx2.Response(
+                200, json={"access_token": "new-tok", "expires_in": 3600, "refresh_token": "refresh-new"}
+            )
+        )
+
+        assert CredentialsFile()().token == "new-tok"
+
+        creds_file = tmp_path / "credentials" / "default.json"
+        rewritten = json.loads(creds_file.read_text())
+        assert rewritten["access_token"] == "new-tok"
+        assert rewritten["refresh_token"] == "refresh-new"
 
     def test_authorized_user_fresh_token_no_refresh(self, tmp_path: pathlib.Path) -> None:
         _write_profile(

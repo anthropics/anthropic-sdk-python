@@ -1,14 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_file_not_found_run_error_object import BetaManagedAgentsFileNotFoundRunErrorObject
 
 __all__ = ["BetaManagedAgentsFileNotFoundRunError"]
 
-
-class BetaManagedAgentsFileNotFoundRunError(BaseModel):
-    """A file resource referenced by the deployment no longer exists."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["file_not_found_error"]
+BetaManagedAgentsFileNotFoundRunError = BetaManagedAgentsFileNotFoundRunErrorObject
+"""
+Deprecated: BetaManagedAgentsFileNotFoundRunError has been renamed to BetaManagedAgentsFileNotFoundRunErrorObject
+"""

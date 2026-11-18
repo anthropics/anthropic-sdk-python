@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_memory_store_archived_deployment_paused_reason_error_object import (
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError(BaseModel):
-    """A memory store referenced by the deployment is archived."""
-
-    type: Literal["memory_store_archived_error"]
+BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError = (
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonErrorObject
+"""

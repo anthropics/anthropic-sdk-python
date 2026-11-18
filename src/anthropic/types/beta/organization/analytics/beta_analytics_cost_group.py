@@ -57,9 +57,7 @@ class BetaAnalyticsCostGroup(BaseModel):
     addressed), `scheduled` (a scheduled routine ran), `monitoring` (Claude watching
     a channel it was asked to monitor), or `dm` (direct messages with Claude).
     Populated only when `claude_tag_category` is in `group_by[]`; null for usage
-    that is not Claude Tag. Direct-message usage is billed to the individual user
-    and is reported under that user's product, not under `claude_tag`. New
-    categories may be added over time.
+    that is not Claude Tag. New categories may be added over time.
     """
 
     claude_tag_user_id: Optional[str] = None
@@ -113,6 +111,12 @@ class BetaAnalyticsCostGroup(BaseModel):
     not attributed to a specific model, such as code execution.
     """
 
+    organization_id: Optional[str] = None
+    """
+    UUID of the child organization the usage belongs to, on a parent organization's
+    report across its children. Null unless `organization_id` is in `group_by[]`.
+    """
+
     product: Optional[str] = None
     """Product surface that produced the usage or cost.
 
@@ -123,8 +127,8 @@ class BetaAnalyticsCostGroup(BaseModel):
     product in Slack. `chat_cowork_unified` is Chat and Cowork unified, Cowork's
     features inside claude.ai chat: chat and Cowork usage by a member who has it
     turned on is reported under this value instead of `chat` or `cowork`. It is
-    accepted as a filter only on deployments that offer Chat and Cowork unified.
-    Some unattributed usage is reported as "other".
+    accepted as a filter only where Chat and Cowork unified is available. Some
+    unattributed usage is reported as "other".
     """
 
     rbac_group_id: Optional[str] = None
@@ -158,7 +162,8 @@ class BetaAnalyticsCostGroup(BaseModel):
     """Slack channel the usage originated from.
 
     Populated only when `slack_channel_id` is in `group_by[]`; null for usage
-    outside Slack (and for rows recorded before channel attribution was enabled).
+    outside Slack, for some Claude Tag usage that has no channel recorded, and for
+    usage recorded before channel attribution was enabled.
     """
 
     speed: Optional[BetaAnalyticsSpeed] = None

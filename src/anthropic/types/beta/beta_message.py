@@ -7,7 +7,7 @@ from .beta_usage import BetaUsage
 from .beta_container import BetaContainer
 from .beta_diagnostics import BetaDiagnostics
 from .beta_stop_reason import BetaStopReason
-from .beta_content_block import BetaContentBlock, BetaContentBlock as BetaContentBlock
+from .beta_content_block import BetaContentBlock
 from .beta_input_transformation import BetaInputTransformation
 from .beta_refusal_stop_details import BetaRefusalStopDetails
 from .beta_assistant_message_param import BetaAssistantMessageParam

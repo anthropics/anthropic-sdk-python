@@ -1,14 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_vault_archived_run_error_object import BetaManagedAgentsVaultArchivedRunErrorObject
 
 __all__ = ["BetaManagedAgentsVaultArchivedRunError"]
 
-
-class BetaManagedAgentsVaultArchivedRunError(BaseModel):
-    """A vault referenced by the deployment is archived."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["vault_archived_error"]
+BetaManagedAgentsVaultArchivedRunError = BetaManagedAgentsVaultArchivedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsVaultArchivedRunError has been renamed to BetaManagedAgentsVaultArchivedRunErrorObject
+"""

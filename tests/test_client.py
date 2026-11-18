@@ -5,6 +5,7 @@ import os
 import sys
 import copy
 import json
+import socket
 import asyncio
 import inspect
 import dataclasses
@@ -19,12 +20,12 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
+from anthropic import Anthropic, AsyncAnthropic, DefaultAioHttpClient, APIResponseValidationError
 from anthropic._types import Omit, Timeout, NotGiven, not_given
 from anthropic._utils import asyncify
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
-from anthropic._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
+from anthropic._exceptions import APIStatusError, APITimeoutError, APIConnectionError, APIResponseValidationError
 from anthropic._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -1225,6 +1226,10 @@ class TestAnthropic:
     def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
             Anthropic(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
+
+    def test_none_path_param_is_rejected(self, client: Anthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     def test_default_stream_cls(self, respx_mock: MockRouter, client: Anthropic) -> None:
@@ -2673,6 +2678,10 @@ class TestAsyncAnthropic:
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
+    async def test_none_path_param_is_rejected(self, async_client: AsyncAnthropic) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `message_batch_id` but received None"):
+            await async_client.messages.batches.with_raw_response.retrieve(message_batch_id=cast(Any, None))
+
     @pytest.mark.respx(base_url=base_url)
     async def test_default_stream_cls(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:
         class Model(BaseModel):
@@ -2975,6 +2984,21 @@ class TestAsyncAnthropic:
             http2=False,
             limits=httpx2.Limits(max_connections=100, max_keepalive_connections=20),
         )
+
+    async def test_aiohttp_refused_connection_is_not_a_timeout(self, async_client: AsyncAnthropic) -> None:
+        with socket.socket() as socket_that_never_listens:
+            socket_that_never_listens.bind(("127.0.0.1", 0))
+            port = socket_that_never_listens.getsockname()[1]
+
+            async with DefaultAioHttpClient() as http_client:
+                client = async_client.with_options(
+                    base_url=f"http://127.0.0.1:{port}", http_client=http_client, max_retries=0
+                )
+
+                with pytest.raises(APIConnectionError) as exc_info:
+                    await client.get("/foo", cast_to=httpx2.Response)
+
+        assert not isinstance(exc_info.value, APITimeoutError)
 
     @pytest.mark.respx(base_url=base_url)
     async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:

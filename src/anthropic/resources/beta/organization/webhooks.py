@@ -38,7 +38,7 @@ class Webhooks(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WebhooksWithRawResponse(self)
 
@@ -47,7 +47,7 @@ class Webhooks(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return WebhooksWithStreamingResponse(self)
 
@@ -55,7 +55,13 @@ class Webhooks(SyncAPIResource):
         self,
         *,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "external_key.failed",
+                "external_key.recovered",
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ],
         url: str,
         description: str | Omit = omit,
@@ -209,7 +215,13 @@ class Webhooks(SyncAPIResource):
         *,
         description: str | Omit = omit,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "external_key.failed",
+                "external_key.recovered",
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ]
         | Omit = omit,
         name: str | Omit = omit,
@@ -416,6 +428,9 @@ class Webhooks(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -484,6 +499,9 @@ class Webhooks(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -526,7 +544,7 @@ class AsyncWebhooks(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWebhooksWithRawResponse(self)
 
@@ -535,7 +553,7 @@ class AsyncWebhooks(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncWebhooksWithStreamingResponse(self)
 
@@ -543,7 +561,13 @@ class AsyncWebhooks(AsyncAPIResource):
         self,
         *,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "external_key.failed",
+                "external_key.recovered",
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ],
         url: str,
         description: str | Omit = omit,
@@ -697,7 +721,13 @@ class AsyncWebhooks(AsyncAPIResource):
         *,
         description: str | Omit = omit,
         enabled_events: List[
-            Literal["user_profile.enforcement_action_opened", "user_profile.enforcement_action_resolved"]
+            Literal[
+                "external_key.failed",
+                "external_key.recovered",
+                "user_profile.enforcement_action_opened",
+                "user_profile.enforcement_action_resolved",
+                "user_profile.program_status_updated",
+            ]
         ]
         | Omit = omit,
         name: str | Omit = omit,
@@ -904,6 +934,9 @@ class AsyncWebhooks(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(
@@ -972,6 +1005,9 @@ class AsyncWebhooks(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          SandboxEgressRestrictedError:
         """
         if not webhook_endpoint_id:
             raise ValueError(

@@ -9,7 +9,6 @@ from typing_extensions import Self, override
 import httpx2
 
 from .._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
-from .._utils import is_given
 from .._client import Anthropic, AsyncAnthropic
 from .._compat import model_copy
 from .._models import FinalRequestOptions
@@ -22,6 +21,7 @@ from .._base_client import (
     merge_headers,
 )
 from ..resources.beta import Beta, AsyncBeta
+from ._platform_client import copy_platform_client
 from ..resources.messages import Messages, AsyncMessages
 from ..resources.beta.messages import Messages as BetaMessages, AsyncMessages as AsyncBetaMessages
 
@@ -148,7 +148,7 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_FOUNDRY_API_KEY`
-        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`
+        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`, unless `base_url` is provided
         - `base_url` from `ANTHROPIC_FOUNDRY_BASE_URL`
 
         Args:
@@ -157,7 +157,9 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
             open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
-        resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
+        # A `base_url` argument wins over the variable, and `copy()` always passes one.
+        if resource is None and base_url is None:
+            resource = os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
         if api_key is None and azure_ad_token_provider is None:
@@ -229,36 +231,21 @@ class AnthropicFoundry(BaseFoundryClient[httpx2.Client, Stream[Any]], Anthropic)
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             azure_ad_token_provider=azure_ad_token_provider or self._azure_ad_token_provider,
             webhook_key=webhook_key or self.webhook_key,
             base_url=str(base_url or self.base_url),
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 
@@ -373,7 +360,7 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `api_key` from `ANTHROPIC_FOUNDRY_API_KEY`
-        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`
+        - `resource` from `ANTHROPIC_FOUNDRY_RESOURCE`, unless `base_url` is provided
         - `base_url` from `ANTHROPIC_FOUNDRY_BASE_URL`
 
         Args:
@@ -382,7 +369,9 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
             open_telemetry: OpenTelemetry tracing of this client's API calls. `False` disables the spans, and `traces.content_mode` set to `"content"` adds the content of requests and responses to them.
         """
         api_key = api_key if api_key is not None else os.environ.get("ANTHROPIC_FOUNDRY_API_KEY")
-        resource = resource if resource is not None else os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
+        # A `base_url` argument wins over the variable, and `copy()` always passes one.
+        if resource is None and base_url is None:
+            resource = os.environ.get("ANTHROPIC_FOUNDRY_RESOURCE")
         base_url = base_url if base_url is not None else os.environ.get("ANTHROPIC_FOUNDRY_BASE_URL")
 
         if api_key is None and azure_ad_token_provider is None:
@@ -454,36 +443,21 @@ class AsyncAnthropicFoundry(BaseFoundryClient[httpx2.AsyncClient, AsyncStream[An
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
-        return self.__class__(
+        return copy_platform_client(
+            self,
             api_key=api_key or self.api_key,
             azure_ad_token_provider=azure_ad_token_provider or self._azure_ad_token_provider,
             webhook_key=webhook_key or self.webhook_key,
             base_url=str(base_url or self.base_url),
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             **_extra_kwargs,
         )
 

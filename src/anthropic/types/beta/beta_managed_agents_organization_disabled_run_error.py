@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_organization_disabled_run_error_object import (
+    BetaManagedAgentsOrganizationDisabledRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsOrganizationDisabledRunError"]
 
-
-class BetaManagedAgentsOrganizationDisabledRunError(BaseModel):
-    """The deployment's organization is disabled."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["organization_disabled_error"]
+BetaManagedAgentsOrganizationDisabledRunError = BetaManagedAgentsOrganizationDisabledRunErrorObject
+"""
+Deprecated: BetaManagedAgentsOrganizationDisabledRunError has been renamed to BetaManagedAgentsOrganizationDisabledRunErrorObject
+"""

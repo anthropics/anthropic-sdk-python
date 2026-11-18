@@ -3,21 +3,9 @@ from typing import Optional
 from ...._models import BaseModel
 from .beta_analytics_plugin_cowork_metrics import BetaAnalyticsPluginCoworkMetrics
 from .beta_analytics_plugin_claude_code_metrics import BetaAnalyticsPluginClaudeCodeMetrics
+from .beta_analytics_plugin_chat_cowork_unified_metrics import BetaAnalyticsPluginChatCoworkUnifiedMetrics
 
-__all__ = ["BetaAnalyticsPluginActivity", "ChatCoworkUnifiedMetrics"]
-
-
-class ChatCoworkUnifiedMetrics(BaseModel):
-    """
-    Plugin use recorded while members had Chat and Cowork unified (Cowork's features inside claude.ai chat) turned on. A count is null in date-range mode where it cannot be computed. Omitted from the response on deployments that do not offer Chat and Cowork unified.
-    """
-
-    distinct_session_plugin_used_count: Optional[int] = None
-    """
-    Same measure as `cowork_metrics.distinct_session_plugin_used_count`, for
-    activity recorded while members had Chat and Cowork unified turned on. Null on
-    aggregated rows where a distinct count cannot be computed.
-    """
+__all__ = ["BetaAnalyticsPluginActivity"]
 
 
 class BetaAnalyticsPluginActivity(BaseModel):
@@ -54,22 +42,22 @@ class BetaAnalyticsPluginActivity(BaseModel):
     invocation_count: int
     """Number of plugin invocations on the requested day"""
 
-    plugin_name: str
-    """Name of the plugin"""
-
-    chat_cowork_unified_metrics: Optional[ChatCoworkUnifiedMetrics] = None
-    """
-    Plugin use recorded while members had Chat and Cowork unified (Cowork's features
-    inside claude.ai chat) turned on. A count is null in date-range mode where it
-    cannot be computed. Omitted from the response on deployments that do not offer
-    Chat and Cowork unified.
-    """
-
     plugin_id: Optional[str] = None
     """Stable plugin identifier when available (e.g.
 
     `serena@claude-plugins-official`). Null for third-party Claude Code plugins
     (redacted at the source) and Cowork slash commands that carry only a hashed id.
+    """
+
+    plugin_name: str
+    """Name of the plugin"""
+
+    chat_cowork_unified_metrics: Optional[BetaAnalyticsPluginChatCoworkUnifiedMetrics] = None
+    """
+    Plugin use recorded while members had Chat and Cowork unified (Cowork's features
+    inside claude.ai chat) turned on. A count is null in date-range mode where it
+    cannot be computed. Omitted from the response where Chat and Cowork unified is
+    not available.
     """
 
     product: Optional[str] = None

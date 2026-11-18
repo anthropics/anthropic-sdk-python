@@ -1,17 +1,8 @@
-from typing_extensions import Literal
-
-from ...._models import BaseModel
+from .beta_managed_agents_program_workflow_run_error_object import BetaManagedAgentsProgramWorkflowRunErrorObject
 
 __all__ = ["BetaManagedAgentsProgramWorkflowRunError"]
 
-
-class BetaManagedAgentsProgramWorkflowRunError(BaseModel):
-    """The plan, a program that the agent wrote, failed, or the server refused it."""
-
-    message: str
-    """Short explanation written by the server.
-
-    It never contains content from the run or its agents.
-    """
-
-    type: Literal["program_error"]
+BetaManagedAgentsProgramWorkflowRunError = BetaManagedAgentsProgramWorkflowRunErrorObject
+"""
+Deprecated: BetaManagedAgentsProgramWorkflowRunError has been renamed to BetaManagedAgentsProgramWorkflowRunErrorObject
+"""

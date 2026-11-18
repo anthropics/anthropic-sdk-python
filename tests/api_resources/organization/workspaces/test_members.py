@@ -172,7 +172,7 @@ class TestMembers:
     def test_method_add(self, client: Anthropic) -> None:
         member = client.organization.workspaces.members.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         )
         assert_matches_type(WorkspaceMember, member, path=["response"])
@@ -181,7 +181,7 @@ class TestMembers:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.organization.workspaces.members.with_raw_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         )
 
@@ -194,7 +194,7 @@ class TestMembers:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.organization.workspaces.members.with_streaming_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         ) as response:
             assert not response.is_closed
@@ -210,7 +210,7 @@ class TestMembers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.organization.workspaces.members.with_raw_response.add(
                 workspace_id="",
-                user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+                user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
                 workspace_role="workspace_admin",
             )
 
@@ -421,7 +421,7 @@ class TestAsyncMembers:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         member = await async_client.organization.workspaces.members.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         )
         assert_matches_type(WorkspaceMember, member, path=["response"])
@@ -430,7 +430,7 @@ class TestAsyncMembers:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.organization.workspaces.members.with_raw_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         )
 
@@ -443,7 +443,7 @@ class TestAsyncMembers:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.organization.workspaces.members.with_streaming_response.add(
             workspace_id="workspace_id",
-            user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+            user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
             workspace_role="workspace_admin",
         ) as response:
             assert not response.is_closed
@@ -459,7 +459,7 @@ class TestAsyncMembers:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.organization.workspaces.members.with_raw_response.add(
                 workspace_id="",
-                user_id="user_01WCz1FkmYMm4gnmykNKUu3Q",
+                user_id="user_01WxYzAbCdEfGhJkMnPqRsTu",
                 workspace_role="workspace_admin",
             )
 

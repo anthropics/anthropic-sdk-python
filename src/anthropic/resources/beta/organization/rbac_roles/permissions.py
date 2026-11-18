@@ -28,7 +28,7 @@ class Permissions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PermissionsWithRawResponse(self)
 
@@ -37,7 +37,7 @@ class Permissions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return PermissionsWithStreamingResponse(self)
 
@@ -75,6 +75,13 @@ class Permissions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
+
+          ParentOrganizationRequiredError:
+
+          RBACRoleNotFoundError:
         """
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
@@ -106,7 +113,7 @@ class AsyncPermissions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPermissionsWithRawResponse(self)
 
@@ -115,7 +122,7 @@ class AsyncPermissions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncPermissionsWithStreamingResponse(self)
 
@@ -153,6 +160,13 @@ class AsyncPermissions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
+
+          ParentOrganizationRequiredError:
+
+          RBACRoleNotFoundError:
         """
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")

@@ -1,11 +1,8 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_authentication_error_object import BetaAuthenticationErrorObject
 
 __all__ = ["BetaAuthenticationError"]
 
-
-class BetaAuthenticationError(BaseModel):
-    message: str
-
-    type: Literal["authentication_error"]
+BetaAuthenticationError = BetaAuthenticationErrorObject
+"""
+Deprecated: BetaAuthenticationError has been renamed to BetaAuthenticationErrorObject
+"""

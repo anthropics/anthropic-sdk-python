@@ -20,6 +20,17 @@ class ExternalKeyCreateParams(TypedDict, total=False):
     geo: Literal["us"]
     """Data residency geo. Only `us` is supported."""
 
+    user_profile_id: Optional[str]
+    """ID of a user profile to bind the key to.
+
+    A user profile represents one of your customers: bind a customer's key to that
+    customer's user profile. A key bound to a user profile can only be attached to a
+    Workspace that has the same user profile, and the binding cannot be changed
+    later. Omit this field only for your organization's own key, never a customer's.
+    A key created without a user profile ID can't be attached to a Workspace that
+    has a user profile, and you can't add one to the key later.
+    """
+
 
 ProviderConfig: TypeAlias = Union[
     BetaAWSExternalKeyConfigParam, BetaGCPExternalKeyConfigParam, BetaAzureExternalKeyConfigParam

@@ -78,7 +78,7 @@ from anthropic.types import (
 )
 from anthropic._types import OpenTelemetryTraces, OpenTelemetryOptions, OpenTelemetryClientOption
 from anthropic._compat import PYDANTIC_V1, get_model_fields
-from anthropic._tracing import defined_query, is_content_query, global_tracer_provider_loads
+from anthropic._tracing import SPAN_ATTRIBUTES, defined_query, is_content_query, global_tracer_provider_loads
 from anthropic.types.beta import (
     BetaUsage,
     BetaContentBlock,
@@ -104,6 +104,7 @@ from anthropic.lib._tracing._content import (
     fit_content,
     set_content_attributes,
 )
+from anthropic.lib._tracing._response import FINAL_FROM_MESSAGE_DELTA
 from anthropic.lib._tracing._attributes import AttributeName
 
 from .utils import update_env
@@ -843,6 +844,13 @@ def events_up_to_message_delta() -> list[dict[str, Any]]:
     return [*events, {**message_delta, "usage": usage}]
 
 
+def events_before_message_delta() -> list[dict[str, Any]]:
+    """The events of a stream that ends before `message_delta`, whose `message_start` has every placeholder."""
+    start, *events = events_up_to_message_delta()[:-1]
+    usage = {**start["message"]["usage"], "output_tokens_details": {"thinking_tokens": 0}}
+    return [{**start, "message": {**start["message"], "usage": usage}}, *events]
+
+
 def assert_span_has_what_message_delta_gave(span: ReadableSpan, *, beta: bool) -> None:
     # The stream still ended early, which fails the span as before.
     assert span.status.status_code == StatusCode.ERROR
@@ -872,6 +880,14 @@ def assert_span_has_nothing_that_message_delta_gives(span: ReadableSpan) -> None
         "anthropic.usage.compaction.output_tokens",
     ):
         assert name not in attributes(span)
+
+
+def assert_span_has_no_sampling_attributes(span: ReadableSpan) -> None:
+    for name in ("gen_ai.request.temperature", "gen_ai.request.top_p", "gen_ai.request.top_k"):
+        assert name not in attributes(span), (
+            f"`{name}` is recorded. The Python SDK does not model `temperature`, `top_p` and `top_k`, so "
+            "`SPAN_ATTRIBUTES` (src/anthropic/_tracing.py) has no row for them."
+        )
 
 
 class TestCallSpans:
@@ -933,18 +949,28 @@ class TestCallSpans:
         assert "gen_ai.input.messages" not in attributes(span)
 
     @pytest.mark.respx(base_url=base_url)
-    def test_temperature_and_top_p_are_doubles(self, spans: Spans, respx_mock: MockRouter) -> None:
+    def test_sampling_fields_that_the_sdk_does_not_model_have_no_attribute(
+        self, spans: Spans, respx_mock: MockRouter
+    ) -> None:
         respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
         client = make_client(spans)
 
-        create(client, extra_body={"temperature": 1, "top_p": 1})
+        create(client, extra_body={"temperature": 1, "top_p": 1, "top_k": 5})
 
-        span = spans.one("anthropic.messages.create")
-        # An exporter sends an `int` as an integer, and these two attributes are doubles.
-        assert isinstance(attributes(span)["gen_ai.request.temperature"], float)
-        assert isinstance(attributes(span)["gen_ai.request.top_p"], float)
-        assert attributes(span)["gen_ai.request.temperature"] == 1.0
-        assert attributes(span)["gen_ai.request.top_p"] == 1.0
+        assert json.loads(respx_mock.calls.last.request.content)["top_k"] == 5
+        assert_span_has_no_sampling_attributes(spans.one("anthropic.messages.create"))
+
+    @pytest.mark.respx(base_url=base_url)
+    async def test_async_sampling_fields_that_the_sdk_does_not_model_have_no_attribute(
+        self, spans: Spans, respx_mock: MockRouter
+    ) -> None:
+        respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, json=MESSAGE))
+        client = make_async_client(spans)
+
+        await create(client, extra_body={"temperature": 1, "top_p": 1, "top_k": 5})
+
+        assert json.loads(respx_mock.calls.last.request.content)["top_k"] == 5
+        assert_span_has_no_sampling_attributes(spans.one("anthropic.messages.create"))
 
     @pytest.mark.respx(base_url=base_url)
     def test_error_response(self, spans: Spans, respx_mock: MockRouter) -> None:
@@ -2110,7 +2136,7 @@ class TestCallSpans:
     def test_stream_ended_before_message_delta_has_nothing_that_message_delta_gives(
         self, beta: bool, helper: bool, spans: Spans, respx_mock: MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=stream_response(events_up_to_message_delta()[:-1]))
+        respx_mock.post("/v1/messages").mock(return_value=stream_response(events_before_message_delta()))
         messages = messages_resource(make_client(spans), beta=beta)
 
         if helper:
@@ -2127,7 +2153,7 @@ class TestCallSpans:
     async def test_async_stream_ended_before_message_delta_has_nothing_that_message_delta_gives(
         self, beta: bool, helper: bool, spans: Spans, respx_mock: MockRouter
     ) -> None:
-        respx_mock.post("/v1/messages").mock(return_value=stream_response(events_up_to_message_delta()[:-1]))
+        respx_mock.post("/v1/messages").mock(return_value=stream_response(events_before_message_delta()))
         messages = messages_resource(make_async_client(spans), beta=beta)
 
         if helper:
@@ -8302,8 +8328,9 @@ def test_usage_fields_are_all_recorded_or_left_out(
     usage: type[pydantic.BaseModel], recorded: set[str], without_an_attribute: set[str]
 ) -> None:
     assert set(get_model_fields(usage)) == recorded | without_an_attribute, (
-        f"`{usage.__name__}` has changed. If the spans have an attribute for the new field, record it in "
-        "`set_message_attributes` (src/anthropic/lib/_tracing/_response.py). Then list it in this test."
+        f"`{usage.__name__}` has changed. If the spans have an attribute for the new field, the SDK's configuration "
+        "gives it one in `SPAN_ATTRIBUTES` (src/anthropic/_tracing.py), and a field that adds to a sum is read in "
+        "`set_usage_sums` (src/anthropic/lib/_tracing/_response.py). Then list it in this test."
     )
 
 
@@ -8313,9 +8340,55 @@ def test_usage_iteration_types_are_all_recorded_or_left_out() -> None:
     in_the_totals = {"message", "advisor_message", "fallback_message"}
 
     assert type_names(field_types(BetaUsage)["iterations"]) == compactions | in_the_totals, (
-        "`BetaUsage.iterations` has a new type of entry. `set_message_attributes` "
+        "`BetaUsage.iterations` has a new type of entry. `set_usage_sums` "
         "(src/anthropic/lib/_tracing/_response.py) records only the `compaction` entries, whose tokens the usage's "
         "totals leave out. Record the new entries there if the totals leave them out too. Then list the type here."
+    )
+
+
+RESPONSE_PATHS_KNOWN_AT_MESSAGE_START: set[tuple[str, ...]] = {
+    ("id",),
+    ("model",),
+    ("usage", "cache_creation_input_tokens"),
+    ("usage", "cache_read_input_tokens"),
+    ("usage", "cache_creation", "ephemeral_5m_input_tokens"),
+    ("usage", "cache_creation", "ephemeral_1h_input_tokens"),
+    ("usage", "service_tier"),
+}
+"""The response paths of `anthropic.messages.create` that `message_start` already has the Message's value for."""
+
+
+def test_messages_create_response_paths_are_all_final_from_message_start_or_from_message_delta() -> None:
+    def under(path: tuple[str, ...], parent: tuple[str, ...]) -> bool:
+        return path[: len(parent)] == parent
+
+    paths = {path for path, _ in SPAN_ATTRIBUTES["anthropic.messages.create"].get("response", {}).values()}
+    from_delta = set(FINAL_FROM_MESSAGE_DELTA)
+
+    unclassified = {
+        path
+        for path in paths
+        if path not in RESPONSE_PATHS_KNOWN_AT_MESSAGE_START and not any(under(path, each) for each in from_delta)
+    }
+    assert not unclassified, (
+        f"`SPAN_ATTRIBUTES` (src/anthropic/_tracing.py) has new response paths: {sorted(unclassified)}. If "
+        "`message_start` has only a placeholder for one, add it to `FINAL_FROM_MESSAGE_DELTA` "
+        "(src/anthropic/lib/_tracing/_response.py), and to `RESPONSE_PATHS_KNOWN_AT_MESSAGE_START` here if not."
+    )
+
+    gone = (RESPONSE_PATHS_KNOWN_AT_MESSAGE_START - paths) | {
+        each for each in from_delta if not any(under(path, each) for path in paths)
+    }
+    assert not gone, (
+        f"`SPAN_ATTRIBUTES` (src/anthropic/_tracing.py) no longer has these response paths: {sorted(gone)}. Remove "
+        "them from `FINAL_FROM_MESSAGE_DELTA` (src/anthropic/lib/_tracing/_response.py) or from "
+        "`RESPONSE_PATHS_KNOWN_AT_MESSAGE_START` here."
+    )
+
+    both = {path for path in RESPONSE_PATHS_KNOWN_AT_MESSAGE_START if any(under(path, each) for each in from_delta)}
+    assert not both, (
+        f"`FINAL_FROM_MESSAGE_DELTA` (src/anthropic/lib/_tracing/_response.py) and "
+        f"`RESPONSE_PATHS_KNOWN_AT_MESSAGE_START` both have these response paths: {sorted(both)}."
     )
 
 

@@ -31,7 +31,7 @@ class Shares(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SharesWithRawResponse(self)
 
@@ -40,7 +40,7 @@ class Shares(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SharesWithStreamingResponse(self)
 
@@ -94,7 +94,8 @@ class Shares(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
@@ -155,7 +156,7 @@ class AsyncShares(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSharesWithRawResponse(self)
 
@@ -164,7 +165,7 @@ class AsyncShares(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSharesWithStreamingResponse(self)
 
@@ -218,7 +219,8 @@ class AsyncShares(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 

@@ -25,7 +25,7 @@ class TestMemories:
         memory = client.beta.memory_stores.memories.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
@@ -35,9 +35,9 @@ class TestMemories:
         memory = client.beta.memory_stores.memories.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -48,7 +48,7 @@ class TestMemories:
         response = client.beta.memory_stores.memories.with_raw_response.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         )
 
@@ -62,7 +62,7 @@ class TestMemories:
         with client.beta.memory_stores.memories.with_streaming_response.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -79,7 +79,7 @@ class TestMemories:
             client.beta.memory_stores.memories.with_raw_response.create(
                 memory_store_id="",
                 content="content",
-                path="xx",
+                path="/P",
             )
 
     @parametrize
@@ -97,7 +97,7 @@ class TestMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -161,12 +161,12 @@ class TestMemories:
             memory_store_id="memory_store_id",
             view="basic",
             content="content",
-            path="xx",
+            path="/P",
             precondition={
                 "type": "content_sha256",
-                "content_sha256": "content_sha256",
+                "content_sha256": "210b9798eb53baa4e69d31c1071cf03d212b8ad0ca30cf321e0ea82e120aac26",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -231,7 +231,7 @@ class TestMemories:
             page="page",
             path_prefix="path_prefix",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -285,7 +285,7 @@ class TestMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -344,7 +344,7 @@ class TestAsyncMemories:
         memory = await async_client.beta.memory_stores.memories.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsMemory, memory, path=["response"])
@@ -354,9 +354,9 @@ class TestAsyncMemories:
         memory = await async_client.beta.memory_stores.memories.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -367,7 +367,7 @@ class TestAsyncMemories:
         response = await async_client.beta.memory_stores.memories.with_raw_response.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         )
 
@@ -381,7 +381,7 @@ class TestAsyncMemories:
         async with async_client.beta.memory_stores.memories.with_streaming_response.create(
             memory_store_id="memory_store_id",
             content="content",
-            path="xx",
+            path="/P",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -398,7 +398,7 @@ class TestAsyncMemories:
             await async_client.beta.memory_stores.memories.with_raw_response.create(
                 memory_store_id="",
                 content="content",
-                path="xx",
+                path="/P",
             )
 
     @parametrize
@@ -416,7 +416,7 @@ class TestAsyncMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -480,12 +480,12 @@ class TestAsyncMemories:
             memory_store_id="memory_store_id",
             view="basic",
             content="content",
-            path="xx",
+            path="/P",
             precondition={
                 "type": "content_sha256",
-                "content_sha256": "content_sha256",
+                "content_sha256": "210b9798eb53baa4e69d31c1071cf03d212b8ad0ca30cf321e0ea82e120aac26",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -550,7 +550,7 @@ class TestAsyncMemories:
             page="page",
             path_prefix="path_prefix",
             view="basic",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -604,7 +604,7 @@ class TestAsyncMemories:
             memory_id="memory_id",
             memory_store_id="memory_store_id",
             expected_content_sha256="expected_content_sha256",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

@@ -49,7 +49,7 @@ class Versions(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithRawResponse(self)
 
@@ -58,7 +58,7 @@ class Versions(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return VersionsWithStreamingResponse(self)
 
@@ -89,11 +89,10 @@ class Versions(SyncAPIResource):
         Only a Plugin in a `manual` marketplace takes uploads; a Plugin synchronized
         from a repository gets its versions from the repository. When the Plugin is in
         the organization's library marketplace, a version that adds a skill with the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai) is refused with a 409: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A 503 with
-        `error_code` `registration_pending` means the version was stored but is not yet
-        usable; a later version create on the Plugin completes it.
+        name of an organization skill that this API does not list is refused with a 409:
+        `error_code` `skill_name_taken`, with that name in `details.skill_name`. A 503
+        with `error_code` `registration_pending` means the version was stored but is not
+        yet usable; a later version create on the Plugin completes it.
 
         For a worked example, see
         [Create a version](/docs/en/manage-claude/plugins-api#create-a-version) in the
@@ -131,6 +130,17 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -215,7 +225,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -309,7 +320,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
@@ -414,7 +426,8 @@ class Versions(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -426,6 +439,11 @@ class Versions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -472,7 +490,7 @@ class AsyncVersions(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithRawResponse(self)
 
@@ -481,7 +499,7 @@ class AsyncVersions(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncVersionsWithStreamingResponse(self)
 
@@ -512,11 +530,10 @@ class AsyncVersions(AsyncAPIResource):
         Only a Plugin in a `manual` marketplace takes uploads; a Plugin synchronized
         from a repository gets its versions from the repository. When the Plugin is in
         the organization's library marketplace, a version that adds a skill with the
-        name of an organization skill (a skill an administrator uploaded for the whole
-        organization in claude.ai) is refused with a 409: `error_code`
-        `skill_name_taken`, with that name in `details.skill_name`. A 503 with
-        `error_code` `registration_pending` means the version was stored but is not yet
-        usable; a later version create on the Plugin completes it.
+        name of an organization skill that this API does not list is refused with a 409:
+        `error_code` `skill_name_taken`, with that name in `details.skill_name`. A 503
+        with `error_code` `registration_pending` means the version was stored but is not
+        yet usable; a later version create on the Plugin completes it.
 
         For a worked example, see
         [Create a version](/docs/en/manage-claude/plugins-api#create-a-version) in the
@@ -554,6 +571,17 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
+
+          BetaUnsupportedCharsetError:
+
+          BetaSkillNameTakenError:
+
+          BetaRegistrationPendingError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -638,7 +666,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -732,7 +761,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           page: Optionally set to the `next_page` token from the previous response.
 
@@ -837,7 +867,8 @@ class AsyncVersions(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -849,6 +880,11 @@ class AsyncVersions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          CMEKKeyDisabledError:
+
+          CMEKKeyNetworkBlockedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

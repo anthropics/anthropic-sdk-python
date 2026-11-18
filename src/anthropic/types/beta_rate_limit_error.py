@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
+from .beta_rate_limit_error_object import BetaRateLimitErrorObject
 
 __all__ = ["BetaRateLimitError"]
 
-
-class BetaRateLimitError(BaseModel):
-    message: str
-
-    type: Literal["rate_limit_error"]
+BetaRateLimitError = BetaRateLimitErrorObject
+"""Deprecated: BetaRateLimitError has been renamed to BetaRateLimitErrorObject"""

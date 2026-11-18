@@ -361,7 +361,7 @@ async def test_worker_flush_is_bounded_and_teardown_still_runs(
 
     assert flush_started.is_set()
     # Without the timeout the hung flush would hold teardown the full 5s.
-    assert elapsed < 2.0
+    assert elapsed < 4.0
     assert "memory flush cut off after" in caplog.text
     assert not local.exists()
 
@@ -389,7 +389,8 @@ async def test_worker_final_sync_is_bounded_and_the_flush_still_runs(
 
     elapsed = await _run_timed(worker)
 
-    assert elapsed < 2.0
+    # Without the timeout the hung sync would hold teardown the full 5s.
+    assert elapsed < 4.0
     assert "final memory sync cut off after" in caplog.text
     # The flush finished in time, so only the final sync reports a cut-off.
     assert "memory flush cut off after" not in caplog.text

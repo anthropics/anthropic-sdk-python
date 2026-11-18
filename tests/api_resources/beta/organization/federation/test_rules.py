@@ -55,7 +55,7 @@ class TestRules:
             description="description",
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -112,7 +112,7 @@ class TestRules:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -180,7 +180,7 @@ class TestRules:
             },
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -232,7 +232,7 @@ class TestRules:
             issuer_id="issuer_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaFederationRule], rule, path=["response"])
@@ -273,7 +273,7 @@ class TestRules:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -354,7 +354,7 @@ class TestAsyncRules:
             description="description",
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -411,7 +411,7 @@ class TestAsyncRules:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.retrieve(
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -479,7 +479,7 @@ class TestAsyncRules:
             },
             token_lifetime_seconds=60,
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])
@@ -531,7 +531,7 @@ class TestAsyncRules:
             issuer_id="issuer_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaFederationRule], rule, path=["response"])
@@ -572,7 +572,7 @@ class TestAsyncRules:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.archive(
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRule, rule, path=["response"])

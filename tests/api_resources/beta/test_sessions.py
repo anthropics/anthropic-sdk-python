@@ -62,7 +62,7 @@ class TestSessions:
             ],
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -108,7 +108,7 @@ class TestSessions:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.retrieve(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -195,7 +195,7 @@ class TestSessions:
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -257,7 +257,7 @@ class TestSessions:
             order="asc",
             page="page",
             statuses=["rescheduling"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -299,7 +299,7 @@ class TestSessions:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.delete(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -350,7 +350,7 @@ class TestSessions:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         session = client.beta.sessions.archive(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -437,7 +437,7 @@ class TestAsyncSessions:
             ],
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -483,7 +483,7 @@ class TestAsyncSessions:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.retrieve(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -570,7 +570,7 @@ class TestAsyncSessions:
             metadata={"foo": "string"},
             title="Order #1234 inquiry",
             vault_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -632,7 +632,7 @@ class TestAsyncSessions:
             order="asc",
             page="page",
             statuses=["rescheduling"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -674,7 +674,7 @@ class TestAsyncSessions:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.delete(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -725,7 +725,7 @@ class TestAsyncSessions:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         session = await async_client.beta.sessions.archive(
             session_id="sesn_011CZkZAtmR3yMPDzynEDxu7",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

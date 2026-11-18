@@ -31,7 +31,7 @@ class TestCost:
     def test_method_list_with_all_params(self, client: Anthropic) -> None:
         cost = client.beta.organization.analytics.cost.list(
             starting_at=parse_datetime("2026-09-01T00:00:00Z"),
-            actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
+            actor_ids=["user_01WxYzAbCdEfGhJkMnPqRsTu"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
             api_key_ids=["apikey_01Rj2N8SVvo6BePZj99NhmiT"],
@@ -48,6 +48,7 @@ class TestCost:
             models=["string"],
             order="asc",
             order_by="amount",
+            organization_ids=["12345678-1234-5678-1234-567812345678"],
             page="page",
             products=["chat"],
             rbac_group_ids=["rbac_group_012rppKaSVsmTo6NqRDXQXNF"],
@@ -58,7 +59,7 @@ class TestCost:
             time_bucket_width="1d",
             user_profile_ids=["uprof_01M33NeYUQK2WV9PpYcsPHLi"],
             workspace_ids=["wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncReportPageCursor[BetaAnalyticsCostItem], cost, path=["response"])
@@ -107,7 +108,7 @@ class TestAsyncCost:
     async def test_method_list_with_all_params(self, async_client: AsyncAnthropic) -> None:
         cost = await async_client.beta.organization.analytics.cost.list(
             starting_at=parse_datetime("2026-09-01T00:00:00Z"),
-            actor_ids=["user_01WCz1FkmYMm4gnmykNKUu3Q"],
+            actor_ids=["user_01WxYzAbCdEfGhJkMnPqRsTu"],
             actor_types=["service_account_actor"],
             agent_ids=["agent_01VHd3EAGJ6PLkP9LM7DDu3f"],
             api_key_ids=["apikey_01Rj2N8SVvo6BePZj99NhmiT"],
@@ -124,6 +125,7 @@ class TestAsyncCost:
             models=["string"],
             order="asc",
             order_by="amount",
+            organization_ids=["12345678-1234-5678-1234-567812345678"],
             page="page",
             products=["chat"],
             rbac_group_ids=["rbac_group_012rppKaSVsmTo6NqRDXQXNF"],
@@ -134,7 +136,7 @@ class TestAsyncCost:
             time_bucket_width="1d",
             user_profile_ids=["uprof_01M33NeYUQK2WV9PpYcsPHLi"],
             workspace_ids=["wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncReportPageCursor[BetaAnalyticsCostItem], cost, path=["response"])

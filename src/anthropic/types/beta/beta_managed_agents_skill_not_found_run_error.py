@@ -1,14 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_skill_not_found_run_error_object import BetaManagedAgentsSkillNotFoundRunErrorObject
 
 __all__ = ["BetaManagedAgentsSkillNotFoundRunError"]
 
-
-class BetaManagedAgentsSkillNotFoundRunError(BaseModel):
-    """A skill referenced by the deployment's agent no longer exists."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["skill_not_found_error"]
+BetaManagedAgentsSkillNotFoundRunError = BetaManagedAgentsSkillNotFoundRunErrorObject
+"""
+Deprecated: BetaManagedAgentsSkillNotFoundRunError has been renamed to BetaManagedAgentsSkillNotFoundRunErrorObject
+"""

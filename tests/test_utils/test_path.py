@@ -23,6 +23,10 @@ from anthropic._utils._path import path_template
         ("/v1/{v}", dict(v=".hidden"), "/v1/.hidden"),  # dot prefix ok
         ("/v1/{v}", dict(v="file.txt"), "/v1/file.txt"),  # dot in middle ok
         ("/v1/{v}", dict(v="..."), "/v1/..."),  # triple dot ok
+        ("/v1/{v}", dict(v="a;b"), "/v1/a;b"),  # semicolon sent as is
+        ("/v1/{v}", dict(v="a;"), "/v1/a;"),  # trailing semicolon ok
+        ("/v1/{v}", dict(v="...;x"), "/v1/...;x"),  # triple dot before semicolon ok
+        ("/v1/{v}", dict(v="x;.."), "/v1/x;.."),  # dots after semicolon ok
         ("/v1/{a}{b}", dict(a=".", b="txt"), "/v1/.txt"),  # dot var combining with adjacent to be ok
         ("/items?q={v}#{f}", dict(v=".", f=".."), "/items?q=.#.."),  # dots in query/fragment are fine
         (
@@ -74,16 +78,34 @@ def test_missing_kwarg_raises_key_error() -> None:
         ("/v1/{a}", dict(a="..")),
         ("/v1/{a}/path", dict(a=".")),
         ("/v1/{a}/path", dict(a="..")),
+        ("/v1/{a}", dict(a=".;x")),  # "." before semicolon
+        ("/v1/{a}", dict(a="..;x")),  # ".." before semicolon
+        ("/v1/{a}", dict(a="..;")),  # ".." before trailing semicolon
+        ("/v1/{a}", dict(a="..;x;y")),  # ".." before the first of two semicolons
         ("/v1/{a}{b}", dict(a=".", b=".")),  # adjacent vars → ".."
         ("/v1/{a}.", dict(a=".")),  # var + static → ".."
         ("/v1/{a}{b}", dict(a="", b=".")),  # empty + dot → "."
         ("/v1/%2e/{x}", dict(x="ok")),  # encoded dot in static text
         ("/v1/%2e./{x}", dict(x="ok")),  # mixed encoded ".." in static
         ("/v1/.%2E/{x}", dict(x="ok")),  # mixed encoded ".." in static
+        ("/v1/%2e%2e;x/{x}", dict(x="ok")),  # encoded ".." before semicolon in static
         ("/v1/{v}?q=1", dict(v="..")),
         ("/v1/{v}#frag", dict(v="..")),
     ],
 )
 def test_dot_segment_rejected(template: str, kwargs: dict[str, Any]) -> None:
     with pytest.raises(ValueError, match="dot-segment"):
+        path_template(template, **kwargs)
+
+
+@pytest.mark.parametrize(
+    "template, kwargs",
+    [
+        ("/v1/{a}", dict(a=";x")),
+        ("/v1/{a}", dict(a=";")),
+        ("/v1/{a}{b}", dict(a="", b=";x")),  # empty + leading semicolon
+    ],
+)
+def test_leading_semicolon_rejected(template: str, kwargs: dict[str, Any]) -> None:
+    with pytest.raises(ValueError, match="starting with ';'"):
         path_template(template, **kwargs)

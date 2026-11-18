@@ -10,13 +10,14 @@ from typing_extensions import Self, override
 import httpx2
 
 from ..._types import Timeout, NotGiven, OpenTelemetryClientOption, not_given
-from ..._utils import asyncify, is_given
+from ..._utils import asyncify, is_given, path_template
 from ..._client import Anthropic, AsyncAnthropic
 from ..._models import FinalRequestOptions
 from ..._streaming import Stream, AsyncStream
 from ..._exceptions import AnthropicError
 from ..._middleware import MiddlewareInput
-from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient, merge_headers
+from ..._base_client import DEFAULT_MAX_RETRIES, BaseClient
+from .._platform_client import copy_platform_client
 from .._extras._google_auth import refresh_credentials, load_default_credentials
 
 # Bind the install-hint extra so a missing google-auth dep points users at
@@ -28,13 +29,16 @@ if TYPE_CHECKING:
     from google.auth.credentials import Credentials as GoogleCredentials  # type: ignore
 
 
-_LOCATION_URL_TEMPLATE = "https://claude.googleapis.com/v1/projects/{project}/locations/{location}"
+_ORIGIN = "https://claude.googleapis.com"
+_LOCATION_PATH_TEMPLATE = "/v1/projects/{project}/locations/{location}"
+_WORKSPACE_PATH_TEMPLATE = _LOCATION_PATH_TEMPLATE + "/workspaces/{workspace_id}/invoke"
+_ORGANIZATION_PATH_TEMPLATE = _LOCATION_PATH_TEMPLATE + "/claudeOrganization/invoke"
 
 # The gateway base URL; stays overridable via the `base_url` argument and env var.
-DEFAULT_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/workspaces/{workspace_id}/invoke"
+DEFAULT_URL_TEMPLATE = _ORIGIN + _WORKSPACE_PATH_TEMPLATE
 
 # Organization-level routes are served from a base with no workspace in it.
-ORGANIZATION_URL_TEMPLATE = _LOCATION_URL_TEMPLATE + "/claudeOrganization/invoke"
+ORGANIZATION_URL_TEMPLATE = _ORIGIN + _ORGANIZATION_PATH_TEMPLATE
 
 USER_PROFILES_PATH = "/v1/user_profiles"
 _ORGANIZATION_PATH_PREFIXES = ("/v1/organizations/", USER_PROFILES_PATH + "/")
@@ -131,7 +135,7 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
             if self._project is None:
                 raise AnthropicError(_MISSING_PROJECT_MESSAGE)
             base = self._enforce_trailing_slash(
-                httpx2.URL(ORGANIZATION_URL_TEMPLATE.format(project=self._project, location=self._location))
+                httpx2.URL(derived_url(_ORGANIZATION_PATH_TEMPLATE, project=self._project, location=self._location))
             )
             return base.copy_with(raw_path=base.raw_path + merge_url.raw_path.lstrip(b"/"))
 
@@ -161,12 +165,23 @@ class BaseGoogleCloudClient(BaseClient[_HttpxClientT, _DefaultStreamT]):
         if self.workspace_id is not None:
             self._base_url = self._enforce_trailing_slash(
                 httpx2.URL(
-                    DEFAULT_URL_TEMPLATE.format(
-                        project=self._project, location=self._location, workspace_id=self.workspace_id
+                    derived_url(
+                        _WORKSPACE_PATH_TEMPLATE,
+                        project=self._project,
+                        location=self._location,
+                        workspace_id=self.workspace_id,
                     )
                 )
             )
         self._base_url_deferred = False
+
+
+def derived_url(template: str, /, **values: str) -> str:
+    for name, value in values.items():
+        if not value:
+            raise ValueError(f"Expected a non-empty value for `{name}` but received {value!r}")
+
+    return _ORIGIN + path_template(template, **values)
 
 
 def _resolve_base_url(
@@ -196,7 +211,7 @@ def _resolve_base_url(
     if workspace_id is None:
         # Organization-only client: there is no workspace base to derive.
         return None
-    return DEFAULT_URL_TEMPLATE.format(project=project, location=location, workspace_id=workspace_id)
+    return derived_url(_WORKSPACE_PATH_TEMPLATE, project=project, location=location, workspace_id=workspace_id)
 
 
 def _reject_skip_auth_conflict(
@@ -422,24 +437,6 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         `workspace_id=None` clears the workspace ID; `project` /
         `location` overrides re-derive a template-derived base URL.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
         resolved_skip_auth = skip_auth if skip_auth is not None else self._skip_auth
         credential_overridden = is_given(token_provider) or is_given(credentials)
         new_token_provider: TokenProvider | None = None
@@ -458,7 +455,8 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 
-        client = self.__class__(
+        client = copy_platform_client(
+            self,
             project=project if project is not None else self._project,
             location=location if location is not None else self._location,
             workspace_id=workspace_id if is_given(workspace_id) else self.workspace_id,
@@ -466,13 +464,15 @@ class AnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.Client, Stream[Any]], An
             credentials=new_credentials,
             skip_auth=resolved_skip_auth,
             base_url=new_base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             _strict_response_validation=self._strict_response_validation,
             **_extra_kwargs,
         )
@@ -651,24 +651,6 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
 
         See `AnthropicGoogleCloud.copy` for the override semantics.
         """
-        if default_headers is not None and set_default_headers is not None:
-            raise ValueError("The `default_headers` and `set_default_headers` arguments are mutually exclusive")
-
-        if default_query is not None and set_default_query is not None:
-            raise ValueError("The `default_query` and `set_default_query` arguments are mutually exclusive")
-
-        headers = self._custom_headers
-        if default_headers is not None:
-            headers = merge_headers(headers, default_headers)
-        elif set_default_headers is not None:
-            headers = set_default_headers
-
-        params = self._custom_query
-        if default_query is not None:
-            params = {**params, **default_query}
-        elif set_default_query is not None:
-            params = set_default_query
-
         resolved_skip_auth = skip_auth if skip_auth is not None else self._skip_auth
         credential_overridden = is_given(token_provider) or is_given(credentials)
         new_token_provider: AsyncTokenProvider | None = None
@@ -687,7 +669,8 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
         else:
             new_base_url = base_url if base_url is not None else self.base_url
 
-        client = self.__class__(
+        client = copy_platform_client(
+            self,
             project=project if project is not None else self._project,
             location=location if location is not None else self._location,
             workspace_id=workspace_id if is_given(workspace_id) else self.workspace_id,
@@ -695,13 +678,15 @@ class AsyncAnthropicGoogleCloud(BaseGoogleCloudClient[httpx2.AsyncClient, AsyncS
             credentials=new_credentials,
             skip_auth=resolved_skip_auth,
             base_url=new_base_url,
-            timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
-            http_client=http_client or self._client,
-            max_retries=max_retries if is_given(max_retries) else self.max_retries,
-            open_telemetry=self._copy_open_telemetry(open_telemetry),
-            default_headers=headers,
-            default_query=params,
-            middleware=self._middleware if isinstance(middleware, NotGiven) else middleware,
+            timeout=timeout,
+            http_client=http_client,
+            max_retries=max_retries,
+            open_telemetry=open_telemetry,
+            default_headers=default_headers,
+            set_default_headers=set_default_headers,
+            default_query=default_query,
+            set_default_query=set_default_query,
+            middleware=middleware,
             _strict_response_validation=self._strict_response_validation,
             **_extra_kwargs,
         )

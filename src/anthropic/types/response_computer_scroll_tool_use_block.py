@@ -4,5 +4,5 @@ __all__ = ["ResponseComputerScrollToolUseBlock"]
 
 ResponseComputerScrollToolUseBlock = ComputerScrollToolUseBlock
 """
-ResponseComputerScrollToolUseBlock has been renamed to ComputerScrollToolUseBlock
+Deprecated: ResponseComputerScrollToolUseBlock has been renamed to ComputerScrollToolUseBlock
 """

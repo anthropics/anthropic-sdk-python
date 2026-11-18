@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .invalid_request_error_object import InvalidRequestErrorObject
 
 __all__ = ["InvalidRequestError"]
 
-
-class InvalidRequestError(BaseModel):
-    message: str
-
-    type: Literal["invalid_request_error"]
+InvalidRequestError = InvalidRequestErrorObject
+"""Deprecated: InvalidRequestError has been renamed to InvalidRequestErrorObject"""

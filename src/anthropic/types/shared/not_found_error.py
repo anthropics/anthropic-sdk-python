@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .not_found_error_object import NotFoundErrorObject
 
 __all__ = ["NotFoundError"]
 
-
-class NotFoundError(BaseModel):
-    message: str
-
-    type: Literal["not_found_error"]
+NotFoundError = NotFoundErrorObject
+"""Deprecated: NotFoundError has been renamed to NotFoundErrorObject"""

@@ -2,8 +2,8 @@ from typing import List, Optional
 from typing_extensions import Literal
 
 from ...._models import BaseModel
-from .beta_plugin_marketplace_validation_plugin_error import BetaPluginMarketplaceValidationPluginError
 from .beta_plugin_marketplace_validation_plugin_warnings import BetaPluginMarketplaceValidationPluginWarnings
+from .beta_plugin_marketplace_validation_plugin_error_object import BetaPluginMarketplaceValidationPluginErrorObject
 
 __all__ = ["BetaPluginMarketplaceValidationReport"]
 
@@ -30,7 +30,7 @@ class BetaPluginMarketplaceValidationReport(BaseModel):
     manifest_error_code: Optional[str] = None
     """A stable identifier for `manifest_error`; null when that is."""
 
-    plugin_errors: List[BetaPluginMarketplaceValidationPluginError]
+    plugin_errors: List[BetaPluginMarketplaceValidationPluginErrorObject]
     """
     One entry per plugin a synchronization would skip entirely, keyed by the
     plugin's name in marketplace.json.

@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_environment_archived_run_error_object import (
+    BetaManagedAgentsEnvironmentArchivedRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsEnvironmentArchivedRunError"]
 
-
-class BetaManagedAgentsEnvironmentArchivedRunError(BaseModel):
-    """The deployment's environment was archived."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["environment_archived_error"]
+BetaManagedAgentsEnvironmentArchivedRunError = BetaManagedAgentsEnvironmentArchivedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsEnvironmentArchivedRunError has been renamed to BetaManagedAgentsEnvironmentArchivedRunErrorObject
+"""

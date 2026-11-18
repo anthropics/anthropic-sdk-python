@@ -39,7 +39,7 @@ class TestTargets:
                 "slack_channel_id": "xxxxxxxx",
                 "type": "slack_channel",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundleTarget, target, path=["response"])
@@ -103,7 +103,7 @@ class TestTargets:
         target = client.beta.organization.claude_tag.bundles.targets.retrieve(
             target_id="btgt_01SvpyRQK3nN6eH9uhRA7n1qHq8TzW5mKc2YbX7vNd4RfJ",
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundleTarget, target, path=["response"])
@@ -164,7 +164,7 @@ class TestTargets:
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaClaudeTagBundleTarget], target, path=["response"])
@@ -216,7 +216,7 @@ class TestTargets:
         target = client.beta.organization.claude_tag.bundles.targets.delete(
             target_id="btgt_01SvpyRQK3nN6eH9uhRA7n1qHq8TzW5mKc2YbX7vNd4RfJ",
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagDeletedBundleTarget, target, path=["response"])
@@ -289,7 +289,7 @@ class TestAsyncTargets:
                 "slack_channel_id": "xxxxxxxx",
                 "type": "slack_channel",
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundleTarget, target, path=["response"])
@@ -353,7 +353,7 @@ class TestAsyncTargets:
         target = await async_client.beta.organization.claude_tag.bundles.targets.retrieve(
             target_id="btgt_01SvpyRQK3nN6eH9uhRA7n1qHq8TzW5mKc2YbX7vNd4RfJ",
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagBundleTarget, target, path=["response"])
@@ -414,7 +414,7 @@ class TestAsyncTargets:
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaClaudeTagBundleTarget], target, path=["response"])
@@ -466,7 +466,7 @@ class TestAsyncTargets:
         target = await async_client.beta.organization.claude_tag.bundles.targets.delete(
             target_id="btgt_01SvpyRQK3nN6eH9uhRA7n1qHq8TzW5mKc2YbX7vNd4RfJ",
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaClaudeTagDeletedBundleTarget, target, path=["response"])

@@ -34,7 +34,7 @@ class TestMemoryStores:
             name="x",
             description="description",
             metadata={"foo": "string"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -78,7 +78,7 @@ class TestMemoryStores:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         memory_store = client.beta.memory_stores.retrieve(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -132,7 +132,7 @@ class TestMemoryStores:
             description="description",
             metadata={"foo": "string"},
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -186,7 +186,7 @@ class TestMemoryStores:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -228,7 +228,7 @@ class TestMemoryStores:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         memory_store = client.beta.memory_stores.delete(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -279,7 +279,7 @@ class TestMemoryStores:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         memory_store = client.beta.memory_stores.archive(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -338,7 +338,7 @@ class TestAsyncMemoryStores:
             name="x",
             description="description",
             metadata={"foo": "string"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -382,7 +382,7 @@ class TestAsyncMemoryStores:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         memory_store = await async_client.beta.memory_stores.retrieve(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -436,7 +436,7 @@ class TestAsyncMemoryStores:
             description="description",
             metadata={"foo": "string"},
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -490,7 +490,7 @@ class TestAsyncMemoryStores:
             include_archived=True,
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -532,7 +532,7 @@ class TestAsyncMemoryStores:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         memory_store = await async_client.beta.memory_stores.delete(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -583,7 +583,7 @@ class TestAsyncMemoryStores:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         memory_store = await async_client.beta.memory_stores.archive(
             memory_store_id="memory_store_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

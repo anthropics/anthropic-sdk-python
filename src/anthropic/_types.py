@@ -37,6 +37,8 @@ import pydantic
 from httpx2 import Timeout, Response
 
 if TYPE_CHECKING:
+    from pydantic import GetCoreSchemaHandler
+    from pydantic_core import CoreSchema
     from opentelemetry.trace import TracerProvider
 
     from ._models import BaseModel
@@ -280,6 +282,12 @@ class Omit:
 
     def __bool__(self) -> Literal[False]:
         return False
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> CoreSchema:
+        from pydantic_core import core_schema
+
+        return core_schema.is_instance_schema(cls)
 
 
 omit = Omit()

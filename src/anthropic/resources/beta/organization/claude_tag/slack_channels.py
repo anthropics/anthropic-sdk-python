@@ -38,7 +38,7 @@ class SlackChannels(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SlackChannelsWithRawResponse(self)
 
@@ -47,7 +47,7 @@ class SlackChannels(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return SlackChannelsWithStreamingResponse(self)
 
@@ -93,6 +93,23 @@ class SlackChannels(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSlackChannelSetUpSettingsRefusedError:
+
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         extra_headers = {
             **strip_not_given(
@@ -166,6 +183,15 @@ class SlackChannels(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -231,6 +257,21 @@ class SlackChannels(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -316,6 +357,15 @@ class SlackChannels(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(
@@ -392,6 +442,17 @@ class SlackChannels(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -429,7 +490,7 @@ class AsyncSlackChannels(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#accessing-raw-response-data-eg-headers
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSlackChannelsWithRawResponse(self)
 
@@ -438,7 +499,7 @@ class AsyncSlackChannels(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/anthropics/anthropic-sdk-python#with_streaming_response
+        For more information, see https://platform.claude.com/docs/en/api/sdks/python
         """
         return AsyncSlackChannelsWithStreamingResponse(self)
 
@@ -484,6 +545,23 @@ class AsyncSlackChannels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaSlackChannelSetUpSettingsRefusedError:
+
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         extra_headers = {
             **strip_not_given(
@@ -557,6 +635,15 @@ class AsyncSlackChannels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -622,6 +709,21 @@ class AsyncSlackChannels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpEnvironmentNotFoundError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
@@ -707,6 +809,15 @@ class AsyncSlackChannels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
         """
         extra_headers = {
             **strip_not_given(
@@ -783,6 +894,17 @@ class AsyncSlackChannels(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          BetaAPIKeyScopeMissingError:
+
+          BetaClaudeTagWritesNotEnabledError:
+
+          BetaComplianceConfigurationRestrictedError:
+
+          BetaOrganizationLevelScopedAPIKeyRequiredError:
+
+          BetaSlackChannelSetUpSettingsConflictError:
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")

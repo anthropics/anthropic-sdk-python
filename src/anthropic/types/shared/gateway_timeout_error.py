@@ -1,11 +1,6 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .gateway_timeout_error_object import GatewayTimeoutErrorObject
 
 __all__ = ["GatewayTimeoutError"]
 
-
-class GatewayTimeoutError(BaseModel):
-    message: str
-
-    type: Literal["timeout_error"]
+GatewayTimeoutError = GatewayTimeoutErrorObject
+"""Deprecated: GatewayTimeoutError has been renamed to GatewayTimeoutErrorObject"""

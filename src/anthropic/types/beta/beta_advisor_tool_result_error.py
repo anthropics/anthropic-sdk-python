@@ -1,19 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_advisor_tool_result_error_object import BetaAdvisorToolResultErrorObject
 
 __all__ = ["BetaAdvisorToolResultError"]
 
-
-class BetaAdvisorToolResultError(BaseModel):
-    error_code: Literal[
-        "max_uses_exceeded",
-        "prompt_too_long",
-        "too_many_requests",
-        "overloaded",
-        "unavailable",
-        "execution_time_exceeded",
-        "model_not_found",
-    ]
-
-    type: Literal["advisor_tool_result_error"]
+BetaAdvisorToolResultError = BetaAdvisorToolResultErrorObject
+"""
+Deprecated: BetaAdvisorToolResultError has been renamed to BetaAdvisorToolResultErrorObject
+"""

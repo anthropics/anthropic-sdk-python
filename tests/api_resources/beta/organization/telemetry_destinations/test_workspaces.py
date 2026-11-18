@@ -33,7 +33,7 @@ class TestWorkspaces:
             destination_id="destination_id",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
@@ -85,7 +85,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.telemetry_destinations.workspaces.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
@@ -146,7 +146,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.telemetry_destinations.workspaces.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
@@ -213,7 +213,7 @@ class TestAsyncWorkspaces:
             destination_id="destination_id",
             limit=0,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTelemetryDestinationWorkspace], workspace, path=["response"])
@@ -265,7 +265,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.telemetry_destinations.workspaces.add(
             workspace_id="workspace_id",
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationWorkspace, workspace, path=["response"])
@@ -326,7 +326,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.telemetry_destinations.workspaces.remove(
             workspace_id="workspace_id",
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestinationWorkspace, workspace, path=["response"])
