@@ -5,12 +5,18 @@ from contextlib import contextmanager, asynccontextmanager
 from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
 
 import pytest
+import pydantic
 from pydantic import BaseModel
 
 from anthropic import beta_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools._beta_functions import BaseFunctionTool
 from anthropic.types.beta.beta_tool_param import InputSchema
+
+
+class _CustomUnsupportedType:
+    def __init__(self, val: str) -> None:
+        self.val = val
 
 
 @pytest.mark.skipif(PYDANTIC_V1, reason="only applicable in pydantic v2")
@@ -529,6 +535,31 @@ class TestContextManagerTool:
         assert seen == ["enter"]
 
         await aclose_runnable_tool(echo_tool)
+        assert seen == ["enter", "exit"]
+
+    async def test_async_context_manager_tool_unwinds_on_validation_failure(self) -> None:
+        from anthropic.lib.tools._beta_functions import beta_async_tool
+
+        seen: list[str] = []
+
+        @asynccontextmanager
+        async def bad_cm() -> AsyncIterator[Callable[[_CustomUnsupportedType], Awaitable[str]]]:
+            seen.append("enter")
+            try:
+                # Deliberately use a signature that fails Pydantic schema generation
+                async def invalid_func(arg: _CustomUnsupportedType) -> str:
+                    return arg.val
+
+                yield invalid_func
+            finally:
+                seen.append("exit")
+
+        bad_tool = beta_async_tool(name="invalid", input_schema={"type": "object"})(cast(Any, bad_cm))
+        assert seen == []
+
+        with pytest.raises(pydantic.errors.PydanticSchemaGenerationError):
+            await bad_tool.call({"arg": "val"})
+
         assert seen == ["enter", "exit"]
 
     def test_wrong_decorator_raises(self) -> None:
