@@ -64,7 +64,12 @@ def get_auth_headers(
     if not credentials:
         raise RuntimeError("Could not resolve AWS credentials from session")
 
-    signer = SigV4Auth(credentials, service_name, session.region_name)
+    # Refreshable botocore credentials are proxy objects whose individual
+    # properties may trigger a refresh. Freeze one coherent snapshot before
+    # signing so access key, secret key, and session token cannot come from
+    # different credential generations.
+    frozen_credentials = credentials.get_frozen_credentials()
+    signer = SigV4Auth(frozen_credentials, service_name, session.region_name)
     signer.add_auth(request)
 
     prepped = request.prepare()
