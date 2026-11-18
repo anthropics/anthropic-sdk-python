@@ -72,6 +72,10 @@ def _array_suffix(array_format: ArrayFormat, array_index: int) -> str:
     )
 
 
+def _is_array_like(obj: object) -> TypeGuard[list[object] | tuple[object, ...]]:
+    return isinstance(obj, (list, tuple))
+
+
 def _extract_items(
     obj: object,
     path: Sequence[str],
@@ -130,7 +134,7 @@ def _extract_items(
             flattened_key=flattened_key,
             array_format=array_format,
         )
-    elif is_list(obj):
+    elif _is_array_like(obj):
         if key != "<array>":
             return []
 
