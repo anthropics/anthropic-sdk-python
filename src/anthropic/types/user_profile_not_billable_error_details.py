@@ -6,7 +6,7 @@ __all__ = ["UserProfileNotBillableErrorDetails"]
 
 
 class UserProfileNotBillableErrorDetails(BaseModel):
-    """The caller is not allowed to bill the user profile that the request names.
+    """The request's user profile cannot be billed.
 
     The response gives no more specific error code and does not say what the reason is.
     """
