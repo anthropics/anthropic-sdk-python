@@ -912,7 +912,8 @@ def test_prepare_options_lifts_anthropic_beta_header_case_insensitively() -> Non
             url="/v1/messages",
             json_data={"model": "anthropic.claude-sonnet-4-5"},
             headers={"Anthropic-Beta": "context-1m-2025-08-07,other-beta"},
-        )
+        ),
+        {},
     )
 
     assert cast("dict[str, object]", options.json_data).get("anthropic_beta") == [
@@ -972,7 +973,7 @@ def test_user_profiles_not_available() -> None:
 
 
 @pytest.mark.respx()
-def test_user_profile_id_is_sent_in_the_header(respx_mock: MockRouter) -> None:
+def test_user_profile_id_is_sent_in_the_body(respx_mock: MockRouter) -> None:
     respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
     sync_api_key_client.messages.create(
@@ -981,102 +982,10 @@ def test_user_profile_id_is_sent_in_the_header(respx_mock: MockRouter) -> None:
         model="anthropic.claude-3-5-sonnet-20241022-v2:0",
         user_profile_id="uprof_test",
     )
-    sync_api_key_client.beta.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        user_profile_id="uprof_test",
-    )
-    sync_api_key_client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        extra_headers={"Anthropic-User-Profile-Id": "uprof_test"},
-    )
 
-    calls = cast("list[MockRequestCall]", respx_mock.calls)
-    assert len(calls) == 3
-    for call in calls:
-        assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
-        assert "user_profile_id" not in json.loads(call.request.content)
-
-
-@pytest.mark.respx()
-@pytest.mark.asyncio()
-async def test_user_profile_id_is_sent_in_the_header_async(respx_mock: MockRouter) -> None:
-    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
-
-    await async_api_key_client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        user_profile_id="uprof_test",
-    )
-    await async_api_key_client.beta.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        user_profile_id="uprof_test",
-    )
-    await async_api_key_client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        extra_headers={"Anthropic-User-Profile-Id": "uprof_test"},
-    )
-
-    calls = cast("list[MockRequestCall]", respx_mock.calls)
-    assert len(calls) == 3
-    for call in calls:
-        assert call.request.headers["anthropic-user-profile-id"] == "uprof_test"
-        assert "user_profile_id" not in json.loads(call.request.content)
-
-
-@pytest.mark.respx()
-def test_client_user_profile_id_is_kept(respx_mock: MockRouter) -> None:
-    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
-    client = sync_api_key_client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
-
-    client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-    )
-    client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        user_profile_id="uprof_request",
-    )
-
-    calls = cast("list[MockRequestCall]", respx_mock.calls)
-    assert len(calls) == 2
-    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
-    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
-
-
-@pytest.mark.respx()
-@pytest.mark.asyncio()
-async def test_client_user_profile_id_is_kept_async(respx_mock: MockRouter) -> None:
-    respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
-    client = async_api_key_client.with_options(default_headers={"anthropic-user-profile-id": "uprof_client"})
-
-    await client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-    )
-    await client.messages.create(
-        max_tokens=1024,
-        messages=[{"role": "user", "content": "Say hello there!"}],
-        model="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        user_profile_id="uprof_request",
-    )
-
-    calls = cast("list[MockRequestCall]", respx_mock.calls)
-    assert len(calls) == 2
-    assert calls[0].request.headers["anthropic-user-profile-id"] == "uprof_client"
-    assert calls[1].request.headers["anthropic-user-profile-id"] == "uprof_request"
+    [call] = cast("list[MockRequestCall]", respx_mock.calls)
+    assert "anthropic-user-profile-id" not in call.request.headers
+    assert json.loads(call.request.content)["user_profile_id"] == "uprof_test"
 
 
 @pytest.mark.respx()
@@ -1127,7 +1036,7 @@ async def test_client_workspace_id_is_kept_async(respx_mock: MockRouter) -> None
 
 
 @pytest.mark.respx()
-def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
+def test_user_profile_id_is_not_sent_when_unset(respx_mock: MockRouter) -> None:
     respx_mock.post(INVOKE_URL).mock(return_value=httpx2.Response(200, json={"foo": "bar"}))
 
     sync_api_key_client.messages.create(
@@ -1139,6 +1048,7 @@ def test_no_header_without_a_user_profile_id(respx_mock: MockRouter) -> None:
     calls = cast("list[MockRequestCall]", respx_mock.calls)
     assert len(calls) == 1
     assert "anthropic-user-profile-id" not in calls[0].request.headers
+    assert "user_profile_id" not in json.loads(calls[0].request.content)
 
 
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])

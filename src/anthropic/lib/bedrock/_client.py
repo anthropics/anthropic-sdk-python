@@ -9,7 +9,7 @@ import httpx2
 
 from .._env import with_environment_headers
 from ._beta import Beta, AsyncBeta
-from ..._types import Omit, Timeout, NotGiven, OpenTelemetryClientOption, not_given
+from ..._types import Omit, Headers, Timeout, NotGiven, OpenTelemetryClientOption, omit, not_given
 from ..._utils import is_dict, asyncify, is_given, get_async_library
 from ..._client import _keep_client_header_params
 from ..._compat import model_copy
@@ -26,16 +26,19 @@ from ..._base_client import (
     AsyncAPIClient,
     FinalRequestOptions,
     build_headers,
+    merge_headers,
 )
 from ._stream_decoder import AWSEventStreamDecoder
 from .._platform_client import copy_platform_client
 from ...resources.messages import Messages, AsyncMessages
 
+USER_PROFILE_ID_HEADER = "anthropic-user-profile-id"
+
 _HttpxClientT = TypeVar("_HttpxClientT", bound=Union[httpx2.Client, httpx2.AsyncClient])
 _DefaultStreamT = TypeVar("_DefaultStreamT", bound=Union[Stream[Any], AsyncStream[Any]])
 
 
-def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
+def _prepare_options(input_options: FinalRequestOptions, custom_headers: Mapping[str, str]) -> FinalRequestOptions:
     options = model_copy(_keep_client_header_params(input_options), deep=True)
 
     if is_dict(options.json_data):
@@ -49,6 +52,12 @@ def _prepare_options(input_options: FinalRequestOptions) -> FinalRequestOptions:
     if options.url in {"/v1/messages", "/v1/messages?beta=true"} and options.method == "post":
         if not is_dict(options.json_data):
             raise RuntimeError("Expected dictionary json_data for post /v1/messages endpoint")
+
+        headers: Headers = options.headers if is_given(options.headers) else {}
+        user_profile_id = build_headers(custom_headers, headers)[0].get(USER_PROFILE_ID_HEADER)
+        if user_profile_id is not None:
+            options.headers = merge_headers(headers, {USER_PROFILE_ID_HEADER: omit})
+            options.json_data.setdefault("user_profile_id", user_profile_id)
 
         model = options.json_data.pop("model", None)
         # A server that drops ";params" from a segment before routing sees only what precedes the first ";".
@@ -201,7 +210,7 @@ class AnthropicBedrock(BaseBedrockClient[httpx2.Client, Stream[Any]], SyncAPICli
 
     @override
     def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
+        return _prepare_options(options, self._custom_headers)
 
     @override
     def _prepare_request(self, request: httpx2.Request) -> None:
@@ -382,7 +391,7 @@ class AsyncAnthropicBedrock(BaseBedrockClient[httpx2.AsyncClient, AsyncStream[An
 
     @override
     async def _prepare_options(self, options: FinalRequestOptions) -> FinalRequestOptions:
-        return _prepare_options(options)
+        return _prepare_options(options, self._custom_headers)
 
     @override
     async def _prepare_request(self, request: httpx2.Request) -> None:
