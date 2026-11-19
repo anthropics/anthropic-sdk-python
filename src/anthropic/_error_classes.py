@@ -36,6 +36,7 @@ from .types.user_profile_not_found_error import UserProfileNotFoundError
 from .types.beta_unsupported_charset_error import BetaUnsupportedCharsetError
 from .types.shared.cmek_key_disabled_error import CMEKKeyDisabledError
 from .types.thread_already_continued_error import ThreadAlreadyContinuedError
+from .types.beta_request_body_timeout_error import BetaRequestBodyTimeoutError
 from .types.org_member_limit_exceeded_error import OrgMemberLimitExceededError
 from .types.thread_continue_in_flight_error import ThreadContinueInFlightError
 from .types.tool_reference_unresolved_error import ToolReferenceUnresolvedError
@@ -89,6 +90,7 @@ from .types.beta.organization.beta_plugin_name_taken_error import BetaPluginName
 from .types.shared.request_body_encoding_unsupported_error import RequestBodyEncodingUnsupportedError
 from .types.shared.claude_code_key_creator_not_member_error import ClaudeCodeKeyCreatorNotMemberError
 from .types.beta.organization.beta_cannot_sign_out_self_error import BetaCannotSignOutSelfError
+from .types.beta.organization.beta_rbac_group_not_found_error import BetaRBACGroupNotFoundError
 from .types.beta.organization.beta_registration_pending_error import BetaRegistrationPendingError
 from .types.organization.external_key_validation_failed_error import ExternalKeyValidationFailedError
 from .types.organization.rbac_group_grants_owner_access_error import RBACGroupGrantsOwnerAccessError
@@ -115,6 +117,7 @@ from .types.organization.cannot_invite_emails_with_unverified_domains_error impo
 from .types.beta.organization.beta_compliance_configuration_restricted_error import (
     BetaComplianceConfigurationRestrictedError,
 )
+from .types.beta.organization.claude_code.beta_cmek_feature_unsupported_error import BetaCMEKFeatureUnsupportedError
 from .types.beta.organization.beta_slack_channel_set_up_settings_refused_error import (
     BetaSlackChannelSetUpSettingsRefusedError,
 )
@@ -129,6 +132,18 @@ from .types.beta.organization.beta_organization_level_scoped_api_key_required_er
 )
 from .types.beta.organization.beta_slack_channel_set_up_environment_not_found_error import (
     BetaSlackChannelSetUpEnvironmentNotFoundError,
+)
+from .types.beta.organization.claude_code.beta_rbac_group_order_limit_exceeded_error import (
+    BetaRBACGroupOrderLimitExceededError,
+)
+from .types.beta.organization.claude_code.beta_settings_history_limit_exceeded_error import (
+    BetaSettingsHistoryLimitExceededError,
+)
+from .types.beta.organization.claude_code.beta_settings_document_limit_exceeded_error import (
+    BetaSettingsDocumentLimitExceededError,
+)
+from .types.beta.organization.claude_code.beta_rbac_group_managed_settings_not_found_error import (
+    BetaRBACGroupManagedSettingsNotFoundError,
 )
 
 ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
@@ -159,6 +174,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "cannot_sign_out_self"): BetaCannotSignOutSelfError,
     (400, "claude_code_key_creator_not_member"): ClaudeCodeKeyCreatorNotMemberError,
     (400, "claude_code_version_too_old"): ClaudeCodeVersionTooOldError,
+    (400, "cmek_feature_unsupported"): BetaCMEKFeatureUnsupportedError,
     (400, "cmek_key_disabled"): CMEKKeyDisabledError,
     (400, "cmek_key_network_blocked"): CMEKKeyNetworkBlockedError,
     (400, "compaction_block_ambiguous"): CompactionBlockAmbiguousError,
@@ -186,10 +202,14 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "organization_type_not_supported"): OrganizationTypeNotSupportedError,
     (400, "parent_organization_required"): ParentOrganizationRequiredError,
     (400, "rbac_group_grants_owner_access"): RBACGroupGrantsOwnerAccessError,
+    (400, "rbac_group_order_limit_exceeded"): BetaRBACGroupOrderLimitExceededError,
     (400, "rbac_group_owner_access_unconfirmed"): RBACGroupOwnerAccessUnconfirmedError,
     (400, "request_body_encoding_invalid"): RequestBodyEncodingInvalidError,
     (400, "request_body_encoding_unsupported"): RequestBodyEncodingUnsupportedError,
+    (400, "request_body_timeout"): BetaRequestBodyTimeoutError,
     (400, "scan_failed"): BetaScanFailedError,
+    (400, "settings_document_limit_exceeded"): BetaSettingsDocumentLimitExceededError,
+    (400, "settings_history_limit_exceeded"): BetaSettingsHistoryLimitExceededError,
     (400, "slack_channel_set_up_settings_refused"): BetaSlackChannelSetUpSettingsRefusedError,
     (400, "storage_quota_exceeded"): StorageQuotaExceededError,
     (400, "thread_already_continued"): ThreadAlreadyContinuedError,
@@ -222,6 +242,8 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (403, "user_profile_not_billable"): UserProfileNotBillableError,
     (404, "environment_not_found"): BetaEnvironmentNotFoundError,
     (404, "file_expired"): FileExpiredError,
+    (404, "rbac_group_managed_settings_not_found"): BetaRBACGroupManagedSettingsNotFoundError,
+    (404, "rbac_group_not_found"): BetaRBACGroupNotFoundError,
     (404, "rbac_role_not_found"): RBACRoleNotFoundError,
     (404, "slack_channel_set_up_environment_not_found"): BetaSlackChannelSetUpEnvironmentNotFoundError,
     (404, "thread_not_found"): ThreadNotFoundError,

@@ -64,6 +64,7 @@ AnthropicBetaParam: TypeAlias = Union[
         "skills-2025-10-02",
         "cache-diagnosis-2026-04-07",
         "ce-user-management-2026-07-13",
+        "ce-claude-code-managed-settings-2026-10-06",
         "user-profiles-billing-2026-10-01",
     ],
 ]

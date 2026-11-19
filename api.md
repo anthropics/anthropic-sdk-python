@@ -1307,6 +1307,7 @@ from anthropic.types import (
     BetaOverloadedErrorObject,
     BetaPermissionErrorObject,
     BetaRateLimitErrorObject,
+    BetaRequestBodyTimeoutErrorDetails,
     BetaUnsupportedCharsetErrorDetails,
     BetaError,
     BetaAPIError,
@@ -1319,6 +1320,7 @@ from anthropic.types import (
     BetaPermissionError,
     BetaRateLimitError,
     BetaOrganizationNotEnrolledInBetaError,
+    BetaRequestBodyTimeoutError,
     BetaUnsupportedCharsetError,
 )
 ```
@@ -3534,7 +3536,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaDeletedRBACGroup, BetaRBACGroup
+from anthropic.types.beta.organization import (
+    BetaDeletedRBACGroup,
+    BetaRBACGroup,
+    BetaRBACGroupNotFoundErrorDetails,
+    BetaRBACGroupNotFoundError,
+)
 ```
 
 Methods:
@@ -3790,6 +3797,86 @@ Methods:
 - <code title="get /v1/organizations/webhooks">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/webhook_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint.py">SyncPage[BetaOrganizationWebhookEndpoint]</a></code>
 - <code title="delete /v1/organizations/webhooks/{webhook_endpoint_id}">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">delete</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_organization_webhook_endpoint.py">BetaDeletedOrganizationWebhookEndpoint</a></code>
 - <code title="post /v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">regenerate_signing_secret</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint_signing_secret.py">BetaOrganizationWebhookEndpointSigningSecret</a></code>
+
+### ClaudeCode
+
+#### ManagedSettings
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code import (
+    BetaCMEKFeatureUnsupportedErrorDetails,
+    BetaRBACGroupManagedSettingsNotFoundErrorDetails,
+    BetaRBACGroupOrderLimitExceededErrorDetails,
+    BetaSettingsDocumentLimitExceededErrorDetails,
+    BetaSettingsHistoryLimitExceededErrorDetails,
+    BetaCMEKFeatureUnsupportedError,
+    BetaRBACGroupOrderLimitExceededError,
+    BetaSettingsDocumentLimitExceededError,
+    BetaSettingsHistoryLimitExceededError,
+    BetaRBACGroupManagedSettingsNotFoundError,
+)
+```
+
+##### Configuration
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeManagedSettingsConfiguration,
+    BetaClaudeCodeManagedSettingsMode,
+    BetaClaudeCodeManagedSettingsModeParam,
+    BetaClaudeCodeManagedSettingsOrganizationMode,
+    BetaClaudeCodeManagedSettingsOrganizationModeParam,
+    BetaClaudeCodeManagedSettingsRBACGroupsMode,
+    BetaClaudeCodeManagedSettingsRBACGroupsModeParam,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/configuration">client.beta.organization.claude_code.managed_settings.configuration.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/configuration.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_managed_settings_configuration.py">BetaClaudeCodeManagedSettingsConfiguration</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/configuration">client.beta.organization.claude_code.managed_settings.configuration.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/configuration.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/configuration_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_managed_settings_configuration.py">BetaClaudeCodeManagedSettingsConfiguration</a></code>
+
+##### RBACGroups
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeRBACGroupManagedSettings,
+    BetaClaudeCodeRBACGroupManagedSettingsSummary,
+    BetaClaudeCodeRBACGroupStatus,
+    BetaClaudeCodeRBACGroupStatusActive,
+    BetaClaudeCodeRBACGroupStatusDeleted,
+    BetaClaudeCodeRBACGroupStatusUnknown,
+    BetaDeletedClaudeCodeRBACGroupManagedSettings,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings.py">BetaClaudeCodeRBACGroupManagedSettings</a></code>
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_groups">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings_summary.py">SyncPageCursor[BetaClaudeCodeRBACGroupManagedSettingsSummary]</a></code>
+- <code title="delete /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_deleted_claude_code_rbac_group_managed_settings.py">BetaDeletedClaudeCodeRBACGroupManagedSettings</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">set</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_set_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings.py">BetaClaudeCodeRBACGroupManagedSettings</a></code>
+
+##### RBACGroupDefault
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeRBACGroupDefaultManagedSettings,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_group_default">client.beta.organization.claude_code.managed_settings.rbac_group_default.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_group_default.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_default_managed_settings.py">BetaClaudeCodeRBACGroupDefaultManagedSettings</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/rbac_group_default">client.beta.organization.claude_code.managed_settings.rbac_group_default.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_group_default.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_default_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_default_managed_settings.py">BetaClaudeCodeRBACGroupDefaultManagedSettings</a></code>
 
 ### ClaudeTag
 

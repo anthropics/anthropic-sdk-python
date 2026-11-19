@@ -122,6 +122,7 @@ from .beta_api_key_organization_scope import BetaAPIKeyOrganizationScope as Beta
 from .beta_cannot_sign_out_self_error import BetaCannotSignOutSelfError as BetaCannotSignOutSelfError
 from .beta_claude_tag_setting_sources import BetaClaudeTagSettingSources as BetaClaudeTagSettingSources
 from .beta_plugin_target_organization import BetaPluginTargetOrganization as BetaPluginTargetOrganization
+from .beta_rbac_group_not_found_error import BetaRBACGroupNotFoundError as BetaRBACGroupNotFoundError
 from .beta_registration_pending_error import BetaRegistrationPendingError as BetaRegistrationPendingError
 from .beta_scan_pending_error_details import BetaScanPendingErrorDetails as BetaScanPendingErrorDetails
 from .beta_analytics_artifact_activity import BetaAnalyticsArtifactActivity as BetaAnalyticsArtifactActivity
@@ -255,6 +256,9 @@ from .beta_data_residency_update_config_param import (
 )
 from .beta_external_key_unattached_attachment import (
     BetaExternalKeyUnattachedAttachment as BetaExternalKeyUnattachedAttachment,
+)
+from .beta_rbac_group_not_found_error_details import (
+    BetaRBACGroupNotFoundErrorDetails as BetaRBACGroupNotFoundErrorDetails,
 )
 from .beta_registration_pending_error_details import (
     BetaRegistrationPendingErrorDetails as BetaRegistrationPendingErrorDetails,

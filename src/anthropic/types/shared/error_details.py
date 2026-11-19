@@ -20,6 +20,7 @@ from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDe
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
 from .sandbox_egress_restricted_error_details import SandboxEgressRestrictedErrorDetails
+from ..beta_request_body_timeout_error_details import BetaRequestBodyTimeoutErrorDetails
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
 from ..thread_continue_in_flight_error_details import ThreadContinueInFlightErrorDetails
 from ..tool_reference_unresolved_error_details import ToolReferenceUnresolvedErrorDetails
@@ -70,6 +71,7 @@ from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLim
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
 from ..beta.organization.beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails
 from ..beta.organization.beta_cannot_sign_out_self_error_details import BetaCannotSignOutSelfErrorDetails
+from ..beta.organization.beta_rbac_group_not_found_error_details import BetaRBACGroupNotFoundErrorDetails
 from ..beta.organization.beta_registration_pending_error_details import BetaRegistrationPendingErrorDetails
 from ..organization.external_key_validation_failed_error_details import ExternalKeyValidationFailedErrorDetails
 from ..organization.rbac_group_grants_owner_access_error_details import RBACGroupGrantsOwnerAccessErrorDetails
@@ -107,6 +109,9 @@ from ..organization.cannot_invite_emails_with_unverified_domains_error_details i
 from ..beta.organization.beta_compliance_configuration_restricted_error_details import (
     BetaComplianceConfigurationRestrictedErrorDetails,
 )
+from ..beta.organization.claude_code.beta_cmek_feature_unsupported_error_details import (
+    BetaCMEKFeatureUnsupportedErrorDetails,
+)
 from ..beta.organization.beta_slack_channel_set_up_settings_refused_error_details import (
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
 )
@@ -121,6 +126,18 @@ from ..beta.organization.beta_organization_level_scoped_api_key_required_error_d
 )
 from ..beta.organization.beta_slack_channel_set_up_environment_not_found_error_details import (
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
+)
+from ..beta.organization.claude_code.beta_rbac_group_order_limit_exceeded_error_details import (
+    BetaRBACGroupOrderLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_settings_history_limit_exceeded_error_details import (
+    BetaSettingsHistoryLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_settings_document_limit_exceeded_error_details import (
+    BetaSettingsDocumentLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_rbac_group_managed_settings_not_found_error_details import (
+    BetaRBACGroupManagedSettingsNotFoundErrorDetails,
 )
 
 __all__ = ["ErrorDetails"]
@@ -209,6 +226,13 @@ ErrorDetails: TypeAlias = Annotated[
         BetaRegistrationPendingErrorDetails,
         BetaScanFailedErrorDetails,
         BetaScanPendingErrorDetails,
+        BetaRequestBodyTimeoutErrorDetails,
+        BetaSettingsDocumentLimitExceededErrorDetails,
+        BetaSettingsHistoryLimitExceededErrorDetails,
+        BetaCMEKFeatureUnsupportedErrorDetails,
+        BetaRBACGroupManagedSettingsNotFoundErrorDetails,
+        BetaRBACGroupOrderLimitExceededErrorDetails,
+        BetaRBACGroupNotFoundErrorDetails,
         BetaSlackChannelSetUpSettingsRefusedErrorDetails,
         BetaAPIKeyScopeMissingErrorDetails,
         BetaClaudeTagWritesNotEnabledErrorDetails,
