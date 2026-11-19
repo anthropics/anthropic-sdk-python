@@ -6,7 +6,7 @@ import pydantic
 from inline_snapshot import snapshot
 
 from anthropic._compat import PYDANTIC_V1
-from anthropic.lib._parse._transform import transform_schema
+from anthropic.lib._parse._transform import transform_schema, to_json_output_format
 
 
 def test_ref_schema():
@@ -286,3 +286,20 @@ def test_original_schema_not_mutated():
     transform_schema(original_schema)
 
     assert original_schema == original_schema_backup
+
+
+@pytest.mark.skipif(PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
+def test_output_format_schema_not_shared_between_calls():
+    class Step(pydantic.BaseModel):
+        choice: Literal["a", "b"]
+
+    class Solution(pydantic.BaseModel):
+        step: Step
+
+    first: Any = to_json_output_format(Solution)["schema"]
+    first["required"].append("extra")
+    first["$defs"]["Step"]["properties"]["choice"]["enum"].append("c")
+
+    second: Any = to_json_output_format(Solution)["schema"]
+    assert second["required"] == ["step"]
+    assert second["$defs"]["Step"]["properties"]["choice"]["enum"] == ["a", "b"]

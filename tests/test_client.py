@@ -964,6 +964,23 @@ class TestAnthropic:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
+    def test_request_query_spaces(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo",
+                **make_request_options(
+                    query={"foo": "a b+c"},
+                    extra_query={"bar": "d e"},
+                ),
+            ),
+        )
+        assert request.url.query == b"foo=a%20b%2Bc&bar=d%20e"
+
+        # a query in a URL that the caller wrote is sent as it is
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo?bar=a+b"))
+        assert request.url.query == b"bar=a+b"
+
     def test_multipart_repeating_array(self, client: Anthropic) -> None:
         request = client._build_request(
             FinalRequestOptions.construct(
@@ -2401,6 +2418,23 @@ class TestAsyncAnthropic:
         )
         params = dict(request.url.params)
         assert params == {"foo": "2"}
+
+    def test_request_query_spaces(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo",
+                **make_request_options(
+                    query={"foo": "a b+c"},
+                    extra_query={"bar": "d e"},
+                ),
+            ),
+        )
+        assert request.url.query == b"foo=a%20b%2Bc&bar=d%20e"
+
+        # a query in a URL that the caller wrote is sent as it is
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo?bar=a+b"))
+        assert request.url.query == b"bar=a+b"
 
     def test_multipart_repeating_array(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(

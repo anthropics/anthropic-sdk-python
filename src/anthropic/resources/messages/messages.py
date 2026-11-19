@@ -45,7 +45,7 @@ from ...types.message_param import MessageParam
 from ...lib._parse._response import ResponseFormatT, parse_response
 from ...types.metadata_param import MetadataParam
 from ...types.parsed_message import ParsedMessage
-from ...lib._parse._transform import transform_schema
+from ...lib._parse._transform import transform_schema, cached_json_schema
 from ...lib._stainless_helpers import (
     HELPER_METHOD_STREAM as _HELPER_METHOD_STREAM,
     STAINLESS_HELPER_METHOD_HEADER as _STAINLESS_HELPER_METHOD_HEADER,
@@ -1381,7 +1381,7 @@ class Messages(SyncAPIResource):
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
@@ -1499,7 +1499,7 @@ class Messages(SyncAPIResource):
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
@@ -1849,7 +1849,7 @@ class Messages(SyncAPIResource):
             adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
@@ -3181,7 +3181,7 @@ class AsyncMessages(AsyncAPIResource):
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
@@ -3298,7 +3298,7 @@ class AsyncMessages(AsyncAPIResource):
             adapted_type: TypeAdapter[ResponseFormatT] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(
@@ -3648,7 +3648,7 @@ class AsyncMessages(AsyncAPIResource):
             adapted_type: TypeAdapter[type] = TypeAdapter(output_format)
 
             try:
-                schema = adapted_type.json_schema()
+                schema = cached_json_schema(adapted_type)
                 transformed_output_format = JSONOutputFormatParam(schema=transform_schema(schema), type="json_schema")
             except pydantic.errors.PydanticSchemaGenerationError as e:
                 raise TypeError(

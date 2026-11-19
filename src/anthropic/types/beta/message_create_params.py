@@ -401,17 +401,6 @@ Container: TypeAlias = Union[BetaContainerParams, str]
 FallbackCreditToken: TypeAlias = Union[str, BetaFallbackCreditTokenParam]
 
 
-class ParseMessageCreateParamsBase(MessageCreateParamsBase, Generic[ResponseFormatT]):
-    output_format: type[ResponseFormatT]  # type: ignore[misc]
-
-
-class OutputFormat(TypedDict, total=False):
-    schema: Required[object]
-    """The JSON schema of the format"""
-
-    type: Required[Literal["json_schema"]]
-
-
 class MessageCreateParamsNonStreaming(MessageCreateParamsBase, total=False):
     stream: Literal[False]
     """Whether to incrementally stream the response using server-sent events.
@@ -441,3 +430,14 @@ class MessageCreateParamsStreaming(MessageCreateParamsBase):
 
 
 MessageCreateParams = Union[MessageCreateParamsNonStreaming, MessageCreateParamsStreaming]
+
+
+class ParseMessageCreateParamsBase(MessageCreateParamsBase, Generic[ResponseFormatT]):
+    output_format: type[ResponseFormatT]  # type: ignore[misc]
+
+
+class OutputFormat(TypedDict, total=False):
+    schema: Required[object]
+    """The JSON schema of the format"""
+
+    type: Required[Literal["json_schema"]]

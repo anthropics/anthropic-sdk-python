@@ -29,7 +29,7 @@ class WorkspaceRateLimitValue(BaseModel):
     type: str
     """
     The limiter type (for example, `requests_per_minute` or
-    `input_tokens_per_minute`).
+    `input_tokens_per_minute_cache_aware`).
     """
 
     value: int
