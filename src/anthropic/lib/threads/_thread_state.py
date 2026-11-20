@@ -123,6 +123,17 @@ class ThreadState(Generic[RunnableToolT, ResponseFormatT]):
         entries = self._staged or self._stored
         return bool(entries) and isinstance(entries[-1], Reply) and same_message(message, entries[-1].param)
 
+    def insert_after_reply(self, reply: BetaMessage, message: BetaMessageParam) -> None:
+        """Insert `message` immediately after the last occurrence of the recorded `reply`, if present."""
+        entries = [*self._stored, *self._staged]
+        for index in reversed(range(len(entries))):
+            entry = entries[index]
+            if isinstance(entry, Reply) and entry.message.id == reply.id:
+                messages = [item.param for item in entries]
+                messages.insert(index + 1, message)
+                self.set_messages(messages)
+                return
+
     @property
     def _last_reply(self) -> BetaMessage | None:
         """The most recent reply the history records."""
