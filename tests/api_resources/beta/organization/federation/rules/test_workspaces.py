@@ -75,7 +75,7 @@ class TestWorkspaces:
     def test_method_add(self, client: Anthropic) -> None:
         workspace = client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRuleWorkspace, workspace, path=["response"])
@@ -84,7 +84,7 @@ class TestWorkspaces:
     def test_method_add_with_all_params(self, client: Anthropic) -> None:
         workspace = client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -94,7 +94,7 @@ class TestWorkspaces:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.rules.workspaces.with_raw_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         )
 
@@ -107,7 +107,7 @@ class TestWorkspaces:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.beta.organization.federation.rules.workspaces.with_streaming_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -123,7 +123,7 @@ class TestWorkspaces:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `federation_rule_id` but received ''"):
             client.beta.organization.federation.rules.workspaces.with_raw_response.add(
                 federation_rule_id="",
-                workspace_id="workspace_id",
+                workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             )
 
     @parametrize
@@ -249,7 +249,7 @@ class TestAsyncWorkspaces:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRuleWorkspace, workspace, path=["response"])
@@ -258,7 +258,7 @@ class TestAsyncWorkspaces:
     async def test_method_add_with_all_params(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -268,7 +268,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.rules.workspaces.with_raw_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         )
 
@@ -281,7 +281,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.rules.workspaces.with_streaming_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -297,7 +297,7 @@ class TestAsyncWorkspaces:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `federation_rule_id` but received ''"):
             await async_client.beta.organization.federation.rules.workspaces.with_raw_response.add(
                 federation_rule_id="",
-                workspace_id="workspace_id",
+                workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             )
 
     @parametrize

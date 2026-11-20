@@ -23,8 +23,8 @@ class TestSlackChannels:
     def test_method_create(self, client: Anthropic) -> None:
         slack_channel = client.beta.organization.claude_tag.slack_channels.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         )
@@ -34,8 +34,8 @@ class TestSlackChannels:
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         slack_channel = client.beta.organization.claude_tag.slack_channels.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             settings={
                 "enabled": True,
@@ -54,8 +54,8 @@ class TestSlackChannels:
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.claude_tag.slack_channels.with_raw_response.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         )
@@ -69,8 +69,8 @@ class TestSlackChannels:
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.claude_tag.slack_channels.with_streaming_response.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         ) as response:
@@ -302,8 +302,8 @@ class TestAsyncSlackChannels:
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         slack_channel = await async_client.beta.organization.claude_tag.slack_channels.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         )
@@ -313,8 +313,8 @@ class TestAsyncSlackChannels:
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         slack_channel = await async_client.beta.organization.claude_tag.slack_channels.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             settings={
                 "enabled": True,
@@ -333,8 +333,8 @@ class TestAsyncSlackChannels:
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.claude_tag.slack_channels.with_raw_response.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         )
@@ -348,8 +348,8 @@ class TestAsyncSlackChannels:
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.claude_tag.slack_channels.with_streaming_response.create(
             slack={
-                "channel_id": "xx",
-                "workspace_id": "xx",
+                "channel_id": "C0456EFGH",
+                "workspace_id": "T0123ABCD",
             },
             extra_query={"beta": "true"},
         ) as response:

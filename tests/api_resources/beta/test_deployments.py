@@ -23,20 +23,23 @@ class TestDeployments:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -44,20 +47,24 @@ class TestDeployments:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         deployment = client.beta.deployments.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+                "version": 0,
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             budget={
                 "max_list_cost": {
                     "amount": "2500",
@@ -89,20 +96,23 @@ class TestDeployments:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.deployments.with_raw_response.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         )
 
@@ -114,20 +124,23 @@ class TestDeployments:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.deployments.with_streaming_response.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -536,20 +549,23 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaManagedAgentsDeployment, deployment, path=["response"])
@@ -557,20 +573,24 @@ class TestAsyncDeployments:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         deployment = await async_client.beta.deployments.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+                "version": 0,
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             budget={
                 "max_list_cost": {
                     "amount": "2500",
@@ -602,20 +622,23 @@ class TestAsyncDeployments:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.deployments.with_raw_response.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         )
 
@@ -627,20 +650,23 @@ class TestAsyncDeployments:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.deployments.with_streaming_response.create(
-            agent="string",
-            environment_id="x",
+            agent={
+                "id": "agent_011CZkYpogX7uDKUyvBTophP",
+                "type": "agent",
+            },
+            environment_id="env_011CZkZ9X2dpNyB7HsEFoRfW",
             initial_events=[
                 {
                     "content": [
                         {
-                            "text": "Where is my order #1234?",
+                            "text": "Compile yesterday's orders into report.md.",
                             "type": "text",
                         }
                     ],
                     "type": "user.message",
                 }
             ],
-            name="x",
+            name="Daily order report",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed

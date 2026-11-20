@@ -171,7 +171,7 @@ class TestServiceAccounts:
     def test_method_add(self, client: Anthropic) -> None:
         service_account = client.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         )
         assert_matches_type(ServiceAccountWorkspaceMember, service_account, path=["response"])
@@ -180,7 +180,7 @@ class TestServiceAccounts:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.organization.workspaces.service_accounts.with_raw_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         )
 
@@ -193,7 +193,7 @@ class TestServiceAccounts:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.organization.workspaces.service_accounts.with_streaming_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         ) as response:
             assert not response.is_closed
@@ -209,7 +209,7 @@ class TestServiceAccounts:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.organization.workspaces.service_accounts.with_raw_response.add(
                 workspace_id="",
-                service_account_id="service_account_id",
+                service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
                 workspace_role="workspace_admin",
             )
 
@@ -419,7 +419,7 @@ class TestAsyncServiceAccounts:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         )
         assert_matches_type(ServiceAccountWorkspaceMember, service_account, path=["response"])
@@ -428,7 +428,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.organization.workspaces.service_accounts.with_raw_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         )
 
@@ -441,7 +441,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.organization.workspaces.service_accounts.with_streaming_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
         ) as response:
             assert not response.is_closed
@@ -457,7 +457,7 @@ class TestAsyncServiceAccounts:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.organization.workspaces.service_accounts.with_raw_response.add(
                 workspace_id="",
-                service_account_id="service_account_id",
+                service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
                 workspace_role="workspace_admin",
             )
 

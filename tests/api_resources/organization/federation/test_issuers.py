@@ -21,16 +21,16 @@ class TestIssuers:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         issuer = client.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         )
         assert_matches_type(FederationIssuer, issuer, path=["response"])
 
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         issuer = client.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             check_jti=True,
             jwks={
                 "type": "discovery",
@@ -44,8 +44,8 @@ class TestIssuers:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.organization.federation.issuers.with_raw_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         )
 
         assert response.is_closed is True
@@ -56,8 +56,8 @@ class TestIssuers:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.organization.federation.issuers.with_streaming_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -241,16 +241,16 @@ class TestAsyncIssuers:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         )
         assert_matches_type(FederationIssuer, issuer, path=["response"])
 
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             check_jti=True,
             jwks={
                 "type": "discovery",
@@ -264,8 +264,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.organization.federation.issuers.with_raw_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         )
 
         assert response.is_closed is True
@@ -276,8 +276,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.organization.federation.issuers.with_streaming_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

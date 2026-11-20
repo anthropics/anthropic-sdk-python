@@ -21,10 +21,10 @@ class TestRules:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -36,15 +36,20 @@ class TestRules:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         rule = client.beta.organization.federation.rules.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={
                 "audience": "audience",
-                "claims": {"foo": "string"},
+                "claims": {
+                    "event_name": "push",
+                    "ref": "refs/heads/main",
+                    "repository_id": "123456789",
+                    "repository_owner_id": "987654321",
+                },
                 "condition": "condition",
                 "subject_prefix": "subject_prefix",
             },
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -54,7 +59,7 @@ class TestRules:
             attributes={"foo": "string"},
             description="description",
             token_lifetime_seconds=60,
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -63,10 +68,10 @@ class TestRules:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.rules.with_raw_response.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -82,10 +87,10 @@ class TestRules:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.federation.rules.with_streaming_response.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -320,10 +325,10 @@ class TestAsyncRules:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -335,15 +340,20 @@ class TestAsyncRules:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         rule = await async_client.beta.organization.federation.rules.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={
                 "audience": "audience",
-                "claims": {"foo": "string"},
+                "claims": {
+                    "event_name": "push",
+                    "ref": "refs/heads/main",
+                    "repository_id": "123456789",
+                    "repository_owner_id": "987654321",
+                },
                 "condition": "condition",
                 "subject_prefix": "subject_prefix",
             },
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -353,7 +363,7 @@ class TestAsyncRules:
             attributes={"foo": "string"},
             description="description",
             token_lifetime_seconds=60,
-            workspace_id="workspace_id",
+            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
@@ -362,10 +372,10 @@ class TestAsyncRules:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.rules.with_raw_response.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
@@ -381,10 +391,10 @@ class TestAsyncRules:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.rules.with_streaming_response.create(
-            issuer_id="issuer_id",
+            issuer_id="fdis_01SDCCSbTxrXDpWc1phhtcfK",
             match={},
-            name="x",
-            oauth_scope="x",
+            name="prod-deploy-pipeline",
+            oauth_scope="workspace:developer",
             target={
                 "service_account_id": "svac_01SDCCSbTxrXDpWc1phhtcfK",
                 "type": "service_account",
