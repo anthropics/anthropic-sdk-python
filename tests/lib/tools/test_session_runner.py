@@ -16,10 +16,11 @@ from typing import Any, Optional, cast
 from collections.abc import Callable, Sequence, Awaitable, AsyncIterator
 from typing_extensions import override
 
+import anyio
 import httpx2
 import pytest
 
-from anthropic import APIStatusError
+from anthropic import APIStatusError, AsyncAnthropic
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError, BetaBuiltinFunctionTool, _beta_session_runner as session_runner_mod
 from anthropic.types.beta import BetaToolParam
@@ -1319,6 +1320,96 @@ async def test_terminated_event_ends_iteration() -> None:
     items = [item async for item in _run_with_fakes(events=events, tools=[])]
 
     assert items == []
+
+
+@pytest.mark.parametrize(
+    ("reconnect", "close_fails"),
+    [(False, False), (True, False), (True, True)],
+    ids=["first-attach", "reconnect", "reconnect-with-close-error"],
+)
+@pytest.mark.parametrize("terminal_event", ["session.status_terminated", "session.deleted"])
+@pytest.mark.asyncio()
+async def test_terminal_session_history_stops_the_runner_before_dispatch(
+    reconnect: bool, close_fails: bool, terminal_event: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(session_runner_mod, "STREAM_BACKOFF_START", 0)
+    path = "/v1/sessions/sesn_1/events"
+    stream_path = f"{path}/stream"
+    headers = {"content-type": "text/event-stream"}
+    timestamp = "2026-01-01T00:00:00Z"
+    requests: list[tuple[str, str, str | None]] = []
+    inputs: list[object] = []
+    observed: list[DispatchedToolCall] = []
+    attached = 0
+
+    class LiveStream(httpx2.AsyncByteStream):
+        started = False
+        closed = False
+
+        @override
+        async def __aiter__(self) -> AsyncIterator[bytes]:
+            self.started = True
+            await anyio.sleep_forever()
+            yield b""
+
+        @override
+        async def aclose(self) -> None:
+            await anyio.sleep(0.01)
+            self.closed = True
+            if close_fails:
+                raise httpx2.ReadError("stream close failed")
+
+    live = LiveStream()
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        nonlocal attached
+        page = request.url.params.get("page")
+        requests.append((request.method, request.url.path, page))
+        if request.url.path == stream_path:
+            attached += 1
+            if reconnect and attached == 1:
+                return httpx2.Response(200, headers=headers, content=b"")
+            return httpx2.Response(200, headers=headers, stream=live)
+
+        assert request.url.path == path
+        if request.method == "POST" or (reconnect and attached == 1):
+            return httpx2.Response(200, json={"data": []})
+        if page == "last":
+            terminal = {"type": terminal_event, "id": "sevt_2", "processed_at": timestamp}
+            return httpx2.Response(200, json={"data": [terminal]})
+
+        assert page is None
+        unanswered: dict[str, object] = {
+            "type": "agent.custom_tool_use",
+            "id": "sevt_1",
+            "processed_at": timestamp,
+            "name": "record",
+            "input": {},
+        }
+        return httpx2.Response(200, json={"data": [unanswered], "next_page": "last"})
+
+    def record(value: object) -> str:
+        inputs.append(value)
+        return "recorded"
+
+    async with AsyncAnthropic(
+        api_key="key",
+        base_url="https://example.test",
+        max_retries=0,
+        http_client=httpx2.AsyncClient(transport=httpx2.MockTransport(respond)),
+    ) as client:
+        runner = client.beta.sessions.events.tool_runner("sesn_1", tools=[_SyncTool("record", record)], max_idle=None)
+        with anyio.move_on_after(3) as limit:
+            async for call in runner:
+                observed.append(call)
+
+    assert inputs == []
+    assert observed == []
+    assert not limit.cancelled_caught
+    assert not live.started
+    assert live.closed
+    attach = [("GET", stream_path, None), ("GET", path, None)]
+    assert requests == attach * (2 if reconnect else 1) + [("GET", path, "last")]
 
 
 # ---------- tool cleanup --------------------------------------------------
