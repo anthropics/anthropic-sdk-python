@@ -76,7 +76,7 @@ class AsyncThreadMessageStreamManager(BetaAsyncMessageStreamManager[ResponseForm
         messages: Iterable[BetaMessageParam | BetaMessage],
         overrides: TurnOverrides,
     ) -> None:
-        super().__init__(thread._open_stream(messages, overrides), output_format=thread._state.output_format)
+        super().__init__(lambda: thread._open_stream(messages, overrides), output_format=thread._state.output_format)
         self._thread = thread
         self._stream: BetaAsyncMessageStream[ResponseFormatT]
         self._turn_ended = False
@@ -85,6 +85,7 @@ class AsyncThreadMessageStreamManager(BetaAsyncMessageStreamManager[ResponseForm
     @override
     async def __aenter__(self) -> BetaAsyncMessageStream[ResponseFormatT]:
         self._stream = await super().__aenter__()
+        self._turn_ended = False
         self._stream._iterator = self._end_turn_after(self._stream._iterator)
         return self._stream
 
@@ -103,11 +104,13 @@ class AsyncThreadMessageStreamManager(BetaAsyncMessageStreamManager[ResponseForm
     async def _end_turn_after(
         self, events: AsyncIterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]
     ) -> AsyncIterator[ParsedBetaMessageStreamEvent[ResponseFormatT]]:
+        stream = self._stream
         try:
             async for event in events:
                 yield event
         finally:
-            _end_turn(self)
+            if stream is self._stream:
+                _end_turn(self)
 
 
 def _end_turn(manager: ThreadMessageStreamManager[Any] | AsyncThreadMessageStreamManager[Any]) -> None:
