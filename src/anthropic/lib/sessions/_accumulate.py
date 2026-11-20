@@ -42,8 +42,9 @@ def accumulate_managed_agents_event(
     - `event_start` opens the preview: a new snapshot with empty content is
       returned (so `accumulated` may be `None`). Its `processed_at` is an
       epoch placeholder that the buffered final event's server timestamp
-      replaces. `accumulated` is passed through unchanged when the
-      previewed event is not an `agent.message` — this helper only tracks
+      replaces. A repeated start for the accumulated event's ID preserves
+      its existing preview or final snapshot. `accumulated` is also passed
+      through unchanged when the previewed event is not an `agent.message` — this helper only tracks
       `agent.message` previews.
     - `event_delta` is folded into `accumulated`: a new `delta.index`
       inserts the fragment as a fresh content entry; an existing index returns
@@ -57,6 +58,8 @@ def accumulate_managed_agents_event(
     """
     if event.type == "event_start":
         if event.event.type == "agent.message":
+            if accumulated is not None and accumulated.id == event.event.id:
+                return accumulated
             return build(
                 BetaManagedAgentsAgentMessageEvent,
                 id=event.event.id,
