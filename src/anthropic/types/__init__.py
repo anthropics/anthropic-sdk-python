@@ -420,6 +420,7 @@ from .computer_hold_key_tool_use_block import ComputerHoldKeyToolUseBlock as Com
 from .computer_left_click_config_param import ComputerLeftClickConfigParam as ComputerLeftClickConfigParam
 from .computer_mouse_move_config_param import ComputerMouseMoveConfigParam as ComputerMouseMoveConfigParam
 from .computer_screenshot_config_param import ComputerScreenshotConfigParam as ComputerScreenshotConfigParam
+from .image_dimensions_too_large_error import ImageDimensionsTooLargeError as ImageDimensionsTooLargeError
 from .response_computer_tool_use_block import ResponseComputerToolUseBlock as ResponseComputerToolUseBlock
 from .thread_unsupported_request_error import ThreadUnsupportedRequestError as ThreadUnsupportedRequestError
 from .tool_name_conflict_error_details import ToolNameConflictErrorDetails as ToolNameConflictErrorDetails
@@ -621,6 +622,9 @@ from .compaction_block_misplaced_error_details import (
 )
 from .compaction_incomplete_turn_error_details import (
     CompactionIncompleteTurnErrorDetails as CompactionIncompleteTurnErrorDetails,
+)
+from .image_dimensions_too_large_error_details import (
+    ImageDimensionsTooLargeErrorDetails as ImageDimensionsTooLargeErrorDetails,
 )
 from .response_browser_hold_key_tool_use_block import (
     ResponseBrowserHoldKeyToolUseBlock as ResponseBrowserHoldKeyToolUseBlock,

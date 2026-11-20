@@ -29,6 +29,7 @@ from ..beta.beta_invalid_metadata_error_details import BetaInvalidMetadataErrorD
 from ..compaction_block_ambiguous_error_details import CompactionBlockAmbiguousErrorDetails
 from ..compaction_block_misplaced_error_details import CompactionBlockMisplacedErrorDetails
 from ..compaction_incomplete_turn_error_details import CompactionIncompleteTurnErrorDetails
+from ..image_dimensions_too_large_error_details import ImageDimensionsTooLargeErrorDetails
 from ..thread_unsupported_request_error_details import ThreadUnsupportedRequestErrorDetails
 from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldErrorDetails
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
@@ -157,6 +158,7 @@ ErrorDetails: TypeAlias = Annotated[
         CompactionSignatureInvalidErrorDetails,
         CompactionTooManyToolReferencesErrorDetails,
         CompactionToolChangesMismatchErrorDetails,
+        ImageDimensionsTooLargeErrorDetails,
         OrganizationOnHoldErrorDetails,
         RequestBodyEncodingInvalidErrorDetails,
         RequestBodyEncodingUnsupportedErrorDetails,

@@ -45,6 +45,7 @@ from .types.beta.beta_invalid_metadata_error import BetaInvalidMetadataError
 from .types.compaction_block_ambiguous_error import CompactionBlockAmbiguousError
 from .types.compaction_block_misplaced_error import CompactionBlockMisplacedError
 from .types.compaction_incomplete_turn_error import CompactionIncompleteTurnError
+from .types.image_dimensions_too_large_error import ImageDimensionsTooLargeError
 from .types.shared.ramp_limit_exceeded_error import RampLimitExceededError
 from .types.thread_unsupported_request_error import ThreadUnsupportedRequestError
 from .types.compaction_content_mismatch_error import CompactionContentMismatchError
@@ -191,6 +192,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "external_key_validation_failed"): ExternalKeyValidationFailedError,
     (400, "external_key_validation_timed_out"): ExternalKeyValidationTimedOutError,
     (400, "file_not_downloadable"): FileNotDownloadableError,
+    (400, "image_dimensions_too_large"): ImageDimensionsTooLargeError,
     (400, "invalid_config_type_change"): BetaInvalidConfigTypeChangeError,
     (400, "invalid_metadata"): BetaInvalidMetadataError,
     (400, "invite_already_exists"): InviteAlreadyExistsError,
