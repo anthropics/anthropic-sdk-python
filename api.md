@@ -2821,6 +2821,8 @@ from anthropic.types.beta import (
     BetaWebhookEventData,
     BetaWebhookExternalKeyFailedEventData,
     BetaWebhookExternalKeyRecoveredEventData,
+    BetaWebhookExternalStorageFailedEventData,
+    BetaWebhookExternalStorageRecoveredEventData,
     BetaWebhookMemoryStoreArchivedEventData,
     BetaWebhookMemoryStoreCreatedEventData,
     BetaWebhookMemoryStoreDeletedEventData,

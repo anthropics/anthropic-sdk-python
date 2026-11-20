@@ -1371,6 +1371,9 @@ from .beta_tool_search_tool_search_result_block_param import (
 from .beta_web_search_tool_request_error_object_param import (
     BetaWebSearchToolRequestErrorObjectParam as BetaWebSearchToolRequestErrorObjectParam,
 )
+from .beta_webhook_external_storage_failed_event_data import (
+    BetaWebhookExternalStorageFailedEventData as BetaWebhookExternalStorageFailedEventData,
+)
 from .beta_webhook_session_requires_action_event_data import (
     BetaWebhookSessionRequiresActionEventData as BetaWebhookSessionRequiresActionEventData,
 )
@@ -1547,6 +1550,9 @@ from .beta_response_computer_middle_click_tool_use_block import (
 )
 from .beta_response_computer_triple_click_tool_use_block import (
     BetaResponseComputerTripleClickToolUseBlock as BetaResponseComputerTripleClickToolUseBlock,
+)
+from .beta_webhook_external_storage_recovered_event_data import (
+    BetaWebhookExternalStorageRecoveredEventData as BetaWebhookExternalStorageRecoveredEventData,
 )
 from .beta_webhook_session_status_rescheduled_event_data import (
     BetaWebhookSessionStatusRescheduledEventData as BetaWebhookSessionStatusRescheduledEventData,
