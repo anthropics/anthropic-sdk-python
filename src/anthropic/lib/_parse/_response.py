@@ -20,6 +20,19 @@ def parse_text(text: str, output_format: ResponseFormatT | NotGiven) -> Response
     return None
 
 
+def _parse_text_for_stop_reason(
+    text: str,
+    output_format: ResponseFormatT | NotGiven,
+    stop_reason: str | None,
+) -> ResponseFormatT | None:
+    # Structured output is not guaranteed to match the requested schema when
+    # generation is refused or truncated. Preserve the response and its stop
+    # reason instead of masking it with a JSON/schema validation exception.
+    if stop_reason == "refusal" or stop_reason == "max_tokens":
+        return None
+    return parse_text(text, output_format)
+
+
 def parse_beta_response(
     *,
     output_format: ResponseFormatT | NotGiven,
@@ -31,7 +44,14 @@ def parse_beta_response(
             content_list.append(
                 construct_type_unchecked(
                     type_=ParsedBetaTextBlock[ResponseFormatT],
-                    value={**content.to_dict(), "parsed_output": parse_text(content.text, output_format)},
+                    value={
+                        **content.to_dict(),
+                        "parsed_output": _parse_text_for_stop_reason(
+                            content.text,
+                            output_format,
+                            response.stop_reason,
+                        ),
+                    },
                 )
             )
         else:
@@ -57,7 +77,14 @@ def parse_response(
             content_list.append(
                 construct_type_unchecked(
                     type_=ParsedTextBlock[ResponseFormatT],
-                    value={**content.to_dict(), "parsed_output": parse_text(content.text, output_format)},
+                    value={
+                        **content.to_dict(),
+                        "parsed_output": _parse_text_for_stop_reason(
+                            content.text,
+                            output_format,
+                            response.stop_reason,
+                        ),
+                    },
                 )
             )
         else:
