@@ -126,6 +126,14 @@ from .external_keys import (
     ExternalKeysWithStreamingResponse,
     AsyncExternalKeysWithStreamingResponse,
 )
+from .external_storage import (
+    ExternalStorage,
+    AsyncExternalStorage,
+    ExternalStorageWithRawResponse,
+    AsyncExternalStorageWithRawResponse,
+    ExternalStorageWithStreamingResponse,
+    AsyncExternalStorageWithStreamingResponse,
+)
 from .service_accounts import (
     ServiceAccounts,
     AsyncServiceAccounts,
@@ -190,6 +198,12 @@ __all__ = [
     "AsyncServiceAccountsWithRawResponse",
     "ServiceAccountsWithStreamingResponse",
     "AsyncServiceAccountsWithStreamingResponse",
+    "ExternalStorage",
+    "AsyncExternalStorage",
+    "ExternalStorageWithRawResponse",
+    "AsyncExternalStorageWithRawResponse",
+    "ExternalStorageWithStreamingResponse",
+    "AsyncExternalStorageWithStreamingResponse",
     "Users",
     "AsyncUsers",
     "UsersWithRawResponse",

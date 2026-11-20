@@ -40,10 +40,16 @@ from .service_accounts import (
     ServiceAccountsWithStreamingResponse,
     AsyncServiceAccountsWithStreamingResponse,
 )
+from .....types.beta.organization import (
+    BetaInferenceDataPrivacyCreateParam,
+    BetaInferenceDataPrivacyUpdateParam,
+)
 from .....types.anthropic_beta_param import AnthropicBetaParam
 from .....types.beta.organization.beta_workspace import BetaWorkspace
 from .....types.beta.organization.beta_data_residency_create_config_param import BetaDataResidencyCreateConfigParam
 from .....types.beta.organization.beta_data_residency_update_config_param import BetaDataResidencyUpdateConfigParam
+from .....types.beta.organization.beta_inference_data_privacy_create_param import BetaInferenceDataPrivacyCreateParam
+from .....types.beta.organization.beta_inference_data_privacy_update_param import BetaInferenceDataPrivacyUpdateParam
 
 __all__ = ["Workspaces", "AsyncWorkspaces"]
 
@@ -87,6 +93,7 @@ class Workspaces(SyncAPIResource):
         data_residency: Optional[BetaDataResidencyCreateConfigParam] | Omit = omit,
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
+        inference_data_privacy: Optional[BetaInferenceDataPrivacyCreateParam] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
         user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -122,6 +129,13 @@ class Workspaces(SyncAPIResource):
               cannot be detached or replaced. To rotate key material, rotate the underlying
               key on your cloud KMS; the `external_key_id` stays the same.
 
+          inference_data_privacy: Where the Workspace's retained inference data and transcript copies go, and
+              whether Anthropic's human review applies. Requires the `efs-2026-10-01`
+              `anthropic-beta` value. When omitted, `safeguards_storage` and
+              `transcripts_storage` are `internal` and `human_review` is `enabled`. Cannot be
+              null. An Admin API key can't set this field, because it doesn't belong to a user
+              or a service account. Use an API key that belongs to one, or an OAuth token.
+
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
 
@@ -141,11 +155,33 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          BetaApprovalRequiredError:
+
           ExternalKeyValidationFailedError:
 
           ExternalKeyValidationTimedOutError:
 
+          BetaExternalStorageNotAvailableError:
+
+          BetaGrantRequiredError:
+
+          BetaHumanReviewNotAvailableError:
+
+          BetaHumanReviewOnWithExternalStorageError:
+
+          BetaInvalidStorageARNError:
+
           KeyProfileMismatchError:
+
+          BetaOrganizationNotEligibleError:
+
+          BetaStorageNotAttachableError:
+
+          StorageProfileMismatchError:
+
+          BetaStorageVerificationFailedError:
+
+          BetaTranscriptsStorageRequiredError:
 
           UserProfileNotFoundError:
 
@@ -154,6 +190,10 @@ class Workspaces(SyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          BetaAuthorizationCheckUnavailableError:
+
+          WorkspaceCreatedIncompleteError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -166,6 +206,7 @@ class Workspaces(SyncAPIResource):
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
+                "inference_data_privacy": inference_data_privacy,
                 "tags": tags,
                 "user_profile_id": user_profile_id,
             },
@@ -186,6 +227,7 @@ class Workspaces(SyncAPIResource):
         self,
         workspace_id: str,
         *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -193,11 +235,15 @@ class Workspaces(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaWorkspace:
-        """
-        Get Workspace
+        """Get Workspace
 
         Args:
           workspace_id: ID of the Workspace.
+
+          betas: Optional.
+
+        Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
 
           extra_headers: Send extra headers
 
@@ -209,6 +255,10 @@ class Workspaces(SyncAPIResource):
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
@@ -231,9 +281,11 @@ class Workspaces(SyncAPIResource):
         data_residency: Optional[BetaDataResidencyUpdateConfigParam] | Omit = omit,
         display_color: str | Omit = omit,
         external_key_id: str | Omit = omit,
+        inference_data_privacy: Optional[BetaInferenceDataPrivacyUpdateParam] | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -262,6 +314,13 @@ class Workspaces(SyncAPIResource):
               cannot be detached or replaced. To rotate key material, rotate the underlying
               key on your cloud KMS; the `external_key_id` stays the same.
 
+          inference_data_privacy: Changes to where the Workspace's retained inference data and transcript copies
+              go, and to whether Anthropic's human review applies. Requires the
+              `efs-2026-10-01` `anthropic-beta` value. An omitted member is unchanged. Cannot
+              be null. An Admin API key can't set this field, because it doesn't belong to a
+              user or a service account. Use an API key that belongs to one, or an OAuth
+              token.
+
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
@@ -274,6 +333,9 @@ class Workspaces(SyncAPIResource):
               clears it. It can't be set on a Workspace whose External Key isn't bound to this
               user profile. The default Workspace can't have a user profile.
 
+          betas: Optional. Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -283,11 +345,37 @@ class Workspaces(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          BetaApprovalRequiredError:
+
           ExternalKeyValidationFailedError:
 
           ExternalKeyValidationTimedOutError:
 
+          BetaExternalStorageNotAvailableError:
+
+          BetaGrantRequiredError:
+
+          BetaHumanReviewNotAvailableError:
+
+          BetaHumanReviewOnWithExternalStorageError:
+
+          BetaInvalidStorageARNError:
+
           KeyProfileMismatchError:
+
+          BetaOrganizationNotEligibleError:
+
+          BetaStorageAttachLimitReachedError:
+
+          BetaStorageNotAttachableError:
+
+          StorageProfileMismatchError:
+
+          BetaStorageProfileStillRequiredError:
+
+          BetaStorageVerificationFailedError:
+
+          BetaTranscriptsStorageRequiredError:
 
           UserProfileNotFoundError:
 
@@ -296,15 +384,28 @@ class Workspaces(SyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          BetaStorageChangedConcurrentlyError:
+
+          BetaWorkspaceChangedConcurrentlyError:
+
+          BetaAuthorizationCheckUnavailableError:
+
+          ChangeOutcomeUnknownError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
+                "inference_data_privacy": inference_data_privacy,
                 "name": name,
                 "tags": tags,
                 "user_profile_id": user_profile_id,
@@ -331,6 +432,7 @@ class Workspaces(SyncAPIResource):
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -360,6 +462,9 @@ class Workspaces(SyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
+          betas: Optional. Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -368,6 +473,10 @@ class Workspaces(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return self._get_api_list(
             "/v1/organizations/workspaces",
             page=SyncPage[BetaWorkspace],
@@ -395,6 +504,7 @@ class Workspaces(SyncAPIResource):
         self,
         workspace_id: str,
         *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -402,10 +512,14 @@ class Workspaces(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaWorkspace:
-        """
-        Archive Workspace
+        """Archive Workspace
 
         Args:
+          betas: Optional.
+
+        Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -416,9 +530,15 @@ class Workspaces(SyncAPIResource):
 
         Raises:
           SandboxEgressRestrictedError:
+
+          StorageAttachedDuringArchiveError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(
@@ -474,6 +594,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         data_residency: Optional[BetaDataResidencyCreateConfigParam] | Omit = omit,
         display_color: Optional[str] | Omit = omit,
         external_key_id: Optional[str] | Omit = omit,
+        inference_data_privacy: Optional[BetaInferenceDataPrivacyCreateParam] | Omit = omit,
         tags: Optional[Dict[str, str]] | Omit = omit,
         user_profile_id: Optional[str] | Omit = omit,
         betas: List[AnthropicBetaParam] | Omit = omit,
@@ -509,6 +630,13 @@ class AsyncWorkspaces(AsyncAPIResource):
               cannot be detached or replaced. To rotate key material, rotate the underlying
               key on your cloud KMS; the `external_key_id` stays the same.
 
+          inference_data_privacy: Where the Workspace's retained inference data and transcript copies go, and
+              whether Anthropic's human review applies. Requires the `efs-2026-10-01`
+              `anthropic-beta` value. When omitted, `safeguards_storage` and
+              `transcripts_storage` are `internal` and `human_review` is `enabled`. Cannot be
+              null. An Admin API key can't set this field, because it doesn't belong to a user
+              or a service account. Use an API key that belongs to one, or an OAuth token.
+
           tags: User-defined tags as string key-value pairs. Keys may not begin with
               `anthropic`.
 
@@ -528,11 +656,33 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          BetaApprovalRequiredError:
+
           ExternalKeyValidationFailedError:
 
           ExternalKeyValidationTimedOutError:
 
+          BetaExternalStorageNotAvailableError:
+
+          BetaGrantRequiredError:
+
+          BetaHumanReviewNotAvailableError:
+
+          BetaHumanReviewOnWithExternalStorageError:
+
+          BetaInvalidStorageARNError:
+
           KeyProfileMismatchError:
+
+          BetaOrganizationNotEligibleError:
+
+          BetaStorageNotAttachableError:
+
+          StorageProfileMismatchError:
+
+          BetaStorageVerificationFailedError:
+
+          BetaTranscriptsStorageRequiredError:
 
           UserProfileNotFoundError:
 
@@ -541,6 +691,10 @@ class AsyncWorkspaces(AsyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          BetaAuthorizationCheckUnavailableError:
+
+          WorkspaceCreatedIncompleteError:
         """
         extra_headers = {
             **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
@@ -553,6 +707,7 @@ class AsyncWorkspaces(AsyncAPIResource):
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
+                "inference_data_privacy": inference_data_privacy,
                 "tags": tags,
                 "user_profile_id": user_profile_id,
             },
@@ -573,6 +728,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         self,
         workspace_id: str,
         *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -580,11 +736,15 @@ class AsyncWorkspaces(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaWorkspace:
-        """
-        Get Workspace
+        """Get Workspace
 
         Args:
           workspace_id: ID of the Workspace.
+
+          betas: Optional.
+
+        Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
 
           extra_headers: Send extra headers
 
@@ -596,6 +756,10 @@ class AsyncWorkspaces(AsyncAPIResource):
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return await self._get(
             path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             options=make_request_options(
@@ -618,9 +782,11 @@ class AsyncWorkspaces(AsyncAPIResource):
         data_residency: Optional[BetaDataResidencyUpdateConfigParam] | Omit = omit,
         display_color: str | Omit = omit,
         external_key_id: str | Omit = omit,
+        inference_data_privacy: Optional[BetaInferenceDataPrivacyUpdateParam] | Omit = omit,
         name: str | Omit = omit,
         tags: Optional[Dict[str, Optional[str]]] | Omit = omit,
         user_profile_id: str | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -649,6 +815,13 @@ class AsyncWorkspaces(AsyncAPIResource):
               cannot be detached or replaced. To rotate key material, rotate the underlying
               key on your cloud KMS; the `external_key_id` stays the same.
 
+          inference_data_privacy: Changes to where the Workspace's retained inference data and transcript copies
+              go, and to whether Anthropic's human review applies. Requires the
+              `efs-2026-10-01` `anthropic-beta` value. An omitted member is unchanged. Cannot
+              be null. An Admin API key can't set this field, because it doesn't belong to a
+              user or a service account. Use an API key that belongs to one, or an OAuth
+              token.
+
           name: Name of the Workspace.
 
           tags: User-defined tags as string key-value pairs. Keys may not begin with
@@ -661,6 +834,9 @@ class AsyncWorkspaces(AsyncAPIResource):
               clears it. It can't be set on a Workspace whose External Key isn't bound to this
               user profile. The default Workspace can't have a user profile.
 
+          betas: Optional. Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -670,11 +846,37 @@ class AsyncWorkspaces(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
 
         Raises:
+          BetaApprovalRequiredError:
+
           ExternalKeyValidationFailedError:
 
           ExternalKeyValidationTimedOutError:
 
+          BetaExternalStorageNotAvailableError:
+
+          BetaGrantRequiredError:
+
+          BetaHumanReviewNotAvailableError:
+
+          BetaHumanReviewOnWithExternalStorageError:
+
+          BetaInvalidStorageARNError:
+
           KeyProfileMismatchError:
+
+          BetaOrganizationNotEligibleError:
+
+          BetaStorageAttachLimitReachedError:
+
+          BetaStorageNotAttachableError:
+
+          StorageProfileMismatchError:
+
+          BetaStorageProfileStillRequiredError:
+
+          BetaStorageVerificationFailedError:
+
+          BetaTranscriptsStorageRequiredError:
 
           UserProfileNotFoundError:
 
@@ -683,15 +885,28 @@ class AsyncWorkspaces(AsyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          BetaStorageChangedConcurrentlyError:
+
+          BetaWorkspaceChangedConcurrentlyError:
+
+          BetaAuthorizationCheckUnavailableError:
+
+          ChangeOutcomeUnknownError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return await self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}", workspace_id=workspace_id),
             body={
                 "data_residency": data_residency,
                 "display_color": display_color,
                 "external_key_id": external_key_id,
+                "inference_data_privacy": inference_data_privacy,
                 "name": name,
                 "tags": tags,
                 "user_profile_id": user_profile_id,
@@ -718,6 +933,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         include_archived: bool | Omit = omit,
         include_default: bool | Omit = omit,
         limit: int | Omit = omit,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -747,6 +963,9 @@ class AsyncWorkspaces(AsyncAPIResource):
 
               Defaults to `20`. Ranges from `1` to `1000`.
 
+          betas: Optional. Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -755,6 +974,10 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return self._get_api_list(
             "/v1/organizations/workspaces",
             page=AsyncPage[BetaWorkspace],
@@ -782,6 +1005,7 @@ class AsyncWorkspaces(AsyncAPIResource):
         self,
         workspace_id: str,
         *,
+        betas: List[AnthropicBetaParam] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -789,10 +1013,14 @@ class AsyncWorkspaces(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> BetaWorkspace:
-        """
-        Archive Workspace
+        """Archive Workspace
 
         Args:
+          betas: Optional.
+
+        Send `efs-2026-10-01` in this header to use this endpoint's beta
+              features: additional parameters, accepted values and response fields.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -803,9 +1031,15 @@ class AsyncWorkspaces(AsyncAPIResource):
 
         Raises:
           SandboxEgressRestrictedError:
+
+          StorageAttachedDuringArchiveError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
+        extra_headers = {
+            **strip_not_given({"anthropic-beta": ",".join(str(e) for e in betas) if is_given(betas) else not_given}),
+            **(extra_headers or {}),
+        }
         return await self._post(
             path_template("/v1/organizations/workspaces/{workspace_id}/archive", workspace_id=workspace_id),
             options=make_request_options(

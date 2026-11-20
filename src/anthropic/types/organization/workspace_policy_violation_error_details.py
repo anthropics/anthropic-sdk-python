@@ -15,4 +15,4 @@ class WorkspacePolicyViolationErrorDetails(BaseModel):
     error_code: Literal["workspace_policy_violation"]
 
     field: WorkspacePolicyField
-    """The request field the broken rule applies to."""
+    """The request field the broken rule applies to. Other values may be returned."""

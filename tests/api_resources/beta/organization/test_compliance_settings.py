@@ -25,6 +25,14 @@ class TestComplianceSettings:
         assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
 
     @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        compliance_setting = client.beta.organization.compliance_settings.retrieve(
+            betas=["computer-use-2024-10-22"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
+
+    @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.compliance_settings.with_raw_response.retrieve(
             extra_query={"beta": "true"},
@@ -52,6 +60,15 @@ class TestComplianceSettings:
     def test_method_update(self, client: Anthropic) -> None:
         compliance_setting = client.beta.organization.compliance_settings.update(
             state={"type": "enabled"},
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
+
+    @parametrize
+    def test_method_update_with_all_params(self, client: Anthropic) -> None:
+        compliance_setting = client.beta.organization.compliance_settings.update(
+            state={"type": "enabled"},
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
@@ -96,6 +113,14 @@ class TestAsyncComplianceSettings:
         assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
 
     @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        compliance_setting = await async_client.beta.organization.compliance_settings.retrieve(
+            betas=["computer-use-2024-10-22"],
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
+
+    @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.compliance_settings.with_raw_response.retrieve(
             extra_query={"beta": "true"},
@@ -123,6 +148,15 @@ class TestAsyncComplianceSettings:
     async def test_method_update(self, async_client: AsyncAnthropic) -> None:
         compliance_setting = await async_client.beta.organization.compliance_settings.update(
             state={"type": "enabled"},
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])
+
+    @parametrize
+    async def test_method_update_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        compliance_setting = await async_client.beta.organization.compliance_settings.update(
+            state={"type": "enabled"},
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaComplianceSettings, compliance_setting, path=["response"])

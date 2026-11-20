@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from typing_extensions import TypedDict
 
+from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_data_residency_update_config_param import BetaDataResidencyUpdateConfigParam
+from .beta_inference_data_privacy_update_param import BetaInferenceDataPrivacyUpdateParam
 
 __all__ = ["WorkspaceUpdateParams"]
 
@@ -31,6 +33,16 @@ class WorkspaceUpdateParams(TypedDict, total=False):
     key on your cloud KMS; the `external_key_id` stays the same.
     """
 
+    inference_data_privacy: Optional[BetaInferenceDataPrivacyUpdateParam]
+    """
+    Changes to where the Workspace's retained inference data and transcript copies
+    go, and to whether Anthropic's human review applies. Requires the
+    `efs-2026-10-01` `anthropic-beta` value. An omitted member is unchanged. Cannot
+    be null. An Admin API key can't set this field, because it doesn't belong to a
+    user or a service account. Use an API key that belongs to one, or an OAuth
+    token.
+    """
+
     name: str
     """Name of the Workspace."""
 
@@ -49,4 +61,11 @@ class WorkspaceUpdateParams(TypedDict, total=False):
     deleting the user profile clears it. It can't be set on a Workspace whose
     External Key isn't bound to this user profile. The default Workspace can't have
     a user profile.
+    """
+
+    betas: List[AnthropicBetaParam]
+    """Optional.
+
+    Send `efs-2026-10-01` in this header to use this endpoint's beta features:
+    additional parameters, accepted values and response fields.
     """

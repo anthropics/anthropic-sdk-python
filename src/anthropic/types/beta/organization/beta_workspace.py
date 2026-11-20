@@ -4,6 +4,7 @@ from typing_extensions import Literal
 
 from ...._models import BaseModel
 from .beta_data_residency import BetaDataResidency
+from .beta_inference_data_privacy import BetaInferenceDataPrivacy
 
 __all__ = ["BetaWorkspace"]
 
@@ -78,4 +79,12 @@ class BetaWorkspace(BaseModel):
 
     Every inference request through a Workspace that has a user profile must name
     that profile.
+    """
+
+    inference_data_privacy: Optional[BetaInferenceDataPrivacy] = None
+    """
+    Where the Workspace's retained inference data and transcript copies go, and
+    whether Anthropic's human review applies. Returned only to requests that send
+    the `efs-2026-10-01` `anthropic-beta` value, and each member only to
+    organizations enabled for it.
     """
