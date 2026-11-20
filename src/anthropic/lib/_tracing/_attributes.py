@@ -19,6 +19,7 @@ AttributeName = Literal[
     "gen_ai.provider.name",
     "gen_ai.request.model",
     "gen_ai.request.stop_sequences",
+    "gen_ai.response.finish_reasons",
     "gen_ai.response.time_to_first_chunk",
     "gen_ai.system_instructions",
     "gen_ai.tool.call.arguments",

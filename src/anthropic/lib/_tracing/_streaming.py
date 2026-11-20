@@ -6,12 +6,11 @@ from collections.abc import Callable
 
 import httpx2
 from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
 
 from ._utils import MessageCreateBody, get
 from ...types import Message, ParsedMessage, RawMessageStartEvent, RawMessageStreamEvent
 from ._content import set_message_content
-from ._response import set_usage_sums, set_time_to_first_chunk, without_message_delta_fields
+from ._response import set_usage_sums, set_finish_reasons, set_time_to_first_chunk, without_message_delta_fields
 from ..._tracing import FirstEnd, StreamEnd, set_error_status, set_response_attributes
 from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaMessage, BetaRawMessageStartEvent, BetaRawMessageStreamEvent
@@ -99,10 +98,10 @@ class StreamedMessage:
             if message is not None:
                 # `message_delta` has the last of what the span reads, so a stream that ends after it lacks nothing.
                 complete = self._has_message_delta and not withheld
-                set_response_attributes(
-                    self._span, self._span_name, message if complete else without_message_delta_fields(message)
-                )
+                data = message if complete else without_message_delta_fields(message)
+                set_response_attributes(self._span, self._span_name, data)
                 set_usage_sums(self._span, message, complete=complete, iterations=isinstance(message, BetaMessage))
+                set_finish_reasons(self._span, data)
             if self._content:
                 # Before `message_stop` the snapshot is partial: a `tool_use` block has the input parsed so far.
                 output = message.content if message is not None and shared is not None and not withheld else None
@@ -112,10 +111,7 @@ class StreamedMessage:
 
         if error is not None:
             set_error_status(self._span, error)
-        # An application that reads the bytes of the body itself leaves the events unknown.
-        elif how == "read" and (self._stopped or not self._parsed):
-            self._span.set_status(Status(StatusCode.OK))
-        elif how == "read":
+        elif how == "read" and self._parsed and not self._stopped:
             # The server cut the stream short. The application sees no error, so only the span fails.
             set_error_status(self._span, AnthropicError("The stream ended before its end event."), "api_error")
         self._span.end()

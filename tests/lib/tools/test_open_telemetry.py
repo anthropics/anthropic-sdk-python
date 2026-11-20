@@ -314,7 +314,7 @@ class TestToolRunnerSpans:
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.kind == SpanKind.INTERNAL
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert parent_id(tool_runner_span) == span_id(app)
         assert attributes(tool_runner_span) == {
             "gen_ai.operation.name": "invoke_agent",
@@ -333,7 +333,7 @@ class TestToolRunnerSpans:
 
         tool = spans.one("anthropic.custom_tool_use get_weather")
         assert tool.kind == SpanKind.INTERNAL
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert parent_id(tool) == span_id(tool_runner_span)
         assert attributes(tool) == {
             "gen_ai.operation.name": "execute_tool",
@@ -367,7 +367,7 @@ class TestToolRunnerSpans:
             {"type": "text", "text": "ValueError('no such city')"}
         ]
         assert "gen_ai.tool.call.result" not in attributes(tool)
-        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.UNSET
 
     @pytest.mark.respx(base_url=base_url)
     def test_tool_result_content(self, spans: Spans, respx_mock: MockRouter) -> None:
@@ -473,7 +473,7 @@ class TestToolRunnerSpans:
         # The JSON of a list, as it is with content, and neither `null` nor an object.
         tool = spans.one("anthropic.custom_tool_use get_weather")
         assert cities == ["SF"]
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert attributes(tool)["anthropic.tool_result.content"] == "[]"
 
     @pytest.mark.parametrize("returned", [None, []], ids=["none", "empty_list"])
@@ -503,7 +503,7 @@ class TestToolRunnerSpans:
 
         tool = spans.one("anthropic.custom_tool_use get_weather")
         assert cities == ["SF"]
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert attributes(tool)["anthropic.tool_result.content"] == "[]"
 
     @pytest.mark.respx(base_url=base_url)
@@ -752,7 +752,7 @@ class TestToolRunnerSpans:
         runner.generate_tool_call_response()
 
         tool = spans.one("anthropic.custom_tool_use get_weather")
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert "anthropic.tool_result.content" not in attributes(tool)
 
     @pytest.mark.respx(base_url=base_url)
@@ -940,7 +940,7 @@ class TestToolRunnerSpans:
         runner.close()
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert len(spans.named("anthropic.messages.create")) == 2
         assert parent_id(spans.one("anthropic.custom_tool_use get_weather")) == span_id(tool_runner_span)
 
@@ -1112,7 +1112,7 @@ class TestToolRunnerSpans:
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.status.status_code == StatusCode.UNSET
-        assert spans.one("anthropic.custom_tool_use get_weather").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.custom_tool_use get_weather").status.status_code == StatusCode.UNSET
         assert len(spans.named("anthropic.messages.create")) == 1
 
     @pytest.mark.respx(base_url=base_url)
@@ -1129,7 +1129,7 @@ class TestToolRunnerSpans:
         await runner.close()
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert len(spans.named("anthropic.messages.create")) == 2
 
     @pytest.mark.respx(base_url=base_url, assert_all_called=False)
@@ -1264,7 +1264,7 @@ class TestToolRunnerSpans:
         assert stop_reasons == ["tool_use", "compaction", "end_turn"]
         assert "compaction" in json.loads(cast(Any, respx_mock.calls[1]).request.content)
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         calls = spans.named("anthropic.messages.create")
         assert len(calls) == 3
         for call in calls:
@@ -1308,7 +1308,7 @@ class TestToolRunnerSpans:
         assert steps == 3
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert parent_id(tool_runner_span) == span_id(spans.one("app.step_0"))
         for name in ("other._append_tool_results", "other._register_compaction_response"):
             assert parent_id(spans.one(name)) == span_id(tool_runner_span)
@@ -1349,7 +1349,7 @@ class TestToolRunnerSpans:
         assert steps == 3
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert parent_id(tool_runner_span) == span_id(spans.one("app.step_0"))
         for name in ("other._append_tool_results", "other._register_compaction_response"):
             assert parent_id(spans.one(name)) == span_id(tool_runner_span)
@@ -1482,11 +1482,11 @@ class TestToolRunnerSpans:
                 pass
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         calls = spans.named("anthropic.messages.create")
         assert len(calls) == 2
         assert all(parent_id(call) == span_id(tool_runner_span) for call in calls)
-        assert all(call.status.status_code == StatusCode.OK for call in calls)
+        assert all(call.status.status_code == StatusCode.UNSET for call in calls)
         # The runner streams with the stream helper, whose snapshot gives each call's output content.
         assert [json.loads(attributes(call)["gen_ai.output.messages"])[0]["parts"] for call in calls] == [
             [{"type": "tool_call", "id": "toolu_SF", "name": "get_weather", "arguments": {"city": "SF"}}],
@@ -1529,9 +1529,9 @@ class TestToolRunnerSpans:
             assert tool.status.status_code == StatusCode.ERROR
             assert attributes(tool)["error.type"] == "tool_error"
         else:
-            assert tool.status.status_code == StatusCode.OK
+            assert tool.status.status_code == StatusCode.UNSET
             assert "error.type" not in attributes(tool)
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         sent = json.loads(route.calls.last.request.content)["messages"][-1]["content"]
         assert [block["tool_use_id"] for block in sent] == [f"toolu_{city}"]
 
@@ -1565,9 +1565,9 @@ class TestToolRunnerSpans:
             assert tool.status.status_code == StatusCode.ERROR
             assert attributes(tool)["error.type"] == "tool_error"
         else:
-            assert tool.status.status_code == StatusCode.OK
+            assert tool.status.status_code == StatusCode.UNSET
             assert "error.type" not in attributes(tool)
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         sent = json.loads(route.calls.last.request.content)["messages"][-1]["content"]
         assert [block["tool_use_id"] for block in sent] == [f"toolu_{city}"]
 
@@ -1676,7 +1676,7 @@ class TestToolRunnerSpans:
         assert "error.type" not in attributes(tool_runner_span)
         tools = spans.named("anthropic.custom_tool_use get_weather")
         assert [attributes(tool)["gen_ai.tool.call.id"] for tool in tools] == ["toolu_SF", "toolu_LA"]
-        assert all(tool.status.status_code == StatusCode.OK for tool in tools)
+        assert all(tool.status.status_code == StatusCode.UNSET for tool in tools)
         assert all(parent_id(tool) == span_id(tool_runner_span) for tool in tools)
         # The close ended nothing while a tool ran, so the runner's span outlasted the tools' spans.
         assert all(tool.end_time <= tool_runner_span.end_time for tool in tools)  # type: ignore[operator]
@@ -1727,7 +1727,7 @@ class TestToolRunnerSpans:
         assert "error.type" not in attributes(tool_runner_span)
         tools = spans.named("anthropic.custom_tool_use get_weather")
         assert [attributes(tool)["gen_ai.tool.call.id"] for tool in tools] == ["toolu_SF", "toolu_LA"]
-        assert all(tool.status.status_code == StatusCode.OK for tool in tools)
+        assert all(tool.status.status_code == StatusCode.UNSET for tool in tools)
         assert all(parent_id(tool) == span_id(tool_runner_span) for tool in tools)
         # The close ended nothing while a tool ran, so the runner's span outlasted the tools' spans.
         assert all(tool.end_time <= tool_runner_span.end_time for tool in tools)  # type: ignore[operator]
@@ -1776,7 +1776,7 @@ class TestToolRunnerSpans:
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert [attributes(tool)["gen_ai.tool.call.id"] for tool in tool_spans(spans)] == ["toolu_1", "toolu_2"]
-        assert all(tool.status.status_code == StatusCode.OK for tool in tool_spans(spans))
+        assert all(tool.status.status_code == StatusCode.UNSET for tool in tool_spans(spans))
         assert all(parent_id(tool) == span_id(tool_runner_span) for tool in tool_spans(spans))
         # The close ended nothing while a member ran, so the runner's span outlasted the members' spans.
         assert all(tool.end_time <= tool_runner_span.end_time for tool in tool_spans(spans))  # type: ignore[operator]
@@ -1824,7 +1824,7 @@ class TestToolRunnerSpans:
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
         assert tool_runner_span.status.status_code == StatusCode.UNSET
         assert [attributes(tool)["gen_ai.tool.call.id"] for tool in tool_spans(spans)] == ["toolu_1", "toolu_2"]
-        assert all(tool.status.status_code == StatusCode.OK for tool in tool_spans(spans))
+        assert all(tool.status.status_code == StatusCode.UNSET for tool in tool_spans(spans))
         assert all(parent_id(tool) == span_id(tool_runner_span) for tool in tool_spans(spans))
         # The close ended nothing while a member ran, so the runner's span outlasted the members' spans.
         assert all(tool.end_time <= tool_runner_span.end_time for tool in tool_spans(spans))  # type: ignore[operator]
@@ -1846,9 +1846,9 @@ class TestToolRunnerSpans:
         await runner.until_done()
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         tool = spans.one("anthropic.custom_tool_use get_weather")
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert parent_id(tool) == span_id(tool_runner_span)
         assert len(spans.named("anthropic.messages.create")) == 2
 
@@ -1926,7 +1926,7 @@ class TestToolRunnerSpans:
 
         tool = spans.one("anthropic.mcp_tool_use get_weather")
         assert tool.kind == SpanKind.INTERNAL
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert parent_id(tool) == span_id(spans.one("anthropic.messages.tool_runner"))
         assert attributes(tool) == {
             "gen_ai.operation.name": "execute_tool",
@@ -1986,7 +1986,7 @@ class TestToolRunnerSpans:
         )
 
         tool_runner_span = spans.one("anthropic.messages.tool_runner")
-        assert tool_runner_span.status.status_code == StatusCode.OK
+        assert tool_runner_span.status.status_code == StatusCode.UNSET
         # Each member call that the toolset ran has one span, in the model's order.
         assert [span.name for span in tool_spans(spans)] == [
             "anthropic.custom_tool_use navigate",
@@ -1996,7 +1996,7 @@ class TestToolRunnerSpans:
             tool_spans(spans), ("navigate", "screenshot"), ("toolu_1", "toolu_2"), strict=True
         ):
             assert tool.kind == SpanKind.INTERNAL
-            assert tool.status.status_code == StatusCode.OK
+            assert tool.status.status_code == StatusCode.UNSET
             assert parent_id(tool) == span_id(tool_runner_span)
             # A toolset has no description, and the call's input and result are content.
             assert attributes(tool) == {
@@ -2065,7 +2065,7 @@ class TestToolRunnerSpans:
         assert json.loads(attributes(tool)["anthropic.tool_result.content"]) == [
             {"type": "text", "text": "member refused"}
         ]
-        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.UNSET
         # The runner answered the later member without running it, so that call has no span.
         sent = json.loads(route.calls.last.request.content)["messages"][-1]["content"]
         assert [(block["tool_use_id"], block["is_error"]) for block in sent] == [("toolu_1", True), ("toolu_2", True)]
@@ -2088,7 +2088,7 @@ class TestToolRunnerSpans:
             )
 
         assert tool_spans(spans) == []
-        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.OK
+        assert spans.one("anthropic.messages.tool_runner").status.status_code == StatusCode.UNSET
         sent = json.loads(route.calls.last.request.content)["messages"][-1]["content"]
         assert [(block["tool_use_id"], block["is_error"]) for block in sent] == [("toolu_1", True), ("toolu_2", True)]
 
@@ -2209,11 +2209,11 @@ class TestSessionToolRunnerSpans:
         # An agent-toolset tool (`agent.tool_use`) runs in an anthropic.tool_use span, an
         # application-defined tool (`agent.custom_tool_use`) in an anthropic.custom_tool_use span.
         custom = spans.one("anthropic.custom_tool_use get_weather")
-        assert custom.status.status_code == StatusCode.OK
+        assert custom.status.status_code == StatusCode.UNSET
         assert attributes(custom)["gen_ai.tool.call.id"] == "sevt_2"
         tool = spans.one("anthropic.tool_use echo")
         assert tool.kind == SpanKind.INTERNAL
-        assert tool.status.status_code == StatusCode.OK
+        assert tool.status.status_code == StatusCode.UNSET
         assert parent_id(tool) == span_id(app)
         assert attributes(tool)["gen_ai.tool.call.id"] == "sevt_1"
         assert json.loads(attributes(tool)["gen_ai.tool.call.arguments"]) == {"x": 42}

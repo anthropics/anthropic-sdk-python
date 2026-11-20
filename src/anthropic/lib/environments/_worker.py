@@ -554,13 +554,13 @@ class EnvironmentWorker:
             try:
                 with as_current_span(work_span.span):
                     await self._handle_item(work_item, environment_key, lease)
-                work_span.end(finished=lease.kept)
+                work_span.end()
             except Exception as e:  # noqa: BLE001
                 # One bad item fails that item, not the worker: the teardown
                 # already stopped or released it, so polling continues.
                 # Cancellation is a BaseException and still ends the loop.
                 # An error after the lease is gone is a side effect of losing it, not a failed item.
-                work_span.end(_first_cause(e) if lease.kept else None, finished=lease.kept)
+                work_span.end(_first_cause(e) if lease.kept else None)
                 log.error("work item failed work_id=%s error=%s", work_item.id, _flattened_causes(e))
             except BaseException as e:
                 work_span.end(e)
