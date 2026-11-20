@@ -53,7 +53,11 @@ class ActionURLs(SyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> UserProfileActionURL:
         """
-        Create Action URL
+        Create a link that sends the profile's end customer to the Verification Portal.
+
+        See
+        [Send an end customer a link to the Verification Portal](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal)
+        for when to create the link and what the end customer sees.
 
         Args:
           user_profile_id: The ID of the user profile the action is for (`uprof_...`).
@@ -128,7 +132,11 @@ class AsyncActionURLs(AsyncAPIResource):
         timeout: float | httpx2.Timeout | None | NotGiven = not_given,
     ) -> UserProfileActionURL:
         """
-        Create Action URL
+        Create a link that sends the profile's end customer to the Verification Portal.
+
+        See
+        [Send an end customer a link to the Verification Portal](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal)
+        for when to create the link and what the end customer sees.
 
         Args:
           user_profile_id: The ID of the user profile the action is for (`uprof_...`).

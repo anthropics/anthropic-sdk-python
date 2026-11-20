@@ -178,6 +178,9 @@ class Beta(SyncAPIResource):
 
     @cached_property
     def user_profiles(self) -> UserProfiles:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return UserProfiles(self._client)
 
     @cached_property
@@ -263,6 +266,9 @@ class AsyncBeta(AsyncAPIResource):
 
     @cached_property
     def user_profiles(self) -> AsyncUserProfiles:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return AsyncUserProfiles(self._client)
 
     @cached_property
@@ -347,6 +353,9 @@ class BetaWithRawResponse:
 
     @cached_property
     def user_profiles(self) -> UserProfilesWithRawResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return UserProfilesWithRawResponse(self._beta.user_profiles)
 
     @cached_property
@@ -412,6 +421,9 @@ class AsyncBetaWithRawResponse:
 
     @cached_property
     def user_profiles(self) -> AsyncUserProfilesWithRawResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return AsyncUserProfilesWithRawResponse(self._beta.user_profiles)
 
     @cached_property
@@ -477,6 +489,9 @@ class BetaWithStreamingResponse:
 
     @cached_property
     def user_profiles(self) -> UserProfilesWithStreamingResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return UserProfilesWithStreamingResponse(self._beta.user_profiles)
 
     @cached_property
@@ -542,6 +557,9 @@ class AsyncBetaWithStreamingResponse:
 
     @cached_property
     def user_profiles(self) -> AsyncUserProfilesWithStreamingResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         return AsyncUserProfilesWithStreamingResponse(self._beta.user_profiles)
 
     @cached_property
