@@ -51,6 +51,7 @@ class ToolError(Exception):
         if isinstance(content, str):
             message = content
         else:
+            content = list(content)
             parts: list[str] = []
             for block in content:
                 text = block.get("text")
