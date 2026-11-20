@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
@@ -43,6 +44,8 @@ from .lib.credentials import (
     default_credentials,
 )
 from .lib.credentials._auth import (
+    BearerTokenAuth,
+    AsyncBearerTokenAuth,
     warn_env_static_shadows_auto_discovery,
     warn_env_api_key_shadows_env_auth_token,
 )
@@ -153,11 +156,12 @@ class Anthropic(SyncAPIClient):
 
     # client options
     api_key: str | None
+    _auth_token_getter: Callable[[], str] | None
     auth_token: str | None
     webhook_key: str | None
     credentials: AccessTokenProvider | None
     _token_cache: TokenCache | None
-    _custom_auth: AccessTokenAuth | None
+    _custom_auth: httpx2.Auth | None
     _credential_headers: Mapping[str, str]
     _unchosen_base_url: httpx2.URL | None
 
@@ -165,7 +169,7 @@ class Anthropic(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: str | Callable[[], str] | None = None,
         credentials: AccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -231,7 +235,8 @@ class Anthropic(SyncAPIClient):
         ):
             api_key, auth_token = static_credential_from_env(warn=_is_base_client(self))
         self.api_key = api_key
-        self.auth_token = auth_token
+        self._auth_token_getter = auth_token if callable(auth_token) else None
+        self.auth_token = auth_token if isinstance(auth_token, str) else None
 
         if webhook_key is None:
             webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
@@ -293,7 +298,12 @@ class Anthropic(SyncAPIClient):
             self._token_cache = _token_cache
         else:
             self._token_cache = TokenCache(credentials) if credentials is not None else None
-        self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
+        if self._auth_token_getter is not None:
+            self._custom_auth = BearerTokenAuth(self._auth_token_getter)
+        elif self._token_cache is not None:
+            self._custom_auth = AccessTokenAuth(self._token_cache)
+        else:
+            self._custom_auth = None
 
         super().__init__(
             version=__version__,
@@ -401,18 +411,14 @@ class Anthropic(SyncAPIClient):
 
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
-        # --- credentials support (hand-written, upstream to Stainless) ---
-        # The token cache *may* inject an Authorization header per-request via
-        # custom_auth, so validation that checks only default_headers would
-        # false-negative when credentials are the only auth source. Defer to
-        # the static-header check below — if a static api_key or auth_token
-        # is set it will already be on default_headers; otherwise custom_auth
-        # will fill in Authorization at request time.
-        if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
+        if (
+            (self._token_cache is not None or self._auth_token_getter is not None)
+            and not headers.get("X-Api-Key")
+            and not headers.get("Authorization")
+        ):
             return
-        # --- end credentials support ---
+
         if headers.get("Authorization") or headers.get("X-Api-Key"):
-            # valid
             return
 
         if headers.get("Authorization") or "authorization" in omitted:
@@ -421,8 +427,6 @@ class Anthropic(SyncAPIClient):
         raise TypeError(
             '"Could not resolve authentication method. Expected one of api_key, auth_token, or credentials to be set. Or for the `Authorization` header to be explicitly omitted"'
         )
-
-    # --- credentials support (hand-written, upstream to Stainless) ---
     @property
     @override
     def custom_auth(self) -> httpx2.Auth | None:
@@ -454,7 +458,7 @@ class Anthropic(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: str | Callable[[], str] | None = None,
         credentials: AccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -504,7 +508,11 @@ class Anthropic(SyncAPIClient):
             keeps_credential = isinstance(credentials, NotGiven)
             # The attributes can be assigned to, so inherit only the credential this client sends.
             api_key = self.api_key
-            auth_token = self.auth_token if api_key is None else None
+            auth_token = (
+                       self._auth_token_getter
+                       if api_key is None and self._auth_token_getter is not None
+                       else self.auth_token if api_key is None else None
+            )
             if isinstance(credentials, NotGiven) and api_key is None and auth_token is None and _is_base_client(self):
                 resolved_credentials = self.credentials
         inherits_provider = isinstance(credentials, NotGiven) and resolved_credentials is not None
@@ -568,11 +576,12 @@ class AsyncAnthropic(AsyncAPIClient):
 
     # client options
     api_key: str | None
+    _auth_token_getter: Callable[[], Awaitable[str]] | None
     auth_token: str | None
     webhook_key: str | None
     credentials: AccessTokenProvider | AsyncAccessTokenProvider | None
     _token_cache: TokenCache | None
-    _custom_auth: AccessTokenAuth | None
+    _custom_auth: httpx2.Auth | None
     _credential_headers: Mapping[str, str]
     _unchosen_base_url: httpx2.URL | None
 
@@ -580,7 +589,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: str | Callable[[], Awaitable[str]] | None = None,
         credentials: AccessTokenProvider | AsyncAccessTokenProvider | None = None,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -646,7 +655,8 @@ class AsyncAnthropic(AsyncAPIClient):
         ):
             api_key, auth_token = static_credential_from_env(warn=_is_base_client(self))
         self.api_key = api_key
-        self.auth_token = auth_token
+        self._auth_token_getter = auth_token if callable(auth_token) else None
+        self.auth_token = auth_token if isinstance(auth_token, str) else None
 
         if webhook_key is None:
             webhook_key = os.environ.get("ANTHROPIC_WEBHOOK_SIGNING_KEY")
@@ -701,7 +711,12 @@ class AsyncAnthropic(AsyncAPIClient):
             self._token_cache = _token_cache
         else:
             self._token_cache = TokenCache(credentials) if credentials is not None else None
-        self._custom_auth = AccessTokenAuth(self._token_cache) if self._token_cache is not None else None
+        if self._auth_token_getter is not None:
+            self._custom_auth = AsyncBearerTokenAuth(self._auth_token_getter)
+        elif self._token_cache is not None:
+            self._custom_auth = AccessTokenAuth(self._token_cache)
+        else:
+            self._custom_auth = None
 
         super().__init__(
             version=__version__,
@@ -809,10 +824,12 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @override
     def _validate_headers(self, headers: httpx2.Headers, omitted: frozenset[str]) -> None:
-        # --- credentials support (hand-written, upstream to Stainless) ---
-        if self._token_cache is not None and not headers.get("X-Api-Key") and not headers.get("Authorization"):
+        if (
+            (self._token_cache is not None or self._auth_token_getter is not None)
+            and not headers.get("X-Api-Key")
+            and not headers.get("Authorization")
+        ):
             return
-        # --- end credentials support ---
         if headers.get("Authorization") or headers.get("X-Api-Key"):
             # valid
             return
@@ -856,7 +873,7 @@ class AsyncAnthropic(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        auth_token: str | None = None,
+        auth_token: str | Callable[[], Awaitable[str]] | None = None,
         credentials: AccessTokenProvider | AsyncAccessTokenProvider | None | NotGiven = not_given,
         config: Mapping[str, Any] | None = None,
         profile: str | None = None,
@@ -906,7 +923,11 @@ class AsyncAnthropic(AsyncAPIClient):
             keeps_credential = isinstance(credentials, NotGiven)
             # The attributes can be assigned to, so inherit only the credential this client sends.
             api_key = self.api_key
-            auth_token = self.auth_token if api_key is None else None
+            auth_token = (
+                self._auth_token_getter
+                if api_key is None and self._auth_token_getter is not None
+                else self.auth_token if api_key is None else None
+            )
             if isinstance(credentials, NotGiven) and api_key is None and auth_token is None and _is_base_client(self):
                 resolved_credentials = self.credentials
         inherits_provider = isinstance(credentials, NotGiven) and resolved_credentials is not None
