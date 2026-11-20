@@ -8,6 +8,7 @@ from typing_extensions import Literal, overload
 import httpx2
 import pydantic
 
+from ..._data import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ...types import (
     DiagnosticsParam,
     ThinkingConfigParam,
@@ -66,32 +67,6 @@ from ...types.message_count_tokens_tool_param import MessageCountTokensToolParam
 from ...types.message_create_params_container_param import MessageCreateParamsContainerParam
 
 __all__ = ["Messages", "AsyncMessages"]
-
-
-DEPRECATED_MODELS = {
-    "claude-1.3": "November 6th, 2024",
-    "claude-1.3-100k": "November 6th, 2024",
-    "claude-instant-1.1": "November 6th, 2024",
-    "claude-instant-1.1-100k": "November 6th, 2024",
-    "claude-instant-1.2": "November 6th, 2024",
-    "claude-3-sonnet-20240229": "July 21st, 2025",
-    "claude-3-opus-20240229": "January 5th, 2026",
-    "claude-2.1": "July 21st, 2025",
-    "claude-2.0": "July 21st, 2025",
-    "claude-3-7-sonnet-latest": "February 19th, 2026",
-    "claude-3-7-sonnet-20250219": "February 19th, 2026",
-    "claude-3-5-haiku-latest": "February 19th, 2026",
-    "claude-3-5-haiku-20241022": "February 19th, 2026",
-    "claude-opus-4-0": "June 15th, 2026",
-    "claude-opus-4-20250514": "June 15th, 2026",
-    "claude-sonnet-4-0": "June 15th, 2026",
-    "claude-sonnet-4-20250514": "June 15th, 2026",
-    "claude-mythos-preview": "June 30th, 2026",
-    "claude-sonnet-4-5": "November 30th, 2026",
-    "claude-sonnet-4-5-20250929": "November 30th, 2026",
-}
-
-MODELS_TO_WARN_WITH_THINKING_ENABLED = ["claude-opus-4-6", "claude-mythos-preview"]
 
 
 class Messages(SyncAPIResource):

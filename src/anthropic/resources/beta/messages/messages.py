@@ -16,6 +16,7 @@ from .batches import (
     BatchesWithStreamingResponse,
     AsyncBatchesWithStreamingResponse,
 )
+from ...._data import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ...._types import Body, Omit, Query, Headers, NotGiven, SequenceNotStr, omit, not_given
 from ...._utils import is_given, required_args, strip_not_given
 from ...._compat import cached_property
@@ -49,7 +50,6 @@ from ...._base_client import (
 )
 from ....lib._tracing import messages_create_request_attributes
 from ....lib.streaming import BetaMessageStreamManager, BetaAsyncMessageStreamManager
-from ...messages.messages import DEPRECATED_MODELS, MODELS_TO_WARN_WITH_THINKING_ENABLED
 from ....types.model_param import ModelParam
 from ....lib.threads._params import given, turn_overrides
 from ....lib.tools._toolsets import BetaRunnableToolset, BetaAsyncRunnableToolset
