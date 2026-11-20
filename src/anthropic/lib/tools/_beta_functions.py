@@ -269,6 +269,17 @@ class BaseFunctionTool(Generic[CallableT]):
         return TypeAdapter(self._func_with_validate)
 
 
+
+def _validation_error_summary(exc: pydantic.ValidationError) -> str:
+    """Short field errors for the model; values are not echoed."""
+    parts: list[str] = []
+    for error in exc.errors():
+        loc = ".".join(str(part) for part in error.get("loc", ()))
+        msg = (error.get("msg") or "invalid input").splitlines()[0]
+        parts.append(f"{loc}: {msg}" if loc else msg)
+    return "; ".join(parts) or "invalid input"
+
+
 class BetaFunctionTool(BaseFunctionTool[FunctionT]):
     def call(self, input: object) -> BetaFunctionToolResultType:
         if iscoroutinefunction(self.func):
@@ -280,7 +291,7 @@ class BetaFunctionTool(BaseFunctionTool[FunctionT]):
         try:
             return self._func_with_validate(**cast(Any, input))
         except pydantic.ValidationError as e:
-            raise ValueError(f"Invalid arguments for function {self.name}") from e
+            raise ValueError(f"Invalid arguments for function {self.name}: {_validation_error_summary(e)}") from e
 
 
 class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
@@ -294,7 +305,7 @@ class BetaAsyncFunctionTool(BaseFunctionTool[AsyncFunctionT]):
         try:
             return await self._func_with_validate(**cast(Any, input))
         except pydantic.ValidationError as e:
-            raise ValueError(f"Invalid arguments for function {self.name}") from e
+            raise ValueError(f"Invalid arguments for function {self.name}: {_validation_error_summary(e)}") from e
 
 
 def _is_sync_cm_factory(fn: object) -> bool:
