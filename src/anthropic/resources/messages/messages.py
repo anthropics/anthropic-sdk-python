@@ -440,6 +440,8 @@ class Messages(SyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -808,6 +810,8 @@ class Messages(SyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -1175,6 +1179,8 @@ class Messages(SyncAPIResource):
           CompactionTooManyToolReferencesError:
 
           CompactionToolChangesMismatchError:
+
+          ImageDimensionsTooLargeError:
 
           OrganizationOnHoldError:
 
@@ -2240,6 +2246,8 @@ class AsyncMessages(AsyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -2608,6 +2616,8 @@ class AsyncMessages(AsyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -2975,6 +2985,8 @@ class AsyncMessages(AsyncAPIResource):
           CompactionTooManyToolReferencesError:
 
           CompactionToolChangesMismatchError:
+
+          ImageDimensionsTooLargeError:
 
           OrganizationOnHoldError:
 
