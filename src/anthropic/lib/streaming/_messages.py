@@ -26,9 +26,11 @@ from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from .._tracing import share_message_snapshot, withhold_message_snapshot
 from ..._streaming import Stream, AsyncStream
+from ...types.usage import Usage
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.parsed_message import ParsedMessage, ParsedContentBlock
+from ...types.message_delta_usage import MessageDeltaUsage
 
 
 class MessageStream(Generic[ResponseFormatT]):
@@ -539,20 +541,32 @@ def accumulate_event(
         current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
-        if event.usage.input_tokens is not None:
-            current_snapshot.usage.input_tokens = event.usage.input_tokens
-        if event.usage.cache_creation_input_tokens is not None:
-            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-        if event.usage.cache_read_input_tokens is not None:
-            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-        if event.usage.server_tool_use is not None:
-            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-        if event.usage.output_tokens_details is not None:
-            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
+        # `message_start` may omit `usage` (the streaming docs' thinking example does), and
+        # `construct()` fills the missing field with `None`. Seed it from the first delta that
+        # carries usage, and let a stream that never carries it finish with `usage=None`
+        # rather than raising an `AttributeError` mid-stream.
+        delta_usage = cast("MessageDeltaUsage | None", event.usage)
+        if delta_usage is not None:
+            snapshot_usage = cast("Usage | None", current_snapshot.usage)
+            if snapshot_usage is None:
+                snapshot_usage = Usage.construct(**cast(Any, delta_usage.to_dict()))
+                current_snapshot.usage = snapshot_usage
+
+            snapshot_usage.output_tokens = delta_usage.output_tokens
+
+            # Usage counts on a message_delta are cumulative totals, so they overwrite rather
+            # than add; optional ones are omitted when not applicable, in which case the
+            # message_start value must survive.
+            if delta_usage.input_tokens is not None:
+                snapshot_usage.input_tokens = delta_usage.input_tokens
+            if delta_usage.cache_creation_input_tokens is not None:
+                snapshot_usage.cache_creation_input_tokens = delta_usage.cache_creation_input_tokens
+            if delta_usage.cache_read_input_tokens is not None:
+                snapshot_usage.cache_read_input_tokens = delta_usage.cache_read_input_tokens
+            if delta_usage.server_tool_use is not None:
+                snapshot_usage.server_tool_use = delta_usage.server_tool_use
+            if delta_usage.output_tokens_details is not None:
+                snapshot_usage.output_tokens_details = delta_usage.output_tokens_details
 
     return current_snapshot

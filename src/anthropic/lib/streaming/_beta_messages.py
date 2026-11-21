@@ -31,7 +31,9 @@ from ..._streaming import Stream, AsyncStream
 from ...types.beta import BetaRawMessageStreamEvent
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
+from ...types.beta.beta_usage import BetaUsage
 from ...types.beta.parsed_beta_message import ParsedBetaMessage, ParsedBetaContentBlock
+from ...types.beta.beta_message_delta_usage import BetaMessageDeltaUsage
 
 
 class BetaMessageStream(Generic[ResponseFormatT]):
@@ -585,7 +587,6 @@ def accumulate_event(
         current_snapshot.stop_details = event.delta.stop_details
         if event.delta.container is not None:
             current_snapshot.container = event.delta.container
-        current_snapshot.usage.output_tokens = event.usage.output_tokens
         if event.context_management is not None:
             current_snapshot.context_management = event.context_management
         # only sent on `message_delta` after a mid-stream fallback, in which case it
@@ -593,22 +594,35 @@ def accumulate_event(
         if event.input_transformations is not None:
             current_snapshot.input_transformations = event.input_transformations
 
-        # Usage counts on a message_delta are cumulative totals, so they overwrite rather
-        # than add; optional ones are omitted when not applicable, in which case the
-        # message_start value must survive.
-        if event.usage.input_tokens is not None:
-            current_snapshot.usage.input_tokens = event.usage.input_tokens
-        if event.usage.cache_creation_input_tokens is not None:
-            current_snapshot.usage.cache_creation_input_tokens = event.usage.cache_creation_input_tokens
-        if event.usage.cache_read_input_tokens is not None:
-            current_snapshot.usage.cache_read_input_tokens = event.usage.cache_read_input_tokens
-        if event.usage.server_tool_use is not None:
-            current_snapshot.usage.server_tool_use = event.usage.server_tool_use
-        if event.usage.output_tokens_details is not None:
-            current_snapshot.usage.output_tokens_details = event.usage.output_tokens_details
-        if event.usage.iterations is not None:
-            current_snapshot.usage.iterations = event.usage.iterations
-        if event.usage.fallback_credit is not None:
-            current_snapshot.usage.fallback_credit = event.usage.fallback_credit
+        # `message_start` may omit `usage` (the streaming docs' thinking example does), and
+        # `construct()` fills the missing field with `None`. Seed it from the first delta that
+        # carries usage, and let a stream that never carries it finish with `usage=None`
+        # rather than raising an `AttributeError` mid-stream.
+        delta_usage = cast("BetaMessageDeltaUsage | None", event.usage)
+        if delta_usage is not None:
+            snapshot_usage = cast("BetaUsage | None", current_snapshot.usage)
+            if snapshot_usage is None:
+                snapshot_usage = BetaUsage.construct(**cast(Any, delta_usage.to_dict()))
+                current_snapshot.usage = snapshot_usage
+
+            snapshot_usage.output_tokens = delta_usage.output_tokens
+
+            # Usage counts on a message_delta are cumulative totals, so they overwrite rather
+            # than add; optional ones are omitted when not applicable, in which case the
+            # message_start value must survive.
+            if delta_usage.input_tokens is not None:
+                snapshot_usage.input_tokens = delta_usage.input_tokens
+            if delta_usage.cache_creation_input_tokens is not None:
+                snapshot_usage.cache_creation_input_tokens = delta_usage.cache_creation_input_tokens
+            if delta_usage.cache_read_input_tokens is not None:
+                snapshot_usage.cache_read_input_tokens = delta_usage.cache_read_input_tokens
+            if delta_usage.server_tool_use is not None:
+                snapshot_usage.server_tool_use = delta_usage.server_tool_use
+            if delta_usage.output_tokens_details is not None:
+                snapshot_usage.output_tokens_details = delta_usage.output_tokens_details
+            if delta_usage.iterations is not None:
+                snapshot_usage.iterations = delta_usage.iterations
+            if delta_usage.fallback_credit is not None:
+                snapshot_usage.fallback_credit = delta_usage.fallback_credit
 
     return current_snapshot
