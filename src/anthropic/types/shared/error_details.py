@@ -46,6 +46,7 @@ from .request_body_encoding_invalid_error_details import RequestBodyEncodingInva
 from ..available_tools_limit_exceeded_error_details import AvailableToolsLimitExceededErrorDetails
 from ..beta.beta_environment_archived_error_details import BetaEnvironmentArchivedErrorDetails
 from .organization_type_not_supported_error_details import OrganizationTypeNotSupportedErrorDetails
+from .workspace_human_review_disabled_error_details import WorkspaceHumanReviewDisabledErrorDetails
 from ..beta.beta_environment_not_found_error_details import BetaEnvironmentNotFoundErrorDetails
 from ..compaction_nothing_to_summarize_error_details import CompactionNothingToSummarizeErrorDetails
 from ..compaction_tool_changes_mismatch_error_details import CompactionToolChangesMismatchErrorDetails
@@ -221,6 +222,7 @@ ErrorDetails: TypeAlias = Annotated[
         RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,
         CompactionUnavailableErrorDetails,
+        WorkspaceHumanReviewDisabledErrorDetails,
         StorageQuotaExceededErrorDetails,
         FileNotDownloadableErrorDetails,
         FileExpiredErrorDetails,

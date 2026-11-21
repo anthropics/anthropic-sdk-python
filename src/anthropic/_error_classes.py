@@ -90,6 +90,7 @@ from .types.organization.storage_profile_mismatch_error import StorageProfileMis
 from .types.beta_organization_not_enrolled_in_beta_error import BetaOrganizationNotEnrolledInBetaError
 from .types.organization.cannot_remove_last_member_error import CannotRemoveLastMemberError
 from .types.shared.organization_type_not_supported_error import OrganizationTypeNotSupportedError
+from .types.shared.workspace_human_review_disabled_error import WorkspaceHumanReviewDisabledError
 from .types.beta.organization.beta_skill_name_taken_error import BetaSkillNameTakenError
 from .types.organization.org_api_key_limit_exceeded_error import OrgAPIKeyLimitExceededError
 from .types.organization.workspace_policy_violation_error import WorkspacePolicyViolationError
@@ -269,6 +270,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "user_profile_not_found"): UserProfileNotFoundError,
     (400, "user_profile_required"): UserProfileRequiredError,
     (400, "workspace_api_key_limit_exceeded"): WorkspaceAPIKeyLimitExceededError,
+    (400, "workspace_human_review_disabled"): WorkspaceHumanReviewDisabledError,
     (400, "workspace_member_limit_exceeded"): WorkspaceMemberLimitExceededError,
     (400, "workspace_policy_violation"): WorkspacePolicyViolationError,
     (402, "linked_organization_billing_unavailable"): LinkedOrganizationBillingUnavailableError,
