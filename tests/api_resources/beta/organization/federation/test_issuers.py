@@ -39,7 +39,7 @@ class TestIssuers:
                 "discovery_base": "discovery_base",
             },
             max_jwt_lifetime_seconds=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -84,7 +84,7 @@ class TestIssuers:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -144,7 +144,7 @@ class TestIssuers:
             jwks_polling_disabled=True,
             max_jwt_lifetime_seconds=1,
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -195,7 +195,7 @@ class TestIssuers:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
@@ -236,7 +236,7 @@ class TestIssuers:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -301,7 +301,7 @@ class TestAsyncIssuers:
                 "discovery_base": "discovery_base",
             },
             max_jwt_lifetime_seconds=1,
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -346,7 +346,7 @@ class TestAsyncIssuers:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.retrieve(
             federation_issuer_id="federation_issuer_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -406,7 +406,7 @@ class TestAsyncIssuers:
             jwks_polling_disabled=True,
             max_jwt_lifetime_seconds=1,
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -457,7 +457,7 @@ class TestAsyncIssuers:
             include_archived=True,
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaFederationIssuer], issuer, path=["response"])
@@ -498,7 +498,7 @@ class TestAsyncIssuers:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.archive(
             federation_issuer_id="federation_issuer_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])

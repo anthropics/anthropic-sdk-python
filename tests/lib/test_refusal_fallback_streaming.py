@@ -504,6 +504,7 @@ class TestEdgeCases:
         delta = next(e for e in events if e.type == "message_delta")
         assert delta.delta.stop_reason == "refusal"
         assert delta.delta.stop_details is not None
+        assert delta.delta.stop_details.type == "refusal"
         assert delta.delta.stop_details.fallback_credit_token is not None
         assert delta.delta.stop_details.recommended_model is None
         assert [(i.type, i.model) for i in (delta.usage.iterations or [])] == [  # type: ignore[union-attr]
@@ -531,6 +532,7 @@ class TestEdgeCases:
         # a capacity failure (429/529) stamps the failed model as the recommendation
         delta = next(e for e in events if e.type == "message_delta")
         assert delta.delta.stop_details is not None
+        assert delta.delta.stop_details.type == "refusal"
         assert delta.delta.stop_details.recommended_model == FALLBACK_MODEL
 
     @pytest.mark.respx(base_url=base_url)
@@ -875,6 +877,7 @@ class TestFallbackChain:
         assert delta.delta.stop_reason == "refusal"
         # The fresh token reaches the client for a manual retry.
         assert delta.delta.stop_details is not None
+        assert delta.delta.stop_details.type == "refusal"
         assert delta.delta.stop_details.fallback_credit_token == "tok_b"
         assert [(i.type, i.model) for i in (delta.usage.iterations or [])] == [  # type: ignore[union-attr]
             ("message", "claude-fable-5"),

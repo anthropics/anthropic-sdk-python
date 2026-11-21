@@ -12,6 +12,7 @@ from .data_residency import DataResidency as DataResidency
 from .workspace_role import WorkspaceRole as WorkspaceRole
 from .analytics_order import AnalyticsOrder as AnalyticsOrder
 from .service_account import ServiceAccount as ServiceAccount
+from .rbac_role_source import RBACRoleSource as RBACRoleSource
 from .user_list_params import UserListParams as UserListParams
 from .workspace_member import WorkspaceMember as WorkspaceMember
 from .organization_user import OrganizationUser as OrganizationUser
@@ -45,6 +46,7 @@ from .api_key_workspace_scope import APIKeyWorkspaceScope as APIKeyWorkspaceScop
 from .aws_external_key_config import AWSExternalKeyConfig as AWSExternalKeyConfig
 from .gcp_external_key_config import GCPExternalKeyConfig as GCPExternalKeyConfig
 from .organization_rate_limit import OrganizationRateLimit as OrganizationRateLimit
+from .rbac_role_source_custom import RBACRoleSourceCustom as RBACRoleSourceCustom
 from .workspace_create_params import WorkspaceCreateParams as WorkspaceCreateParams
 from .workspace_update_params import WorkspaceUpdateParams as WorkspaceUpdateParams
 from .analytics_cowork_metrics import AnalyticsCoworkMetrics as AnalyticsCoworkMetrics
@@ -61,6 +63,7 @@ from .analytics_science_metrics import AnalyticsScienceMetrics as AnalyticsScien
 from .azure_external_key_config import AzureExternalKeyConfig as AzureExternalKeyConfig
 from .compliance_settings_state import ComplianceSettingsState as ComplianceSettingsState
 from .no_billing_workspace_role import NoBillingWorkspaceRole as NoBillingWorkspaceRole
+from .rbac_role_source_built_in import RBACRoleSourceBuiltIn as RBACRoleSourceBuiltIn
 from .analytics_project_activity import AnalyticsProjectActivity as AnalyticsProjectActivity
 from .analytics_project_group_by import AnalyticsProjectGroupBy as AnalyticsProjectGroupBy
 from .api_key_organization_scope import APIKeyOrganizationScope as APIKeyOrganizationScope

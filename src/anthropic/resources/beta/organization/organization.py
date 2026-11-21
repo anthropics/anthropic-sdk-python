@@ -124,6 +124,14 @@ from .workspaces.workspaces import (
     WorkspacesWithStreamingResponse,
     AsyncWorkspacesWithStreamingResponse,
 )
+from .claude_code.claude_code import (
+    ClaudeCode,
+    AsyncClaudeCode,
+    ClaudeCodeWithRawResponse,
+    AsyncClaudeCodeWithRawResponse,
+    ClaudeCodeWithStreamingResponse,
+    AsyncClaudeCodeWithStreamingResponse,
+)
 from .rbac_groups.rbac_groups import (
     RBACGroups,
     AsyncRBACGroups,
@@ -229,6 +237,10 @@ class Organization(SyncAPIResource):
     @cached_property
     def webhooks(self) -> Webhooks:
         return Webhooks(self._client)
+
+    @cached_property
+    def claude_code(self) -> ClaudeCode:
+        return ClaudeCode(self._client)
 
     @cached_property
     def claude_tag(self) -> ClaudeTag:
@@ -350,6 +362,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def webhooks(self) -> AsyncWebhooks:
         return AsyncWebhooks(self._client)
+
+    @cached_property
+    def claude_code(self) -> AsyncClaudeCode:
+        return AsyncClaudeCode(self._client)
 
     @cached_property
     def claude_tag(self) -> AsyncClaudeTag:
@@ -480,6 +496,10 @@ class OrganizationWithRawResponse:
         return WebhooksWithRawResponse(self._organization.webhooks)
 
     @cached_property
+    def claude_code(self) -> ClaudeCodeWithRawResponse:
+        return ClaudeCodeWithRawResponse(self._organization.claude_code)
+
+    @cached_property
     def claude_tag(self) -> ClaudeTagWithRawResponse:
         return ClaudeTagWithRawResponse(self._organization.claude_tag)
 
@@ -559,6 +579,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def webhooks(self) -> AsyncWebhooksWithRawResponse:
         return AsyncWebhooksWithRawResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_code(self) -> AsyncClaudeCodeWithRawResponse:
+        return AsyncClaudeCodeWithRawResponse(self._organization.claude_code)
 
     @cached_property
     def claude_tag(self) -> AsyncClaudeTagWithRawResponse:
@@ -642,6 +666,10 @@ class OrganizationWithStreamingResponse:
         return WebhooksWithStreamingResponse(self._organization.webhooks)
 
     @cached_property
+    def claude_code(self) -> ClaudeCodeWithStreamingResponse:
+        return ClaudeCodeWithStreamingResponse(self._organization.claude_code)
+
+    @cached_property
     def claude_tag(self) -> ClaudeTagWithStreamingResponse:
         return ClaudeTagWithStreamingResponse(self._organization.claude_tag)
 
@@ -721,6 +749,10 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def webhooks(self) -> AsyncWebhooksWithStreamingResponse:
         return AsyncWebhooksWithStreamingResponse(self._organization.webhooks)
+
+    @cached_property
+    def claude_code(self) -> AsyncClaudeCodeWithStreamingResponse:
+        return AsyncClaudeCodeWithStreamingResponse(self._organization.claude_code)
 
     @cached_property
     def claude_tag(self) -> AsyncClaudeTagWithStreamingResponse:

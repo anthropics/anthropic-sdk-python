@@ -1,32 +1,8 @@
-from typing import Union
-from typing_extensions import Literal, Annotated, TypeAlias
-
-from ...._models import BaseModel, UnionDiscriminator
-from .beta_managed_agents_retry_status_retrying import BetaManagedAgentsRetryStatusRetrying
-from .beta_managed_agents_retry_status_terminal import BetaManagedAgentsRetryStatusTerminal
-from .beta_managed_agents_retry_status_exhausted import BetaManagedAgentsRetryStatusExhausted
+from .beta_managed_agents_billing_error_object import RetryStatus, BetaManagedAgentsBillingErrorObject
 
 __all__ = ["BetaManagedAgentsBillingError", "RetryStatus"]
 
-RetryStatus: TypeAlias = Annotated[
-    Union[
-        BetaManagedAgentsRetryStatusRetrying,
-        BetaManagedAgentsRetryStatusExhausted,
-        BetaManagedAgentsRetryStatusTerminal,
-    ],
-    UnionDiscriminator("type"),
-]
-
-
-class BetaManagedAgentsBillingError(BaseModel):
-    """
-    The caller's organization or workspace cannot make model requests — out of credits or spend limit reached. Retrying with the same credentials will not succeed; the caller must resolve the billing state.
-    """
-
-    message: str
-    """Human-readable error description."""
-
-    retry_status: RetryStatus
-    """What the client should do next."""
-
-    type: Literal["billing_error"]
+BetaManagedAgentsBillingError = BetaManagedAgentsBillingErrorObject
+"""
+Deprecated: BetaManagedAgentsBillingError has been renamed to BetaManagedAgentsBillingErrorObject
+"""

@@ -78,6 +78,14 @@ from .workspaces import (
     WorkspacesWithStreamingResponse,
     AsyncWorkspacesWithStreamingResponse,
 )
+from .claude_code import (
+    ClaudeCode,
+    AsyncClaudeCode,
+    ClaudeCodeWithRawResponse,
+    AsyncClaudeCodeWithRawResponse,
+    ClaudeCodeWithStreamingResponse,
+    AsyncClaudeCodeWithStreamingResponse,
+)
 from .rate_limits import (
     RateLimits,
     AsyncRateLimits,
@@ -254,6 +262,12 @@ __all__ = [
     "AsyncWebhooksWithRawResponse",
     "WebhooksWithStreamingResponse",
     "AsyncWebhooksWithStreamingResponse",
+    "ClaudeCode",
+    "AsyncClaudeCode",
+    "ClaudeCodeWithRawResponse",
+    "AsyncClaudeCodeWithRawResponse",
+    "ClaudeCodeWithStreamingResponse",
+    "AsyncClaudeCodeWithStreamingResponse",
     "ClaudeTag",
     "AsyncClaudeTag",
     "ClaudeTagWithRawResponse",

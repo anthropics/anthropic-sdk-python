@@ -80,6 +80,7 @@ from ....types.beta.beta_tool_union_param import BetaToolUnionParam
 from ....types.beta.beta_diagnostics_param import BetaDiagnosticsParam
 from ....types.beta.beta_tool_choice_param import BetaToolChoiceParam
 from ....types.beta.beta_output_config_param import BetaOutputConfigParam
+from ....types.beta.beta_billing_policy_param import BetaBillingPolicyParam
 from ....types.beta.beta_message_thread_param import BetaMessageThreadParam
 from ....types.beta.beta_message_tokens_count import BetaMessageTokensCount
 from ....types.beta.beta_thinking_config_param import BetaThinkingConfigParam
@@ -128,6 +129,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -256,6 +258,20 @@ class Messages(SyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -504,6 +520,8 @@ class Messages(SyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -522,11 +540,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -546,6 +576,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -683,6 +714,20 @@ class Messages(SyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -921,6 +966,8 @@ class Messages(SyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -939,11 +986,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -963,6 +1022,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1100,6 +1160,20 @@ class Messages(SyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -1338,6 +1412,8 @@ class Messages(SyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -1356,11 +1432,23 @@ class Messages(SyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -1379,6 +1467,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1446,6 +1535,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -1488,6 +1578,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1573,6 +1664,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -1617,6 +1709,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1656,6 +1749,7 @@ class Messages(SyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         stream: Literal[True],
         max_iterations: int | Omit = omit,
@@ -1699,6 +1793,7 @@ class Messages(SyncAPIResource):
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1737,6 +1832,7 @@ class Messages(SyncAPIResource):
         tools: Iterable[BetaRunnableTool | BetaRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -1812,6 +1908,7 @@ class Messages(SyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "billing_policy": billing_policy,
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
@@ -1897,6 +1994,7 @@ class Messages(SyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -1973,6 +2071,7 @@ class Messages(SyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "metadata": metadata,
@@ -2019,6 +2118,7 @@ class Messages(SyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -2123,6 +2223,11 @@ class Messages(SyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed when this body is sent to `/v1/messages`.
+              Accepted here so that you can count the tokens of the exact body you will send,
+              and otherwise ignored: counting tokens bills nobody, so no user profile is
+              required.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -2324,6 +2429,7 @@ class Messages(SyncAPIResource):
             body={
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "context_management": context_management,
@@ -2379,6 +2485,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2507,6 +2614,20 @@ class AsyncMessages(AsyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -2755,6 +2876,8 @@ class AsyncMessages(AsyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -2773,11 +2896,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -2797,6 +2932,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: Literal[True],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -2934,6 +3070,20 @@ class AsyncMessages(AsyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -3172,6 +3322,8 @@ class AsyncMessages(AsyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -3190,11 +3342,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -3214,6 +3378,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         stream: bool,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3351,6 +3516,20 @@ class AsyncMessages(AsyncAPIResource):
               [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks)
               for an example in each language.
 
+          billing_policy: Declares which organization is billed for this request.
+              `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+              behind the user profile named in the `anthropic-user-profile-id` header, instead
+              of your organization. If that customer has not linked an Anthropic organization
+              to the profile, or has not allowed your organization to bill it, the request is
+              rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+              (the default), to be billed as usual.
+
+              Message Batches does not currently support billing the customer behind a user
+              profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+              batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+              `invalid_request_error`, nobody is billed for it, and the batch's other requests
+              run as usual.
+
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
 
@@ -3589,6 +3768,8 @@ class AsyncMessages(AsyncAPIResource):
 
           CompactionToolChangesMismatchError:
 
+          ImageDimensionsTooLargeError:
+
           OrganizationOnHoldError:
 
           RequestBodyEncodingInvalidError:
@@ -3607,11 +3788,23 @@ class AsyncMessages(AsyncAPIResource):
 
           ToolReferenceUnresolvedError:
 
+          UserProfileRequiredError:
+
+          LinkedOrganizationBillingUnavailableError:
+
+          LinkedOrganizationSpendLimitReachedError:
+
+          UserProfileBillingNotAuthorizedError:
+
+          UserProfileNotBillableError:
+
           ThreadNotFoundError:
 
           SkillReadBlockedUndecryptableError:
 
           RequestBodyTooLargeAfterDecodingError:
+
+          ContractSpendLimitReachedError:
 
           EnforcedSpendLimitReachedError:
 
@@ -3630,6 +3823,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3697,6 +3891,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -3739,6 +3934,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3824,6 +4020,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "container": container,
@@ -3868,6 +4065,7 @@ class AsyncMessages(AsyncAPIResource):
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
         tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         max_iterations: int | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
@@ -3910,6 +4108,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: Literal[True],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3950,6 +4149,7 @@ class AsyncMessages(AsyncAPIResource):
         stream: bool,
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -3988,6 +4188,7 @@ class AsyncMessages(AsyncAPIResource):
         tools: Iterable[BetaAsyncRunnableTool | BetaAsyncRunnableToolset | BetaToolUnionParam],
         max_iterations: int | Omit = omit,
         run_tools_eagerly: bool = False,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         container: Optional[message_create_params.Container] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -4063,6 +4264,7 @@ class AsyncMessages(AsyncAPIResource):
                     "max_tokens": max_tokens,
                     "messages": messages,
                     "model": model,
+                    "billing_policy": billing_policy,
                     "cache_control": cache_control,
                     "container": container,
                     "context_management": context_management,
@@ -4150,6 +4352,7 @@ class AsyncMessages(AsyncAPIResource):
         max_tokens: int,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         metadata: BetaMetadataParam | Omit = omit,
@@ -4224,6 +4427,7 @@ class AsyncMessages(AsyncAPIResource):
                 "max_tokens": max_tokens,
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "metadata": metadata,
@@ -4270,6 +4474,7 @@ class AsyncMessages(AsyncAPIResource):
         *,
         messages: Iterable[BetaMessageParam],
         model: ModelParam,
+        billing_policy: Optional[BetaBillingPolicyParam] | Omit = omit,
         cache_control: Optional[BetaCacheControlEphemeralParam] | Omit = omit,
         compaction: Optional[BetaCompactionConfigParam] | Omit = omit,
         context_management: Optional[BetaContextManagementConfigParam] | Omit = omit,
@@ -4374,6 +4579,11 @@ class AsyncMessages(AsyncAPIResource):
 
               See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
               details and options.
+
+          billing_policy: Declares which organization is billed when this body is sent to `/v1/messages`.
+              Accepted here so that you can count the tokens of the exact body you will send,
+              and otherwise ignored: counting tokens bills nobody, so no user profile is
+              required.
 
           cache_control: Top-level cache control automatically applies a cache_control marker to the last
               cacheable block in the request.
@@ -4575,6 +4785,7 @@ class AsyncMessages(AsyncAPIResource):
             body={
                 "messages": messages,
                 "model": model,
+                "billing_policy": billing_policy,
                 "cache_control": cache_control,
                 "compaction": compaction,
                 "context_management": context_management,

@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_agent_archived_deployment_paused_reason_error_object import (
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsAgentArchivedDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsAgentArchivedDeploymentPausedReasonError(BaseModel):
-    """The deployment's agent was archived."""
-
-    type: Literal["agent_archived_error"]
+BetaManagedAgentsAgentArchivedDeploymentPausedReasonError = (
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsAgentArchivedDeploymentPausedReasonError has been renamed to BetaManagedAgentsAgentArchivedDeploymentPausedReasonErrorObject
+"""

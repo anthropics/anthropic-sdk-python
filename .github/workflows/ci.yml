@@ -3,16 +3,9 @@ on:
   push:
     branches:
       - '**'
-      - '!integrated/**'
-      - '!stl-preview-head/**'
-      - '!stl-preview-base/**'
-      - '!generated'
-      - '!codegen/**'
-      - 'codegen/stl/**'
-  pull_request:
-    branches-ignore:
-      - 'stl-preview-head/**'
-      - 'stl-preview-base/**'
+  # No pull_request trigger: pushes to the branches above run this workflow. A pull request from a
+  # fork pushes nothing to this repo, so ci-forks.yml calls this workflow for it.
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
@@ -22,7 +15,7 @@ jobs:
   lint:
     timeout-minutes: 10
     name: lint
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,7 +37,7 @@ jobs:
     name: build
     permissions:
       contents: read
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -53,16 +46,16 @@ jobs:
         with:
           version: '0.10.2'
 
-      - name: Install dependencies
-        run: uv sync --all-extras
-
       - name: Run build
         run: uv build --build-constraints build-constraints.txt --require-hashes
+
+      - name: Check the wheel and the sdist
+        run: python3 -I ./scripts/utils/check-dist.py dist/*.whl dist/*.tar.gz
 
   test:
     timeout-minutes: 10
     name: test
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: github.event_name == 'push' || github.event.pull_request.head.repo.fork
     strategy:
       fail-fast: false
@@ -95,7 +88,7 @@ jobs:
   detect_breaking_changes:
     timeout-minutes: 10
     name: detect-breaking-changes
-    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'ubuntu-latest-4-core' }}
+    runs-on: ${{ github.repository == 'anthropics/anthropic-sdk-python' && 'ubuntu-latest' || 'sdk-ubuntu-latest-4-core' }}
     if: |-
       (github.event_name == 'push' &&
        !startsWith(github.ref, 'refs/heads/release-please--')) ||
@@ -135,6 +128,14 @@ jobs:
           fi
           echo "Comparing against $BASE_REF"
           BASE_SHA=$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "")
+          # A commit already on synced/published is its own merge-base, and comparing it with itself
+          # would always pass, so it keeps the comparison above. Any other branch fails only for what
+          # it changed after it left synced/published.
+          FORK_SHA=$(git merge-base HEAD 'origin/synced/published' 2>/dev/null || echo "")
+          if [ -n "$FORK_SHA" ] && [ "$FORK_SHA" != "$(git rev-parse HEAD)" ]; then
+            echo "Comparing against $FORK_SHA instead, where this branch left synced/published"
+            BASE_SHA=$FORK_SHA
+          fi
           echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
 
       - name: Download the base commit's files
@@ -159,9 +160,38 @@ jobs:
           uv run python scripts/detect-breaking-changes.py "$BASE_SHA"
 
       - name: Detect breaking changes
-        if: env.BASE_SHA != ''
+        if: ${{ !cancelled() && env.BASE_SHA != '' }}
         run: |
           # Try to check out previous versions of the breaking change detection script. This ensures that
           # we still detect breaking changes when entire files and their tests are removed.
           git checkout "$BASE_SHA" -- ./scripts/detect-breaking-changes 2>/dev/null || true
           ./scripts/detect-breaking-changes "$BASE_SHA"
+
+  # The one check for branch rules to require. `if: always()` runs it even after a job it needs fails,
+  # so that it fails too: if it were skipped, GitHub would count it as passing.
+  ci:
+    timeout-minutes: 5
+    name: ci
+    needs: [lint, build, test]
+    if: always()
+    runs-on: ${{ github.event.repository.private && 'ubuntu-latest-16-core' || 'ubuntu-latest' }}
+    permissions: {}
+    steps:
+      - name: Check that lint, build and test passed
+        env:
+          RESULTS: lint=${{ needs.lint.result }} build=${{ needs.build.result }} test=${{ needs.test.result }}
+        run: |
+          status=0
+          passed=0
+          for result in $RESULTS; do
+            case "$result" in
+              *=success) echo "$result"; passed=1 ;;
+              *=skipped) echo "$result" ;;
+              *) echo "::error::The ${result%%=*} job's result was '${result#*=}', so this check fails. Open that job to see why."; status=1 ;;
+            esac
+          done
+          if [ "$status" = 0 ] && [ "$passed" = 0 ]; then
+            echo "::error::Every job this check needs was skipped, so nothing was tested and this check fails."
+            status=1
+          fi
+          exit "$status"

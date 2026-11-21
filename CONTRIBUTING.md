@@ -144,9 +144,7 @@ the changes aren't made through the automated pipeline, you may want to make rel
 
 You can release to package managers by using [the `Publish PyPI` GitHub action](https://www.github.com/anthropics/anthropic-sdk-python/actions/workflows/publish-pypi.yml). This requires a setup organization or repository secret to be set up.
 
-### Publish manually
-
-If you need to manually release a package, you can run the `bin/publish-pypi` script with a `PYPI_TOKEN` set on
+Don't publish from your own machine. `bin/publish-pypi` is only for that workflow, even with a `PYPI_TOKEN` set on
 the environment.
 
 ## License

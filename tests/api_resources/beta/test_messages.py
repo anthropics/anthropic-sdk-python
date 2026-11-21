@@ -44,6 +44,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -170,7 +174,7 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
@@ -245,6 +249,10 @@ class TestMessages:
             ],
             model="claude-opus-5-5",
             stream=True,
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -370,7 +378,7 @@ class TestMessages:
                     "type": "custom",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
@@ -442,6 +450,10 @@ class TestMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -625,6 +637,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -751,7 +767,7 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
@@ -826,6 +842,10 @@ class TestAsyncMessages:
             ],
             model="claude-opus-5-5",
             stream=True,
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",
@@ -951,7 +971,7 @@ class TestAsyncMessages:
                     "type": "custom",
                 }
             ],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             user_profile_id="anthropic-user-profile-id",
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
@@ -1023,6 +1043,10 @@ class TestAsyncMessages:
                 }
             ],
             model="claude-opus-5-5",
+            billing_policy={
+                "type": "billing_policy",
+                "bill_to": "self",
+            },
             cache_control={
                 "type": "ephemeral",
                 "ttl": "5m",

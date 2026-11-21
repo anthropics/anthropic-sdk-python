@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_environment_not_found_run_error_object import (
+    BetaManagedAgentsEnvironmentNotFoundRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsEnvironmentNotFoundRunError"]
 
-
-class BetaManagedAgentsEnvironmentNotFoundRunError(BaseModel):
-    """The deployment's environment no longer exists."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["environment_not_found_error"]
+BetaManagedAgentsEnvironmentNotFoundRunError = BetaManagedAgentsEnvironmentNotFoundRunErrorObject
+"""
+Deprecated: BetaManagedAgentsEnvironmentNotFoundRunError has been renamed to BetaManagedAgentsEnvironmentNotFoundRunErrorObject
+"""

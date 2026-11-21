@@ -3,11 +3,11 @@ from typing_extensions import Literal, TypeAlias
 
 from ..._models import BaseModel
 from .beta_bash_code_execution_result_block import BetaBashCodeExecutionResultBlock
-from .beta_bash_code_execution_tool_result_error import BetaBashCodeExecutionToolResultError
+from .beta_bash_code_execution_tool_result_error_object import BetaBashCodeExecutionToolResultErrorObject
 
 __all__ = ["BetaBashCodeExecutionToolResultBlock", "Content"]
 
-Content: TypeAlias = Union[BetaBashCodeExecutionToolResultError, BetaBashCodeExecutionResultBlock]
+Content: TypeAlias = Union[BetaBashCodeExecutionToolResultErrorObject, BetaBashCodeExecutionResultBlock]
 
 
 class BetaBashCodeExecutionToolResultBlock(BaseModel):

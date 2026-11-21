@@ -7,9 +7,11 @@ from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails
+from ..rbac_role_not_found_error_details import RBACRoleNotFoundErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
+from ..user_profile_required_error_details import UserProfileRequiredErrorDetails
 from ..compaction_unavailable_error_details import CompactionUnavailableErrorDetails
 from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails
 from ..user_profile_not_found_error_details import UserProfileNotFoundErrorDetails
@@ -18,19 +20,24 @@ from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDe
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
 from .sandbox_egress_restricted_error_details import SandboxEgressRestrictedErrorDetails
+from ..beta_request_body_timeout_error_details import BetaRequestBodyTimeoutErrorDetails
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
 from ..thread_continue_in_flight_error_details import ThreadContinueInFlightErrorDetails
 from ..tool_reference_unresolved_error_details import ToolReferenceUnresolvedErrorDetails
+from ..user_profile_not_billable_error_details import UserProfileNotBillableErrorDetails
 from ..beta.beta_invalid_metadata_error_details import BetaInvalidMetadataErrorDetails
 from ..compaction_block_ambiguous_error_details import CompactionBlockAmbiguousErrorDetails
 from ..compaction_block_misplaced_error_details import CompactionBlockMisplacedErrorDetails
 from ..compaction_incomplete_turn_error_details import CompactionIncompleteTurnErrorDetails
+from ..image_dimensions_too_large_error_details import ImageDimensionsTooLargeErrorDetails
 from ..thread_unsupported_request_error_details import ThreadUnsupportedRequestErrorDetails
 from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldErrorDetails
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
+from .contract_spend_limit_reached_error_details import ContractSpendLimitReachedErrorDetails
 from .enforced_spend_limit_reached_error_details import EnforcedSpendLimitReachedErrorDetails
+from .parent_organization_required_error_details import ParentOrganizationRequiredErrorDetails
 from ..compaction_signature_invalid_error_details import CompactionSignatureInvalidErrorDetails
 from ..concurrent_membership_change_error_details import ConcurrentMembershipChangeErrorDetails
 from .request_body_encoding_invalid_error_details import RequestBodyEncodingInvalidErrorDetails
@@ -49,18 +56,23 @@ from ..beta.organization.beta_scan_failed_error_details import BetaScanFailedErr
 from ..organization.invite_already_exists_error_details import InviteAlreadyExistsErrorDetails
 from ..beta.organization.beta_scan_pending_error_details import BetaScanPendingErrorDetails
 from ..compaction_too_many_tool_references_error_details import CompactionTooManyToolReferencesErrorDetails
+from ..user_profile_billing_not_authorized_error_details import UserProfileBillingNotAuthorizedErrorDetails
 from ..beta.beta_invalid_config_type_change_error_details import BetaInvalidConfigTypeChangeErrorDetails
 from .request_body_too_large_after_decoding_error_details import RequestBodyTooLargeAfterDecodingErrorDetails
 from ..beta.beta_environment_create_disabled_error_details import BetaEnvironmentCreateDisabledErrorDetails
 from ..beta.beta_environment_update_disabled_error_details import BetaEnvironmentUpdateDisabledErrorDetails
+from ..beta.organization.beta_bundle_on_call_error_details import BetaBundleOnCallErrorDetails
 from ..organization.email_domain_not_allowed_error_details import EmailDomainNotAllowedErrorDetails
 from ..beta_organization_not_enrolled_in_beta_error_details import BetaOrganizationNotEnrolledInBetaErrorDetails
 from ..organization.cannot_remove_last_member_error_details import CannotRemoveLastMemberErrorDetails
+from .linked_organization_billing_unavailable_error_details import LinkedOrganizationBillingUnavailableErrorDetails
+from .linked_organization_spend_limit_reached_error_details import LinkedOrganizationSpendLimitReachedErrorDetails
 from ..beta.organization.beta_skill_name_taken_error_details import BetaSkillNameTakenErrorDetails
 from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLimitExceededErrorDetails
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
 from ..beta.organization.beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails
 from ..beta.organization.beta_cannot_sign_out_self_error_details import BetaCannotSignOutSelfErrorDetails
+from ..beta.organization.beta_rbac_group_not_found_error_details import BetaRBACGroupNotFoundErrorDetails
 from ..beta.organization.beta_registration_pending_error_details import BetaRegistrationPendingErrorDetails
 from ..organization.external_key_validation_failed_error_details import ExternalKeyValidationFailedErrorDetails
 from ..organization.rbac_group_grants_owner_access_error_details import RBACGroupGrantsOwnerAccessErrorDetails
@@ -83,6 +95,9 @@ from ..beta.organization.beta_claude_tag_writes_not_enabled_error_details import
 from ..beta.organization.beta_cannot_sign_out_managed_member_error_details import (
     BetaCannotSignOutManagedMemberErrorDetails,
 )
+from ..beta.organization.beta_bundle_attachment_not_supported_error_details import (
+    BetaBundleAttachmentNotSupportedErrorDetails,
+)
 from ..beta.organization.beta_cannot_sign_out_membership_admin_error_details import (
     BetaCannotSignOutMembershipAdminErrorDetails,
 )
@@ -94,6 +109,9 @@ from ..organization.cannot_invite_emails_with_unverified_domains_error_details i
 )
 from ..beta.organization.beta_compliance_configuration_restricted_error_details import (
     BetaComplianceConfigurationRestrictedErrorDetails,
+)
+from ..beta.organization.claude_code.beta_cmek_feature_unsupported_error_details import (
+    BetaCMEKFeatureUnsupportedErrorDetails,
 )
 from ..beta.organization.beta_slack_channel_set_up_settings_refused_error_details import (
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
@@ -109,6 +127,18 @@ from ..beta.organization.beta_organization_level_scoped_api_key_required_error_d
 )
 from ..beta.organization.beta_slack_channel_set_up_environment_not_found_error_details import (
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
+)
+from ..beta.organization.claude_code.beta_rbac_group_order_limit_exceeded_error_details import (
+    BetaRBACGroupOrderLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_settings_history_limit_exceeded_error_details import (
+    BetaSettingsHistoryLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_settings_document_limit_exceeded_error_details import (
+    BetaSettingsDocumentLimitExceededErrorDetails,
+)
+from ..beta.organization.claude_code.beta_rbac_group_managed_settings_not_found_error_details import (
+    BetaRBACGroupManagedSettingsNotFoundErrorDetails,
 )
 
 __all__ = ["ErrorDetails"]
@@ -128,6 +158,7 @@ ErrorDetails: TypeAlias = Annotated[
         CompactionSignatureInvalidErrorDetails,
         CompactionTooManyToolReferencesErrorDetails,
         CompactionToolChangesMismatchErrorDetails,
+        ImageDimensionsTooLargeErrorDetails,
         OrganizationOnHoldErrorDetails,
         RequestBodyEncodingInvalidErrorDetails,
         RequestBodyEncodingUnsupportedErrorDetails,
@@ -137,9 +168,15 @@ ErrorDetails: TypeAlias = Annotated[
         ThreadUnsupportedRequestErrorDetails,
         ToolNameConflictErrorDetails,
         ToolReferenceUnresolvedErrorDetails,
+        UserProfileRequiredErrorDetails,
+        LinkedOrganizationBillingUnavailableErrorDetails,
+        LinkedOrganizationSpendLimitReachedErrorDetails,
+        UserProfileBillingNotAuthorizedErrorDetails,
+        UserProfileNotBillableErrorDetails,
         ThreadNotFoundErrorDetails,
         SkillReadBlockedUndecryptableErrorDetails,
         RequestBodyTooLargeAfterDecodingErrorDetails,
+        ContractSpendLimitReachedErrorDetails,
         EnforcedSpendLimitReachedErrorDetails,
         RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,
@@ -169,6 +206,8 @@ ErrorDetails: TypeAlias = Annotated[
         ExternalKeyChangedErrorDetails,
         WorkspaceMemberLimitExceededErrorDetails,
         OrganizationTypeNotSupportedErrorDetails,
+        ParentOrganizationRequiredErrorDetails,
+        RBACRoleNotFoundErrorDetails,
         BetaEnvironmentCreateDisabledErrorDetails,
         BetaEnvironmentArchivedErrorDetails,
         BetaInvalidConfigTypeChangeErrorDetails,
@@ -189,6 +228,13 @@ ErrorDetails: TypeAlias = Annotated[
         BetaRegistrationPendingErrorDetails,
         BetaScanFailedErrorDetails,
         BetaScanPendingErrorDetails,
+        BetaRequestBodyTimeoutErrorDetails,
+        BetaSettingsDocumentLimitExceededErrorDetails,
+        BetaSettingsHistoryLimitExceededErrorDetails,
+        BetaCMEKFeatureUnsupportedErrorDetails,
+        BetaRBACGroupManagedSettingsNotFoundErrorDetails,
+        BetaRBACGroupOrderLimitExceededErrorDetails,
+        BetaRBACGroupNotFoundErrorDetails,
         BetaSlackChannelSetUpSettingsRefusedErrorDetails,
         BetaAPIKeyScopeMissingErrorDetails,
         BetaClaudeTagWritesNotEnabledErrorDetails,
@@ -197,6 +243,8 @@ ErrorDetails: TypeAlias = Annotated[
         BetaEnvironmentNotFoundErrorDetails,
         BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
         BetaSlackChannelSetUpSettingsConflictErrorDetails,
+        BetaBundleAttachmentNotSupportedErrorDetails,
+        BetaBundleOnCallErrorDetails,
     ],
     UnionDiscriminator("error_code"),
 ]

@@ -15,6 +15,7 @@ from collections.abc import Iterable, Sequence
 
 from ._hooks import BetaURLContext
 from ._errors import ToolsetConfigError, UploadNoRootsError, UploadRefusedError, UploadOutsideRootsError
+from .._skills import _within
 from .._beta_functions import ToolError
 
 __all__ = ["beta_check_upload_path", "BetaLocalFilePolicy"]
@@ -125,7 +126,7 @@ def beta_check_upload_path(
             # deployment. Refusing here closes that. Never raised when strict_roots is False: the
             # download-path check tolerates a download_dir that does not exist yet.
             continue
-        if resolved == resolved_root or PurePath(resolved_root) in PurePath(resolved).parents:
+        if _within(resolved, resolved_root):
             return str(resolved)
 
     raise UploadOutsideRootsError()

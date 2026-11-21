@@ -1,6 +1,6 @@
 [project]
 name = "anthropic"
-version = "2.8.0"
+version = "2.12.0"
 description = "The official Python library for the anthropic API"
 dynamic = ["readme"]
 license = "Apache-2.0"
@@ -137,7 +137,7 @@ replacement = '[\1](https://github.com/anthropics/anthropic-sdk-python/tree/main
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short -n auto -p tests._alias_httpx"
+addopts = "--tb=short -n auto --dist worksteal -p tests._alias_httpx"
 pythonpath = ["."]
 xfail_strict = true
 asyncio_mode = "auto"

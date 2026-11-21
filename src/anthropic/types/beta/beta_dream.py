@@ -3,12 +3,12 @@ from datetime import datetime
 from typing_extensions import Literal
 
 from ..._models import BaseModel
-from .beta_dream_error import BetaDreamError
 from .beta_dream_input import BetaDreamInput
 from .beta_dream_usage import BetaDreamUsage
 from .beta_dream_output import BetaDreamOutput
 from .beta_dream_status import BetaDreamStatus
 from .beta_output_behavior import BetaOutputBehavior
+from .beta_dream_error_object import BetaDreamErrorObject
 from .beta_dream_model_config import BetaDreamModelConfig
 
 __all__ = ["BetaDream"]
@@ -43,7 +43,7 @@ class BetaDream(BaseModel):
     `null` if it is still `pending` or `running`.
     """
 
-    error: Optional[BetaDreamError] = None
+    error: Optional[BetaDreamErrorObject] = None
     """Why the dream failed, or `null` if `status` isn't `failed`."""
 
     inputs: List[BetaDreamInput]

@@ -3,42 +3,58 @@
 ```python
 from anthropic.types import (
     APIErrorObject,
-    AuthenticationError,
-    BillingError,
+    AuthenticationErrorObject,
+    BillingErrorObject,
     ClaudeCodeKeyCreatorNotMemberErrorDetails,
     ClaudeCodeVersionTooOldErrorDetails,
     CMEKContextUnavailableErrorDetails,
     CMEKKeyDisabledErrorDetails,
     CMEKKeyNetworkBlockedErrorDetails,
     CMEKKeyUnreachableErrorDetails,
+    ContractSpendLimitReachedErrorDetails,
     EnforcedSpendLimitReachedErrorDetails,
     ErrorDetails,
     ErrorObject,
     ErrorResponse,
     ErrorType,
-    GatewayTimeoutError,
-    InvalidRequestError,
-    NotFoundError,
+    GatewayTimeoutErrorObject,
+    InvalidRequestErrorObject,
+    LinkedOrganizationBillingUnavailableErrorDetails,
+    LinkedOrganizationSpendLimitReachedErrorDetails,
+    NotFoundErrorObject,
     OrganizationOnHoldErrorDetails,
     OrganizationTypeNotSupportedErrorDetails,
-    OverloadedError,
-    PermissionError,
+    OverloadedErrorObject,
+    ParentOrganizationRequiredErrorDetails,
+    PermissionErrorObject,
     RampLimitExceededErrorDetails,
-    RateLimitError,
+    RateLimitErrorObject,
     RequestBodyEncodingInvalidErrorDetails,
     RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails,
     SandboxEgressRestrictedErrorDetails,
+    AuthenticationError,
+    InvalidRequestError,
+    BillingError,
+    GatewayTimeoutError,
+    NotFoundError,
+    OverloadedError,
+    PermissionError,
+    RateLimitError,
     ClaudeCodeKeyCreatorNotMemberError,
     ClaudeCodeVersionTooOldError,
     CMEKKeyDisabledError,
     CMEKKeyNetworkBlockedError,
     OrganizationOnHoldError,
     OrganizationTypeNotSupportedError,
+    ParentOrganizationRequiredError,
     RequestBodyEncodingInvalidError,
     RequestBodyEncodingUnsupportedError,
+    LinkedOrganizationBillingUnavailableError,
+    LinkedOrganizationSpendLimitReachedError,
     SandboxEgressRestrictedError,
     RequestBodyTooLargeAfterDecodingError,
+    ContractSpendLimitReachedError,
     EnforcedSpendLimitReachedError,
     RampLimitExceededError,
     CMEKContextUnavailableError,
@@ -63,8 +79,8 @@ from anthropic.types import (
     BashCodeExecutionResultBlockParam,
     BashCodeExecutionToolResultBlock,
     BashCodeExecutionToolResultBlockParam,
-    BashCodeExecutionToolResultError,
     BashCodeExecutionToolResultErrorCode,
+    BashCodeExecutionToolResultErrorObject,
     BashCodeExecutionToolResultErrorParam,
     BrowserClickTarget,
     BrowserCloseTabConfigParam,
@@ -211,8 +227,8 @@ from anthropic.types import (
     CodeExecutionToolResultBlockContent,
     CodeExecutionToolResultBlockParam,
     CodeExecutionToolResultBlockParamContentParam,
-    CodeExecutionToolResultError,
     CodeExecutionToolResultErrorCode,
+    CodeExecutionToolResultErrorObject,
     CodeExecutionToolResultErrorParam,
     CompactionBlockAmbiguousErrorDetails,
     CompactionBlockMisplacedErrorDetails,
@@ -300,6 +316,7 @@ from anthropic.types import (
     FileDocumentSourceParam,
     FileImageSourceParam,
     ImageBlockParam,
+    ImageDimensionsTooLargeErrorDetails,
     ImageTransformationsParam,
     InputJSONDelta,
     JSONOutputFormatParam,
@@ -352,8 +369,8 @@ from anthropic.types import (
     TextEditorCodeExecutionStrReplaceResultBlockParam,
     TextEditorCodeExecutionToolResultBlock,
     TextEditorCodeExecutionToolResultBlockParam,
-    TextEditorCodeExecutionToolResultError,
     TextEditorCodeExecutionToolResultErrorCode,
+    TextEditorCodeExecutionToolResultErrorObject,
     TextEditorCodeExecutionToolResultErrorParam,
     TextEditorCodeExecutionViewResultBlock,
     TextEditorCodeExecutionViewResultBlockParam,
@@ -387,8 +404,8 @@ from anthropic.types import (
     ToolSearchToolRegex20251119Param,
     ToolSearchToolResultBlock,
     ToolSearchToolResultBlockParam,
-    ToolSearchToolResultError,
     ToolSearchToolResultErrorCode,
+    ToolSearchToolResultErrorObject,
     ToolSearchToolResultErrorParam,
     ToolSearchToolSearchResultBlock,
     ToolSearchToolSearchResultBlockParam,
@@ -427,13 +444,13 @@ from anthropic.types import (
     WebSearchTool20250305Param,
     WebSearchTool20260209Param,
     WebSearchTool20260318Param,
-    WebSearchToolRequestErrorParam,
+    WebSearchToolRequestErrorObjectParam,
     WebSearchToolResultBlock,
     WebSearchToolResultBlockContent,
     WebSearchToolResultBlockParam,
     WebSearchToolResultBlockParamContentParam,
-    WebSearchToolResultError,
     WebSearchToolResultErrorCode,
+    WebSearchToolResultErrorObject,
     MessageStreamEvent,
     MessageStartEvent,
     MessageDeltaEvent,
@@ -441,6 +458,12 @@ from anthropic.types import (
     ContentBlockStartEvent,
     ContentBlockDeltaEvent,
     ContentBlockStopEvent,
+    WebSearchToolResultError,
+    WebSearchToolRequestErrorParam,
+    CodeExecutionToolResultError,
+    BashCodeExecutionToolResultError,
+    TextEditorCodeExecutionToolResultError,
+    ToolSearchToolResultError,
     ResponseToolUseBlockUnion,
     ResponseBrowserToolUseBlock,
     ResponseBrowserCloseTabToolUseBlock,
@@ -501,6 +524,7 @@ from anthropic.types import (
     CompactionSignatureInvalidError,
     CompactionTooManyToolReferencesError,
     CompactionToolChangesMismatchError,
+    ImageDimensionsTooLargeError,
     ThreadAlreadyContinuedError,
     ThreadContinueInFlightError,
     ThreadFingerprintMismatchError,
@@ -638,6 +662,7 @@ from anthropic.types import (
     DeletedUserProfile,
     UserProfile,
     UserProfileAccessType,
+    UserProfileBillingNotAuthorizedErrorDetails,
     UserProfileCyberProgram,
     UserProfileCyberRequirements,
     UserProfileCyberTier,
@@ -655,10 +680,15 @@ from anthropic.types import (
     UserProfileExternalUserEntityType,
     UserProfileListOrder,
     UserProfileListOrderBy,
+    UserProfileNotBillableErrorDetails,
     UserProfileNotFoundErrorDetails,
     UserProfileProgramStatus,
     UserProfilePrograms,
+    UserProfileRequiredErrorDetails,
     UserProfileNotFoundError,
+    UserProfileRequiredError,
+    UserProfileBillingNotAuthorizedError,
+    UserProfileNotBillableError,
 )
 ```
 
@@ -692,7 +722,9 @@ from anthropic.types import (
     OrgMemberLimitExceededErrorDetails,
     OrganizationInfo,
     OrganizationRole,
+    RBACRoleNotFoundErrorDetails,
     OrgMemberLimitExceededError,
+    RBACRoleNotFoundError,
     ConcurrentMembershipChangeError,
 )
 ```
@@ -1223,7 +1255,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.organization import RBACRole
+from anthropic.types.organization import (
+    RBACRole,
+    RBACRoleSource,
+    RBACRoleSourceBuiltIn,
+    RBACRoleSourceCustom,
+)
 ```
 
 Methods:
@@ -1257,23 +1294,35 @@ Types:
 ```python
 from anthropic.types import (
     AnthropicBetaParam,
-    BetaAPIError,
-    BetaAuthenticationError,
-    BetaBillingError,
+    BetaAPIErrorObject,
+    BetaAuthenticationErrorObject,
+    BetaBillingErrorObject,
     BetaCurrency,
-    BetaError,
+    BetaErrorObject,
     BetaErrorResponse,
-    BetaGatewayTimeoutError,
-    BetaInvalidRequestError,
+    BetaGatewayTimeoutErrorObject,
+    BetaInvalidRequestErrorObject,
     BetaMonetaryAmount,
     BetaMonetaryAmountParam,
-    BetaNotFoundError,
+    BetaNotFoundErrorObject,
     BetaOrganizationNotEnrolledInBetaErrorDetails,
+    BetaOverloadedErrorObject,
+    BetaPermissionErrorObject,
+    BetaRateLimitErrorObject,
+    BetaRequestBodyTimeoutErrorDetails,
+    BetaUnsupportedCharsetErrorDetails,
+    BetaError,
+    BetaAPIError,
+    BetaAuthenticationError,
+    BetaInvalidRequestError,
+    BetaBillingError,
+    BetaGatewayTimeoutError,
+    BetaNotFoundError,
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
-    BetaUnsupportedCharsetErrorDetails,
     BetaOrganizationNotEnrolledInBetaError,
+    BetaRequestBodyTimeoutError,
     BetaUnsupportedCharsetError,
 )
 ```
@@ -1317,7 +1366,7 @@ from anthropic.types.beta import (
     BetaAdvisorTool20260301Param,
     BetaAdvisorToolResultBlock,
     BetaAdvisorToolResultBlockParam,
-    BetaAdvisorToolResultError,
+    BetaAdvisorToolResultErrorObject,
     BetaAdvisorToolResultErrorParam,
     BetaAllThinkingTurnsParam,
     BetaAssistantMessageParam,
@@ -1330,8 +1379,10 @@ from anthropic.types.beta import (
     BetaBashCodeExecutionResultBlockParam,
     BetaBashCodeExecutionToolResultBlock,
     BetaBashCodeExecutionToolResultBlockParam,
-    BetaBashCodeExecutionToolResultError,
+    BetaBashCodeExecutionToolResultErrorObject,
     BetaBashCodeExecutionToolResultErrorParam,
+    BetaBillTo,
+    BetaBillingPolicyParam,
     BetaBrowserClickTarget,
     BetaBrowserCloseTabConfig,
     BetaBrowserCloseTabConfigParam,
@@ -1520,8 +1571,8 @@ from anthropic.types.beta import (
     BetaCodeExecutionToolResultBlockContent,
     BetaCodeExecutionToolResultBlockParam,
     BetaCodeExecutionToolResultBlockParamContentParam,
-    BetaCodeExecutionToolResultError,
     BetaCodeExecutionToolResultErrorCode,
+    BetaCodeExecutionToolResultErrorObject,
     BetaCodeExecutionToolResultErrorParam,
     BetaCompact20260112EditParam,
     BetaCompactionBlock,
@@ -1730,7 +1781,7 @@ from anthropic.types.beta import (
     BetaTextEditorCodeExecutionStrReplaceResultBlockParam,
     BetaTextEditorCodeExecutionToolResultBlock,
     BetaTextEditorCodeExecutionToolResultBlockParam,
-    BetaTextEditorCodeExecutionToolResultError,
+    BetaTextEditorCodeExecutionToolResultErrorObject,
     BetaTextEditorCodeExecutionToolResultErrorParam,
     BetaTextEditorCodeExecutionViewResultBlock,
     BetaTextEditorCodeExecutionViewResultBlockParam,
@@ -1780,7 +1831,7 @@ from anthropic.types.beta import (
     BetaToolSearchToolRegex20251119Param,
     BetaToolSearchToolResultBlock,
     BetaToolSearchToolResultBlockParam,
-    BetaToolSearchToolResultError,
+    BetaToolSearchToolResultErrorObject,
     BetaToolSearchToolResultErrorParam,
     BetaToolSearchToolSearchResultBlock,
     BetaToolSearchToolSearchResultBlockParam,
@@ -1840,13 +1891,20 @@ from anthropic.types.beta import (
     BetaWebSearchTool20260209Param,
     BetaWebSearchTool20260318,
     BetaWebSearchTool20260318Param,
-    BetaWebSearchToolRequestErrorParam,
+    BetaWebSearchToolRequestErrorObjectParam,
     BetaWebSearchToolResultBlock,
     BetaWebSearchToolResultBlockContent,
     BetaWebSearchToolResultBlockParam,
     BetaWebSearchToolResultBlockParamContentParam,
-    BetaWebSearchToolResultError,
     BetaWebSearchToolResultErrorCode,
+    BetaWebSearchToolResultErrorObject,
+    BetaWebSearchToolResultError,
+    BetaWebSearchToolRequestErrorParam,
+    BetaCodeExecutionToolResultError,
+    BetaBashCodeExecutionToolResultError,
+    BetaTextEditorCodeExecutionToolResultError,
+    BetaToolSearchToolResultError,
+    BetaAdvisorToolResultError,
     BetaResponseToolUseBlockUnion,
     BetaResponseBrowserToolUseBlock,
     BetaResponseBrowserCloseTabToolUseBlock,
@@ -2243,9 +2301,9 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsBase64DocumentSourceParam,
     BetaManagedAgentsBase64ImageSource,
     BetaManagedAgentsBase64ImageSourceParam,
-    BetaManagedAgentsBillingError,
-    BetaManagedAgentsCompactionLimitReachedError,
-    BetaManagedAgentsCredentialHostUnreachableError,
+    BetaManagedAgentsBillingErrorObject,
+    BetaManagedAgentsCompactionLimitReachedErrorObject,
+    BetaManagedAgentsCredentialHostUnreachableErrorObject,
     BetaManagedAgentsDocumentBlock,
     BetaManagedAgentsDocumentBlockParam,
     BetaManagedAgentsEventParams,
@@ -2257,22 +2315,22 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsFileRubricParams,
     BetaManagedAgentsImageBlock,
     BetaManagedAgentsImageBlockParam,
-    BetaManagedAgentsMaxWorkflowRunsWorkflowRunError,
-    BetaManagedAgentsMCPAuthenticationFailedError,
-    BetaManagedAgentsMCPConnectionFailedError,
-    BetaManagedAgentsModelOverloadedError,
-    BetaManagedAgentsModelRateLimitedError,
-    BetaManagedAgentsModelRequestFailedError,
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunErrorObject,
+    BetaManagedAgentsMCPAuthenticationFailedErrorObject,
+    BetaManagedAgentsMCPConnectionFailedErrorObject,
+    BetaManagedAgentsModelOverloadedErrorObject,
+    BetaManagedAgentsModelRateLimitedErrorObject,
+    BetaManagedAgentsModelRequestFailedErrorObject,
     BetaManagedAgentsPlainTextDocumentSource,
     BetaManagedAgentsPlainTextDocumentSourceParam,
-    BetaManagedAgentsProgramWorkflowRunError,
+    BetaManagedAgentsProgramWorkflowRunErrorObject,
     BetaManagedAgentsRedactedBlock,
     BetaManagedAgentsRedactedBlockParam,
-    BetaManagedAgentsRepositoryAuthenticationError,
-    BetaManagedAgentsRepositoryCheckoutError,
-    BetaManagedAgentsRepositoryCloneError,
-    BetaManagedAgentsRepositoryForbiddenError,
-    BetaManagedAgentsRepositoryNotFoundError,
+    BetaManagedAgentsRepositoryAuthenticationErrorObject,
+    BetaManagedAgentsRepositoryCheckoutErrorObject,
+    BetaManagedAgentsRepositoryCloneErrorObject,
+    BetaManagedAgentsRepositoryForbiddenErrorObject,
+    BetaManagedAgentsRepositoryNotFoundErrorObject,
     BetaManagedAgentsRetryStatusExhausted,
     BetaManagedAgentsRetryStatusRetrying,
     BetaManagedAgentsRetryStatusTerminal,
@@ -2315,11 +2373,11 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsTextBlockParam,
     BetaManagedAgentsTextRubric,
     BetaManagedAgentsTextRubricParams,
-    BetaManagedAgentsThreadLimitWorkflowRunError,
-    BetaManagedAgentsTimeoutWorkflowRunError,
-    BetaManagedAgentsToolUseLimitReachedError,
-    BetaManagedAgentsUnknownError,
-    BetaManagedAgentsUnknownWorkflowRunError,
+    BetaManagedAgentsThreadLimitWorkflowRunErrorObject,
+    BetaManagedAgentsTimeoutWorkflowRunErrorObject,
+    BetaManagedAgentsToolUseLimitReachedErrorObject,
+    BetaManagedAgentsUnknownErrorObject,
+    BetaManagedAgentsUnknownWorkflowRunErrorObject,
     BetaManagedAgentsURLDocumentSource,
     BetaManagedAgentsURLDocumentSourceParam,
     BetaManagedAgentsURLImageSource,
@@ -2336,18 +2394,40 @@ from anthropic.types.beta.sessions import (
     BetaManagedAgentsUserToolConfirmationEventParams,
     BetaManagedAgentsUserToolResultEventParams,
     BetaManagedAgentsWorkflowRunCreatedEvent,
-    BetaManagedAgentsWorkflowRunError,
     BetaManagedAgentsWorkflowRunErrorEvent,
+    BetaManagedAgentsWorkflowRunErrorObject,
     BetaManagedAgentsWorkflowRunPhase,
     BetaManagedAgentsWorkflowRunPhaseEndedEvent,
     BetaManagedAgentsWorkflowRunPhaseStartedEvent,
     BetaManagedAgentsWorkflowRunResult,
     BetaManagedAgentsWorkflowRunResultCompleted,
-    BetaManagedAgentsWorkflowRunResultError,
+    BetaManagedAgentsWorkflowRunResultErrorObject,
     BetaManagedAgentsWorkflowRunResultStopped,
     BetaManagedAgentsWorkflowRunStatusEndedEvent,
     BetaManagedAgentsWorkflowRunStatusIdleEvent,
     BetaManagedAgentsWorkflowRunStatusRunningEvent,
+    BetaManagedAgentsUnknownError,
+    BetaManagedAgentsModelOverloadedError,
+    BetaManagedAgentsModelRateLimitedError,
+    BetaManagedAgentsModelRequestFailedError,
+    BetaManagedAgentsMCPConnectionFailedError,
+    BetaManagedAgentsMCPAuthenticationFailedError,
+    BetaManagedAgentsBillingError,
+    BetaManagedAgentsToolUseLimitReachedError,
+    BetaManagedAgentsCompactionLimitReachedError,
+    BetaManagedAgentsCredentialHostUnreachableError,
+    BetaManagedAgentsRepositoryAuthenticationError,
+    BetaManagedAgentsRepositoryForbiddenError,
+    BetaManagedAgentsRepositoryNotFoundError,
+    BetaManagedAgentsRepositoryCheckoutError,
+    BetaManagedAgentsRepositoryCloneError,
+    BetaManagedAgentsWorkflowRunResultError,
+    BetaManagedAgentsWorkflowRunError,
+    BetaManagedAgentsTimeoutWorkflowRunError,
+    BetaManagedAgentsProgramWorkflowRunError,
+    BetaManagedAgentsUnknownWorkflowRunError,
+    BetaManagedAgentsThreadLimitWorkflowRunError,
+    BetaManagedAgentsMaxWorkflowRunsWorkflowRunError,
 )
 ```
 
@@ -2415,37 +2495,52 @@ Types:
 
 ```python
 from anthropic.types.beta import (
-    BetaManagedAgentsAgentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsDeployment,
     BetaManagedAgentsDeploymentInitialEvent,
     BetaManagedAgentsDeploymentInitialEventParams,
     BetaManagedAgentsDeploymentPausedReason,
-    BetaManagedAgentsDeploymentPausedReasonError,
+    BetaManagedAgentsDeploymentPausedReasonErrorObject,
     BetaManagedAgentsDeploymentStatus,
     BetaManagedAgentsDeploymentSystemMessageEvent,
     BetaManagedAgentsDeploymentUserDefineOutcomeEvent,
     BetaManagedAgentsDeploymentUserMessageEvent,
-    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError,
-    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject,
     BetaManagedAgentsErrorDeploymentPausedReason,
-    BetaManagedAgentsFileNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonErrorObject,
     BetaManagedAgentsFileResourceConfig,
     BetaManagedAgentsGitHubRepositoryResourceConfig,
     BetaManagedAgentsManualDeploymentPausedReason,
-    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
-    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsMemoryStoreResourceConfig,
-    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError,
+    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonErrorObject,
     BetaManagedAgentsSchedule,
     BetaManagedAgentsScheduleParams,
-    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonErrorObject,
     BetaManagedAgentsSessionResourceConfig,
-    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError,
-    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError,
-    BetaManagedAgentsUnknownDeploymentPausedReasonError,
-    BetaManagedAgentsVaultArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsUnknownDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsVaultNotFoundDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonErrorObject,
+    BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsAgentArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError,
+    BetaManagedAgentsMCPEgressBlockedDeploymentPausedReasonError,
     BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsFileNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError,
     BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError,
+    BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError,
+    BetaManagedAgentsVaultArchivedDeploymentPausedReasonError,
+    BetaManagedAgentsUnknownDeploymentPausedReasonError,
+    BetaManagedAgentsDeploymentPausedReasonError,
 )
 ```
 
@@ -2466,27 +2561,43 @@ Types:
 
 ```python
 from anthropic.types.beta import (
-    BetaManagedAgentsAgentArchivedRunError,
+    BetaManagedAgentsAgentArchivedRunErrorObject,
     BetaManagedAgentsDeploymentRun,
-    BetaManagedAgentsEnvironmentArchivedRunError,
-    BetaManagedAgentsEnvironmentNotFoundRunError,
-    BetaManagedAgentsFileNotFoundRunError,
+    BetaManagedAgentsEnvironmentArchivedRunErrorObject,
+    BetaManagedAgentsEnvironmentNotFoundRunErrorObject,
+    BetaManagedAgentsFileNotFoundRunErrorObject,
     BetaManagedAgentsManualTriggerContext,
-    BetaManagedAgentsMCPEgressBlockedRunError,
-    BetaManagedAgentsMemoryStoreArchivedRunError,
-    BetaManagedAgentsOrganizationDisabledRunError,
+    BetaManagedAgentsMCPEgressBlockedRunErrorObject,
+    BetaManagedAgentsMemoryStoreArchivedRunErrorObject,
+    BetaManagedAgentsOrganizationDisabledRunErrorObject,
     BetaManagedAgentsScheduleTriggerContext,
-    BetaManagedAgentsSelfHostedResourcesUnsupportedRunError,
-    BetaManagedAgentsSessionCreationRejectedRunError,
-    BetaManagedAgentsSessionRateLimitedRunError,
-    BetaManagedAgentsSessionResourceNotFoundRunError,
-    BetaManagedAgentsSkillNotFoundRunError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunErrorObject,
+    BetaManagedAgentsSessionCreationRejectedRunErrorObject,
+    BetaManagedAgentsSessionRateLimitedRunErrorObject,
+    BetaManagedAgentsSessionResourceNotFoundRunErrorObject,
+    BetaManagedAgentsSkillNotFoundRunErrorObject,
     BetaManagedAgentsTriggerContext,
     BetaManagedAgentsTriggerType,
-    BetaManagedAgentsUnknownRunError,
-    BetaManagedAgentsVaultArchivedRunError,
+    BetaManagedAgentsUnknownRunErrorObject,
+    BetaManagedAgentsVaultArchivedRunErrorObject,
+    BetaManagedAgentsVaultNotFoundRunErrorObject,
+    BetaManagedAgentsWorkspaceArchivedRunErrorObject,
+    BetaManagedAgentsEnvironmentArchivedRunError,
+    BetaManagedAgentsAgentArchivedRunError,
+    BetaManagedAgentsEnvironmentNotFoundRunError,
     BetaManagedAgentsVaultNotFoundRunError,
+    BetaManagedAgentsVaultArchivedRunError,
+    BetaManagedAgentsFileNotFoundRunError,
+    BetaManagedAgentsMemoryStoreArchivedRunError,
+    BetaManagedAgentsSkillNotFoundRunError,
+    BetaManagedAgentsSessionResourceNotFoundRunError,
     BetaManagedAgentsWorkspaceArchivedRunError,
+    BetaManagedAgentsOrganizationDisabledRunError,
+    BetaManagedAgentsSessionRateLimitedRunError,
+    BetaManagedAgentsSessionCreationRejectedRunError,
+    BetaManagedAgentsUnknownRunError,
+    BetaManagedAgentsSelfHostedResourcesUnsupportedRunError,
+    BetaManagedAgentsMCPEgressBlockedRunError,
 )
 ```
 
@@ -2700,6 +2811,8 @@ from anthropic.types.beta import (
     BetaWebhookEnvironmentUpdatedEventData,
     BetaWebhookEvent,
     BetaWebhookEventData,
+    BetaWebhookExternalKeyFailedEventData,
+    BetaWebhookExternalKeyRecoveredEventData,
     BetaWebhookMemoryStoreArchivedEventData,
     BetaWebhookMemoryStoreCreatedEventData,
     BetaWebhookMemoryStoreDeletedEventData,
@@ -2780,7 +2893,7 @@ Types:
 ```python
 from anthropic.types.beta import (
     BetaDream,
-    BetaDreamError,
+    BetaDreamErrorObject,
     BetaDreamInput,
     BetaDreamInputParam,
     BetaDreamMemoryStoreInput,
@@ -2798,6 +2911,7 @@ from anthropic.types.beta import (
     BetaOutputBehaviorCreateNewParam,
     BetaOutputBehaviorUpdateExisting,
     BetaOutputBehaviorUpdateExistingParam,
+    BetaDreamError,
 )
 ```
 
@@ -3424,7 +3538,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaDeletedRBACGroup, BetaRBACGroup
+from anthropic.types.beta.organization import (
+    BetaDeletedRBACGroup,
+    BetaRBACGroup,
+    BetaRBACGroupNotFoundErrorDetails,
+    BetaRBACGroupNotFoundError,
+)
 ```
 
 Methods:
@@ -3457,7 +3576,12 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta.organization import BetaRBACRole
+from anthropic.types.beta.organization import (
+    BetaRBACRole,
+    BetaRBACRoleSource,
+    BetaRBACRoleSourceBuiltIn,
+    BetaRBACRoleSourceCustom,
+)
 ```
 
 Methods:
@@ -3573,10 +3697,11 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaPluginMarketplace,
-    BetaPluginMarketplaceValidationPluginError,
+    BetaPluginMarketplaceValidationPluginErrorObject,
     BetaPluginMarketplaceValidationPluginWarning,
     BetaPluginMarketplaceValidationPluginWarnings,
     BetaPluginMarketplaceValidationReport,
+    BetaPluginMarketplaceValidationPluginError,
 )
 ```
 
@@ -3675,6 +3800,86 @@ Methods:
 - <code title="delete /v1/organizations/webhooks/{webhook_endpoint_id}">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">delete</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_organization_webhook_endpoint.py">BetaDeletedOrganizationWebhookEndpoint</a></code>
 - <code title="post /v1/organizations/webhooks/{webhook_endpoint_id}/regenerate_signing_secret">client.beta.organization.webhooks.<a href="./src/anthropic/resources/beta/organization/webhooks.py">regenerate_signing_secret</a>(webhook_endpoint_id) -> <a href="./src/anthropic/types/beta/organization/beta_organization_webhook_endpoint_signing_secret.py">BetaOrganizationWebhookEndpointSigningSecret</a></code>
 
+### ClaudeCode
+
+#### ManagedSettings
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code import (
+    BetaCMEKFeatureUnsupportedErrorDetails,
+    BetaRBACGroupManagedSettingsNotFoundErrorDetails,
+    BetaRBACGroupOrderLimitExceededErrorDetails,
+    BetaSettingsDocumentLimitExceededErrorDetails,
+    BetaSettingsHistoryLimitExceededErrorDetails,
+    BetaCMEKFeatureUnsupportedError,
+    BetaRBACGroupOrderLimitExceededError,
+    BetaSettingsDocumentLimitExceededError,
+    BetaSettingsHistoryLimitExceededError,
+    BetaRBACGroupManagedSettingsNotFoundError,
+)
+```
+
+##### Configuration
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeManagedSettingsConfiguration,
+    BetaClaudeCodeManagedSettingsMode,
+    BetaClaudeCodeManagedSettingsModeParam,
+    BetaClaudeCodeManagedSettingsOrganizationMode,
+    BetaClaudeCodeManagedSettingsOrganizationModeParam,
+    BetaClaudeCodeManagedSettingsRBACGroupsMode,
+    BetaClaudeCodeManagedSettingsRBACGroupsModeParam,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/configuration">client.beta.organization.claude_code.managed_settings.configuration.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/configuration.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_managed_settings_configuration.py">BetaClaudeCodeManagedSettingsConfiguration</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/configuration">client.beta.organization.claude_code.managed_settings.configuration.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/configuration.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/configuration_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_managed_settings_configuration.py">BetaClaudeCodeManagedSettingsConfiguration</a></code>
+
+##### RBACGroups
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeRBACGroupManagedSettings,
+    BetaClaudeCodeRBACGroupManagedSettingsSummary,
+    BetaClaudeCodeRBACGroupStatus,
+    BetaClaudeCodeRBACGroupStatusActive,
+    BetaClaudeCodeRBACGroupStatusDeleted,
+    BetaClaudeCodeRBACGroupStatusUnknown,
+    BetaDeletedClaudeCodeRBACGroupManagedSettings,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">retrieve</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings.py">BetaClaudeCodeRBACGroupManagedSettings</a></code>
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_groups">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings_summary.py">SyncPageCursor[BetaClaudeCodeRBACGroupManagedSettingsSummary]</a></code>
+- <code title="delete /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">delete</a>(rbac_group_id) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_deleted_claude_code_rbac_group_managed_settings.py">BetaDeletedClaudeCodeRBACGroupManagedSettings</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/rbac_groups/{rbac_group_id}">client.beta.organization.claude_code.managed_settings.rbac_groups.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_groups.py">set</a>(rbac_group_id, \*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_set_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_managed_settings.py">BetaClaudeCodeRBACGroupManagedSettings</a></code>
+
+##### RBACGroupDefault
+
+Types:
+
+```python
+from anthropic.types.beta.organization.claude_code.managed_settings import (
+    BetaClaudeCodeRBACGroupDefaultManagedSettings,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/claude_code/managed_settings/rbac_group_default">client.beta.organization.claude_code.managed_settings.rbac_group_default.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_group_default.py">retrieve</a>() -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_default_managed_settings.py">BetaClaudeCodeRBACGroupDefaultManagedSettings</a></code>
+- <code title="post /v1/organizations/claude_code/managed_settings/rbac_group_default">client.beta.organization.claude_code.managed_settings.rbac_group_default.<a href="./src/anthropic/resources/beta/organization/claude_code/managed_settings/rbac_group_default.py">update</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_code/managed_settings/rbac_group_default_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_code/managed_settings/beta_claude_code_rbac_group_default_managed_settings.py">BetaClaudeCodeRBACGroupDefaultManagedSettings</a></code>
+
 ### ClaudeTag
 
 Types:
@@ -3682,6 +3887,8 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaAPIKeyScopeMissingErrorDetails,
+    BetaBundleAttachmentNotSupportedErrorDetails,
+    BetaBundleOnCallErrorDetails,
     BetaClaudeTagDefaultSettingSource,
     BetaClaudeTagGuestPolicy,
     BetaClaudeTagGuestPolicyParam,
@@ -3720,6 +3927,8 @@ from anthropic.types.beta.organization import (
     BetaSlackChannelSetUpEnvironmentNotFoundErrorDetails,
     BetaSlackChannelSetUpSettingsConflictErrorDetails,
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
+    BetaBundleAttachmentNotSupportedError,
+    BetaBundleOnCallError,
     BetaSlackChannelSetUpSettingsRefusedError,
     BetaAPIKeyScopeMissingError,
     BetaClaudeTagWritesNotEnabledError,
@@ -3774,6 +3983,7 @@ from anthropic.types.beta.organization.claude_tag import BetaClaudeTagBundle
 Methods:
 
 - <code title="get /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">retrieve</a>(bundle_id) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
+- <code title="post /v1/organizations/claude_tag/bundles/{bundle_id}">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">update</a>(bundle_id, \*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">BetaClaudeTagBundle</a></code>
 - <code title="get /v1/organizations/claude_tag/bundles">client.beta.organization.claude_tag.bundles.<a href="./src/anthropic/resources/beta/organization/claude_tag/bundles/bundles.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/claude_tag/bundle_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/claude_tag/beta_claude_tag_bundle.py">SyncPageCursor[BetaClaudeTagBundle]</a></code>
 
 ##### Targets

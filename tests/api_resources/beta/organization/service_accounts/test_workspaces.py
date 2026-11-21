@@ -33,7 +33,7 @@ class TestWorkspaces:
             service_account_id="service_account_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaServiceAccountWorkspaceMember], workspace, path=["response"])
@@ -87,7 +87,7 @@ class TestWorkspaces:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, workspace, path=["response"])
@@ -145,7 +145,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.service_accounts.workspaces.remove(
             workspace_id="workspace_id",
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(WorkspaceRemoveResponse, workspace, path=["response"])
@@ -212,7 +212,7 @@ class TestAsyncWorkspaces:
             service_account_id="service_account_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaServiceAccountWorkspaceMember], workspace, path=["response"])
@@ -266,7 +266,7 @@ class TestAsyncWorkspaces:
             service_account_id="service_account_id",
             workspace_id="workspace_id",
             workspace_role="workspace_admin",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaServiceAccountWorkspaceMember, workspace, path=["response"])
@@ -324,7 +324,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.service_accounts.workspaces.remove(
             workspace_id="workspace_id",
             service_account_id="service_account_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(WorkspaceRemoveResponse, workspace, path=["response"])

@@ -1,14 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_agent_archived_run_error_object import BetaManagedAgentsAgentArchivedRunErrorObject
 
 __all__ = ["BetaManagedAgentsAgentArchivedRunError"]
 
-
-class BetaManagedAgentsAgentArchivedRunError(BaseModel):
-    """The deployment's agent was archived."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["agent_archived_error"]
+BetaManagedAgentsAgentArchivedRunError = BetaManagedAgentsAgentArchivedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsAgentArchivedRunError has been renamed to BetaManagedAgentsAgentArchivedRunErrorObject
+"""

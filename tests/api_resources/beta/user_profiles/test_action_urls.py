@@ -31,7 +31,7 @@ class TestActionURLs:
         action_url = client.beta.user_profiles.action_urls.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -93,7 +93,7 @@ class TestAsyncActionURLs:
         action_url = await async_client.beta.user_profiles.action_urls.create(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
             action={"type": "enroll_end_user"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

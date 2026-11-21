@@ -1,14 +1,10 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_session_creation_rejected_run_error_object import (
+    BetaManagedAgentsSessionCreationRejectedRunErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsSessionCreationRejectedRunError"]
 
-
-class BetaManagedAgentsSessionCreationRejectedRunError(BaseModel):
-    """The session create request was rejected with a non-retryable validation error."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["session_creation_rejected_error"]
+BetaManagedAgentsSessionCreationRejectedRunError = BetaManagedAgentsSessionCreationRejectedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsSessionCreationRejectedRunError has been renamed to BetaManagedAgentsSessionCreationRejectedRunErrorObject
+"""

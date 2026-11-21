@@ -99,8 +99,9 @@ class UserUsageReport(SyncAPIResource):
         usage with no user account, such as Code Review usage and Claude Tag usage in
         Slack channels, is left out. Claude Tag one-to-one direct messages are included,
         with product `claude-tag`, only for members who have connected a Claude account.
-        Available to organizations on a Claude Enterprise plan. Requires an API key with
-        the `read:analytics` scope.
+        To see all usage by product, call `GET /v1/organizations/analytics/usage_report`
+        with `group_by[]=product`. Available to organizations on a Claude Enterprise
+        plan. Requires an API key with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use
@@ -294,8 +295,9 @@ class AsyncUserUsageReport(AsyncAPIResource):
         usage with no user account, such as Code Review usage and Claude Tag usage in
         Slack channels, is left out. Claude Tag one-to-one direct messages are included,
         with product `claude-tag`, only for members who have connected a Claude account.
-        Available to organizations on a Claude Enterprise plan. Requires an API key with
-        the `read:analytics` scope.
+        To see all usage by product, call `GET /v1/organizations/analytics/usage_report`
+        with `group_by[]=product`. Available to organizations on a Claude Enterprise
+        plan. Requires an API key with the `read:analytics` scope.
 
         This endpoint is one of the legacy Claude Enterprise usage and cost reports. For
         new integrations, use

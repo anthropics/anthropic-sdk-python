@@ -4,5 +4,5 @@ __all__ = ["ResponseComputerMiddleClickToolUseBlock"]
 
 ResponseComputerMiddleClickToolUseBlock = ComputerMiddleClickToolUseBlock
 """
-ResponseComputerMiddleClickToolUseBlock has been renamed to ComputerMiddleClickToolUseBlock
+Deprecated: ResponseComputerMiddleClickToolUseBlock has been renamed to ComputerMiddleClickToolUseBlock
 """

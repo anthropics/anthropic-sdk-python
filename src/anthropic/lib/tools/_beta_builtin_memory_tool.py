@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import uuid
 import shutil
 from abc import abstractmethod
@@ -20,8 +21,8 @@ from anthropic.types.beta import (
     BetaMemoryTool20250818StrReplaceCommand,
 )
 
-from ._files import read_text_exact
 from ..._models import construct_type_unchecked
+from ._file_store import FileStoreError, open_regular_file
 from ...types.beta import (
     BetaMemoryTool20250818Param,
     BetaMemoryTool20250818Command,
@@ -354,7 +355,10 @@ def _validate_no_symlink_escape(target_path: Path, memory_root: Path) -> None:
 
 def _read_file_content(full_path: Path, memory_path: str) -> str:
     try:
-        return read_text_exact(full_path)
+        with open_regular_file(memory_path, full_path) as file:
+            return file.read().decode("utf-8")
+    except FileStoreError as err:
+        raise ToolError(str(err)) from err
     except FileNotFoundError as err:
         raise ToolError(
             f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
@@ -414,10 +418,12 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
     def view(self, command: BetaMemoryTool20250818ViewCommand) -> str:
         full_path = self._validate_path(command.path)
 
-        if not full_path.exists():
-            raise ToolError(f"The path {command.path} does not exist. Please provide a valid path.")
+        try:
+            leaf = os.lstat(full_path)
+        except (FileNotFoundError, NotADirectoryError) as err:
+            raise ToolError(f"The path {command.path} does not exist. Please provide a valid path.") from err
 
-        if full_path.is_dir():
+        if stat.S_ISDIR(leaf.st_mode):
             items: List[tuple[str, str]] = []
 
             def collect_items(dir_path: Path, relative_path: str, depth: int) -> None:
@@ -434,6 +440,7 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
                         continue
                     item_relative_path = f"{relative_path}/{item.name}" if relative_path else item.name
                     try:
+                        _validate_no_symlink_escape(item, self.memory_root)
                         stat = item.stat()
                     except Exception:
                         continue
@@ -448,14 +455,13 @@ class BetaLocalFilesystemMemoryTool(BetaAbstractMemoryTool):
             collect_items(full_path, "", 1)
 
             header = f"Here're the files and directories up to 2 levels deep in {command.path}, excluding hidden items:"
-            dir_stat = full_path.stat()
-            dir_size = _format_file_size(dir_stat.st_size)
+            dir_size = _format_file_size(leaf.st_size)
             lines = [f"{dir_size}\t{command.path}"]
             lines.extend([f"{size}\t{command.path}/{path}" for size, path in items])
 
             return f"{header}\n" + "\n".join(lines)
 
-        elif full_path.is_file():
+        elif stat.S_ISREG(leaf.st_mode):
             content = _read_file_content(full_path, command.path)
             lines = content.split("\n")
 
@@ -661,12 +667,7 @@ async def _async_secure_mkdir(path: AsyncPath, mode: int = _DIR_CREATE_MODE) -> 
 
 
 async def _async_read_file_content(full_path: AsyncPath, memory_path: str) -> str:
-    try:
-        return await run_sync(read_text_exact, Path(str(full_path)))
-    except FileNotFoundError as err:
-        raise ToolError(
-            f"The file {memory_path} no longer exists (may have been deleted or renamed concurrently)."
-        ) from err
+    return await run_sync(_read_file_content, Path(str(full_path)), memory_path)
 
 
 class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
@@ -707,10 +708,12 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
         await self._ensure_memory_root()
         full_path = await self._validate_path(command.path)
 
-        if not await full_path.exists():
-            raise ToolError(f"The path {command.path} does not exist. Please provide a valid path.")
+        try:
+            leaf = await run_sync(os.lstat, full_path)
+        except (FileNotFoundError, NotADirectoryError) as err:
+            raise ToolError(f"The path {command.path} does not exist. Please provide a valid path.") from err
 
-        if await full_path.is_dir():
+        if stat.S_ISDIR(leaf.st_mode):
             items: List[tuple[str, str]] = []
 
             async def collect_items(dir_path: AsyncPath, relative_path: str, depth: int) -> None:
@@ -728,6 +731,7 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
                         continue
                     item_relative_path = f"{relative_path}/{item.name}" if relative_path else item.name
                     try:
+                        await _async_validate_no_symlink_escape(item, self.memory_root)
                         sync_item = Path(str(item))
                         stat = await run_sync(sync_item.stat)
                     except Exception:
@@ -743,15 +747,13 @@ class BetaAsyncLocalFilesystemMemoryTool(BetaAsyncAbstractMemoryTool):
             await collect_items(full_path, "", 1)
 
             header = f"Here're the files and directories up to 2 levels deep in {command.path}, excluding hidden items:"
-            sync_full_path = Path(str(full_path))
-            dir_stat = await run_sync(sync_full_path.stat)
-            dir_size = _format_file_size(dir_stat.st_size)
+            dir_size = _format_file_size(leaf.st_size)
             lines = [f"{dir_size}\t{command.path}"]
             lines.extend([f"{size}\t{command.path}/{path}" for size, path in items])
 
             return f"{header}\n" + "\n".join(lines)
 
-        elif await full_path.is_file():
+        elif stat.S_ISREG(leaf.st_mode):
             content = await _async_read_file_content(full_path, command.path)
             lines = content.split("\n")
 

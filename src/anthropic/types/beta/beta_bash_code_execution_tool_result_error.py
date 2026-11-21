@@ -1,13 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_bash_code_execution_tool_result_error_object import BetaBashCodeExecutionToolResultErrorObject
 
 __all__ = ["BetaBashCodeExecutionToolResultError"]
 
-
-class BetaBashCodeExecutionToolResultError(BaseModel):
-    error_code: Literal[
-        "invalid_tool_input", "unavailable", "too_many_requests", "execution_time_exceeded", "output_file_too_large"
-    ]
-
-    type: Literal["bash_code_execution_tool_result_error"]
+BetaBashCodeExecutionToolResultError = BetaBashCodeExecutionToolResultErrorObject
+"""
+Deprecated: BetaBashCodeExecutionToolResultError has been renamed to BetaBashCodeExecutionToolResultErrorObject
+"""

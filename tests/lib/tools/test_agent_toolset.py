@@ -5,12 +5,15 @@ import re
 import sys
 import time
 import base64
+import signal
+from types import SimpleNamespace
 from typing import Any, cast
 from pathlib import Path
 from typing_extensions import Required, get_args, get_origin, get_type_hints
 
 import anyio
 import pytest
+import anyio.to_thread
 
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import ToolError
@@ -677,6 +680,110 @@ async def test_glob_with_path(tmp_path: Path) -> None:
 
 
 @needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+@pytest.mark.parametrize("relative_entry", [".", "", "bin"])
+async def test_grep_ignores_relative_path_entries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, relative_entry: str
+) -> None:
+    for directory, output in [("cwd", "relative"), ("cwd/bin", "relative"), ("system", "absolute")]:
+        rg = tmp_path / directory / "rg"
+        rg.parent.mkdir()
+        rg.write_text(f"#!/bin/sh\necho {output}\n")
+        rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "x.txt").write_text("needle\n")
+    monkeypatch.chdir(tmp_path / "cwd")
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work)))
+
+    monkeypatch.setenv("PATH", os.pathsep.join([relative_entry, str(tmp_path / "no-rg")]))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+    monkeypatch.setenv("PATH", os.pathsep.join([relative_entry, str(tmp_path / "system")]))
+    assert await grep.call({"pattern": "needle"}) == "absolute\n"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+@pytest.mark.parametrize(("os_name", "expected"), [("posix", "rg"), ("nt", "rg.exe")])
+async def test_grep_runs_the_rg_named_for_the_platform(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, os_name: str, expected: str
+) -> None:
+    for name in ("rg", "rg.exe", "rg.cmd"):
+        rg = tmp_path / name
+        rg.write_text(f"#!/bin/sh\necho {name}\n")
+        rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.setenv("PATH", str(tmp_path))
+    monkeypatch.setattr("anthropic.lib.tools.agent_toolset.os", SimpleNamespace(**{**vars(os), "name": os_name}))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"})
+    assert res == f"{expected}\n"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize(
+    "entry", ["work/bin", "WORK/bin", "allowed/bin", "cafe\u0301/bin", "linked-dir", "linked-file"]
+)
+async def test_grep_passes_over_an_rg_inside_the_workdir_or_an_allowed_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, entry: str
+) -> None:
+    for directory in ("work/bin", "WORK/bin", "allowed/bin", "cafe\u0301/bin", "system"):
+        rg = tmp_path / directory / "rg"
+        rg.parent.mkdir(parents=True, exist_ok=True)
+        rg.write_text(f"#!/bin/sh\necho {rg.parent.name}\n")
+        rg.chmod(0o755)
+    work = tmp_path / "work"
+    (work / "x.txt").write_text("needle\n")
+    (tmp_path / "linked-dir").symlink_to(work / "bin")
+    (tmp_path / "linked-file").mkdir()
+    (tmp_path / "linked-file" / "rg").symlink_to(work / "bin" / "rg")
+    (tmp_path / "allowed-link").symlink_to(tmp_path / "allowed")
+    allowed_roots = [tmp_path / "allowed-link", tmp_path / "caf\u00e9"]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work), allowed_roots=allowed_roots))
+
+    monkeypatch.setenv("PATH", str(tmp_path / entry))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+    monkeypatch.setenv("PATH", os.pathsep.join([str(tmp_path / entry), str(tmp_path / "system")]))
+    assert await grep.call({"pattern": "needle"}) == "system\n"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_grep_runs_no_rg_when_an_allowed_root_cannot_be_resolved(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    rg = tmp_path / "system" / "rg"
+    rg.parent.mkdir()
+    rg.write_text("#!/bin/sh\necho outside\n")
+    rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "x.txt").write_text("needle\n")
+    (tmp_path / "loop").symlink_to("loop")
+    monkeypatch.setenv("PATH", str(rg.parent))
+    grep = beta_grep_tool(AgentToolContext(workdir=str(work), allowed_roots=[tmp_path / "loop"]))
+    assert await grep.call({"pattern": "needle"}) == f"{work.resolve() / 'x.txt'}:1:needle"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+async def test_grep_does_not_pass_anthropic_variables_to_rg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    rg = tmp_path / "system" / "rg"
+    rg.parent.mkdir()
+    rg.write_text('#!/bin/sh\necho "[$ANTHROPIC_API_KEY] [$KEPT]"\n')
+    rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.setenv("PATH", str(rg.parent))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "fake-key")
+    monkeypatch.setenv("KEPT", "kept")
+    assert await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"}) == "[] [kept]\n"
+
+
+@needs_pydantic_v2
 async def test_grep_finds_match(tmp_path: Path) -> None:
     (tmp_path / "x.txt").write_text("foo\nbar\nbaz\n")
     env = AgentToolContext(workdir=str(tmp_path))
@@ -695,6 +802,68 @@ async def test_grep_single_file_path(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert isinstance(res, str)
     assert "beta" in res
     assert res != "no matches"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs interval timers")
+async def test_grep_walk_stops_a_backtracking_pattern(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("a" * 28 + "b\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    monkeypatch.setattr("anthropic.lib.tools.agent_toolset._GREP_CPU_SECONDS", 0.2)
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+
+    for _ in range(2):
+        with pytest.raises(ToolError, match="grep: timed out after 0.2s"):
+            await grep.call({"pattern": "^(a+)+$"})
+        assert signal.getsignal(signal.SIGVTALRM) is signal.SIG_DFL
+        assert signal.getitimer(signal.ITIMER_VIRTUAL) == (0, 0)
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs interval timers")
+async def test_grep_walk_leaves_the_hosts_signal_alone(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+
+    def handler(_signum: int, _frame: object) -> None: ...
+
+    signal.setitimer(signal.ITIMER_VIRTUAL, 1000)
+    try:
+        assert "beta" in str(await grep.call({"pattern": "beta"}))
+        assert signal.getitimer(signal.ITIMER_VIRTUAL)[0] > 900
+
+        signal.setitimer(signal.ITIMER_VIRTUAL, 0)
+        signal.signal(signal.SIGVTALRM, handler)
+        assert "beta" in str(await grep.call({"pattern": "beta"}))
+        assert signal.getsignal(signal.SIGVTALRM) is handler
+    finally:
+        signal.setitimer(signal.ITIMER_VIRTUAL, 0)
+        signal.signal(signal.SIGVTALRM, signal.SIG_DFL)
+
+
+@needs_pydantic_v2
+@pytest.mark.parametrize("error", [AttributeError, getattr(signal, "ItimerError", OSError)], ids=["windows", "refused"])
+async def test_grep_walk_works_without_interval_timers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: type[Exception]
+) -> None:
+    def getitimer(_which: int) -> None:
+        raise error
+
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    monkeypatch.setattr(signal, "getitimer", getitimer, raising=False)
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+    assert "beta" in str(await grep.call({"pattern": "beta"}))
+
+
+@needs_pydantic_v2
+async def test_grep_walk_works_off_the_main_thread(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("beta\n")
+    monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
+    grep = beta_grep_tool(AgentToolContext(workdir=str(tmp_path)))
+    result = await anyio.to_thread.run_sync(lambda: anyio.run(grep.call, {"pattern": "beta"}))
+    assert "beta" in str(result)
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="bash session requires /bin/bash")
@@ -833,6 +1002,76 @@ async def test_write_through_dangling_symlink_inside_workdir(tmp_path: Path) -> 
     assert (tmp_path / "newdir" / "f.txt").read_text() == "via link"
 
 
+def _missing_target_fixture(tmp_path: Path) -> Path:
+    """Workdir with two links to `deep/t`, which doesn't exist. With `..`
+    collapsed by name, both targets read as `t`, whose entries link outside."""
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_text("SECRET")
+    work = tmp_path / "work"
+    (work / "deep" / "dir").mkdir(parents=True)
+    (work / "s").symlink_to("deep/dir")
+    (work / "deep" / "dir" / "relative").symlink_to("../t")
+    (work / "spelled").symlink_to("s/../t")
+    (work / "t").mkdir()
+    (work / "t" / "leaf").symlink_to(outside / "secret.txt")
+    (work / "t" / "d").symlink_to(outside)
+    return work
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize(
+    ("make_tool", "tool_input"),
+    [
+        (beta_read_tool, {"file_path": "spelled/leaf"}),
+        (beta_read_tool, {"file_path": "spelled/d/secret.txt"}),
+        (beta_edit_tool, {"file_path": "spelled/leaf", "old_string": "SECRET", "new_string": "x"}),
+        (beta_edit_tool, {"file_path": "spelled/d/secret.txt", "old_string": "SECRET", "new_string": "x"}),
+        (beta_write_tool, {"file_path": "spelled/leaf", "content": "x"}),
+        (beta_write_tool, {"file_path": "spelled/d/new.txt", "content": "x"}),
+        (beta_write_tool, {"file_path": "spelled/d/missing/new.txt", "content": "x"}),
+        (beta_grep_tool, {"pattern": "SECRET", "path": "spelled/leaf"}),
+        (beta_grep_tool, {"pattern": "SECRET", "path": "spelled/d"}),
+        (beta_glob_tool, {"pattern": "*", "path": "spelled/d"}),
+    ],
+)
+async def test_symlink_escape_after_dangling_symlink_is_rejected(
+    tmp_path: Path, make_tool: Any, tool_input: dict[str, str]
+) -> None:
+    env = AgentToolContext(workdir=str(_missing_target_fixture(tmp_path)))
+
+    with pytest.raises(ToolError, match="outside the session's working directory"):
+        await make_tool(env).call(tool_input)
+
+    assert os.listdir(tmp_path / "outside") == ["secret.txt"]
+    assert (tmp_path / "outside" / "secret.txt").read_text() == "SECRET"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize("rest", ["leaf", "d/new.txt"])
+async def test_write_resolves_dangling_symlink_from_its_real_directory(tmp_path: Path, rest: str) -> None:
+    work = _missing_target_fixture(tmp_path)
+    env = AgentToolContext(workdir=str(work))
+
+    await beta_write_tool(env).call({"file_path": f"s/relative/{rest}", "content": "x"})
+
+    assert (work / "deep" / "t" / rest).read_text() == "x"
+    assert os.listdir(tmp_path / "outside") == ["secret.txt"]
+    assert (tmp_path / "outside" / "secret.txt").read_text() == "SECRET"
+
+
+@needs_pydantic_v2
+@needs_symlinks
+@pytest.mark.parametrize("rest", ["leaf", "d/secret.txt"])
+async def test_read_resolves_dangling_symlink_from_its_real_directory(tmp_path: Path, rest: str) -> None:
+    env = AgentToolContext(workdir=str(_missing_target_fixture(tmp_path)))
+
+    with pytest.raises(ToolError, match="no such file or directory"):
+        await beta_read_tool(env).call({"file_path": f"s/relative/{rest}"})
+
+
 @needs_pydantic_v2
 @needs_symlinks
 async def test_read_follows_symlink_chain_inside_workdir(tmp_path: Path) -> None:
@@ -923,6 +1162,53 @@ async def test_grep_skips_symlinked_files(tmp_path: Path, monkeypatch: pytest.Mo
     monkeypatch.setattr("shutil.which", lambda _name: None)  # type: ignore[arg-type]
     res = await beta_grep_tool(env).call({"pattern": "TOPSECRET"})
     assert res == "no matches"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="needs FIFOs")
+async def test_grep_without_rg_reads_only_regular_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "x.txt").write_text("needle\n")
+    os.mkfifo(tmp_path / "pipe")
+    monkeypatch.setenv("PATH", "")
+    # Holding both ends open lets a reader in, so reading the FIFO fails this test rather than hanging it.
+    pipe = os.open(tmp_path / "pipe", os.O_RDWR | os.O_NONBLOCK)
+    try:
+        os.write(pipe, b"needle\n" * 100)
+        res = await beta_grep_tool(AgentToolContext(workdir=str(tmp_path))).call({"pattern": "needle"})
+        assert res == f"{tmp_path.resolve() / 'x.txt'}:1:needle"
+        assert os.read(pipe, 1024) == b"needle\n" * 100
+    finally:
+        os.close(pipe)
+
+
+@needs_pydantic_v2
+@needs_symlinks
+async def test_grep_ignores_the_ripgrep_config_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("TOPSECRET")
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "leak").symlink_to(secret)
+    config = tmp_path / "ripgreprc"
+    config.write_text("--follow\n")
+    monkeypatch.setenv("RIPGREP_CONFIG_PATH", str(config))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "TOPSECRET"})
+    assert res == "no matches"
+
+
+@needs_pydantic_v2
+@pytest.mark.skipif(sys.platform == "win32", reason="the stand-in rg is a shell script")
+async def test_grep_passes_no_config_to_rg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    rg = tmp_path / "bin" / "rg"
+    rg.parent.mkdir()
+    rg.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\"\n")
+    rg.chmod(0o755)
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.setenv("PATH", str(rg.parent))
+    res = await beta_grep_tool(AgentToolContext(workdir=str(work))).call({"pattern": "x"})
+    args = str(res).splitlines()
+    assert "--no-config" in args[: args.index("-e")]
 
 
 @needs_pydantic_v2

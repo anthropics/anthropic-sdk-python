@@ -75,6 +75,13 @@ class Permissions(SyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
+
+          ParentOrganizationRequiredError:
+
+          RBACRoleNotFoundError:
         """
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")
@@ -153,6 +160,13 @@ class AsyncPermissions(AsyncAPIResource):
           extra_body: Add additional JSON properties to the request
 
           timeout: Override the client-level default timeout for this request, in seconds
+
+        Raises:
+          OrganizationTypeNotSupportedError:
+
+          ParentOrganizationRequiredError:
+
+          RBACRoleNotFoundError:
         """
         if not rbac_role_id:
             raise ValueError(f"Expected a non-empty value for `rbac_role_id` but received {rbac_role_id!r}")

@@ -1,0 +1,12 @@
+# A pull request from a fork pushes nothing to this repo, so this calls ci.yml for it.
+name: CI (forks)
+on:
+  pull_request:
+
+jobs:
+  fork-ci:
+    if: github.event.pull_request.head.repo.fork
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/ci.yml

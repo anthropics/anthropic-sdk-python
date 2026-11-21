@@ -18,14 +18,20 @@ else
   URL="$SPEC_TMPFILE"
 fi
 
+# Install the mock server, checked against the hashes in scripts/mock-lock.json.
+# This runs first so the download isn't counted in the 30s wait below.
+steady_dir="$(mktemp -d)"
+trap 'rm -rf "$steady_dir" "${SPEC_TMPFILE:-}" || true' EXIT
+cp scripts/mock-lock.json "$steady_dir/package-lock.json"
+echo '{"dependencies":{"@stdy/cli":"0.22.2"}}' > "$steady_dir/package.json"
+(cd "$steady_dir" && npm ci --ignore-scripts --no-audit --no-fund --loglevel=error)
+steady="$steady_dir/node_modules/.bin/steady"
+
 echo "==> Starting mock server with URL ${URL}"
 
 # Run steady mock on the given spec
 if [ "$1" == "--daemon" ]; then
-  # Pre-install the package so the download doesn't eat into the startup timeout
-  npm exec --package=@stdy/cli@0.22.2 -- steady --version
-
-  npm exec --package=@stdy/cli@0.22.2 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=brackets --validator-form-array-format=brackets --validator-query-object-format=brackets --validator-form-object-format=brackets "$URL" &> .stdy.log &
+  "$steady" --host 127.0.0.1 -p 4010 --validator-query-array-format=brackets --validator-form-array-format=brackets --validator-query-object-format=brackets --validator-form-object-format=brackets "$URL" &> .stdy.log &
 
   # Wait for server to come online via health endpoint (max 30s)
   echo -n "Waiting for server"
@@ -49,5 +55,5 @@ if [ "$1" == "--daemon" ]; then
 
   echo
 else
-  npm exec --package=@stdy/cli@0.22.2 -- steady --host 127.0.0.1 -p 4010 --validator-query-array-format=brackets --validator-form-array-format=brackets --validator-query-object-format=brackets --validator-form-object-format=brackets "$URL"
+  "$steady" --host 127.0.0.1 -p 4010 --validator-query-array-format=brackets --validator-form-array-format=brackets --validator-query-object-format=brackets --validator-form-object-format=brackets "$URL"
 fi

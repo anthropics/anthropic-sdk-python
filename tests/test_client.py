@@ -5,6 +5,7 @@ import os
 import sys
 import copy
 import json
+import socket
 import asyncio
 import inspect
 import dataclasses
@@ -19,12 +20,12 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from anthropic import Anthropic, AsyncAnthropic, APIResponseValidationError
+from anthropic import Anthropic, AsyncAnthropic, DefaultAioHttpClient, APIResponseValidationError
 from anthropic._types import Omit, Timeout, NotGiven, not_given
 from anthropic._utils import asyncify
 from anthropic._models import BaseModel, FinalRequestOptions
 from anthropic._streaming import Stream, AsyncStream
-from anthropic._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
+from anthropic._exceptions import APIStatusError, APITimeoutError, APIConnectionError, APIResponseValidationError
 from anthropic._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -962,6 +963,23 @@ class TestAnthropic:
         )
         params = dict(request.url.params)
         assert params == {"foo": "2"}
+
+    def test_request_query_spaces(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo",
+                **make_request_options(
+                    query={"foo": "a b+c"},
+                    extra_query={"bar": "d e"},
+                ),
+            ),
+        )
+        assert request.url.query == b"foo=a%20b%2Bc&bar=d%20e"
+
+        # a query in a URL that the caller wrote is sent as it is
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo?bar=a+b"))
+        assert request.url.query == b"bar=a+b"
 
     def test_multipart_repeating_array(self, client: Anthropic) -> None:
         request = client._build_request(
@@ -2401,6 +2419,23 @@ class TestAsyncAnthropic:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
+    def test_request_query_spaces(self, client: Anthropic) -> None:
+        request = client._build_request(
+            FinalRequestOptions(
+                method="get",
+                url="/foo",
+                **make_request_options(
+                    query={"foo": "a b+c"},
+                    extra_query={"bar": "d e"},
+                ),
+            ),
+        )
+        assert request.url.query == b"foo=a%20b%2Bc&bar=d%20e"
+
+        # a query in a URL that the caller wrote is sent as it is
+        request = client._build_request(FinalRequestOptions(method="get", url="/foo?bar=a+b"))
+        assert request.url.query == b"bar=a+b"
+
     def test_multipart_repeating_array(self, async_client: AsyncAnthropic) -> None:
         request = async_client._build_request(
             FinalRequestOptions.construct(
@@ -2983,6 +3018,21 @@ class TestAsyncAnthropic:
             http2=False,
             limits=httpx2.Limits(max_connections=100, max_keepalive_connections=20),
         )
+
+    async def test_aiohttp_refused_connection_is_not_a_timeout(self, async_client: AsyncAnthropic) -> None:
+        with socket.socket() as socket_that_never_listens:
+            socket_that_never_listens.bind(("127.0.0.1", 0))
+            port = socket_that_never_listens.getsockname()[1]
+
+            async with DefaultAioHttpClient() as http_client:
+                client = async_client.with_options(
+                    base_url=f"http://127.0.0.1:{port}", http_client=http_client, max_retries=0
+                )
+
+                with pytest.raises(APIConnectionError) as exc_info:
+                    await client.get("/foo", cast_to=httpx2.Response)
+
+        assert not isinstance(exc_info.value, APITimeoutError)
 
     @pytest.mark.respx(base_url=base_url)
     async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncAnthropic) -> None:

@@ -43,7 +43,7 @@ class TestDreams:
             model="string",
             instructions="x",
             output_behavior={"type": "create_new"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -99,7 +99,7 @@ class TestDreams:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         dream = client.beta.dreams.retrieve(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -154,7 +154,7 @@ class TestDreams:
             limit=0,
             page="page",
             statuses=["pending"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -196,7 +196,7 @@ class TestDreams:
     def test_method_archive_with_all_params(self, client: Anthropic) -> None:
         dream = client.beta.dreams.archive(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -247,7 +247,7 @@ class TestDreams:
     def test_method_cancel_with_all_params(self, client: Anthropic) -> None:
         dream = client.beta.dreams.cancel(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -318,7 +318,7 @@ class TestAsyncDreams:
             model="string",
             instructions="x",
             output_behavior={"type": "create_new"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -374,7 +374,7 @@ class TestAsyncDreams:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.retrieve(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -429,7 +429,7 @@ class TestAsyncDreams:
             limit=0,
             page="page",
             statuses=["pending"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -471,7 +471,7 @@ class TestAsyncDreams:
     async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.archive(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -522,7 +522,7 @@ class TestAsyncDreams:
     async def test_method_cancel_with_all_params(self, async_client: AsyncAnthropic) -> None:
         dream = await async_client.beta.dreams.cancel(
             dream_id="dream_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

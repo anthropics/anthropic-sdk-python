@@ -73,8 +73,9 @@ class ExternalKeys(SyncAPIResource):
               customers: bind a customer's key to that customer's user profile. A key bound to
               a user profile can only be attached to a Workspace that has the same user
               profile, and the binding cannot be changed later. Omit this field only for your
-              organization's own key, because a key created without a user profile ID can be
-              attached to any Workspace, including another customer's.
+              organization's own key, never a customer's. A key created without a user profile
+              ID can't be attached to a Workspace that has a user profile, and you can't add
+              one to the key later.
 
           extra_headers: Send extra headers
 
@@ -171,8 +172,8 @@ class ExternalKeys(SyncAPIResource):
         Omitted fields are left unchanged.
 
         `display_name` is always editable. `geo` and `provider_config` cannot be changed
-        once any workspace references this config, because previously encrypted data
-        requires the original key identity to decrypt.
+        once any workspace references this config, and a Google Cloud key's provider and
+        `key_name` cannot be changed at all.
 
         Args:
           external_key_id: ID of the External Key.
@@ -418,8 +419,9 @@ class AsyncExternalKeys(AsyncAPIResource):
               customers: bind a customer's key to that customer's user profile. A key bound to
               a user profile can only be attached to a Workspace that has the same user
               profile, and the binding cannot be changed later. Omit this field only for your
-              organization's own key, because a key created without a user profile ID can be
-              attached to any Workspace, including another customer's.
+              organization's own key, never a customer's. A key created without a user profile
+              ID can't be attached to a Workspace that has a user profile, and you can't add
+              one to the key later.
 
           extra_headers: Send extra headers
 
@@ -516,8 +518,8 @@ class AsyncExternalKeys(AsyncAPIResource):
         Omitted fields are left unchanged.
 
         `display_name` is always editable. `geo` and `provider_config` cannot be changed
-        once any workspace references this config, because previously encrypted data
-        requires the original key identity to decrypt.
+        once any workspace references this config, and a Google Cloud key's provider and
+        `key_name` cannot be changed at all.
 
         Args:
           external_key_id: ID of the External Key.

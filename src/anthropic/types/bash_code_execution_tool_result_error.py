@@ -1,12 +1,8 @@
-from typing_extensions import Literal
-
-from .._models import BaseModel
-from .bash_code_execution_tool_result_error_code import BashCodeExecutionToolResultErrorCode
+from .bash_code_execution_tool_result_error_object import BashCodeExecutionToolResultErrorObject
 
 __all__ = ["BashCodeExecutionToolResultError"]
 
-
-class BashCodeExecutionToolResultError(BaseModel):
-    error_code: BashCodeExecutionToolResultErrorCode
-
-    type: Literal["bash_code_execution_tool_result_error"]
+BashCodeExecutionToolResultError = BashCodeExecutionToolResultErrorObject
+"""
+Deprecated: BashCodeExecutionToolResultError has been renamed to BashCodeExecutionToolResultErrorObject
+"""

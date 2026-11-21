@@ -33,7 +33,7 @@ class TestWorkspaces:
             federation_rule_id="federation_rule_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaFederationRuleWorkspace], workspace, path=["response"])
@@ -85,7 +85,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRuleWorkspace, workspace, path=["response"])
@@ -140,7 +140,7 @@ class TestWorkspaces:
         workspace = client.beta.organization.federation.rules.workspaces.remove(
             workspace_id="workspace_id",
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(WorkspaceRemoveResponse, workspace, path=["response"])
@@ -207,7 +207,7 @@ class TestAsyncWorkspaces:
             federation_rule_id="federation_rule_id",
             limit=1,
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaFederationRuleWorkspace], workspace, path=["response"])
@@ -259,7 +259,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
             workspace_id="workspace_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationRuleWorkspace, workspace, path=["response"])
@@ -314,7 +314,7 @@ class TestAsyncWorkspaces:
         workspace = await async_client.beta.organization.federation.rules.workspaces.remove(
             workspace_id="workspace_id",
             federation_rule_id="federation_rule_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(WorkspaceRemoveResponse, workspace, path=["response"])

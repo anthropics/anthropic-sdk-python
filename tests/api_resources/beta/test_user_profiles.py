@@ -45,7 +45,7 @@ class TestUserProfiles:
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={},
             name="Example User",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -87,7 +87,7 @@ class TestUserProfiles:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -152,7 +152,7 @@ class TestUserProfiles:
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -205,7 +205,7 @@ class TestUserProfiles:
             order="asc",
             order_by="created_at",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -247,7 +247,7 @@ class TestUserProfiles:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -298,7 +298,7 @@ class TestUserProfiles:
     def test_method_create_enrollment_url_with_all_params(self, client: Anthropic) -> None:
         user_profile = client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -367,7 +367,7 @@ class TestAsyncUserProfiles:
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={},
             name="Example User",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -409,7 +409,7 @@ class TestAsyncUserProfiles:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.retrieve(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -474,7 +474,7 @@ class TestAsyncUserProfiles:
             external_user_onboarded_at=parse_datetime("2019-12-27T18:11:19.117Z"),
             metadata={"foo": "string"},
             name="x",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -527,7 +527,7 @@ class TestAsyncUserProfiles:
             order="asc",
             order_by="created_at",
             page="page",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -569,7 +569,7 @@ class TestAsyncUserProfiles:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.delete(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )
@@ -620,7 +620,7 @@ class TestAsyncUserProfiles:
     async def test_method_create_enrollment_url_with_all_params(self, async_client: AsyncAnthropic) -> None:
         user_profile = await async_client.beta.user_profiles.create_enrollment_url(
             user_profile_id="uprof_011CZkZCu8hGbp5mYRQgUmz9",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             workspace_id="wrkspc_011CZkZaBF1tNoB5wlCeusgy",
             extra_query={"beta": "true"},
         )

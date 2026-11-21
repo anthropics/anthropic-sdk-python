@@ -1,0 +1,15 @@
+from typing import Optional
+from typing_extensions import Literal
+
+from .._models import BaseModel
+from .text_editor_code_execution_tool_result_error_code import TextEditorCodeExecutionToolResultErrorCode
+
+__all__ = ["TextEditorCodeExecutionToolResultErrorObject"]
+
+
+class TextEditorCodeExecutionToolResultErrorObject(BaseModel):
+    error_code: TextEditorCodeExecutionToolResultErrorCode
+
+    error_message: Optional[str] = None
+
+    type: Literal["text_editor_code_execution_tool_result_error"]

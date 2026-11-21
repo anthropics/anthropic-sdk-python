@@ -1,14 +1,8 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_workspace_archived_run_error_object import BetaManagedAgentsWorkspaceArchivedRunErrorObject
 
 __all__ = ["BetaManagedAgentsWorkspaceArchivedRunError"]
 
-
-class BetaManagedAgentsWorkspaceArchivedRunError(BaseModel):
-    """The deployment's workspace was archived."""
-
-    message: str
-    """Human-readable error description."""
-
-    type: Literal["workspace_archived_error"]
+BetaManagedAgentsWorkspaceArchivedRunError = BetaManagedAgentsWorkspaceArchivedRunErrorObject
+"""
+Deprecated: BetaManagedAgentsWorkspaceArchivedRunError has been renamed to BetaManagedAgentsWorkspaceArchivedRunErrorObject
+"""

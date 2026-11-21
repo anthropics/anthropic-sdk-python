@@ -180,6 +180,8 @@ class Plugins(SyncAPIResource):
 
           BetaUnsupportedCharsetError:
 
+          SandboxEgressRestrictedError:
+
           BetaPluginNameTakenError:
 
           BetaSkillNameTakenError:
@@ -263,7 +265,8 @@ class Plugins(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -321,8 +324,12 @@ class Plugins(SyncAPIResource):
         """
         Change which stored version of an organization-owned Plugin is served to
         members, for example to roll back to an earlier one. This pins the served
-        version: later uploads are stored but no longer change what is served, and
-        pinning cannot currently be undone, here or in claude.ai.
+        version: later uploads through this API are stored but no longer change what is
+        served, and pinning cannot currently be undone, here or in claude.ai.
+
+        A version from claude.ai might still change what is served: see
+        [Versions and the served version](/docs/en/manage-claude/plugins-api#versions-and-the-served-version)
+        in the Plugins API guide.
 
         Pass the version as `served_version_id`: an earlier one to roll back, a later
         one to start serving a version that was stored without being served, or the one
@@ -376,6 +383,8 @@ class Plugins(SyncAPIResource):
           CMEKKeyNetworkBlockedError:
 
           BetaScanFailedError:
+
+          SandboxEgressRestrictedError:
 
           BetaScanPendingError:
 
@@ -473,7 +482,8 @@ class Plugins(SyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           owner_type: `organization` for Plugins in the organization's plugin marketplaces, `user` for
               Plugins in members' personal plugin marketplaces.
@@ -585,6 +595,8 @@ class Plugins(SyncAPIResource):
 
         Raises:
           CMEKKeyDisabledError:
+
+          SandboxEgressRestrictedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")
@@ -734,6 +746,8 @@ class AsyncPlugins(AsyncAPIResource):
 
           BetaUnsupportedCharsetError:
 
+          SandboxEgressRestrictedError:
+
           BetaPluginNameTakenError:
 
           BetaSkillNameTakenError:
@@ -817,7 +831,8 @@ class AsyncPlugins(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           betas: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this
               header.
@@ -875,8 +890,12 @@ class AsyncPlugins(AsyncAPIResource):
         """
         Change which stored version of an organization-owned Plugin is served to
         members, for example to roll back to an earlier one. This pins the served
-        version: later uploads are stored but no longer change what is served, and
-        pinning cannot currently be undone, here or in claude.ai.
+        version: later uploads through this API are stored but no longer change what is
+        served, and pinning cannot currently be undone, here or in claude.ai.
+
+        A version from claude.ai might still change what is served: see
+        [Versions and the served version](/docs/en/manage-claude/plugins-api#versions-and-the-served-version)
+        in the Plugins API guide.
 
         Pass the version as `served_version_id`: an earlier one to roll back, a later
         one to start serving a version that was stored without being served, or the one
@@ -930,6 +949,8 @@ class AsyncPlugins(AsyncAPIResource):
           CMEKKeyNetworkBlockedError:
 
           BetaScanFailedError:
+
+          SandboxEgressRestrictedError:
 
           BetaScanPendingError:
 
@@ -1027,7 +1048,8 @@ class AsyncPlugins(AsyncAPIResource):
               organization's UUID or its `org_`-prefixed ID. A value that is neither returns a
               400; an organization that is not a child of the key's parent, or where the
               Plugins API is not available, returns a 404. Any other key may pass only its own
-              organization's ID here; another organization returns a 404.
+              organization's ID here; another organization returns a 404. A key with no
+              organization of its own must always pass `organization_id`.
 
           owner_type: `organization` for Plugins in the organization's plugin marketplaces, `user` for
               Plugins in members' personal plugin marketplaces.
@@ -1139,6 +1161,8 @@ class AsyncPlugins(AsyncAPIResource):
 
         Raises:
           CMEKKeyDisabledError:
+
+          SandboxEgressRestrictedError:
         """
         if not plugin_id:
             raise ValueError(f"Expected a non-empty value for `plugin_id` but received {plugin_id!r}")

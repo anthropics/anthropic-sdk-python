@@ -12,6 +12,7 @@ from ..anthropic_beta_param import AnthropicBetaParam
 from .beta_text_block_param import BetaTextBlockParam
 from .beta_diagnostics_param import BetaDiagnosticsParam
 from .beta_tool_choice_param import BetaToolChoiceParam
+from .beta_billing_policy_param import BetaBillingPolicyParam
 from .beta_thinking_config_param import BetaThinkingConfigParam
 from .beta_compaction_config_param import BetaCompactionConfigParam
 from .beta_cache_control_ephemeral_param import BetaCacheControlEphemeralParam
@@ -45,6 +46,23 @@ class ThreadSendParams(TypedDict, total=False):
 
     See [models](https://docs.anthropic.com/en/docs/models-overview) for additional
     details and options.
+    """
+
+    billing_policy: Optional[BetaBillingPolicyParam] | Omit
+    """Declares which organization is billed for this request.
+
+    `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer
+    behind the user profile named in the `anthropic-user-profile-id` header, instead
+    of your organization. If that customer has not linked an Anthropic organization
+    to the profile, or has not allowed your organization to bill it, the request is
+    rejected rather than billed to you. Omit the field, or send `"bill_to": "self"`
+    (the default), to be billed as usual.
+
+    Message Batches does not currently support billing the customer behind a user
+    profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a
+    batch that sets `"bill_to": "user_profile"` gets an `errored` result with an
+    `invalid_request_error`, nobody is billed for it, and the batch's other requests
+    run as usual.
     """
 
     cache_control: Optional[BetaCacheControlEphemeralParam] | Omit

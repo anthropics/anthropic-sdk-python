@@ -1,11 +1,12 @@
-from typing_extensions import Literal
-
-from ..._models import BaseModel
+from .beta_managed_agents_environment_not_found_deployment_paused_reason_error_object import (
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject,
+)
 
 __all__ = ["BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError"]
 
-
-class BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError(BaseModel):
-    """The deployment's environment no longer exists."""
-
-    type: Literal["environment_not_found_error"]
+BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError = (
+    BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject
+)
+"""
+Deprecated: BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError has been renamed to BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonErrorObject
+"""

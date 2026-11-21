@@ -15,7 +15,7 @@ import tarfile
 import zipfile
 from types import SimpleNamespace
 from typing import Any, AsyncIterator, cast
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from contextlib import asynccontextmanager
 from collections.abc import Callable
 
@@ -24,14 +24,38 @@ ArchiveMaker = Callable[[Path, dict[str, bytes]], None]
 # archive records for that member.
 ArchiveModeMaker = Callable[[Path, "dict[str, tuple[bytes, int]]"], None]
 
+import anyio
+import httpx2
 import pytest
+from respx import Route, MockRouter
 
+from anthropic import AsyncAnthropic
 from anthropic.lib.tools._skills import (
+    _within,
     _strip_top,
     _archive_top_dir,
     _extract_skill_archive,
     download_session_skills,
 )
+
+base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
+
+
+@pytest.mark.parametrize(
+    ("root", "child", "expected"),
+    [
+        ("C:\\w", "C:\\w", True),
+        ("C:\\w", "C:\\w\\x\\y", True),
+        ("C:\\", "C:\\w", True),
+        ("C:\\w", "C:\\w2", False),
+        ("C:\\w", "C:\\", False),
+        ("C:\\w", "D:\\w\\x", False),
+        ("C:\\w\\k", "C:\\w\\\u212a\\x", False),
+        ("C:\\w\\i\u0307", "C:\\w\\\u0130\\x", False),
+    ],
+)
+def test_within_compares_windows_names_exactly(root: str, child: str, expected: bool) -> None:
+    assert _within(PureWindowsPath(child), PureWindowsPath(root)) is expected
 
 
 def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
@@ -40,12 +64,18 @@ def _make_zip(path: Path, entries: dict[str, bytes]) -> None:
             zf.writestr(name, data)
 
 
-def _make_targz(path: Path, entries: dict[str, bytes]) -> None:
-    with tarfile.open(path, "w:gz") as tf:
+def _targz_bytes(entries: dict[str, bytes]) -> bytes:
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w:gz") as tf:
         for name, data in entries.items():
             info = tarfile.TarInfo(name)
             info.size = len(data)
             tf.addfile(info, io.BytesIO(data))
+    return buffer.getvalue()
+
+
+def _make_targz(path: Path, entries: dict[str, bytes]) -> None:
+    path.write_bytes(_targz_bytes(entries))
 
 
 def _make_zip_modes(path: Path, entries: dict[str, tuple[bytes, int]]) -> None:
@@ -419,3 +449,105 @@ async def test_download_retrieves_by_configured_version_and_downloads_by_returne
     assert versions.downloads == ["skill_01@skillver_123"]
     assert created == [(work / "skills" / "pdf").resolve()]
     assert (work / "skills" / "pdf" / "SKILL.md").read_text() == "# PDF"
+
+
+def _mock_skill(respx_mock: MockRouter, skill_id: str, *, name: str) -> Route:
+    """Mocks the lookup of the skill's version, and returns the route of its download."""
+    respx_mock.get(f"/v1/skills/{skill_id}/versions/1").mock(
+        return_value=httpx2.Response(
+            200,
+            json={
+                "id": "1",
+                "created_at": "2026-01-01T00:00:00Z",
+                "description": "A skill",
+                "name": name,
+                "skill_id": skill_id,
+                "type": "skill_version",
+            },
+        )
+    )
+    return respx_mock.get(f"/v1/skills/{skill_id}/versions/1/content")
+
+
+def _session_with_skills(*skill_ids: str) -> Any:
+    return SimpleNamespace(agent=SimpleNamespace(skills=[SimpleNamespace(skill_id=i, version="1") for i in skill_ids]))
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize(
+    "failing_download",
+    [
+        pytest.param(
+            httpx2.Response(
+                400, json={"type": "error", "error": {"type": "invalid_request_error", "message": "Bad request"}}
+            ),
+            id="bad-request",
+        ),
+        pytest.param(httpx2.Response(200, content=b"not an archive"), id="not-an-archive"),
+        pytest.param(
+            httpx2.Response(200, content=_targz_bytes({"pdf/SKILL.md": b"# bad", "pdf/../../x": b"x"})),
+            id="rejected-member",
+        ),
+        pytest.param(
+            httpx2.Response(200, content=_targz_bytes({"pdf/SKILL.md": b"# bad", "pdf/a": b"x", "pdf/a/b": b"x"})),
+            id="fails-partway",
+        ),
+    ],
+)
+async def test_failed_skill_keeps_the_directory_it_would_have_replaced(
+    tmp_path: Path, async_client: AsyncAnthropic, respx_mock: MockRouter, failing_download: httpx2.Response
+) -> None:
+    good_download = httpx2.Response(200, content=_targz_bytes({"pdf/SKILL.md": b"# PDF"}))
+    _mock_skill(respx_mock, "skill_01", name="pdf").mock(return_value=good_download)
+    _mock_skill(respx_mock, "skill_02", name="pdf").mock(return_value=failing_download)
+    skills = tmp_path / "skills"
+
+    created = await download_session_skills(
+        async_client, workdir=tmp_path, session=_session_with_skills("skill_01", "skill_02")
+    )
+
+    assert created == [(skills / "pdf").resolve()]
+    assert os.listdir(skills) == ["pdf"]
+    assert os.listdir(skills / "pdf") == ["SKILL.md"]
+    assert (skills / "pdf" / "SKILL.md").read_text() == "# PDF"
+
+
+@pytest.mark.respx(base_url=base_url)
+async def test_download_replaces_the_directory_of_an_earlier_skill_with_the_same_name(
+    tmp_path: Path, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    first = httpx2.Response(200, content=_targz_bytes({"pdf/SKILL.md": b"# first", "pdf/only-first.txt": b"x"}))
+    second = httpx2.Response(200, content=_targz_bytes({"pdf/SKILL.md": b"# second"}))
+    _mock_skill(respx_mock, "skill_01", name="pdf").mock(return_value=first)
+    _mock_skill(respx_mock, "skill_02", name="pdf").mock(return_value=second)
+    skills = tmp_path / "skills"
+
+    await download_session_skills(async_client, workdir=tmp_path, session=_session_with_skills("skill_01", "skill_02"))
+
+    assert os.listdir(skills) == ["pdf"]
+    assert os.listdir(skills / "pdf") == ["SKILL.md"]
+    assert (skills / "pdf" / "SKILL.md").read_text() == "# second"
+
+
+@pytest.mark.respx(base_url=base_url, assert_all_called=False)
+async def test_cancelled_download_leaves_nothing_in_the_skills_directory(
+    tmp_path: Path, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    downloading = anyio.Event()
+
+    async def hang(_request: httpx2.Request) -> httpx2.Response:
+        downloading.set()
+        await anyio.sleep_forever()
+        return httpx2.Response(200)
+
+    async def download() -> None:
+        await download_session_skills(async_client, workdir=tmp_path, session=_session_with_skills("skill_01"))
+
+    _mock_skill(respx_mock, "skill_01", name="pdf").mock(side_effect=hang)
+
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(download)
+        await downloading.wait()
+        tg.cancel_scope.cancel()
+
+    assert os.listdir(tmp_path / "skills") == []

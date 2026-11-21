@@ -42,7 +42,7 @@ class TestTelemetryDestinations:
                 "endpoint_url": "endpoint_url",
                 "max_content_bytes": 0,
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -87,7 +87,7 @@ class TestTelemetryDestinations:
     def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
         telemetry_destination = client.beta.organization.telemetry_destinations.retrieve(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -148,7 +148,7 @@ class TestTelemetryDestinations:
                 "max_content_bytes": 0,
             },
             workspaces={"type": "all"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -199,7 +199,7 @@ class TestTelemetryDestinations:
             limit=0,
             page="page",
             workspace_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPageCursor[BetaTelemetryDestination], telemetry_destination, path=["response"])
@@ -240,7 +240,7 @@ class TestTelemetryDestinations:
     def test_method_delete_with_all_params(self, client: Anthropic) -> None:
         telemetry_destination = client.beta.organization.telemetry_destinations.delete(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestination, telemetry_destination, path=["response"])
@@ -290,7 +290,7 @@ class TestTelemetryDestinations:
     def test_method_test_with_all_params(self, client: Anthropic) -> None:
         telemetry_destination = client.beta.organization.telemetry_destinations.test(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])
@@ -356,7 +356,7 @@ class TestAsyncTelemetryDestinations:
                 "endpoint_url": "endpoint_url",
                 "max_content_bytes": 0,
             },
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -401,7 +401,7 @@ class TestAsyncTelemetryDestinations:
     async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.retrieve(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -462,7 +462,7 @@ class TestAsyncTelemetryDestinations:
                 "max_content_bytes": 0,
             },
             workspaces={"type": "all"},
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestination, telemetry_destination, path=["response"])
@@ -513,7 +513,7 @@ class TestAsyncTelemetryDestinations:
             limit=0,
             page="page",
             workspace_ids=["string"],
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPageCursor[BetaTelemetryDestination], telemetry_destination, path=["response"])
@@ -554,7 +554,7 @@ class TestAsyncTelemetryDestinations:
     async def test_method_delete_with_all_params(self, async_client: AsyncAnthropic) -> None:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.delete(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaDeletedTelemetryDestination, telemetry_destination, path=["response"])
@@ -604,7 +604,7 @@ class TestAsyncTelemetryDestinations:
     async def test_method_test_with_all_params(self, async_client: AsyncAnthropic) -> None:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.test(
             destination_id="destination_id",
-            betas=["message-batches-2024-09-24"],
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaTelemetryDestinationTestResponse, telemetry_destination, path=["response"])

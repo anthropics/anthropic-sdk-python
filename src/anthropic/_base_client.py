@@ -691,7 +691,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             kwargs.pop("data", None)
 
         # TODO: report this error to httpx
-        return self._client.build_request(  # pyright: ignore[reportUnknownMemberType]
+        request = self._client.build_request(  # pyright: ignore[reportUnknownMemberType]
             headers=headers,
             timeout=self.timeout if isinstance(options.timeout, NotGiven) else options.timeout,
             method=options.method,
@@ -703,6 +703,11 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             params=self.qs.stringify(cast(Mapping[str, Any], params)) if params else None,
             **kwargs,
         )
+        if params and b"+" in request.url.query:
+            # httpx writes a space as `+` and a plus as `%2B`
+            request.url = request.url.copy_with(query=request.url.query.replace(b"+", b"%20"))
+
+        return request
 
     def _serialize_multipartform(self, data: Mapping[object, object]) -> dict[str, object]:
         items = self.qs.stringify_items(

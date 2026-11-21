@@ -606,8 +606,9 @@ class EnvironmentWorker:
         `environment_key` — and with no `environment_key` either, the item
         fails rather than run unauthenticated.
 
-        Non-session work items are ignored (but still force-stopped so the
-        lease doesn't sit until TTL).
+        Non-session work items, and the work item of a session that has already
+        terminated, are force-stopped without running any tools, so the lease
+        doesn't sit until TTL.
 
         Raises:
           ValueError: if any of `work_id` / `environment_id` / `session_id`
@@ -775,6 +776,17 @@ class EnvironmentWorker:
                 # memory-store download — two fetches could disagree about the
                 # attached resources.
                 session = await worker_client.beta.sessions.retrieve(session_id)
+                if session.status == "terminated":
+                    # A terminated session, which includes an archived one, accepts no tool
+                    # result, so there is nothing to run.
+                    log.info(
+                        "skipping the work item of a terminated session work_id=%s session_id=%s",
+                        work_item.id,
+                        session_id,
+                    )
+                    lease.finish(_LeaseEndReason.RUNNER_DONE)
+                    tg.cancel_scope.cancel()
+                    return
                 # Only here, after the fetch, can we tell a session that
                 # simply has no memory from one whose memory we cannot mount.
                 # The interval knob is a deliberate opt-out and stays quiet.

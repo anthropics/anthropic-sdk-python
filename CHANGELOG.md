@@ -1,5 +1,147 @@
 # Changelog
 
+## [2.12.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.11.0...v2.12.0) (2026-11-20)
+
+### Features
+
+* **api:** add the image_dimensions_too_large error code
+
+
+### Bug Fixes
+
+* **bedrock:** send the user profile ID in the request body
+
+  Amazon Bedrock reads `user_profile_id` from the request body and ignores the `anthropic-user-profile-id` header, so a profile ID given to `AnthropicBedrock` or `AsyncAnthropicBedrock` was not applied. Both clients now move it into the body of Messages requests and no longer send the header. A `user_profile_id` already in the body takes priority over the header.
+
+  Some models on Bedrock do not support user profiles. A request to one of them with a profile ID now fails with a 400 error; before, the ID was ignored. Leave the ID off requests to those models.
+
+
+### Chores
+
+* **docs:** clarify billing_policy in batches and two billing errors
+
+## [2.11.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.10.0...v2.11.0) (2026-11-19)
+
+### Features
+
+* **api:** add Claude Code managed settings to the Admin API
+* **api:** add the sandbox_egress_restricted error to Admin API plugin methods
+
+
+### Bug Fixes
+
+* **client:** encode spaces in query strings as %20
+
+  The AWS SigV4 signature of a request now matches its query string when a parameter contains a space.
+
+
+### Performance Improvements
+
+* **structured outputs:** build each call's output schema from a cached raw schema
+
+
+### Chores
+
+* **docs:** explain how the input-token rate limit types differ
+* **docs:** name Claude Security in the usage and cost report descriptions
+* **docs:** note that a Google Cloud external key's provider and key_name can't be changed
+
+## [2.10.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.9.0...v2.10.0) (2026-11-17)
+
+### Features
+
+* **api:** add beta support for the billing_policy request parameter
+* **api:** add contract_spend_limit_reached error code to messages
+* **api:** add error codes for linked billing refusals
+* **api:** add the user_profile_billing_not_authorized error code
+* **api:** add webhook events for external key failure and recovery
+
+
+### Bug Fixes
+
+* **client:** stop reporting failed aiohttp connections as timeouts
+* **types:** keep deprecated model aliases and the types nested under them working
+
+
+### Chores
+
+* **api:** rename error data models, deprecating the old names
+* **docs:** clarify which AWS KMS keys a workspace can use on Claude Platform on AWS
+* **docs:** clarify which credential work get, update and list accept
+* **docs:** clarify which uploads a plugin pin holds back
+* **docs:** note that a plugin scan's reason also covers errored scans
+
+  `content_scan.reason` on an errored scan now says why there is no verdict. It is not a security finding, so code that treats any `reason` as a concern should also check `status`.
+
+* **internal:** don't report moved classes as breaking changes
+
+
+### Documentation
+
+* name each SDK's own types in rename deprecations
+
+## [2.9.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.8.0...v2.9.0) (2026-11-16)
+
+### Features
+
+* **api:** add source and error codes to the RBAC Role read endpoints
+* **api:** add Update Bundle, which sets a Claude Tag Bundle's instructions, and return instructions on Bundle
+
+
+### Bug Fixes
+
+* **credentials:** write the credentials file on Windows with Python 3.12 and earlier
+* **tools:** compare directory names exactly when confining file tool and upload paths on Windows
+* **tools:** fully resolve file tool paths that pass through a dangling symlink
+* **tools:** ignore ripgrep config files in the agent toolset's grep tool
+* **tools:** keep an existing skill directory when the download or extraction that would replace it fails
+* **tools:** keep the session tool runner's max_idle countdown running when a session thread terminates
+
+  If the runner fails to read the session's event history after a reconnect, a termination that then arrives on the event stream still cancels the countdown, until the next idle or successful read.
+
+* **tools:** leave symlinks that point outside /memories out of listings
+* **tools:** look for ripgrep only in absolute `PATH` entries in the agent toolset's grep tool
+
+  The tool no longer runs an `rg` from a relative or empty `PATH` entry or, on Windows, from the current directory. On Windows it looks for `rg.exe`, so an `rg.cmd`, `rg.bat` or `rg.com` is no longer used. With no other `rg` on `PATH`, the tool uses its built-in search.
+
+* **tools:** pass over an rg inside the directories the agent toolset's file tools can write
+
+  `grep` passes over an `rg` that resolves to somewhere inside `workdir` or `allowed_roots`, whatever the letter case of the names. It uses the next `rg` on `PATH`, or the built-in search when there is none. With a `workdir` that holds every `rg` on the host, such as `/`, every search is a built-in search. `rg` no longer gets the `ANTHROPIC_*` variables of the process, like the shell of `bash`.
+
+* **tools:** read memory files only through the path that was validated
+* **tools:** read only regular files in the grep tool's built-in search
+
+  The built-in search of `grep` passes over a FIFO or a device in the directory it walks, as ripgrep does. Reading one could block the search, and the event loop with it, forever.
+
+* **tools:** stop EnvironmentWorker from running tools for a terminated session
+
+  For a terminated session, the worker now force-stops the work item right after it retrieves the session, before it downloads skills or memory stores. It no longer raises `SessionMemoryError` for such a session. The API reports an archived session as `terminated`.
+
+* **tools:** stop the grep tool after 30 seconds of CPU time when ripgrep is not installed
+* **tools:** stop the session tool runner from running the tool calls of a terminated session thread
+
+  The runner also no longer yields these calls, including a denied call (`confirmation="deny"`) and a call to a tool that it does not own. The one exception is a call whose tool is already running when the thread terminates: the runner yields it with `posted=False` and posts no result.
+
+
+### Chores
+
+* **api:** deprecate old beta header values
+
+  The API still accepts these values, but a later release removes them from the SDKs. Delete `prompt-caching-2024-07-31`, `pdfs-2024-09-25`, `token-counting-2024-11-01`, `token-efficient-tools-2025-02-19`, `extended-cache-ttl-2025-04-11`, `cache-diagnosis-2026-04-07` and `ce-user-management-2026-07-13` from your requests. `files-api-2025-04-14` and `skills-2025-10-02` select the beta response shapes, so follow the Files API and Skills migration guides before you delete them.
+
+  In C#, the `AnthropicBeta` enum's members have new numbers, so code compiled against an earlier SDK version sends a different beta value, with no error, until you rebuild it.
+
+* **api:** stop sending an old beta header on batch requests
+
+  `beta.messages.batches` no longer sends `message-batches-2024-09-24`, which the API doesn't need. If your client sets a default `anthropic-beta` header, these requests now send it, where in some SDKs the old value replaced it. The API still accepts the old value. If you set it yourself, delete it: a later release removes it from the SDKs.
+
+* **docs:** add an example value for the workspace name
+* **docs:** clarify when the auto permission policy denies a tool call
+* **docs:** clarify which workspaces an external key can be attached to
+* **docs:** recommend multiagent_20261001 over the coordinator type
+* **docs:** say when organization_id is required on plugin reads
+* **tests:** let idle test workers take queued tests
+
 ## [2.8.0](https://github.com/anthropics/anthropic-sdk-python/compare/v2.7.0...v2.8.0) (2026-11-10)
 
 ### Features

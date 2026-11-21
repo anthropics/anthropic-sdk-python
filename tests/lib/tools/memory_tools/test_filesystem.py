@@ -7,8 +7,10 @@ from typing import Iterator
 from pathlib import Path
 
 import pytest
+from anyio import Path as AsyncPath
 
 from anthropic.types.beta import (
+    BetaMemoryTool20250818Command,
     BetaMemoryTool20250818ViewCommand,
     BetaMemoryTool20250818CreateCommand,
     BetaMemoryTool20250818DeleteCommand,
@@ -37,6 +39,29 @@ def sync_local_filesystem_tool(temp_directory: str) -> BetaLocalFilesystemMemory
 @pytest.fixture
 def async_local_filesystem_tool(temp_directory: str) -> BetaAsyncLocalFilesystemMemoryTool:
     return BetaAsyncLocalFilesystemMemoryTool(base_path=temp_directory)
+
+
+READ_COMMANDS: list[BetaMemoryTool20250818Command] = [
+    BetaMemoryTool20250818ViewCommand(command="view", path="/memories/notes.txt"),
+    BetaMemoryTool20250818StrReplaceCommand(
+        command="str_replace", path="/memories/notes.txt", old_str="outside", new_str="x"
+    ),
+    BetaMemoryTool20250818InsertCommand(command="insert", path="/memories/notes.txt", insert_line=0, insert_text="x"),
+]
+
+
+def replace_with_symlink_on_open(monkeypatch: pytest.MonkeyPatch, path: Path, target: Path) -> None:
+    path = path.resolve()
+    real_open = os.open
+
+    def replace_then_open(opened: Path, flags: int) -> int:
+        monkeypatch.setattr(os, "open", real_open)
+        assert opened == path
+        path.unlink()
+        path.symlink_to(target)
+        return real_open(opened, flags)
+
+    monkeypatch.setattr(os, "open", replace_then_open)
 
 
 def get_directory_snapshot(base_path: str) -> dict[str, str]:
@@ -541,6 +566,67 @@ class TestBetaLocalFilesystemMemoryTool:
                 )
             )
 
+    @pytest.mark.skipif(not hasattr(os, "O_NOFOLLOW"), reason="needs O_NOFOLLOW")
+    @pytest.mark.parametrize("command", READ_COMMANDS, ids=lambda c: c.command)
+    def test_read_rejects_symlink_created_after_validation(
+        self,
+        sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        command: BetaMemoryTool20250818Command,
+    ) -> None:
+        outside_file = tmp_path / "outside.txt"
+        outside_file.write_text("outside", encoding="utf-8")
+        validate_path = sync_local_filesystem_tool._validate_path
+
+        def validate_then_symlink(path: str) -> Path:
+            validated = validate_path(path)
+            validated.symlink_to(outside_file)
+            return validated
+
+        monkeypatch.setattr(sync_local_filesystem_tool, "_validate_path", validate_then_symlink)
+
+        with pytest.raises(ToolError, match="is a symlink|Unsupported file type"):
+            sync_local_filesystem_tool.execute(command)
+
+    @pytest.mark.skipif(not hasattr(os, "O_NOFOLLOW"), reason="needs O_NOFOLLOW")
+    @pytest.mark.parametrize("command", READ_COMMANDS, ids=lambda c: c.command)
+    def test_read_rejects_file_replaced_with_symlink_before_open(
+        self,
+        sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        command: BetaMemoryTool20250818Command,
+    ) -> None:
+        outside_file = tmp_path / "outside.txt"
+        outside_file.write_text("outside", encoding="utf-8")
+        sync_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="inside", path="/memories/notes.txt")
+        )
+        replace_with_symlink_on_open(monkeypatch, sync_local_filesystem_tool.memory_root / "notes.txt", outside_file)
+
+        with pytest.raises(ToolError, match="is a symlink"):
+            sync_local_filesystem_tool.execute(command)
+
+    def test_view_rejects_directory_symlink_created_after_validation(
+        self,
+        sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        (tmp_path / "outside.txt").touch()
+        validate_path = sync_local_filesystem_tool._validate_path
+
+        def validate_then_symlink(path: str) -> Path:
+            validated = validate_path(path)
+            validated.symlink_to(tmp_path, target_is_directory=True)
+            return validated
+
+        monkeypatch.setattr(sync_local_filesystem_tool, "_validate_path", validate_then_symlink)
+
+        with pytest.raises(ToolError, match="Unsupported file type"):
+            sync_local_filesystem_tool.view(BetaMemoryTool20250818ViewCommand(command="view", path="/memories/dir"))
+
     def test_symlink_validation_reject_symlink_pointing_outside_memories(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
     ) -> None:
@@ -556,6 +642,32 @@ class TestBetaLocalFilesystemMemoryTool:
                 sync_local_filesystem_tool.view(
                     BetaMemoryTool20250818ViewCommand(command="view", path="/memories/escape_link/secret.txt")
                 )
+
+    def test_view_lists_symlinks_only_when_they_stay_inside_memories(
+        self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
+    ) -> None:
+        with tempfile.TemporaryDirectory() as outside_dir:
+            secret_path = Path(outside_dir, "secret.txt")
+            secret_path.write_text("sensitive data", encoding="utf-8")
+
+            memories_path = sync_local_filesystem_tool.memory_root
+            sub_path = memories_path / "sub"
+            sub_path.mkdir()
+            (sub_path / "notes.txt").write_text("hello", encoding="utf-8")
+            os.symlink(Path("sub", "notes.txt"), memories_path / "inside_file")
+            os.symlink(outside_dir, memories_path / "outside_dir", target_is_directory=True)
+            os.symlink(secret_path, memories_path / "outside_file")
+            os.symlink(outside_dir, sub_path / "nested_outside_dir", target_is_directory=True)
+
+            result = sync_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories")
+            )
+
+            assert [line.split("\t")[1] for line in result.splitlines()[2:]] == [
+                "/memories/inside_file",
+                "/memories/sub/",
+                "/memories/sub/notes.txt",
+            ]
 
     def test_symlink_validation_reject_creating_files_through_symlink_pointing_outside(
         self, sync_local_filesystem_tool: BetaLocalFilesystemMemoryTool
@@ -1123,6 +1235,71 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
         assert "link" not in result_str, f"_validate_path returned unresolved symlink path: {result_str}"
         assert str(legit_dir.resolve()) in result_str
 
+    @pytest.mark.skipif(not hasattr(os, "O_NOFOLLOW"), reason="needs O_NOFOLLOW")
+    @pytest.mark.parametrize("command", READ_COMMANDS, ids=lambda c: c.command)
+    async def test_read_rejects_symlink_created_after_validation(
+        self,
+        async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        command: BetaMemoryTool20250818Command,
+    ) -> None:
+        outside_file = tmp_path / "outside.txt"
+        outside_file.write_text("outside", encoding="utf-8")
+        validate_path = async_local_filesystem_tool._validate_path
+
+        async def validate_then_symlink(path: str) -> AsyncPath:
+            validated = await validate_path(path)
+            await validated.symlink_to(outside_file)
+            return validated
+
+        monkeypatch.setattr(async_local_filesystem_tool, "_validate_path", validate_then_symlink)
+
+        with pytest.raises(ToolError, match="is a symlink|Unsupported file type"):
+            await async_local_filesystem_tool.execute(command)
+
+    @pytest.mark.skipif(not hasattr(os, "O_NOFOLLOW"), reason="needs O_NOFOLLOW")
+    @pytest.mark.parametrize("command", READ_COMMANDS, ids=lambda c: c.command)
+    async def test_read_rejects_file_replaced_with_symlink_before_open(
+        self,
+        async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        command: BetaMemoryTool20250818Command,
+    ) -> None:
+        outside_file = tmp_path / "outside.txt"
+        outside_file.write_text("outside", encoding="utf-8")
+        await async_local_filesystem_tool.create(
+            BetaMemoryTool20250818CreateCommand(command="create", file_text="inside", path="/memories/notes.txt")
+        )
+        replace_with_symlink_on_open(
+            monkeypatch, Path(async_local_filesystem_tool.memory_root) / "notes.txt", outside_file
+        )
+
+        with pytest.raises(ToolError, match="is a symlink"):
+            await async_local_filesystem_tool.execute(command)
+
+    async def test_view_rejects_directory_symlink_created_after_validation(
+        self,
+        async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        (tmp_path / "outside.txt").touch()
+        validate_path = async_local_filesystem_tool._validate_path
+
+        async def validate_then_symlink(path: str) -> AsyncPath:
+            validated = await validate_path(path)
+            await validated.symlink_to(tmp_path, target_is_directory=True)
+            return validated
+
+        monkeypatch.setattr(async_local_filesystem_tool, "_validate_path", validate_then_symlink)
+
+        with pytest.raises(ToolError, match="Unsupported file type"):
+            await async_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories/dir")
+            )
+
     async def test_symlink_validation_reject_symlink_pointing_outside_memories(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
     ) -> None:
@@ -1139,6 +1316,32 @@ class TestBetaAsyncLocalFilesystemMemoryTool:
                 await async_local_filesystem_tool.view(
                     BetaMemoryTool20250818ViewCommand(command="view", path="/memories/escape_link/secret.txt")
                 )
+
+    async def test_view_lists_symlinks_only_when_they_stay_inside_memories(
+        self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
+    ) -> None:
+        with tempfile.TemporaryDirectory() as outside_dir:
+            secret_path = Path(outside_dir, "secret.txt")
+            secret_path.write_text("sensitive data", encoding="utf-8")
+
+            memories_path = Path(str(async_local_filesystem_tool.memory_root))
+            sub_path = memories_path / "sub"
+            sub_path.mkdir(parents=True)
+            (sub_path / "notes.txt").write_text("hello", encoding="utf-8")
+            os.symlink(Path("sub", "notes.txt"), memories_path / "inside_file")
+            os.symlink(outside_dir, memories_path / "outside_dir", target_is_directory=True)
+            os.symlink(secret_path, memories_path / "outside_file")
+            os.symlink(outside_dir, sub_path / "nested_outside_dir", target_is_directory=True)
+
+            result = await async_local_filesystem_tool.view(
+                BetaMemoryTool20250818ViewCommand(command="view", path="/memories")
+            )
+
+            assert [line.split("\t")[1] for line in result.splitlines()[2:]] == [
+                "/memories/inside_file",
+                "/memories/sub/",
+                "/memories/sub/notes.txt",
+            ]
 
     async def test_symlink_validation_reject_creating_files_through_symlink_pointing_outside(
         self, async_local_filesystem_tool: BetaAsyncLocalFilesystemMemoryTool
