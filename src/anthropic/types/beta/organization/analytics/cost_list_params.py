@@ -48,8 +48,7 @@ class CostListParams(TypedDict, total=False):
     agent_ids: Optional[SequenceNotStr[str]]
     """Filter to usage incurred by sessions of specific Claude Managed Agents agents.
 
-    Use `group_by[]=agent_id` to break out per-agent values. Claude Platform
-    organizations only.
+    Use `group_by[]=agent_id` to break out per-agent values.
     """
 
     api_key_ids: Optional[SequenceNotStr[str]]
@@ -58,7 +57,7 @@ class CostListParams(TypedDict, total=False):
     (`apikey_...`), whichever identity the usage is attributed to. Include an empty
     entry (`api_key_ids[]=`) to also match usage that no API key authenticated. Use
     `group_by[]=api_key_id` to break out per-key values; usage without a key has a
-    null `api_key_id`. Claude Platform organizations only.
+    null `api_key_id`.
     """
 
     claude_tag_categories: Optional[List[BetaAnalyticsClaudeTagCategory]]
@@ -86,7 +85,7 @@ class CostListParams(TypedDict, total=False):
     """
     Filter to usage incurred by Claude Managed Agents sessions that specific
     deployments started. Use `group_by[]=deployment_id` to break out per-deployment
-    values. Claude Platform organizations only.
+    values.
     """
 
     ending_at: Union[str, datetime, None]
@@ -101,7 +100,7 @@ class CostListParams(TypedDict, total=False):
     """
     Filter to usage incurred by Claude Managed Agents sessions that ran in specific
     environments. Use `group_by[]=environment_id` to break out per-environment
-    values. Claude Platform organizations only.
+    values.
     """
 
     exclude_deleted_users: bool
@@ -166,8 +165,10 @@ class CostListParams(TypedDict, total=False):
     """
     Filter a parent organization's report to specific child organizations, by
     organization UUID or `org_` ID; an ID that is not one of its child organizations
-    matches nothing. Requires an API key created at the parent organization level.
-    Use `group_by[]=organization_id` to break out per-organization values.
+    matches nothing. The report leaves out child organizations with HIPAA readiness
+    enabled, and naming one returns a 400 error. Requires an API key created at the
+    parent organization level. Use `group_by[]=organization_id` to break out
+    per-organization values.
     """
 
     page: Optional[str]
@@ -187,15 +188,14 @@ class CostListParams(TypedDict, total=False):
     service_tiers: Optional[List[BetaAnalyticsServiceTier]]
     """Filter to specific service tiers.
 
-    Use `group_by[]=service_tier` to break out per-tier values. Claude Platform
-    organizations only; matches nothing for a Claude Enterprise organization.
+    Use `group_by[]=service_tier` to break out per-tier values.
     """
 
     session_ids: Optional[SequenceNotStr[str]]
     """
     Filter to usage incurred by specific Claude Managed Agents sessions, by tagged
     session ID (`sesn_...`). Use `group_by[]=session_id` to break out per-session
-    values. Claude Platform organizations only.
+    values.
     """
 
     slack_channel_ids: Optional[SequenceNotStr[str]]
@@ -225,14 +225,12 @@ class CostListParams(TypedDict, total=False):
     """
     Filter to usage attributed to specific user profiles, by tagged user profile ID
     (`uprof_...`). Use `group_by[]=user_profile_id` to break out per-profile values.
-    Claude Platform organizations only.
     """
 
     workspace_ids: Optional[SequenceNotStr[str]]
     """Filter to usage in specific workspaces, by tagged workspace ID (`wrkspc_...`).
 
-    Use `group_by[]=workspace_id` to break out per-workspace values. Claude Platform
-    organizations only; matches nothing for a Claude Enterprise organization.
+    Use `group_by[]=workspace_id` to break out per-workspace values.
     """
 
     betas: List[AnthropicBetaParam]

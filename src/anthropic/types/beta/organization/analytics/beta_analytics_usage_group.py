@@ -144,7 +144,7 @@ class BetaAnalyticsUsageGroup(BaseModel):
     """Service tier the usage was served at.
 
     Populated only when `service_tier` is in `group_by[]`; null for usage with no
-    service tier (for example, code execution) and for Claude Enterprise usage.
+    service tier (for example, code execution).
     """
 
     session_id: Optional[str] = None
@@ -172,12 +172,13 @@ class BetaAnalyticsUsageGroup(BaseModel):
     """User profile the usage was attributed to, as a tagged `uprof_` ID.
 
     Populated only when `user_profile_id` is in `group_by[]`; null for usage that
-    named no profile and for Claude Enterprise usage.
+    named no profile.
     """
 
     workspace_id: Optional[str] = None
     """
-    Workspace the usage occurred in, as a tagged workspace ID, including the
-    organization's default workspace. Populated only when `workspace_id` is in
-    `group_by[]`; null for Claude Enterprise usage.
+    Workspace the usage occurred in, as a tagged workspace ID, including a Claude
+    Platform organization's default workspace. Populated only when `workspace_id` is
+    in `group_by[]`; null for usage in a Claude Enterprise organization's default
+    workspace, which is its only workspace.
     """
