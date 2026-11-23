@@ -388,9 +388,9 @@ class Versions(SyncAPIResource):
     ) -> BinaryAPIResponse:
         """Download one version's `.zip` archive, exactly as stored.
 
-        Each download of a
-        Plugin from a member's personal plugin marketplace is recorded on the Compliance
-        API activity feed.
+        Downloads of Plugins
+        from members' personal plugin marketplaces can be recorded on the Compliance API
+        activity feed.
 
         The response body is the archive (`Content-Type: application/zip`), sent as an
         attachment whose filename is derived from the Plugin's name; name saved files
@@ -406,9 +406,12 @@ class Versions(SyncAPIResource):
         show, and a `read:org_audit` or `read:compliance_org_data` key created for all
         of your parent organization's linked organizations can do this in any
         organization under it that has access to this API, by passing `organization_id`.
-        Each such download records a `claude_plugin_archive_accessed` event on the
-        Compliance API activity feed, identifying the key, the plugin, the version, and
-        the member. Downloads of organization-owned plugins are not recorded.
+        The Compliance API activity feed can record such a download as a
+        `claude_plugin_archive_accessed` event, which identifies the key, the plugin,
+        the version, and the member. It does so only while activity events are captured
+        for the plugin's organization, and a record is not guaranteed even then. The
+        files are served whether or not the download is recorded. Downloads of
+        organization-owned plugins are not recorded.
 
         Every request must include the beta header
         `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`,
@@ -833,9 +836,9 @@ class AsyncVersions(AsyncAPIResource):
     ) -> AsyncBinaryAPIResponse:
         """Download one version's `.zip` archive, exactly as stored.
 
-        Each download of a
-        Plugin from a member's personal plugin marketplace is recorded on the Compliance
-        API activity feed.
+        Downloads of Plugins
+        from members' personal plugin marketplaces can be recorded on the Compliance API
+        activity feed.
 
         The response body is the archive (`Content-Type: application/zip`), sent as an
         attachment whose filename is derived from the Plugin's name; name saved files
@@ -851,9 +854,12 @@ class AsyncVersions(AsyncAPIResource):
         show, and a `read:org_audit` or `read:compliance_org_data` key created for all
         of your parent organization's linked organizations can do this in any
         organization under it that has access to this API, by passing `organization_id`.
-        Each such download records a `claude_plugin_archive_accessed` event on the
-        Compliance API activity feed, identifying the key, the plugin, the version, and
-        the member. Downloads of organization-owned plugins are not recorded.
+        The Compliance API activity feed can record such a download as a
+        `claude_plugin_archive_accessed` event, which identifies the key, the plugin,
+        the version, and the member. It does so only while activity events are captured
+        for the plugin's organization, and a record is not guaranteed even then. The
+        files are served whether or not the download is recorded. Downloads of
+        organization-owned plugins are not recorded.
 
         Every request must include the beta header
         `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`,
