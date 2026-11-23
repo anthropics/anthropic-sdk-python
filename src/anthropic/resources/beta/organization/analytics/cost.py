@@ -106,6 +106,12 @@ class Cost(SyncAPIResource):
         With no `group_by[]` and no `time_bucket_width`, a single row aggregates the
         whole range. Includes all cost, whether or not it is attributable to a seat
         user. Requires an API key with the `read:analytics` scope, or an Admin API key.
+        This endpoint is in beta and is not available to organizations with HIPAA
+        readiness enabled: their API requests return a 400 error. A parent
+        organization's report across its child organizations leaves out the child
+        organizations that have HIPAA readiness enabled. If the parent has child
+        organizations and all of them have HIPAA readiness enabled, the request returns
+        a 400 error.
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -122,14 +128,13 @@ class Cost(SyncAPIResource):
               `group_by[]=actor_type` to break out per-kind values.
 
           agent_ids: Filter to usage incurred by sessions of specific Claude Managed Agents agents.
-              Use `group_by[]=agent_id` to break out per-agent values. Claude Platform
-              organizations only.
+              Use `group_by[]=agent_id` to break out per-agent values.
 
           api_key_ids: Filter to usage authenticated by specific API keys, by tagged API key ID
               (`apikey_...`), whichever identity the usage is attributed to. Include an empty
               entry (`api_key_ids[]=`) to also match usage that no API key authenticated. Use
               `group_by[]=api_key_id` to break out per-key values; usage without a key has a
-              null `api_key_id`. Claude Platform organizations only.
+              null `api_key_id`.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
               with no category never matches. Use `group_by[]=claude_tag_category` to break
@@ -145,7 +150,7 @@ class Cost(SyncAPIResource):
 
           deployment_ids: Filter to usage incurred by Claude Managed Agents sessions that specific
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
-              values. Claude Platform organizations only.
+              values.
 
           ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
               `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
@@ -153,7 +158,7 @@ class Cost(SyncAPIResource):
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment
-              values. Claude Platform organizations only.
+              values.
 
           exclude_deleted_users: If true, omit rows whose `actor` is a `user_actor` with `deleted: true`.
               Requires `group_by[]=actor`. Rows for other actor types, and rows whose `actor`
@@ -192,8 +197,10 @@ class Cost(SyncAPIResource):
 
           organization_ids: Filter a parent organization's report to specific child organizations, by
               organization UUID or `org_` ID; an ID that is not one of its child organizations
-              matches nothing. Requires an API key created at the parent organization level.
-              Use `group_by[]=organization_id` to break out per-organization values.
+              matches nothing. The report leaves out child organizations with HIPAA readiness
+              enabled, and naming one returns a 400 error. Requires an API key created at the
+              parent organization level. Use `group_by[]=organization_id` to break out
+              per-organization values.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
@@ -205,12 +212,11 @@ class Cost(SyncAPIResource):
               group attribution never matches.
 
           service_tiers: Filter to specific service tiers. Use `group_by[]=service_tier` to break out
-              per-tier values. Claude Platform organizations only; matches nothing for a
-              Claude Enterprise organization.
+              per-tier values.
 
           session_ids: Filter to usage incurred by specific Claude Managed Agents sessions, by tagged
               session ID (`sesn_...`). Use `group_by[]=session_id` to break out per-session
-              values. Claude Platform organizations only.
+              values.
 
           slack_channel_ids: Filter to usage originating from specific Slack channels. Use
               `group_by[]=slack_channel_id` to break out per-channel values.
@@ -228,11 +234,9 @@ class Cost(SyncAPIResource):
 
           user_profile_ids: Filter to usage attributed to specific user profiles, by tagged user profile ID
               (`uprof_...`). Use `group_by[]=user_profile_id` to break out per-profile values.
-              Claude Platform organizations only.
 
           workspace_ids: Filter to usage in specific workspaces, by tagged workspace ID (`wrkspc_...`).
-              Use `group_by[]=workspace_id` to break out per-workspace values. Claude Platform
-              organizations only; matches nothing for a Claude Enterprise organization.
+              Use `group_by[]=workspace_id` to break out per-workspace values.
 
           betas: This endpoint is in beta: requests must send `analytics-usage-cost-2026-08-24`
               in this header.
@@ -372,6 +376,12 @@ class AsyncCost(AsyncAPIResource):
         With no `group_by[]` and no `time_bucket_width`, a single row aggregates the
         whole range. Includes all cost, whether or not it is attributable to a seat
         user. Requires an API key with the `read:analytics` scope, or an Admin API key.
+        This endpoint is in beta and is not available to organizations with HIPAA
+        readiness enabled: their API requests return a 400 error. A parent
+        organization's report across its child organizations leaves out the child
+        organizations that have HIPAA readiness enabled. If the parent has child
+        organizations and all of them have HIPAA readiness enabled, the request returns
+        a 400 error.
 
         Args:
           starting_at: Start of range, inclusive. RFC 3339 tz-aware. Must be within the last 365 days
@@ -388,14 +398,13 @@ class AsyncCost(AsyncAPIResource):
               `group_by[]=actor_type` to break out per-kind values.
 
           agent_ids: Filter to usage incurred by sessions of specific Claude Managed Agents agents.
-              Use `group_by[]=agent_id` to break out per-agent values. Claude Platform
-              organizations only.
+              Use `group_by[]=agent_id` to break out per-agent values.
 
           api_key_ids: Filter to usage authenticated by specific API keys, by tagged API key ID
               (`apikey_...`), whichever identity the usage is attributed to. Include an empty
               entry (`api_key_ids[]=`) to also match usage that no API key authenticated. Use
               `group_by[]=api_key_id` to break out per-key values; usage without a key has a
-              null `api_key_id`. Claude Platform organizations only.
+              null `api_key_id`.
 
           claude_tag_categories: Filter to Claude Tag (Claude in Slack) usage in specific spend categories. Usage
               with no category never matches. Use `group_by[]=claude_tag_category` to break
@@ -411,7 +420,7 @@ class AsyncCost(AsyncAPIResource):
 
           deployment_ids: Filter to usage incurred by Claude Managed Agents sessions that specific
               deployments started. Use `group_by[]=deployment_id` to break out per-deployment
-              values. Claude Platform organizations only.
+              values.
 
           ending_at: End of range, exclusive. Required when `time_bucket_width` is set. Without
               `time_bucket_width`, defaults to the earlier of now and `starting_at` + 31 days.
@@ -419,7 +428,7 @@ class AsyncCost(AsyncAPIResource):
 
           environment_ids: Filter to usage incurred by Claude Managed Agents sessions that ran in specific
               environments. Use `group_by[]=environment_id` to break out per-environment
-              values. Claude Platform organizations only.
+              values.
 
           exclude_deleted_users: If true, omit rows whose `actor` is a `user_actor` with `deleted: true`.
               Requires `group_by[]=actor`. Rows for other actor types, and rows whose `actor`
@@ -458,8 +467,10 @@ class AsyncCost(AsyncAPIResource):
 
           organization_ids: Filter a parent organization's report to specific child organizations, by
               organization UUID or `org_` ID; an ID that is not one of its child organizations
-              matches nothing. Requires an API key created at the parent organization level.
-              Use `group_by[]=organization_id` to break out per-organization values.
+              matches nothing. The report leaves out child organizations with HIPAA readiness
+              enabled, and naming one returns a 400 error. Requires an API key created at the
+              parent organization level. Use `group_by[]=organization_id` to break out
+              per-organization values.
 
           page: Opaque cursor from a previous response's `next_page` field.
 
@@ -471,12 +482,11 @@ class AsyncCost(AsyncAPIResource):
               group attribution never matches.
 
           service_tiers: Filter to specific service tiers. Use `group_by[]=service_tier` to break out
-              per-tier values. Claude Platform organizations only; matches nothing for a
-              Claude Enterprise organization.
+              per-tier values.
 
           session_ids: Filter to usage incurred by specific Claude Managed Agents sessions, by tagged
               session ID (`sesn_...`). Use `group_by[]=session_id` to break out per-session
-              values. Claude Platform organizations only.
+              values.
 
           slack_channel_ids: Filter to usage originating from specific Slack channels. Use
               `group_by[]=slack_channel_id` to break out per-channel values.
@@ -494,11 +504,9 @@ class AsyncCost(AsyncAPIResource):
 
           user_profile_ids: Filter to usage attributed to specific user profiles, by tagged user profile ID
               (`uprof_...`). Use `group_by[]=user_profile_id` to break out per-profile values.
-              Claude Platform organizations only.
 
           workspace_ids: Filter to usage in specific workspaces, by tagged workspace ID (`wrkspc_...`).
-              Use `group_by[]=workspace_id` to break out per-workspace values. Claude Platform
-              organizations only; matches nothing for a Claude Enterprise organization.
+              Use `group_by[]=workspace_id` to break out per-workspace values.
 
           betas: This endpoint is in beta: requests must send `analytics-usage-cost-2026-08-24`
               in this header.

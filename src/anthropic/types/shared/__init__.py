@@ -38,6 +38,9 @@ from .request_body_encoding_invalid_error import RequestBodyEncodingInvalidError
 from .organization_type_not_supported_error import (
     OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
 )
+from .workspace_human_review_disabled_error import (
+    WorkspaceHumanReviewDisabledError as WorkspaceHumanReviewDisabledError,
+)
 from .cmek_context_unavailable_error_details import (
     CMEKContextUnavailableErrorDetails as CMEKContextUnavailableErrorDetails,
 )
@@ -79,6 +82,9 @@ from .linked_organization_spend_limit_reached_error import (
 )
 from .organization_type_not_supported_error_details import (
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
+)
+from .workspace_human_review_disabled_error_details import (
+    WorkspaceHumanReviewDisabledErrorDetails as WorkspaceHumanReviewDisabledErrorDetails,
 )
 from .request_body_encoding_unsupported_error_details import (
     RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,

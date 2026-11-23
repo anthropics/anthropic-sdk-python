@@ -233,6 +233,7 @@ from .beta_tool_choice_tool_param import BetaToolChoiceToolParam as BetaToolChoi
 from .beta_toolset_tool_use_block import BetaToolsetToolUseBlock as BetaToolsetToolUseBlock
 from .beta_url_image_source_param import BetaURLImageSourceParam as BetaURLImageSourceParam
 from .message_count_tokens_params import MessageCountTokensParams as MessageCountTokensParams
+from .beta_approval_required_error import BetaApprovalRequiredError as BetaApprovalRequiredError
 from .beta_assistant_message_param import BetaAssistantMessageParam as BetaAssistantMessageParam
 from .beta_base64_pdf_source_param import BetaBase64PDFSourceParam as BetaBase64PDFSourceParam
 from .beta_browser_close_tab_input import BetaBrowserCloseTabInput as BetaBrowserCloseTabInput
@@ -515,6 +516,7 @@ from .beta_web_search_tool_20260318_param import BetaWebSearchTool20260318Param 
 from .beta_advisor_message_iteration_usage import BetaAdvisorMessageIterationUsage as BetaAdvisorMessageIterationUsage
 from .beta_advisor_tool_result_block_param import BetaAdvisorToolResultBlockParam as BetaAdvisorToolResultBlockParam
 from .beta_advisor_tool_result_error_param import BetaAdvisorToolResultErrorParam as BetaAdvisorToolResultErrorParam
+from .beta_approval_required_error_details import BetaApprovalRequiredErrorDetails as BetaApprovalRequiredErrorDetails
 from .beta_browser_form_input_config_param import BetaBrowserFormInputConfigParam as BetaBrowserFormInputConfigParam
 from .beta_browser_hold_key_tool_use_block import BetaBrowserHoldKeyToolUseBlock as BetaBrowserHoldKeyToolUseBlock
 from .beta_browser_left_click_config_param import BetaBrowserLeftClickConfigParam as BetaBrowserLeftClickConfigParam
@@ -536,6 +538,7 @@ from .beta_managed_agents_effort_max_param import BetaManagedAgentsEffortMaxPara
 from .beta_managed_agents_glob_tool_config import BetaManagedAgentsGlobToolConfig as BetaManagedAgentsGlobToolConfig
 from .beta_managed_agents_grep_tool_config import BetaManagedAgentsGrepToolConfig as BetaManagedAgentsGrepToolConfig
 from .beta_managed_agents_read_tool_config import BetaManagedAgentsReadToolConfig as BetaManagedAgentsReadToolConfig
+from .beta_organization_not_eligible_error import BetaOrganizationNotEligibleError as BetaOrganizationNotEligibleError
 from .beta_output_behavior_update_existing import BetaOutputBehaviorUpdateExisting as BetaOutputBehaviorUpdateExisting
 from .beta_response_browser_tool_use_block import BetaResponseBrowserToolUseBlock as BetaResponseBrowserToolUseBlock
 from .beta_tool_search_tool_regex_20251119 import BetaToolSearchToolRegex20251119 as BetaToolSearchToolRegex20251119
@@ -565,6 +568,7 @@ from .beta_computer_screenshot_config_param import (
 from .beta_fallback_message_iteration_usage import (
     BetaFallbackMessageIterationUsage as BetaFallbackMessageIterationUsage,
 )
+from .beta_human_review_not_available_error import BetaHumanReviewNotAvailableError as BetaHumanReviewNotAvailableError
 from .beta_invalid_config_type_change_error import BetaInvalidConfigTypeChangeError as BetaInvalidConfigTypeChangeError
 from .beta_managed_agents_agent_tool_config import BetaManagedAgentsAgentToolConfig as BetaManagedAgentsAgentToolConfig
 from .beta_managed_agents_always_ask_policy import BetaManagedAgentsAlwaysAskPolicy as BetaManagedAgentsAlwaysAskPolicy
@@ -959,6 +963,9 @@ from .beta_web_search_tool_result_block_content import (
 from .beta_webhook_deployment_paused_event_data import (
     BetaWebhookDeploymentPausedEventData as BetaWebhookDeploymentPausedEventData,
 )
+from .beta_authorization_check_unavailable_error import (
+    BetaAuthorizationCheckUnavailableError as BetaAuthorizationCheckUnavailableError,
+)
 from .beta_bash_code_execution_tool_result_block import (
     BetaBashCodeExecutionToolResultBlock as BetaBashCodeExecutionToolResultBlock,
 )
@@ -1166,6 +1173,9 @@ from .beta_managed_agents_web_fetch_url_source_all import (
 from .beta_managed_agents_write_tool_config_params import (
     BetaManagedAgentsWriteToolConfigParams as BetaManagedAgentsWriteToolConfigParams,
 )
+from .beta_organization_not_eligible_error_details import (
+    BetaOrganizationNotEligibleErrorDetails as BetaOrganizationNotEligibleErrorDetails,
+)
 from .beta_request_mcp_server_url_definition_param import (
     BetaRequestMCPServerURLDefinitionParam as BetaRequestMCPServerURLDefinitionParam,
 )
@@ -1204,6 +1214,9 @@ from .beta_code_execution_tool_result_block_content import (
 )
 from .beta_count_tokens_context_management_response import (
     BetaCountTokensContextManagementResponse as BetaCountTokensContextManagementResponse,
+)
+from .beta_human_review_not_available_error_details import (
+    BetaHumanReviewNotAvailableErrorDetails as BetaHumanReviewNotAvailableErrorDetails,
 )
 from .beta_invalid_config_type_change_error_details import (
     BetaInvalidConfigTypeChangeErrorDetails as BetaInvalidConfigTypeChangeErrorDetails,
@@ -1358,6 +1371,9 @@ from .beta_tool_search_tool_search_result_block_param import (
 from .beta_web_search_tool_request_error_object_param import (
     BetaWebSearchToolRequestErrorObjectParam as BetaWebSearchToolRequestErrorObjectParam,
 )
+from .beta_webhook_external_storage_failed_event_data import (
+    BetaWebhookExternalStorageFailedEventData as BetaWebhookExternalStorageFailedEventData,
+)
 from .beta_webhook_session_requires_action_event_data import (
     BetaWebhookSessionRequiresActionEventData as BetaWebhookSessionRequiresActionEventData,
 )
@@ -1487,6 +1503,9 @@ from .beta_webhook_session_thread_terminated_event_data import (
 from .beta_webhook_vault_credential_archived_event_data import (
     BetaWebhookVaultCredentialArchivedEventData as BetaWebhookVaultCredentialArchivedEventData,
 )
+from .beta_authorization_check_unavailable_error_details import (
+    BetaAuthorizationCheckUnavailableErrorDetails as BetaAuthorizationCheckUnavailableErrorDetails,
+)
 from .beta_browser_state_change_download_completed_param import (
     BetaBrowserStateChangeDownloadCompletedParam as BetaBrowserStateChangeDownloadCompletedParam,
 )
@@ -1531,6 +1550,9 @@ from .beta_response_computer_middle_click_tool_use_block import (
 )
 from .beta_response_computer_triple_click_tool_use_block import (
     BetaResponseComputerTripleClickToolUseBlock as BetaResponseComputerTripleClickToolUseBlock,
+)
+from .beta_webhook_external_storage_recovered_event_data import (
+    BetaWebhookExternalStorageRecoveredEventData as BetaWebhookExternalStorageRecoveredEventData,
 )
 from .beta_webhook_session_status_rescheduled_event_data import (
     BetaWebhookSessionStatusRescheduledEventData as BetaWebhookSessionStatusRescheduledEventData,

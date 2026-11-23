@@ -150,6 +150,8 @@ class Workspaces(SyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          WorkspaceCreatedIncompleteError:
         """
         return self._post(
             "/v1/organizations/workspaces",
@@ -279,6 +281,8 @@ class Workspaces(SyncAPIResource):
 
           KeyProfileMismatchError:
 
+          StorageProfileMismatchError:
+
           UserProfileNotFoundError:
 
           WorkspacePolicyViolationError:
@@ -286,6 +290,8 @@ class Workspaces(SyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          ChangeOutcomeUnknownError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -404,6 +410,8 @@ class Workspaces(SyncAPIResource):
 
         Raises:
           SandboxEgressRestrictedError:
+
+          StorageAttachedDuringArchiveError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -525,6 +533,8 @@ class AsyncWorkspaces(AsyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          WorkspaceCreatedIncompleteError:
         """
         return await self._post(
             "/v1/organizations/workspaces",
@@ -654,6 +664,8 @@ class AsyncWorkspaces(AsyncAPIResource):
 
           KeyProfileMismatchError:
 
+          StorageProfileMismatchError:
+
           UserProfileNotFoundError:
 
           WorkspacePolicyViolationError:
@@ -661,6 +673,8 @@ class AsyncWorkspaces(AsyncAPIResource):
           SandboxEgressRestrictedError:
 
           ExternalKeyChangedError:
+
+          ChangeOutcomeUnknownError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")
@@ -779,6 +793,8 @@ class AsyncWorkspaces(AsyncAPIResource):
 
         Raises:
           SandboxEgressRestrictedError:
+
+          StorageAttachedDuringArchiveError:
         """
         if not workspace_id:
             raise ValueError(f"Expected a non-empty value for `workspace_id` but received {workspace_id!r}")

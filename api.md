@@ -33,6 +33,7 @@ from anthropic.types import (
     RequestBodyEncodingUnsupportedErrorDetails,
     RequestBodyTooLargeAfterDecodingErrorDetails,
     SandboxEgressRestrictedErrorDetails,
+    WorkspaceHumanReviewDisabledErrorDetails,
     AuthenticationError,
     InvalidRequestError,
     BillingError,
@@ -50,6 +51,7 @@ from anthropic.types import (
     ParentOrganizationRequiredError,
     RequestBodyEncodingInvalidError,
     RequestBodyEncodingUnsupportedError,
+    WorkspaceHumanReviewDisabledError,
     LinkedOrganizationBillingUnavailableError,
     LinkedOrganizationSpendLimitReachedError,
     SandboxEgressRestrictedError,
@@ -718,6 +720,7 @@ Types:
 
 ```python
 from anthropic.types import (
+    ChangeOutcomeUnknownErrorDetails,
     ConcurrentMembershipChangeErrorDetails,
     OrgMemberLimitExceededErrorDetails,
     OrganizationInfo,
@@ -726,6 +729,7 @@ from anthropic.types import (
     OrgMemberLimitExceededError,
     RBACRoleNotFoundError,
     ConcurrentMembershipChangeError,
+    ChangeOutcomeUnknownError,
 )
 ```
 
@@ -947,15 +951,21 @@ from anthropic.types.organization import (
     DataResidencyUpdateConfigParam,
     KeyProfileMismatchErrorDetails,
     NoBillingWorkspaceRole,
+    StorageAttachedDuringArchiveErrorDetails,
+    StorageProfileMismatchErrorDetails,
     Workspace,
+    WorkspaceCreatedIncompleteErrorDetails,
     WorkspaceMember,
     WorkspaceMemberLimitExceededErrorDetails,
     WorkspacePolicyField,
     WorkspacePolicyViolationErrorDetails,
     WorkspaceRole,
     KeyProfileMismatchError,
+    StorageProfileMismatchError,
     WorkspaceMemberLimitExceededError,
     WorkspacePolicyViolationError,
+    StorageAttachedDuringArchiveError,
+    WorkspaceCreatedIncompleteError,
 )
 ```
 
@@ -2813,6 +2823,8 @@ from anthropic.types.beta import (
     BetaWebhookEventData,
     BetaWebhookExternalKeyFailedEventData,
     BetaWebhookExternalKeyRecoveredEventData,
+    BetaWebhookExternalStorageFailedEventData,
+    BetaWebhookExternalStorageRecoveredEventData,
     BetaWebhookMemoryStoreArchivedEventData,
     BetaWebhookMemoryStoreCreatedEventData,
     BetaWebhookMemoryStoreDeletedEventData,
@@ -2960,7 +2972,18 @@ Methods:
 Types:
 
 ```python
-from anthropic.types.beta import BetaOrganization, BetaOrganizationRole
+from anthropic.types.beta import (
+    BetaApprovalRequiredErrorDetails,
+    BetaAuthorizationCheckUnavailableErrorDetails,
+    BetaHumanReviewNotAvailableErrorDetails,
+    BetaOrganization,
+    BetaOrganizationNotEligibleErrorDetails,
+    BetaOrganizationRole,
+    BetaApprovalRequiredError,
+    BetaHumanReviewNotAvailableError,
+    BetaOrganizationNotEligibleError,
+    BetaAuthorizationCheckUnavailableError,
+)
 ```
 
 Methods:
@@ -3126,6 +3149,61 @@ Methods:
 - <code title="post /v1/organizations/service_accounts/{service_account_id}/workspaces">client.beta.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/beta/organization/service_accounts/workspaces.py">add</a>(service_account_id, \*\*<a href="src/anthropic/types/beta/organization/service_accounts/workspace_add_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_service_account_workspace_member.py">BetaServiceAccountWorkspaceMember</a></code>
 - <code title="delete /v1/organizations/service_accounts/{service_account_id}/workspaces/{workspace_id}">client.beta.organization.service_accounts.workspaces.<a href="./src/anthropic/resources/beta/organization/service_accounts/workspaces.py">remove</a>(workspace_id, \*, service_account_id) -> <a href="./src/anthropic/types/beta/organization/service_accounts/workspace_remove_response.py">WorkspaceRemoveResponse</a></code>
 
+### ExternalStorage
+
+Types:
+
+```python
+from anthropic.types.beta.organization import (
+    BetaActiveExternalStorageStatus,
+    BetaAvailableExternalStorageStatus,
+    BetaAWSExternalStorageConfig,
+    BetaAWSExternalStorageConfigParam,
+    BetaDeletedExternalStorage,
+    BetaDrainingExternalStorageStatus,
+    BetaExternalStorage,
+    BetaExternalStorageFailedCheck,
+    BetaExternalStorageInUseErrorDetails,
+    BetaExternalStorageInWorkspacePolicyErrorDetails,
+    BetaExternalStorageNotAvailableErrorDetails,
+    BetaGCPExternalStorageConfig,
+    BetaGCPExternalStorageConfigParam,
+    BetaGrantRequiredErrorDetails,
+    BetaInvalidStorageARNErrorDetails,
+    BetaPendingConfigurationExternalStorageStatus,
+    BetaProviderNotAllowedErrorDetails,
+    BetaStorageAlreadyRegisteredErrorDetails,
+    BetaStorageAttachLimitReachedErrorDetails,
+    BetaStorageChangedConcurrentlyErrorDetails,
+    BetaStorageNotAttachableErrorDetails,
+    BetaStorageProfileStillRequiredErrorDetails,
+    BetaStorageVerificationFailedErrorDetails,
+    BetaUnsupportedRegionErrorDetails,
+    BetaExternalStorageInUseError,
+    BetaExternalStorageInWorkspacePolicyError,
+    BetaExternalStorageNotAvailableError,
+    BetaGrantRequiredError,
+    BetaInvalidStorageARNError,
+    BetaProviderNotAllowedError,
+    BetaStorageAttachLimitReachedError,
+    BetaStorageNotAttachableError,
+    BetaStorageProfileStillRequiredError,
+    BetaStorageVerificationFailedError,
+    BetaUnsupportedRegionError,
+    BetaStorageAlreadyRegisteredError,
+    BetaStorageChangedConcurrentlyError,
+)
+```
+
+Methods:
+
+- <code title="post /v1/organizations/external_storage">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">create</a>(\*\*<a href="src/anthropic/types/beta/organization/external_storage_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+- <code title="get /v1/organizations/external_storage/{external_storage_id}">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">retrieve</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+- <code title="post /v1/organizations/external_storage/{external_storage_id}">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">update</a>(external_storage_id, \*\*<a href="src/anthropic/types/beta/organization/external_storage_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+- <code title="get /v1/organizations/external_storage">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/external_storage_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">SyncPageCursor[BetaExternalStorage]</a></code>
+- <code title="delete /v1/organizations/external_storage/{external_storage_id}">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">delete</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_external_storage.py">BetaDeletedExternalStorage</a></code>
+- <code title="post /v1/organizations/external_storage/{external_storage_id}/activate">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">activate</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+
 ### Users
 
 Types:
@@ -3164,13 +3242,31 @@ Types:
 ```python
 from anthropic.types.beta.organization import (
     BetaAllowedInferenceGeo,
+    BetaAnthropicHumanReview,
+    BetaAnthropicHumanReviewParam,
     BetaDataResidency,
     BetaDataResidencyCreateConfigParam,
     BetaDataResidencyUpdateConfigParam,
+    BetaExternalStorageMember,
+    BetaExternalStorageMemberParam,
+    BetaHumanReviewOnWithExternalStorageErrorDetails,
+    BetaInferenceDataPrivacy,
+    BetaInferenceDataPrivacyCreateParam,
+    BetaInferenceDataPrivacyUpdateParam,
+    BetaInternalStorage,
+    BetaInternalStorageParam,
     BetaNoBillingWorkspaceRole,
+    BetaStorageMember,
+    BetaStorageMemberParam,
+    BetaTranscriptsStorageRequiredErrorDetails,
     BetaWorkspace,
+    BetaWorkspaceChangedConcurrentlyErrorDetails,
+    BetaWorkspaceChangedConcurrentlyField,
     BetaWorkspaceMember,
     BetaWorkspaceRole,
+    BetaHumanReviewOnWithExternalStorageError,
+    BetaTranscriptsStorageRequiredError,
+    BetaWorkspaceChangedConcurrentlyError,
 )
 ```
 
@@ -3261,6 +3357,7 @@ Types:
 
 ```python
 from anthropic.types.beta.organization import (
+    BetaAccessTransparency,
     BetaComplianceSettings,
     BetaComplianceSettingsState,
     BetaComplianceSettingsStateDisabled,

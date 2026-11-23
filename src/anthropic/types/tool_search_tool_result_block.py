@@ -1,7 +1,7 @@
 from typing import Union
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import Literal, Annotated, TypeAlias
 
-from .._models import BaseModel
+from .._models import BaseModel, UnionDiscriminator
 from .tool_search_tool_result_error_object import ToolSearchToolResultErrorObject
 from .tool_search_tool_search_result_block import ToolSearchToolSearchResultBlock
 
@@ -11,7 +11,7 @@ Content: TypeAlias = Union[ToolSearchToolResultErrorObject, ToolSearchToolSearch
 
 
 class ToolSearchToolResultBlock(BaseModel):
-    content: Content
+    content: Annotated[Content, UnionDiscriminator("type")]
 
     tool_use_id: str
 

@@ -2452,7 +2452,7 @@ def _workload_credentials() -> WorkloadIdentityCredentials:
 def _send_message(client: Anthropic) -> None:
     client.messages.create(
         max_tokens=1,
-        model="claude-opus-4-5",
+        model="claude-opus-5-5",
         messages=[{"role": "user", "content": "hi"}],
     )
 
@@ -2566,7 +2566,7 @@ class TestAnthropicCredentials:
         client = Anthropic(credentials=StaticToken("static-bearer"))
         client.messages.create(
             max_tokens=1,
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
             messages=[{"role": "user", "content": "hi"}],
             extra_headers={"anthropic-beta": OAUTH_API_BETA_HEADER},
         )
@@ -2589,7 +2589,7 @@ class TestAnthropicCredentials:
         )
         client.messages.create(
             max_tokens=1,
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
             messages=[{"role": "user", "content": "hi"}],
             extra_headers={"anthropic-beta": f"{OAUTH_API_BETA_HEADER}-future-variant"},
         )
@@ -2747,7 +2747,7 @@ class TestAnthropicCredentials:
         _send_message(client)
         client.messages.create(
             max_tokens=1,
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
             messages=[{"role": "user", "content": "hi"}],
             workspace_id="wrkspc_req",
         )
@@ -3317,7 +3317,7 @@ class TestInMemoryConfig:
 async def _send_message_async(client: AsyncAnthropic) -> None:
     await client.messages.create(
         max_tokens=1,
-        model="claude-opus-4-5",
+        model="claude-opus-5-5",
         messages=[{"role": "user", "content": "hi"}],
     )
 
@@ -3343,7 +3343,7 @@ class TestAsyncAnthropicCredentials:
         await _send_message_async(client)
         await client.messages.create(
             max_tokens=1,
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
             messages=[{"role": "user", "content": "hi"}],
             workspace_id="wrkspc_req",
         )

@@ -12,6 +12,7 @@ from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
 from ..user_profile_required_error_details import UserProfileRequiredErrorDetails
+from ..change_outcome_unknown_error_details import ChangeOutcomeUnknownErrorDetails
 from ..compaction_unavailable_error_details import CompactionUnavailableErrorDetails
 from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails
 from ..user_profile_not_found_error_details import UserProfileNotFoundErrorDetails
@@ -32,6 +33,7 @@ from ..compaction_incomplete_turn_error_details import CompactionIncompleteTurnE
 from ..image_dimensions_too_large_error_details import ImageDimensionsTooLargeErrorDetails
 from ..thread_unsupported_request_error_details import ThreadUnsupportedRequestErrorDetails
 from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldErrorDetails
+from ..beta.beta_approval_required_error_details import BetaApprovalRequiredErrorDetails
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
@@ -44,6 +46,7 @@ from .request_body_encoding_invalid_error_details import RequestBodyEncodingInva
 from ..available_tools_limit_exceeded_error_details import AvailableToolsLimitExceededErrorDetails
 from ..beta.beta_environment_archived_error_details import BetaEnvironmentArchivedErrorDetails
 from .organization_type_not_supported_error_details import OrganizationTypeNotSupportedErrorDetails
+from .workspace_human_review_disabled_error_details import WorkspaceHumanReviewDisabledErrorDetails
 from ..beta.beta_environment_not_found_error_details import BetaEnvironmentNotFoundErrorDetails
 from ..compaction_nothing_to_summarize_error_details import CompactionNothingToSummarizeErrorDetails
 from ..compaction_tool_changes_mismatch_error_details import CompactionToolChangesMismatchErrorDetails
@@ -54,15 +57,19 @@ from ..organization.key_profile_mismatch_error_details import KeyProfileMismatch
 from .claude_code_key_creator_not_member_error_details import ClaudeCodeKeyCreatorNotMemberErrorDetails
 from ..beta.organization.beta_scan_failed_error_details import BetaScanFailedErrorDetails
 from ..organization.invite_already_exists_error_details import InviteAlreadyExistsErrorDetails
+from ..beta.beta_organization_not_eligible_error_details import BetaOrganizationNotEligibleErrorDetails
 from ..beta.organization.beta_scan_pending_error_details import BetaScanPendingErrorDetails
 from ..compaction_too_many_tool_references_error_details import CompactionTooManyToolReferencesErrorDetails
 from ..user_profile_billing_not_authorized_error_details import UserProfileBillingNotAuthorizedErrorDetails
+from ..beta.beta_human_review_not_available_error_details import BetaHumanReviewNotAvailableErrorDetails
 from ..beta.beta_invalid_config_type_change_error_details import BetaInvalidConfigTypeChangeErrorDetails
 from .request_body_too_large_after_decoding_error_details import RequestBodyTooLargeAfterDecodingErrorDetails
 from ..beta.beta_environment_create_disabled_error_details import BetaEnvironmentCreateDisabledErrorDetails
 from ..beta.beta_environment_update_disabled_error_details import BetaEnvironmentUpdateDisabledErrorDetails
 from ..beta.organization.beta_bundle_on_call_error_details import BetaBundleOnCallErrorDetails
+from ..beta.organization.beta_grant_required_error_details import BetaGrantRequiredErrorDetails
 from ..organization.email_domain_not_allowed_error_details import EmailDomainNotAllowedErrorDetails
+from ..organization.storage_profile_mismatch_error_details import StorageProfileMismatchErrorDetails
 from ..beta_organization_not_enrolled_in_beta_error_details import BetaOrganizationNotEnrolledInBetaErrorDetails
 from ..organization.cannot_remove_last_member_error_details import CannotRemoveLastMemberErrorDetails
 from .linked_organization_billing_unavailable_error_details import LinkedOrganizationBillingUnavailableErrorDetails
@@ -71,18 +78,37 @@ from ..beta.organization.beta_skill_name_taken_error_details import BetaSkillNam
 from ..organization.org_api_key_limit_exceeded_error_details import OrgAPIKeyLimitExceededErrorDetails
 from ..organization.workspace_policy_violation_error_details import WorkspacePolicyViolationErrorDetails
 from ..beta.organization.beta_plugin_name_taken_error_details import BetaPluginNameTakenErrorDetails
+from ..beta.beta_authorization_check_unavailable_error_details import BetaAuthorizationCheckUnavailableErrorDetails
+from ..beta.organization.beta_unsupported_region_error_details import BetaUnsupportedRegionErrorDetails
+from ..organization.workspace_created_incomplete_error_details import WorkspaceCreatedIncompleteErrorDetails
+from ..beta.organization.beta_invalid_storage_arn_error_details import BetaInvalidStorageARNErrorDetails
 from ..beta.organization.beta_cannot_sign_out_self_error_details import BetaCannotSignOutSelfErrorDetails
+from ..beta.organization.beta_provider_not_allowed_error_details import BetaProviderNotAllowedErrorDetails
 from ..beta.organization.beta_rbac_group_not_found_error_details import BetaRBACGroupNotFoundErrorDetails
 from ..beta.organization.beta_registration_pending_error_details import BetaRegistrationPendingErrorDetails
 from ..organization.external_key_validation_failed_error_details import ExternalKeyValidationFailedErrorDetails
 from ..organization.rbac_group_grants_owner_access_error_details import RBACGroupGrantsOwnerAccessErrorDetails
 from ..beta.organization.beta_api_key_scope_missing_error_details import BetaAPIKeyScopeMissingErrorDetails
 from ..beta.organization.beta_cannot_sign_out_owner_error_details import BetaCannotSignOutOwnerErrorDetails
+from ..organization.storage_attached_during_archive_error_details import StorageAttachedDuringArchiveErrorDetails
 from ..organization.workspace_member_limit_exceeded_error_details import WorkspaceMemberLimitExceededErrorDetails
+from ..beta.organization.beta_storage_not_attachable_error_details import BetaStorageNotAttachableErrorDetails
 from ..organization.external_key_in_workspace_policy_error_details import ExternalKeyInWorkspacePolicyErrorDetails
 from ..organization.workspace_api_key_limit_exceeded_error_details import WorkspaceAPIKeyLimitExceededErrorDetails
+from ..beta.organization.beta_external_storage_in_use_error_details import BetaExternalStorageInUseErrorDetails
 from ..organization.external_key_validation_timed_out_error_details import ExternalKeyValidationTimedOutErrorDetails
 from ..organization.rbac_group_owner_access_unconfirmed_error_details import RBACGroupOwnerAccessUnconfirmedErrorDetails
+from ..beta.organization.beta_storage_already_registered_error_details import BetaStorageAlreadyRegisteredErrorDetails
+from ..beta.organization.beta_storage_verification_failed_error_details import BetaStorageVerificationFailedErrorDetails
+from ..beta.organization.beta_storage_attach_limit_reached_error_details import (
+    BetaStorageAttachLimitReachedErrorDetails,
+)
+from ..beta.organization.beta_storage_changed_concurrently_error_details import (
+    BetaStorageChangedConcurrentlyErrorDetails,
+)
+from ..beta.organization.beta_transcripts_storage_required_error_details import (
+    BetaTranscriptsStorageRequiredErrorDetails,
+)
 from ..beta.environments.beta_heartbeat_precondition_failed_error_details import (
     BetaHeartbeatPreconditionFailedErrorDetails,
 )
@@ -94,6 +120,15 @@ from ..beta.organization.beta_claude_tag_writes_not_enabled_error_details import
 )
 from ..beta.organization.beta_cannot_sign_out_managed_member_error_details import (
     BetaCannotSignOutManagedMemberErrorDetails,
+)
+from ..beta.organization.beta_external_storage_not_available_error_details import (
+    BetaExternalStorageNotAvailableErrorDetails,
+)
+from ..beta.organization.beta_storage_profile_still_required_error_details import (
+    BetaStorageProfileStillRequiredErrorDetails,
+)
+from ..beta.organization.beta_workspace_changed_concurrently_error_details import (
+    BetaWorkspaceChangedConcurrentlyErrorDetails,
 )
 from ..beta.organization.beta_bundle_attachment_not_supported_error_details import (
     BetaBundleAttachmentNotSupportedErrorDetails,
@@ -110,8 +145,14 @@ from ..organization.cannot_invite_emails_with_unverified_domains_error_details i
 from ..beta.organization.beta_compliance_configuration_restricted_error_details import (
     BetaComplianceConfigurationRestrictedErrorDetails,
 )
+from ..beta.organization.beta_external_storage_in_workspace_policy_error_details import (
+    BetaExternalStorageInWorkspacePolicyErrorDetails,
+)
 from ..beta.organization.claude_code.beta_cmek_feature_unsupported_error_details import (
     BetaCMEKFeatureUnsupportedErrorDetails,
+)
+from ..beta.organization.beta_human_review_on_with_external_storage_error_details import (
+    BetaHumanReviewOnWithExternalStorageErrorDetails,
 )
 from ..beta.organization.beta_slack_channel_set_up_settings_refused_error_details import (
     BetaSlackChannelSetUpSettingsRefusedErrorDetails,
@@ -181,6 +222,7 @@ ErrorDetails: TypeAlias = Annotated[
         RampLimitExceededErrorDetails,
         CMEKKeyUnreachableErrorDetails,
         CompactionUnavailableErrorDetails,
+        WorkspaceHumanReviewDisabledErrorDetails,
         StorageQuotaExceededErrorDetails,
         FileNotDownloadableErrorDetails,
         FileExpiredErrorDetails,
@@ -204,6 +246,10 @@ ErrorDetails: TypeAlias = Annotated[
         KeyProfileMismatchErrorDetails,
         WorkspacePolicyViolationErrorDetails,
         ExternalKeyChangedErrorDetails,
+        WorkspaceCreatedIncompleteErrorDetails,
+        StorageProfileMismatchErrorDetails,
+        ChangeOutcomeUnknownErrorDetails,
+        StorageAttachedDuringArchiveErrorDetails,
         WorkspaceMemberLimitExceededErrorDetails,
         OrganizationTypeNotSupportedErrorDetails,
         ParentOrganizationRequiredErrorDetails,
@@ -214,6 +260,16 @@ ErrorDetails: TypeAlias = Annotated[
         BetaEnvironmentUpdateDisabledErrorDetails,
         BetaHeartbeatPreconditionFailedErrorDetails,
         BetaInvalidMetadataErrorDetails,
+        BetaGrantRequiredErrorDetails,
+        BetaOrganizationNotEligibleErrorDetails,
+        BetaProviderNotAllowedErrorDetails,
+        BetaUnsupportedRegionErrorDetails,
+        BetaStorageAlreadyRegisteredErrorDetails,
+        BetaAuthorizationCheckUnavailableErrorDetails,
+        BetaInvalidStorageARNErrorDetails,
+        BetaExternalStorageInUseErrorDetails,
+        BetaExternalStorageInWorkspacePolicyErrorDetails,
+        BetaStorageVerificationFailedErrorDetails,
         BetaCannotSignOutPrimaryOwnerErrorDetails,
         BetaCannotSignOutSelfErrorDetails,
         BetaOrganizationNotEnrolledInBetaErrorDetails,
@@ -221,6 +277,16 @@ ErrorDetails: TypeAlias = Annotated[
         BetaCannotSignOutMembershipAdminErrorDetails,
         BetaCannotSignOutOwnerErrorDetails,
         BetaCannotSignOutPrivilegedMemberErrorDetails,
+        BetaApprovalRequiredErrorDetails,
+        BetaExternalStorageNotAvailableErrorDetails,
+        BetaHumanReviewNotAvailableErrorDetails,
+        BetaHumanReviewOnWithExternalStorageErrorDetails,
+        BetaStorageNotAttachableErrorDetails,
+        BetaTranscriptsStorageRequiredErrorDetails,
+        BetaStorageAttachLimitReachedErrorDetails,
+        BetaStorageProfileStillRequiredErrorDetails,
+        BetaStorageChangedConcurrentlyErrorDetails,
+        BetaWorkspaceChangedConcurrentlyErrorDetails,
         BetaSpendLimitsAdminAPIWritesNotEnabledErrorDetails,
         BetaUnsupportedCharsetErrorDetails,
         BetaPluginNameTakenErrorDetails,

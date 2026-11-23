@@ -37,6 +37,11 @@ class TestWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
+            inference_data_privacy={
+                "human_review": {"type": "disabled"},
+                "safeguards_storage": {"type": "internal"},
+                "transcripts_storage": {"type": "internal"},
+            },
             tags={
                 "env": "prod",
                 "team": "platform",
@@ -76,7 +81,16 @@ class TestWorkspaces:
     @parametrize
     def test_method_retrieve(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaWorkspace, workspace, path=["response"])
+
+    @parametrize
+    def test_method_retrieve_with_all_params(self, client: Anthropic) -> None:
+        workspace = client.beta.organization.workspaces.retrieve(
+            workspace_id="workspace_id",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -84,7 +98,7 @@ class TestWorkspaces:
     @parametrize
     def test_raw_response_retrieve(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         )
 
@@ -96,7 +110,7 @@ class TestWorkspaces:
     @parametrize
     def test_streaming_response_retrieve(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -111,7 +125,7 @@ class TestWorkspaces:
     def test_path_params_retrieve(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.beta.organization.workspaces.with_raw_response.retrieve(
-                "",
+                workspace_id="",
             )
 
     @parametrize
@@ -132,12 +146,18 @@ class TestWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
+            inference_data_privacy={
+                "human_review": {"type": "disabled"},
+                "safeguards_storage": {"type": "internal"},
+                "transcripts_storage": {"type": "internal"},
+            },
             name="Workspace Name",
             tags={
                 "env": "prod",
                 "team": "platform",
             },
             user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -191,6 +211,7 @@ class TestWorkspaces:
             include_archived=True,
             include_default=True,
             limit=1,
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(SyncPage[BetaWorkspace], workspace, path=["response"])
@@ -222,7 +243,16 @@ class TestWorkspaces:
     @parametrize
     def test_method_archive(self, client: Anthropic) -> None:
         workspace = client.beta.organization.workspaces.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaWorkspace, workspace, path=["response"])
+
+    @parametrize
+    def test_method_archive_with_all_params(self, client: Anthropic) -> None:
+        workspace = client.beta.organization.workspaces.archive(
+            workspace_id="workspace_id",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -230,7 +260,7 @@ class TestWorkspaces:
     @parametrize
     def test_raw_response_archive(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.with_raw_response.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         )
 
@@ -242,7 +272,7 @@ class TestWorkspaces:
     @parametrize
     def test_streaming_response_archive(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.with_streaming_response.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -257,7 +287,7 @@ class TestWorkspaces:
     def test_path_params_archive(self, client: Anthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.beta.organization.workspaces.with_raw_response.archive(
-                "",
+                workspace_id="",
             )
 
 
@@ -285,6 +315,11 @@ class TestAsyncWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
+            inference_data_privacy={
+                "human_review": {"type": "disabled"},
+                "safeguards_storage": {"type": "internal"},
+                "transcripts_storage": {"type": "internal"},
+            },
             tags={
                 "env": "prod",
                 "team": "platform",
@@ -324,7 +359,16 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaWorkspace, workspace, path=["response"])
+
+    @parametrize
+    async def test_method_retrieve_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        workspace = await async_client.beta.organization.workspaces.retrieve(
+            workspace_id="workspace_id",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -332,7 +376,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         )
 
@@ -344,7 +388,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.retrieve(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -359,7 +403,7 @@ class TestAsyncWorkspaces:
     async def test_path_params_retrieve(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.beta.organization.workspaces.with_raw_response.retrieve(
-                "",
+                workspace_id="",
             )
 
     @parametrize
@@ -380,12 +424,18 @@ class TestAsyncWorkspaces:
             },
             display_color="#6C5BB9",
             external_key_id="ekey_01SDCCSbTxrXDpWc1phhtcfK",
+            inference_data_privacy={
+                "human_review": {"type": "disabled"},
+                "safeguards_storage": {"type": "internal"},
+                "transcripts_storage": {"type": "internal"},
+            },
             name="Workspace Name",
             tags={
                 "env": "prod",
                 "team": "platform",
             },
             user_profile_id="uprof_01SDCCSbTxrXDpWc1phhtcfK",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -439,6 +489,7 @@ class TestAsyncWorkspaces:
             include_archived=True,
             include_default=True,
             limit=1,
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(AsyncPage[BetaWorkspace], workspace, path=["response"])
@@ -470,7 +521,16 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_method_archive(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.beta.organization.workspaces.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
+            extra_query={"beta": "true"},
+        )
+        assert_matches_type(BetaWorkspace, workspace, path=["response"])
+
+    @parametrize
+    async def test_method_archive_with_all_params(self, async_client: AsyncAnthropic) -> None:
+        workspace = await async_client.beta.organization.workspaces.archive(
+            workspace_id="workspace_id",
+            betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaWorkspace, workspace, path=["response"])
@@ -478,7 +538,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_raw_response_archive(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.with_raw_response.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         )
 
@@ -490,7 +550,7 @@ class TestAsyncWorkspaces:
     @parametrize
     async def test_streaming_response_archive(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.with_streaming_response.archive(
-            "workspace_id",
+            workspace_id="workspace_id",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -505,5 +565,5 @@ class TestAsyncWorkspaces:
     async def test_path_params_archive(self, async_client: AsyncAnthropic) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.beta.organization.workspaces.with_raw_response.archive(
-                "",
+                workspace_id="",
             )

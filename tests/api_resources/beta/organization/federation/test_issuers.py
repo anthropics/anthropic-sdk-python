@@ -21,8 +21,8 @@ class TestIssuers:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -30,8 +30,8 @@ class TestIssuers:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         issuer = client.beta.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             check_jti=True,
             jwks={
                 "type": "discovery",
@@ -47,8 +47,8 @@ class TestIssuers:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.federation.issuers.with_raw_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         )
 
@@ -60,8 +60,8 @@ class TestIssuers:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.federation.issuers.with_streaming_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed
@@ -283,8 +283,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         )
         assert_matches_type(BetaFederationIssuer, issuer, path=["response"])
@@ -292,8 +292,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         issuer = await async_client.beta.organization.federation.issuers.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             check_jti=True,
             jwks={
                 "type": "discovery",
@@ -309,8 +309,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.federation.issuers.with_raw_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         )
 
@@ -322,8 +322,8 @@ class TestAsyncIssuers:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.federation.issuers.with_streaming_response.create(
-            issuer_url="x",
-            name="x",
+            issuer_url="https://token.actions.githubusercontent.com",
+            name="github-actions",
             extra_query={"beta": "true"},
         ) as response:
             assert not response.is_closed

@@ -24,7 +24,7 @@ class TestTargets:
         target = client.beta.organization.claude_tag.bundles.targets.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -36,7 +36,7 @@ class TestTargets:
         target = client.beta.organization.claude_tag.bundles.targets.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             betas=["computer-use-2024-10-22"],
@@ -49,7 +49,7 @@ class TestTargets:
         response = client.beta.organization.claude_tag.bundles.targets.with_raw_response.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -65,7 +65,7 @@ class TestTargets:
         with client.beta.organization.claude_tag.bundles.targets.with_streaming_response.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -84,7 +84,7 @@ class TestTargets:
             client.beta.organization.claude_tag.bundles.targets.with_raw_response.create(
                 bundle_id="",
                 target={
-                    "slack_channel_id": "xxxxxxxx",
+                    "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                     "type": "slack_channel",
                 },
             )
@@ -274,7 +274,7 @@ class TestAsyncTargets:
         target = await async_client.beta.organization.claude_tag.bundles.targets.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -286,7 +286,7 @@ class TestAsyncTargets:
         target = await async_client.beta.organization.claude_tag.bundles.targets.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             betas=["computer-use-2024-10-22"],
@@ -299,7 +299,7 @@ class TestAsyncTargets:
         response = await async_client.beta.organization.claude_tag.bundles.targets.with_raw_response.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -315,7 +315,7 @@ class TestAsyncTargets:
         async with async_client.beta.organization.claude_tag.bundles.targets.with_streaming_response.create(
             bundle_id="capp_011CZkZjLP1cWxj5EtMmdgbq",
             target={
-                "slack_channel_id": "xxxxxxxx",
+                "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                 "type": "slack_channel",
             },
             extra_query={"beta": "true"},
@@ -334,7 +334,7 @@ class TestAsyncTargets:
             await async_client.beta.organization.claude_tag.bundles.targets.with_raw_response.create(
                 bundle_id="",
                 target={
-                    "slack_channel_id": "xxxxxxxx",
+                    "slack_channel_id": "slch_01SvpyRQK3nN6eH9uhRA7n1q",
                     "type": "slack_channel",
                 },
             )

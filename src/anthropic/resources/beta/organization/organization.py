@@ -68,6 +68,14 @@ from .plugins.plugins import (
     PluginsWithStreamingResponse,
     AsyncPluginsWithStreamingResponse,
 )
+from .external_storage import (
+    ExternalStorage,
+    AsyncExternalStorage,
+    ExternalStorageWithRawResponse,
+    AsyncExternalStorageWithRawResponse,
+    ExternalStorageWithStreamingResponse,
+    AsyncExternalStorageWithStreamingResponse,
+)
 from .analytics.analytics import (
     Analytics,
     AsyncAnalytics,
@@ -189,6 +197,10 @@ class Organization(SyncAPIResource):
     @cached_property
     def service_accounts(self) -> ServiceAccounts:
         return ServiceAccounts(self._client)
+
+    @cached_property
+    def external_storage(self) -> ExternalStorage:
+        return ExternalStorage(self._client)
 
     @cached_property
     def users(self) -> Users:
@@ -314,6 +326,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def service_accounts(self) -> AsyncServiceAccounts:
         return AsyncServiceAccounts(self._client)
+
+    @cached_property
+    def external_storage(self) -> AsyncExternalStorage:
+        return AsyncExternalStorage(self._client)
 
     @cached_property
     def users(self) -> AsyncUsers:
@@ -448,6 +464,10 @@ class OrganizationWithRawResponse:
         return ServiceAccountsWithRawResponse(self._organization.service_accounts)
 
     @cached_property
+    def external_storage(self) -> ExternalStorageWithRawResponse:
+        return ExternalStorageWithRawResponse(self._organization.external_storage)
+
+    @cached_property
     def users(self) -> UsersWithRawResponse:
         return UsersWithRawResponse(self._organization.users)
 
@@ -531,6 +551,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def service_accounts(self) -> AsyncServiceAccountsWithRawResponse:
         return AsyncServiceAccountsWithRawResponse(self._organization.service_accounts)
+
+    @cached_property
+    def external_storage(self) -> AsyncExternalStorageWithRawResponse:
+        return AsyncExternalStorageWithRawResponse(self._organization.external_storage)
 
     @cached_property
     def users(self) -> AsyncUsersWithRawResponse:
@@ -618,6 +642,10 @@ class OrganizationWithStreamingResponse:
         return ServiceAccountsWithStreamingResponse(self._organization.service_accounts)
 
     @cached_property
+    def external_storage(self) -> ExternalStorageWithStreamingResponse:
+        return ExternalStorageWithStreamingResponse(self._organization.external_storage)
+
+    @cached_property
     def users(self) -> UsersWithStreamingResponse:
         return UsersWithStreamingResponse(self._organization.users)
 
@@ -701,6 +729,10 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def service_accounts(self) -> AsyncServiceAccountsWithStreamingResponse:
         return AsyncServiceAccountsWithStreamingResponse(self._organization.service_accounts)
+
+    @cached_property
+    def external_storage(self) -> AsyncExternalStorageWithStreamingResponse:
+        return AsyncExternalStorageWithStreamingResponse(self._organization.external_storage)
 
     @cached_property
     def users(self) -> AsyncUsersWithStreamingResponse:

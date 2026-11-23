@@ -23,7 +23,7 @@ class TestTelemetryDestinations:
     @parametrize
     def test_method_create(self, client: Anthropic) -> None:
         telemetry_destination = client.beta.organization.telemetry_destinations.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         )
@@ -32,7 +32,7 @@ class TestTelemetryDestinations:
     @parametrize
     def test_method_create_with_all_params(self, client: Anthropic) -> None:
         telemetry_destination = client.beta.organization.telemetry_destinations.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             display_name="display_name",
             headers={"foo": "string"},
@@ -50,7 +50,7 @@ class TestTelemetryDestinations:
     @parametrize
     def test_raw_response_create(self, client: Anthropic) -> None:
         response = client.beta.organization.telemetry_destinations.with_raw_response.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         )
@@ -63,7 +63,7 @@ class TestTelemetryDestinations:
     @parametrize
     def test_streaming_response_create(self, client: Anthropic) -> None:
         with client.beta.organization.telemetry_destinations.with_streaming_response.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         ) as response:
@@ -337,7 +337,7 @@ class TestAsyncTelemetryDestinations:
     @parametrize
     async def test_method_create(self, async_client: AsyncAnthropic) -> None:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         )
@@ -346,7 +346,7 @@ class TestAsyncTelemetryDestinations:
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncAnthropic) -> None:
         telemetry_destination = await async_client.beta.organization.telemetry_destinations.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             display_name="display_name",
             headers={"foo": "string"},
@@ -364,7 +364,7 @@ class TestAsyncTelemetryDestinations:
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.telemetry_destinations.with_raw_response.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         )
@@ -377,7 +377,7 @@ class TestAsyncTelemetryDestinations:
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.telemetry_destinations.with_streaming_response.create(
-            endpoint_url="x",
+            endpoint_url="https://gateway.example.com",
             workspaces={"type": "all"},
             extra_query={"beta": "true"},
         ) as response:

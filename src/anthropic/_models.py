@@ -61,6 +61,7 @@ from ._utils import (
     lru_cache,
     is_mapping,
     parse_date,
+    is_list_type,
     coerce_boolean,
     parse_datetime,
     strip_not_given,
@@ -724,6 +725,9 @@ def construct_type(*, value: object, type_: object, metadata: Optional[List[Any]
                 variant_type = discriminator.mapping.get(variant_value)
                 if variant_type:
                     return construct_type(type_=variant_type, value=value)
+
+        if is_list(value) and any(is_list_type(variant) for variant in args):
+            args = tuple(variant for variant in args if not is_basemodel_type(variant))
 
         # if the data is not valid, use the first variant that doesn't fail while deserializing
         for variant in args:

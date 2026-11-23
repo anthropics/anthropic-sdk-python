@@ -203,7 +203,7 @@ class TestServiceAccounts:
     def test_method_add(self, client: Anthropic) -> None:
         service_account = client.beta.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -213,7 +213,7 @@ class TestServiceAccounts:
     def test_method_add_with_all_params(self, client: Anthropic) -> None:
         service_account = client.beta.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
@@ -224,7 +224,7 @@ class TestServiceAccounts:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.beta.organization.workspaces.service_accounts.with_raw_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -238,7 +238,7 @@ class TestServiceAccounts:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.beta.organization.workspaces.service_accounts.with_streaming_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         ) as response:
@@ -255,7 +255,7 @@ class TestServiceAccounts:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             client.beta.organization.workspaces.service_accounts.with_raw_response.add(
                 workspace_id="",
-                service_account_id="service_account_id",
+                service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
                 workspace_role="workspace_admin",
             )
 
@@ -510,7 +510,7 @@ class TestAsyncServiceAccounts:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -520,7 +520,7 @@ class TestAsyncServiceAccounts:
     async def test_method_add_with_all_params(self, async_client: AsyncAnthropic) -> None:
         service_account = await async_client.beta.organization.workspaces.service_accounts.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             betas=["computer-use-2024-10-22"],
             extra_query={"beta": "true"},
@@ -531,7 +531,7 @@ class TestAsyncServiceAccounts:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.beta.organization.workspaces.service_accounts.with_raw_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         )
@@ -545,7 +545,7 @@ class TestAsyncServiceAccounts:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.beta.organization.workspaces.service_accounts.with_streaming_response.add(
             workspace_id="workspace_id",
-            service_account_id="service_account_id",
+            service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
             workspace_role="workspace_admin",
             extra_query={"beta": "true"},
         ) as response:
@@ -562,7 +562,7 @@ class TestAsyncServiceAccounts:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `workspace_id` but received ''"):
             await async_client.beta.organization.workspaces.service_accounts.with_raw_response.add(
                 workspace_id="",
-                service_account_id="service_account_id",
+                service_account_id="svac_01SDCCSbTxrXDpWc1phhtcfK",
                 workspace_role="workspace_admin",
             )
 

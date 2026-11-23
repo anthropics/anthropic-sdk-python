@@ -101,6 +101,8 @@ class Batches(SyncAPIResource):
 
           OrganizationOnHoldError:
 
+          WorkspaceHumanReviewDisabledError:
+
           EnforcedSpendLimitReachedError:
         """
         extra_headers = {
@@ -539,6 +541,8 @@ class AsyncBatches(AsyncAPIResource):
           CMEKKeyDisabledError:
 
           OrganizationOnHoldError:
+
+          WorkspaceHumanReviewDisabledError:
 
           EnforcedSpendLimitReachedError:
         """

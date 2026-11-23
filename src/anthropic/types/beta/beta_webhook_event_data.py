@@ -37,6 +37,7 @@ from .beta_webhook_deployment_run_started_event_data import BetaWebhookDeploymen
 from .beta_webhook_external_key_recovered_event_data import BetaWebhookExternalKeyRecoveredEventData
 from .beta_webhook_session_budget_reached_event_data import BetaWebhookSessionBudgetReachedEventData
 from .beta_webhook_session_thread_created_event_data import BetaWebhookSessionThreadCreatedEventData
+from .beta_webhook_external_storage_failed_event_data import BetaWebhookExternalStorageFailedEventData
 from .beta_webhook_session_requires_action_event_data import BetaWebhookSessionRequiresActionEventData
 from .beta_webhook_deployment_run_succeeded_event_data import BetaWebhookDeploymentRunSucceededEventData
 from .beta_webhook_vault_credential_created_event_data import BetaWebhookVaultCredentialCreatedEventData
@@ -44,6 +45,7 @@ from .beta_webhook_vault_credential_deleted_event_data import BetaWebhookVaultCr
 from .beta_webhook_session_status_terminated_event_data import BetaWebhookSessionStatusTerminatedEventData
 from .beta_webhook_session_thread_terminated_event_data import BetaWebhookSessionThreadTerminatedEventData
 from .beta_webhook_vault_credential_archived_event_data import BetaWebhookVaultCredentialArchivedEventData
+from .beta_webhook_external_storage_recovered_event_data import BetaWebhookExternalStorageRecoveredEventData
 from .beta_webhook_session_status_rescheduled_event_data import BetaWebhookSessionStatusRescheduledEventData
 from .beta_webhook_session_status_run_started_event_data import BetaWebhookSessionStatusRunStartedEventData
 from .beta_webhook_vault_credential_refresh_failed_event_data import BetaWebhookVaultCredentialRefreshFailedEventData
@@ -111,6 +113,8 @@ BetaWebhookEventData: TypeAlias = Annotated[
         BetaWebhookUserProfileProgramStatusUpdatedEventData,
         BetaWebhookExternalKeyFailedEventData,
         BetaWebhookExternalKeyRecoveredEventData,
+        BetaWebhookExternalStorageFailedEventData,
+        BetaWebhookExternalStorageRecoveredEventData,
     ],
     UnionDiscriminator("type"),
 ]

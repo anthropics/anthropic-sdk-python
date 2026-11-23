@@ -5,6 +5,7 @@ from typing_extensions import Required, TypedDict
 
 from ...anthropic_beta_param import AnthropicBetaParam
 from .beta_data_residency_create_config_param import BetaDataResidencyCreateConfigParam
+from .beta_inference_data_privacy_create_param import BetaInferenceDataPrivacyCreateParam
 
 __all__ = ["WorkspaceCreateParams"]
 
@@ -37,6 +38,16 @@ class WorkspaceCreateParams(TypedDict, total=False):
     request. This field is write-once: once a key is attached to a Workspace it
     cannot be detached or replaced. To rotate key material, rotate the underlying
     key on your cloud KMS; the `external_key_id` stays the same.
+    """
+
+    inference_data_privacy: Optional[BetaInferenceDataPrivacyCreateParam]
+    """
+    Where the Workspace's retained inference data and transcript copies go, and
+    whether Anthropic's human review applies. Requires the `efs-2026-10-01`
+    `anthropic-beta` value. When omitted, `safeguards_storage` and
+    `transcripts_storage` are `internal` and `human_review` is `enabled`. Cannot be
+    null. An Admin API key can't set this field, because it doesn't belong to a user
+    or a service account. Use an API key that belongs to one, or an OAuth token.
     """
 
     tags: Optional[Dict[str, str]]

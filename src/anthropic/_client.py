@@ -336,6 +336,9 @@ class Anthropic(SyncAPIClient):
 
     @cached_property
     def user_profiles(self) -> UserProfiles:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import UserProfiles
 
         return UserProfiles(self)
@@ -744,6 +747,9 @@ class AsyncAnthropic(AsyncAPIClient):
 
     @cached_property
     def user_profiles(self) -> AsyncUserProfiles:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import AsyncUserProfiles
 
         return AsyncUserProfiles(self)
@@ -997,6 +1003,9 @@ class AnthropicWithRawResponse:
 
     @cached_property
     def user_profiles(self) -> user_profiles.UserProfilesWithRawResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import UserProfilesWithRawResponse
 
         return UserProfilesWithRawResponse(self._client.user_profiles)
@@ -1046,6 +1055,9 @@ class AsyncAnthropicWithRawResponse:
 
     @cached_property
     def user_profiles(self) -> user_profiles.AsyncUserProfilesWithRawResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import AsyncUserProfilesWithRawResponse
 
         return AsyncUserProfilesWithRawResponse(self._client.user_profiles)
@@ -1095,6 +1107,9 @@ class AnthropicWithStreamedResponse:
 
     @cached_property
     def user_profiles(self) -> user_profiles.UserProfilesWithStreamingResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import UserProfilesWithStreamingResponse
 
         return UserProfilesWithStreamingResponse(self._client.user_profiles)
@@ -1144,6 +1159,9 @@ class AsyncAnthropicWithStreamedResponse:
 
     @cached_property
     def user_profiles(self) -> user_profiles.AsyncUserProfilesWithStreamingResponse:
+        """
+        Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+        """
         from .resources.user_profiles import AsyncUserProfilesWithStreamingResponse
 
         return AsyncUserProfilesWithStreamingResponse(self._client.user_profiles)

@@ -43,6 +43,7 @@ from .shared import (
     RequestBodyEncodingInvalidError as RequestBodyEncodingInvalidError,
     CMEKKeyNetworkBlockedErrorDetails as CMEKKeyNetworkBlockedErrorDetails,
     OrganizationTypeNotSupportedError as OrganizationTypeNotSupportedError,
+    WorkspaceHumanReviewDisabledError as WorkspaceHumanReviewDisabledError,
     ClaudeCodeKeyCreatorNotMemberError as ClaudeCodeKeyCreatorNotMemberError,
     CMEKContextUnavailableErrorDetails as CMEKContextUnavailableErrorDetails,
     ClaudeCodeVersionTooOldErrorDetails as ClaudeCodeVersionTooOldErrorDetails,
@@ -55,6 +56,7 @@ from .shared import (
     RequestBodyEncodingInvalidErrorDetails as RequestBodyEncodingInvalidErrorDetails,
     LinkedOrganizationSpendLimitReachedError as LinkedOrganizationSpendLimitReachedError,
     OrganizationTypeNotSupportedErrorDetails as OrganizationTypeNotSupportedErrorDetails,
+    WorkspaceHumanReviewDisabledErrorDetails as WorkspaceHumanReviewDisabledErrorDetails,
     ClaudeCodeKeyCreatorNotMemberErrorDetails as ClaudeCodeKeyCreatorNotMemberErrorDetails,
     LinkedOrganizationBillingUnavailableError as LinkedOrganizationBillingUnavailableError,
     RequestBodyEncodingUnsupportedErrorDetails as RequestBodyEncodingUnsupportedErrorDetails,
@@ -319,6 +321,7 @@ from .beta_permission_error_object import BetaPermissionErrorObject as BetaPermi
 from .beta_rate_limit_error_object import BetaRateLimitErrorObject as BetaRateLimitErrorObject
 from .browser_hover_tool_use_block import BrowserHoverToolUseBlock as BrowserHoverToolUseBlock
 from .browser_new_tab_config_param import BrowserNewTabConfigParam as BrowserNewTabConfigParam
+from .change_outcome_unknown_error import ChangeOutcomeUnknownError as ChangeOutcomeUnknownError
 from .citation_char_location_param import CitationCharLocationParam as CitationCharLocationParam
 from .citation_page_location_param import CitationPageLocationParam as CitationPageLocationParam
 from .compaction_unavailable_error import CompactionUnavailableError as CompactionUnavailableError
@@ -490,6 +493,7 @@ from .browser_javascript_exec_config_param import BrowserJavascriptExecConfigPar
 from .browser_left_click_drag_config_param import BrowserLeftClickDragConfigParam as BrowserLeftClickDragConfigParam
 from .browser_left_mouse_down_config_param import BrowserLeftMouseDownConfigParam as BrowserLeftMouseDownConfigParam
 from .browser_left_mouse_up_tool_use_block import BrowserLeftMouseUpToolUseBlock as BrowserLeftMouseUpToolUseBlock
+from .change_outcome_unknown_error_details import ChangeOutcomeUnknownErrorDetails as ChangeOutcomeUnknownErrorDetails
 from .citations_web_search_result_location import CitationsWebSearchResultLocation as CitationsWebSearchResultLocation
 from .compaction_unavailable_error_details import CompactionUnavailableErrorDetails as CompactionUnavailableErrorDetails
 from .computer_double_click_tool_use_block import ComputerDoubleClickToolUseBlock as ComputerDoubleClickToolUseBlock

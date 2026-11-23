@@ -16,6 +16,8 @@ class WebhookUpdateParams(TypedDict, total=False):
         Literal[
             "external_key.failed",
             "external_key.recovered",
+            "external_storage.failed",
+            "external_storage.recovered",
             "user_profile.enforcement_action_opened",
             "user_profile.enforcement_action_resolved",
             "user_profile.program_status_updated",
