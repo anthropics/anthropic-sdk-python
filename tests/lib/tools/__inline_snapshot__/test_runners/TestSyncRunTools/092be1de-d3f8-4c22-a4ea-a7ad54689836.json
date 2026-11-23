@@ -33,7 +33,7 @@
             "content": "What is the weather in SF, NY, and London in Celsius?"
           }
         ],
-        "model": "claude-opus-4-5",
+        "model": "claude-opus-5-5",
         "tools": [
           {
             "name": "get_weather",
@@ -229,7 +229,7 @@
             ]
           }
         ],
-        "model": "claude-opus-4-5",
+        "model": "claude-opus-5-5",
         "container": "container_011CYVPF4iP8oD6Vsz1NhVih",
         "tools": [
           {

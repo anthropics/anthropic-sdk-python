@@ -747,7 +747,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
         ) as stream:
             assert isinstance(cast(Any, stream), BetaAsyncMessageStream)
 
@@ -775,7 +775,7 @@ class TestAsyncMessages:
                     "content": "Say hello there!",
                 }
             ],
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
         ) as stream:
             assert_unknown_events_response([event async for event in stream], await stream.get_final_message())
 

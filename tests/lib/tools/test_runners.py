@@ -508,7 +508,7 @@ class TestSyncRunTools:
 
         runner = snapshot_client.beta.messages.tool_runner(
             max_tokens=1024,
-            model="claude-opus-4-5",
+            model="claude-opus-5-5",
             tools=[get_weather],
             messages=[{"role": "user", "content": "What is the weather in SF, NY, and London in Celsius?"}],
         )
