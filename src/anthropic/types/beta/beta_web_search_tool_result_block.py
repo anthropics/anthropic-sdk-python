@@ -15,7 +15,7 @@ Caller: TypeAlias = Annotated[
 
 
 class BetaWebSearchToolResultBlock(BaseModel):
-    content: BetaWebSearchToolResultBlockContent
+    content: Annotated[BetaWebSearchToolResultBlockContent, UnionDiscriminator("type")]
 
     tool_use_id: str
 

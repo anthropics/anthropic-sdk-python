@@ -17,7 +17,7 @@ Caller: TypeAlias = Annotated[
 class WebSearchToolResultBlock(BaseModel):
     caller: Optional[Caller] = None
 
-    content: WebSearchToolResultBlockContent
+    content: Annotated[WebSearchToolResultBlockContent, UnionDiscriminator("type")]
 
     tool_use_id: str
 

@@ -373,6 +373,25 @@ def test_union_of_lists() -> None:
     assert cast(Any, m.items[1]) == 156
 
 
+def test_union_of_model_and_list_invalid_data() -> None:
+    class Error(BaseModel):
+        code: str
+
+    class Result(BaseModel):
+        level: int
+
+    class Model(BaseModel):
+        content: Union[Error, List[Result]]
+
+    m = Model.construct(content=[{"level": "high"}])
+    assert isinstance(m.content, list)
+    assert isinstance(m.content[0], Result)
+    assert cast(Any, m.content[0].level) == "high"
+
+    m = Model.construct(content={"level": "high"})
+    assert isinstance(m.content, Error)
+
+
 def test_dict_of_union() -> None:
     class SubModel1(BaseModel):
         name: str

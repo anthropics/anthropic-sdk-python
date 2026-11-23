@@ -18,7 +18,7 @@ Caller: TypeAlias = Annotated[
 
 
 class BetaWebFetchToolResultBlock(BaseModel):
-    content: Content
+    content: Annotated[Content, UnionDiscriminator("type")]
 
     tool_use_id: str
 

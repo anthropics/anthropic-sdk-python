@@ -20,7 +20,7 @@ Content: TypeAlias = Union[WebFetchToolResultErrorBlock, WebFetchBlock]
 class WebFetchToolResultBlock(BaseModel):
     caller: Optional[Caller] = None
 
-    content: Content
+    content: Annotated[Content, UnionDiscriminator("type")]
 
     tool_use_id: str
 
