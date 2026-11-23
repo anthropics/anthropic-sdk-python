@@ -10,6 +10,13 @@ __all__ = ["BetaFallbackCreditUsage", "Status"]
 Status: TypeAlias = Annotated[
     Union[BetaFallbackCreditRedeemed, BetaFallbackCreditNotApplied], UnionDiscriminator("type")
 ]
+"""Whether the fallback-credit reprice was applied to this response's billing.
+
+A union discriminated on `type`. `redeemed`: the retry is billed as if
+the conversation had been on the retry model all along — including when the
+resulting shift is zero because there was nothing to move. `not_applied`:
+no reprice was applied; the arm's `reason` says why.
+"""
 
 
 class BetaFallbackCreditUsage(BaseModel):

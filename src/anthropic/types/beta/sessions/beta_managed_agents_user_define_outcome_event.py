@@ -11,6 +11,10 @@ __all__ = ["BetaManagedAgentsUserDefineOutcomeEvent", "Rubric"]
 Rubric: TypeAlias = Annotated[
     Union[BetaManagedAgentsFileRubric, BetaManagedAgentsTextRubric], UnionDiscriminator("type")
 ]
+"""How to grade the outcome.
+
+File rubrics are currently resolved to their text content; clients should handle both variants.
+"""
 
 
 class BetaManagedAgentsUserDefineOutcomeEvent(BaseModel):

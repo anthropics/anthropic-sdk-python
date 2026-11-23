@@ -40,3 +40,6 @@ BetaComputerMemberInput: TypeAlias = Union[
     BetaComputerScreenshotInput,
     BetaComputerZoomInput,
 ]
+"""
+The `input` of a computer toolset member `tool_use` block: the member's own parameters.
+"""

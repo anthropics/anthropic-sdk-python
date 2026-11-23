@@ -10,6 +10,7 @@ __all__ = ["BetaManagedAgentsGitHubRepositoryResourceConfig", "Checkout"]
 Checkout: TypeAlias = Annotated[
     Union[BetaManagedAgentsBranchCheckout, BetaManagedAgentsCommitCheckout, None], UnionDiscriminator("type")
 ]
+"""Branch or commit to check out. Defaults to the repository's default branch."""
 
 
 class BetaManagedAgentsGitHubRepositoryResourceConfig(BaseModel):

@@ -11,3 +11,4 @@ BetaManagedAgentsSessionMultiagentWorkflows: TypeAlias = Annotated[
     Union[BetaManagedAgentsSessionMultiagentWorkflowsEnabled, BetaManagedAgentsMultiagentWorkflowsDisabled],
     UnionDiscriminator("type"),
 ]
+"""Whether the agent can start workflow runs."""

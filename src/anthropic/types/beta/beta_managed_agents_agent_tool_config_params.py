@@ -24,3 +24,4 @@ BetaManagedAgentsAgentToolConfigParams: TypeAlias = Union[
     BetaManagedAgentsWebFetchToolConfigParams,
     BetaManagedAgentsWebSearchToolConfigParams,
 ]
+"""Configuration override for a specific tool within a toolset."""

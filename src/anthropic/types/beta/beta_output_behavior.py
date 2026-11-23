@@ -10,3 +10,7 @@ __all__ = ["BetaOutputBehavior"]
 BetaOutputBehavior: TypeAlias = Annotated[
     Union[BetaOutputBehaviorCreateNew, BetaOutputBehaviorUpdateExisting], UnionDiscriminator("type")
 ]
+"""Which memory store a dream writes its result to.
+
+Defaults to `create_new` when left out of a create request.
+"""

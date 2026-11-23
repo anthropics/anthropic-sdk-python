@@ -14,6 +14,10 @@ __all__ = ["BetaManagedAgentsWebFetchToolConfigParams", "PermissionPolicy"]
 PermissionPolicy: TypeAlias = Union[
     BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam, BetaManagedAgentsAutoPolicyParam
 ]
+"""Permission policy for this tool.
+
+Controls whether tool calls are auto-approved or require confirmation.
+"""
 
 
 class BetaManagedAgentsWebFetchToolConfigParams(TypedDict, total=False):

@@ -22,3 +22,4 @@ BetaManagedAgentsEventParams: TypeAlias = Union[
     BetaManagedAgentsUserToolResultEventParams,
     BetaManagedAgentsSystemMessageEventParams,
 ]
+"""Union type for event parameters that can be sent to a session."""

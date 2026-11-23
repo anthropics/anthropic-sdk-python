@@ -18,6 +18,9 @@ Tool: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""
+The tool made available: a reference to a `tools` entry or MCP toolset, or a `tool_definition` carrying the definition by value.
+"""
 
 
 class BetaResponseToolAdditionBlock(BaseModel):

@@ -75,11 +75,20 @@ class SessionCreateParams(TypedDict, total=False):
 
 
 Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams, BetaManagedAgentsAgentWithOverridesParams]
+"""Agent identifier.
+
+Accepts the `agent` ID string, which pins the latest version for the session, or an `agent` object with both id and version specified.
+"""
 
 InitialEvent: TypeAlias = Union[BetaManagedAgentsUserMessageEventParams, BetaManagedAgentsUserDefineOutcomeEventParams]
+"""An event sent to the `session` immediately after it is created.
+
+Supports `user.message` and `user.define_outcome`.
+"""
 
 Resource: TypeAlias = Union[
     BetaManagedAgentsGitHubRepositoryResourceParams,
     BetaManagedAgentsFileResourceParams,
     BetaManagedAgentsMemoryStoreResourceParam,
 ]
+"""Union of resources that can be mounted into a session."""

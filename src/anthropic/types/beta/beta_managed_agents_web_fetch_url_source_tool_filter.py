@@ -18,3 +18,4 @@ BetaManagedAgentsWebFetchURLSourceToolFilter: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Which tools' results contribute URLs that may be fetched."""

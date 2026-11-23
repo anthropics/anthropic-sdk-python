@@ -16,6 +16,7 @@ Source: TypeAlias = Union[
     BetaManagedAgentsURLDocumentSourceParam,
     BetaManagedAgentsFileDocumentSourceParam,
 ]
+"""The source of the document data."""
 
 
 class BetaManagedAgentsDocumentBlockParam(TypedDict, total=False):

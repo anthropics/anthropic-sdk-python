@@ -13,12 +13,19 @@ __all__ = ["WebFetchURLSourcesParam", "ClientToolResults", "ServerToolResults", 
 ClientToolResults: TypeAlias = Union[
     WebFetchURLSourceAllParam, WebFetchURLSourceNoneParam, WebFetchURLSourceOnlyParam, WebFetchURLSourceExceptParam
 ]
+"""
+Which client tools' results contribute fetchable URLs: "all", "none", or an only or except list of client tool names from tools[].
+"""
 
 ServerToolResults: TypeAlias = Union[
     WebFetchURLSourceAllParam, WebFetchURLSourceNoneParam, WebFetchURLSourceOnlyParam, WebFetchURLSourceExceptParam
 ]
+"""
+Which server tools' results contribute fetchable URLs: "all", "none", or an only or except list of server tool names from tools[]; only web_search and web_fetch results ever contribute.
+"""
 
 UserInput: TypeAlias = Union[WebFetchURLSourceAllParam, WebFetchURLSourceNoneParam]
+"""Whether URLs in user messages are fetchable: "all" or "none"."""
 
 
 class WebFetchURLSourcesParam(TypedDict, total=False):

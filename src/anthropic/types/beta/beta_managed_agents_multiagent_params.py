@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsMultiagentParams"]
 BetaManagedAgentsMultiagentParams: TypeAlias = Union[
     BetaManagedAgentsMultiagentCoordinatorParams, BetaManagedAgentsMultiagent20261001Params
 ]
+"""Multiagent orchestration configuration."""

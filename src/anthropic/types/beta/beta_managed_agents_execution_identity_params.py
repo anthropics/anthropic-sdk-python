@@ -13,3 +13,6 @@ __all__ = ["BetaManagedAgentsExecutionIdentityParams"]
 BetaManagedAgentsExecutionIdentityParams: TypeAlias = Union[
     BetaManagedAgentsAWSRoleExecutionIdentityParams, BetaManagedAgentsServiceAccountExecutionIdentityParams
 ]
+"""
+Execution principal for runs of this agent: `service_account` (the default) or `aws_role`.
+"""

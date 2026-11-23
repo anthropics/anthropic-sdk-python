@@ -98,9 +98,14 @@ class DeploymentUpdateParams(TypedDict, total=False):
 
 
 Agent: TypeAlias = Union[str, BetaManagedAgentsAgentParams]
+"""Agent to deploy.
+
+Accepts the `agent` ID string, which re-pins to the latest version, or an `agent` object with both id and version specified. Omit to preserve. Cannot be cleared.
+"""
 
 Resource: TypeAlias = Union[
     BetaManagedAgentsGitHubRepositoryResourceParams,
     BetaManagedAgentsFileResourceParams,
     BetaManagedAgentsMemoryStoreResourceParam,
 ]
+"""Union of resources that can be mounted into a session."""

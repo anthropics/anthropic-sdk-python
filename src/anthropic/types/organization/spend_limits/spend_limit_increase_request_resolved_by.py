@@ -10,3 +10,4 @@ __all__ = ["SpendLimitIncreaseRequestResolvedBy"]
 SpendLimitIncreaseRequestResolvedBy: TypeAlias = Annotated[
     Union[SpendLimitUserActor, SpendLimitScopedAPIKeyActor], UnionDiscriminator("type")
 ]
+"""Who approved or denied the increase request."""

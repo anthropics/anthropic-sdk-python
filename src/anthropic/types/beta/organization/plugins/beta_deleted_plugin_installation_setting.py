@@ -12,6 +12,7 @@ Target: TypeAlias = Annotated[
     Union[BetaPluginTargetOrganization, BetaPluginTargetRBACGroup, BetaPluginTargetOrganizationMember],
     UnionDiscriminator("type"),
 ]
+"""Whose setting was removed."""
 
 
 class BetaDeletedPluginInstallationSetting(BaseModel):

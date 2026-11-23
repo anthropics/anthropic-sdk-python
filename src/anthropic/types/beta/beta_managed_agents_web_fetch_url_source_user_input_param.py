@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsWebFetchURLSourceUserInputParam"]
 BetaManagedAgentsWebFetchURLSourceUserInputParam: TypeAlias = Union[
     BetaManagedAgentsWebFetchURLSourceAllParam, BetaManagedAgentsWebFetchURLSourceNoneParam
 ]
+"""Whether URLs in the text of user messages may be fetched."""

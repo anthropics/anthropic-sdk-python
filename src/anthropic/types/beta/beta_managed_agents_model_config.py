@@ -21,6 +21,10 @@ Effort: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""How hard Claude works on each inference call.
+
+One of `low`, `medium`, `high`, `xhigh`, `max`. Always present; resolved to the per-model default at save time when not supplied.
+"""
 
 
 class BetaManagedAgentsModelConfig(BaseModel):

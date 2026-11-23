@@ -66,3 +66,4 @@ BetaManagedAgentsDeploymentPausedReasonErrorObject: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The error that triggered an auto-pause. Matches the failed run's `error.type`."""

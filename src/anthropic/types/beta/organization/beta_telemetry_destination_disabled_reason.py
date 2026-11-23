@@ -22,3 +22,6 @@ BetaTelemetryDestinationDisabledReason: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""
+Why the destination is disabled: `caller` when a caller disabled it, or the reason the API disabled it automatically (`sustained_failure`, `invalid_address`, or `redirect`). Every automatic disable is reversible with an update that sets `state` to `enabled`. An update that sets `disabled` on a destination that is already disabled keeps its reason.
+"""

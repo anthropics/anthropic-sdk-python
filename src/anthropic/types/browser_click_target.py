@@ -8,3 +8,4 @@ from .browser_coordinate_target import BrowserCoordinateTarget
 __all__ = ["BrowserClickTarget"]
 
 BrowserClickTarget: TypeAlias = Annotated[Union[BrowserCoordinateTarget, BrowserRefTarget], UnionDiscriminator("type")]
+"""Where to act: either a viewport coordinate or an element reference."""

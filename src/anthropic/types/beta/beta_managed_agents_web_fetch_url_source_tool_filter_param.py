@@ -16,3 +16,4 @@ BetaManagedAgentsWebFetchURLSourceToolFilterParam: TypeAlias = Union[
     BetaManagedAgentsWebFetchURLSourceOnlyParam,
     BetaManagedAgentsWebFetchURLSourceExceptParam,
 ]
+"""Which tools' results contribute URLs that may be fetched."""

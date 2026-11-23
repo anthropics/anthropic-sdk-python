@@ -22,3 +22,4 @@ BetaClaudeTagSettingSource: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The settings level a value comes from. More types can be added."""

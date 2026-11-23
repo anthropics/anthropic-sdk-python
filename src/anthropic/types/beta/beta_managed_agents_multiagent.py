@@ -10,3 +10,4 @@ __all__ = ["BetaManagedAgentsMultiagent"]
 BetaManagedAgentsMultiagent: TypeAlias = Annotated[
     Union[BetaManagedAgentsMultiagentCoordinator, BetaManagedAgentsMultiagent20261001], UnionDiscriminator("type")
 ]
+"""Resolved multiagent orchestration configuration as returned in API responses."""

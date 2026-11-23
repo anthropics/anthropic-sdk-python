@@ -32,3 +32,7 @@ ModelParam: TypeAlias = Union[
     ],
     str,
 ]
+"""The model that will complete your prompt.
+
+See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+"""

@@ -12,6 +12,7 @@ __all__ = ["BetaManagedAgentsMCPToolsetDefaultConfigParams", "PermissionPolicy"]
 PermissionPolicy: TypeAlias = Union[
     BetaManagedAgentsAlwaysAllowPolicyParam, BetaManagedAgentsAlwaysAskPolicyParam, BetaManagedAgentsAutoPolicyParam
 ]
+"""Default permission policy for tools from this server."""
 
 
 class BetaManagedAgentsMCPToolsetDefaultConfigParams(TypedDict, total=False):

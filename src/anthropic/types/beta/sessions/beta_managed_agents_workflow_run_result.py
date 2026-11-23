@@ -16,3 +16,4 @@ BetaManagedAgentsWorkflowRunResult: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""How a workflow run ended."""

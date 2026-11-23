@@ -24,3 +24,7 @@ BetaManagedAgentsWorkflowRunErrorObject: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Why a workflow run did not finish, or was not created.
+
+More types may be added. On `workflow_run.status_ended`, for a `type` you do not recognize, rely on the event's `result.type`.
+"""

@@ -16,3 +16,4 @@ BetaManagedAgentsSessionResourceConfig: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""A configured session resource. Echoes the input minus write-only credentials."""

@@ -11,6 +11,7 @@ __all__ = ["BetaManagedAgentsAgentMessageEvent", "Content"]
 Content: TypeAlias = Annotated[
     Union[BetaManagedAgentsTextBlock, BetaManagedAgentsRedactedBlock], UnionDiscriminator("type")
 ]
+"""Content block in an agent message."""
 
 
 class BetaManagedAgentsAgentMessageEvent(BaseModel):

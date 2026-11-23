@@ -10,3 +10,7 @@ __all__ = ["BetaClaudeTagBundleTarget"]
 BetaClaudeTagBundleTarget: TypeAlias = Annotated[
     Union[BetaClaudeTagSlackChannelBundleTarget, BetaClaudeTagSlackWorkspaceBundleTarget], UnionDiscriminator("type")
 ]
+"""One Bundle attached to one Slack channel or one Slack workspace.
+
+More types of target can be added.
+"""

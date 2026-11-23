@@ -35,3 +35,4 @@ class ExternalKeyCreateParams(TypedDict, total=False):
 ProviderConfig: TypeAlias = Union[
     BetaAWSExternalKeyConfigParam, BetaGCPExternalKeyConfigParam, BetaAzureExternalKeyConfigParam
 ]
+"""KMS provider identity and auth coordinates."""

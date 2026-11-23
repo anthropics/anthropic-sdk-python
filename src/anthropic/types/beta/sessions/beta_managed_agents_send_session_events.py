@@ -24,6 +24,7 @@ Data: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Union type for events that can be sent to a session."""
 
 
 class BetaManagedAgentsSendSessionEvents(BaseModel):

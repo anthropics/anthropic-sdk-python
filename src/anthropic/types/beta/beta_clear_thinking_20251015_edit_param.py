@@ -9,6 +9,10 @@ from .beta_all_thinking_turns_param import BetaAllThinkingTurnsParam
 __all__ = ["BetaClearThinking20251015EditParam", "Keep"]
 
 Keep: TypeAlias = Union[BetaThinkingTurnsParam, BetaAllThinkingTurnsParam, Literal["all"]]
+"""Number of most recent assistant turns to keep thinking blocks for.
+
+Older turns will have their thinking blocks removed.
+"""
 
 
 class BetaClearThinking20251015EditParam(TypedDict, total=False):

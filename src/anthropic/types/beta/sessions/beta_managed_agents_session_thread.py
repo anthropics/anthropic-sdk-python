@@ -16,6 +16,10 @@ Agent: TypeAlias = Annotated[
     Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor, BetaManagedAgentsInlineAgent],
     UnionDiscriminator("type"),
 ]
+"""Resolved agent definition for this thread.
+
+Snapshot of the agent at thread creation time.
+"""
 
 
 class BetaManagedAgentsSessionThread(BaseModel):

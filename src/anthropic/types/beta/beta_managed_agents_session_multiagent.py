@@ -11,3 +11,4 @@ BetaManagedAgentsSessionMultiagent: TypeAlias = Annotated[
     Union[BetaManagedAgentsSessionMultiagentCoordinator, BetaManagedAgentsSessionMultiagent20261001],
     UnionDiscriminator("type"),
 ]
+"""Resolved multiagent orchestration configuration as returned on a `session`."""

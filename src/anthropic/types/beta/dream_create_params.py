@@ -64,3 +64,10 @@ class DreamCreateParams(TypedDict, total=False):
 
 
 Model: TypeAlias = Union[str, BetaDreamModelConfigParam]
+"""
+The model that runs a dream, given as a model ID or as an object with `id` and `speed`.
+
+In the object form, `speed` can only be `standard`.
+
+The [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability) lists the supported models.
+"""

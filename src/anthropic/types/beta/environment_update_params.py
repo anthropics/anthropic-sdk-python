@@ -52,3 +52,4 @@ class EnvironmentUpdateParams(TypedDict, total=False):
 
 
 Config: TypeAlias = Union[BetaCloudConfigParams, BetaSelfHostedConfigParams]
+"""Updated environment configuration"""

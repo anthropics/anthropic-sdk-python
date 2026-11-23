@@ -12,6 +12,7 @@ from .beta_input_tokens_clear_at_least_param import BetaInputTokensClearAtLeastP
 __all__ = ["BetaClearToolUses20250919EditParam", "Trigger"]
 
 Trigger: TypeAlias = Union[BetaInputTokensTriggerParam, BetaToolUsesTriggerParam]
+"""Condition that triggers the context management strategy"""
 
 
 class BetaClearToolUses20250919EditParam(TypedDict, total=False):

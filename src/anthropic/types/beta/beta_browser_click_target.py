@@ -10,3 +10,4 @@ __all__ = ["BetaBrowserClickTarget"]
 BetaBrowserClickTarget: TypeAlias = Annotated[
     Union[BetaBrowserCoordinateTarget, BetaBrowserRefTarget], UnionDiscriminator("type")
 ]
+"""Where to act: either a viewport coordinate or an element reference."""

@@ -11,6 +11,7 @@ from .federation_issuer_poll_status import FederationIssuerPollStatus
 __all__ = ["FederationIssuer", "JWKS"]
 
 JWKS: TypeAlias = Annotated[Union[JWKSDiscovery, JWKSExplicitURL, JWKSInline], UnionDiscriminator("type")]
+"""How signing keys are obtained for signature verification."""
 
 
 class FederationIssuer(BaseModel):

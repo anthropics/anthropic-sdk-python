@@ -16,6 +16,7 @@ Tool: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""A reference to the withdrawn `tools` entry, MCP tool or MCP toolset."""
 
 
 class BetaResponseToolRemovalBlock(BaseModel):

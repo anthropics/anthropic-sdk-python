@@ -14,3 +14,6 @@ BetaTelemetryDestinationWorkspacesParams: TypeAlias = Union[
     BetaTelemetryDestinationWorkspacesIncludeParams,
     BetaTelemetryDestinationWorkspacesExcludeParams,
 ]
+"""
+Which of the organization's workspaces a telemetry destination covers, as a create or update request sets it.
+"""

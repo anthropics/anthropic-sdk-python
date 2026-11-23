@@ -8,3 +8,4 @@ from .container_params import ContainerParams
 __all__ = ["MessageCreateParamsContainerParam"]
 
 MessageCreateParamsContainerParam: TypeAlias = Union[ContainerParams, str]
+"""Container identifier for reuse across requests."""

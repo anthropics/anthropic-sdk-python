@@ -14,3 +14,4 @@ ResourceUpdateResponse: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The updated session resource."""

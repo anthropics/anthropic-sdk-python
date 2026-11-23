@@ -19,6 +19,10 @@ Content: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Content block in a tool result.
+
+Can be `text`, `image`, `document`, or `search_result`.
+"""
 
 
 class BetaManagedAgentsAgentToolResultEvent(BaseModel):

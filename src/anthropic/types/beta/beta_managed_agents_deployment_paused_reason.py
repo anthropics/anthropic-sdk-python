@@ -11,3 +11,4 @@ BetaManagedAgentsDeploymentPausedReason: TypeAlias = Annotated[
     Union[BetaManagedAgentsManualDeploymentPausedReason, BetaManagedAgentsErrorDeploymentPausedReason],
     UnionDiscriminator("type"),
 ]
+"""Why a deployment is paused. Non-null exactly when `status` is `paused`."""

@@ -10,6 +10,7 @@ __all__ = ["BetaManagedAgentsSessionMultiagentCoordinator", "Agent"]
 Agent: TypeAlias = Annotated[
     Union[BetaManagedAgentsSessionThreadAgent, BetaManagedAgentsAdvisor], UnionDiscriminator("type")
 ]
+"""A session-resolved multiagent roster entry."""
 
 
 class BetaManagedAgentsSessionMultiagentCoordinator(BaseModel):

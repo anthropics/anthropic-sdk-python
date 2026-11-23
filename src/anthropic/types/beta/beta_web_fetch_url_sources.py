@@ -13,13 +13,20 @@ ClientToolResults: TypeAlias = Annotated[
     Union[BetaWebFetchURLSourceAll, BetaWebFetchURLSourceNone, BetaWebFetchURLSourceOnly, BetaWebFetchURLSourceExcept],
     UnionDiscriminator("type"),
 ]
+"""
+Which client tools' results contribute fetchable URLs: "all", "none", or an only or except list of client tool names from tools[].
+"""
 
 ServerToolResults: TypeAlias = Annotated[
     Union[BetaWebFetchURLSourceAll, BetaWebFetchURLSourceNone, BetaWebFetchURLSourceOnly, BetaWebFetchURLSourceExcept],
     UnionDiscriminator("type"),
 ]
+"""
+Which server tools' results contribute fetchable URLs: "all", "none", or an only or except list of server tool names from tools[]; only web_search and web_fetch results ever contribute.
+"""
 
 UserInput: TypeAlias = Annotated[Union[BetaWebFetchURLSourceAll, BetaWebFetchURLSourceNone], UnionDiscriminator("type")]
+"""Whether URLs in user messages are fetchable: "all" or "none"."""
 
 
 class BetaWebFetchURLSources(BaseModel):

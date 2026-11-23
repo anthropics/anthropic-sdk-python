@@ -12,6 +12,7 @@ Source: TypeAlias = Annotated[
     Union[BetaManagedAgentsBase64ImageSource, BetaManagedAgentsURLImageSource, BetaManagedAgentsFileImageSource],
     UnionDiscriminator("type"),
 ]
+"""The source of the image data."""
 
 
 class BetaManagedAgentsImageBlock(BaseModel):

@@ -11,3 +11,4 @@ BetaManagedAgentsMultiagentAdvisor: TypeAlias = Annotated[
     Union[BetaManagedAgentsMultiagentAdvisorEnabled, BetaManagedAgentsMultiagentAdvisorDisabled],
     UnionDiscriminator("type"),
 ]
+"""Whether the session's primary thread can consult an advisor model."""

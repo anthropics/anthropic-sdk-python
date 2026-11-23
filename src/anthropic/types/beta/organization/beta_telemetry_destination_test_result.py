@@ -10,3 +10,4 @@ __all__ = ["BetaTelemetryDestinationTestResult"]
 BetaTelemetryDestinationTestResult: TypeAlias = Annotated[
     Union[BetaTelemetryDestinationTestSuccess, BetaTelemetryDestinationTestFailure], UnionDiscriminator("type")
 ]
+"""The outcome of a test: `success`, or `failure` with the reason."""

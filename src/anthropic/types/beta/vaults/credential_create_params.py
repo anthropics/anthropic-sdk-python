@@ -46,3 +46,4 @@ Auth: TypeAlias = Union[
     BetaManagedAgentsStaticBearerCreateParams,
     BetaManagedAgentsEnvironmentVariableCreateParams,
 ]
+"""Authentication configuration for the credential."""

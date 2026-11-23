@@ -8,6 +8,7 @@ from .beta_self_hosted_config import BetaSelfHostedConfig
 __all__ = ["BetaEnvironment", "Config"]
 
 Config: TypeAlias = Annotated[Union[BetaCloudConfig, BetaSelfHostedConfig], UnionDiscriminator("type")]
+"""Environment configuration (either Anthropic Cloud or self-hosted)"""
 
 
 class BetaEnvironment(BaseModel):
