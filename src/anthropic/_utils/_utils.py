@@ -393,7 +393,7 @@ def removesuffix(string: str, suffix: str) -> str:
 
     Backport of `str.removesuffix` for Python < 3.9
     """
-    if string.endswith(suffix):
+    if suffix and string.endswith(suffix):
         return string[: -len(suffix)]
     return string
 
