@@ -16,3 +16,7 @@ BetaManagedAgentsDeploymentInitialEvent: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""An event sent to a session immediately after it is created.
+
+Supports `user.message`, `user.define_outcome`, and `system.message`.
+"""

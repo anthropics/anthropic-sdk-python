@@ -14,3 +14,4 @@ ResourceRetrieveResponse: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The requested session resource."""

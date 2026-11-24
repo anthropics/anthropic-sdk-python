@@ -16,6 +16,7 @@ RetryStatus: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""What the client should do next."""
 
 
 class BetaManagedAgentsCredentialHostUnreachableErrorObject(BaseModel):

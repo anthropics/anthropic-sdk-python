@@ -14,10 +14,15 @@ from .beta_managed_agents_agent_toolset20260401_params import BetaManagedAgentsA
 __all__ = ["BetaManagedAgentsAgentWithOverridesParams", "Model", "Tool"]
 
 Model: TypeAlias = Union[BetaManagedAgentsModelParam, BetaManagedAgentsModelConfigParams]
+"""Replacement model.
+
+Accepts the model string, e.g. `claude-opus-5-5`, or a `model_config` object. Omit to use the agent's model.
+"""
 
 Tool: TypeAlias = Union[
     BetaManagedAgentsAgentToolset20260401Params, BetaManagedAgentsMCPToolsetParams, BetaManagedAgentsCustomToolParams
 ]
+"""Union type for tool configurations in the tools array."""
 
 
 class BetaManagedAgentsAgentWithOverridesParams(TypedDict, total=False):

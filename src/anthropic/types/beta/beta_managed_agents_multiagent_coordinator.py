@@ -10,6 +10,7 @@ __all__ = ["BetaManagedAgentsMultiagentCoordinator", "Agent"]
 Agent: TypeAlias = Annotated[
     Union[BetaManagedAgentsAgentReference, BetaManagedAgentsAdvisor], UnionDiscriminator("type")
 ]
+"""A resolved multiagent roster entry."""
 
 
 class BetaManagedAgentsMultiagentCoordinator(BaseModel):

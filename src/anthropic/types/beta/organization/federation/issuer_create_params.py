@@ -43,3 +43,4 @@ class IssuerCreateParams(TypedDict, total=False):
 
 
 JWKS: TypeAlias = Union[BetaJWKSDiscoveryParam, BetaJWKSExplicitURLParam, BetaJWKSInlineParam]
+"""How signing keys are obtained. Defaults to OIDC discovery."""

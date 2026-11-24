@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsMultiagentSubagentsParams"]
 BetaManagedAgentsMultiagentSubagentsParams: TypeAlias = Union[
     BetaManagedAgentsMultiagentSubagentsEnabledParams, BetaManagedAgentsMultiagentSubagentsDisabledParams
 ]
+"""Whether the agent can spawn session threads."""

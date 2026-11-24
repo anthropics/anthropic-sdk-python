@@ -11,6 +11,7 @@ from ..beta_plugin_content_scan import BetaPluginContentScan
 __all__ = ["BetaPluginVersion", "CreatedBy"]
 
 CreatedBy: TypeAlias = Annotated[Union[BetaPluginUserActor, BetaPluginAPIActor, None], UnionDiscriminator("type")]
+"""Who uploaded this version; null when not recorded."""
 
 
 class BetaPluginVersion(BaseModel):

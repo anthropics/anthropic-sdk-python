@@ -57,7 +57,7 @@ class TestRules:
             applies_to_all_workspaces=True,
             description="description",
             token_lifetime_seconds=60,
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
         assert_matches_type(FederationRule, rule, path=["response"])
 
@@ -317,7 +317,7 @@ class TestAsyncRules:
             applies_to_all_workspaces=True,
             description="description",
             token_lifetime_seconds=60,
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
         assert_matches_type(FederationRule, rule, path=["response"])
 

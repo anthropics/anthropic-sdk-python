@@ -13,3 +13,7 @@ __all__ = ["BetaToolChoiceParam"]
 BetaToolChoiceParam: TypeAlias = Union[
     BetaToolChoiceAutoParam, BetaToolChoiceAnyParam, BetaToolChoiceToolParam, BetaToolChoiceNoneParam
 ]
+"""How the model should use the provided tools.
+
+The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
+"""

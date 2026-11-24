@@ -9,6 +9,7 @@ from .beta_plugin_owner_organization import BetaPluginOwnerOrganization
 __all__ = ["BetaPluginMarketplace", "Owner"]
 
 Owner: TypeAlias = Annotated[Union[BetaPluginOwnerOrganization, BetaPluginOwnerUser], UnionDiscriminator("type")]
+"""The organization, or the member whose personal plugin marketplace it is."""
 
 
 class BetaPluginMarketplace(BaseModel):

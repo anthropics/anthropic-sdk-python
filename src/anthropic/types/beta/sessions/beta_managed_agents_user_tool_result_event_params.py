@@ -16,6 +16,10 @@ Content: TypeAlias = Union[
     BetaManagedAgentsDocumentBlockParam,
     BetaManagedAgentsSearchResultBlockParam,
 ]
+"""Content block in a tool result.
+
+Can be `text`, `image`, `document`, or `search_result`.
+"""
 
 
 class BetaManagedAgentsUserToolResultEventParams(TypedDict, total=False):

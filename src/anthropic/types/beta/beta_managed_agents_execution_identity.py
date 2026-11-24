@@ -11,3 +11,4 @@ BetaManagedAgentsExecutionIdentity: TypeAlias = Annotated[
     Union[BetaManagedAgentsAWSRoleExecutionIdentity, BetaManagedAgentsServiceAccountExecutionIdentity],
     UnionDiscriminator("type"),
 ]
+"""Execution principal for runs of this agent as returned in API responses."""

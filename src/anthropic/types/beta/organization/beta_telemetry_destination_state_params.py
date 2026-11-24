@@ -11,3 +11,7 @@ __all__ = ["BetaTelemetryDestinationStateParams"]
 BetaTelemetryDestinationStateParams: TypeAlias = Union[
     BetaTelemetryDestinationStateEnabledParams, BetaTelemetryDestinationStateDisabledParams
 ]
+"""The state to set on a telemetry destination, by `type` alone.
+
+A caller can't set the `reason` of a disabled state. Only the API sets it.
+"""

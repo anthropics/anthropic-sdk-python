@@ -68,3 +68,6 @@ BetaBrowserMemberInput: TypeAlias = Union[
     BetaBrowserWaitInput,
     BetaBrowserJavascriptExecInput,
 ]
+"""
+The `input` of a browser toolset member `tool_use` block: the member's own parameters.
+"""

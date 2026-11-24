@@ -10,6 +10,7 @@ from .beta_unrestricted_network_param import BetaUnrestrictedNetworkParam
 __all__ = ["BetaCloudConfigParams", "Networking"]
 
 Networking: TypeAlias = Union[BetaUnrestrictedNetworkParam, BetaLimitedNetworkParams]
+"""Network configuration policy. Omit on update to preserve the existing value."""
 
 
 class BetaCloudConfigParams(TypedDict, total=False):

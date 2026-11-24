@@ -11,3 +11,9 @@ BetaInputTransformation: TypeAlias = Annotated[
     Union[BetaThinkingDroppedInputTransformation, BetaThinkingMismatchAllowedInputTransformation],
     UnionDiscriminator("type"),
 ]
+"""
+One entry of `input_transformations`: either a change the API made to the
+request's input before showing it to the model, or a block that failed a
+binding check and was still shown to the model unchanged. The `type` field
+says which.
+"""

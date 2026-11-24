@@ -18,3 +18,7 @@ BetaClaudeTagReplyMode: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""How Claude takes part in a Slack channel.
+
+A channel alone stores one. More types can be added.
+"""

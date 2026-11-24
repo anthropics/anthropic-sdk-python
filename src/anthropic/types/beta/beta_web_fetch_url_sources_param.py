@@ -16,6 +16,9 @@ ClientToolResults: TypeAlias = Union[
     BetaWebFetchURLSourceOnlyParam,
     BetaWebFetchURLSourceExceptParam,
 ]
+"""
+Which client tools' results contribute fetchable URLs: "all", "none", or an only or except list of client tool names from tools[].
+"""
 
 ServerToolResults: TypeAlias = Union[
     BetaWebFetchURLSourceAllParam,
@@ -23,8 +26,12 @@ ServerToolResults: TypeAlias = Union[
     BetaWebFetchURLSourceOnlyParam,
     BetaWebFetchURLSourceExceptParam,
 ]
+"""
+Which server tools' results contribute fetchable URLs: "all", "none", or an only or except list of server tool names from tools[]; only web_search and web_fetch results ever contribute.
+"""
 
 UserInput: TypeAlias = Union[BetaWebFetchURLSourceAllParam, BetaWebFetchURLSourceNoneParam]
+"""Whether URLs in user messages are fetchable: "all" or "none"."""
 
 
 class BetaWebFetchURLSourcesParam(TypedDict, total=False):

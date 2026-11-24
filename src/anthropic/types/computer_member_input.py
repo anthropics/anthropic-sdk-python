@@ -40,3 +40,6 @@ ComputerMemberInput: TypeAlias = Union[
     ComputerScreenshotInput,
     ComputerZoomInput,
 ]
+"""
+The `input` of a computer toolset member `tool_use` block: the member's own parameters.
+"""

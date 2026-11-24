@@ -18,6 +18,7 @@ Content: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Content block in a user message. Can be `text`, `image`, or `document`."""
 
 
 class BetaManagedAgentsDeploymentUserMessageEvent(BaseModel):

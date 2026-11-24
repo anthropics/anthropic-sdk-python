@@ -13,8 +13,12 @@ from .beta_plugin_owner_organization import BetaPluginOwnerOrganization
 __all__ = ["BetaPlugin", "CreatedBy", "Owner"]
 
 CreatedBy: TypeAlias = Annotated[Union[BetaPluginUserActor, BetaPluginAPIActor, None], UnionDiscriminator("type")]
+"""Who created the Plugin; null when no creator is recorded."""
 
 Owner: TypeAlias = Annotated[Union[BetaPluginOwnerOrganization, BetaPluginOwnerUser], UnionDiscriminator("type")]
+"""
+Who owns the Plugin: the organization, or the member whose personal plugin marketplace it lives in.
+"""
 
 
 class BetaPlugin(BaseModel):

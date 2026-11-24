@@ -10,3 +10,4 @@ __all__ = ["BetaSpendLimitIncreaseRequestActor"]
 BetaSpendLimitIncreaseRequestActor: TypeAlias = Annotated[
     Union[BetaSpendLimitUserActor, BetaSpendLimitScopedAPIKeyActor], UnionDiscriminator("type")
 ]
+"""Who submitted the increase request."""

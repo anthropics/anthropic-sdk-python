@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsMultiagentWorkflowsParams"]
 BetaManagedAgentsMultiagentWorkflowsParams: TypeAlias = Union[
     BetaManagedAgentsMultiagentWorkflowsEnabledParams, BetaManagedAgentsMultiagentWorkflowsDisabledParams
 ]
+"""Whether the agent can start workflow runs."""

@@ -13,6 +13,9 @@ Target: TypeAlias = Annotated[
     Union[BetaPluginTargetOrganization, BetaPluginTargetRBACGroup, BetaPluginTargetOrganizationMember],
     UnionDiscriminator("type"),
 ]
+"""
+Whose setting this is: `organization` (the Plugin's own organization-wide setting) or `rbac_group` (one RBAC Group's own setting); `organization_member` does not occur here.
+"""
 
 
 class BetaPluginInstallationSetting(BaseModel):

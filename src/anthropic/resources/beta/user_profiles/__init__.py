@@ -1,3 +1,11 @@
+from .providers import (
+    Providers,
+    AsyncProviders,
+    ProvidersWithRawResponse,
+    AsyncProvidersWithRawResponse,
+    ProvidersWithStreamingResponse,
+    AsyncProvidersWithStreamingResponse,
+)
 from .action_urls import (
     ActionURLs,
     AsyncActionURLs,
@@ -22,6 +30,12 @@ __all__ = [
     "AsyncActionURLsWithRawResponse",
     "ActionURLsWithStreamingResponse",
     "AsyncActionURLsWithStreamingResponse",
+    "Providers",
+    "AsyncProviders",
+    "ProvidersWithRawResponse",
+    "AsyncProvidersWithRawResponse",
+    "ProvidersWithStreamingResponse",
+    "AsyncProvidersWithStreamingResponse",
     "UserProfiles",
     "AsyncUserProfiles",
     "UserProfilesWithRawResponse",

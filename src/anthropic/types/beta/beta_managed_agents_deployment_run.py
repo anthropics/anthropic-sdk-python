@@ -60,6 +60,10 @@ Error: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Populated on creation failure.
+
+Null on success. Exactly one of `session_id` or `error` is non-null.
+"""
 
 
 class BetaManagedAgentsDeploymentRun(BaseModel):

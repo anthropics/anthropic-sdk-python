@@ -9,3 +9,7 @@ from .beta_output_behavior_update_existing_param import BetaOutputBehaviorUpdate
 __all__ = ["BetaOutputBehaviorParam"]
 
 BetaOutputBehaviorParam: TypeAlias = Union[BetaOutputBehaviorCreateNewParam, BetaOutputBehaviorUpdateExistingParam]
+"""Which memory store a dream writes its result to.
+
+Defaults to `create_new` when left out of a create request.
+"""

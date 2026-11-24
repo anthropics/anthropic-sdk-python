@@ -18,6 +18,7 @@ Source: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The source of the document data."""
 
 
 class BetaManagedAgentsDocumentBlock(BaseModel):

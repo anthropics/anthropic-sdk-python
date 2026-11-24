@@ -12,6 +12,7 @@ PermissionPolicy: TypeAlias = Annotated[
     Union[BetaManagedAgentsAlwaysAllowPolicy, BetaManagedAgentsAlwaysAskPolicy, BetaManagedAgentsAutoPolicy],
     UnionDiscriminator("type"),
 ]
+"""Permission policy for tool execution."""
 
 
 class BetaManagedAgentsEditToolConfig(BaseModel):

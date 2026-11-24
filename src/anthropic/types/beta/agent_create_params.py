@@ -88,7 +88,12 @@ class AgentCreateParams(TypedDict, total=False):
 
 
 Model: TypeAlias = Union[BetaManagedAgentsModelParam, BetaManagedAgentsModelConfigParams]
+"""Model identifier.
+
+Accepts the [model string](https://platform.claude.com/docs/en/about-claude/models/overview#latest-models-comparison), e.g. `claude-opus-5-5`, or a `model_config` object for additional configuration control
+"""
 
 Tool: TypeAlias = Union[
     BetaManagedAgentsAgentToolset20260401Params, BetaManagedAgentsMCPToolsetParams, BetaManagedAgentsCustomToolParams
 ]
+"""Union type for tool configurations in the tools array."""

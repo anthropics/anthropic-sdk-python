@@ -26,6 +26,10 @@ Scope: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""What the limit applies to.
+
+A tagged union on `type`; each variant carries the identifier for its scope.
+"""
 
 
 class SpendLimit(BaseModel):

@@ -17,6 +17,7 @@ Auth: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Authentication configuration for this credential."""
 
 
 class BetaManagedAgentsCredential(BaseModel):

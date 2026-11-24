@@ -10,3 +10,4 @@ __all__ = ["BetaManagedAgentsWebFetchURLSourceUserInput"]
 BetaManagedAgentsWebFetchURLSourceUserInput: TypeAlias = Annotated[
     Union[BetaManagedAgentsWebFetchURLSourceAll, BetaManagedAgentsWebFetchURLSourceNone], UnionDiscriminator("type")
 ]
+"""Whether URLs in the text of user messages may be fetched."""

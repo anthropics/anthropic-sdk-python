@@ -45,3 +45,4 @@ BetaManagedAgentsSessionEventType: TypeAlias = Literal[
     "workflow_run.phase_started",
     "workflow_run.phase_ended",
 ]
+"""The `type` of a session event."""

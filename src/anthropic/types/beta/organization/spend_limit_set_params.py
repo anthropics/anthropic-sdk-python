@@ -39,3 +39,7 @@ class SpendLimitSetParams(TypedDict, total=False):
 Scope: TypeAlias = Union[
     BetaSpendLimitUserScopeParam, BetaSpendLimitOrganizationScopeParam, BetaSpendLimitWorkspaceScopeParam
 ]
+"""What the limit applies to.
+
+Claude Enterprise organizations set `user` limits. Claude Console organizations set `organization` and `workspace` limits. Any other combination returns 400. Setting `organization` and `workspace` limits through the API is in an early access preview. To request access, contact your Anthropic account team.
+"""

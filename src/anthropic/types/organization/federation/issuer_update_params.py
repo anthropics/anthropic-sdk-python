@@ -52,3 +52,4 @@ class IssuerUpdateParams(TypedDict, total=False):
 
 
 JWKS: TypeAlias = Union[JWKSDiscoveryParam, JWKSExplicitURLParam, JWKSInlineParam]
+"""Replaces the entire JWKS configuration."""

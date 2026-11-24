@@ -16,6 +16,10 @@ RetryStatus: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""What the client should do next.
+
+Always `retrying`: the session keeps running without the repository.
+"""
 
 
 class BetaManagedAgentsRepositoryCheckoutErrorObject(BaseModel):

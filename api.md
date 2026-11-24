@@ -1307,10 +1307,15 @@ from anthropic.types import (
     BetaAPIErrorObject,
     BetaAuthenticationErrorObject,
     BetaBillingErrorObject,
+    BetaCMEKNotApprovedErrorDetails,
     BetaCurrency,
     BetaErrorObject,
     BetaErrorResponse,
+    BetaExternalKeyNotFoundErrorDetails,
+    BetaExternalKeyProviderMismatchErrorDetails,
     BetaGatewayTimeoutErrorObject,
+    BetaGCPProjectControlledByAnotherOrganizationErrorDetails,
+    BetaGCPProjectNotVerifiedErrorDetails,
     BetaInvalidRequestErrorObject,
     BetaMonetaryAmount,
     BetaMonetaryAmountParam,
@@ -1319,7 +1324,10 @@ from anthropic.types import (
     BetaOverloadedErrorObject,
     BetaPermissionErrorObject,
     BetaRateLimitErrorObject,
+    BetaRegionNotSupportedErrorDetails,
     BetaRequestBodyTimeoutErrorDetails,
+    BetaStorageInUseErrorDetails,
+    BetaStorageNotApprovedErrorDetails,
     BetaUnsupportedCharsetErrorDetails,
     BetaError,
     BetaAPIError,
@@ -1331,9 +1339,17 @@ from anthropic.types import (
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
+    BetaCMEKNotApprovedError,
+    BetaExternalKeyNotFoundError,
+    BetaExternalKeyProviderMismatchError,
+    BetaGCPProjectNotVerifiedError,
     BetaOrganizationNotEnrolledInBetaError,
+    BetaRegionNotSupportedError,
     BetaRequestBodyTimeoutError,
+    BetaStorageNotApprovedError,
     BetaUnsupportedCharsetError,
+    BetaGCPProjectControlledByAnotherOrganizationError,
+    BetaStorageInUseError,
 )
 ```
 
@@ -2898,6 +2914,55 @@ Methods:
 
 - <code title="post /v1/user_profiles/{user_profile_id}/action_urls">client.beta.user_profiles.action_urls.<a href="./src/anthropic/resources/beta/user_profiles/action_urls.py">create</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profiles/action_url_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/user_profiles/beta_user_profile_action_url.py">BetaUserProfileActionURL</a></code>
 
+### Providers
+
+#### Google
+
+##### DataControls
+
+Types:
+
+```python
+from anthropic.types.beta.user_profiles.providers.google import (
+    BetaGoogleManagedBucketReference,
+    BetaGoogleManagedBucketReferenceParam,
+    BetaGoogleManagedCMEKControl,
+    BetaGoogleManagedCMEKControlParams,
+    BetaGoogleManagedCMEKDisabled,
+    BetaGoogleManagedCMEKDisabledParams,
+    BetaGoogleManagedCMEKEnabled,
+    BetaGoogleManagedCMEKEnabledParams,
+    BetaGoogleManagedCMEKRegionActive,
+    BetaGoogleManagedCMEKRegionFailed,
+    BetaGoogleManagedCMEKRegionNotConfigured,
+    BetaGoogleManagedCMEKRegionPending,
+    BetaGoogleManagedCMEKRegionStatus,
+    BetaGoogleManagedCMEKRegionSuspended,
+    BetaGoogleManagedDataControls,
+    BetaGoogleManagedRetiredBucket,
+    BetaGoogleManagedRetiredKey,
+    BetaGoogleManagedStorageBucket,
+    BetaGoogleManagedStorageControl,
+    BetaGoogleManagedStorageControlParams,
+    BetaGoogleManagedStorageDisabled,
+    BetaGoogleManagedStorageDisabledParams,
+    BetaGoogleManagedStorageEnabled,
+    BetaGoogleManagedStorageEnabledParams,
+    BetaGoogleManagedStorageFailedCheck,
+    BetaGoogleManagedStorageRegionActive,
+    BetaGoogleManagedStorageRegionFailed,
+    BetaGoogleManagedStorageRegionNotConfigured,
+    BetaGoogleManagedStorageRegionPending,
+    BetaGoogleManagedStorageRegionStatus,
+    BetaGoogleManagedStorageRegionSuspended,
+)
+```
+
+Methods:
+
+- <code title="get /v1/user_profiles/{user_profile_id}/providers/google/data_controls">client.beta.user_profiles.providers.google.data_controls.<a href="./src/anthropic/resources/beta/user_profiles/providers/google/data_controls.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/user_profiles/providers/google/beta_google_managed_data_controls.py">BetaGoogleManagedDataControls</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}/providers/google/data_controls">client.beta.user_profiles.providers.google.data_controls.<a href="./src/anthropic/resources/beta/user_profiles/providers/google/data_controls.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profiles/providers/google/data_control_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/user_profiles/providers/google/beta_google_managed_data_controls.py">BetaGoogleManagedDataControls</a></code>
+
 ## Dreams
 
 Types:
@@ -2966,6 +3031,83 @@ Methods:
 - <code title="get /v1/tunnels/{tunnel_id}/certificates/{certificate_id}">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">retrieve</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
 - <code title="get /v1/tunnels/{tunnel_id}/certificates">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">list</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnels/certificate_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">SyncPageCursor[BetaTunnelCertificate]</a></code>
 - <code title="post /v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">archive</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
+
+## Compliance
+
+### Review
+
+Types:
+
+```python
+from anthropic.types.beta.compliance import BetaComplianceReviewOrder
+```
+
+#### Cases
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewCase,
+    BetaComplianceReviewCaseCloseReason,
+    BetaComplianceReviewCaseClosed,
+    BetaComplianceReviewCaseOpen,
+    BetaComplianceReviewCaseOrderBy,
+    BetaComplianceReviewCaseStatus,
+    BetaComplianceReviewCaseStatusFilter,
+    BetaComplianceReviewDetermination,
+    BetaComplianceReviewEnforcementAction,
+    BetaComplianceReviewPolicyCategory,
+    BetaComplianceReviewTranscript,
+    BetaComplianceReviewVerdictParam,
+    BetaComplianceReviewViolatedPolicyCategory,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/cases/{case_id}">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">retrieve</a>(case_id) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">BetaComplianceReviewCase</a></code>
+- <code title="get /v1/compliance/review/cases">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">list</a>(\*\*<a href="src/anthropic/types/beta/compliance/review/case_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">SyncPageCursor[BetaComplianceReviewCase]</a></code>
+- <code title="post /v1/compliance/review/cases/{case_id}/respond">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">respond</a>(case_id, \*\*<a href="src/anthropic/types/beta/compliance/review/case_respond_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">BetaComplianceReviewCase</a></code>
+
+#### Notices
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewNotice,
+    BetaComplianceReviewNoticeKind,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/notices">client.beta.compliance.review.notices.<a href="./src/anthropic/resources/beta/compliance/review/notices.py">list</a>(\*\*<a href="src/anthropic/types/beta/compliance/review/notice_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_notice.py">SyncPageCursor[BetaComplianceReviewNotice]</a></code>
+
+#### Items
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewActor,
+    BetaComplianceReviewAPIActor,
+    BetaComplianceReviewContentNotCaptured,
+    BetaComplianceReviewContentUnavailableReason,
+    BetaComplianceReviewCreateMessageContent,
+    BetaComplianceReviewItem,
+    BetaComplianceReviewMessageDetails,
+    BetaComplianceReviewSafeguardsReason,
+    BetaComplianceReviewServiceAccountActor,
+    BetaComplianceReviewStoredCopyUnavailable,
+    BetaComplianceReviewUserActor,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/items/{item_id}">client.beta.compliance.review.items.<a href="./src/anthropic/resources/beta/compliance/review/items.py">retrieve</a>(item_id) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_item.py">BetaComplianceReviewItem</a></code>
 
 ## Organization
 
@@ -3203,6 +3345,57 @@ Methods:
 - <code title="get /v1/organizations/external_storage">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/external_storage_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">SyncPageCursor[BetaExternalStorage]</a></code>
 - <code title="delete /v1/organizations/external_storage/{external_storage_id}">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">delete</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_external_storage.py">BetaDeletedExternalStorage</a></code>
 - <code title="post /v1/organizations/external_storage/{external_storage_id}/activate">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">activate</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+
+### Providers
+
+#### Google
+
+##### Projects
+
+###### DataControls
+
+Types:
+
+```python
+from anthropic.types.beta.organization.providers.google.projects import (
+    BetaGoogleManagedProjectBucketReferenceParam,
+    BetaGoogleManagedProjectCMEKControl,
+    BetaGoogleManagedProjectCMEKControlParams,
+    BetaGoogleManagedProjectCMEKDisabled,
+    BetaGoogleManagedProjectCMEKDisabledParams,
+    BetaGoogleManagedProjectCMEKEnabled,
+    BetaGoogleManagedProjectCMEKEnabledParams,
+    BetaGoogleManagedProjectCMEKRegionActive,
+    BetaGoogleManagedProjectCMEKRegionFailed,
+    BetaGoogleManagedProjectCMEKRegionNotConfigured,
+    BetaGoogleManagedProjectCMEKRegionPending,
+    BetaGoogleManagedProjectCMEKRegionStatus,
+    BetaGoogleManagedProjectCMEKRegionSuspended,
+    BetaGoogleManagedProjectDataControls,
+    BetaGoogleManagedProjectEffectiveBucket,
+    BetaGoogleManagedProjectRetiredBucket,
+    BetaGoogleManagedProjectRetiredKey,
+    BetaGoogleManagedProjectStorageBucket,
+    BetaGoogleManagedProjectStorageControl,
+    BetaGoogleManagedProjectStorageControlParams,
+    BetaGoogleManagedProjectStorageDisabled,
+    BetaGoogleManagedProjectStorageDisabledParams,
+    BetaGoogleManagedProjectStorageEnabled,
+    BetaGoogleManagedProjectStorageEnabledParams,
+    BetaGoogleManagedProjectStorageFailedCheck,
+    BetaGoogleManagedProjectStorageRegionActive,
+    BetaGoogleManagedProjectStorageRegionFailed,
+    BetaGoogleManagedProjectStorageRegionNotConfigured,
+    BetaGoogleManagedProjectStorageRegionPending,
+    BetaGoogleManagedProjectStorageRegionStatus,
+    BetaGoogleManagedProjectStorageRegionSuspended,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/providers/google/projects/{project_number}/data_controls">client.beta.organization.providers.google.projects.data_controls.<a href="./src/anthropic/resources/beta/organization/providers/google/projects/data_controls.py">retrieve</a>(project_number) -> <a href="./src/anthropic/types/beta/organization/providers/google/projects/beta_google_managed_project_data_controls.py">BetaGoogleManagedProjectDataControls</a></code>
+- <code title="post /v1/organizations/providers/google/projects/{project_number}/data_controls">client.beta.organization.providers.google.projects.data_controls.<a href="./src/anthropic/resources/beta/organization/providers/google/projects/data_controls.py">update</a>(project_number, \*\*<a href="src/anthropic/types/beta/organization/providers/google/projects/data_control_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/providers/google/projects/beta_google_managed_project_data_controls.py">BetaGoogleManagedProjectDataControls</a></code>
 
 ### Users
 

@@ -13,6 +13,9 @@ Target: TypeAlias = Annotated[
     Union[BetaPluginTargetOrganization, BetaPluginTargetRBACGroup, BetaPluginTargetOrganizationMember],
     UnionDiscriminator("type"),
 ]
+"""
+Who the Plugin is shared with: `organization` (every member), `rbac_group` (one RBAC Group), or `organization_member` (one member).
+"""
 
 
 class BetaPluginShare(BaseModel):

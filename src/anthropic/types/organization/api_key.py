@@ -12,8 +12,14 @@ from .api_key_service_account_actor import APIKeyServiceAccountActor
 __all__ = ["APIKey", "Principal", "Scope"]
 
 Principal: TypeAlias = Annotated[Union[APIKeyUserActor, APIKeyServiceAccountActor, None], UnionDiscriminator("type")]
+"""
+The principal the API key acts as (a User or a Service Account), or `null` if the API key is not bound to a principal.
+"""
 
 Scope: TypeAlias = Annotated[Union[APIKeyOrganizationScope, APIKeyWorkspaceScope], UnionDiscriminator("type")]
+"""
+Where the API key belongs: its Workspace (`{"type": "workspace", "workspace_id": "wrkspc_..."}`, with the Workspace's real ID even when it is the organization's default Workspace), or the organization (`{"type": "organization"}`) for a principal-bound API key that has no Workspace.
+"""
 
 
 class APIKey(BaseModel):

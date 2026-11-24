@@ -18,6 +18,13 @@ Thinking: TypeAlias = Union[
     BetaThinkingConfigBetweenToolsParam,
     BetaThinkingConfigAdaptiveParam,
 ]
+"""
+The thinking configuration for the fallback attempt that uses this `fallbacks` entry's `model`. If you leave it out, the attempt uses the request's `thinking` when `model` supports that thinking `type`.
+
+If you leave it out and the request's thinking `type` is `between_tools` but `model` doesn't support `between_tools`, the attempt uses `disabled` if `model` supports it. Otherwise, if `model` doesn't support the request's thinking `type`, if the request doesn't set `thinking`, or if you set this field to `null`, the attempt uses the thinking `type` that `model` uses when a request leaves out `thinking`. The request's `thinking.display` still applies where `model` allows it.
+
+These rules apply with the `server-side-fallback-2026-07-01` beta header.
+"""
 
 
 class BetaFallbackParam(TypedDict, total=False, extra_items=object):  # type: ignore[call-arg]

@@ -11,3 +11,7 @@ __all__ = ["BetaManagedAgentsMultiagentPredefinedAgentParams"]
 BetaManagedAgentsMultiagentPredefinedAgentParams: TypeAlias = Union[
     str, BetaManagedAgentsAgentParams, BetaManagedAgentsMultiagentSelfParams
 ]
+"""One agent in a `predefined_agents` list.
+
+It is an agent ID string, an `agent` reference with an optional `version`, or `self` for the agent that owns this configuration.
+"""

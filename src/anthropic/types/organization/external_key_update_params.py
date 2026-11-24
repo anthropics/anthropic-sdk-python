@@ -22,3 +22,4 @@ class ExternalKeyUpdateParams(TypedDict, total=False):
 
 
 ProviderConfig: TypeAlias = Union[AWSExternalKeyConfigParam, GCPExternalKeyConfigParam, AzureExternalKeyConfigParam]
+"""KMS provider identity and auth coordinates."""

@@ -9,3 +9,4 @@ from .beta_dream_memory_store_input_param import BetaDreamMemoryStoreInputParam
 __all__ = ["BetaDreamInputParam"]
 
 BetaDreamInputParam: TypeAlias = Union[BetaDreamMemoryStoreInputParam, BetaDreamSessionsInputParam]
+"""A source that a dream reads, such as a memory store or a set of sessions."""

@@ -47,3 +47,4 @@ class EnvironmentCreateParams(TypedDict, total=False):
 
 
 Config: TypeAlias = Union[BetaCloudConfigParams, BetaSelfHostedConfigParams]
+"""Environment configuration"""

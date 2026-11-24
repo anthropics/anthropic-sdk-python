@@ -9,6 +9,7 @@ from .beta_managed_agents_text_rubric_params import BetaManagedAgentsTextRubricP
 __all__ = ["BetaManagedAgentsUserDefineOutcomeEventParams", "Rubric"]
 
 Rubric: TypeAlias = Union[BetaManagedAgentsFileRubricParams, BetaManagedAgentsTextRubricParams]
+"""How to grade the outcome. Text or file reference."""
 
 
 class BetaManagedAgentsUserDefineOutcomeEventParams(TypedDict, total=False):

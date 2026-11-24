@@ -23,6 +23,7 @@ Group: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""The rate-limit group this entry's limits apply to."""
 
 
 class OrganizationRateLimit(BaseModel):

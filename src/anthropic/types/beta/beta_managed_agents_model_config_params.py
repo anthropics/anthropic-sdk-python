@@ -20,6 +20,10 @@ Effort: TypeAlias = Union[
     BetaManagedAgentsEffortXhighParam,
     BetaManagedAgentsEffortMaxParam,
 ]
+"""How hard Claude works on each inference call.
+
+Accepts a bare level string (`"high"`) or `{"type": "high"}`. On create, omitting it resolves the per-model default; on update, omitting it leaves the stored value unchanged.
+"""
 
 
 class BetaManagedAgentsModelConfigParams(TypedDict, total=False):

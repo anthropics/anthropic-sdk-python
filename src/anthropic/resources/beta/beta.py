@@ -91,6 +91,14 @@ from .sessions.sessions import (
     SessionsWithStreamingResponse,
     AsyncSessionsWithStreamingResponse,
 )
+from .compliance.compliance import (
+    Compliance,
+    AsyncCompliance,
+    ComplianceWithRawResponse,
+    AsyncComplianceWithRawResponse,
+    ComplianceWithStreamingResponse,
+    AsyncComplianceWithStreamingResponse,
+)
 from .environments.environments import (
     Environments,
     AsyncEnvironments,
@@ -192,6 +200,10 @@ class Beta(SyncAPIResource):
         return Tunnels(self._client)
 
     @cached_property
+    def compliance(self) -> Compliance:
+        return Compliance(self._client)
+
+    @cached_property
     def organization(self) -> Organization:
         return Organization(self._client)
 
@@ -278,6 +290,10 @@ class AsyncBeta(AsyncAPIResource):
     @cached_property
     def tunnels(self) -> AsyncTunnels:
         return AsyncTunnels(self._client)
+
+    @cached_property
+    def compliance(self) -> AsyncCompliance:
+        return AsyncCompliance(self._client)
 
     @cached_property
     def organization(self) -> AsyncOrganization:
@@ -367,6 +383,10 @@ class BetaWithRawResponse:
         return TunnelsWithRawResponse(self._beta.tunnels)
 
     @cached_property
+    def compliance(self) -> ComplianceWithRawResponse:
+        return ComplianceWithRawResponse(self._beta.compliance)
+
+    @cached_property
     def organization(self) -> OrganizationWithRawResponse:
         return OrganizationWithRawResponse(self._beta.organization)
 
@@ -433,6 +453,10 @@ class AsyncBetaWithRawResponse:
     @cached_property
     def tunnels(self) -> AsyncTunnelsWithRawResponse:
         return AsyncTunnelsWithRawResponse(self._beta.tunnels)
+
+    @cached_property
+    def compliance(self) -> AsyncComplianceWithRawResponse:
+        return AsyncComplianceWithRawResponse(self._beta.compliance)
 
     @cached_property
     def organization(self) -> AsyncOrganizationWithRawResponse:
@@ -503,6 +527,10 @@ class BetaWithStreamingResponse:
         return TunnelsWithStreamingResponse(self._beta.tunnels)
 
     @cached_property
+    def compliance(self) -> ComplianceWithStreamingResponse:
+        return ComplianceWithStreamingResponse(self._beta.compliance)
+
+    @cached_property
     def organization(self) -> OrganizationWithStreamingResponse:
         return OrganizationWithStreamingResponse(self._beta.organization)
 
@@ -569,6 +597,10 @@ class AsyncBetaWithStreamingResponse:
     @cached_property
     def tunnels(self) -> AsyncTunnelsWithStreamingResponse:
         return AsyncTunnelsWithStreamingResponse(self._beta.tunnels)
+
+    @cached_property
+    def compliance(self) -> AsyncComplianceWithStreamingResponse:
+        return AsyncComplianceWithStreamingResponse(self._beta.compliance)
 
     @cached_property
     def organization(self) -> AsyncOrganizationWithStreamingResponse:

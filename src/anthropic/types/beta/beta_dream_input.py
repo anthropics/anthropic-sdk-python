@@ -10,3 +10,4 @@ __all__ = ["BetaDreamInput"]
 BetaDreamInput: TypeAlias = Annotated[
     Union[BetaDreamMemoryStoreInput, BetaDreamSessionsInput], UnionDiscriminator("type")
 ]
+"""A source that a dream reads, such as a memory store or a set of sessions."""

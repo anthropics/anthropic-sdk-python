@@ -12,3 +12,6 @@ __all__ = ["BetaManagedAgentsMultiagentRosterEntryParams"]
 BetaManagedAgentsMultiagentRosterEntryParams: TypeAlias = Union[
     str, BetaManagedAgentsAgentParams, BetaManagedAgentsMultiagentSelfParams, BetaManagedAgentsAdvisorParams
 ]
+"""
+An entry in a multiagent roster: an agent ID string, a versioned agent reference, or `self`.
+"""

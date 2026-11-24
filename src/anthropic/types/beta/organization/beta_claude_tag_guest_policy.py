@@ -12,3 +12,6 @@ BetaClaudeTagGuestPolicy: TypeAlias = Annotated[
     Union[BetaClaudeTagGuestPolicyAllow, BetaClaudeTagGuestPolicyRestrict, BetaClaudeTagGuestPolicyChannelOnly],
     UnionDiscriminator("type"),
 ]
+"""
+What Claude does in a channel while a Slack guest is in it, for everyone in the channel. It changes nothing in a channel without Slack guests. More types can be added.
+"""

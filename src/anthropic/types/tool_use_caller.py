@@ -11,3 +11,6 @@ __all__ = ["ToolUseCaller"]
 ToolUseCaller: TypeAlias = Annotated[
     Union[DirectCaller, ServerToolCaller, ServerToolCaller20260120], UnionDiscriminator("type")
 ]
+"""
+Which party invoked the tool call: the model directly, or a server tool on its behalf.
+"""

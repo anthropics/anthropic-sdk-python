@@ -9,6 +9,7 @@ from .beta_managed_agents_commit_checkout_param import BetaManagedAgentsCommitCh
 __all__ = ["BetaManagedAgentsGitHubRepositoryResourceParams", "Checkout"]
 
 Checkout: TypeAlias = Union[BetaManagedAgentsBranchCheckoutParam, BetaManagedAgentsCommitCheckoutParam]
+"""Branch or commit to check out. Defaults to the repository's default branch."""
 
 
 class BetaManagedAgentsGitHubRepositoryResourceParams(TypedDict, total=False):

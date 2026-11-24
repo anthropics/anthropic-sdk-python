@@ -20,6 +20,11 @@ Resource: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""What the permission applies to.
+
+A tagged union: `type` names the kind of resource and determines which
+identifier fields are present.
+"""
 
 
 class RBACRolePermission(BaseModel):

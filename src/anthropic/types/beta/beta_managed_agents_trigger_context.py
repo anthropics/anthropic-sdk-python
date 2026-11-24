@@ -10,3 +10,4 @@ __all__ = ["BetaManagedAgentsTriggerContext"]
 BetaManagedAgentsTriggerContext: TypeAlias = Annotated[
     Union[BetaManagedAgentsScheduleTriggerContext, BetaManagedAgentsManualTriggerContext], UnionDiscriminator("type")
 ]
+"""Describes what triggered a deployment run, with trigger-specific metadata."""

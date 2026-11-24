@@ -18,3 +18,7 @@ BetaManagedAgentsActor: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Identifies who performed an operation.
+
+Recorded when the operation happens and not updated afterwards, so the ID may refer to a user, service account, API key, or session that has since been deleted.
+"""

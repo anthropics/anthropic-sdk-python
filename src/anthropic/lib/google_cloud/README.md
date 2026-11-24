@@ -9,9 +9,6 @@ with the `Anthropic` client.
 This client never reads `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or
 `ANTHROPIC_BASE_URL`; it authenticates with Google credentials only.
 
-> **Note:** the class name and `ANTHROPIC_GOOGLE_CLOUD_*` environment variable
-> names are provisional and may change before a stable release.
-
 ## Installation
 
 Google auth support is an optional dependency:

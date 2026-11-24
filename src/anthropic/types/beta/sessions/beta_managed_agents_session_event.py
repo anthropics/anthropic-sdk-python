@@ -100,3 +100,4 @@ BetaManagedAgentsSessionEvent: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Union type for all event types in a session."""

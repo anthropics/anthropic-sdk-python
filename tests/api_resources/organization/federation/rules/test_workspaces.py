@@ -70,7 +70,7 @@ class TestWorkspaces:
     def test_method_add(self, client: Anthropic) -> None:
         workspace = client.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
         assert_matches_type(FederationRuleWorkspace, workspace, path=["response"])
 
@@ -78,7 +78,7 @@ class TestWorkspaces:
     def test_raw_response_add(self, client: Anthropic) -> None:
         response = client.organization.federation.rules.workspaces.with_raw_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
 
         assert response.is_closed is True
@@ -90,7 +90,7 @@ class TestWorkspaces:
     def test_streaming_response_add(self, client: Anthropic) -> None:
         with client.organization.federation.rules.workspaces.with_streaming_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -105,7 +105,7 @@ class TestWorkspaces:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `federation_rule_id` but received ''"):
             client.organization.federation.rules.workspaces.with_raw_response.add(
                 federation_rule_id="",
-                workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+                workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
             )
 
     @parametrize
@@ -213,7 +213,7 @@ class TestAsyncWorkspaces:
     async def test_method_add(self, async_client: AsyncAnthropic) -> None:
         workspace = await async_client.organization.federation.rules.workspaces.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
         assert_matches_type(FederationRuleWorkspace, workspace, path=["response"])
 
@@ -221,7 +221,7 @@ class TestAsyncWorkspaces:
     async def test_raw_response_add(self, async_client: AsyncAnthropic) -> None:
         response = await async_client.organization.federation.rules.workspaces.with_raw_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         )
 
         assert response.is_closed is True
@@ -233,7 +233,7 @@ class TestAsyncWorkspaces:
     async def test_streaming_response_add(self, async_client: AsyncAnthropic) -> None:
         async with async_client.organization.federation.rules.workspaces.with_streaming_response.add(
             federation_rule_id="federation_rule_id",
-            workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -248,7 +248,7 @@ class TestAsyncWorkspaces:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `federation_rule_id` but received ''"):
             await async_client.organization.federation.rules.workspaces.with_raw_response.add(
                 federation_rule_id="",
-                workspace_id="wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+                workspace_id="wrkspc_01AbCdEfGhJkLmNpQrStUvWx",
             )
 
     @parametrize

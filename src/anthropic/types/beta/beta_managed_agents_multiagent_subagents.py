@@ -11,3 +11,4 @@ BetaManagedAgentsMultiagentSubagents: TypeAlias = Annotated[
     Union[BetaManagedAgentsMultiagentSubagentsEnabled, BetaManagedAgentsMultiagentSubagentsDisabled],
     UnionDiscriminator("type"),
 ]
+"""Whether the agent can spawn session threads."""

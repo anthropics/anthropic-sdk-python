@@ -16,11 +16,13 @@ __all__ = ["BetaManagedAgentsInlineAgent", "Skill", "Tool"]
 Skill: TypeAlias = Annotated[
     Union[BetaManagedAgentsAnthropicSkill, BetaManagedAgentsCustomSkill], UnionDiscriminator("type")
 ]
+"""Resolved skill as returned in API responses."""
 
 Tool: TypeAlias = Annotated[
     Union[BetaManagedAgentsAgentToolset20260401, BetaManagedAgentsMCPToolset, BetaManagedAgentsCustomTool],
     UnionDiscriminator("type"),
 ]
+"""Union type for tool configurations returned in API responses."""
 
 
 class BetaManagedAgentsInlineAgent(BaseModel):

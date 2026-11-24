@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsMultiagentAdvisorParams"]
 BetaManagedAgentsMultiagentAdvisorParams: TypeAlias = Union[
     BetaManagedAgentsMultiagentAdvisorEnabledParams, BetaManagedAgentsMultiagentAdvisorDisabledParams
 ]
+"""Whether the session's primary thread can consult an advisor model."""

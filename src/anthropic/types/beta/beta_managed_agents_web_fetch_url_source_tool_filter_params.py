@@ -13,3 +13,7 @@ __all__ = ["BetaManagedAgentsWebFetchURLSourceToolFilterParams"]
 BetaManagedAgentsWebFetchURLSourceToolFilterParams: TypeAlias = Union[
     BetaManagedAgentsWebFetchURLSourceShorthand, BetaManagedAgentsWebFetchURLSourceToolFilterParam
 ]
+"""Which tools' results contribute URLs that may be fetched.
+
+Accepts the string "all" or "none", or an object whose type is "all", "none", "only" or "except". Responses use the object form.
+"""

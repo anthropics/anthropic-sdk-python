@@ -10,3 +10,6 @@ __all__ = ["BetaManagedAgentsMemoryListItem"]
 BetaManagedAgentsMemoryListItem: TypeAlias = Annotated[
     Union[BetaManagedAgentsMemory, BetaManagedAgentsMemoryPrefix], UnionDiscriminator("type")
 ]
+"""
+One item in a [List Memories](https://platform.claude.com/docs/en/api/beta/memory_stores/memories/list) response: a `memory`, or a `memory_prefix` marker when `depth` is `1`.
+"""

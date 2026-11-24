@@ -11,3 +11,4 @@ __all__ = ["BetaManagedAgentsSkillParams"]
 BetaManagedAgentsSkillParams: TypeAlias = Union[
     BetaManagedAgentsAnthropicSkillParams, BetaManagedAgentsCustomSkillParams
 ]
+"""Skill to load in the session container."""

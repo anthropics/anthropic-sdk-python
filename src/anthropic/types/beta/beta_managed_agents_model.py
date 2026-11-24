@@ -26,3 +26,7 @@ BetaManagedAgentsModel: TypeAlias = Union[
     ],
     str,
 ]
+"""The model that will power your agent.
+
+See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+"""

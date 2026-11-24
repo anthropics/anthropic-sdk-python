@@ -104,3 +104,4 @@ BetaManagedAgentsStreamSessionEvents: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Server-sent event in the session stream."""

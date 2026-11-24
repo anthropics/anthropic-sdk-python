@@ -53,3 +53,7 @@ Auth: TypeAlias = Union[
     BetaManagedAgentsStaticBearerUpdateParams,
     BetaManagedAgentsEnvironmentVariableUpdateParams,
 ]
+"""New authentication settings for the credential.
+
+The `type` must match the credential's current type, which can't be changed.
+"""

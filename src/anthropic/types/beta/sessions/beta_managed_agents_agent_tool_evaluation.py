@@ -16,3 +16,6 @@ BetaManagedAgentsAgentToolEvaluation: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""
+Names the resolved permission_policy that produced evaluated_permission, and under auto carries the judgement. Open union: clients must tolerate unknown variants.
+"""

@@ -14,10 +14,14 @@ __all__ = ["ExternalKey", "Attachment", "ProviderConfig"]
 Attachment: TypeAlias = Annotated[
     Union[ExternalKeyAttachedAttachment, ExternalKeyUnattachedAttachment], UnionDiscriminator("type")
 ]
+"""
+Whether any workspace uses this config to encrypt its data — counting live and archived workspaces (an archived workspace's data remains encrypted under the config), excluding deleted ones. Only an attached config is used by the encryption path; an `unattached` config is inert and can be deleted.
+"""
 
 ProviderConfig: TypeAlias = Annotated[
     Union[AWSExternalKeyConfig, GCPExternalKeyConfig, AzureExternalKeyConfig], UnionDiscriminator("type")
 ]
+"""KMS provider identity and auth coordinates."""
 
 
 class ExternalKey(BaseModel):

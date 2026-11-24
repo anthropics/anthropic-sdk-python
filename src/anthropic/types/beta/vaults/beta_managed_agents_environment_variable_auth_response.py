@@ -18,6 +18,7 @@ Networking: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Outbound hosts the secret value is substituted on."""
 
 
 class BetaManagedAgentsEnvironmentVariableAuthResponse(BaseModel):

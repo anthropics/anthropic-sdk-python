@@ -9,6 +9,7 @@ from .beta_unrestricted_network import BetaUnrestrictedNetwork
 __all__ = ["BetaCloudConfig", "Networking"]
 
 Networking: TypeAlias = Annotated[Union[BetaUnrestrictedNetwork, BetaLimitedNetwork], UnionDiscriminator("type")]
+"""Network configuration policy."""
 
 
 class BetaCloudConfig(BaseModel):

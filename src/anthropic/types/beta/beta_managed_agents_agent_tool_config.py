@@ -26,3 +26,4 @@ BetaManagedAgentsAgentToolConfig: TypeAlias = Annotated[
     ],
     UnionDiscriminator("type"),
 ]
+"""Configuration for a specific agent tool."""

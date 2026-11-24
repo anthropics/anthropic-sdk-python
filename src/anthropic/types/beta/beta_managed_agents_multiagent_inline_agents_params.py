@@ -15,3 +15,7 @@ __all__ = ["BetaManagedAgentsMultiagentInlineAgentsParams"]
 BetaManagedAgentsMultiagentInlineAgentsParams: TypeAlias = Union[
     BetaManagedAgentsMultiagentInlineAgentsEnabledParams, BetaManagedAgentsMultiagentInlineAgentsDisabledParams
 ]
+"""Whether the agent can define inline agents.
+
+The agent defines an inline agent itself, in a workflow run's plan or when it spawns a session thread, and the inline agent is not saved.
+"""

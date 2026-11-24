@@ -16,6 +16,7 @@ Content: TypeAlias = Union[
     BetaManagedAgentsDocumentBlockParam,
     BetaManagedAgentsRedactedBlockParam,
 ]
+"""Content block in a user message. Can be `text`, `image`, or `document`."""
 
 
 class BetaManagedAgentsUserMessageEventParams(TypedDict, total=False):

@@ -66,6 +66,11 @@ AnthropicBetaParam: TypeAlias = Union[
         "ce-user-management-2026-07-13",
         "ce-claude-code-managed-settings-2026-10-06",
         "efs-2026-10-01",
+        "google-managed-data-controls-2026-09-01",
         "user-profiles-billing-2026-10-01",
     ],
 ]
+"""Beta names you can send in the `anthropic-beta` header.
+
+See [Beta headers](https://platform.claude.com/docs/en/api/beta-headers) for how to send them and where to find the name a feature needs.
+"""

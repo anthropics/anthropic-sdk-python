@@ -10,6 +10,10 @@ __all__ = ["BetaWorkspaceRateLimitValue", "Source"]
 Source: TypeAlias = Annotated[
     Union[BetaWorkspaceRateLimitWorkspaceSource, BetaWorkspaceRateLimitOrganizationSource], UnionDiscriminator("type")
 ]
+"""Where `value` comes from.
+
+`organization` values are listed only when `include_inherited` is `true`, and then `value` equals `org_limit`.
+"""
 
 
 class BetaWorkspaceRateLimitValue(BaseModel):

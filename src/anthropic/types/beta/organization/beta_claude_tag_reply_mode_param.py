@@ -16,3 +16,7 @@ BetaClaudeTagReplyModeParam: TypeAlias = Union[
     BetaClaudeTagReplyModeAlwaysAwakeParam,
     BetaClaudeTagReplyModeThreadParam,
 ]
+"""How Claude takes part in a Slack channel.
+
+A channel alone stores one. More types can be added.
+"""

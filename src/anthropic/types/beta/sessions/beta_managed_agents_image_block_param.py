@@ -12,6 +12,7 @@ __all__ = ["BetaManagedAgentsImageBlockParam", "Source"]
 Source: TypeAlias = Union[
     BetaManagedAgentsBase64ImageSourceParam, BetaManagedAgentsURLImageSourceParam, BetaManagedAgentsFileImageSourceParam
 ]
+"""The source of the image data."""
 
 
 class BetaManagedAgentsImageBlockParam(TypedDict, total=False):

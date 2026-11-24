@@ -100,6 +100,14 @@ from .plugin_marketplaces import (
     PluginMarketplacesWithStreamingResponse,
     AsyncPluginMarketplacesWithStreamingResponse,
 )
+from .providers.providers import (
+    Providers,
+    AsyncProviders,
+    ProvidersWithRawResponse,
+    AsyncProvidersWithRawResponse,
+    ProvidersWithStreamingResponse,
+    AsyncProvidersWithStreamingResponse,
+)
 from .claude_tag.claude_tag import (
     ClaudeTag,
     AsyncClaudeTag,
@@ -201,6 +209,10 @@ class Organization(SyncAPIResource):
     @cached_property
     def external_storage(self) -> ExternalStorage:
         return ExternalStorage(self._client)
+
+    @cached_property
+    def providers(self) -> Providers:
+        return Providers(self._client)
 
     @cached_property
     def users(self) -> Users:
@@ -330,6 +342,10 @@ class AsyncOrganization(AsyncAPIResource):
     @cached_property
     def external_storage(self) -> AsyncExternalStorage:
         return AsyncExternalStorage(self._client)
+
+    @cached_property
+    def providers(self) -> AsyncProviders:
+        return AsyncProviders(self._client)
 
     @cached_property
     def users(self) -> AsyncUsers:
@@ -468,6 +484,10 @@ class OrganizationWithRawResponse:
         return ExternalStorageWithRawResponse(self._organization.external_storage)
 
     @cached_property
+    def providers(self) -> ProvidersWithRawResponse:
+        return ProvidersWithRawResponse(self._organization.providers)
+
+    @cached_property
     def users(self) -> UsersWithRawResponse:
         return UsersWithRawResponse(self._organization.users)
 
@@ -555,6 +575,10 @@ class AsyncOrganizationWithRawResponse:
     @cached_property
     def external_storage(self) -> AsyncExternalStorageWithRawResponse:
         return AsyncExternalStorageWithRawResponse(self._organization.external_storage)
+
+    @cached_property
+    def providers(self) -> AsyncProvidersWithRawResponse:
+        return AsyncProvidersWithRawResponse(self._organization.providers)
 
     @cached_property
     def users(self) -> AsyncUsersWithRawResponse:
@@ -646,6 +670,10 @@ class OrganizationWithStreamingResponse:
         return ExternalStorageWithStreamingResponse(self._organization.external_storage)
 
     @cached_property
+    def providers(self) -> ProvidersWithStreamingResponse:
+        return ProvidersWithStreamingResponse(self._organization.providers)
+
+    @cached_property
     def users(self) -> UsersWithStreamingResponse:
         return UsersWithStreamingResponse(self._organization.users)
 
@@ -733,6 +761,10 @@ class AsyncOrganizationWithStreamingResponse:
     @cached_property
     def external_storage(self) -> AsyncExternalStorageWithStreamingResponse:
         return AsyncExternalStorageWithStreamingResponse(self._organization.external_storage)
+
+    @cached_property
+    def providers(self) -> AsyncProvidersWithStreamingResponse:
+        return AsyncProvidersWithStreamingResponse(self._organization.providers)
 
     @cached_property
     def users(self) -> AsyncUsersWithStreamingResponse:

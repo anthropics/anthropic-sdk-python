@@ -13,6 +13,7 @@ __all__ = ["BetaManagedAgentsSessionAgentUpdateParam", "Tool"]
 Tool: TypeAlias = Union[
     BetaManagedAgentsAgentToolset20260401Params, BetaManagedAgentsMCPToolsetParams, BetaManagedAgentsCustomToolParams
 ]
+"""Union type for tool configurations in the tools array."""
 
 
 class BetaManagedAgentsSessionAgentUpdateParam(TypedDict, total=False):
