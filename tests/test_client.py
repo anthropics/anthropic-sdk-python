@@ -130,6 +130,43 @@ def test_make_status_error_sync_async_parity(status_code: int) -> None:
     )
 
 
+@pytest.mark.parametrize("client_cls", [DefaultHttpxClient, DefaultAsyncHttpxClient])
+@pytest.mark.parametrize(
+    ("kwargs", "env", "expected_proxy_host"),
+    [
+        ({}, {"HTTPS_PROXY": "http://env.proxy"}, b"env.proxy"),
+        ({}, {"HTTPS_PROXY": "http://env.proxy", "NO_PROXY": "api.anthropic.com"}, None),
+        ({"trust_env": True}, {"HTTPS_PROXY": "http://env.proxy"}, b"env.proxy"),
+        ({"trust_env": False}, {"HTTPS_PROXY": "http://env.proxy"}, None),
+        ({"proxy": "http://arg.proxy"}, {}, b"arg.proxy"),
+        ({"proxy": "http://arg.proxy"}, {"HTTPS_PROXY": "http://env.proxy"}, b"arg.proxy"),
+        ({"proxy": "http://arg.proxy"}, {"ALL_PROXY": "http://env.proxy"}, b"arg.proxy"),
+        ({"proxy": "http://arg.proxy"}, {"NO_PROXY": "api.anthropic.com"}, b"arg.proxy"),
+        ({"proxy": "http://arg.proxy", "mounts": {"all://": None}}, {}, None),
+    ],
+    ids=str,
+)
+def test_default_client_proxy_arguments_beat_environment(
+    client_cls: type[httpx2.Client] | type[httpx2.AsyncClient],
+    kwargs: dict[str, Any],
+    env: dict[str, str],
+    expected_proxy_host: bytes | None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY"):
+        monkeypatch.delenv(name, raising=False)
+        monkeypatch.delenv(name.lower(), raising=False)
+    for name, value in env.items():
+        monkeypatch.setenv(name, value)
+
+    transport = client_cls(**kwargs)._transport_for_url(httpx2.URL("https://api.anthropic.com"))
+    assert isinstance(transport, (httpx2.HTTPTransport, httpx2.AsyncHTTPTransport))
+
+    proxy_url = getattr(transport._pool, "_proxy_url", None)
+    assert (None if proxy_url is None else proxy_url.host) == expected_proxy_host
+    assert (socket.SOL_SOCKET, socket.SO_KEEPALIVE, True) in (transport._pool._socket_options or ())
+
+
 class TestAnthropic:
     @pytest.mark.respx(base_url=base_url)
     def test_user_profile_id_header(self, respx_mock: MockRouter, client: Anthropic) -> None:

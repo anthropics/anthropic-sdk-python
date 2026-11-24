@@ -1026,7 +1026,11 @@ class _DefaultHttpxClient(httpx2.Client):
             if TCP_KEEPIDLE is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
 
-            proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
+            proxy_map: dict[str, URL | str | Proxy | None] = {}
+            if (proxy := kwargs.pop("proxy", None)) is not None:
+                proxy_map["all://"] = proxy
+            elif kwargs.get("trust_env", True):
+                proxy_map.update(get_environment_proxies())
 
             transport_kwargs = {
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
@@ -1783,7 +1787,11 @@ class _DefaultAsyncHttpxClient(httpx2.AsyncClient):
             if TCP_KEEPIDLE is not None:
                 socket_options.append((socket.IPPROTO_TCP, TCP_KEEPIDLE, 60))
 
-            proxy_map = {key: None if url is None else Proxy(url=url) for key, url in get_environment_proxies().items()}
+            proxy_map: dict[str, URL | str | Proxy | None] = {}
+            if (proxy := kwargs.pop("proxy", None)) is not None:
+                proxy_map["all://"] = proxy
+            elif kwargs.get("trust_env", True):
+                proxy_map.update(get_environment_proxies())
 
             transport_kwargs = {
                 arg: kwargs[arg] for arg in ("verify", "cert", "trust_env", "http1", "http2", "limits") if arg in kwargs
