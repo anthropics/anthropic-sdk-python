@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from typing import Any, cast
+from functools import partial
 from contextlib import contextmanager, asynccontextmanager
 from collections.abc import Callable, Iterator, Awaitable, AsyncIterator
 
 import pytest
 from pydantic import BaseModel
 
-from anthropic import beta_tool
+from anthropic import beta_tool, beta_async_tool
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools._beta_functions import BaseFunctionTool
 from anthropic.types.beta.beta_tool_param import InputSchema
@@ -39,6 +40,96 @@ class TestFunctionTool:
 
         # invalid types should be allowed because __call__ should just be the original function
         assert function_tool(location=cast(Any, 1)) == "Weather in 1 is 20 degrees celsius"
+
+    @pytest.mark.parametrize("metadata_source", ["inferred", "explicit", "partial"])
+    def test_partial_function_preserves_bound_arguments(self, metadata_source: str) -> None:
+        def greet(prefix: str, name: str, suffix: str = ".") -> str:
+            """Greet a person.
+
+            Args:
+                prefix: Greeting prefix.
+                name: Name of the person.
+                suffix: Greeting punctuation.
+            """
+            return f"{prefix} {name}{suffix}"
+
+        bound = partial(greet, "Hello", suffix="!")
+        if metadata_source == "partial":
+            vars(bound)["__name__"] = "custom_greeting"
+            bound.__doc__ = """Custom greeting.
+
+            Args:
+                name: Name of the person.
+                suffix: Greeting punctuation.
+            """
+        function_tool = (
+            beta_tool(bound, name="custom_greeting", description="Custom greeting.")
+            if metadata_source == "explicit"
+            else beta_tool(bound)
+        )
+
+        assert function_tool.name == ("greet" if metadata_source == "inferred" else "custom_greeting")
+        assert function_tool.description == ("Greet a person." if metadata_source == "inferred" else "Custom greeting.")
+        assert function_tool.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "name": {"title": "Name", "type": "string", "description": "Name of the person."},
+                "suffix": {
+                    "title": "Suffix",
+                    "type": "string",
+                    "default": "!",
+                    "description": "Greeting punctuation.",
+                },
+            },
+            "required": ["name"],
+        }
+        assert function_tool.call({"name": "Ada"}) == "Hello Ada!"
+        assert function_tool.call({"name": "Ada", "suffix": "?"}) == "Hello Ada?"
+        with pytest.raises(ValueError, match="Invalid arguments for function"):
+            function_tool.call({})
+
+    @pytest.mark.parametrize("explicit_metadata", [False, True])
+    async def test_partial_async_function_preserves_bound_arguments(self, explicit_metadata: bool) -> None:
+        async def greet(prefix: str, name: str, suffix: str = ".") -> str:
+            """Greet a person asynchronously.
+
+            Args:
+                prefix: Greeting prefix.
+                name: Name of the person.
+                suffix: Greeting punctuation.
+            """
+            return f"{prefix} {name}{suffix}"
+
+        bound = partial(greet, "Hello", suffix="!")
+        function_tool = (
+            beta_async_tool(bound, name="custom_greeting", description="Custom greeting.")
+            if explicit_metadata
+            else beta_async_tool(bound)
+        )
+
+        assert function_tool.name == ("custom_greeting" if explicit_metadata else "greet")
+        assert function_tool.description == (
+            "Custom greeting." if explicit_metadata else "Greet a person asynchronously."
+        )
+        assert function_tool.input_schema == {
+            "additionalProperties": False,
+            "type": "object",
+            "properties": {
+                "name": {"title": "Name", "type": "string", "description": "Name of the person."},
+                "suffix": {
+                    "title": "Suffix",
+                    "type": "string",
+                    "default": "!",
+                    "description": "Greeting punctuation.",
+                },
+            },
+            "required": ["name"],
+        }
+        assert await function_tool.call({"name": "Ada"}) == "Hello Ada!"
+        assert await function_tool.call({"name": "Ada", "suffix": "?"}) == "Hello Ada?"
+        with pytest.raises(ValueError, match="Invalid arguments for function"):
+            await function_tool.call({})
 
     def test_function_with_multiple_types(self) -> None:
         """Test function schema conversion with various Python types."""
