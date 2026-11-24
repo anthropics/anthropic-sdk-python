@@ -79,6 +79,14 @@ from .sessions import (
     AsyncSessionsWithStreamingResponse,
 )
 from .webhooks import Webhooks, AsyncWebhooks
+from .compliance import (
+    Compliance,
+    AsyncCompliance,
+    ComplianceWithRawResponse,
+    AsyncComplianceWithRawResponse,
+    ComplianceWithStreamingResponse,
+    AsyncComplianceWithStreamingResponse,
+)
 from .deployments import (
     Deployments,
     AsyncDeployments,
@@ -215,6 +223,12 @@ __all__ = [
     "AsyncTunnelsWithRawResponse",
     "TunnelsWithStreamingResponse",
     "AsyncTunnelsWithStreamingResponse",
+    "Compliance",
+    "AsyncCompliance",
+    "ComplianceWithRawResponse",
+    "AsyncComplianceWithRawResponse",
+    "ComplianceWithStreamingResponse",
+    "AsyncComplianceWithStreamingResponse",
     "Organization",
     "AsyncOrganization",
     "OrganizationWithRawResponse",

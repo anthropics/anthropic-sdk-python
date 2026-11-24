@@ -3032,6 +3032,83 @@ Methods:
 - <code title="get /v1/tunnels/{tunnel_id}/certificates">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">list</a>(tunnel_id, \*\*<a href="src/anthropic/types/beta/tunnels/certificate_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">SyncPageCursor[BetaTunnelCertificate]</a></code>
 - <code title="post /v1/tunnels/{tunnel_id}/certificates/{certificate_id}/archive">client.beta.tunnels.certificates.<a href="./src/anthropic/resources/beta/tunnels/certificates.py">archive</a>(certificate_id, \*, tunnel_id) -> <a href="./src/anthropic/types/beta/tunnels/beta_tunnel_certificate.py">BetaTunnelCertificate</a></code>
 
+## Compliance
+
+### Review
+
+Types:
+
+```python
+from anthropic.types.beta.compliance import BetaComplianceReviewOrder
+```
+
+#### Cases
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewCase,
+    BetaComplianceReviewCaseCloseReason,
+    BetaComplianceReviewCaseClosed,
+    BetaComplianceReviewCaseOpen,
+    BetaComplianceReviewCaseOrderBy,
+    BetaComplianceReviewCaseStatus,
+    BetaComplianceReviewCaseStatusFilter,
+    BetaComplianceReviewDetermination,
+    BetaComplianceReviewEnforcementAction,
+    BetaComplianceReviewPolicyCategory,
+    BetaComplianceReviewTranscript,
+    BetaComplianceReviewVerdictParam,
+    BetaComplianceReviewViolatedPolicyCategory,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/cases/{case_id}">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">retrieve</a>(case_id) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">BetaComplianceReviewCase</a></code>
+- <code title="get /v1/compliance/review/cases">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">list</a>(\*\*<a href="src/anthropic/types/beta/compliance/review/case_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">SyncPageCursor[BetaComplianceReviewCase]</a></code>
+- <code title="post /v1/compliance/review/cases/{case_id}/respond">client.beta.compliance.review.cases.<a href="./src/anthropic/resources/beta/compliance/review/cases.py">respond</a>(case_id, \*\*<a href="src/anthropic/types/beta/compliance/review/case_respond_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_case.py">BetaComplianceReviewCase</a></code>
+
+#### Notices
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewNotice,
+    BetaComplianceReviewNoticeKind,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/notices">client.beta.compliance.review.notices.<a href="./src/anthropic/resources/beta/compliance/review/notices.py">list</a>(\*\*<a href="src/anthropic/types/beta/compliance/review/notice_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_notice.py">SyncPageCursor[BetaComplianceReviewNotice]</a></code>
+
+#### Items
+
+Types:
+
+```python
+from anthropic.types.beta.compliance.review import (
+    BetaComplianceReviewActor,
+    BetaComplianceReviewAPIActor,
+    BetaComplianceReviewContentNotCaptured,
+    BetaComplianceReviewContentUnavailableReason,
+    BetaComplianceReviewCreateMessageContent,
+    BetaComplianceReviewItem,
+    BetaComplianceReviewMessageDetails,
+    BetaComplianceReviewSafeguardsReason,
+    BetaComplianceReviewServiceAccountActor,
+    BetaComplianceReviewStoredCopyUnavailable,
+    BetaComplianceReviewUserActor,
+)
+```
+
+Methods:
+
+- <code title="get /v1/compliance/review/items/{item_id}">client.beta.compliance.review.items.<a href="./src/anthropic/resources/beta/compliance/review/items.py">retrieve</a>(item_id) -> <a href="./src/anthropic/types/beta/compliance/review/beta_compliance_review_item.py">BetaComplianceReviewItem</a></code>
+
 ## Organization
 
 Types:
