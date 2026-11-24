@@ -30,6 +30,14 @@ from ....types.beta import (
     BetaUserProfileExternalUserDetailsParams,
 )
 from ...._base_client import AsyncPaginator, make_request_options
+from .providers.providers import (
+    Providers,
+    AsyncProviders,
+    ProvidersWithRawResponse,
+    AsyncProvidersWithRawResponse,
+    ProvidersWithStreamingResponse,
+    AsyncProvidersWithStreamingResponse,
+)
 from ....types.anthropic_beta_param import AnthropicBetaParam
 from ....types.beta.beta_user_profile import BetaUserProfile
 from ....types.beta.beta_deleted_user_profile import BetaDeletedUserProfile
@@ -47,6 +55,10 @@ class UserProfiles(SyncAPIResource):
     @cached_property
     def action_urls(self) -> ActionURLs:
         return ActionURLs(self._client)
+
+    @cached_property
+    def providers(self) -> Providers:
+        return Providers(self._client)
 
     @cached_property
     def with_raw_response(self) -> UserProfilesWithRawResponse:
@@ -615,6 +627,10 @@ class AsyncUserProfiles(AsyncAPIResource):
     @cached_property
     def action_urls(self) -> AsyncActionURLs:
         return AsyncActionURLs(self._client)
+
+    @cached_property
+    def providers(self) -> AsyncProviders:
+        return AsyncProviders(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncUserProfilesWithRawResponse:
@@ -1202,6 +1218,10 @@ class UserProfilesWithRawResponse:
     def action_urls(self) -> ActionURLsWithRawResponse:
         return ActionURLsWithRawResponse(self._user_profiles.action_urls)
 
+    @cached_property
+    def providers(self) -> ProvidersWithRawResponse:
+        return ProvidersWithRawResponse(self._user_profiles.providers)
+
 
 class AsyncUserProfilesWithRawResponse:
     def __init__(self, user_profiles: AsyncUserProfiles) -> None:
@@ -1229,6 +1249,10 @@ class AsyncUserProfilesWithRawResponse:
     @cached_property
     def action_urls(self) -> AsyncActionURLsWithRawResponse:
         return AsyncActionURLsWithRawResponse(self._user_profiles.action_urls)
+
+    @cached_property
+    def providers(self) -> AsyncProvidersWithRawResponse:
+        return AsyncProvidersWithRawResponse(self._user_profiles.providers)
 
 
 class UserProfilesWithStreamingResponse:
@@ -1258,6 +1282,10 @@ class UserProfilesWithStreamingResponse:
     def action_urls(self) -> ActionURLsWithStreamingResponse:
         return ActionURLsWithStreamingResponse(self._user_profiles.action_urls)
 
+    @cached_property
+    def providers(self) -> ProvidersWithStreamingResponse:
+        return ProvidersWithStreamingResponse(self._user_profiles.providers)
+
 
 class AsyncUserProfilesWithStreamingResponse:
     def __init__(self, user_profiles: AsyncUserProfiles) -> None:
@@ -1285,3 +1313,7 @@ class AsyncUserProfilesWithStreamingResponse:
     @cached_property
     def action_urls(self) -> AsyncActionURLsWithStreamingResponse:
         return AsyncActionURLsWithStreamingResponse(self._user_profiles.action_urls)
+
+    @cached_property
+    def providers(self) -> AsyncProvidersWithStreamingResponse:
+        return AsyncProvidersWithStreamingResponse(self._user_profiles.providers)

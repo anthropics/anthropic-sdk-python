@@ -2898,6 +2898,55 @@ Methods:
 
 - <code title="post /v1/user_profiles/{user_profile_id}/action_urls">client.beta.user_profiles.action_urls.<a href="./src/anthropic/resources/beta/user_profiles/action_urls.py">create</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profiles/action_url_create_params.py">params</a>) -> <a href="./src/anthropic/types/beta/user_profiles/beta_user_profile_action_url.py">BetaUserProfileActionURL</a></code>
 
+### Providers
+
+#### Google
+
+##### DataControls
+
+Types:
+
+```python
+from anthropic.types.beta.user_profiles.providers.google import (
+    BetaGoogleManagedBucketReference,
+    BetaGoogleManagedBucketReferenceParam,
+    BetaGoogleManagedCMEKControl,
+    BetaGoogleManagedCMEKControlParams,
+    BetaGoogleManagedCMEKDisabled,
+    BetaGoogleManagedCMEKDisabledParams,
+    BetaGoogleManagedCMEKEnabled,
+    BetaGoogleManagedCMEKEnabledParams,
+    BetaGoogleManagedCMEKRegionActive,
+    BetaGoogleManagedCMEKRegionFailed,
+    BetaGoogleManagedCMEKRegionNotConfigured,
+    BetaGoogleManagedCMEKRegionPending,
+    BetaGoogleManagedCMEKRegionStatus,
+    BetaGoogleManagedCMEKRegionSuspended,
+    BetaGoogleManagedDataControls,
+    BetaGoogleManagedRetiredBucket,
+    BetaGoogleManagedRetiredKey,
+    BetaGoogleManagedStorageBucket,
+    BetaGoogleManagedStorageControl,
+    BetaGoogleManagedStorageControlParams,
+    BetaGoogleManagedStorageDisabled,
+    BetaGoogleManagedStorageDisabledParams,
+    BetaGoogleManagedStorageEnabled,
+    BetaGoogleManagedStorageEnabledParams,
+    BetaGoogleManagedStorageFailedCheck,
+    BetaGoogleManagedStorageRegionActive,
+    BetaGoogleManagedStorageRegionFailed,
+    BetaGoogleManagedStorageRegionNotConfigured,
+    BetaGoogleManagedStorageRegionPending,
+    BetaGoogleManagedStorageRegionStatus,
+    BetaGoogleManagedStorageRegionSuspended,
+)
+```
+
+Methods:
+
+- <code title="get /v1/user_profiles/{user_profile_id}/providers/google/data_controls">client.beta.user_profiles.providers.google.data_controls.<a href="./src/anthropic/resources/beta/user_profiles/providers/google/data_controls.py">retrieve</a>(user_profile_id) -> <a href="./src/anthropic/types/beta/user_profiles/providers/google/beta_google_managed_data_controls.py">BetaGoogleManagedDataControls</a></code>
+- <code title="post /v1/user_profiles/{user_profile_id}/providers/google/data_controls">client.beta.user_profiles.providers.google.data_controls.<a href="./src/anthropic/resources/beta/user_profiles/providers/google/data_controls.py">update</a>(user_profile_id, \*\*<a href="src/anthropic/types/beta/user_profiles/providers/google/data_control_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/user_profiles/providers/google/beta_google_managed_data_controls.py">BetaGoogleManagedDataControls</a></code>
+
 ## Dreams
 
 Types:
