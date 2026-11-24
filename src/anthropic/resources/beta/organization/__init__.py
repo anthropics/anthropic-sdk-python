@@ -46,6 +46,14 @@ from .analytics import (
     AnalyticsWithStreamingResponse,
     AsyncAnalyticsWithStreamingResponse,
 )
+from .providers import (
+    Providers,
+    AsyncProviders,
+    ProvidersWithRawResponse,
+    AsyncProvidersWithRawResponse,
+    ProvidersWithStreamingResponse,
+    AsyncProvidersWithStreamingResponse,
+)
 from .claude_tag import (
     ClaudeTag,
     AsyncClaudeTag,
@@ -204,6 +212,12 @@ __all__ = [
     "AsyncExternalStorageWithRawResponse",
     "ExternalStorageWithStreamingResponse",
     "AsyncExternalStorageWithStreamingResponse",
+    "Providers",
+    "AsyncProviders",
+    "ProvidersWithRawResponse",
+    "AsyncProvidersWithRawResponse",
+    "ProvidersWithStreamingResponse",
+    "AsyncProvidersWithStreamingResponse",
     "Users",
     "AsyncUsers",
     "UsersWithRawResponse",

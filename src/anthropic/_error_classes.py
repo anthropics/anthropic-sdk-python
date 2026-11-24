@@ -27,9 +27,11 @@ from ._exceptions import (
 from .types.file_expired_error import FileExpiredError
 from .types.thread_not_found_error import ThreadNotFoundError
 from .types.tool_name_conflict_error import ToolNameConflictError
+from .types.beta_storage_in_use_error import BetaStorageInUseError
 from .types.rbac_role_not_found_error import RBACRoleNotFoundError
 from .types.file_not_downloadable_error import FileNotDownloadableError
 from .types.user_profile_required_error import UserProfileRequiredError
+from .types.beta_cmek_not_approved_error import BetaCMEKNotApprovedError
 from .types.change_outcome_unknown_error import ChangeOutcomeUnknownError
 from .types.compaction_unavailable_error import CompactionUnavailableError
 from .types.storage_quota_exceeded_error import StorageQuotaExceededError
@@ -37,7 +39,9 @@ from .types.user_profile_not_found_error import UserProfileNotFoundError
 from .types.beta_unsupported_charset_error import BetaUnsupportedCharsetError
 from .types.shared.cmek_key_disabled_error import CMEKKeyDisabledError
 from .types.thread_already_continued_error import ThreadAlreadyContinuedError
+from .types.beta_region_not_supported_error import BetaRegionNotSupportedError
 from .types.beta_request_body_timeout_error import BetaRequestBodyTimeoutError
+from .types.beta_storage_not_approved_error import BetaStorageNotApprovedError
 from .types.org_member_limit_exceeded_error import OrgMemberLimitExceededError
 from .types.thread_continue_in_flight_error import ThreadContinueInFlightError
 from .types.tool_reference_unresolved_error import ToolReferenceUnresolvedError
@@ -50,6 +54,7 @@ from .types.image_dimensions_too_large_error import ImageDimensionsTooLargeError
 from .types.shared.ramp_limit_exceeded_error import RampLimitExceededError
 from .types.thread_unsupported_request_error import ThreadUnsupportedRequestError
 from .types.beta.beta_approval_required_error import BetaApprovalRequiredError
+from .types.beta_external_key_not_found_error import BetaExternalKeyNotFoundError
 from .types.compaction_content_mismatch_error import CompactionContentMismatchError
 from .types.organization.already_member_error import AlreadyMemberError
 from .types.shared.cmek_key_unreachable_error import CMEKKeyUnreachableError
@@ -57,6 +62,7 @@ from .types.shared.organization_on_hold_error import OrganizationOnHoldError
 from .types.thread_fingerprint_mismatch_error import ThreadFingerprintMismatchError
 from .types.compaction_signature_invalid_error import CompactionSignatureInvalidError
 from .types.concurrent_membership_change_error import ConcurrentMembershipChangeError
+from .types.beta_gcp_project_not_verified_error import BetaGCPProjectNotVerifiedError
 from .types.available_tools_limit_exceeded_error import AvailableToolsLimitExceededError
 from .types.beta.beta_environment_archived_error import BetaEnvironmentArchivedError
 from .types.beta.beta_environment_not_found_error import BetaEnvironmentNotFoundError
@@ -73,6 +79,7 @@ from .types.organization.invite_already_exists_error import InviteAlreadyExistsE
 from .types.shared.claude_code_version_too_old_error import ClaudeCodeVersionTooOldError
 from .types.beta.beta_organization_not_eligible_error import BetaOrganizationNotEligibleError
 from .types.beta.organization.beta_scan_pending_error import BetaScanPendingError
+from .types.beta_external_key_provider_mismatch_error import BetaExternalKeyProviderMismatchError
 from .types.compaction_too_many_tool_references_error import CompactionTooManyToolReferencesError
 from .types.shared.contract_spend_limit_reached_error import ContractSpendLimitReachedError
 from .types.shared.enforced_spend_limit_reached_error import EnforcedSpendLimitReachedError
@@ -125,6 +132,9 @@ from .types.beta.organization.beta_storage_verification_failed_error import Beta
 from .types.beta.organization.beta_storage_attach_limit_reached_error import BetaStorageAttachLimitReachedError
 from .types.beta.organization.beta_storage_changed_concurrently_error import BetaStorageChangedConcurrentlyError
 from .types.beta.organization.beta_transcripts_storage_required_error import BetaTranscriptsStorageRequiredError
+from .types.beta_gcp_project_controlled_by_another_organization_error import (
+    BetaGCPProjectControlledByAnotherOrganizationError,
+)
 from .types.beta.environments.beta_heartbeat_precondition_failed_error import BetaHeartbeatPreconditionFailedError
 from .types.beta.organization.beta_cannot_sign_out_primary_owner_error import BetaCannotSignOutPrimaryOwnerError
 from .types.beta.organization.beta_claude_tag_writes_not_enabled_error import BetaClaudeTagWritesNotEnabledError
@@ -208,6 +218,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "cmek_feature_unsupported"): BetaCMEKFeatureUnsupportedError,
     (400, "cmek_key_disabled"): CMEKKeyDisabledError,
     (400, "cmek_key_network_blocked"): CMEKKeyNetworkBlockedError,
+    (400, "cmek_not_approved"): BetaCMEKNotApprovedError,
     (400, "compaction_block_ambiguous"): CompactionBlockAmbiguousError,
     (400, "compaction_block_misplaced"): CompactionBlockMisplacedError,
     (400, "compaction_content_mismatch"): CompactionContentMismatchError,
@@ -219,12 +230,15 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "email_domain_not_allowed"): EmailDomainNotAllowedError,
     (400, "environment_archived"): BetaEnvironmentArchivedError,
     (400, "external_key_in_workspace_policy"): ExternalKeyInWorkspacePolicyError,
+    (400, "external_key_not_found"): BetaExternalKeyNotFoundError,
+    (400, "external_key_provider_mismatch"): BetaExternalKeyProviderMismatchError,
     (400, "external_key_validation_failed"): ExternalKeyValidationFailedError,
     (400, "external_key_validation_timed_out"): ExternalKeyValidationTimedOutError,
     (400, "external_storage_in_use"): BetaExternalStorageInUseError,
     (400, "external_storage_in_workspace_policy"): BetaExternalStorageInWorkspacePolicyError,
     (400, "external_storage_not_available"): BetaExternalStorageNotAvailableError,
     (400, "file_not_downloadable"): FileNotDownloadableError,
+    (400, "gcp_project_not_verified"): BetaGCPProjectNotVerifiedError,
     (400, "grant_required"): BetaGrantRequiredError,
     (400, "human_review_not_available"): BetaHumanReviewNotAvailableError,
     (400, "human_review_on_with_external_storage"): BetaHumanReviewOnWithExternalStorageError,
@@ -245,6 +259,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "rbac_group_grants_owner_access"): RBACGroupGrantsOwnerAccessError,
     (400, "rbac_group_order_limit_exceeded"): BetaRBACGroupOrderLimitExceededError,
     (400, "rbac_group_owner_access_unconfirmed"): RBACGroupOwnerAccessUnconfirmedError,
+    (400, "region_not_supported"): BetaRegionNotSupportedError,
     (400, "request_body_encoding_invalid"): RequestBodyEncodingInvalidError,
     (400, "request_body_encoding_unsupported"): RequestBodyEncodingUnsupportedError,
     (400, "request_body_timeout"): BetaRequestBodyTimeoutError,
@@ -253,6 +268,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (400, "settings_history_limit_exceeded"): BetaSettingsHistoryLimitExceededError,
     (400, "slack_channel_set_up_settings_refused"): BetaSlackChannelSetUpSettingsRefusedError,
     (400, "storage_attach_limit_reached"): BetaStorageAttachLimitReachedError,
+    (400, "storage_not_approved"): BetaStorageNotApprovedError,
     (400, "storage_not_attachable"): BetaStorageNotAttachableError,
     (400, "storage_profile_mismatch"): StorageProfileMismatchError,
     (400, "storage_profile_still_required"): BetaStorageProfileStillRequiredError,
@@ -298,6 +314,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (404, "thread_not_found"): ThreadNotFoundError,
     (409, "concurrent_membership_change"): ConcurrentMembershipChangeError,
     (409, "external_key_changed"): ExternalKeyChangedError,
+    (409, "gcp_project_controlled_by_another_organization"): BetaGCPProjectControlledByAnotherOrganizationError,
     (409, "plugin_name_taken"): BetaPluginNameTakenError,
     (409, "scan_pending"): BetaScanPendingError,
     (409, "skill_name_taken"): BetaSkillNameTakenError,
@@ -306,6 +323,7 @@ ERROR_CLASSES: dict[tuple[int, str | None], type[APIStatusError]] = {
     (409, "storage_already_registered"): BetaStorageAlreadyRegisteredError,
     (409, "storage_attached_during_archive"): StorageAttachedDuringArchiveError,
     (409, "storage_changed_concurrently"): BetaStorageChangedConcurrentlyError,
+    (409, "storage_in_use"): BetaStorageInUseError,
     (409, "workspace_changed_concurrently"): BetaWorkspaceChangedConcurrentlyError,
     (412, "heartbeat_precondition_failed"): BetaHeartbeatPreconditionFailedError,
     (413, "request_body_too_large_after_decoding"): RequestBodyTooLargeAfterDecodingError,

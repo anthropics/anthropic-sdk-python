@@ -7,11 +7,13 @@ from ..thread_not_found_error_details import ThreadNotFoundErrorDetails
 from .cmek_key_disabled_error_details import CMEKKeyDisabledErrorDetails
 from ..tool_name_conflict_error_details import ToolNameConflictErrorDetails
 from .ramp_limit_exceeded_error_details import RampLimitExceededErrorDetails
+from ..beta_storage_in_use_error_details import BetaStorageInUseErrorDetails
 from ..rbac_role_not_found_error_details import RBACRoleNotFoundErrorDetails
 from .cmek_key_unreachable_error_details import CMEKKeyUnreachableErrorDetails
 from .organization_on_hold_error_details import OrganizationOnHoldErrorDetails
 from ..file_not_downloadable_error_details import FileNotDownloadableErrorDetails
 from ..user_profile_required_error_details import UserProfileRequiredErrorDetails
+from ..beta_cmek_not_approved_error_details import BetaCMEKNotApprovedErrorDetails
 from ..change_outcome_unknown_error_details import ChangeOutcomeUnknownErrorDetails
 from ..compaction_unavailable_error_details import CompactionUnavailableErrorDetails
 from ..storage_quota_exceeded_error_details import StorageQuotaExceededErrorDetails
@@ -21,7 +23,9 @@ from .cmek_key_network_blocked_error_details import CMEKKeyNetworkBlockedErrorDe
 from ..beta_unsupported_charset_error_details import BetaUnsupportedCharsetErrorDetails
 from ..thread_already_continued_error_details import ThreadAlreadyContinuedErrorDetails
 from .sandbox_egress_restricted_error_details import SandboxEgressRestrictedErrorDetails
+from ..beta_region_not_supported_error_details import BetaRegionNotSupportedErrorDetails
 from ..beta_request_body_timeout_error_details import BetaRequestBodyTimeoutErrorDetails
+from ..beta_storage_not_approved_error_details import BetaStorageNotApprovedErrorDetails
 from ..org_member_limit_exceeded_error_details import OrgMemberLimitExceededErrorDetails
 from ..thread_continue_in_flight_error_details import ThreadContinueInFlightErrorDetails
 from ..tool_reference_unresolved_error_details import ToolReferenceUnresolvedErrorDetails
@@ -34,6 +38,7 @@ from ..image_dimensions_too_large_error_details import ImageDimensionsTooLargeEr
 from ..thread_unsupported_request_error_details import ThreadUnsupportedRequestErrorDetails
 from .claude_code_version_too_old_error_details import ClaudeCodeVersionTooOldErrorDetails
 from ..beta.beta_approval_required_error_details import BetaApprovalRequiredErrorDetails
+from ..beta_external_key_not_found_error_details import BetaExternalKeyNotFoundErrorDetails
 from ..compaction_content_mismatch_error_details import CompactionContentMismatchErrorDetails
 from ..organization.already_member_error_details import AlreadyMemberErrorDetails
 from ..thread_fingerprint_mismatch_error_details import ThreadFingerprintMismatchErrorDetails
@@ -43,6 +48,7 @@ from .parent_organization_required_error_details import ParentOrganizationRequir
 from ..compaction_signature_invalid_error_details import CompactionSignatureInvalidErrorDetails
 from ..concurrent_membership_change_error_details import ConcurrentMembershipChangeErrorDetails
 from .request_body_encoding_invalid_error_details import RequestBodyEncodingInvalidErrorDetails
+from ..beta_gcp_project_not_verified_error_details import BetaGCPProjectNotVerifiedErrorDetails
 from ..available_tools_limit_exceeded_error_details import AvailableToolsLimitExceededErrorDetails
 from ..beta.beta_environment_archived_error_details import BetaEnvironmentArchivedErrorDetails
 from .organization_type_not_supported_error_details import OrganizationTypeNotSupportedErrorDetails
@@ -59,6 +65,7 @@ from ..beta.organization.beta_scan_failed_error_details import BetaScanFailedErr
 from ..organization.invite_already_exists_error_details import InviteAlreadyExistsErrorDetails
 from ..beta.beta_organization_not_eligible_error_details import BetaOrganizationNotEligibleErrorDetails
 from ..beta.organization.beta_scan_pending_error_details import BetaScanPendingErrorDetails
+from ..beta_external_key_provider_mismatch_error_details import BetaExternalKeyProviderMismatchErrorDetails
 from ..compaction_too_many_tool_references_error_details import CompactionTooManyToolReferencesErrorDetails
 from ..user_profile_billing_not_authorized_error_details import UserProfileBillingNotAuthorizedErrorDetails
 from ..beta.beta_human_review_not_available_error_details import BetaHumanReviewNotAvailableErrorDetails
@@ -108,6 +115,9 @@ from ..beta.organization.beta_storage_changed_concurrently_error_details import 
 )
 from ..beta.organization.beta_transcripts_storage_required_error_details import (
     BetaTranscriptsStorageRequiredErrorDetails,
+)
+from ..beta_gcp_project_controlled_by_another_organization_error_details import (
+    BetaGCPProjectControlledByAnotherOrganizationErrorDetails,
 )
 from ..beta.environments.beta_heartbeat_precondition_failed_error_details import (
     BetaHeartbeatPreconditionFailedErrorDetails,
@@ -270,6 +280,14 @@ ErrorDetails: TypeAlias = Annotated[
         BetaExternalStorageInUseErrorDetails,
         BetaExternalStorageInWorkspacePolicyErrorDetails,
         BetaStorageVerificationFailedErrorDetails,
+        BetaCMEKNotApprovedErrorDetails,
+        BetaExternalKeyNotFoundErrorDetails,
+        BetaExternalKeyProviderMismatchErrorDetails,
+        BetaGCPProjectNotVerifiedErrorDetails,
+        BetaRegionNotSupportedErrorDetails,
+        BetaStorageNotApprovedErrorDetails,
+        BetaGCPProjectControlledByAnotherOrganizationErrorDetails,
+        BetaStorageInUseErrorDetails,
         BetaCannotSignOutPrimaryOwnerErrorDetails,
         BetaCannotSignOutSelfErrorDetails,
         BetaOrganizationNotEnrolledInBetaErrorDetails,

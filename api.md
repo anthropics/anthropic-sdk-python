@@ -1307,10 +1307,15 @@ from anthropic.types import (
     BetaAPIErrorObject,
     BetaAuthenticationErrorObject,
     BetaBillingErrorObject,
+    BetaCMEKNotApprovedErrorDetails,
     BetaCurrency,
     BetaErrorObject,
     BetaErrorResponse,
+    BetaExternalKeyNotFoundErrorDetails,
+    BetaExternalKeyProviderMismatchErrorDetails,
     BetaGatewayTimeoutErrorObject,
+    BetaGCPProjectControlledByAnotherOrganizationErrorDetails,
+    BetaGCPProjectNotVerifiedErrorDetails,
     BetaInvalidRequestErrorObject,
     BetaMonetaryAmount,
     BetaMonetaryAmountParam,
@@ -1319,7 +1324,10 @@ from anthropic.types import (
     BetaOverloadedErrorObject,
     BetaPermissionErrorObject,
     BetaRateLimitErrorObject,
+    BetaRegionNotSupportedErrorDetails,
     BetaRequestBodyTimeoutErrorDetails,
+    BetaStorageInUseErrorDetails,
+    BetaStorageNotApprovedErrorDetails,
     BetaUnsupportedCharsetErrorDetails,
     BetaError,
     BetaAPIError,
@@ -1331,9 +1339,17 @@ from anthropic.types import (
     BetaOverloadedError,
     BetaPermissionError,
     BetaRateLimitError,
+    BetaCMEKNotApprovedError,
+    BetaExternalKeyNotFoundError,
+    BetaExternalKeyProviderMismatchError,
+    BetaGCPProjectNotVerifiedError,
     BetaOrganizationNotEnrolledInBetaError,
+    BetaRegionNotSupportedError,
     BetaRequestBodyTimeoutError,
+    BetaStorageNotApprovedError,
     BetaUnsupportedCharsetError,
+    BetaGCPProjectControlledByAnotherOrganizationError,
+    BetaStorageInUseError,
 )
 ```
 
@@ -3252,6 +3268,57 @@ Methods:
 - <code title="get /v1/organizations/external_storage">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">list</a>(\*\*<a href="src/anthropic/types/beta/organization/external_storage_list_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">SyncPageCursor[BetaExternalStorage]</a></code>
 - <code title="delete /v1/organizations/external_storage/{external_storage_id}">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">delete</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_deleted_external_storage.py">BetaDeletedExternalStorage</a></code>
 - <code title="post /v1/organizations/external_storage/{external_storage_id}/activate">client.beta.organization.external_storage.<a href="./src/anthropic/resources/beta/organization/external_storage.py">activate</a>(external_storage_id) -> <a href="./src/anthropic/types/beta/organization/beta_external_storage.py">BetaExternalStorage</a></code>
+
+### Providers
+
+#### Google
+
+##### Projects
+
+###### DataControls
+
+Types:
+
+```python
+from anthropic.types.beta.organization.providers.google.projects import (
+    BetaGoogleManagedProjectBucketReferenceParam,
+    BetaGoogleManagedProjectCMEKControl,
+    BetaGoogleManagedProjectCMEKControlParams,
+    BetaGoogleManagedProjectCMEKDisabled,
+    BetaGoogleManagedProjectCMEKDisabledParams,
+    BetaGoogleManagedProjectCMEKEnabled,
+    BetaGoogleManagedProjectCMEKEnabledParams,
+    BetaGoogleManagedProjectCMEKRegionActive,
+    BetaGoogleManagedProjectCMEKRegionFailed,
+    BetaGoogleManagedProjectCMEKRegionNotConfigured,
+    BetaGoogleManagedProjectCMEKRegionPending,
+    BetaGoogleManagedProjectCMEKRegionStatus,
+    BetaGoogleManagedProjectCMEKRegionSuspended,
+    BetaGoogleManagedProjectDataControls,
+    BetaGoogleManagedProjectEffectiveBucket,
+    BetaGoogleManagedProjectRetiredBucket,
+    BetaGoogleManagedProjectRetiredKey,
+    BetaGoogleManagedProjectStorageBucket,
+    BetaGoogleManagedProjectStorageControl,
+    BetaGoogleManagedProjectStorageControlParams,
+    BetaGoogleManagedProjectStorageDisabled,
+    BetaGoogleManagedProjectStorageDisabledParams,
+    BetaGoogleManagedProjectStorageEnabled,
+    BetaGoogleManagedProjectStorageEnabledParams,
+    BetaGoogleManagedProjectStorageFailedCheck,
+    BetaGoogleManagedProjectStorageRegionActive,
+    BetaGoogleManagedProjectStorageRegionFailed,
+    BetaGoogleManagedProjectStorageRegionNotConfigured,
+    BetaGoogleManagedProjectStorageRegionPending,
+    BetaGoogleManagedProjectStorageRegionStatus,
+    BetaGoogleManagedProjectStorageRegionSuspended,
+)
+```
+
+Methods:
+
+- <code title="get /v1/organizations/providers/google/projects/{project_number}/data_controls">client.beta.organization.providers.google.projects.data_controls.<a href="./src/anthropic/resources/beta/organization/providers/google/projects/data_controls.py">retrieve</a>(project_number) -> <a href="./src/anthropic/types/beta/organization/providers/google/projects/beta_google_managed_project_data_controls.py">BetaGoogleManagedProjectDataControls</a></code>
+- <code title="post /v1/organizations/providers/google/projects/{project_number}/data_controls">client.beta.organization.providers.google.projects.data_controls.<a href="./src/anthropic/resources/beta/organization/providers/google/projects/data_controls.py">update</a>(project_number, \*\*<a href="src/anthropic/types/beta/organization/providers/google/projects/data_control_update_params.py">params</a>) -> <a href="./src/anthropic/types/beta/organization/providers/google/projects/beta_google_managed_project_data_controls.py">BetaGoogleManagedProjectDataControls</a></code>
 
 ### Users
 
