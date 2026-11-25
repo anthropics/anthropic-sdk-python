@@ -5,6 +5,7 @@ import re
 import httpx2
 import pytest
 
+from anthropic import CredentialsError
 from anthropic.lib.aws._auth import get_auth_headers
 from anthropic.lib.aws._credentials import (
     resolve_region,
@@ -595,7 +596,7 @@ class TestGetAuthHeaders:
 
         monkeypatch.setattr("anthropic.lib.aws._auth._get_session", fake_get_session)
 
-        with pytest.raises(RuntimeError, match="Could not resolve AWS credentials"):
+        with pytest.raises(CredentialsError, match="Could not resolve AWS credentials"):
             get_auth_headers(
                 method="POST",
                 url="https://gateway.us-east-1.api.aws/v1/messages",
