@@ -10,7 +10,7 @@ from respx import MockRouter
 from anthropic import AnthropicError, BadRequestError, InternalServerError
 from anthropic._compat import PYDANTIC_V1
 from anthropic.lib.tools import beta_tool
-from anthropic.types.beta import BetaToolParam
+from anthropic.types.beta import BetaToolParam, BetaMessageParam
 
 from .helpers import (
     MODEL,
@@ -434,8 +434,19 @@ class TestThreadToolRunner:
         assert (later["max_tokens"], later["messages"]) == (12, [COMPACTED, user("In one word.")])
 
     @RESPONSE_KINDS
+    @pytest.mark.parametrize("rewrite_history", [False, True], ids=["continue", "replay"])
+    @pytest.mark.parametrize(
+        "staged_messages",
+        [(user("In one word."),), (user("Can you keep it short?"), assistant("Yes."), user("In one word."))],
+        ids=["user-only", "includes-assistant"],
+    )
     def test_runner_adds_tool_results_ahead_of_messages_appended_to_the_thread_mid_loop(
-        self, respx_mock: MockRouter, respond: Any, stream: bool
+        self,
+        respx_mock: MockRouter,
+        respond: Any,
+        stream: bool,
+        staged_messages: tuple[BetaMessageParam, ...],
+        rewrite_history: bool,
     ) -> None:
         queue_responses(respx_mock, respond("msg_a", tool_use_id="toolu_a"), respond("msg_b", "Sunny."))
         thread = make_thread(tools=[beta_tool(get_weather)])
@@ -443,13 +454,20 @@ class TestThreadToolRunner:
         runner = thread.tool_runner(stream=stream)
 
         next(runner)
-        thread.append(user("In one word."))
+        if rewrite_history:
+            runner.set_messages_params(lambda params: {**params, "messages": [user("Weather in San Francisco?")]})
+        thread.append(*staged_messages)
         runner.until_done()
 
-        continued = request_bodies(respx_mock)[1]
-        assert continued["thread"] == continue_from("msg_a")
-        assert continued["messages"] == [tool_result("toolu_a"), user("In one word.")]
-        assert roles(thread.messages) == ["user", "assistant", "user", "user", "assistant"]
+        follow_up = request_bodies(respx_mock)[1]
+        expected_messages = [tool_result("toolu_a"), *staged_messages]
+        if rewrite_history:
+            assert follow_up["thread"] == CREATE
+            assert follow_up["messages"] == [user("Weather in San Francisco?"), tool_use("toolu_a"), *expected_messages]
+        else:
+            assert follow_up["thread"] == continue_from("msg_a")
+            assert follow_up["messages"] == expected_messages
+        assert thread.messages[2:-1] == (tool_result("toolu_a"), *staged_messages)
 
     def test_runner_on_a_thread_whose_stream_ended_early_sends_that_turn_again(self, respx_mock: MockRouter) -> None:
         queue_responses(

@@ -459,12 +459,9 @@ class BaseToolRunner(Generic[ThreadT, RunnableToolT, AnyToolsetT, ResponseFormat
         added_to_thread = self._thread.messages[len(self._sent_messages) :]
         self._thread._state.set_messages([*messages, *(m for m in added_to_thread if not same_message(m, reply_param))])
 
-    def _append_tool_results(self, results: BetaMessageParam) -> None:
-        """Add `results` right after the reply, where the API takes them, ahead of messages added to the thread while
-        it was handled."""
-        messages = list(self._thread.messages)
-        index = max(i for i, message in enumerate(messages) if message["role"] == "assistant") + 1
-        self._thread._state.set_messages([*messages[:index], results, *messages[index:]])
+    def _append_tool_results(self, reply: BetaMessage, results: BetaMessageParam) -> None:
+        """Place `results` after `reply` and ahead of messages added to the thread while it was handled."""
+        self._thread._state.insert_after_reply(reply, results)
 
     def add_tools(self, *tools: RunnableToolT | BetaToolUnionParam) -> None:
         """Give the model more tools without changing the `tools` param, which would miss the prompt cache.
@@ -752,7 +749,7 @@ class BaseSyncToolRunner(
                     yield from self._compact_after_final_turn(message)
                     break
                 if response is not None and not self._messages_modified:
-                    self._append_tool_results(response)
+                    self._append_tool_results(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
@@ -1296,7 +1293,7 @@ class BaseAsyncToolRunner(
                             yield item
                     break
                 if response is not None and not self._messages_modified:
-                    self._append_tool_results(response)
+                    self._append_tool_results(message, response)
 
             self._messages_modified = False
             self._cached_tool_call_response = None
