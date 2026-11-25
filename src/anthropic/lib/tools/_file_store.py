@@ -74,13 +74,14 @@ class FileStore:
     Every `rel_path` is relative to the root (a leading `/` also means the
     root) and refused with `FileStoreError` when it escapes. The store
     holds regular files only: symlinks are refused on read and skipped by
-    listings — `find_symlinks` reports them. A `rel_path` resolving to
-    the root itself is banned by this interface: `put` and `get` refuse it,
-    `move` and `remove` do nothing. A store opened with `utf8_only=True`
-    refuses binary content the same way — on `put` of such bytes and on
-    `get` of such a file. Only `create_root` makes the root: writes
-    create directories below it, never the root itself, so a root removed
-    while the store is open stays removed and the write raises
+    listings — `find_symlinks` reports them. A symlink in a parent directory
+    is refused by every verb; a symlinked leaf keeps its verb-specific handling.
+    A `rel_path` resolving to the root itself is banned by this interface:
+    `put` and `get` refuse it, and `move` and `remove` do nothing. A store
+    opened with `utf8_only=True` refuses binary content the same way — on `put`
+    of such bytes and on `get` of such a file. Only `create_root` makes the
+    root: writes create directories below it, never the root itself, so a root
+    removed while the store is open stays removed and the write raises
     `FileNotFoundError`.
     """
 
@@ -142,7 +143,7 @@ class FileStore:
         tail = rel_path.replace("\\", "/")
         if tail.endswith(("/", "/.")) or tail in ("", "."):
             raise FileStoreError(FileStoreError.NOT_A_FILE, rel_path)
-        dest = self._resolve_under_root(rel_path)
+        dest = await self._resolve_under_root(rel_path)
         payload = data.encode("utf-8") if isinstance(data, str) else bytes(data)
         self._require_utf8(rel_path, payload)
         await run_sync(_make_dirs_below_root, self._root, dest.parent)
@@ -150,7 +151,7 @@ class FileStore:
 
     async def get(self, rel_path: str) -> bytes | None:
         """The file's bytes; `None` when absent."""
-        dest = self._resolve_under_root(rel_path)
+        dest = await self._resolve_under_root(rel_path)
 
         def read() -> bytes | None:
             try:
@@ -168,7 +169,7 @@ class FileStore:
 
     async def ls(self, under: str = "/") -> set[str]:
         """The relative path of every file under the directory `under`."""
-        base = self._resolve_under_root(under)
+        base = await self._resolve_under_root(under)
 
         def walk() -> set[str]:
             return {rel for rel, _ in _filenames_in_dir(self._root, under, base)}
@@ -178,7 +179,7 @@ class FileStore:
     async def find_symlinks(self, under: str = "/") -> set[str]:
         """Every symlink under `under` — listings skip them and reads refuse
         them, so a caller that must know they exist asks here."""
-        base = self._resolve_under_root(under)
+        base = await self._resolve_under_root(under)
         return await run_sync(_symlinks_in_dir, self._root, under, base)
 
     async def hashtree(self, under: str = "/") -> dict[str, str]:
@@ -187,7 +188,7 @@ class FileStore:
         Unchanged files — same size, mtime, and ctime since the last call —
         reuse their recorded hash instead of being re-read.
         """
-        base = self._resolve_under_root(under)
+        base = await self._resolve_under_root(under)
 
         def hash_all() -> dict[str, str]:
             walk_start_ns = _now_ns()
@@ -202,7 +203,7 @@ class FileStore:
 
     async def hash_file(self, rel_path: str) -> str | None:
         """One file's sha256; `None` when absent. Shares `hashtree`'s cache."""
-        dest = self._resolve_under_root(rel_path)
+        dest = await self._resolve_under_root(rel_path)
 
         def one() -> str | None:
             try:
@@ -220,8 +221,8 @@ class FileStore:
     async def move(self, src: str, dst: str) -> None:
         """Rename `src` to `dst`; an existing `dst` is refused. The banned
         store root as either end does nothing."""
-        s = self._resolve_under_root(src)
-        d = self._resolve_under_root(dst)
+        s = await self._resolve_under_root(src)
+        d = await self._resolve_under_root(dst)
         if s == self._root or d == self._root:
             return
         if await anyio.Path(d).exists():
@@ -231,7 +232,7 @@ class FileStore:
 
     async def remove(self, rel_path: str) -> None:
         """Delete a file or subtree; absent — and the banned store root — do nothing."""
-        dest = self._resolve_under_root(rel_path)
+        dest = await self._resolve_under_root(rel_path)
         if dest == self._root:
             return
 
@@ -249,10 +250,11 @@ class FileStore:
 
         await run_sync(delete)
 
-    def _resolve_under_root(self, rel_path: str) -> Path:
+    async def _resolve_under_root(self, rel_path: str) -> Path:
         norm = PurePosixPath(rel_path.replace("\\", "/").lstrip("/"))
         if norm.is_absolute() or ".." in norm.parts:
             raise FileStoreError(FileStoreError.ESCAPES_ROOT, rel_path)
+        await run_sync(_raise_for_a_symlinked_parent, self._root, rel_path, norm.parts)
         return self._root.joinpath(*norm.parts)
 
     def _require_utf8(self, rel_path: str, data: bytes) -> None:
@@ -288,6 +290,27 @@ class FileStore:
 
 
 # The helpers below block; they are always called via run_sync.
+
+
+def _raise_for_a_symlinked_parent(root: Path, rel_path: str, parts: tuple[str, ...]) -> None:
+    """Refuse a symlink in every existing parent component.
+
+    The leaf itself is deliberately excluded: `put` replaces a symlinked leaf,
+    `remove` unlinks it, and the readers apply their own leaf checks. A missing
+    or non-directory parent ends the walk; nothing can exist below it, and the
+    operation keeps its existing missing-path behaviour.
+    """
+    current = root
+    for part in parts[:-1]:
+        current = current / part
+        try:
+            st = current.lstat()
+        except FileNotFoundError:
+            return
+        if stat.S_ISLNK(st.st_mode):
+            raise FileStoreError(FileStoreError.IS_A_SYMLINK, rel_path)
+        if not stat.S_ISDIR(st.st_mode):
+            return
 
 
 def _platform_supported() -> bool:
