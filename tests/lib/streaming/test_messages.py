@@ -470,6 +470,24 @@ class TestSyncMessages:
         ) as stream:
             assert_message_delta_omitted_usage_response(stream.get_final_message())
 
+    @pytest.mark.skipif(PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
+    @pytest.mark.respx(base_url=base_url)
+    def test_falsy_parsed_output_is_preserved(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=get_response("falsy_parsed_output_response.txt"))
+        )
+
+        with sync_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Answer with zero"}],
+            model="claude-sonnet-5-5",
+            output_format=int,
+        ) as stream:
+            message = stream.get_final_message()
+
+        # `None` means "not parsed"; zero is a parsed value.
+        assert message.parsed_output == 0
+
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
@@ -747,6 +765,25 @@ class TestAsyncMessages:
             model="claude-sonnet-5-5",
         ) as stream:
             assert_message_delta_omitted_usage_response(await stream.get_final_message())
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(PYDANTIC_V1, reason="structured outputs not supported with pydantic v1")
+    @pytest.mark.respx(base_url=base_url)
+    async def test_falsy_parsed_output_is_preserved(self, respx_mock: MockRouter) -> None:
+        respx_mock.post("/v1/messages").mock(
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("falsy_parsed_output_response.txt")))
+        )
+
+        async with async_client.messages.stream(
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Answer with zero"}],
+            model="claude-sonnet-5-5",
+            output_format=int,
+        ) as stream:
+            message = await stream.get_final_message()
+
+        # `None` means "not parsed"; zero is a parsed value.
+        assert message.parsed_output == 0
 
     @pytest.mark.asyncio
     @pytest.mark.respx(base_url=base_url)
