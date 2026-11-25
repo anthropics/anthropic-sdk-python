@@ -129,6 +129,43 @@ async def test_filestore_get_does_not_follow_a_symlink_leaf(store: FileStore) ->
 
 
 @pytest.mark.asyncio()
+async def test_filestore_verbs_refuse_a_symlinked_parent(tmp_path: Path, store: FileStore) -> None:
+    """A symlinked directory below the root is not a route back out of it:
+    writes land nowhere outside, reads refuse, and removals cannot delete there."""
+    outside = tmp_path / "outside"
+    (outside / "sub").mkdir(parents=True)
+    (outside / "secret.md").write_text("secret")
+    (outside / "sub" / "listed.md").write_text("listed")
+    os.symlink(outside, store.root().path / "link")
+
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.put("link/new.md", "new")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.get("link/secret.md")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.ls("link/sub")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.find_symlinks("link/sub")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.hashtree("link/sub")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.hash_file("link/secret.md")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.move("link/secret.md", "copied.md")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.remove("link/secret.md")
+
+    await store.put("inside.md", "inside")
+    with pytest.raises(FileStoreError, match="is a symlink"):
+        await store.move("inside.md", "link/copied.md")
+
+    assert (outside / "secret.md").read_text() == "secret"
+    assert not (outside / "new.md").exists()
+    assert not (outside / "copied.md").exists()
+    assert await store.get("inside.md") == b"inside"
+
+
+@pytest.mark.asyncio()
 async def test_filestore_get_refuses_a_non_regular_file(store: FileStore) -> None:
     """A present-but-non-regular leaf (fifo, symlink, ...) raises FileStoreError
     instead of hanging or being read."""
