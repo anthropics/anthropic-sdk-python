@@ -11,6 +11,7 @@ from __future__ import annotations
 import io
 import os
 import stat
+import errno
 import shutil
 import hashlib
 import zipfile
@@ -65,6 +66,32 @@ async def test_filestore_put_is_atomic_and_leaves_no_temp_on_success(store: File
     await store.put("a.md", "first")
     await store.put("a.md", "second")  # overwrite
     assert (store.root().path / "a.md").read_text() == "second"
+    assert sorted(p.name for p in store.root().path.iterdir()) == ["a.md"]
+
+
+@pytest.mark.asyncio()
+@pytest.mark.parametrize("previous", [None, b"original content"])
+async def test_filestore_put_preserves_destination_and_cleans_up_on_replace_failure(
+    store: FileStore, monkeypatch: pytest.MonkeyPatch, previous: bytes | None
+) -> None:
+    if previous is not None:
+        await store.put("a.md", previous)
+    error = OSError(errno.EIO, "replacement failed")
+
+    def fail_replace(_src: Path, _dst: Path) -> None:
+        raise error
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "replace", fail_replace)
+        with pytest.raises(OSError) as exc:
+            await store.put("a.md", "replacement content")
+
+    assert exc.value is error
+    assert await store.get("a.md") == previous
+    assert sorted(p.name for p in store.root().path.iterdir()) == ([] if previous is None else ["a.md"])
+
+    await store.put("a.md", "retry content")
+    assert await store.get("a.md") == b"retry content"
     assert sorted(p.name for p in store.root().path.iterdir()) == ["a.md"]
 
 
