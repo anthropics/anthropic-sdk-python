@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 from typing import Generic, Mapping, Iterable, Sequence, cast
-from collections.abc import Collection
+from collections.abc import Iterator, Collection
 from typing_extensions import Literal, get_args
 
 import pydantic
@@ -27,7 +27,7 @@ from ..._compat import model_copy
 from ...types.beta import BetaMessage, BetaMessageParam, BetaMessageThreadParam
 from ..._exceptions import AnthropicError, APIStatusError
 from ..._base_client import build_headers, merge_headers, _append_header_value
-from ..._utils._json import openapi_model_dump
+from ..._utils._json import is_sent_as_list, openapi_model_dump
 from .._parse._transform import merge_output_config, to_json_output_format
 from .._stainless_helpers import (
     HELPER_METHOD_STREAM,
@@ -107,6 +107,9 @@ class ThreadState(Generic[RunnableToolT, ResponseFormatT]):
     def append(self, messages: Iterable[BetaMessageParam | BetaMessage]) -> None:
         """Stage messages for the next turn, skipping the reply just recorded and deferring while a turn is in
         flight."""
+        messages = [
+            message if isinstance(message, BetaMessage) else replayable_message(message) for message in messages
+        ]
         if self._turn is not None:
             self._turn.deferred_messages.extend(messages)
             return
@@ -184,11 +187,12 @@ class ThreadState(Generic[RunnableToolT, ResponseFormatT]):
         self.update({}, tools=tools)
         output_type = cast("type[ResponseFormatT] | None", params.get("output_format"))
         self._output_format = JSONOutputFormat(output_type) if output_type is not None else None
-        self.set_messages(list(params["messages"]))
+        self.set_messages(params["messages"])
 
-    def set_messages(self, messages: list[BetaMessageParam]) -> None:
+    def set_messages(self, messages: Iterable[BetaMessageParam]) -> None:
         """Take the history from `messages`: additions to the current history are staged, and any other list replaces it
         and starts a new thread."""
+        messages = [replayable_message(message) for message in messages]
         if self._turn is not None:
             # A turn in flight has already sent what is staged: an edit that only appends to it is deferred like
             # `append()`, and a rewritten history replaces the thread (and anything deferred so far) once the turn ends.
@@ -681,6 +685,14 @@ def _split_tools(
 
 
 RUNNABLE_TOOL_TYPES = (BetaFunctionTool, BetaBuiltinFunctionTool, BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)
+
+
+def replayable_message(message: BetaMessageParam) -> BetaMessageParam:
+    """Keep iterator-backed content in the history so each request can send the same blocks."""
+    content = message.get("content")
+    if isinstance(content, Iterator) and is_sent_as_list(content):
+        return cast("BetaMessageParam", {**message, "content": list(content)})
+    return message
 
 
 def _to_message_param(message: BetaMessageParam | BetaMessage) -> BetaMessageParam:

@@ -458,6 +458,21 @@ class TestMessageThread:
         assert "fallbacks" not in retried
         assert thread.previous_message_id == "msg_c"
 
+    @pytest.mark.parametrize("one_shot", [False, True], ids=["list", "iterator"])
+    def test_lost_thread_replays_the_original_message_blocks(self, respx_mock: MockRouter, one_shot: bool) -> None:
+        queue_responses(respx_mock, message_response("msg_a"), THREAD_NOT_FOUND, message_response("msg_b"))
+        blocks: list[BetaTextBlockParam] = [{"type": "text", "text": "alpha"}, {"type": "text", "text": "beta"}]
+        seed: BetaMessageParam = {"role": "user", "content": iter(blocks) if one_shot else blocks}
+        thread = make_thread(messages=[seed])
+
+        thread.send()
+        thread.send(user("Again"))
+
+        created, continued, replayed = request_bodies(respx_mock)
+        assert created["messages"] == [{"role": "user", "content": blocks}]
+        assert continued["messages"] == [user("Again")]
+        assert replayed["messages"] == [*created["messages"], assistant(), user("Again")]
+
     def test_continue_unthreaded_stops_threading_after_an_unsupported_request_that_lists_no_feature(
         self, respx_mock: MockRouter
     ) -> None:
@@ -1342,6 +1357,26 @@ class TestMessageThread:
         assert (body["system"], body["max_tokens"]) == ("You are terse.", 1024)
         assert sent_requests(respx_mock)[1].headers["X-Trace"] == "abc"
         assert request_betas(respx_mock)[1] == [THREADS_BETA]
+
+    def test_fork_during_a_turn_keeps_deferred_message_blocks_in_both_threads(self, respx_mock: MockRouter) -> None:
+        queue_responses(
+            respx_mock, stream_response("msg_a", "Hi!"), message_response("msg_b"), message_response("msg_c")
+        )
+        blocks: list[BetaTextBlockParam] = [{"type": "text", "text": "next turn"}]
+        iterator = iter(blocks)
+        message: BetaMessageParam = {"role": "user", "content": iterator}
+        thread = make_thread()
+
+        with thread.stream(user("Hello")) as stream:
+            thread.append(message)
+            fork = thread.fork()
+            stream.until_done()
+        fork.send()
+        thread.send()
+
+        _, forked, continued = request_bodies(respx_mock)
+        assert forked["messages"][-1] == continued["messages"][-1] == {"role": "user", "content": blocks}
+        assert message["content"] is iterator
 
     def test_fork_keeps_the_unsupported_request_behavior(self, respx_mock: MockRouter) -> None:
         queue_responses(respx_mock, unsupported_response("inference_hooks"), message_response("msg_b"))

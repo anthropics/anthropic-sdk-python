@@ -270,6 +270,20 @@ class TestAsyncMessageThread:
         assert thread.previous_message_id == "msg_a"
         assert roles(thread.messages) == ["user", "assistant"]
 
+    @pytest.mark.parametrize("one_shot", [False, True], ids=["list", "iterator"])
+    async def test_unthreaded_retry_resends_the_original_message_blocks(
+        self, respx_mock: MockRouter, one_shot: bool
+    ) -> None:
+        queue_responses(respx_mock, unsupported_response(), message_response("msg_a"))
+        blocks: list[BetaTextBlockParam] = [{"type": "text", "text": "alpha"}, {"type": "text", "text": "beta"}]
+        thread = make_async_thread(unsupported_request_behavior="continue_unthreaded")
+
+        await thread.send({"role": "user", "content": iter(blocks) if one_shot else blocks})
+
+        rejected, retried = request_bodies(respx_mock)
+        assert rejected["messages"] == [{"role": "user", "content": blocks}]
+        assert retried["messages"] == rejected["messages"]
+
     async def test_continue_unthreaded_stops_threading_for_good_after_an_unsupported_request(
         self, respx_mock: MockRouter
     ) -> None:
