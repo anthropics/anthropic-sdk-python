@@ -529,6 +529,69 @@ async def test_download_replaces_the_directory_of_an_earlier_skill_with_the_same
     assert (skills / "pdf" / "SKILL.md").read_text() == "# second"
 
 
+@pytest.mark.parametrize("rollback_fails", [False, True])
+async def test_failed_skill_promotion_preserves_previous_contents(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, rollback_fails: bool
+) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# new"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    dest = tmp_path / "skills" / "pdf"
+    dest.mkdir(parents=True)
+    (dest / "SKILL.md").write_text("# previous")
+    rename = anyio.Path.rename
+
+    async def fail_promotion(path: anyio.Path, target: Any) -> anyio.Path:
+        if path.name == "stage":
+            raise OSError("promotion failed")
+        if rollback_fails and path.name == "replaced":
+            raise OSError("rollback failed")
+        return await rename(path, target)
+
+    monkeypatch.setattr(anyio.Path, "rename", fail_promotion)
+    created = await download_session_skills(client, workdir=tmp_path, session=_session_with_skills("skill_01"))
+
+    assert created == []
+    assert "promotion failed" in caplog.text
+    if rollback_fails:
+        backups = list(dest.parent.glob(".skill-*/replaced/SKILL.md"))
+        assert len(backups) == 1
+        assert backups[0].read_text() == "# previous"
+        assert str(backups[0].parent) in caplog.text
+    else:
+        assert (dest / "SKILL.md").read_text() == "# previous"
+        assert os.listdir(dest.parent) == ["pdf"]
+
+
+async def test_cancellation_during_skill_replacement_finishes_the_swap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = tmp_path / "skill.tar.gz"
+    _make_targz(archive, {"pdf/SKILL.md": b"# new"})
+    versions = _FakeVersions(archive)
+    client = cast(Any, SimpleNamespace(beta=SimpleNamespace(skills=SimpleNamespace(versions=versions))))
+    dest = tmp_path / "skills" / "pdf"
+    dest.mkdir(parents=True)
+    (dest / "SKILL.md").write_text("# previous")
+    rename = anyio.Path.rename
+
+    with anyio.CancelScope() as scope:
+
+        async def cancel_after_previous_directory_moves(path: anyio.Path, target: Any) -> anyio.Path:
+            result = await rename(path, target)
+            if Path(path) == dest:
+                scope.cancel()
+            return result
+
+        monkeypatch.setattr(anyio.Path, "rename", cancel_after_previous_directory_moves)
+        await download_session_skills(client, workdir=tmp_path, session=_session_with_skills("skill_01"))
+
+    assert scope.cancel_called
+    assert (dest / "SKILL.md").read_text() == "# new"
+    assert os.listdir(dest.parent) == ["pdf"]
+
+
 @pytest.mark.respx(base_url=base_url, assert_all_called=False)
 async def test_cancelled_download_leaves_nothing_in_the_skills_directory(
     tmp_path: Path, async_client: AsyncAnthropic, respx_mock: MockRouter
