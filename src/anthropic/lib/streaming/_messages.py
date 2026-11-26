@@ -38,6 +38,9 @@ def require_message_stop(complete: bool) -> None:
 
 
 class MessageStream(Generic[ResponseFormatT]):
+    _message_complete: bool
+    """Whether the stream received the final `message_stop` event."""
+
     text_stream: Iterator[str]
     """Iterator over just the text deltas in the stream.
 
@@ -207,6 +210,9 @@ class MessageStreamManager(Generic[ResponseFormatT]):
 
 
 class AsyncMessageStream(Generic[ResponseFormatT]):
+    _message_complete: bool
+    """Whether the stream received the final `message_stop` event."""
+
     text_stream: AsyncIterator[str]
     """Async iterator over just the text deltas in the stream.
 

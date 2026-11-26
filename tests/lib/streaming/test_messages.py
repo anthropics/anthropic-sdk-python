@@ -812,8 +812,8 @@ def final_getter_last_event(request: pytest.FixtureRequest, respx_mock: MockRout
 
 @pytest.mark.respx(base_url=base_url)
 @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
-def test_final_getters_require_message_stop(beta: bool, final_getter_last_event: str | None) -> None:
-    messages = sync_client.beta.messages if beta else sync_client.messages
+def test_final_getters_require_message_stop(client: Anthropic, beta: bool, final_getter_last_event: str | None) -> None:
+    messages = client.beta.messages if beta else client.messages
     with messages.stream(
         model="claude-sonnet-5-5", max_tokens=64, messages=[{"role": "user", "content": "Hello"}]
     ) as stream:
@@ -841,7 +841,9 @@ def test_final_getters_require_message_stop(beta: bool, final_getter_last_event:
 @pytest.mark.asyncio
 @pytest.mark.respx(base_url=base_url)
 @pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
-async def test_async_final_getters_require_message_stop(beta: bool, final_getter_last_event: str | None) -> None:
+async def test_async_final_getters_require_message_stop(
+    async_client: AsyncAnthropic, beta: bool, final_getter_last_event: str | None
+) -> None:
     messages = async_client.beta.messages if beta else async_client.messages
     async with messages.stream(
         model="claude-sonnet-5-5", max_tokens=64, messages=[{"role": "user", "content": "Hello"}]
