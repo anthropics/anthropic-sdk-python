@@ -50,6 +50,8 @@ def accumulate_managed_agents_event(
       a copy with that entry appended to. An unrecognised fragment type on an
       existing index passes the entry through unchanged — deltas are
       best-effort and the buffered final event is canonical.
+      A delta addressed to another event raises `AnthropicError` instead of
+      adding its content to the wrong message.
     - `agent.message` is the buffered final event: a copy of it is returned,
       replacing whatever the preview had accumulated.
     - Any other event, including types this SDK version does not know about,
@@ -75,6 +77,8 @@ def accumulate_managed_agents_event(
     elif event.type == "event_delta":
         if accumulated is None:
             raise AnthropicError(f"event_delta for {event.event_id} received before its event_start")
+        if event.event_id != accumulated.id:
+            raise AnthropicError(f"event_delta for {event.event_id} cannot be applied to snapshot {accumulated.id}")
 
         idx = event.delta.index
         if idx is None:

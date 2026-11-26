@@ -104,6 +104,27 @@ def test_throws_on_event_delta_with_no_prior_snapshot() -> None:
         accumulate_managed_agents_event(None, delta("evt_1", "x", 0))
 
 
+@pytest.mark.parametrize("index", [None, 0, 1])
+def test_rejects_a_delta_addressed_to_another_message(index: int | None) -> None:
+    msg = fold(seed("evt_1"), delta("evt_1", "First", 0))
+    with pytest.raises(AnthropicError, match=r"event_delta for evt_2 cannot be applied to snapshot evt_1"):
+        accumulate_managed_agents_event(msg, delta("evt_2", "Second", index))
+    assert msg.content == [BetaManagedAgentsTextBlock(type="text", text="First")]
+
+
+def test_misrouted_delta_does_not_corrupt_interleaved_previews() -> None:
+    first = fold(seed("evt_1"), delta("evt_1", "First", 0))
+    second = fold(seed("evt_2"), delta("evt_2", "Second", 0))
+
+    with pytest.raises(AnthropicError, match="snapshot evt_2"):
+        accumulate_managed_agents_event(second, delta("evt_1", " message", 0))
+
+    first = fold(first, delta("evt_1", " message", 0))
+    second = fold(second, delta("evt_2", " message", 0))
+    assert first.content == [BetaManagedAgentsTextBlock(type="text", text="First message")]
+    assert second.content == [BetaManagedAgentsTextBlock(type="text", text="Second message")]
+
+
 def test_next_sequential_index_inserts() -> None:
     msg = seed("evt_1")
     msg = fold(msg, delta("evt_1", "a", 0))
