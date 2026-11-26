@@ -16,6 +16,7 @@ from ..._types import NotGiven, not_given
 from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from .._tracing import share_message_snapshot, withhold_message_snapshot
+from ._messages import require_message_stop
 from ._beta_types import (
     BetaCitationEvent,
     BetaThinkingEvent,
@@ -100,11 +101,11 @@ class BetaMessageStream(Generic[ResponseFormatT]):
 
     def get_final_message(self) -> ParsedBetaMessage[ResponseFormatT]:
         """Waits until the stream has been read to completion and returns
-        the accumulated `Message` object.
+        the accumulated `Message` object. Raises `AnthropicError` if the stream ends before `message_stop`.
         """
         self.until_done()
-        assert self.__final_message_snapshot is not None
-        return self.__final_message_snapshot
+        require_message_stop(self._message_complete)
+        return self.current_message_snapshot
 
     def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
@@ -112,7 +113,7 @@ class BetaMessageStream(Generic[ResponseFormatT]):
         > [!NOTE]
         > Currently the API will only respond with a single content block.
 
-        Will raise an error if no `text` content blocks were returned.
+        Raises `AnthropicError` if the stream ends before `message_stop`, or `RuntimeError` if it has no text blocks.
         """
         message = self.get_final_message()
         text_blocks: list[str] = []
@@ -272,11 +273,11 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
 
     async def get_final_message(self) -> ParsedBetaMessage[ResponseFormatT]:
         """Waits until the stream has been read to completion and returns
-        the accumulated `Message` object.
+        the accumulated `Message` object. Raises `AnthropicError` if the stream ends before `message_stop`.
         """
         await self.until_done()
-        assert self.__final_message_snapshot is not None
-        return self.__final_message_snapshot
+        require_message_stop(self._message_complete)
+        return self.current_message_snapshot
 
     async def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
@@ -284,7 +285,7 @@ class BetaAsyncMessageStream(Generic[ResponseFormatT]):
         > [!NOTE]
         > Currently the API will only respond with a single content block.
 
-        Will raise an error if no `text` content blocks were returned.
+        Raises `AnthropicError` if the stream ends before `message_stop`, or `RuntimeError` if it has no text blocks.
         """
         message = await self.get_final_message()
         text_blocks: list[str] = []

@@ -11,7 +11,7 @@ import httpx2
 import pytest
 from respx import MockRouter
 
-from anthropic import Stream, Anthropic, AsyncStream, AsyncAnthropic
+from anthropic import Stream, Anthropic, AsyncStream, AnthropicError, AsyncAnthropic
 from anthropic._utils import assert_signatures_in_sync
 from anthropic._compat import PYDANTIC_V1, get_model_fields
 from anthropic.lib.streaming import InputJsonEvent, ParsedMessageStreamEvent
@@ -21,7 +21,7 @@ from anthropic.lib.streaming._messages import TRACKS_TOOL_INPUT
 from anthropic.types.message_delta_usage import MessageDeltaUsage
 from anthropic.types.raw_message_delta_event import Delta as RawMessageDelta, RawMessageDeltaEvent
 
-from .helpers import get_response, to_async_iter
+from .helpers import get_response, load_fixture, to_async_iter
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 api_key = "my-anthropic-api-key"
@@ -84,6 +84,7 @@ def assert_basic_response(events: list[ParsedMessageStreamEvent[None]], message:
         "text",
         "content_block_stop",
         "message_delta",
+        "message_stop",
     ]
 
 
@@ -162,6 +163,7 @@ def assert_tool_use_response(events: list[ParsedMessageStreamEvent[None]], messa
         "input_json",
         "content_block_stop",
         "message_delta",
+        "message_stop",
     ]
 
 
@@ -182,6 +184,7 @@ def assert_server_tool_use_response(events: list[ParsedMessageStreamEvent[None]]
         "text",
         "content_block_stop",
         "message_delta",
+        "message_stop",
     ]
 
     server_tool_use = message.content[0]
@@ -473,9 +476,8 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
-        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx2.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
         with sync_client.messages.stream(
@@ -752,9 +754,8 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
     async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
-        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx2.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )
 
         async with async_client.messages.stream(
@@ -787,6 +788,83 @@ class TestAsyncMessages:
 
         request_body = json.loads(route.calls.last.request.content)
         assert request_body["speed"] == "fast"
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(None, id="empty"),
+        pytest.param("content_block_delta", id="mid-text"),
+        pytest.param("message_delta", id="after-stop-reason"),
+        pytest.param("message_stop", id="complete"),
+    ]
+)
+def final_getter_last_event(request: pytest.FixtureRequest, respx_mock: MockRouter) -> str | None:
+    last_event: str | None = request.param
+    frames: list[str] = []
+    if last_event is not None:
+        for frame in load_fixture("basic_response.txt").strip().split("\n\n"):
+            frames.append(frame + "\n\n")
+            if frame.startswith(f"event: {last_event}\n"):
+                break
+    respx_mock.post("/v1/messages").mock(return_value=httpx2.Response(200, content="".join(frames).encode()))
+    return last_event
+
+
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+def test_final_getters_require_message_stop(beta: bool, final_getter_last_event: str | None) -> None:
+    messages = sync_client.beta.messages if beta else sync_client.messages
+    with messages.stream(
+        model="claude-sonnet-5-5", max_tokens=64, messages=[{"role": "user", "content": "Hello"}]
+    ) as stream:
+        events = [event.type for event in stream]
+        if final_getter_last_event == "message_stop":
+            assert events[-1] == "message_stop"
+            assert stream.get_final_message() is stream.current_message_snapshot
+            assert stream.get_final_text() == "Hello there!"
+            return
+
+        assert "message_stop" not in events
+        if final_getter_last_event is None:
+            assert events == []
+        else:
+            assert final_getter_last_event in events
+            block = stream.current_message_snapshot.content[0]
+            assert block.type == "text"
+            assert block.text == ("Hello" if final_getter_last_event == "content_block_delta" else "Hello there!")
+        with pytest.raises(AnthropicError, match="message_stop"):
+            stream.get_final_message()
+        with pytest.raises(AnthropicError, match="message_stop"):
+            stream.get_final_text()
+
+
+@pytest.mark.asyncio
+@pytest.mark.respx(base_url=base_url)
+@pytest.mark.parametrize("beta", [False, True], ids=["stable", "beta"])
+async def test_async_final_getters_require_message_stop(beta: bool, final_getter_last_event: str | None) -> None:
+    messages = async_client.beta.messages if beta else async_client.messages
+    async with messages.stream(
+        model="claude-sonnet-5-5", max_tokens=64, messages=[{"role": "user", "content": "Hello"}]
+    ) as stream:
+        events = [event.type async for event in stream]
+        if final_getter_last_event == "message_stop":
+            assert events[-1] == "message_stop"
+            assert await stream.get_final_message() is stream.current_message_snapshot
+            assert await stream.get_final_text() == "Hello there!"
+            return
+
+        assert "message_stop" not in events
+        if final_getter_last_event is None:
+            assert events == []
+        else:
+            assert final_getter_last_event in events
+            block = stream.current_message_snapshot.content[0]
+            assert block.type == "text"
+            assert block.text == ("Hello" if final_getter_last_event == "content_block_delta" else "Hello there!")
+        with pytest.raises(AnthropicError, match="message_stop"):
+            await stream.get_final_message()
+        with pytest.raises(AnthropicError, match="message_stop"):
+            await stream.get_final_text()
 
 
 def test_message_delta_fields_are_all_accumulated() -> None:

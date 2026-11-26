@@ -136,6 +136,9 @@ Blocks until the stream has been read to completion and returns the accumulated 
 
 Blocks until the stream has been read to completion and returns all `text` content blocks concatenated together.
 
+Both final-result methods raise `anthropic.AnthropicError` if the stream ends before `message_stop`.
+If a message started, `stream.current_message_snapshot` holds the content received so far.
+
 ## Message Threads
 
 A message thread (beta) keeps the conversation on the server, so each request sends only the new messages instead of the whole history. `client.beta.messages.thread(...)` takes what `create()` takes and sends nothing until the first turn.

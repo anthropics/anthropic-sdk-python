@@ -16,10 +16,11 @@ def load_fixture(fixture_name: str) -> str:
 
 
 def get_response(fixture_name: str) -> Iterator[bytes]:
-    """Convert a fixture file into a stream of bytes for testing."""
-    content = load_fixture(fixture_name)
+    """Send the fixture as SSE, including the blank line that dispatches its last event."""
+    content = load_fixture(fixture_name).rstrip("\n")
     for line in content.splitlines():
         yield line.encode() + b"\n"
+    yield b"\n"
 
 
 async def to_async_iter(iter: Iterator[_T]) -> AsyncIterator[_T]:

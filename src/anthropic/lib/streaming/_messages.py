@@ -26,9 +26,15 @@ from ..._utils import consume_sync_iterator, consume_async_iterator
 from ..._models import build, construct_type, construct_type_unchecked
 from .._tracing import share_message_snapshot, withhold_message_snapshot
 from ..._streaming import Stream, AsyncStream
+from ..._exceptions import AnthropicError
 from ..._utils._utils import is_given
 from .._parse._response import ResponseFormatT, parse_text
 from ...types.parsed_message import ParsedMessage, ParsedContentBlock
+
+
+def require_message_stop(complete: bool) -> None:
+    if not complete:
+        raise AnthropicError("The stream ended before the `message_stop` event.")
 
 
 class MessageStream(Generic[ResponseFormatT]):
@@ -48,6 +54,7 @@ class MessageStream(Generic[ResponseFormatT]):
         output_format: ResponseFormatT | NotGiven,
     ) -> None:
         self._raw_stream = raw_stream
+        self._message_complete = False
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedMessage[ResponseFormatT] | None = None
@@ -95,11 +102,11 @@ class MessageStream(Generic[ResponseFormatT]):
 
     def get_final_message(self) -> ParsedMessage[ResponseFormatT]:
         """Waits until the stream has been read to completion and returns
-        the accumulated `Message` object.
+        the accumulated `Message` object. Raises `AnthropicError` if the stream ends before `message_stop`.
         """
         self.until_done()
-        assert self.__final_message_snapshot is not None
-        return self.__final_message_snapshot
+        require_message_stop(self._message_complete)
+        return self.current_message_snapshot
 
     def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
@@ -107,7 +114,7 @@ class MessageStream(Generic[ResponseFormatT]):
         > [!NOTE]
         > Currently the API will only respond with a single content block.
 
-        Will raise an error if no `text` content blocks were returned.
+        Raises `AnthropicError` if the stream ends before `message_stop`, or `RuntimeError` if it has no text blocks.
         """
         message = self.get_final_message()
         text_blocks: list[str] = []
@@ -150,6 +157,9 @@ class MessageStream(Generic[ResponseFormatT]):
             except Exception:
                 withhold_message_snapshot(self._raw_stream)
                 raise
+
+            if sse_event.type == "message_stop":
+                self._message_complete = True
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
@@ -213,6 +223,7 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         output_format: ResponseFormatT | NotGiven,
     ) -> None:
         self._raw_stream = raw_stream
+        self._message_complete = False
         self.text_stream = self.__stream_text__()
         self._iterator = self.__stream__()
         self.__final_message_snapshot: ParsedMessage[ResponseFormatT] | None = None
@@ -260,11 +271,11 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
 
     async def get_final_message(self) -> ParsedMessage[ResponseFormatT]:
         """Waits until the stream has been read to completion and returns
-        the accumulated `Message` object.
+        the accumulated `Message` object. Raises `AnthropicError` if the stream ends before `message_stop`.
         """
         await self.until_done()
-        assert self.__final_message_snapshot is not None
-        return self.__final_message_snapshot
+        require_message_stop(self._message_complete)
+        return self.current_message_snapshot
 
     async def get_final_text(self) -> str:
         """Returns all `text` content blocks concatenated together.
@@ -272,7 +283,7 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
         > [!NOTE]
         > Currently the API will only respond with a single content block.
 
-        Will raise an error if no `text` content blocks were returned.
+        Raises `AnthropicError` if the stream ends before `message_stop`, or `RuntimeError` if it has no text blocks.
         """
         message = await self.get_final_message()
         text_blocks: list[str] = []
@@ -315,6 +326,9 @@ class AsyncMessageStream(Generic[ResponseFormatT]):
             except Exception:
                 withhold_message_snapshot(self._raw_stream)
                 raise
+
+            if sse_event.type == "message_stop":
+                self._message_complete = True
 
             events_to_fire = build_events(event=sse_event, message_snapshot=self.current_message_snapshot)
             for event in events_to_fire:
