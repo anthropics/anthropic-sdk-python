@@ -108,7 +108,7 @@ class ThreadState(Generic[RunnableToolT, ResponseFormatT]):
         """Stage messages for the next turn, skipping the reply just recorded and deferring while a turn is in
         flight."""
         messages = [
-            message if isinstance(message, BetaMessage) else _replayable_message(message) for message in messages
+            message if isinstance(message, BetaMessage) else replayable_message(message) for message in messages
         ]
         if self._turn is not None:
             self._turn.deferred_messages.extend(messages)
@@ -192,7 +192,7 @@ class ThreadState(Generic[RunnableToolT, ResponseFormatT]):
     def set_messages(self, messages: Iterable[BetaMessageParam]) -> None:
         """Take the history from `messages`: additions to the current history are staged, and any other list replaces it
         and starts a new thread."""
-        messages = [_replayable_message(message) for message in messages]
+        messages = [replayable_message(message) for message in messages]
         if self._turn is not None:
             # A turn in flight has already sent what is staged: an edit that only appends to it is deferred like
             # `append()`, and a rewritten history replaces the thread (and anything deferred so far) once the turn ends.
@@ -687,7 +687,7 @@ def _split_tools(
 RUNNABLE_TOOL_TYPES = (BetaFunctionTool, BetaBuiltinFunctionTool, BetaAsyncFunctionTool, BetaAsyncBuiltinFunctionTool)
 
 
-def _replayable_message(message: BetaMessageParam) -> BetaMessageParam:
+def replayable_message(message: BetaMessageParam) -> BetaMessageParam:
     """Keep iterator-backed content in the history so each request can send the same blocks."""
     content = message.get("content")
     if isinstance(content, Iterator) and is_sent_as_list(content):
