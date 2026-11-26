@@ -17,7 +17,6 @@ import tempfile
 from typing import TYPE_CHECKING
 from pathlib import Path, PurePath, PurePosixPath
 from functools import partial
-from contextlib import suppress
 from collections.abc import Iterable
 
 import anyio
@@ -265,6 +264,7 @@ async def _download_and_extract(client: AsyncAnthropic, skill_id: str, version_i
     """Download and extract the skill archive in an owner-only directory beside `dest`, then replace `dest`."""
     await anyio.Path(dest.parent).mkdir(parents=True, exist_ok=True, mode=_SKILL_DIR_MODE)
     work = Path(await run_sync(partial(tempfile.mkdtemp, prefix=".skill-", dir=dest.parent)))
+    preserve_backup = False
     try:
         async with client.beta.skills.versions.with_streaming_response.download(
             version_id, skill_id=skill_id
@@ -272,10 +272,33 @@ async def _download_and_extract(client: AsyncAnthropic, skill_id: str, version_i
             await archive.stream_to_file(work / "archive")
         # zipfile / tarfile are blocking; keep them off the event loop.
         await run_sync(_extract_skill_archive, work / "archive", work / "stage")
-        with suppress(FileNotFoundError):
-            await anyio.Path(dest).rename(work / "replaced")
-        await anyio.Path(work / "stage").rename(dest)
+        # Finish the replacement (or restore the previous directory) before
+        # cancellation can interrupt the two filesystem operations.
+        with anyio.CancelScope(shield=True):
+            replaced = False
+            try:
+                await anyio.Path(dest).rename(work / "replaced")
+                replaced = True
+            except FileNotFoundError:
+                pass
+            try:
+                await anyio.Path(work / "stage").rename(dest)
+            except BaseException:
+                if replaced:
+                    try:
+                        await anyio.Path(work / "replaced").rename(dest)
+                    except BaseException:
+                        # Do not erase the only remaining copy if the file
+                        # system also refuses the rollback.
+                        preserve_backup = True
+                        log.exception(
+                            "failed to restore skill directory %s; previous contents kept at %s",
+                            dest,
+                            work / "replaced",
+                        )
+                raise
     finally:
         with anyio.CancelScope(shield=True):
             # `shutil.rmtree` is blocking; keep it off the event loop.
-            await run_sync(partial(shutil.rmtree, work, ignore_errors=True))
+            if not preserve_backup:
+                await run_sync(partial(shutil.rmtree, work, ignore_errors=True))
