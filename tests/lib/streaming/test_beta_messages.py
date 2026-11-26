@@ -66,6 +66,7 @@ EXPECTED_BASIC_EVENT_TYPES = [
     "text",
     "content_block_stop",
     "message_delta",
+    "message_stop",
 ]
 
 EXPECTED_TOOL_USE_MESSAGE = {
@@ -114,6 +115,7 @@ EXPECTED_TOOL_USE_EVENT_TYPES = [
     "input_json",
     "content_block_stop",
     "message_delta",
+    "message_stop",
 ]
 
 EXPECTED_INCOMPLETE_MESSAGE = {
@@ -175,6 +177,7 @@ EXPECTED_INCOMPLETE_EVENT_TYPES = [
     "content_block_delta",
     "input_json",
     "message_delta",
+    "message_stop",
 ]
 
 EXPECTED_COMPACTION_MESSAGE = {
@@ -205,6 +208,7 @@ EXPECTED_COMPACTION_EVENT_TYPES = [
     "text",
     "content_block_stop",
     "message_delta",
+    "message_stop",
 ]
 
 
@@ -299,6 +303,7 @@ EXPECTED_FALLBACK_EVENT_TYPES = [
     "text",
     "content_block_stop",
     "message_delta",
+    "message_stop",
 ]
 
 
@@ -332,6 +337,7 @@ EXPECTED_SERVER_TOOL_USE_EVENT_TYPES = [
     "text",
     "content_block_stop",
     "message_delta",
+    "message_stop",
 ]
 
 
@@ -586,9 +592,8 @@ class TestSyncMessages:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
     def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
-        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx2.Response(200, content=iter([*get_response("basic_response.txt"), b"\n"]))
+            return_value=httpx2.Response(200, content=get_response("basic_response.txt"))
         )
 
         with sync_client.beta.messages.stream(
@@ -905,9 +910,8 @@ class TestAsyncMessages:
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.filterwarnings("error")
     async def test_message_stop_event_serialization(self, respx_mock: MockRouter) -> None:
-        # trailing blank line terminates the final `message_stop` SSE so it is dispatched
         respx_mock.post("/v1/messages").mock(
-            return_value=httpx2.Response(200, content=to_async_iter(iter([*get_response("basic_response.txt"), b"\n"])))
+            return_value=httpx2.Response(200, content=to_async_iter(get_response("basic_response.txt")))
         )
 
         async with async_client.beta.messages.stream(

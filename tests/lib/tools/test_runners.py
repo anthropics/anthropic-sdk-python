@@ -3492,6 +3492,37 @@ def _sse_message(content_block: Dict[str, Any], stop_reason: str, *deltas: Dict[
     return httpx2.Response(200, content=body.encode(), headers={"content-type": "text/event-stream"})
 
 
+@pytest.mark.skipif(PYDANTIC_V1, reason="tool runner not supported with pydantic v1")
+@_sync_and_async
+@pytest.mark.respx(base_url=base_url)
+async def test_streaming_runner_requires_message_stop_before_running_a_tool(
+    sync: bool, client: Anthropic, async_client: AsyncAnthropic, respx_mock: MockRouter
+) -> None:
+    tool_use = _sse_message({"type": "tool_use", "id": "toolu_time", "name": "get_time", "input": {}}, "tool_use")
+    truncated = tool_use.content.partition(b"event: message_stop\n")[0]
+    respx_mock.post("/v1/messages").mock(
+        side_effect=[
+            httpx2.Response(200, content=truncated, headers={"content-type": "text/event-stream"}),
+            _sse_message({"type": "text", "text": "Done."}, "end_turn"),
+        ]
+    )
+    calls: list[str] = []
+    runner = (client if sync else async_client).beta.messages.tool_runner(
+        model="claude-haiku-4-5",
+        max_tokens=64,
+        messages=[{"role": "user", "content": "What time is it?"}],
+        tools=[_recording_tool(sync, "get_time", calls)],
+        stream=True,
+    )
+    with pytest.raises(AnthropicError, match="message_stop"):
+        if isinstance(runner, BetaStreamingToolRunner):
+            runner.until_done()
+        else:
+            await runner.until_done()
+    assert calls == []
+    assert len(respx_mock.calls) == 1
+
+
 def _streamed_responses() -> List[httpx2.Response]:
     return [
         _sse_message(
