@@ -105,6 +105,13 @@ def turn_overrides(**values: object) -> TurnOverrides:
     return cast(TurnOverrides, given(values))
 
 
+def materialize_turn_tools(overrides: TurnOverrides) -> TurnOverrides:
+    """Keep one-shot tool definitions available when the turn rebuilds its request."""
+    if "tools" in overrides and not isinstance(overrides["tools"], list):
+        return {**overrides, "tools": list(overrides["tools"])}
+    return overrides
+
+
 def request_options(**values: object) -> RequestOptions:
     """The given keyword arguments as `RequestOptions`, without the ones left at their "not given" default."""
     return cast(RequestOptions, given(values))

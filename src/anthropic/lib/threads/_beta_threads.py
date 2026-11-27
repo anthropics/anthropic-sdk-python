@@ -14,6 +14,7 @@ from ._params import (
     request_options,
     thread_arguments,
     reject_thread_param,
+    materialize_turn_tools,
 )
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import is_given
@@ -337,6 +338,7 @@ class BetaMessageThread(BaseMessageThread["Anthropic", BetaRunnableTool, Respons
         self, overrides: TurnOverrides, *, stream: bool
     ) -> BetaMessage | Stream[BetaRawMessageStreamEvent]:
         """One `create()` call for this turn, re-sent as long as the state can recover from the rejection."""
+        overrides = materialize_turn_tools(overrides)
         while True:
             arguments = self._state.create_arguments(overrides, stream=stream)
             try:
@@ -550,6 +552,7 @@ class BetaAsyncMessageThread(BaseMessageThread["AsyncAnthropic", BetaAsyncRunnab
         self, overrides: TurnOverrides, *, stream: bool
     ) -> BetaMessage | AsyncStream[BetaRawMessageStreamEvent]:
         """One `create()` call for this turn, re-sent as long as the state can recover from the rejection."""
+        overrides = materialize_turn_tools(overrides)
         while True:
             arguments = self._state.create_arguments(overrides, stream=stream)
             try:
