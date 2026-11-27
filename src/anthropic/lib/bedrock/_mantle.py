@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Union, Mapping, TypeVar, Sequence
+from typing import Any, Union, Literal, Mapping, TypeVar, Sequence
 from typing_extensions import Self, override
 
 import httpx2
@@ -39,6 +39,7 @@ from ...resources.messages import Messages, AsyncMessages
 from ...resources.beta.messages import Messages as BetaMessages, AsyncMessages as AsyncBetaMessages
 
 DEFAULT_SERVICE_NAME = "bedrock-mantle"
+MantleAuthMode = Literal["auto", "api_key", "sigv4"]
 
 _MANTLE_API_KEY_ENV_VARS = ("AWS_BEARER_TOKEN_BEDROCK", "ANTHROPIC_AWS_API_KEY")
 
@@ -98,6 +99,7 @@ def _resolve_mantle_config(
     aws_region: str | None,
     aws_profile: str | None,
     skip_auth: bool,
+    auth_mode: MantleAuthMode,
     base_url: str | httpx2.URL | None,
     default_headers: Mapping[str, str] | None,
 ) -> tuple[str | None, str | httpx2.URL, bool, dict[str, str]]:
@@ -105,25 +107,43 @@ def _resolve_mantle_config(
 
     Returns (resolved_api_key, resolved_base_url, use_sigv4, merged_headers).
     """
+    if auth_mode not in ("auto", "api_key", "sigv4"):
+        raise ValueError("`auth_mode` must be one of `auto`, `api_key`, or `sigv4`")
+
+    if skip_auth and auth_mode != "auto":
+        raise ValueError("`skip_auth` is mutually exclusive with an explicit `auth_mode`")
+
     if skip_auth:
         use_sigv4 = False
         resolved_api_key = None
     else:
         validate_credentials(aws_access_key=aws_access_key, aws_secret_key=aws_secret_key)
 
-        use_sigv4 = resolve_auth_mode(
-            api_key=api_key,
-            aws_access_key=aws_access_key,
-            aws_secret_key=aws_secret_key,
-            aws_profile=aws_profile,
-            api_key_env_vars=_MANTLE_API_KEY_ENV_VARS,
-        )
+        if auth_mode == "auto":
+            use_sigv4 = resolve_auth_mode(
+                api_key=api_key,
+                aws_access_key=aws_access_key,
+                aws_secret_key=aws_secret_key,
+                aws_profile=aws_profile,
+                api_key_env_vars=_MANTLE_API_KEY_ENV_VARS,
+            )
+        else:
+            use_sigv4 = auth_mode == "sigv4"
+
+        if auth_mode == "sigv4" and api_key is not None:
+            raise ValueError("`api_key` cannot be used with `auth_mode='sigv4'`")
 
         resolved_api_key = resolve_api_key(
-            api_key=api_key,
+            api_key=api_key if not use_sigv4 else None,
             use_sigv4=use_sigv4,
             api_key_env_vars=_MANTLE_API_KEY_ENV_VARS,
         )
+
+        if auth_mode == "api_key" and resolved_api_key is None:
+            raise ValueError(
+                "`auth_mode='api_key'` requires an API key. Set `api_key` or one of "
+                "`AWS_BEARER_TOKEN_BEDROCK` / `ANTHROPIC_AWS_API_KEY`."
+            )
 
     resolved_region = resolve_region(aws_region)
 
@@ -151,6 +171,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
     aws_session_token: str | None
     aws_profile: str | None
     skip_auth: bool
+    auth_mode: MantleAuthMode
 
     _use_sigv4: bool
 
@@ -164,6 +185,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
+        auth_mode: MantleAuthMode = "auto",
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -183,6 +205,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
             aws_region=aws_region,
             aws_profile=aws_profile,
             skip_auth=skip_auth,
+            auth_mode=auth_mode,
             base_url=base_url,
             default_headers=default_headers,
         )
@@ -209,6 +232,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         self.aws_session_token = aws_session_token
         self.aws_profile = aws_profile
         self.skip_auth = skip_auth
+        self.auth_mode = auth_mode
         self._use_sigv4 = use_sigv4
 
         self._default_stream_cls = Stream
@@ -280,6 +304,7 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
+        auth_mode: MantleAuthMode | None = None,
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.Client | None = None,
@@ -295,15 +320,21 @@ class AnthropicBedrockMantle(BaseMantleClient[httpx2.Client, Stream[Any]], SyncA
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
+        resolved_auth_mode = auth_mode if auth_mode is not None else self.auth_mode
+        resolved_api_key = api_key or self.api_key
+        if auth_mode == "sigv4" and api_key is None:
+            resolved_api_key = None
+
         return copy_platform_client(
             self,
-            api_key=api_key or self.api_key,
+            api_key=resolved_api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_session_token=aws_session_token or self.aws_session_token,
             aws_region=aws_region or self.aws_region,
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
+            auth_mode=resolved_auth_mode,
             base_url=base_url or self.base_url,
             timeout=timeout,
             http_client=http_client,
@@ -341,6 +372,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
     aws_session_token: str | None
     aws_profile: str | None
     skip_auth: bool
+    auth_mode: MantleAuthMode
 
     _use_sigv4: bool
 
@@ -354,6 +386,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         aws_profile: str | None = None,
         api_key: str | None = None,
         skip_auth: bool = False,
+        auth_mode: MantleAuthMode = "auto",
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -373,6 +406,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
             aws_region=aws_region,
             aws_profile=aws_profile,
             skip_auth=skip_auth,
+            auth_mode=auth_mode,
             base_url=base_url,
             default_headers=default_headers,
         )
@@ -399,6 +433,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         self.aws_session_token = aws_session_token
         self.aws_profile = aws_profile
         self.skip_auth = skip_auth
+        self.auth_mode = auth_mode
         self._use_sigv4 = use_sigv4
 
         self._default_stream_cls = AsyncStream
@@ -470,6 +505,7 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         aws_region: str | None = None,
         aws_profile: str | None = None,
         skip_auth: bool | None = None,
+        auth_mode: MantleAuthMode | None = None,
         base_url: str | httpx2.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx2.AsyncClient | None = None,
@@ -485,15 +521,21 @@ class AsyncAnthropicBedrockMantle(BaseMantleClient[httpx2.AsyncClient, AsyncStre
         """
         Create a new client instance re-using the same options given to the current client with optional overriding.
         """
+        resolved_auth_mode = auth_mode if auth_mode is not None else self.auth_mode
+        resolved_api_key = api_key or self.api_key
+        if auth_mode == "sigv4" and api_key is None:
+            resolved_api_key = None
+
         return copy_platform_client(
             self,
-            api_key=api_key or self.api_key,
+            api_key=resolved_api_key,
             aws_access_key=aws_access_key or self.aws_access_key,
             aws_secret_key=aws_secret_key or self.aws_secret_key,
             aws_session_token=aws_session_token or self.aws_session_token,
             aws_region=aws_region or self.aws_region,
             aws_profile=aws_profile or self.aws_profile,
             skip_auth=skip_auth if skip_auth is not None else self.skip_auth,
+            auth_mode=resolved_auth_mode,
             base_url=base_url or self.base_url,
             timeout=timeout,
             http_client=http_client,
