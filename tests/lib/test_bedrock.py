@@ -18,10 +18,13 @@ from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 
 from anthropic import (
+    AnthropicError,
     APIStatusError,
     BadRequestError,
     OverloadedError,
     AnthropicBedrock,
+    CredentialsError,
+    APIConnectionError,
     InternalServerError,
     AsyncAnthropicBedrock,
     PreconditionFailedError,
@@ -540,6 +543,66 @@ def test_region_is_required(
 
     # an explicit region always wins and skips inference entirely
     assert AnthropicBedrock(aws_region="eu-west-1").aws_region == "eu-west-1"
+
+
+def test_missing_credentials_raise_credentials_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    # no static keys, no profile, no metadata service: boto3 resolves nothing and
+    # signing fails. That is a configuration problem, so callers must be able to
+    # catch it with `except AnthropicError` instead of matching a bare RuntimeError.
+    class _NoCredentialsSession:
+        region_name = "us-east-1"
+
+        def get_credentials(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        "anthropic.lib.aws._auth._get_session",
+        lambda **_: _NoCredentialsSession(),
+    )
+
+    client = AnthropicBedrock(aws_region="us-east-1", max_retries=0)
+    with pytest.raises(CredentialsError) as exc_info:
+        client.messages.create(
+            model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hi"}],
+        )
+
+    assert str(exc_info.value) == "Could not resolve AWS credentials from session"
+    assert isinstance(exc_info.value, AnthropicError)
+    # the credentials never resolved, so this is not a failed request
+    assert not isinstance(exc_info.value, APIConnectionError)
+
+
+def test_missing_credentials_raise_credentials_error_async(monkeypatch: pytest.MonkeyPatch) -> None:
+    # the async client resolves credentials through the same helper, so it gets the
+    # same error class rather than a RuntimeError from the signing path
+    class _NoCredentialsSession:
+        region_name = "us-east-1"
+
+        def get_credentials(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        "anthropic.lib.aws._auth._get_session",
+        lambda **_: _NoCredentialsSession(),
+    )
+
+    client = AsyncAnthropicBedrock(aws_region="us-east-1", max_retries=0)
+
+    async def _call() -> None:
+        await client.messages.create(
+            model="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            max_tokens=16,
+            messages=[{"role": "user", "content": "hi"}],
+        )
+
+    import asyncio
+
+    with pytest.raises(CredentialsError) as exc_info:
+        asyncio.run(_call())
+
+    assert isinstance(exc_info.value, AnthropicError)
 
 
 def test_chunk_bytes_to_sse_typed_event() -> None:
