@@ -269,7 +269,6 @@ class BaseFunctionTool(Generic[CallableT]):
         return TypeAdapter(self._func_with_validate)
 
 
-
 def _validation_error_summary(exc: pydantic.ValidationError) -> str:
     """Short field errors for the model; values are not echoed."""
     parts: list[str] = []
