@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from opentelemetry.trace import Span, Status, SpanKind, StatusCode
+from opentelemetry.trace import Span, SpanKind
 
 from ..._tracing import set_error_status
 from ._attributes import attributes
@@ -20,10 +20,9 @@ log: logging.Logger = logging.getLogger(__name__)
 class WorkSpan:
     """The `anthropic.environment.work` span of the work item that a work poller returned last.
 
-    The poller starts it when a poll returns the item, and ends it with status `OK` when its consumer asks
-    for the next item or stops polling. A consumer that gives the poller its own `WorkSpan`, as the
-    environment worker does, handles the item with `span` current and ends the span first, with how
-    the handling went.
+    The poller starts it when a poll returns the item, and ends it when its consumer asks for the next
+    item or stops polling. A consumer that gives the poller its own `WorkSpan`, as the environment
+    worker does, handles the item with `span` current and ends the span first, with how the handling went.
     """
 
     span: Span | None = None
@@ -51,11 +50,10 @@ class WorkSpan:
         except Exception:
             log.debug("Could not start the span of a work item", exc_info=True)
 
-    def end(self, error: BaseException | None = None, *, finished: bool = True) -> None:
+    def end(self, error: BaseException | None = None) -> None:
         """Ends the span, unless it has ended.
 
-        The status stays unset when `error` is a cancellation, and when the consumer stopped before it
-        `finished` with the item, as a worker that lost the item's lease does. Never raises.
+        The status stays unset when `error` is a cancellation. Never raises.
         """
         span = self.span
         if span is None:
@@ -64,8 +62,6 @@ class WorkSpan:
         try:
             if error is not None:
                 set_error_status(span, error)
-            elif finished:
-                span.set_status(Status(StatusCode.OK))
             span.end()
         except Exception:
             log.debug("Could not end the span of a work item", exc_info=True)

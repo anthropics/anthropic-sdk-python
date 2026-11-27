@@ -10,7 +10,7 @@ from opentelemetry.util.types import AttributeValue
 from ._utils import MessageCreateBody, get, as_dict
 from ...types import Message
 from ._content import set_message_content
-from ._response import set_usage_sums
+from ._response import set_usage_sums, set_finish_reasons
 from ..._tracing import (
     ApiCallResult,
     StreamObserver,
@@ -104,6 +104,7 @@ def record_messages_create(
         )
 
     set_usage_sums(span, data, complete=True, iterations=issubclass(returns, BetaMessage))
+    set_finish_reasons(span, data)
     if content:
         set_message_content(span, body, get(data, "content"), limit=client._otel.max_content_bytes)
     return None

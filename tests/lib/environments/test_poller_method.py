@@ -656,7 +656,7 @@ async def test_each_work_item_has_a_span_until_the_next_item(sync: bool, respx_m
     for work_span, work_id in ((first, "work_1"), (second, "work_2")):
         assert parent_id(work_span) == span_id(app_span)
         assert work_span.kind == SpanKind.INTERNAL
-        assert work_span.status.status_code == StatusCode.OK
+        assert work_span.status.status_code == StatusCode.UNSET
         assert attributes(work_span) == {
             "gen_ai.provider.name": "anthropic",
             "anthropic.environment.id": "env_1",
@@ -674,7 +674,7 @@ async def test_each_work_item_has_a_span_until_the_next_item(sync: bool, respx_m
 
 @pytest.mark.respx(base_url=base_url)
 @pytest.mark.parametrize("sync", [True, False], ids=["sync", "async"])
-async def test_work_span_ends_ok_when_the_consumer_stops_polling(sync: bool, respx_mock: MockRouter) -> None:
+async def test_work_span_is_unset_when_the_consumer_stops_polling(sync: bool, respx_mock: MockRouter) -> None:
     spans = Spans()
     # The consumer owns the stop request, so the poller sends none.
     _mock_work_api(respx_mock, [httpx2.Response(200, json=_work_json("work_1"))], actions=("ack",))
@@ -695,7 +695,7 @@ async def test_work_span_ends_ok_when_the_consumer_stops_polling(sync: bool, res
         await cast(Any, async_items).aclose()
 
     work_span = spans.one("anthropic.environment.work")
-    assert work_span.status.status_code == StatusCode.OK
+    assert work_span.status.status_code == StatusCode.UNSET
     # No span was current around the consumer's calls, so the item's span is a root span.
     assert work_span.parent is None
 
@@ -787,7 +787,7 @@ async def test_a_work_item_without_data_is_acked_and_given_with_a_span(sync: boo
 
     assert respx_mock.calls.call_count == 4
     work_span = spans.one("anthropic.environment.work")
-    assert work_span.status.status_code == StatusCode.OK
+    assert work_span.status.status_code == StatusCode.UNSET
     assert attributes(work_span) == {
         "gen_ai.provider.name": "anthropic",
         "anthropic.environment.id": "env_1",
