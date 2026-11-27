@@ -135,6 +135,13 @@ def _clear_aws_url_env(monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv(var, raising=False)
 
 
+@pytest.fixture(autouse=True)
+def isolate_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep AWS settings from the developer's shell out of these tests."""
+    _clear_aws_url_env(monkeypatch)
+    monkeypatch.delenv("ANTHROPIC_AWS_API_KEY", raising=False)
+
+
 def _set_ambient_first_party_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ambient-key")
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "ambient-token")
