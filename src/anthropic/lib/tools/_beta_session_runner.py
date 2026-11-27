@@ -142,6 +142,7 @@ DEFAULT_MAX_IDLE = 60.0
 # Events that leave the idle countdown as it is: they are neither agent activity
 # nor an idle. The exception is a termination that follows a failed history read.
 IDLE_NEUTRAL_EVENTS = ("user.tool_confirmation", "session.thread_status_terminated")
+SESSION_END_EVENTS = ("session.status_terminated", "session.deleted")
 
 log = logging.getLogger(__name__)
 
@@ -619,8 +620,10 @@ class SessionToolRunner:
                 for tool in self.tools:
                     await aclose_runnable_tool(tool)
 
-    async def _reconcile(self) -> None:
+    async def _reconcile(self) -> bool:
         """Read full history and enqueue every tool-call event still unanswered.
+
+        Return whether the history reports that the session has ended.
 
         Two-pass: read the whole history before emitting so a tool-call whose
         result appears later in the same history is not re-dispatched. Pairs
@@ -634,6 +637,9 @@ class SessionToolRunner:
         self._idle_may_be_stale = True
         try:
             async for ev in self._events.list(self.session_id, limit=1000, extra_headers=self.extra_headers):
+                if ev.type in SESSION_END_EVENTS:
+                    self._idle_clock.disarm()
+                    return True
                 self._note_primary_thread(ev)
                 if ev.type == "agent.tool_use" or ev.type == "agent.custom_tool_use":
                     # Mark the event seen so the live stream doesn't re-enqueue it, but
@@ -678,7 +684,7 @@ class SessionToolRunner:
             # reading.
             for ev in pending:
                 self._seen.discard(ev.id)
-            return
+            return False
         unanswered = [ev for ev in pending if ev.id not in self._answered]
         # Disarm before routing: enqueuing below can block on a full work
         # buffer while the clock may still be armed from before the reconnect.
@@ -709,17 +715,21 @@ class SessionToolRunner:
         ]
         if last_ended_turn and not outstanding:
             self._idle_clock.arm()
+        return False
 
     async def _stream_loop(self) -> None:
         backoff = STREAM_BACKOFF_START
         while not self._stop.is_set():
+            session_ended = False
             try:
                 # Open the stream *before* reconciling: with the stream already
                 # attached, an event emitted in the gap between the list call
                 # and the attach is delivered live instead of lost. `_seen`
                 # dedups any overlap between the history and the live stream.
                 async with await self._events.stream(self.session_id, extra_headers=self.extra_headers) as stream:
-                    await self._reconcile()
+                    session_ended = await self._reconcile()
+                    if session_ended:
+                        return
                     async for ev in stream:
                         backoff = STREAM_BACKOFF_START
                         # Arm/disarm the idle clock: an idle that ends the turn starts
@@ -747,12 +757,11 @@ class SessionToolRunner:
                             self._answered.add(ev.custom_tool_use_id)
                         elif ev.type == "user.tool_confirmation":
                             await self._note_confirmation(ev)
-                        elif ev.type in ("session.status_terminated", "session.deleted"):
-                            log.info("session terminated")
-                            self._stop.set()
+                        elif ev.type in SESSION_END_EVENTS:
+                            session_ended = True
                             return
             except TRANSIENT_ERRORS as e:
-                if self._stop.is_set():
+                if session_ended or self._stop.is_set():
                     return
                 if is_fatal_status_error(e):
                     # No amount of backoff will fix a 401/403; bail out so the
@@ -761,6 +770,11 @@ class SessionToolRunner:
                     self._stop.set()
                     return
                 log.warning("stream disconnected, reconnecting backoff=%.1fs error=%s", backoff, e)
+            finally:
+                if session_ended:
+                    # Close the attachment before signalling the consumer to tear down the task group.
+                    log.info("session terminated")
+                    self._stop.set()
             with anyio.move_on_after(backoff):
                 await self._stop.wait()
             backoff = min(backoff * 2, STREAM_BACKOFF_CAP)
