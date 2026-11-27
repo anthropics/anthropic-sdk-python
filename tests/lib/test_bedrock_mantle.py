@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import threading
 from typing import cast
+from pathlib import Path
 from collections.abc import Callable, Awaitable
 from typing_extensions import Protocol
 
@@ -69,6 +70,21 @@ class GetAuthHeadersRecorder:
         return {"Authorization": "AWS4-HMAC-SHA256 ...", "X-Amz-Date": "20260327T000000Z"}
 
 
+def _clear_region_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """No region from env vars, `~/.aws/config`, or EC2 metadata: the test decides where the region comes from."""
+    for var in ("AWS_REGION", "AWS_DEFAULT_REGION", "AWS_PROFILE", "ANTHROPIC_BEDROCK_MANTLE_BASE_URL"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("AWS_CONFIG_FILE", "/nonexistent/aws-config")
+    monkeypatch.setenv("AWS_EC2_METADATA_DISABLED", "true")
+
+
+def _write_aws_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, profile: str, region: str) -> None:
+    section = "default" if profile == "default" else f"profile {profile}"
+    config = tmp_path / "config"
+    config.write_text(f"[{section}]\nregion = {region}\n")
+    monkeypatch.setenv("AWS_CONFIG_FILE", str(config))
+
+
 @pytest.fixture
 def get_auth_headers_recorder(monkeypatch: pytest.MonkeyPatch) -> GetAuthHeadersRecorder:
     recorder = GetAuthHeadersRecorder()
@@ -106,11 +122,49 @@ class TestBaseURL:
         )
         assert str(client.base_url).startswith("https://from-arg.example.com")
 
-    def test_raises_without_region_or_base_url(self) -> None:
+    def test_raises_without_region_or_base_url(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        _clear_region_env(monkeypatch)
         with pytest.raises(Exception, match="No AWS region or base URL found"):
             AnthropicBedrockMantle(
                 api_key="test-key",
             )
+
+
+class TestRegionFromProfile:
+    """Parity with `AnthropicBedrock`, which falls back to the region configured for the AWS profile."""
+
+    @pytest.mark.parametrize("client_cls", [AnthropicBedrockMantle, AsyncAnthropicBedrockMantle], ids=["sync", "async"])
+    def test_aws_profile_argument(
+        self,
+        client_cls: type[AnthropicBedrockMantle] | type[AsyncAnthropicBedrockMantle],
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _clear_region_env(monkeypatch)
+        _write_aws_config(tmp_path, monkeypatch, profile="mantle", region="us-west-2")
+        client = client_cls(aws_profile="mantle")
+        assert client.aws_region == "us-west-2"
+        assert client.base_url == "https://bedrock-mantle.us-west-2.api.aws/anthropic/"
+
+    def test_aws_profile_env_var(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        _clear_region_env(monkeypatch)
+        _write_aws_config(tmp_path, monkeypatch, profile="from-env", region="eu-central-1")
+        monkeypatch.setenv("AWS_PROFILE", "from-env")
+        client = AnthropicBedrockMantle(api_key="test-key")
+        assert client.aws_region == "eu-central-1"
+
+    def test_region_env_var_wins_over_profile(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        _clear_region_env(monkeypatch)
+        _write_aws_config(tmp_path, monkeypatch, profile="default", region="us-west-2")
+        monkeypatch.setenv("AWS_REGION", "eu-west-1")
+        client = AnthropicBedrockMantle(api_key="test-key")
+        assert client.aws_region == "eu-west-1"
+
+    def test_missing_profile_does_not_raise(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        _clear_region_env(monkeypatch)
+        monkeypatch.setenv("AWS_PROFILE", "not-in-config")
+        client = AnthropicBedrockMantle(api_key="test-key", base_url="https://example.com/anthropic")
+        assert client.aws_region is None
 
 
 class TestSigV4ServiceName:

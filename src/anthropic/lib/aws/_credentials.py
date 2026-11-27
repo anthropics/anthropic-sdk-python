@@ -79,15 +79,31 @@ def resolve_api_key(
     return None
 
 
-def resolve_region(aws_region: str | None) -> str | None:
-    """Resolve the AWS region from constructor arg or env var.
+def resolve_region(aws_region: str | None, *, aws_profile: str | None = None) -> str | None:
+    """Resolve the AWS region from constructor arg, env var, or the AWS profile config.
 
     Does not silently default — returns None if no region is available.
     """
     if aws_region is not None:
         return aws_region
 
-    return os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    if region:
+        return region
+
+    # Same fallback as `AnthropicBedrock`: the region configured for the profile
+    # (`aws_profile` arg, `AWS_PROFILE`, or the default profile in `~/.aws/config`).
+    try:
+        import boto3
+        from botocore.exceptions import BotoCoreError
+    except ImportError:
+        return None
+
+    try:
+        return boto3.Session(profile_name=aws_profile).region_name
+    except BotoCoreError:
+        # e.g. a stale `AWS_PROFILE` that is not in the config: no region, as before
+        return None
 
 
 def resolve_workspace_id(

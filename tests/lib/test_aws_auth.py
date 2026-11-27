@@ -306,6 +306,8 @@ class TestResolveRegion:
     def test_returns_none_when_no_source(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("AWS_REGION", raising=False)
         monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+        monkeypatch.delenv("AWS_PROFILE", raising=False)
+        monkeypatch.setenv("AWS_CONFIG_FILE", "/nonexistent/aws-config")
         assert resolve_region(None) is None
 
 

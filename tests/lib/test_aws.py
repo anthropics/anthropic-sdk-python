@@ -1,6 +1,7 @@
 import re
 import threading
 from typing import Dict, List, Type, Union, Optional, cast
+from pathlib import Path
 from typing_extensions import Protocol
 
 import httpx2
@@ -55,7 +56,7 @@ def test_init_sigv4_default_credential_chain() -> None:
 
 
 def test_init_requires_region_for_sigv4(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("AWS_REGION", raising=False)
+    _clear_aws_url_env(monkeypatch)
     with pytest.raises(AnthropicError, match="No AWS region was provided"):
         AnthropicAWS(aws_access_key="AKID", aws_secret_key="secret", workspace_id="ws-123")
 
@@ -133,6 +134,9 @@ def _clear_aws_url_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "ANTHROPIC_BASE_URL",
     ):
         monkeypatch.delenv(var, raising=False)
+    # no region from `~/.aws/config` or EC2 metadata either
+    monkeypatch.setenv("AWS_CONFIG_FILE", "/nonexistent/aws-config")
+    monkeypatch.setenv("AWS_EC2_METADATA_DISABLED", "true")
 
 
 def _set_ambient_first_party_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -369,6 +373,17 @@ def test_region_constructor_overrides_env(monkeypatch: pytest.MonkeyPatch) -> No
     assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.eu-west-1.api.aws"
 
 
+@_aws_client_classes
+def test_region_from_aws_profile(client_cls: _AWSClientClass, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Parity with `AnthropicBedrock`: the region configured for the profile is used when no env var is set."""
+    _clear_aws_url_env(monkeypatch)
+    (tmp_path / "config").write_text("[profile aws-test]\nregion = us-west-2\n")
+    monkeypatch.setenv("AWS_CONFIG_FILE", str(tmp_path / "config"))
+    client = client_cls(aws_profile="aws-test", workspace_id="ws-123")
+    assert client.aws_region == "us-west-2"
+    assert str(client.base_url).rstrip("/") == "https://aws-external-anthropic.us-west-2.api.aws"
+
+
 def test_base_url_override() -> None:
     client = AnthropicAWS(
         api_key="test-key",
@@ -379,8 +394,9 @@ def test_base_url_override() -> None:
     assert str(client.base_url).rstrip("/") == "https://custom.example.com"
 
 
-def test_api_key_mode_no_region_with_base_url() -> None:
+def test_api_key_mode_no_region_with_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
     """API key mode should work without a region if base_url is provided."""
+    _clear_aws_url_env(monkeypatch)
     client = AnthropicAWS(api_key="test-key", base_url="https://custom.example.com", workspace_id="ws-123")
     assert client.aws_region is None
     assert client._use_sigv4 is False
@@ -388,8 +404,7 @@ def test_api_key_mode_no_region_with_base_url() -> None:
 
 def test_api_key_mode_no_region_no_base_url_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     """API key mode without region or base_url should error."""
-    monkeypatch.delenv("AWS_REGION", raising=False)
-    monkeypatch.delenv("ANTHROPIC_AWS_BASE_URL", raising=False)
+    _clear_aws_url_env(monkeypatch)
     with pytest.raises(AnthropicError, match="No AWS region was provided and no base_url"):
         AnthropicAWS(api_key="test-key", workspace_id="ws-123")
 
