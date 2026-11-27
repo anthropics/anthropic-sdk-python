@@ -68,6 +68,7 @@ _ALL_ENV = [
     "ANTHROPIC_SERVICE_ACCOUNT_ID",
     "ANTHROPIC_WORKSPACE_ID",
     "ANTHROPIC_SCOPE",
+    "ANTHROPIC_BASE_URL",
 ]
 
 _CREDENTIAL_ARGUMENTS = ["api_key", "auth_token", "credentials", "config", "profile"]
