@@ -14,9 +14,11 @@ import asyncio
 import logging
 from types import SimpleNamespace
 from typing import Any, cast
-from collections.abc import AsyncIterator
+from contextlib import aclosing
+from collections.abc import AsyncIterator, AsyncGenerator
 from typing_extensions import override
 
+import anyio
 import httpx2
 import pytest
 from respx import MockRouter
@@ -27,6 +29,7 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
 from anthropic import Anthropic, APIStatusError, AsyncAnthropic
 from anthropic.lib.environments import _poller as poller_mod
+from anthropic.types.beta.environments import BetaSelfHostedWork
 from anthropic.lib.environments._poller import iter_work, aiter_work
 
 from ...test_open_telemetry import TRACING_FAILURES, failing_tracing
@@ -698,6 +701,72 @@ async def test_work_span_ends_ok_when_the_consumer_stops_polling(sync: bool, res
     assert work_span.status.status_code == StatusCode.OK
     # No span was current around the consumer's calls, so the item's span is a root span.
     assert work_span.parent is None
+
+
+@pytest.mark.respx(base_url=base_url, assert_all_called=False)
+@pytest.mark.parametrize("auto_stop", [True, False], ids=["auto-stop", "dispatch"])
+async def test_closing_a_cancelled_work_poller_respects_stop_ownership(auto_stop: bool, respx_mock: MockRouter) -> None:
+    spans = Spans()
+    _mock_work_api(respx_mock, [httpx2.Response(200, json=_work_json("work_1"))], actions=("ack",))
+
+    async def stop_after_checkpoint(_request: httpx2.Request) -> httpx2.Response:
+        ready = anyio.Event()
+
+        async def release() -> None:
+            ready.set()
+
+        async with anyio.create_task_group() as tasks:
+            tasks.start_soon(release)
+            await ready.wait()
+        return httpx2.Response(200, json=_work_json("work_1"))
+
+    stop = respx_mock.post("/v1/environments/env_1/work/work_1/stop").mock(side_effect=stop_after_checkpoint)
+
+    async with AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option()) as client:
+        items = cast(
+            AsyncGenerator[BetaSelfHostedWork, None],
+            client.beta.environments.work.poller(
+                environment_id="env_1", environment_key="env_key", auto_stop=auto_stop
+            ),
+        )
+        with anyio.CancelScope() as scope:
+            async with aclosing(items):
+                assert (await anext(items)).id == "work_1"
+                assert spans.named("anthropic.environment.work") == []
+                scope.cancel()
+                await anyio.Event().wait()
+
+    assert scope.cancelled_caught
+    assert stop.call_count == int(auto_stop)
+    work_span = spans.one("anthropic.environment.work")
+    if auto_stop:
+        assert parent_id(spans.one("anthropic.environments.work.stop")) == span_id(work_span)
+
+
+@pytest.mark.respx(base_url=base_url, assert_all_called=False)
+async def test_work_poller_ends_the_span_when_stop_is_interrupted(respx_mock: MockRouter) -> None:
+    spans = Spans()
+    _mock_work_api(respx_mock, [httpx2.Response(200, json=_work_json("work_1"))], actions=("ack",))
+    interruption = asyncio.CancelledError()
+
+    def interrupt_stop(_request: httpx2.Request) -> httpx2.Response:
+        raise interruption
+
+    respx_mock.post("/v1/environments/env_1/work/work_1/stop").mock(side_effect=interrupt_stop)
+
+    async with AsyncAnthropic(base_url=base_url, api_key="key", open_telemetry=spans.option()) as client:
+        items = cast(
+            AsyncGenerator[BetaSelfHostedWork, None],
+            client.beta.environments.work.poller(environment_id="env_1", environment_key="env_key"),
+        )
+        with pytest.raises(asyncio.CancelledError) as raised:
+            async with aclosing(items):
+                assert (await anext(items)).id == "work_1"
+
+    assert raised.value is interruption
+    work_span = spans.one("anthropic.environment.work")
+    assert work_span.status.status_code == StatusCode.UNSET
+    assert "error.type" not in attributes(work_span)
 
 
 @pytest.mark.respx(base_url=base_url)
